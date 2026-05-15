@@ -2,18 +2,48 @@ import mysql from 'mysql2/promise'
 
 let pool: mysql.Pool | null = null
 
+function useStagingDb(): boolean {
+  const v = process.env.USE_STAGING_DB?.toLowerCase()
+  return v === '1' || v === 'true' || v === 'yes'
+}
+
+/** When USE_STAGING_DB is set, prefer staging_* keys, then fall back to production MYSQL_* / DATABASE_URL. */
+function firstStagingOrProd(stagingKeys: string[], prodKey: string): string | undefined {
+  if (useStagingDb()) {
+    for (const k of stagingKeys) {
+      const x = process.env[k]?.trim()
+      if (x !== undefined && x.length > 0) return x
+    }
+  }
+  const x = process.env[prodKey]?.trim()
+  if (x !== undefined && x.length > 0) return x
+  return undefined
+}
+
 export function getPool(): mysql.Pool {
   if (!pool) {
-    const url = process.env.DATABASE_URL?.trim()
+    const url = firstStagingOrProd(['staging_DATABASE_URL', 'STAGING_DATABASE_URL'], 'DATABASE_URL')
+
     if (url) {
       pool = mysql.createPool(url)
     } else {
+      const host =
+        firstStagingOrProd(['staging_MYSQL_HOST', 'STAGING_MYSQL_HOST'], 'MYSQL_HOST') ?? '127.0.0.1'
+      const portStr = firstStagingOrProd(['staging_MYSQL_PORT', 'STAGING_MYSQL_PORT'], 'MYSQL_PORT')
+      const port = portStr ? Number(portStr) : 3306
+      const user =
+        firstStagingOrProd(['staging_MYSQL_USER', 'STAGING_MYSQL_USER'], 'MYSQL_USER') ?? 'root'
+      const password =
+        firstStagingOrProd(['staging_MYSQL_PASSWORD', 'STAGING_MYSQL_PASSWORD'], 'MYSQL_PASSWORD') ?? ''
+      const database =
+        firstStagingOrProd(['staging_MYSQL_DATABASE', 'STAGING_MYSQL_DATABASE'], 'MYSQL_DATABASE') ??
+        'retirement_calculator'
       pool = mysql.createPool({
-        host: process.env.MYSQL_HOST ?? '127.0.0.1',
-        port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
-        user: process.env.MYSQL_USER ?? 'root',
-        password: process.env.MYSQL_PASSWORD ?? '',
-        database: process.env.MYSQL_DATABASE ?? 'retirement_calculator',
+        host,
+        port,
+        user,
+        password,
+        database,
         waitForConnections: true,
         connectionLimit: 10,
       })
