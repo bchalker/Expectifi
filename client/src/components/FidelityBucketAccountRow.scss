@@ -1,0 +1,16 @@
+/* Fidelity CSV bucket: title + total row inside .edit-row.edit-row--fidelity-bucket */
+.edit-row--fidelity-bucket {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 0;
+}
+
+.edit-row--fidelity-bucket .edit-row-label {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.fidelity-bucket-total {
+  color: var(--accent-text);
+}

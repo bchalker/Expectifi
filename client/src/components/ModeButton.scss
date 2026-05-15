@@ -1,0 +1,39 @@
+.mode-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mode-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.mode-button:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.mode-button--active {
+  background: var(--strip-drawer);
+  border-color: var(--strip-drawer);
+  color: var(--surface);
+}
+
+.mode-button__icon {
+  display: inline-flex;
+  opacity: 0.9;
+}

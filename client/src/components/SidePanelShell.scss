@@ -1,0 +1,68 @@
+/* Scroll region fills grid row; SimpleBar needs a bounded height */
+.side-panel-shell__scroll {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.side-panel-shell__scroll .simplebar-wrapper,
+.side-panel-shell__scroll .simplebar-mask,
+.side-panel-shell__scroll .simplebar-content-wrapper {
+  min-height: 0;
+}
+
+/* Thin vertical track */
+.side-panel-shell__scroll .simplebar-track.simplebar-vertical {
+  width: 5px;
+  margin: 4px 2px 4px 0;
+  background: transparent;
+}
+
+.side-panel-shell__scroll .simplebar-scrollbar.simplebar-vertical {
+  width: 5px;
+}
+
+.side-panel-shell__scroll .simplebar-scrollbar:before {
+  inset: 0;
+  background: rgba(71, 85, 105, 0.38);
+  border-radius: 99px;
+}
+
+.side-panel-shell__scroll .simplebar-track.simplebar-horizontal {
+  height: 5px;
+  margin: 0 4px 2px;
+  background: transparent;
+}
+
+.side-panel-shell__scroll .simplebar-scrollbar.simplebar-horizontal {
+  height: 5px;
+}
+
+.side-panel-shell__scroll .simplebar-scrollbar.simplebar-horizontal:before {
+  inset: 0;
+  background: rgba(71, 85, 105, 0.38);
+  border-radius: 99px;
+}
+
+.side-panel-shell__footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+}
+
+/* Subtle enter when panel is open (after slide-in from right) */
+.drawer-shell--open .side-panel-shell__body-anim {
+  animation: side-panel-body-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes side-panel-body-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

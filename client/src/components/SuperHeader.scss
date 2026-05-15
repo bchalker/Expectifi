@@ -1,0 +1,172 @@
+/* ── SUPERHEADER: transparent shell; bubble SVG; sits below AppTopChrome ── */
+.superheader {
+  position: fixed;
+  top: var(--app-top-chrome-h);
+  top: 0px;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  box-sizing: border-box;
+  height: var(--superheader-h);
+  min-height: var(--superheader-h);
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.superheader-waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  height: var(--superheader-bubble-h);
+  pointer-events: none;
+}
+
+.superheader-bubble {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.superheader-bubble--back {
+  z-index: 0;
+  opacity: 0.1;
+}
+
+.superheader-bubble--front {
+  z-index: 1;
+}
+
+.superheader-inner {
+  // position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  // padding: 0.4rem 1rem 0.5rem;
+  box-sizing: border-box;
+  background: transparent;
+  pointer-events: none;
+}
+
+.superheader-inner .superheader-estimate,
+.superheader-inner button {
+  pointer-events: auto;
+}
+
+.superheader-spacer {
+  height: calc(var(--app-header-stack-h) + 1.5rem);
+  flex-shrink: 0;
+}
+
+.superheader-estimate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  text-align: right;
+  min-width: 0;
+  z-index: 1;
+}
+
+.superheader-estimate--center {
+  align-items: center;
+  text-align: center;
+  max-width: min(100%, 22rem);
+}
+
+.superheader-estimate__label {
+  font-family: var(--body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.superheader-estimate__value {
+  font-family: var(--heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--color-teal-light);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.superheader-estimate__value--after-tax {
+  color: var(--gold);
+}
+
+.superheader-estimate__value-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.superheader-estimate__toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.superheader-estimate__opt {
+  padding: 3px 10px;
+  border: none;
+  background: transparent;
+  font-family: var(--body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.superheader-estimate__opt:hover {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.superheader-estimate__opt--on {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+}
+
+.superheader-estimate__opt--on:hover {
+  filter: brightness(1.04);
+  color: var(--text);
+}
+
+@media (max-width: 700px) {
+  .superheader-inner {
+    padding: 0.4rem 0.75rem 0.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .superheader-estimate__opt {
+    transition-duration: 0.01ms;
+  }
+}

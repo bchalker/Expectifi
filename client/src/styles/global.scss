@@ -1,0 +1,150 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* Brand palette (reference) */
+  --color-navy: #1c2b3a;
+  --color-teal-dark: #0f6e56;
+  --color-teal-mid: #1d9e75;
+  --color-teal-light: #5dcaa5;
+  --color-teal-bg: #e1f5ee;
+  --color-amber: #ef9f27;
+  --color-amber-dark: #ba7517;
+  --color-amber-bg: #faeeda;
+  --color-surface: #f4f6f7;
+  --color-card: #ffffff;
+  --color-border: #e2e8ed;
+  --color-text-primary: #1c2b3a;
+  --color-text-muted: #5f5e5a;
+  --color-text-hint: #888780;
+  --color-danger: #a32d2d;
+
+  /* Design system source tokens — edit via Design panel (localStorage) */
+  --ds-font-body: var(--font-sans);
+  --ds-font-mono: var(--font-mono);
+  --ds-color-bg: var(--color-surface);
+  --ds-color-surface: var(--color-card);
+  --ds-color-surface2: #e8edf2;
+  --ds-color-text: var(--color-text-primary);
+  --ds-color-text-muted: var(--color-text-muted);
+  --ds-color-text-faint: var(--color-text-hint);
+  --ds-color-accent: var(--color-teal-dark);
+  --ds-color-accent-text: #0b5344;
+  --ds-color-accent-light: var(--color-teal-bg);
+  --ds-color-strip-drawer: var(--color-amber);
+  --ds-color-strip-drawer-strong: var(--color-amber-dark);
+  --ds-color-strip-drawer-light: var(--color-amber-bg);
+  --ds-color-strip-drawer-border: rgba(239, 159, 39, 0.42);
+  --ds-color-strip-drawer-text: #6b5410;
+  --ds-color-danger: var(--color-danger);
+
+  --bg: var(--ds-color-bg);
+  --surface: var(--ds-color-surface);
+  --surface2: var(--ds-color-surface2);
+  --text: var(--ds-color-text);
+  --text-muted: var(--ds-color-text-muted);
+  --text-faint: var(--ds-color-text-faint);
+  --accent: var(--ds-color-accent);
+  --accent-light: var(--ds-color-accent-light);
+  --accent-text: var(--ds-color-accent-text);
+  --danger: var(--ds-color-danger);
+  --strip-drawer: var(--ds-color-strip-drawer);
+  --strip-drawer-strong: var(--ds-color-strip-drawer-strong);
+  --strip-drawer-light: var(--ds-color-strip-drawer-light);
+  --strip-drawer-border: var(--ds-color-strip-drawer-border);
+  --strip-drawer-text: var(--ds-color-strip-drawer-text);
+  --border: var(--color-border);
+  --border-strong: #ced8e0;
+  --warn: var(--color-amber-dark);
+  --warn-light: var(--color-amber-bg);
+  --danger-light: #fce9e9;
+  --gold: var(--color-amber);
+  --gold-light: var(--color-amber-bg);
+  /* Chrome: sidebar + subheader bar use navy */
+  --nav-bg: var(--color-navy);
+  --nav-text: rgba(255, 255, 255, 0.92);
+  --nav-text-muted: var(--color-teal-light);
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  /* Subheader on nav-bg: WCAG AA+ for hero (large) and labels / phase labels (normal) */
+  --subheader-hero-fg: #e8faf5;
+  --subheader-label-fg: rgba(255, 255, 255, 0.82);
+  --subheader-phase-muted-fg: rgba(255, 255, 255, 0.78);
+  --mono: var(--ds-font-mono); --sans: var(--font-sans); --serif: var(--font-serif);
+  --body: var(--ds-font-body);
+  --heading: var(--font-heading);
+  /* Bubble: prefer true 72/1000 aspect from width, but never shorter than content (narrow viewports) */
+  --subheader-bubble-h: max(
+    min(calc(100vw * 72 / 1000), 7.5rem),
+    clamp(4.9rem, min(20vw, 18vh) + 2.5rem, 7rem)
+  );
+  --subheader-h: max(var(--subheader-bubble-h), clamp(6.35rem, min(38vw, 34vh), 9.5rem));
+  /* app-header-stack: nav + subheader; combined offset for drawers / mobile sheet */
+  --app-top-chrome-h: clamp(2.875rem, 8.5vw, 3.375rem);
+  --goal-bar-h: 0px;
+  --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
+  /* Mobile slide-over width */
+  --app-left-nav-w: 178px;
+  --app-left-nav-edge: 14px;
+  /* Stacking: chrome above dimmed panels; curve SVG transparency shows backdrop/shell, not page */
+  --z-panel-backdrop: 350;
+  --z-drawer-shell: 360;
+  --z-subheader: 400;
+  /* Right / bottom inset for slide-over panels (drawer shell) */
+  --drawer-panel-inset: 2rem;
+}
+body {
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0;
+}
+
+body.app-left-nav--mobile-open-body {
+  overflow: hidden;
+  touch-action: none;
+}
+
+.font-xs {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+@media (max-width: 680px) {
+  :root {
+    --drawer-panel-inset: 1rem;
+  }
+}
+
+.num-input,
+.num-input-prefix,
+.num-input-suffix,
+.isr-val,
+.slider-val,
+.strip-total-val,
+.strip-total-caption,
+.strip-total-tax-caption,
+.strip-card-val,
+.strip-card-inline-val,
+.card-value,
+.range-inline-tick,
+.strip-equation-main-val,
+.strip-equation-total-val,
+.val-mono,
+.val-strong,
+.val-accent,
+.val-muted,
+.holding-card-value,
+.rate-pill,
+.scenario-table td,
+.stack-item-amount,
+.edit-row-val,
+.strip-select-underline,
+.app-left-nav__profile-age {
+  font-variant-numeric: tabular-nums;
+}
+

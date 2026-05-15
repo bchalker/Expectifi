@@ -1,0 +1,125 @@
+.config-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.config-drawer-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.config-drawer-tabs .tab-btn {
+  font-family: var(--body);
+  text-transform: none;
+  letter-spacing: var(--tracking-normal);
+}
+
+.config-drawer-section {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.config-drawer-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.config-drawer-lead {
+  margin: 0 0 14px !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.config-plan-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-plan-row-triple {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 520px) {
+  .config-plan-row-triple {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.config-plan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-plan-field--goal {
+  max-width: none;
+}
+
+@media (min-width: 520px) {
+  .config-plan-field--goal .num-input-wrap {
+    max-width: 100%;
+  }
+}
+
+.config-plan-age-hint {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.config-plan-input--date {
+  width: 100%;
+  max-width: 12rem;
+  min-height: 2.25rem;
+}
+
+.config-plan-label {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.config-plan-input {
+  width: 5rem;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.config-plan-savings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.config-plan-saveval {
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  min-width: 4.5rem;
+}
+
+.config-plan-savings-slider {
+  flex: 1;
+  min-width: 140px;
+  max-width: 320px;
+}

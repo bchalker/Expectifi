@@ -1,0 +1,36 @@
+/* Typography tokens — loaded before calculator.scss */
+:root {
+  /* Body + tabular UI: Nunito */
+  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Nunito', system-ui, -apple-system, sans-serif;
+  /* Display numbers + hero figures (Merriweather) */
+  --font-heading: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-serif: var(--font-heading);
+
+  /* Type scale */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-strip: clamp(1.375rem, 2.5vw, 1.75rem);
+  --text-hero: clamp(1.75rem, 4vw, 2.5rem);
+  --text-super: clamp(1.25rem, 2vw, 1.5rem);
+
+  /* Line height */
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.65;
+  --leading-loose: 1.8;
+
+  /* Letter spacing */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.08em;
+  --tracking-widest: 0.12em;
+}
