@@ -156,6 +156,26 @@ export function hasPortfolioBalanceInputs(
   return positionsForBrokerage(fidelityRows).length > 0
 }
 
+/** Balances that count toward projections — respects manual vs import mode (no phantom prototype totals). */
+export function activePortfolioBalances(
+  inputs: CalculatorInputs,
+  balanceModes: ComputeBalanceModes | undefined,
+  fidelityRows: FidelityPositionRow[],
+): { retBal: number; brkBal: number } {
+  const bal = accountDisplayBalances(inputs)
+  let retBal = bal.bal401k + bal.balSE401k + bal.balRoth + bal.balHsa
+  let brkBal = inputs.brkBal
+  const retirementMode = balanceModes?.retirement ?? 'fidelity'
+  const brokerageMode = balanceModes?.brokerage ?? 'fidelity'
+  const hasFidelityRetirement = ['trad401k', 'se401k', 'roth', 'hsa'].some(
+    (bucket) => positionsForRetirementBucket(fidelityRows, bucket as 'trad401k' | 'se401k' | 'roth' | 'hsa').length > 0,
+  )
+  const hasFidelityBrokerage = positionsForBrokerage(fidelityRows).length > 0
+  if (retirementMode === 'fidelity' && !hasFidelityRetirement) retBal = 0
+  if (brokerageMode === 'fidelity' && !hasFidelityBrokerage) brkBal = 0
+  return { retBal, brkBal }
+}
+
 export function mergeAllRetirementFidelityBuckets(
   inputs: CalculatorInputs,
   fidelityRows: FidelityPositionRow[],
@@ -193,7 +213,6 @@ export function computeResults(
     retRate,
     brkRate,
     save,
-    brkBal,
     wdRate,
     wdInflation,
     incYield,
@@ -210,10 +229,15 @@ export function computeResults(
   const yearsToRetirement = Math.max(1, Math.min(50, Math.round(targetRetirementAge - currentAge)))
 
   const bal = accountDisplayBalances(inputs)
-  const tradBal = bal.bal401k + bal.balSE401k
-  const rothBal = bal.balRoth
-  const hsaBal = bal.balHsa
-  const retBal = tradBal + rothBal + hsaBal
+
+  let fidelityRows: FidelityPositionRow[] = []
+  const fidelityImp = loadStoredFidelityImport()
+  if (fidelityImp?.batches?.length) fidelityRows = flattenBatches(fidelityImp.batches)
+
+  const { retBal, brkBal } = activePortfolioBalances(inputs, balanceModes, fidelityRows)
+  const tradBal = retBal > 0 ? bal.bal401k + bal.balSE401k : 0
+  const rothBal = retBal > 0 ? bal.balRoth : 0
+  const hsaBal = retBal > 0 ? bal.balHsa : 0
 
   const tradRatio = retBal > 0 ? tradBal / retBal : DEFAULT_TRAD_RATIO
   const rothRatio = retBal > 0 ? rothBal / retBal : DEFAULT_ROTH_RATIO
@@ -236,10 +260,6 @@ export function computeResults(
   let retirementGrowthSliderShowsFallback = false
   let mergedRetirementPositionModels: PositionReturnModel[] = []
   let mergedBrokeragePositionModels: PositionReturnModel[] = []
-
-  let fidelityRows: FidelityPositionRow[] = []
-  const fidelityImp = loadStoredFidelityImport()
-  if (fidelityImp?.batches?.length) fidelityRows = flattenBatches(fidelityImp.batches)
 
   const retirementBuckets = ['trad401k', 'se401k', 'roth', 'hsa'] as const
   const hasFidelityRetirementModeling = retirementBuckets.some((b) => positionsForRetirementBucket(fidelityRows, b).length > 0)

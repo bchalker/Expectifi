@@ -27,20 +27,41 @@ body.onboarding-overlay--open {
   pointer-events: none;
 }
 
+/* Centered modal: header / SimpleBar body / footer (matches csv-import-modal-shell) */
 .onboarding-overlay__panel {
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   width: 100%;
   max-width: min(100%, 26rem);
+  height: min(92dvh, 36rem);
   max-height: min(92dvh, 36rem);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
-  padding: 1.25rem 1.25rem 1.35rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.onboarding-overlay__header {
+  flex-shrink: 0;
+  padding: 1.25rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.onboarding-overlay__title-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 20rem;
+  margin-inline: auto;
 }
 
 .onboarding-overlay__title {
@@ -49,24 +70,47 @@ body.onboarding-overlay--open {
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text);
-  margin: 0 0 0.35rem;
+  margin: 0;
+}
+
+.onboarding-overlay__subtitle {
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .onboarding-overlay__lead {
-  margin: 0 0 1rem;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  margin: 0.15rem 0 0;
+  line-height: 1.45;
+}
+
+.onboarding-overlay__lead strong {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.onboarding-overlay__scroll {
+  min-height: 0;
+}
+
+.onboarding-overlay__body {
+  padding: 1rem 1.25rem 1.25rem;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .onboarding-overlay__section {
   margin-bottom: 1.1rem;
 }
 
-.onboarding-overlay__section-title {
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin: 0 0 0.45rem;
+.onboarding-overlay__section:last-child {
+  margin-bottom: 0;
 }
 
 .onboarding-overlay__married {
@@ -89,34 +133,33 @@ body.onboarding-overlay--open {
   gap: 0.5rem;
 }
 
+.onboarding-overlay__footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem 1.15rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
 .onboarding-overlay__err {
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--danger);
-  margin: 0.5rem 0 0;
+  margin: 0;
 }
 
-.onboarding-overlay__actions {
-  margin-top: 1.15rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* DOB column narrower; retirement age fills remainder (matches Configure duo row) */
+.onboarding-overlay__age-row.config-plan-row-duo {
+  margin-bottom: 0;
 }
 
-.onboarding-overlay__goal-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-@media (min-width: 520px) {
-  .onboarding-overlay__goal-row {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
+.onboarding-overlay__age-row.config-plan-row-duo .config-plan-age-hint {
+  white-space: nowrap;
 }
 
 .onboarding-overlay__retire-age-input {
   width: 100%;
-  max-width: 8rem;
+  max-width: none;
 }

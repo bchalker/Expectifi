@@ -1,5 +1,5 @@
 import type { AnimationEvent, ChangeEvent, CSSProperties, ReactNode } from 'react'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IconArrowDown } from '@tabler/icons-react'
 import { Button, ButtonGroup, ListBox, Select, useOverlayState } from '@heroui/react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
@@ -213,7 +213,6 @@ export function AccountBalances({
   )
 
   const removeAccountsModalState = useOverlayState()
-  const financialsImportPrefixId = useId()
 
   const confirmRemoveAccounts = useCallback(() => {
     removeAccountsModalState.close()
@@ -258,13 +257,26 @@ export function AccountBalances({
 
   const requestBalanceEditClose = useCallback(() => {
     if (!balanceEditPanel || balanceEditClosing) return
+    if (
+      balanceEditPanel === 'import' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      finalizeBalanceEditClose()
+      return
+    }
     setBalanceEditClosing(true)
-  }, [balanceEditPanel, balanceEditClosing])
+  }, [balanceEditPanel, balanceEditClosing, finalizeBalanceEditClose])
 
   const onBalanceEditSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return
-      if (e.animationName !== 'fidelity-scenario-slide-sheet-out') return
+      if (
+        e.animationName !== 'fidelity-scenario-slide-sheet-out' &&
+        e.animationName !== 'account-balances-import-sheet-out'
+      ) {
+        return
+      }
       if (!balanceEditClosing) return
       finalizeBalanceEditClose()
     },
@@ -504,20 +516,8 @@ export function AccountBalances({
     return (
       <div className="account-balances-financials-entry">
         <h2 className="account-balances-financials-entry__title">How would you like to add your financials for this?</h2>
-        <div className="account-balances-financials-entry__manual-row">
-          <Button
-            variant="primary"
-            size="sm"
-            className="account-balances-financials-entry__manual-btn"
-            onPress={() => (mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual'))}
-          >
-            I'll manually add them
-          </Button>
-        </div>
+        <div className="account-balances-financials-entry__actions">
         <div className="account-balances-financials-entry__import-row">
-          <span className="account-balances-financials-entry__import-prefix" id={financialsImportPrefixId}>
-            Import a CSV from
-          </span>
           <input
             ref={financialsCsvFileInputRef}
             type="file"
@@ -529,9 +529,10 @@ export function AccountBalances({
           />
           <Select
             key={custodianSelectResetKey}
-            className="account-balances-financials-entry__select"
-            aria-labelledby={financialsImportPrefixId}
-            placeholder="Choose custodian…"
+            className="account-balances-financials-entry__select app-select--import-menu"
+            variant="secondary"
+            aria-label="Import a CSV"
+            placeholder="Import a CSV"
             onSelectionChange={(keys) => {
               const id = firstKeyFromSelectSelection(keys)
               if (!id || !isPositionsCsvCustodian(id)) return
@@ -543,8 +544,8 @@ export function AccountBalances({
               <Select.Value />
               <Select.Indicator />
             </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
+            <Select.Popover className="app-select-import-menu__popover">
+              <ListBox className="app-select-import-menu__list">
                 <ListBox.Item id="fidelity" textValue="Fidelity">
                   Fidelity
                 </ListBox.Item>
@@ -560,6 +561,15 @@ export function AccountBalances({
               </ListBox>
             </Select.Popover>
           </Select>
+        </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="account-balances-financials-entry__manual-btn"
+            onPress={() => (mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual'))}
+          >
+            I'll manually add them
+          </Button>
         </div>
       </div>
     )
@@ -1079,7 +1089,7 @@ export function AccountBalances({
             ) : null}
             {balanceEditPanel === 'import' && onFidelityApplyBalances ? (
               <aside
-                className={`fidelity-scenario-slide__sheet account-balances-edit-sheet account-balances-edit-sheet--import${balanceEditClosing ? ' fidelity-scenario-slide__sheet--closing' : ''}`}
+                className={`account-balances-import-sheet account-balances-edit-sheet account-balances-edit-sheet--import${balanceEditClosing ? ' account-balances-import-sheet--closing' : ''}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="csv-import-modal-title"

@@ -5,15 +5,17 @@ type Props = {
   monthlyIncomeGoal: number
   afterTaxMon: number
   goalProgressPct: number | null
+  hasPortfolioBalances: boolean
 }
 
-/** Shown above the wave subheader when Configure → after-tax monthly goal is set (> 0). */
+/** Shown above the wave subheader when the user has balances and an after-tax monthly goal. */
 export function GoalProgressBar({
   monthlyIncomeGoal,
   afterTaxMon,
   goalProgressPct,
+  hasPortfolioBalances,
 }: Props) {
-  if (monthlyIncomeGoal <= 0 || goalProgressPct == null) return null
+  if (!hasPortfolioBalances || monthlyIncomeGoal <= 0 || goalProgressPct == null) return null
 
   const pct = goalProgressPct
   const fillPct = Math.min(100, pct)

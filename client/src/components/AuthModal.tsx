@@ -34,7 +34,8 @@ function isValidEmail(raw: string): boolean {
 const REGISTER_VALUE_ADD_COPY =
   'Premium members enjoy CSV account storage, saved CSV data, per-holding scenario customization, and printable scenarios.'
 
-function CreateAccountMarketing({ showStripeSetupHint }: { showStripeSetupHint?: boolean }) {
+function CreateAccountMarketing() {
+  const showStripeSetupHint = import.meta.env.DEV && !stripePublishableKeyConfigured
   return (
     <div className="auth-modal__register-marketing">
       <p className="auth-modal__register-marketing__value-add">
@@ -305,10 +306,14 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       )
       footer = null
     } else if (!stripePublishableKeyConfigured) {
-      body = (
+      body = import.meta.env.DEV ? (
         <p className="auth-modal__msg">
           Add <code className="auth-modal__subtitle-code">VITE_STRIPE_PUBLISHABLE_KEY</code> to the client
           environment so the payment form can load, then refresh this page.
+        </p>
+      ) : (
+        <p className="auth-modal__msg">
+          Payment setup is temporarily unavailable. Please try again later or contact support.
         </p>
       )
       footer = (
@@ -640,7 +645,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     body = (
       <>
         <div className="auth-modal__form-entrance" key={open}>
-          <CreateAccountMarketing showStripeSetupHint />
+          <CreateAccountMarketing />
           {apiReady && googleOAuth ? (
             <>
               <div className="auth-modal__oauth-row">

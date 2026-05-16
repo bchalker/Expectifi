@@ -66,6 +66,74 @@ function BreakdownValueCell({ r }: { r: FidelityPositionRow }) {
   )
 }
 
+export function FidelityAccountPositionsTable({
+  rows,
+  showScenarioColumn = false,
+}: {
+  rows: FidelityPositionRow[]
+  /** Scenario editing is post-import only (dashboard aggregated table). */
+  showScenarioColumn?: boolean
+}) {
+  const sorted = useMemo(
+    () => [...rows].sort((a, b) => b.currentValue - a.currentValue),
+    [rows],
+  )
+  if (!sorted.length) return null
+
+  return (
+    <div className="fidelity-acct-positions">
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th className="fidelity-th-upper">Description</th>
+            <th style={{ textAlign: 'right' }}>Value</th>
+            <th className="fidelity-th-upper" style={{ textAlign: 'right' }}>
+              Cost basis
+            </th>
+            {showScenarioColumn ? (
+              <th className="fidelity-th-upper fidelity-agg-scenario-th">Scenario</th>
+            ) : null}
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((r, i) => {
+            const rowKey = `${r.accountName}-${r.symbol}-${i}`
+            const fullDesc = formatFidelityDescription(r.description)
+            const shortDesc = truncateForHoldingsTable(fullDesc)
+            const showTip = fullDesc.length > shortDesc.length
+            return (
+              <tr key={rowKey}>
+                <td className="sym">{r.symbol}</td>
+                <td className="fidelity-desc-cell fidelity-desc-cell--trunc">
+                  {showTip ? (
+                    <Tooltip content={fullDesc} placement="top">
+                      <span>{shortDesc}</span>
+                    </Tooltip>
+                  ) : (
+                    <span title={fullDesc}>{shortDesc}</span>
+                  )}
+                </td>
+                <td className="val" style={{ textAlign: 'right' }}>
+                  <BreakdownValueCell r={r} />
+                </td>
+                <td className="val" style={{ textAlign: 'right' }}>
+                  {r.costBasis != null ? fmt(r.costBasis) : '—'}
+                </td>
+                {showScenarioColumn ? (
+                  <td className="val fidelity-agg-scenario-cell" style={{ color: 'var(--text-faint)' }}>
+                    —
+                  </td>
+                ) : null}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 /** Collapsible per-account position tables (Fidelity export rows). */
 export function FidelityAccountBreakdown({ rows }: Props) {
   const accountGroups = useMemo(() => (rows.length ? groupPositionsByAccount(rows) : []), [rows])
@@ -85,52 +153,7 @@ export function FidelityAccountBreakdown({ rows }: Props) {
             </div>
             <span className="fidelity-acct-summary-total">{fmt(g.total)}</span>
           </summary>
-          <div className="fidelity-acct-positions">
-            <table>
-              <thead>
-                <tr>
-                  <th>Symbol</th>
-                  <th className="fidelity-th-upper">Description</th>
-                  <th style={{ textAlign: 'right' }}>Value</th>
-                  <th className="fidelity-th-upper" style={{ textAlign: 'right' }}>
-                    Cost basis
-                  </th>
-                  <th className="fidelity-th-upper fidelity-agg-scenario-th">Scenario</th>
-                </tr>
-              </thead>
-              <tbody>
-                {g.rows.map((r, i) => {
-                  const rowKey = `${g.accountName}-${r.symbol}-${i}`
-                  const fullDesc = formatFidelityDescription(r.description)
-                  const shortDesc = truncateForHoldingsTable(fullDesc)
-                  const showTip = fullDesc.length > shortDesc.length
-                  return (
-                    <tr key={rowKey}>
-                      <td className="sym">{r.symbol}</td>
-                      <td className="fidelity-desc-cell fidelity-desc-cell--trunc">
-                        {showTip ? (
-                          <Tooltip content={fullDesc} placement="top">
-                            <span>{shortDesc}</span>
-                          </Tooltip>
-                        ) : (
-                          <span title={fullDesc}>{shortDesc}</span>
-                        )}
-                      </td>
-                      <td className="val" style={{ textAlign: 'right' }}>
-                        <BreakdownValueCell r={r} />
-                      </td>
-                      <td className="val" style={{ textAlign: 'right' }}>
-                        {r.costBasis != null ? fmt(r.costBasis) : '—'}
-                      </td>
-                      <td className="val fidelity-agg-scenario-cell" style={{ color: 'var(--text-faint)' }}>
-                        —
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <FidelityAccountPositionsTable rows={g.rows} />
         </details>
       ))}
     </>

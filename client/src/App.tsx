@@ -12,7 +12,6 @@ import { StripHeader } from './components/StripHeader'
 import { GoalProgressBar } from './components/GoalProgressBar'
 import { SubHeader } from './components/SubHeader'
 import './components/AppHeaderStack.scss'
-import { BAL_HSA, BAL_ROTH_IRA, BAL_TRAD_401K, BAL_TRAD_SE401K } from 'shared'
 import { buildSnapshot, hydrateAppSnapshot, type AppSnapshotV1 } from './lib/appSnapshot'
 import { loadStoredAppState, saveStoredAppState } from './lib/appStateStorage'
 import {
@@ -37,12 +36,13 @@ import { loadBalanceInputMode, saveBalanceInputMode, type BalanceInputMode } fro
 import { isSsConfigured, normalizeClaimAge, type SsClaimAge } from './lib/socialSecurity'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
 
+/** No personal balances until the user enters or imports them (see HTML prototype — examples only). */
 const defaultInputs: CalculatorInputs = {
-  base401k: BAL_TRAD_401K,
-  baseSE401k: BAL_TRAD_SE401K,
-  baseRoth: BAL_ROTH_IRA,
-  baseHsa: BAL_HSA,
-  brkBal: 180_000,
+  base401k: 0,
+  baseSE401k: 0,
+  baseRoth: 0,
+  baseHsa: 0,
+  brkBal: 0,
   retRate: 0.07,
   brkRate: 0.07,
   save: 18_000,
@@ -64,7 +64,7 @@ const defaultInputs: CalculatorInputs = {
   other: 0,
   italyCost: 0,
   ssInvestPct: 5,
-  dateOfBirth: '1971-01-01',
+  dateOfBirth: '',
   targetRetirementAge: 62,
   monthlyIncomeGoal: 0,
   incomePresets: [...DEFAULT_INCOME_PRESETS],
@@ -101,25 +101,17 @@ type InitialAppState = {
   activePreset: string | null
 }
 
-function initialAppState(): InitialAppState {
-  const stored = loadStoredAppState()
-  if (stored) {
-    const hydrated = hydrateAppSnapshot(stored, defaultInputs)
-    if (hydrated) {
-      return {
-        inputs: applyFidelityBalanceOverrides(hydrated.inputs),
-        ui: { ...defaultUi, ...hydrated.ui },
-        phase: hydrated.phase,
-        activePreset: hydrated.activePreset,
-      }
-    }
-  }
+function freshAppState(): InitialAppState {
   return {
     inputs: applyFidelityBalanceOverrides({ ...defaultInputs }),
     ui: defaultUi,
     phase: 'income',
     activePreset: 'p1',
   }
+}
+
+function initialAppState(): InitialAppState {
+  return freshAppState()
 }
 
 let cachedInitialAppState: InitialAppState | undefined
@@ -241,11 +233,34 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (authLoading) return
+    if (!user) {
+      const empty = freshAppState()
+      setInputsState(empty.inputs)
+      setUiState(empty.ui)
+      setPhase(empty.phase)
+      setActivePreset(empty.activePreset)
+      return
+    }
+    const stored = loadStoredAppState()
+    if (stored) {
+      const hydrated = hydrateAppSnapshot(stored, defaultInputs)
+      if (hydrated) {
+        setInputsState(applyFidelityBalanceOverrides(hydrated.inputs))
+        setUiState({ ...defaultUi, ...hydrated.ui })
+        setPhase(hydrated.phase)
+        setActivePreset(hydrated.activePreset)
+      }
+    }
+  }, [authLoading, user?.id])
+
+  useEffect(() => {
+    if (authLoading || !user) return
     const id = window.setTimeout(() => {
       saveStoredAppState(buildSnapshot(inputs, ui, phase, activePreset))
     }, 400)
     return () => window.clearTimeout(id)
-  }, [inputs, ui, phase, activePreset])
+  }, [authLoading, user, inputs, ui, phase, activePreset])
 
   const getSnapshot = useCallback(
     () => buildSnapshot(inputs, ui, phase, activePreset),
@@ -371,6 +386,7 @@ export default function App() {
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
           afterTaxMon={c.afterTaxMon}
           goalProgressPct={c.goalProgressPct}
+          hasPortfolioBalances={c.hasPortfolioBalances}
         />
         <SubHeader
           phase={phase}

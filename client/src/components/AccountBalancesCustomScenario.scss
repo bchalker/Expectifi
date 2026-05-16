@@ -125,44 +125,36 @@
   text-align: center;
 }
 
-.account-balances-financials-entry__manual-row {
+.account-balances-financials-entry__actions {
   display: flex;
-  justify-content: center;
-}
-
-.account-balances-financials-entry__manual-btn {
-  min-height: 44px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
 }
 
 .account-balances-financials-entry__import-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: center;
-  gap: 0.5rem 0.75rem;
-}
-
-.account-balances-financials-entry__import-prefix {
-  font-family: var(--body);
-  font-size: var(--text-base);
-  font-weight: 500;
-  color: var(--text-muted);
-  white-space: nowrap;
+  width: auto;
+  max-width: 100%;
 }
 
 .account-balances-financials-entry__select {
-  flex: 1 1 12rem;
+  width: auto;
   min-width: 0;
-  max-width: 16rem;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
 
-@media (min-width: 480px) {
-  .account-balances-financials-entry__import-row {
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
+.account-balances-financials-entry__manual-btn {
+  min-height: auto;
+  height: auto;
+  padding: 0.35rem 0.65rem;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .account-balances-edit-sheet {
@@ -171,7 +163,54 @@
   min-height: 0;
 }
 
-.fidelity-scenario-slide__sheet.account-balances-edit-sheet--import {
+/* Import CSV: fade over the card (no horizontal slide) */
+.account-balances-import-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  animation: account-balances-import-sheet-in 0.26s ease forwards;
+}
+
+.account-balances-import-sheet--closing {
+  animation: account-balances-import-sheet-out 0.26s ease forwards !important;
+}
+
+@keyframes account-balances-import-sheet-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes account-balances-import-sheet-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-balances-import-sheet {
+    animation: none;
+    opacity: 1;
+  }
+
+  .account-balances-import-sheet--closing {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.account-balances-import-sheet.account-balances-edit-sheet--import {
   left: 0;
   right: 0;
   width: 100%;

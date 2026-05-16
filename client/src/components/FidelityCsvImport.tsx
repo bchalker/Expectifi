@@ -1,9 +1,10 @@
+import type { AnimationEvent } from 'react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '@heroui/react'
-import { IconBuildingBank, IconCheck } from '@tabler/icons-react'
+import { Button, ListBox, Select } from '@heroui/react'
+import { IconBuildingBank, IconCheck, IconChevronRight } from '@tabler/icons-react'
 import { fmt } from '../utils/format'
-import { FidelityAccountBreakdown } from './FidelityAccountBreakdown'
+import { FidelityAccountPositionsTable } from './FidelityAccountBreakdown'
 import type { ParsedFidelityCsv, AccountBucket } from '../lib/fidelityCsv'
 import {
   applyBucketAssignmentsToRows,
@@ -162,6 +163,27 @@ const CUSTODIANS: {
 
 const EMPTY_OTHER: OtherColumnMap = { symbol: '', name: '', currentValue: '', costBasis: '' }
 
+const IMPORT_BUCKET_VALUES = new Set(
+  IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map((o) => o.value),
+)
+
+function firstKeyFromSelectSelection(keys: unknown): string | null {
+  if (keys == null || keys === 'all') return null
+  if (
+    typeof keys === 'object' &&
+    'values' in keys &&
+    typeof (keys as { values: () => Iterator<unknown> }).values === 'function'
+  ) {
+    const it = (keys as Set<unknown>).values().next()
+    return it.done || it.value == null ? null : String(it.value)
+  }
+  return String(keys)
+}
+
+function isImportBucketValue(v: string): v is Exclude<AccountBucket, 'unknown'> {
+  return IMPORT_BUCKET_VALUES.has(v as Exclude<AccountBucket, 'unknown'>)
+}
+
 export function FidelityCsvImport({
   onApplyBalances,
   onImportApplied,
@@ -179,6 +201,7 @@ export function FidelityCsvImport({
   const pickInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const [modalOpen, setModalOpen] = useState(false)
+  const [modalClosing, setModalClosing] = useState(false)
   const flowOpen = isPanel ? Boolean(openControlled) : modalOpen
   const [custodian, setCustodian] = useState<PositionsCsvCustodian | null>(() => initialCustodian ?? null)
   const [stagedFile, setStagedFile] = useState<File | null>(null)
@@ -216,15 +239,36 @@ export function FidelityCsvImport({
 
   function openFlow() {
     resetModalInner({ seedCustodianFromProps: true })
+    setModalClosing(false)
     if (isPanel) onOpenChange?.(true)
     else setModalOpen(true)
   }
 
-  function closeFlow() {
+  function completeCloseFlow() {
+    setModalClosing(false)
     onImportFlowClose?.()
     if (isPanel) onOpenChange?.(false)
     else setModalOpen(false)
     resetModalInner()
+  }
+
+  function closeFlow() {
+    if (!isPanel && modalOpen && !modalClosing) {
+      if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        completeCloseFlow()
+        return
+      }
+      setModalClosing(true)
+      return
+    }
+    completeCloseFlow()
+  }
+
+  const onModalOverlayAnimationEnd = (e: AnimationEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return
+    if (e.animationName !== 'csv-import-modal-fade-out') return
+    if (!modalClosing) return
+    completeCloseFlow()
   }
 
   function stagePickedCsvFile(f: File, c: PositionsCsvCustodian) {
@@ -734,53 +778,71 @@ export function FidelityCsvImport({
           ) : null}
 
           <div className="csv-import-review">
-            <div className="csv-import-review__title">Review bucket assignments</div>
-            <p className="csv-import-review__lead">
-              Holdings are grouped by account name from the file. Adjust any row so each account maps to the right tax
-              treatment, then confirm.
-            </p>
-            <div className="csv-import-review-scroll" role="region" aria-label="Per-account bucket assignments">
-              <table className="csv-import-review-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Account</th>
-                    <th scope="col">Bucket</th>
-                    <th scope="col" className="csv-import-review-table__num">
-                      Balance
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {accountReviewRows.map((row) => {
-                    const sel = reviewAssignments[row.key]
-                    const unknown = sel === 'unknown' || sel === undefined
-                    return (
-                      <tr key={row.key} className={unknown ? 'csv-import-review-table__row--attention' : undefined}>
-                        <td className="csv-import-review-table__acct">{row.label}</td>
-                        <td>
-                          <select
-                            className="csv-import-review-select csv-import-select-sm"
-                            aria-label={`Tax bucket for ${row.label}`}
-                            value={unknown ? '' : sel}
-                            onChange={(e) => {
-                              const v = e.target.value as Exclude<AccountBucket, 'unknown'>
-                              setReviewAssignments((m) => ({ ...m, [row.key]: v }))
-                            }}
-                          >
-                            {unknown ? <option value="">Unmapped — choose…</option> : null}
-                            {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map((o) => (
-                              <option key={o.value} value={o.value}>
-                                {o.label}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="csv-import-review-table__num">{fmt(row.total)}</td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+            <div className="csv-import-review-list" role="list" aria-label="Per-account bucket assignments">
+              {accountReviewRows.map((row, index) => {
+                const sel = reviewAssignments[row.key]
+                const unknown = sel === 'unknown' || sel === undefined
+                const accountRows = rowsThisSelection.filter(
+                  (r) =>
+                    fidelityAccountKey(r.accountName) === row.key && !isFidelityPendingActivityRow(r),
+                )
+                return (
+                  <details
+                    key={row.key}
+                    className={`fidelity-acct-details csv-import-review-acct${unknown ? ' csv-import-review-acct--attention' : ''}`}
+                    style={{ animationDelay: `${index * 0.055}s` }}
+                  >
+                    <summary>
+                      <div className="csv-import-review-acct__identity">
+                        <span className="fidelity-acct-fido-name csv-import-review-acct__name">{row.label}</span>
+                        <span className="csv-import-review-acct__holdings-hint">
+                          <IconChevronRight
+                            className="csv-import-review-acct__holdings-icon"
+                            size={14}
+                            stroke={1.5}
+                            aria-hidden
+                          />
+                          View Holdings
+                        </span>
+                      </div>
+                      <div
+                        className="csv-import-review-acct__bucket"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <Select
+                          className="csv-import-review-bucket-select app-select--compact"
+                          variant="secondary"
+                          aria-label={`Tax bucket for ${row.label}`}
+                          placeholder="Unmapped — choose…"
+                          selectedKey={unknown ? null : sel}
+                          onSelectionChange={(keys) => {
+                            const id = firstKeyFromSelectSelection(keys)
+                            if (!id || !isImportBucketValue(id)) return
+                            setReviewAssignments((m) => ({ ...m, [row.key]: id }))
+                          }}
+                        >
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover className="app-select-import-menu__popover">
+                            <ListBox className="app-select-import-menu__list">
+                              {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map((o) => (
+                                <ListBox.Item key={o.value} id={o.value} textValue={o.label}>
+                                  {o.label}
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </div>
+                      <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
+                    </summary>
+                    <FidelityAccountPositionsTable rows={accountRows} showScenarioColumn={false} />
+                  </details>
+                )
+              })}
             </div>
           </div>
 
@@ -811,13 +873,6 @@ export function FidelityCsvImport({
           ) : null}
         </>
       ) : null}
-
-      {pending && pending.parsed.rows.length > 0 && !parseError ? (
-        <>
-          <div className="csv-import-breakdown-title">By account (this import)</div>
-          <FidelityAccountBreakdown rows={rowsThisSelection} />
-        </>
-      ) : null}
     </>
     )
   }
@@ -835,7 +890,7 @@ export function FidelityCsvImport({
         </h2>
         <p className="csv-import-modal__lead">
           {hideImportSourceUi
-            ? 'Map each account to the correct tax bucket, then confirm.'
+            ? 'Review each account and map it to the correct tax bucket, then confirm.'
             : 'Choose your custodian, then select a single positions export file.'}
         </p>
       </header>
@@ -993,8 +1048,9 @@ export function FidelityCsvImport({
       {flowOpen && !isPanel && typeof document !== 'undefined'
         ? createPortal(
             <div
-              className="csv-import-modal-overlay"
+              className={`csv-import-modal-overlay${modalClosing ? ' csv-import-modal-overlay--closing' : ''}`}
               role="presentation"
+              onAnimationEnd={onModalOverlayAnimationEnd}
               onClick={() => {
                 if (!importBusy && confirmOverlay.mode === 'idle') closeFlow()
               }}

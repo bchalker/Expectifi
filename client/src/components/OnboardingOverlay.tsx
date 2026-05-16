@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Button, Switch } from '@heroui/react'
+import SimpleBar from 'simplebar-react'
+import 'simplebar-react/dist/simplebar.min.css'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import { formatSsAgeLabel, normalizeClaimAge, type SsClaimAge } from '../lib/socialSecurity'
-import { fmtInput, parseNum } from '../utils/format'
+import { fmt, fmtInput, parseNum } from '../utils/format'
 import { ClaimAgeSegment } from './ClaimAgeSegment'
 import './ConfigDrawerBody.scss'
+import './SidePanelShell.scss'
 import './OnboardingOverlay.scss'
 
 const BODY_CLASS = 'onboarding-overlay--open'
 const RETIRE_AGE_MAX = 80
+const MONTHLY_GOAL_SLIDER_MAX = 100_000
+const MONTHLY_GOAL_SLIDER_STEP = 100
 
 type Props = {
   inputs: CalculatorInputs
@@ -86,130 +91,141 @@ export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Pro
     >
       <div className="onboarding-overlay__backdrop" aria-hidden />
       <div className="onboarding-overlay__panel">
-        <h2 id="onboarding-overlay-title" className="onboarding-overlay__title">
-          Welcome — a few quick details
-        </h2>
-        <p className="footnote footnote--muted onboarding-overlay__lead">
-          You can change these anytime in <strong>Configure</strong> (gear icon) under <strong>Planning</strong> and{' '}
-          <strong>Social Security</strong>.
-        </p>
-
-        <div className="onboarding-overlay__section">
-          <div className="config-plan-field">
-            <span className="config-plan-label">When were you born?</span>
-            <input
-              type="date"
-              className="config-plan-input config-plan-input--date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-            />
-            {dobOk ? (
-              <span className="config-plan-age-hint">Age today: {ageToday}</span>
-            ) : (
-              <span className="config-plan-age-hint">Use your calendar date of birth.</span>
-            )}
+        <header className="onboarding-overlay__header">
+          <div className="onboarding-overlay__title-stack">
+            <h2 id="onboarding-overlay-title" className="onboarding-overlay__title">
+              Welcome.
+            </h2>
+            <p className="onboarding-overlay__subtitle">To get started, tell us a little about you</p>
+            <p className="onboarding-overlay__lead">
+              You can change these anytime in <strong>Configure</strong> (gear icon) under <strong>Planning</strong> and{' '}
+              <strong>Social Security</strong>.
+            </p>
           </div>
-        </div>
+        </header>
 
-        <div className="onboarding-overlay__section">
-          <label className="config-plan-field">
-            <span className="config-plan-label">When would you like to retire?</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              className="config-plan-input onboarding-overlay__retire-age-input"
-              value={fmtInput(retireAge)}
-              onChange={(e) => {
-                const n = Math.round(parseNum(e.target.value))
-                if (!Number.isFinite(n)) return
-                setRetireAge(n)
-              }}
-              aria-label="Target retirement age"
-            />
-            {dobOk && ageToday !== null ? (
-              <span className="config-plan-age-hint">
-                Use an age from {retireLo} to {RETIRE_AGE_MAX} based on your current age.
-              </span>
-            ) : (
-              <span className="config-plan-age-hint">Set your date of birth first to validate retirement age.</span>
-            )}
-          </label>
-        </div>
-
-        <div className="onboarding-overlay__section">
-          <p className="config-plan-question" id="onboarding-goal-question">
-            What is your monthly goal when you retire? (optional)
-          </p>
-          <div className="onboarding-overlay__goal-row">
-            <label className="config-plan-field config-plan-field--goal">
-              <span className="num-input-wrap">
-                <span className="num-input-prefix">$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  className="num-input"
-                  value={fmtInput(monthlyGoal)}
-                  onChange={(e) => setMonthlyGoal(Math.max(0, parseNum(e.target.value)))}
-                  placeholder="0"
-                  aria-labelledby="onboarding-goal-question"
-                />
-              </span>
-            </label>
-          </div>
-        </div>
-
-        <div className="onboarding-overlay__section">
-          <div className="onboarding-overlay__section-title">Social Security claiming ages</div>
-          <div className="onboarding-overlay__ss-block">
-            <div>
-              <span className="config-plan-age-hint" style={{ display: 'block', marginBottom: 6 }}>
-                {dobOk ? formatSsAgeLabel(dob, ssAge) : 'Your claiming age'}
-              </span>
-              <ClaimAgeSegment value={ssAge} onChange={setSsAge} ariaLabel="Your Social Security claiming age" />
-            </div>
-            <div className="onboarding-overlay__married">
-              <span id="onboarding-married-label" className="onboarding-overlay__married-label">
-                Planning with a spouse
-              </span>
-              <Switch
-                isSelected={married}
-                onChange={(selected) => setMarried(selected)}
-                size="sm"
-                aria-labelledby="onboarding-married-label"
-              >
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch>
-            </div>
-            {married ? (
-              <div>
-                <span className="config-plan-age-hint" style={{ display: 'block', marginBottom: 6 }}>
-                  {inputs.spouseDateOfBirth && isValidIsoDateString(inputs.spouseDateOfBirth)
-                    ? formatSsAgeLabel(inputs.spouseDateOfBirth, spouseSsAge)
-                    : `Spouse: claim at ${spouseSsAge} (add their date of birth in Configure → Social Security for exact dates)`}
-                </span>
-                <ClaimAgeSegment
-                  value={spouseSsAge}
-                  onChange={setSpouseSsAge}
-                  ariaLabel="Spouse Social Security claiming age"
-                />
+        <SimpleBar className="side-panel-shell__scroll onboarding-overlay__scroll" autoHide={false}>
+          <div className="onboarding-overlay__body">
+            <div className="onboarding-overlay__section">
+              <div className="config-plan-row-duo onboarding-overlay__age-row">
+                <div className="config-plan-field">
+                  <span className="config-plan-label">Your birthday</span>
+                  <input
+                    type="date"
+                    className="config-plan-input config-plan-input--date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                  />
+                  {dobOk ? (
+                    <span className="config-plan-age-hint">Age today: {ageToday}</span>
+                  ) : (
+                    <span className="config-plan-age-hint">Use your calendar date of birth.</span>
+                  )}
+                </div>
+                <label className="config-plan-field">
+                  <span className="config-plan-label">Your target retirement age</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    className="config-plan-input onboarding-overlay__retire-age-input"
+                    value={fmtInput(retireAge)}
+                    onChange={(e) => {
+                      const n = Math.round(parseNum(e.target.value))
+                      if (!Number.isFinite(n)) return
+                      setRetireAge(n)
+                    }}
+                    aria-label="Target retirement age"
+                  />
+                  {dobOk && ageToday !== null ? (
+                    <span className="config-plan-age-hint">Most people plan between 62 and 70.</span>
+                  ) : (
+                    <span className="config-plan-age-hint">Set your date of birth first.</span>
+                  )}
+                </label>
               </div>
-            ) : null}
+            </div>
+
+            <div className="onboarding-overlay__section">
+              <div className="config-plan-field config-plan-field--goal">
+                <span className="config-plan-label" id="onboarding-goal-question">
+                  Monthly income goal in retirement
+                </span>
+                <div className="config-plan-savings-row">
+                  <span className="config-plan-saveval">{fmt(monthlyGoal)}</span>
+                  <input
+                    type="range"
+                    className="config-plan-savings-slider"
+                    min={0}
+                    max={MONTHLY_GOAL_SLIDER_MAX}
+                    step={MONTHLY_GOAL_SLIDER_STEP}
+                    value={Math.min(MONTHLY_GOAL_SLIDER_MAX, monthlyGoal)}
+                    onChange={(e) => {
+                      const n =
+                        Math.round(Number(e.target.value) / MONTHLY_GOAL_SLIDER_STEP) * MONTHLY_GOAL_SLIDER_STEP
+                      setMonthlyGoal(n)
+                    }}
+                    aria-labelledby="onboarding-goal-question"
+                    aria-valuemin={0}
+                    aria-valuemax={MONTHLY_GOAL_SLIDER_MAX}
+                    aria-valuenow={monthlyGoal}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="onboarding-overlay__section">
+              <div className="onboarding-overlay__ss-block">
+                <div className="config-plan-field">
+                  <span className="config-plan-label">When do you plan to claim Social Security?</span>
+                  {dobOk ? (
+                    <span className="config-plan-age-hint">{formatSsAgeLabel(dob, ssAge)}</span>
+                  ) : null}
+                  <ClaimAgeSegment value={ssAge} onChange={setSsAge} ariaLabel="Your Social Security claiming age" />
+                </div>
+                <div className="onboarding-overlay__married">
+                  <span id="onboarding-married-label" className="onboarding-overlay__married-label">
+                    Planning with a spouse
+                  </span>
+                  <Switch
+                    isSelected={married}
+                    onChange={(selected) => setMarried(selected)}
+                    size="sm"
+                    aria-labelledby="onboarding-married-label"
+                  >
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>
+                </div>
+                {married ? (
+                  <div>
+                    <span className="config-plan-age-hint" style={{ display: 'block', marginBottom: 6 }}>
+                      {inputs.spouseDateOfBirth && isValidIsoDateString(inputs.spouseDateOfBirth)
+                        ? formatSsAgeLabel(inputs.spouseDateOfBirth, spouseSsAge)
+                        : `Spouse: claim at ${spouseSsAge} (add their date of birth in Configure → Social Security for exact dates)`}
+                    </span>
+                    <ClaimAgeSegment
+                      value={spouseSsAge}
+                      onChange={setSpouseSsAge}
+                      ariaLabel="Spouse Social Security claiming age"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
+        </SimpleBar>
 
-        {err ? (
-          <p className="onboarding-overlay__err" role="alert">
-            {err}
-          </p>
-        ) : null}
-
-        <div className="onboarding-overlay__actions">
+        <footer className="onboarding-overlay__footer">
+          {err ? (
+            <p className="onboarding-overlay__err" role="alert">
+              {err}
+            </p>
+          ) : null}
           <Button variant="primary" fullWidth isDisabled={!formValid || busy} onPress={() => void onContinue()}>
-            {busy ? 'Saving…' : 'Save and continue'}
+            {busy ? 'Saving…' : "Let's see your numbers"}
           </Button>
-        </div>
+        </footer>
       </div>
     </div>
   )

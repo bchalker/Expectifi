@@ -1,5 +1,13 @@
 {
   "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "deployCommitMessage",
+      "type": "promptString",
+      "description": "Commit message for this deploy (required if you have uncommitted changes)",
+      "default": "Update production"
+    }
+  ],
   "tasks": [
     {
       "label": "Start: client + server (on folder open)",
@@ -36,6 +44,35 @@
         "reveal": "always",
         "panel": "dedicated",
         "showReuseMessage": false
+      }
+    },
+    {
+      "label": "Deploy: push to Railway",
+      "type": "shell",
+      "command": "bash scripts/deploy-railway.sh \"${input:deployCommitMessage}\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    },
+    {
+      "label": "Deploy: push only (already committed)",
+      "type": "shell",
+      "command": "git push -u origin $(git branch --show-current)",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
       }
     }
   ]
