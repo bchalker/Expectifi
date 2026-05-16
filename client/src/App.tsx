@@ -474,7 +474,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
           grossMon={c.grossMon}
           totalFV={c.totalFV}
           targetRetirementAge={inputs.targetRetirementAge}
-          annualSave={inputs.save}
           ssIncluded={ui.ssIncluded}
           onSsIncluded={(v) => setUi({ ssIncluded: v })}
           ssClaimAge={normalizeClaimAge(inputs.ssAge)}
@@ -488,7 +487,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
           }}
           hasPortfolioBalances={c.hasPortfolioBalances}
           portfolioNow={c.retBal + c.brkBal}
-          monPort={c.monPort}
         />
       </div>
       <div className="subheader-spacer" aria-hidden="true" />

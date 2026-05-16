@@ -243,7 +243,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 /* Growth/Income toggle — half over chrome above, half in hero */
 .subheader-estimate__top {
   position: absolute;
-  top: 10px;
+  top: 20px;
   left: 50%;
   z-index: 3;
   display: flex;
@@ -253,22 +253,23 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   pointer-events: auto;
 }
 
-/* Dollar amount + SS row — vertically centered between top toggle and bottom claim */
+/* Dollar amount + chart — sit just under overlapping Growth/Income toggle */
 .subheader-estimate__center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   min-height: 0;
   box-sizing: border-box;
-  padding-top: 1.125rem;
-  padding-bottom: 0.75rem;
+  padding-top: 3rem;
+  padding-bottom: 0.5rem;
 }
 
 .subheader--ss-claim-slot .subheader-estimate__center {
-  padding-bottom: 1.125rem;
+  padding-top: 3rem;
+  padding-bottom: 0.85rem;
 }
 
 /* 62/67/70 — half over bottom wave */
@@ -304,23 +305,29 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  gap: 4px;
+  gap: 3px;
   box-sizing: border-box;
 }
 
 .subheader-estimate__hero-trend {
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  min-height: 36px;
+  width: min(100%, 12.5rem);
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: 22px;
 }
 
 .subheader-estimate__hero-trend .bucket-total-trend {
-  width: auto;
+  width: 100%;
+}
+
+.subheader-estimate__hero-trend .bucket-total-trend__chart--hero {
+  display: block;
+  width: 100%;
+  height: 22px;
 }
 
 /* Label + contrib / after-tax sit in one column with minimal gap (no min-height on label). */
@@ -605,6 +612,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   align-items: stretch;
   flex-wrap: nowrap;
   margin: 0;
+  height: 24px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(0, 0, 0, 0.32);
@@ -634,8 +642,9 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
-  padding: 0 12px;
+  min-height: 0;
+  height: 20px;
+  padding: 0 10px;
   border: 0;
   border-radius: 9999px;
   font-family: var(--body);
@@ -723,7 +732,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   font-weight: 600;
   line-height: 1.05;
   color: var(--subheader-hero-fg);
-  min-height: 2.85rem;
+  min-height: 2.35rem;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;

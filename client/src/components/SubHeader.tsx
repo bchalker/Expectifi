@@ -123,7 +123,6 @@ type Props = {
   grossMon: number
   totalFV: number
   targetRetirementAge: number
-  annualSave: number
   ssIncluded: boolean
   onSsIncluded: (v: boolean) => void
   ssClaimAge: SsClaimAge
@@ -135,8 +134,6 @@ type Props = {
   hasPortfolioBalances: boolean
   /** Current retirement + taxable balance (growth trend baseline). */
   portfolioNow: number
-  /** Portfolio-only monthly withdrawal before SS (income trend baseline). */
-  monPort: number
 }
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -150,7 +147,6 @@ export function SubHeader({
   grossMon,
   totalFV,
   targetRetirementAge,
-  annualSave,
   ssIncluded,
   onSsIncluded,
   ssClaimAge,
@@ -159,7 +155,6 @@ export function SubHeader({
   onOpenSsConfig,
   hasPortfolioBalances,
   portfolioNow,
-  monPort,
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon)
   const totalFvAnim = useAnimatedScalar(totalFV)
@@ -168,21 +163,17 @@ export function SubHeader({
   const incomePhase = phase === 'income'
 
   const heroTrend = useMemo(() => {
-    if (!hasPortfolioBalances) return null
-    if (incomePhase) {
-      if (!(monPort > 0) || !(grossMon > 0)) return null
-      return buildTrendFromAmounts(monPort, grossMon)
-    }
+    if (!hasPortfolioBalances || incomePhase) return null
     const end = totalFV
     const last = prevHeroEndRef.current
     const start = last != null && last > 0 && last !== end ? last : portfolioNow
     if (!(start > 0) || !(end > 0)) return null
     return buildTrendFromAmounts(start, end)
-  }, [hasPortfolioBalances, incomePhase, monPort, grossMon, portfolioNow, totalFV])
+  }, [hasPortfolioBalances, incomePhase, portfolioNow, totalFV])
 
   useEffect(() => {
-    prevHeroEndRef.current = incomePhase ? grossMon : totalFV
-  }, [incomePhase, grossMon, totalFV])
+    if (!incomePhase) prevHeroEndRef.current = totalFV
+  }, [incomePhase, totalFV])
 
   const showSsClaimPicker = incomePhase && ssTimingConfigured && ssIncluded
   /** Reserve hero height/padding when SS is configured so toggling include does not shift the amount. */
@@ -235,15 +226,14 @@ export function SubHeader({
                   {incomePhase ? '/mo' : `/at ${targetRetirementAge}`}
                 </span>
               </div>
-              {heroTrend ? (
+              {!incomePhase && heroTrend ? (
                 <div className="subheader-estimate__hero-trend" aria-hidden>
                   <BucketTotalTrend trend={heroTrend} tone="on-dark" layout="stack" showChart showPercent={false} />
                 </div>
               ) : null}
-              <div className="subheader-estimate__meta">
-                {incomePhase ? (
-                  <>
-                    <div className="subheader-ss-block">
+              {incomePhase ? (
+                <div className="subheader-estimate__meta">
+                  <div className="subheader-ss-block">
                     <div
                       className="subheader-estimate__note subheader-estimate__note--ss-row"
                       role="group"
@@ -270,18 +260,10 @@ export function SubHeader({
                       )}
                     </div>
                   </div>
-                  </>
-                ) : (
-                  <span className="subheader-estimate__note subheader-estimate__note--enter">
-                    {annualSave > 0
-                      ? `Adding ${fmt(annualSave)} per year in contributions`
-                      : 'No annual contributions'}
-                  </span>
-                )}
-              </div>
+                </div>
+              ) : null}
             </div>
           </div>
-
           {reserveSsClaimSlot ? (
             <div className="subheader-estimate__bottom">
               <div

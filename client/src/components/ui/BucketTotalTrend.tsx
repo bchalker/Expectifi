@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { BucketTrendDisplay } from '../../lib/bucketHoldingTrend'
 import {
   formatBucketChangePercent,
@@ -51,8 +52,10 @@ function TrendChart({
   tone: Tone
   wide?: boolean
 }) {
-  const w = wide ? 120 : 80
-  const h = wide ? 36 : 32
+  const gradId = useId().replace(/:/g, '')
+  const w = wide ? 180 : 80
+  const h = wide ? 22 : 32
+  const padY = wide ? 3 : 3
   const min = Math.min(...points)
   const max = Math.max(...points)
   const spread = max - min
@@ -61,28 +64,44 @@ function TrendChart({
   const plotMin = spread < 0.05 ? mid - 0.5 : min
   const coords = points.map((p, i) => {
     const x = (i / (points.length - 1)) * w
-    const y = h - ((p - plotMin) / range) * (h - 6) - 3
+    const y = h - ((p - plotMin) / range) * (h - padY * 2) - padY
     return { x, y }
   })
   const lineD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
   const areaD = `${lineD} L${w},${h} L0,${h} Z`
   const stroke = STROKE_BY_TONE[tone][direction]
+  const useGradient = tone === 'on-dark'
 
   return (
     <svg
-      className="bucket-total-trend__chart"
+      className={`bucket-total-trend__chart${wide ? ' bucket-total-trend__chart--hero' : ''}`}
       viewBox={`0 0 ${w} ${h}`}
-      width={w}
+      width={wide ? '100%' : w}
       height={h}
+      preserveAspectRatio={wide ? 'none' : 'xMidYMid meet'}
       aria-hidden
     >
-      <path className="bucket-total-trend__chart-area" d={areaD} fill={stroke} fillOpacity={tone === 'on-dark' ? 0.28 : 0.18} />
+      {useGradient ? (
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={stroke} stopOpacity="0.5" />
+            <stop offset="72%" stopColor={stroke} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={stroke} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+      ) : null}
+      <path
+        className="bucket-total-trend__chart-area"
+        d={areaD}
+        fill={useGradient ? `url(#${gradId})` : stroke}
+        fillOpacity={useGradient ? 1 : 0.18}
+      />
       <path
         className="bucket-total-trend__chart-line"
         d={lineD}
         fill="none"
         stroke={stroke}
-        strokeWidth={2}
+        strokeWidth={wide ? 1.75 : 2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
