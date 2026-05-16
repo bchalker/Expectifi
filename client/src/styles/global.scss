@@ -60,6 +60,10 @@
   --gold-light: var(--color-amber-bg);
   /* Chrome: sidebar + subheader bar use navy */
   --nav-bg: var(--color-navy);
+  /* Header account strip: darker than --nav-bg, flush to viewport right */
+  --nav-account-strip-bg: #121b26;
+  --nav-account-strip-bg-hover: #172633;
+  --nav-account-strip-bg-active: #15212f;
   --nav-text: rgba(255, 255, 255, 0.92);
   --nav-text-muted: var(--color-teal-light);
   --nav-hover: rgba(255, 255, 255, 0.08);
@@ -87,9 +91,20 @@
   --z-panel-backdrop: 350;
   --z-drawer-shell: 360;
   --z-subheader: 400;
+  /* Full-screen auth overlay: above fixed header stack (202) and drawer shell (360) */
+  --z-auth-modal: 500;
+  /* First-run welcome survey: above auth modal so it can appear immediately after sign-in */
+  --z-onboarding: 520;
   /* Right / bottom inset for slide-over panels (drawer shell) */
   --drawer-panel-inset: 2rem;
 }
+
+/* Empty portfolio: reserve wave band only (hero clamp hidden); front wave height is 5px in SubHeader.scss */
+html[data-no-portfolio-subheader='true'] {
+  --subheader-h: var(--subheader-bubble-h);
+  --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
+}
+
 body {
   font-family: var(--body);
   font-size: var(--text-base);

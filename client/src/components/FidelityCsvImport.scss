@@ -12,6 +12,20 @@
   position: relative;
 }
 
+.csv-import-modal-stack {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: min(90vh, 720px);
+  max-height: 90vh;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.csv-import-modal-stack .csv-import-modal-shell {
+  height: 100%;
+}
+
 .csv-import-panel-shell {
   box-sizing: border-box;
   width: 100%;
@@ -30,6 +44,14 @@
   inset: 0;
   z-index: 10;
   background: rgba(255, 255, 255, 0.72);
+}
+
+.fidelity-import-busy-overlay--modal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .csv-import-modal-overlay {
@@ -183,6 +205,17 @@
 .csv-import-upload {
   margin-top: 4px;
   margin-bottom: 12px;
+}
+
+.csv-import-upload--retry .csv-import-upload__label {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .csv-import-upload__label {
@@ -387,4 +420,212 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0 0 8px;
+}
+
+/* ── Post-Confirm stepped progress (full viewport) ── */
+.csv-import-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 560;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(244, 246, 247, 0.97);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.csv-import-confirm-overlay--exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.csv-import-confirm-overlay__panel {
+  width: 100%;
+  max-width: 26rem;
+  max-height: min(88vh, 36rem);
+  overflow: auto;
+  padding: 1.25rem 1.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: 0 12px 40px rgba(17, 24, 39, 0.12);
+  box-sizing: border-box;
+}
+
+.csv-import-confirm-overlay__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.csv-import-confirm-overlay__error-lead {
+  margin: 0 0 1rem;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.csv-import-confirm-overlay__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.csv-import-confirm-overlay__step {
+  margin: 0 0 0.65rem;
+  padding: 0 0 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.csv-import-confirm-overlay__step:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.csv-import-confirm-overlay__step-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.csv-import-confirm-overlay__step-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.csv-import-confirm-overlay__step-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.csv-import-confirm-overlay__step-title {
+  font-family: var(--body);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.csv-import-confirm-overlay__step-title-wrap--enter .csv-import-confirm-overlay__step-title {
+  animation: csv-import-confirm-fade-up 0.4s ease both;
+}
+
+.csv-import-confirm-overlay__step-title-wrap--enter .csv-import-confirm-overlay__step-sub {
+  animation: csv-import-confirm-fade-up 0.4s ease 0.05s both;
+}
+
+.csv-import-confirm-overlay__step-sub {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.csv-import-confirm-overlay__step-error {
+  margin: 0.35rem 0 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.csv-import-confirm-overlay__step-status {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-text);
+}
+
+.csv-import-confirm-overlay__check {
+  display: block;
+}
+
+.csv-import-confirm-overlay__holdings {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 11rem;
+  overflow: auto;
+}
+
+.csv-import-confirm-overlay__holding {
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: var(--surface2);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.csv-import-confirm-overlay__holding:last-child {
+  margin-bottom: 0;
+}
+
+.csv-import-confirm-overlay__holding--in {
+  animation: csv-import-confirm-holding-in 0.38s ease forwards;
+}
+
+.csv-import-confirm-overlay__footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@keyframes csv-import-confirm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes csv-import-confirm-holding-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csv-import-confirm-overlay {
+    transition-duration: 0.01ms;
+  }
+
+  .csv-import-confirm-overlay__step-title-wrap--enter .csv-import-confirm-overlay__step-title,
+  .csv-import-confirm-overlay__step-title-wrap--enter .csv-import-confirm-overlay__step-sub,
+  .csv-import-confirm-overlay__holding--in {
+    animation: none;
+  }
+
+  .csv-import-confirm-overlay__holding--in {
+    opacity: 1;
+    transform: none;
+  }
 }

@@ -29,25 +29,33 @@
 
 .config-ss-block__title {
   font-family: var(--body);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-  color: var(--text-faint);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+  color: var(--text-muted);
   margin-bottom: 10px;
 }
 
 .config-ss-amounts {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 12px;
   margin-bottom: 10px;
 }
 
+@media (max-width: 480px) {
+  .config-ss-amounts {
+    grid-template-columns: 1fr;
+  }
+}
+
 .config-ss-amount-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(7.5rem, 9.5rem);
-  align-items: center;
-  gap: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
 }
 
 .config-ss-amount-row__label {
@@ -72,6 +80,8 @@
 
 .config-ss-helper {
   margin: 0 0 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
   font-family: var(--body);
   font-size: var(--text-sm);
 }
@@ -100,6 +110,21 @@
   gap: 8px;
 }
 
+.config-ss-spousal-benefits {
+  margin-bottom: 14px;
+}
+
+.config-ss-spousal-benefits .config-ss-married-row {
+  margin-bottom: 0;
+}
+
+.config-ss-spousal-benefits__explain {
+  margin: 8px 0 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  line-height: var(--leading-relaxed);
+}
+
 .config-ss-married-row {
   display: flex;
   flex-direction: row;
@@ -113,29 +138,6 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-muted);
-}
-
-.config-ss-spouse-earnings {
-  border: none;
-  margin: 0 0 14px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.config-ss-spouse-earnings legend {
-  margin-bottom: 6px;
-}
-
-.config-ss-radio {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  color: var(--text);
-  cursor: pointer;
 }
 
 .config-ss-spouse-dob {
@@ -175,10 +177,4 @@
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
   color: var(--text);
-}
-
-@media (max-width: 480px) {
-  .config-ss-amount-row {
-    grid-template-columns: 1fr;
-  }
 }

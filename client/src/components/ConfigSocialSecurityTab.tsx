@@ -118,44 +118,53 @@ export function ConfigSocialSecurityTab({ c, inputs, setInputs }: Props) {
 
       <div className="config-ss-block config-ss-block--married">
         <div className="config-ss-married-row">
-          <span className="config-plan-label">Are you married?</span>
+          <span className="config-plan-label" id="config-ss-married-label">
+            Are you married?
+          </span>
           <Switch
             isSelected={inputs.married}
             onChange={(selected) => setInputs({ married: selected })}
             size="sm"
+            aria-labelledby="config-ss-married-label"
           >
             <Switch.Control>
               <Switch.Thumb />
             </Switch.Control>
           </Switch>
-          <span className="config-ss-married-state">{inputs.married ? 'Yes' : 'No'}</span>
+          <span className="config-ss-married-state" aria-hidden>
+            {inputs.married ? 'Yes' : 'No'}
+          </span>
         </div>
 
         {inputs.married ? (
           <>
-            <fieldset className="config-ss-spouse-earnings">
-              <legend className="config-plan-label">Does your spouse have their own SS earnings history?</legend>
-              <label className="config-ss-radio">
-                <input
-                  type="radio"
-                  name="spouse-earnings"
-                  checked={inputs.spouseHasOwnEarnings}
-                  onChange={() => setInputs({ spouseHasOwnEarnings: true })}
-                />
-                <span>Yes</span>
-              </label>
-              <label className="config-ss-radio">
-                <input
-                  type="radio"
-                  name="spouse-earnings"
-                  checked={!inputs.spouseHasOwnEarnings}
-                  onChange={() => setInputs({ spouseHasOwnEarnings: false })}
-                />
-                <span>No</span>
-              </label>
-            </fieldset>
+            <div className="config-ss-spousal-benefits">
+              <div className="config-ss-married-row">
+                <span className="config-plan-label" id="config-ss-spousal-benefits-label">
+                  Will they receive spousal benefits?
+                </span>
+                <Switch
+                  isSelected={!inputs.spouseHasOwnEarnings}
+                  onChange={(selected) => setInputs({ spouseHasOwnEarnings: !selected })}
+                  size="sm"
+                  aria-labelledby="config-ss-spousal-benefits-label"
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+                <span className="config-ss-married-state" aria-hidden>
+                  {!inputs.spouseHasOwnEarnings ? 'Yes' : 'No'}
+                </span>
+              </div>
+              <p className="footnote footnote--muted config-ss-spousal-benefits__explain">
+                Spousal benefits are monthly payments from Social Security to your spouse based on your work record (up
+                to about half of your full retirement age benefit). They apply when your spouse does not get a higher
+                benefit from their own earnings history.
+              </p>
+            </div>
 
-            {inputs.spouseHasOwnEarnings ? (
+            {!inputs.spouseHasOwnEarnings ? (
               <>
                 <label className="config-plan-field config-ss-spouse-dob">
                   <span className="config-plan-label">Spouse date of birth</span>
@@ -169,39 +178,37 @@ export function ConfigSocialSecurityTab({ c, inputs, setInputs }: Props) {
                     }}
                   />
                 </label>
-                {isValidIsoDateString(spouseDob) ? (
-                  <div className="config-ss-amounts">
-                    <SsAmountRow
-                      dateOfBirth={spouseDob}
-                      claimAge={62}
-                      value={inputs.spouseBenefit62}
-                      onChange={(n) => setSpouseBenefit(62, n)}
-                    />
-                    <SsAmountRow
-                      dateOfBirth={spouseDob}
-                      claimAge={67}
-                      value={inputs.spouseBenefit67}
-                      onChange={(n) => setSpouseBenefit(67, n)}
-                    />
-                    <SsAmountRow
-                      dateOfBirth={spouseDob}
-                      claimAge={70}
-                      value={inputs.spouseBenefit70}
-                      onChange={(n) => setSpouseBenefit(70, n)}
-                    />
-                  </div>
-                ) : (
-                  <p className="config-ss-note">Add spouse date of birth to label spouse benefit ages with calendar years.</p>
-                )}
+                <p className="config-ss-spousal-readonly">
+                  Based on your benefit, your spouse qualifies for up to{' '}
+                  <strong>{fmtMon(spousalEst.b67)}</strong> in spousal benefit at your full retirement age.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="config-ss-amounts">
+                  <SsAmountRow
+                    dateOfBirth={spouseDob}
+                    claimAge={62}
+                    value={inputs.spouseBenefit62}
+                    onChange={(n) => setSpouseBenefit(62, n)}
+                  />
+                  <SsAmountRow
+                    dateOfBirth={spouseDob}
+                    claimAge={67}
+                    value={inputs.spouseBenefit67}
+                    onChange={(n) => setSpouseBenefit(67, n)}
+                  />
+                  <SsAmountRow
+                    dateOfBirth={spouseDob}
+                    claimAge={70}
+                    value={inputs.spouseBenefit70}
+                    onChange={(n) => setSpouseBenefit(70, n)}
+                  />
+                </div>
                 {breakdown?.spouseResolution?.comparisonNote ? (
                   <p className="config-ss-comparison">{breakdown.spouseResolution.comparisonNote}</p>
                 ) : null}
               </>
-            ) : (
-              <p className="config-ss-spousal-readonly">
-                Based on your benefit, your spouse qualifies for up to{' '}
-                <strong>{fmtMon(spousalEst.b67)}</strong> in spousal benefit at your full retirement age.
-              </p>
             )}
 
             <div className="config-ss-claim-row">

@@ -13,6 +13,10 @@
   --subheader-h: 9.5rem;
 }
 
+html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
+  --subheader-h: var(--subheader-bubble-h);
+}
+
 @media (max-width: 520px) {
   .app-header-shell--has-goal {
     --goal-bar-h: 3.35rem;

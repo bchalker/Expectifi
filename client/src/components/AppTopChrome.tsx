@@ -1,12 +1,11 @@
 import { IconAdjustments, IconMenu2, IconX } from "@tabler/icons-react";
+import { useAuth } from "../context/AuthContext";
 import type { DrawerName } from "../lib/computeResults";
 import { APP_NAV_DRAWER_ITEMS } from "../lib/appNavDrawers";
 import "./AppTopChrome.scss";
 
 type Props = {
-  currentAge: number;
   targetRetirementAge: number;
-  profileDisplayName: string;
   drawer: DrawerName | null;
   snapshotOpen: boolean;
   mobileNavOpen: boolean;
@@ -14,12 +13,12 @@ type Props = {
   onOpenDrawer: (name: DrawerName) => void;
   onSnapshotToggle: () => void;
   onOpenConfig: () => void;
+  onOpenSignIn: () => void;
+  onOpenRegister: () => void;
 };
 
 export function AppTopChrome({
-  currentAge,
   targetRetirementAge,
-  profileDisplayName,
   drawer,
   snapshotOpen,
   mobileNavOpen,
@@ -27,7 +26,17 @@ export function AppTopChrome({
   onOpenDrawer,
   onSnapshotToggle,
   onOpenConfig,
+  onOpenSignIn,
+  onOpenRegister,
 }: Props) {
+  const { apiReady, loading, user, googleCheckoutUi } = useAuth();
+  /** Signed-in user, or Google+Stripe checkout identity before session is established. */
+  const accountLabel = user
+    ? user.displayName?.trim() || user.email
+    : googleCheckoutUi
+      ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
+      : "";
+  const showRetireByInProfile = Boolean(user?.onboardingDone);
   return (
     <header className="app-top-chrome">
       <div className="app-top-chrome__brand">
@@ -76,25 +85,67 @@ export function AppTopChrome({
       </button>
 
       <div className="app-top-chrome__tail">
-        <div className="app-top-chrome__profile" aria-label="Profile">
-          <span className="app-top-chrome__profile-name">
-            {profileDisplayName}
-          </span>
-          <span
-            className="app-top-chrome__profile-ages"
-            aria-label="Current age to retirement age"
+        {!loading && user?.email ? (
+          <button
+            type="button"
+            className={`app-top-chrome__account-group${drawer === "config" ? " app-top-chrome__account-group--active" : ""}`}
+            aria-label="Open configure: planning, Social Security, and income presets"
+            aria-expanded={drawer === "config"}
+            aria-controls="drawer"
+            onClick={onOpenConfig}
           >
-            {currentAge} → {targetRetirementAge}
-          </span>
-        </div>
-        <button
-          type="button"
-          className="app-top-chrome__settings"
-          aria-label="Configure: plan, retirement accounts, Fidelity import, brokerage return, and dividend yield presets"
-          onClick={onOpenConfig}
-        >
-          <IconAdjustments size={20} stroke={1.65} aria-hidden />
-        </button>
+            <span className="app-top-chrome__account-group__profile">
+              {accountLabel ? (
+                <span className="app-top-chrome__profile-name">{accountLabel}</span>
+              ) : null}
+              {showRetireByInProfile ? (
+                <span
+                  className="app-top-chrome__profile-ages"
+                  aria-hidden
+                >
+                  Retire by {targetRetirementAge}
+                </span>
+              ) : null}
+            </span>
+            <span className="app-top-chrome__account-group__icons" aria-hidden>
+              <IconAdjustments size={18} stroke={1.65} />
+            </span>
+          </button>
+        ) : !loading ? (
+          <>
+            <div className="app-top-chrome__auth" aria-label="Account">
+              {!apiReady ? (
+                <span className="app-top-chrome__auth-offline" title="API not reachable">
+                  Offline
+                </span>
+              ) : null}
+              <button
+                type="button"
+                className="app-top-chrome__auth-link"
+                onClick={onOpenSignIn}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                className="app-top-chrome__auth-cta"
+                onClick={onOpenRegister}
+              >
+                Create account
+              </button>
+            </div>
+            <button
+              type="button"
+              className={`app-top-chrome__settings${drawer === "config" ? " app-top-chrome__settings--active" : ""}`}
+              aria-label="Configure: planning, Social Security, and income presets"
+              aria-expanded={drawer === "config"}
+              aria-controls="drawer"
+              onClick={onOpenConfig}
+            >
+              <IconAdjustments size={18} stroke={1.65} aria-hidden />
+            </button>
+          </>
+        ) : null}
       </div>
     </header>
   );

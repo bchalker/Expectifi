@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
+import { Button } from '@heroui/react'
+import { useAuth } from '../context/AuthContext'
 import type { ComputedSnapshot, CalculatorInputs, CalculatorUi, DrawerName } from '../lib/computeResults'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
@@ -15,7 +17,7 @@ const TITLES: Record<DrawerName, string> = {
   taxfree: 'Tax-free withdrawals',
   strategy: 'Withdrawal strategy',
   italy: 'Italy comparison',
-  config: 'Configure',
+  config: 'Make your plans',
 }
 
 type Props = {
@@ -58,6 +60,22 @@ export function DrawerPanel({
   configInitialTab,
 }: Props) {
   const open = drawer != null
+  const { user, signOut } = useAuth()
+
+  const configFooter =
+    drawer === 'config' && user?.email ? (
+      <div className="drawer-config-footer">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="drawer-config-footer__signout"
+          onPress={() => void signOut()}
+        >
+          Sign out
+        </Button>
+      </div>
+    ) : undefined
 
   useEffect(() => {
     if (!open) return
@@ -82,8 +100,11 @@ export function DrawerPanel({
         title={drawer ? TITLES[drawer] : 'Details'}
         onClose={onClose}
         scrollKey={drawer ?? ''}
-        shellClassName="drawer-shell--right"
+        shellClassName={['drawer-shell--right', drawer === 'config' ? 'drawer-shell--config' : '']
+          .filter(Boolean)
+          .join(' ')}
         bodyClassName="drawer-shell-body"
+        footer={configFooter}
       >
         {drawer ? (
           <DrawerBody
@@ -118,14 +139,14 @@ function DrawerBody({
   ui,
   activePreset,
   setActivePreset,
-  balanceMode,
-  onBalanceModeChange,
-  brokerageMode,
-  onBrokerageModeChange,
-  fidelityImportRev,
-  onFidelityApplyBalances,
-  onFidelityImportAppliedRetirement,
-  onFidelityImportAppliedBrokerage,
+  balanceMode: _balanceMode,
+  onBalanceModeChange: _onBalanceModeChange,
+  brokerageMode: _brokerageMode,
+  onBrokerageModeChange: _onBrokerageModeChange,
+  fidelityImportRev: _fidelityImportRev,
+  onFidelityApplyBalances: _onFidelityApplyBalances,
+  onFidelityImportAppliedRetirement: _onFidelityImportAppliedRetirement,
+  onFidelityImportAppliedBrokerage: _onFidelityImportAppliedBrokerage,
   configInitialTab,
 }: {
   id: DrawerName
@@ -155,14 +176,6 @@ function DrawerBody({
           ui={ui}
           activePreset={activePreset}
           setActivePreset={setActivePreset}
-          balanceMode={balanceMode}
-          onBalanceModeChange={onBalanceModeChange}
-          brokerageMode={brokerageMode}
-          onBrokerageModeChange={onBrokerageModeChange}
-          fidelityImportRev={fidelityImportRev}
-          onFidelityApplyBalances={onFidelityApplyBalances}
-          onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
-          onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
           initialTab={configInitialTab}
         />
       )
@@ -187,7 +200,8 @@ function ScenariosBody({ c }: { c: ComputedSnapshot }) {
     <>
       <div className="section-title">Return scenarios — retirement accounts</div>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-        Six return rates applied to retirement accounts. Brokerage uses the rate set in Configure.
+        Six return rates applied to retirement accounts. Brokerage uses the dividend yield and return sliders from your
+        dashboard (income phase).
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="scenario-table">

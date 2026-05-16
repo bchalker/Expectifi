@@ -1,7 +1,7 @@
-import type { AnimationEvent, CSSProperties, ReactNode } from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { AnimationEvent, ChangeEvent, CSSProperties, ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { IconArrowDown } from '@tabler/icons-react'
-import { Button, ButtonGroup, useOverlayState } from '@heroui/react'
+import { Button, ButtonGroup, ListBox, Select, useOverlayState } from '@heroui/react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import {
   aggregateFidelityPositionsBySymbol,
@@ -20,6 +20,7 @@ import {
   withdrawalBucketOrder,
   type WithdrawalDisplayBucket,
 } from '../lib/withdrawalDisplayOrder'
+import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { positionUsesCustomReturnMode } from '../lib/positionReturnModel'
@@ -32,6 +33,19 @@ import './AccountBalancesTaxDisclosure.scss'
 import './AccountBalancesCustomScenario.scss'
 
 type BucketKey = 'ret401k' | 'se401k' | 'roth' | 'hsa'
+
+function isPositionsCsvCustodian(id: string): id is PositionsCsvCustodian {
+  return id === 'fidelity' || id === 'schwab' || id === 'vanguard' || id === 'other'
+}
+
+function firstKeyFromSelectSelection(keys: unknown): string | null {
+  if (keys == null || keys === 'all') return null
+  if (typeof keys === 'object' && 'values' in keys && typeof (keys as { values: () => Iterator<unknown> }).values === 'function') {
+    const it = (keys as Set<unknown>).values().next()
+    return it.done || it.value == null ? null : String(it.value)
+  }
+  return String(keys)
+}
 
 type Props = {
   c: ComputedSnapshot
@@ -183,12 +197,23 @@ export function AccountBalances({
   const [fidelityScenarioClosing, setFidelityScenarioClosing] = useState(false)
   const [balanceEditPanel, setBalanceEditPanel] = useState<'manual' | 'import' | null>(null)
   const [balanceEditClosing, setBalanceEditClosing] = useState(false)
+  const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] = useState<PositionsCsvCustodian | null>(null)
+  const [csvImportLaunchNonce, setCsvImportLaunchNonce] = useState(0)
+  const [custodianSelectResetKey, setCustodianSelectResetKey] = useState(0)
+  const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
+    id: number
+    file: File
+    custodian: PositionsCsvCustodian
+  } | null>(null)
+  const financialsCsvPendingCustodianRef = useRef<PositionsCsvCustodian | null>(null)
+  const financialsCsvFileInputRef = useRef<HTMLInputElement>(null)
 
   const canEditBalances = Boolean(
     mergedDashboard && onBases && onBalanceModeChange && onFidelityApplyBalances,
   )
 
   const removeAccountsModalState = useOverlayState()
+  const financialsImportPrefixId = useId()
 
   const confirmRemoveAccounts = useCallback(() => {
     removeAccountsModalState.close()
@@ -266,6 +291,35 @@ export function AccountBalances({
       openBalanceEditPanel(panel)
     },
     [balanceEditPanel, balanceEditClosing, openBalanceEditPanel, requestBalanceEditClose],
+  )
+
+  const clearCsvImportLaunchUi = useCallback(() => {
+    setCsvImportPrefillCustodian(null)
+    setCsvFileIngestRequest(null)
+    setCustodianSelectResetKey((k) => k + 1)
+  }, [])
+
+  const onCsvFileIngestConsumed = useCallback(() => {
+    setCsvFileIngestRequest(null)
+  }, [])
+
+  const onFinancialsCsvFileChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const f = e.target.files?.[0]
+      e.target.value = ''
+      const c = financialsCsvPendingCustodianRef.current
+      financialsCsvPendingCustodianRef.current = null
+      if (!f || !c) return
+      setCsvImportPrefillCustodian(c)
+      setCsvImportLaunchNonce((n) => n + 1)
+      setCsvFileIngestRequest({ id: Date.now(), file: f, custodian: c })
+      setCustodianSelectResetKey((k) => k + 1)
+      onBalanceModeChange?.('fidelity')
+      if (mergedDashboard && onFidelityApplyBalances) {
+        openBalanceEditPanel('import')
+      }
+    },
+    [mergedDashboard, onBalanceModeChange, onFidelityApplyBalances, openBalanceEditPanel],
   )
 
   useEffect(() => {
@@ -436,16 +490,77 @@ export function AccountBalances({
   function renderRetirementBalancesEmptyState() {
     return (
       <div className="account-balances-empty" role="status">
-        <p className="account-balances-empty__lead">
-          Add your retirement account balances to include them in your growth and income projections.
-        </p>
-        <p className="account-balances-empty__hint">
-          Enter totals for each account type manually, or import a positions CSV from your custodian and map accounts to the right tax
-          buckets.
-        </p>
         {showBalanceEntryActions ? (
-          <div className="account-balances-empty__actions">{renderBalanceEntryButtons()}</div>
+          <div className="account-balances-empty__actions account-balances-empty__actions--financials-entry">
+            {renderFinancialsEntryFull()}
+          </div>
         ) : null}
+      </div>
+    )
+  }
+
+  function renderFinancialsEntryFull() {
+    if (!showBalanceEntryActions) return null
+    return (
+      <div className="account-balances-financials-entry">
+        <h2 className="account-balances-financials-entry__title">How would you like to add your financials for this?</h2>
+        <div className="account-balances-financials-entry__manual-row">
+          <Button
+            variant="primary"
+            size="sm"
+            className="account-balances-financials-entry__manual-btn"
+            onPress={() => (mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual'))}
+          >
+            I'll manually add them
+          </Button>
+        </div>
+        <div className="account-balances-financials-entry__import-row">
+          <span className="account-balances-financials-entry__import-prefix" id={financialsImportPrefixId}>
+            Import a CSV from
+          </span>
+          <input
+            ref={financialsCsvFileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+            onChange={onFinancialsCsvFileChange}
+          />
+          <Select
+            key={custodianSelectResetKey}
+            className="account-balances-financials-entry__select"
+            aria-labelledby={financialsImportPrefixId}
+            placeholder="Choose custodian…"
+            onSelectionChange={(keys) => {
+              const id = firstKeyFromSelectSelection(keys)
+              if (!id || !isPositionsCsvCustodian(id)) return
+              financialsCsvPendingCustodianRef.current = id
+              financialsCsvFileInputRef.current?.click()
+            }}
+          >
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                <ListBox.Item id="fidelity" textValue="Fidelity">
+                  Fidelity
+                </ListBox.Item>
+                <ListBox.Item id="schwab" textValue="Charles Schwab">
+                  Charles Schwab
+                </ListBox.Item>
+                <ListBox.Item id="vanguard" textValue="Vanguard">
+                  Vanguard
+                </ListBox.Item>
+                <ListBox.Item id="other" textValue="Other">
+                  Other
+                </ListBox.Item>
+              </ListBox>
+            </Select.Popover>
+          </Select>
+        </div>
       </div>
     )
   }
@@ -971,9 +1086,14 @@ export function AccountBalances({
                 onAnimationEnd={onBalanceEditSheetAnimationEnd}
               >
                 <FidelityCsvImport
+                  key={`acct-balances-import-${csvImportLaunchNonce}`}
                   presentation="panel"
                   open
                   hideTrigger
+                  initialCustodian={csvImportPrefillCustodian}
+                  fileIngestRequest={csvFileIngestRequest}
+                  onFileIngestConsumed={onCsvFileIngestConsumed}
+                  onImportFlowClose={clearCsvImportLaunchUi}
                   onOpenChange={(open) => {
                     if (!open) requestBalanceEditClose()
                   }}
@@ -991,13 +1111,18 @@ export function AccountBalances({
       ) : (
         <>
           <div className="input-col-title">Retirement account balances</div>
-          {!readOnly && hasRetirementAccountData ? (
+          {!readOnly && (hasRetirementAccountData || balanceMode === 'fidelity') ? (
             <div className="balance-input-toolbar">
               {renderBalanceEntryButtons()}
               {renderRemoveAccountsButton()}
               {balanceMode === 'fidelity' ? (
                 <FidelityCsvImport
+                  key={`acct-balances-import-toolbar-${csvImportLaunchNonce}`}
                   variant="toolbar"
+                  initialCustodian={csvImportPrefillCustodian}
+                  fileIngestRequest={csvFileIngestRequest}
+                  onFileIngestConsumed={onCsvFileIngestConsumed}
+                  onImportFlowClose={clearCsvImportLaunchUi}
                   onApplyBalances={onFidelityApplyBalances!}
                   onImportApplied={onFidelityImportApplied}
                 />

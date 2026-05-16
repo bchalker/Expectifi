@@ -12,6 +12,8 @@ import { clampedAgeFromDob } from './ageFromDob'
 import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
 import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
 import { positionsForBrokerage, positionsForRetirementBucket, type FidelityPositionRow } from './fidelityCsv'
+import type { BrokerageBalanceMode } from './brokerageBalanceMode'
+import type { BalanceInputMode } from './retirementBalanceMode'
 import {
   calendarRetirementYear,
   mergeBucketIntoAllModels,
@@ -118,6 +120,12 @@ export type CalculatorUi = {
   incomePresetEditorFocusSeq?: number
 }
 
+/** When retirement/brokerage input is `manual`, growth uses account totals only — not stored CSV line items. */
+export type ComputeBalanceModes = {
+  retirement: BalanceInputMode
+  brokerage: BrokerageBalanceMode
+}
+
 function accountDisplayBalances(bases: CalculatorInputs) {
   return {
     bal401k: bases.base401k,
@@ -174,7 +182,13 @@ export function mergeAllRetirementFidelityBuckets(
   return { working, mergedInHoldings }
 }
 
-export function computeResults(inputs: CalculatorInputs, ui: CalculatorUi) {
+export function computeResults(
+  inputs: CalculatorInputs,
+  ui: CalculatorUi,
+  balanceModes?: ComputeBalanceModes,
+) {
+  const retirementInputMode = balanceModes?.retirement ?? 'fidelity'
+  const brokerageInputMode = balanceModes?.brokerage ?? 'fidelity'
   const {
     retRate,
     brkRate,
@@ -232,7 +246,7 @@ export function computeResults(inputs: CalculatorInputs, ui: CalculatorUi) {
 
   const retirementCalendarYear = calendarRetirementYear(currentAge, targetRetirementAge)
 
-  if (hasFidelityRetirementModeling) {
+  if (retirementInputMode === 'fidelity' && hasFidelityRetirementModeling) {
     const { working, mergedInHoldings } = mergeAllRetirementFidelityBuckets(
       inputs,
       fidelityRows,
@@ -265,7 +279,7 @@ export function computeResults(inputs: CalculatorInputs, ui: CalculatorUi) {
   }
 
   const brokerageRows = positionsForBrokerage(fidelityRows)
-  if (brokerageRows.length > 0) {
+  if (brokerageInputMode === 'fidelity' && brokerageRows.length > 0) {
     let workingBrk = normalizePositionReturnModels(
       inputs.positionReturnModels ?? [],
       yearsToRetirement,

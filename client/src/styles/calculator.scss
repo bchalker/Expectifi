@@ -859,23 +859,22 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   flex: 0 0 auto;
 }
 
-/* Fidelity CSV import */
+/* Fidelity CSV import — modal uses absolute overlay inside .csv-import-modal-stack */
 .fidelity-import-busy-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(28, 24, 18, 0.42);
   padding: 1rem;
+  box-sizing: border-box;
 }
 .fidelity-import-busy-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 1.5rem 2rem;
+  align-items: stretch;
+  gap: 0.75rem;
+  min-width: min(100%, 17rem);
+  max-width: min(100%, 22rem);
+  padding: 1.25rem 1.5rem;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
@@ -884,6 +883,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 .fidelity-import-busy-ring {
   width: 36px;
   height: 36px;
+  align-self: center;
   border-radius: 50%;
   border: 3px solid var(--surface2);
   border-top-color: var(--accent);
@@ -892,12 +892,36 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 @keyframes fidelity-import-spin {
   to { transform: rotate(360deg); }
 }
-.fidelity-import-busy-text {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+
+@media (prefers-reduced-motion: reduce) {
+  .fidelity-import-busy-ring {
+    animation: none;
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--surface2));
+  }
+}
+.fidelity-import-busy-headline {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  text-align: center;
+}
+.fidelity-import-busy-details {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--text-muted);
+  text-align: left;
+}
+.fidelity-import-busy-details li {
+  margin-bottom: 0.35rem;
+}
+.fidelity-import-busy-details li:last-child {
+  margin-bottom: 0;
 }
 .fidelity-import-dropzone {
   display: inline-flex;

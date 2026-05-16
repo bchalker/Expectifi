@@ -1,5 +1,6 @@
 import { IconAdjustments } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { APP_NAV_DRAWER_ITEMS } from "../lib/appNavDrawers";
 import type { DrawerName } from "../lib/computeResults";
 import "./AppLeftNav.scss";
@@ -7,9 +8,7 @@ import "./AppLeftNav.scss";
 const MOBILE_NAV_BODY_CLASS = "app-left-nav--mobile-open-body";
 
 type Props = {
-  currentAge: number;
   targetRetirementAge: number;
-  profileDisplayName: string;
   drawer: DrawerName | null;
   snapshotOpen: boolean;
   mobileOpen: boolean;
@@ -17,12 +16,12 @@ type Props = {
   onOpenDrawer: (name: DrawerName) => void;
   onSnapshotToggle: () => void;
   onOpenConfig: () => void;
+  onOpenSignIn: () => void;
+  onOpenRegister: () => void;
 };
 
 export function AppLeftNav({
-  currentAge,
   targetRetirementAge,
-  profileDisplayName,
   drawer,
   snapshotOpen,
   mobileOpen,
@@ -30,7 +29,16 @@ export function AppLeftNav({
   onOpenDrawer,
   onSnapshotToggle,
   onOpenConfig,
+  onOpenSignIn,
+  onOpenRegister,
 }: Props) {
+  const { apiReady, loading, user, googleCheckoutUi } = useAuth();
+  const accountLabel = user
+    ? user.displayName?.trim() || user.email
+    : googleCheckoutUi
+      ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
+      : "";
+  const showRetireByInProfile = Boolean(user?.onboardingDone);
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
@@ -130,24 +138,81 @@ export function AppLeftNav({
           ))}
         </div>
         <div className="app-left-nav__footer">
-          <div className="app-left-nav__profile" aria-label="Profile">
-            <span className="app-left-nav__profile-name">
-              {profileDisplayName}
-            </span>
-            <span className="app-left-nav__profile-age">
-              Age {currentAge} → {targetRetirementAge}
-            </span>
-          </div>
-          <div className="app-left-nav__footer-actions">
+          {!loading && user?.email ? (
             <button
               type="button"
-              className="app-left-nav__settings-btn"
-              aria-label="Configure: plan, retirement accounts, Fidelity import, brokerage return, and dividend yield presets"
+              className={`app-left-nav__account-group${drawer === "config" ? " app-left-nav__account-group--active" : ""}`}
+              aria-label="Open configure: planning, Social Security, and income presets"
+              aria-expanded={drawer === "config"}
+              aria-controls="drawer"
               onClick={openConfig}
             >
-              <IconAdjustments size={18} stroke={1.65} aria-hidden />
+              <span className="app-left-nav__account-group__profile">
+                {accountLabel ? (
+                  <span className="app-left-nav__profile-name">{accountLabel}</span>
+                ) : null}
+                {showRetireByInProfile ? (
+                  <span className="app-left-nav__profile-age" aria-hidden>
+                    Retire by {targetRetirementAge}
+                  </span>
+                ) : null}
+              </span>
+              <span className="app-left-nav__account-group__icons" aria-hidden>
+                <IconAdjustments size={18} stroke={1.65} />
+              </span>
             </button>
-          </div>
+          ) : !loading ? (
+            <>
+              <div className="app-left-nav__profile" aria-label="Profile">
+                {accountLabel ? (
+                  <span className="app-left-nav__profile-name">{accountLabel}</span>
+                ) : null}
+                {showRetireByInProfile ? (
+                  <span className="app-left-nav__profile-age" aria-label={`Retire by age ${targetRetirementAge}`}>
+                    Retire by {targetRetirementAge}
+                  </span>
+                ) : null}
+              </div>
+              <div className="app-left-nav__auth" aria-label="Account">
+                {!apiReady ? (
+                  <span
+                    className="app-left-nav__auth-offline"
+                    title="API not reachable"
+                  >
+                    Offline
+                  </span>
+                ) : null}
+                <div className="app-left-nav__auth-row">
+                  <button
+                    type="button"
+                    className="app-left-nav__auth-link"
+                    onClick={onOpenSignIn}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    className="app-left-nav__auth-cta"
+                    onClick={onOpenRegister}
+                  >
+                    Create account
+                  </button>
+                </div>
+              </div>
+              <div className="app-left-nav__footer-actions">
+                <button
+                  type="button"
+                  className={`app-left-nav__settings-btn${drawer === "config" ? " app-left-nav__settings-btn--active" : ""}`}
+                  aria-label="Configure: planning, Social Security, and income presets"
+                  aria-expanded={drawer === "config"}
+                  aria-controls="drawer"
+                  onClick={openConfig}
+                >
+                  <IconAdjustments size={18} stroke={1.65} aria-hidden />
+                </button>
+              </div>
+            </>
+          ) : null}
         </div>
       </nav>
     </>

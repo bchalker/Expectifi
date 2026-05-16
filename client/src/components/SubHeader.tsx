@@ -164,7 +164,7 @@ export function SubHeader({
 
   return (
     <header
-      className={`subheader${incomePhase ? ' subheader--phase-income' : ''}${reserveSsClaimSlot ? ' subheader--ss-claim-slot' : ''}`}
+      className={`subheader${incomePhase ? ' subheader--phase-income' : ''}${reserveSsClaimSlot ? ' subheader--ss-claim-slot' : ''}${!hasPortfolioBalances ? ' subheader--no-balances' : ''}`}
     >
       <div className="subheader-waves">
         <div className="subheader-waves__bubbles" aria-hidden>
@@ -175,16 +175,19 @@ export function SubHeader({
           >
             <path d={SUBHEADER_WAVE_BACK_D} fill="var(--nav-bg)" />
           </svg>
-          <svg
-            className="subheader-bubble subheader-bubble--front"
-            viewBox="0 0 1000 72"
-            preserveAspectRatio="xMidYMax slice"
-          >
-            <path className="subheader-bubble__front-path" d={SUBHEADER_WAVE_FRONT_D} />
-          </svg>
+          <div className="subheader-waves__front-scale">
+            <svg
+              className="subheader-bubble subheader-bubble--front"
+              viewBox="0 0 1000 72"
+              preserveAspectRatio="xMidYMax slice"
+            >
+              <path className="subheader-bubble__front-path" d={SUBHEADER_WAVE_FRONT_D} />
+            </svg>
+          </div>
         </div>
       </div>
-      <div className="subheader-content">
+      {hasPortfolioBalances ? (
+        <div className="subheader-content">
         <div className="subheader-estimate" aria-live="polite">
           <div className="subheader-estimate__top">
             <PhaseSegmentTabs phase={phase} onPhase={onPhase} />
@@ -237,11 +240,9 @@ export function SubHeader({
                   </div>
                 ) : (
                   <span className="subheader-estimate__note subheader-estimate__note--enter">
-                    {!hasPortfolioBalances
-                      ? 'Add account balances below to project growth and income'
-                      : annualSave > 0
-                        ? `Adding ${fmtK(annualSave)} per year in contributions`
-                        : 'No annual contributions'}
+                    {annualSave > 0
+                      ? `Adding ${fmtK(annualSave)} per year in contributions`
+                      : 'No annual contributions'}
                   </span>
                 )}
               </div>
@@ -260,6 +261,7 @@ export function SubHeader({
           ) : null}
         </div>
       </div>
+      ) : null}
     </header>
   )
 }

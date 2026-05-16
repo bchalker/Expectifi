@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@heroui/react": "^3.0.4",
+    "@stripe/react-stripe-js": "^6.3.0",
+    "@stripe/stripe-js": "^9.5.0",
     "@tabler/icons-react": "^3.44.0",
     "@tailwindcss/vite": "^4.3.0",
     "react": "^19.2.6",

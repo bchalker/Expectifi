@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AuthBar } from './components/AuthBar'
+import { AuthModal, type AuthModalMode } from './components/AuthModal'
+import { OnboardingOverlay } from './components/OnboardingOverlay'
+import { useAuth } from './context/AuthContext'
 import { AccountBalances } from './components/AccountBalances'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
 import { IncomeInputs } from './components/IncomeInputs'
-import { PhaseToggle } from './components/PhaseToggle'
 import { AppTopChrome } from './components/AppTopChrome'
 import { AppLeftNav } from './components/AppLeftNav'
 import { StripHeader } from './components/StripHeader'
@@ -35,8 +36,6 @@ import {
 import { loadBalanceInputMode, saveBalanceInputMode, type BalanceInputMode } from './lib/retirementBalanceMode'
 import { isSsConfigured, normalizeClaimAge, type SsClaimAge } from './lib/socialSecurity'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
-
-const PROFILE_DISPLAY_NAME = 'Bryan Chalker'
 
 const defaultInputs: CalculatorInputs = {
   base401k: BAL_TRAD_401K,
@@ -148,6 +147,44 @@ export default function App() {
   } | null>(null)
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [authModal, setAuthModal] = useState<AuthModalMode | null>(null)
+
+  const { loading: authLoading, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi, user, completeOnboarding } =
+    useAuth()
+
+  useEffect(() => {
+    if (authLoading) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('google_checkout') !== '1') return
+    let cancelled = false
+    void (async () => {
+      const result = await resolveGoogleCheckoutFromUrl()
+      if (cancelled) return
+      params.delete('google_checkout')
+      const q = params.toString()
+      window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${q ? `?${q}` : ''}${window.location.hash}`,
+      )
+      if (result.status === 'payment_required') {
+        setAuthModal('google_checkout')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [authLoading, resolveGoogleCheckoutFromUrl])
+
+  const openAuthSignIn = useCallback(() => {
+    setMobileNavOpen(false)
+    setAuthModal('signin')
+  }, [])
+
+  const openAuthRegister = useCallback(() => {
+    setMobileNavOpen(false)
+    setAuthModal('register')
+  }, [])
 
   const onReturnEditorOpenHandled = useCallback(() => setReturnEditorOpen(null), [])
 
@@ -184,6 +221,7 @@ export default function App() {
   const requestIncomePresetAdd = useCallback(() => {
     setPhase('income')
     setAccordionOpen(false)
+    setConfigTab('presets')
     setDrawer('config')
     setUiState((s) => ({
       ...s,
@@ -257,10 +295,27 @@ export default function App() {
     onBrokerageModeChange('fidelity')
   }, [onBrokerageModeChange])
 
-  const c = useMemo(() => computeResults(inputs, ui), [inputs, ui])
+  const c = useMemo(
+    () => computeResults(inputs, ui, { retirement: balanceMode, brokerage: brokerageMode }),
+    [inputs, ui, balanceMode, brokerageMode],
+  )
+
+  const showOnboarding = Boolean(user && !user.onboardingDone && !authLoading)
 
   const ssTimingConfigured = isSsConfigured(inputs)
   const hasIncomeGoal = inputs.monthlyIncomeGoal > 0
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (!c.hasPortfolioBalances) {
+      root.dataset.noPortfolioSubheader = 'true'
+    } else {
+      delete root.dataset.noPortfolioSubheader
+    }
+    return () => {
+      delete root.dataset.noPortfolioSubheader
+    }
+  }, [c.hasPortfolioBalances])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return
@@ -274,14 +329,20 @@ export default function App() {
 
   return (
     <>
+      {showOnboarding && user ? (
+        <OnboardingOverlay
+          key={user.id}
+          inputs={inputs}
+          setInputs={setInputs}
+          completeOnboarding={completeOnboarding}
+        />
+      ) : null}
       <div
         className={`app-header-shell${hasIncomeGoal ? ' app-header-shell--has-goal' : ''}${phase === 'income' && ssTimingConfigured ? ' app-header-shell--ss-claim' : ''}`}
       >
         <div className="app-header-stack">
         <AppTopChrome
-          currentAge={c.currentAge}
           targetRetirementAge={inputs.targetRetirementAge}
-          profileDisplayName={PROFILE_DISPLAY_NAME}
           drawer={drawer}
           snapshotOpen={accordionOpen}
           mobileNavOpen={mobileNavOpen}
@@ -303,6 +364,8 @@ export default function App() {
             setConfigTab('plan')
             setDrawer('config')
           }}
+          onOpenSignIn={openAuthSignIn}
+          onOpenRegister={openAuthRegister}
         />
         <GoalProgressBar
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
@@ -333,9 +396,7 @@ export default function App() {
       <div className="subheader-spacer" aria-hidden="true" />
       </div>
       <AppLeftNav
-        currentAge={c.currentAge}
         targetRetirementAge={inputs.targetRetirementAge}
-        profileDisplayName={PROFILE_DISPLAY_NAME}
         drawer={drawer}
         snapshotOpen={accordionOpen}
         mobileOpen={mobileNavOpen}
@@ -356,6 +417,8 @@ export default function App() {
           setConfigTab('plan')
           setDrawer('config')
         }}
+        onOpenSignIn={openAuthSignIn}
+        onOpenRegister={openAuthRegister}
       />
       <div className="app-scroll-stack">
       <StripHeader
@@ -419,23 +482,6 @@ export default function App() {
       <div className="main">
         <div className="section">
           <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-end',
-              alignItems: 'flex-start',
-              gap: '1rem',
-              marginBottom: '1rem',
-            }}
-          >
-            <div className="typo-nav-cluster" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, maxWidth: 560 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 }}>
-                <AuthBar />
-              </div>
-            </div>
-          </div>
-
-          <div
             className="rab-brokerage-stack"
             style={{
               border: '1px solid var(--border-strong)',
@@ -467,13 +513,6 @@ export default function App() {
               onLoadSnapshot={applySnapshot}
             />
           </div>
-
-          <PhaseToggle
-            phase={phase}
-            onPhase={setPhase}
-            currentAge={c.currentAge}
-            targetRetirementAge={inputs.targetRetirementAge}
-          />
 
           {phase === 'income' ? (
             <div id="phase-income">
@@ -516,6 +555,14 @@ export default function App() {
         onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
         onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
         configInitialTab={configTab}
+      />
+      <AuthModal
+        open={authModal}
+        onClose={() => {
+          if (authModal === 'google_checkout') clearGoogleCheckoutUi()
+          setAuthModal(null)
+        }}
+        onSwitchMode={(mode) => setAuthModal(mode)}
       />
     </>
   )

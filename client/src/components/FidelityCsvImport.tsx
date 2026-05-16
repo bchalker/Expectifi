@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@heroui/react'
-import { IconBuildingBank } from '@tabler/icons-react'
+import { IconBuildingBank, IconCheck } from '@tabler/icons-react'
 import { fmt } from '../utils/format'
 import { FidelityAccountBreakdown } from './FidelityAccountBreakdown'
 import type { ParsedFidelityCsv, AccountBucket } from '../lib/fidelityCsv'
@@ -11,6 +11,7 @@ import {
   fidelityAccountKey,
   IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS,
   isFidelityPendingActivityRow,
+  normalizeFidelityImportSymbol,
   uniqueAccountKeysFromRows,
 } from '../lib/fidelityCsv'
 import {
@@ -45,6 +46,13 @@ type Props = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   hideTrigger?: boolean
+  /** When the import flow mounts, pre-select this custodian (e.g. from dashboard picker). */
+  initialCustodian?: PositionsCsvCustodian | null
+  /** Called when the import modal/panel is dismissed (after close, before inner state reset). */
+  onImportFlowClose?: () => void
+  /** Parent picked custodian + file (e.g. empty-state flow): skip custodian grid and immediate file row. */
+  fileIngestRequest?: { id: number; file: File; custodian: PositionsCsvCustodian } | null
+  onFileIngestConsumed?: () => void
 }
 
 type PendingImport = {
@@ -53,6 +61,61 @@ type PendingImport = {
   parsed: ParsedFidelityCsv
   duplicateInStorage: boolean
   duplicateInSelection: boolean
+}
+
+type ImportBusyState = {
+  headline: string
+  details: string[]
+}
+
+const CONFIRM_MIN_STEP_MS = 120
+const CONFIRM_POSITION_STAGGER_MS = 75
+const CONFIRM_OVERLAY_FADE_MS = 400
+const CONFIRM_WAVE_DATASET_CLEAR_MS = 320
+
+type ConfirmStepRow = {
+  id: string
+  title: string
+  subtitle?: string
+  status: 'pending' | 'active' | 'done' | 'error'
+  errorDetail?: string
+}
+
+type ConfirmOverlayState =
+  | { mode: 'idle' }
+  | { mode: 'running'; steps: ConfirmStepRow[]; positionLabels: string[]; positionRevealIndex: number }
+  | {
+      mode: 'exiting'
+      steps: ConfirmStepRow[]
+      positionLabels: string[]
+      positionRevealIndex: number
+    }
+  | { mode: 'error'; steps: ConfirmStepRow[]; failedStepIndex: number; message: string }
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+function brokerageFormatLabel(c: PositionsCsvCustodian): string {
+  if (c === 'fidelity') return 'Fidelity'
+  if (c === 'vanguard') return 'Vanguard'
+  if (c === 'schwab') return 'Schwab'
+  return 'Other'
+}
+
+function buildConfirmSteps(fileName: string, brokerLabel: string): ConfirmStepRow[] {
+  return [
+    { id: 'received', title: 'File received', subtitle: fileName, status: 'pending' },
+    { id: 'parse', title: 'Parsing CSV', status: 'pending' },
+    {
+      id: 'format',
+      title: 'Identifying brokerage format',
+      subtitle: `Detected: ${brokerLabel}`,
+      status: 'pending',
+    },
+    { id: 'validate', title: 'Validating holdings', status: 'pending' },
+    { id: 'positions', title: 'Loading positions', status: 'pending' },
+  ]
 }
 
 function readFileAsText(file: File): Promise<string> {
@@ -107,24 +170,39 @@ export function FidelityCsvImport({
   open: openControlled,
   onOpenChange,
   hideTrigger = false,
+  initialCustodian = null,
+  onImportFlowClose,
+  fileIngestRequest = null,
+  onFileIngestConsumed,
 }: Props) {
   const isPanel = presentation === 'panel'
   const pickInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const [modalOpen, setModalOpen] = useState(false)
   const flowOpen = isPanel ? Boolean(openControlled) : modalOpen
-  const [custodian, setCustodian] = useState<PositionsCsvCustodian | null>(null)
+  const [custodian, setCustodian] = useState<PositionsCsvCustodian | null>(() => initialCustodian ?? null)
   const [stagedFile, setStagedFile] = useState<File | null>(null)
   const [otherMap, setOtherMap] = useState<OtherColumnMap>(EMPTY_OTHER)
   const [headerOptions, setHeaderOptions] = useState<string[]>([])
   const [pending, setPending] = useState<PendingImport | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
-  const [importing, setImporting] = useState(false)
+  const [importBusy, setImportBusy] = useState<ImportBusyState | null>(null)
+  const [confirmOverlay, setConfirmOverlay] = useState<ConfirmOverlayState>({ mode: 'idle' })
+
+  useEffect(() => {
+    return () => {
+      document.documentElement.removeAttribute('data-portfolio-wave-reveal')
+      document.documentElement.removeAttribute('data-portfolio-import-flush')
+    }
+  }, [])
   const [replaceDuplicateImports, setReplaceDuplicateImports] = useState(false)
   const [reviewAssignments, setReviewAssignments] = useState<Record<string, AccountBucket>>({})
+  const [hideImportSourceUi, setHideImportSourceUi] = useState(false)
+  const lastFileIngestIdRef = useRef<number | null>(null)
 
-  function resetModalInner() {
-    setCustodian(null)
+  function resetModalInner(options?: { seedCustodianFromProps?: boolean }) {
+    setHideImportSourceUi(false)
+    setCustodian(options?.seedCustodianFromProps ? (initialCustodian ?? null) : null)
     setStagedFile(null)
     setOtherMap(EMPTY_OTHER)
     setHeaderOptions([])
@@ -132,20 +210,60 @@ export function FidelityCsvImport({
     setParseError(null)
     setReplaceDuplicateImports(false)
     setReviewAssignments({})
+    setConfirmOverlay({ mode: 'idle' })
     if (pickInputRef.current) pickInputRef.current.value = ''
   }
 
   function openFlow() {
-    resetModalInner()
+    resetModalInner({ seedCustodianFromProps: true })
     if (isPanel) onOpenChange?.(true)
     else setModalOpen(true)
   }
 
   function closeFlow() {
+    onImportFlowClose?.()
     if (isPanel) onOpenChange?.(false)
     else setModalOpen(false)
     resetModalInner()
   }
+
+  function stagePickedCsvFile(f: File, c: PositionsCsvCustodian) {
+    const name = f.name.toLowerCase()
+    if (!name.endsWith('.csv') && f.type !== 'text/csv' && f.type !== 'application/csv' && f.type !== 'application/vnd.ms-excel') {
+      setStagedFile(null)
+      setPending(null)
+      setParseError(
+        `We couldn't read this file. Make sure you're uploading a positions export from ${custodianDisplayName(c)} and try again.`,
+      )
+      return
+    }
+    setCustodian(c)
+    setStagedFile(f)
+    setParseError(null)
+    setPending(null)
+    setReplaceDuplicateImports(false)
+    if (c === 'other') {
+      void readFileAsText(f).then((text) => {
+        setHeaderOptions(peekCsvHeaderLabels(text))
+        setOtherMap(EMPTY_OTHER)
+      })
+    } else {
+      setHeaderOptions([])
+    }
+  }
+
+  useEffect(() => {
+    if (!fileIngestRequest) {
+      lastFileIngestIdRef.current = null
+      return
+    }
+    if (lastFileIngestIdRef.current === fileIngestRequest.id) return
+    lastFileIngestIdRef.current = fileIngestRequest.id
+    setHideImportSourceUi(true)
+    if (!isPanel) setModalOpen(true)
+    stagePickedCsvFile(fileIngestRequest.file, fileIngestRequest.custodian)
+    queueMicrotask(() => onFileIngestConsumed?.())
+  }, [fileIngestRequest, isPanel, onFileIngestConsumed])
 
   const otherMapReady =
     custodian !== 'other' ||
@@ -168,17 +286,46 @@ export function FidelityCsvImport({
 
     let cancelled = false
     ;(async () => {
-      setImporting(true)
       setParseError(null)
+      setImportBusy({
+        headline: 'Reading file',
+        details: [stagedFile.name, `Custodian: ${custodianDisplayName(custodian)}`],
+      })
       try {
         const text = await readFileAsText(stagedFile)
+        if (cancelled) return
+        setImportBusy({
+          headline: 'Fingerprinting',
+          details: [stagedFile.name, 'Computing a hash of the file contents'],
+        })
         const contentHash = await hashCsvText(text)
+        if (cancelled) return
+        setImportBusy({
+          headline: 'Parsing positions',
+          details: [
+            `Format: ${custodianDisplayName(custodian)}`,
+            'Reading symbols, account names, and market values from each row',
+          ],
+        })
         const parsed =
           custodian === 'other' ? parsePositionsCsv('other', text, otherMap) : parsePositionsCsv(custodian, text)
         if (cancelled) return
 
+        setImportBusy({
+          headline: 'Checking saved imports',
+          details: ['Comparing this file to imports already saved in this browser'],
+        })
         const existing = loadStoredFidelityImport()
         const duplicateInStorage = isHashAlreadyImported(contentHash, existing)
+
+        const rowCount = parsed.rows.length
+        setImportBusy({
+          headline: 'Preparing review',
+          details:
+            rowCount > 0
+              ? [`${rowCount} position row${rowCount === 1 ? '' : 's'} loaded`, 'Map each account to a tax bucket below']
+              : ['No position rows found in this file', 'Try another export or adjust column mapping for Other'],
+        })
 
         setPending({
           fileName: stagedFile.name,
@@ -206,7 +353,7 @@ export function FidelityCsvImport({
           )
         }
       } finally {
-        if (!cancelled) setImporting(false)
+        if (!cancelled) setImportBusy(null)
       }
     })()
 
@@ -255,86 +402,192 @@ export function FidelityCsvImport({
     const f = e.target.files?.[0]
     e.target.value = ''
     if (!f || !custodian) return
-    const name = f.name.toLowerCase()
-    if (!name.endsWith('.csv') && f.type !== 'text/csv' && f.type !== 'application/csv' && f.type !== 'application/vnd.ms-excel') {
-      setStagedFile(null)
-      setPending(null)
-      setParseError(
-        `We couldn't read this file. Make sure you're uploading a positions export from ${custodianDisplayName(custodian)} and try again.`,
-      )
-      return
-    }
-    setStagedFile(f)
-    setParseError(null)
-    setPending(null)
-    setReplaceDuplicateImports(false)
-    if (custodian === 'other') {
-      void readFileAsText(f).then((text) => {
-        setHeaderOptions(peekCsvHeaderLabels(text))
-        setOtherMap(EMPTY_OTHER)
-      })
-    } else {
-      setHeaderOptions([])
-    }
+    stagePickedCsvFile(f, custodian)
   }
 
-  function applyImport() {
+  const confirmBlocking = confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting'
+
+  function patchConfirmSteps(
+    steps: ConfirmStepRow[],
+    index: number,
+    patch: Partial<ConfirmStepRow>,
+  ): ConfirmStepRow[] {
+    return steps.map((s, i) => (i === index ? { ...s, ...patch } : s))
+  }
+
+  async function applyImportWithProgress() {
     if (!pending?.parsed.rows.length || !custodian) return
-    const incoming = buildIncomingBatches(pending, replaceDuplicateImports, custodian, reviewAssignments)
-    if (!incoming.length) return
-    const existing = loadStoredFidelityImport()
-    const next = mergeFidelityBatches(existing, incoming, { replaceDuplicateHashes: replaceDuplicateImports })
-    saveStoredFidelityImport(next)
-    onApplyBalances(next.balances)
-    onImportApplied?.()
-    closeFlow()
+    const p = pending
+    const cust = custodian
+    const rep = replaceDuplicateImports
+    const ra = { ...reviewAssignments }
+    const rows = applyBucketAssignmentsToRows(p.parsed.rows, ra)
+    const positionLabels = rows
+      .filter((r) => !isFidelityPendingActivityRow(r))
+      .slice(0, 80)
+      .map((r) => {
+        const sym = normalizeFidelityImportSymbol(r.symbol) || '—'
+        const desc = r.description.trim() || 'Holding'
+        const short = desc.length > 48 ? `${desc.slice(0, 47)}…` : desc
+        return `${sym} — ${short}`
+      })
+
+    setConfirmOverlay({
+      mode: 'running',
+      steps: buildConfirmSteps(p.fileName, brokerageFormatLabel(cust)),
+      positionLabels,
+      positionRevealIndex: -1,
+    })
+
+    const fail = (stepIndex: number, message: string) => {
+      setConfirmOverlay((prev) => {
+        if (prev.mode !== 'running') {
+          return {
+            mode: 'error',
+            steps: buildConfirmSteps(p.fileName, brokerageFormatLabel(cust)),
+            failedStepIndex: stepIndex,
+            message,
+          }
+        }
+        const steps = prev.steps.map((s, i) => {
+          if (i < stepIndex) return { ...s, status: 'done' as const }
+          if (i === stepIndex) return { ...s, status: 'error' as const, errorDetail: message }
+          return { ...s, status: 'pending' as const }
+        })
+        return { mode: 'error', steps, failedStepIndex: stepIndex, message }
+      })
+    }
+
+    try {
+      for (let i = 0; i < 4; i++) {
+        await sleep(CONFIRM_MIN_STEP_MS)
+        setConfirmOverlay((prev) => {
+          if (prev.mode !== 'running') return prev
+          return { ...prev, steps: patchConfirmSteps(prev.steps, i, { status: 'active' }) }
+        })
+        await sleep(CONFIRM_MIN_STEP_MS)
+
+        if (i === 1) {
+          try {
+            if (!p.parsed.rows.length) throw new Error('CSV has no data rows.')
+            const sample = p.parsed.rows[0]
+            if (typeof sample.currentValue !== 'number' || Number.isNaN(sample.currentValue)) {
+              throw new Error('Parsed positions are invalid.')
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Parsing failed.'
+            fail(i, msg)
+            return
+          }
+        }
+
+        if (i === 3) {
+          try {
+            for (const r of rows) {
+              if (!Number.isFinite(r.currentValue)) throw new Error('One or more holdings have an invalid value.')
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Validation failed.'
+            fail(i, msg)
+            return
+          }
+        }
+
+        setConfirmOverlay((prev) => {
+          if (prev.mode !== 'running') return prev
+          return { ...prev, steps: patchConfirmSteps(prev.steps, i, { status: 'done' }) }
+        })
+      }
+
+      await sleep(CONFIRM_MIN_STEP_MS)
+      setConfirmOverlay((prev) => {
+        if (prev.mode !== 'running') return prev
+        return { ...prev, steps: patchConfirmSteps(prev.steps, 4, { status: 'active' }) }
+      })
+      await sleep(CONFIRM_MIN_STEP_MS)
+
+      if (positionLabels.length > 0) {
+        setConfirmOverlay((prev) => {
+          if (prev.mode !== 'running') return prev
+          return { ...prev, positionRevealIndex: 0 }
+        })
+        for (let j = 1; j < positionLabels.length; j++) {
+          await sleep(CONFIRM_POSITION_STAGGER_MS)
+          setConfirmOverlay((prev) => {
+            if (prev.mode !== 'running') return prev
+            return { ...prev, positionRevealIndex: j }
+          })
+        }
+      }
+
+      if (positionLabels.length === 0) {
+        await sleep(CONFIRM_MIN_STEP_MS)
+      }
+
+      setConfirmOverlay((prev) => {
+        if (prev.mode !== 'running') return prev
+        return { ...prev, steps: patchConfirmSteps(prev.steps, 4, { status: 'done' }) }
+      })
+
+      await sleep(CONFIRM_MIN_STEP_MS)
+
+      const incoming = buildIncomingBatches(p, rep, cust, ra)
+      if (!incoming.length) {
+        fail(3, 'Could not build import from the current review state.')
+        return
+      }
+      let mergedBalances: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>
+      try {
+        const existing = loadStoredFidelityImport()
+        const next = mergeFidelityBatches(existing, incoming, { replaceDuplicateHashes: rep })
+        saveStoredFidelityImport(next)
+        mergedBalances = next.balances
+      } catch (err) {
+        const msg =
+          err instanceof Error
+            ? err.message
+            : 'Could not save import to this browser (storage may be full or disabled).'
+        fail(4, msg)
+        return
+      }
+
+      await sleep(CONFIRM_MIN_STEP_MS)
+      setConfirmOverlay((prev) => {
+        if (prev.mode !== 'running') return prev
+        const stepsDone = prev.steps.map((s) => ({ ...s, status: 'done' as const }))
+        const lastIdx = Math.max(0, prev.positionLabels.length - 1)
+        return {
+          mode: 'exiting',
+          steps: stepsDone,
+          positionLabels: prev.positionLabels,
+          positionRevealIndex: prev.positionLabels.length ? lastIdx : prev.positionRevealIndex,
+        }
+      })
+      document.documentElement.setAttribute('data-portfolio-import-flush', 'true')
+      onApplyBalances(mergedBalances)
+      window.requestAnimationFrame(() => {
+        document.documentElement.removeAttribute('data-portfolio-import-flush')
+        document.documentElement.setAttribute('data-portfolio-wave-reveal', 'true')
+      })
+      await sleep(CONFIRM_OVERLAY_FADE_MS)
+      onImportApplied?.()
+      closeFlow()
+      window.setTimeout(() => {
+        document.documentElement.removeAttribute('data-portfolio-wave-reveal')
+        document.documentElement.removeAttribute('data-portfolio-import-flush')
+      }, CONFIRM_WAVE_DATASET_CLEAR_MS)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Import failed.'
+      fail(0, msg)
+    }
   }
 
 
-  const renderImportBody = () => (
-    <>
-      <div className="csv-import-custodian-grid" role="listbox" aria-label="Custodian">
-        {CUSTODIANS.map((c) => {
-          const selected = custodian === c.id
-          return (
-            <button
-              key={c.id}
-              type="button"
-              role="option"
-              aria-selected={selected}
-              className={`csv-import-custodian-card${selected ? ' csv-import-custodian-card--selected' : ''}`}
-              onClick={() => {
-                setCustodian(c.id)
-                setStagedFile(null)
-                setPending(null)
-                setParseError(null)
-                setReplaceDuplicateImports(false)
-                setOtherMap(EMPTY_OTHER)
-                setHeaderOptions([])
-                if (pickInputRef.current) pickInputRef.current.value = ''
-              }}
-            >
-              <div className="csv-import-custodian-card__logo-wrap">
-                {c.logoUrl ? (
-                  <img
-                    className="csv-import-custodian-card__logo"
-                    src={c.logoUrl}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <IconBuildingBank size={28} stroke={1.5} aria-hidden />
-                )}
-              </div>
-              <span className="csv-import-custodian-card__name">{c.label}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {custodian ? (
-        <div className="csv-import-upload">
+  const renderImportBody = () => {
+    const showSourcePickers = !hideImportSourceUi
+    return (
+      <>
+        {custodian ? (
           <input
             ref={pickInputRef}
             type="file"
@@ -343,12 +596,66 @@ export function FidelityCsvImport({
             id={fileInputId}
             onChange={onFileInputChange}
           />
-          <label htmlFor={fileInputId} className="csv-import-upload__label">
-            Choose CSV file
-            {stagedFile ? <span className="csv-import-upload__filename">{stagedFile.name}</span> : null}
-          </label>
-        </div>
-      ) : null}
+        ) : null}
+
+        {showSourcePickers ? (
+          <div className="csv-import-custodian-grid" role="listbox" aria-label="Custodian">
+            {CUSTODIANS.map((c) => {
+              const selected = custodian === c.id
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  className={`csv-import-custodian-card${selected ? ' csv-import-custodian-card--selected' : ''}`}
+                  onClick={() => {
+                    setCustodian(c.id)
+                    setStagedFile(null)
+                    setPending(null)
+                    setParseError(null)
+                    setReplaceDuplicateImports(false)
+                    setOtherMap(EMPTY_OTHER)
+                    setHeaderOptions([])
+                    if (pickInputRef.current) pickInputRef.current.value = ''
+                  }}
+                >
+                  <div className="csv-import-custodian-card__logo-wrap">
+                    {c.logoUrl ? (
+                      <img
+                        className="csv-import-custodian-card__logo"
+                        src={c.logoUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <IconBuildingBank size={28} stroke={1.5} aria-hidden />
+                    )}
+                  </div>
+                  <span className="csv-import-custodian-card__name">{c.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        ) : null}
+
+        {showSourcePickers && custodian ? (
+          <div className="csv-import-upload">
+            <label htmlFor={fileInputId} className="csv-import-upload__label">
+              Choose CSV file
+              {stagedFile ? <span className="csv-import-upload__filename">{stagedFile.name}</span> : null}
+            </label>
+          </div>
+        ) : null}
+
+        {hideImportSourceUi && parseError && custodian ? (
+          <div className="csv-import-upload csv-import-upload--retry">
+            <button type="button" className="csv-import-upload__label" onClick={() => pickInputRef.current?.click()}>
+              Choose another CSV file…
+            </button>
+          </div>
+        ) : null}
 
       {custodian === 'other' && stagedFile && headerOptions.length > 0 ? (
         <div className="csv-import-other-map">
@@ -512,7 +819,8 @@ export function FidelityCsvImport({
         </>
       ) : null}
     </>
-  )
+    )
+  }
 
   const flowShell = (
     <div
@@ -520,19 +828,22 @@ export function FidelityCsvImport({
       role="dialog"
       aria-modal={isPanel ? undefined : true}
       aria-labelledby="csv-import-modal-title"
-      onClick={isPanel ? undefined : (e) => e.stopPropagation()}
     >
       <header className="csv-import-modal-header">
         <h2 id="csv-import-modal-title" className="csv-import-modal__title">
           Import positions CSV
         </h2>
-        <p className="csv-import-modal__lead">Choose your custodian, then select a single positions export file.</p>
+        <p className="csv-import-modal__lead">
+          {hideImportSourceUi
+            ? 'Map each account to the correct tax bucket, then confirm.'
+            : 'Choose your custodian, then select a single positions export file.'}
+        </p>
       </header>
       <SimpleBar className="side-panel-shell__scroll csv-import-modal-scroll" autoHide={false}>
         <div className="csv-import-modal-body">{renderImportBody()}</div>
       </SimpleBar>
       <footer className="csv-import-modal-footer">
-        <Button size="sm" variant="ghost" onPress={() => !importing && closeFlow()}>
+        <Button size="sm" variant="ghost" isDisabled={importBusy !== null || confirmBlocking} onPress={() => closeFlow()}>
           Cancel
         </Button>
         {pending && pending.parsed.rows.length > 0 && !parseError ? (
@@ -543,7 +854,12 @@ export function FidelityCsvImport({
           <span />
         )}
         <div className="csv-import-modal__footer-actions">
-          <Button size="sm" variant="primary" isDisabled={!canConfirm || importing} onPress={applyImport}>
+          <Button
+            size="sm"
+            variant="primary"
+            isDisabled={!canConfirm || importBusy !== null || confirmBlocking}
+            onPress={() => void applyImportWithProgress()}
+          >
             Confirm
           </Button>
         </div>
@@ -551,19 +867,111 @@ export function FidelityCsvImport({
     </div>
   )
 
-  const busyOverlay = importing ? (
+  const busyOverlay = importBusy ? (
     <div
-      className={`fidelity-import-busy-overlay${isPanel ? ' fidelity-import-busy-overlay--panel' : ''}`}
+      className={`fidelity-import-busy-overlay${isPanel ? ' fidelity-import-busy-overlay--panel' : ' fidelity-import-busy-overlay--modal'}`}
       role="status"
       aria-live="polite"
       aria-busy="true"
     >
       <div className="fidelity-import-busy-card">
         <div className="fidelity-import-busy-ring" aria-hidden />
-        <div className="fidelity-import-busy-text">Reading CSV…</div>
+        <p className="fidelity-import-busy-headline">{importBusy.headline}</p>
+        <ul className="fidelity-import-busy-details">
+          {importBusy.details.map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
+        </ul>
       </div>
     </div>
   ) : null
+
+  const confirmPositionLabels =
+    confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting' ? confirmOverlay.positionLabels : []
+
+  const confirmPositionRevealIndex =
+    confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting' ? confirmOverlay.positionRevealIndex : -1
+
+  const confirmSteps = confirmOverlay.mode !== 'idle' ? confirmOverlay.steps : []
+
+  const confirmOverlayPortal =
+    confirmOverlay.mode !== 'idle' && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            className={`csv-import-confirm-overlay${confirmOverlay.mode === 'exiting' ? ' csv-import-confirm-overlay--exiting' : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="csv-import-confirm-title"
+            aria-busy={confirmOverlay.mode === 'running'}
+          >
+            <div className="csv-import-confirm-overlay__panel">
+              <h2 id="csv-import-confirm-title" className="csv-import-confirm-overlay__title">
+                {confirmOverlay.mode === 'error' ? 'Import could not finish' : 'Applying import'}
+              </h2>
+              {confirmOverlay.mode === 'error' ? (
+                <p className="csv-import-confirm-overlay__error-lead" role="alert">
+                  {confirmOverlay.message}
+                </p>
+              ) : null}
+              <ul className="csv-import-confirm-overlay__steps">
+                {confirmSteps.map((step) => (
+                  <li
+                    key={step.id}
+                    className={`csv-import-confirm-overlay__step csv-import-confirm-overlay__step--${step.status}`}
+                  >
+                    <div className="csv-import-confirm-overlay__step-row">
+                      <div className="csv-import-confirm-overlay__step-main">
+                        <div
+                          className={`csv-import-confirm-overlay__step-title-wrap${
+                            step.status === 'active' ? ' csv-import-confirm-overlay__step-title-wrap--enter' : ''
+                          }`}
+                        >
+                          <span className="csv-import-confirm-overlay__step-title">{step.title}</span>
+                          {step.subtitle ? (
+                            <span className="csv-import-confirm-overlay__step-sub">{step.subtitle}</span>
+                          ) : null}
+                        </div>
+                        {step.status === 'error' && step.errorDetail ? (
+                          <p className="csv-import-confirm-overlay__step-error">{step.errorDetail}</p>
+                        ) : null}
+                      </div>
+                      <span className="csv-import-confirm-overlay__step-status" aria-hidden>
+                        {step.status === 'done' ? (
+                          <IconCheck className="csv-import-confirm-overlay__check" size={18} stroke={1.5} />
+                        ) : null}
+                      </span>
+                    </div>
+                    {step.id === 'positions' &&
+                    (step.status === 'active' || step.status === 'done') &&
+                    confirmPositionLabels.length > 0 ? (
+                      <ul className="csv-import-confirm-overlay__holdings">
+                        {confirmPositionLabels.map((label, hi) => (
+                          <li
+                            key={`${step.id}-${hi}-${label.slice(0, 24)}`}
+                            className={`csv-import-confirm-overlay__holding${
+                              hi <= confirmPositionRevealIndex ? ' csv-import-confirm-overlay__holding--in' : ''
+                            }`}
+                          >
+                            {label}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {confirmOverlay.mode === 'error' ? (
+                <div className="csv-import-confirm-overlay__footer">
+                  <Button size="sm" variant="primary" onPress={() => setConfirmOverlay({ mode: 'idle' })}>
+                    Dismiss
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
 
   return (
     <>
@@ -584,21 +992,22 @@ export function FidelityCsvImport({
       ) : null}
       {flowOpen && !isPanel && typeof document !== 'undefined'
         ? createPortal(
-            <>
-              {busyOverlay}
-              <div
-                className="csv-import-modal-overlay"
-                role="presentation"
-                onClick={() => {
-                  if (!importing) closeFlow()
-                }}
-              >
+            <div
+              className="csv-import-modal-overlay"
+              role="presentation"
+              onClick={() => {
+                if (!importBusy && confirmOverlay.mode === 'idle') closeFlow()
+              }}
+            >
+              <div className="csv-import-modal-stack" onClick={(e) => e.stopPropagation()}>
+                {busyOverlay}
                 {flowShell}
               </div>
-            </>,
+            </div>,
             document.body,
           )
         : null}
+      {confirmOverlayPortal}
     </>
   )
 }

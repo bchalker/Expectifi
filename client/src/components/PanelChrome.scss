@@ -56,6 +56,14 @@
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
   pointer-events: auto;
 }
+
+/* Configure drawer: narrower than scenario / strategy panels */
+.drawer-shell.drawer-shell--right.drawer-shell--config {
+  width: min(28rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
+  max-width: min(28rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
+  min-width: 0;
+}
+
 .drawer-shell--left {
   left: 0;
   transform: translateX(-100%);
@@ -116,4 +124,14 @@
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.drawer-config-footer {
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.drawer-config-footer__signout {
+  font-variant-numeric: tabular-nums;
 }

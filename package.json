@@ -11,6 +11,7 @@
     "dev:server": "npm run dev -w server",
     "dev": "npm run dev:client & npm run dev:server",
     "build": "npm run build -w client",
-    "build:client": "npm run build -w client"
+    "build:client": "npm run build -w client",
+    "start": "npm run start -w server"
   }
 }
