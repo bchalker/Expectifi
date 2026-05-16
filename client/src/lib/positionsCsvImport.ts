@@ -10,6 +10,12 @@ import {
 
 export type PositionsCsvCustodian = 'fidelity' | 'schwab' | 'vanguard' | 'other'
 
+const POSITIONS_CSV_CUSTODIANS: PositionsCsvCustodian[] = ['fidelity', 'schwab', 'vanguard', 'other']
+
+export function isPositionsCsvCustodian(id: string): id is PositionsCsvCustodian {
+  return (POSITIONS_CSV_CUSTODIANS as string[]).includes(id)
+}
+
 export type OtherColumnMap = {
   symbol: string
   name: string

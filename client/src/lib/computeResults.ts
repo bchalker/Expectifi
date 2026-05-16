@@ -23,13 +23,21 @@ import {
   projectPositionAtRetirement,
   type PositionReturnModel,
 } from './positionReturnModel'
+import {
+  computeAllRetireRegionComparisons,
+  normalizeRetireRegions,
+  type RetireRegionPick,
+} from './calc/retireRegions'
+
+export type { RetireRegionComparison, RetireRegionPick } from './calc/retireRegions'
+export { MAX_RETIRE_REGIONS, listRetireRegions, getRetireRegion, isRetireRegionId } from './calc/retireRegions'
 
 export type DrawerName =
   | 'scenarios'
   | 'sstiming'
   | 'taxfree'
   | 'strategy'
-  | 'italy'
+  | 'relocate'
   | 'config'
 
 /** Dividend yield preset (y = yield %, g = NAV drift %). */
@@ -99,7 +107,10 @@ export type CalculatorInputs = {
   spouseBenefit67: number
   spouseBenefit70: number
   other: number
-  italyCost: number
+  /** Up to 5 destinations to compare (COL, inflation, simplified local tax). */
+  retireRegions: RetireRegionPick[]
+  /** @deprecated Migrated into `retireRegions` on load. */
+  italyCost?: number
   ssInvestPct: number
   /** ISO `YYYY-MM-DD`; current age is derived from this date for projections. */
   dateOfBirth: string
@@ -222,11 +233,14 @@ export function computeResults(
     incGrowth,
     ssAge,
     other,
-    italyCost,
+    retireRegions: retireRegionsRaw,
+    italyCost: legacyItalyCost,
     dateOfBirth,
     targetRetirementAge,
     monthlyIncomeGoal,
   } = inputs
+
+  const retireRegions = normalizeRetireRegions(retireRegionsRaw, legacyItalyCost)
 
   const currentAge = clampedAgeFromDob(dateOfBirth)
   const yearsToRetirement = Math.max(1, Math.min(50, Math.round(targetRetirementAge - currentAge)))
@@ -402,11 +416,14 @@ export function computeResults(
   const barPct = Math.min(100, Math.round((combinedInc / 34000) * 100))
   const barColor = ssZone === 'free' ? '#0F6E56' : ssZone === 'partial' ? '#BA7517' : '#A32D2D'
 
-  const itAnn = annWd + totalSS * 12
-  const itTax = itAnn * 0.07
-  const itAfter = (itAnn - itTax) / 12
-  const itSurplus = itAfter - italyCost
+  const grossAnnualUsd = annWd + totalSS * 12
   const usTax = calcTax(annWd, totalSS, retFV, brkFV, tradRatio, rothRatio, hsaRatio)
+  const retireRegionComparisons = computeAllRetireRegionComparisons(retireRegions, grossAnnualUsd, usTax)
+  const primaryRegion = retireRegionComparisons[0]
+  const itAnn = grossAnnualUsd
+  const itTax = primaryRegion ? primaryRegion.localTaxMonthlyUsd * 12 : 0
+  const itAfter = primaryRegion?.afterTaxMonthlyUsd ?? 0
+  const itSurplus = primaryRegion?.surplusMonthlyUsd ?? 0
 
   const ssTiming = computeSSTiming(inputs.ssInvestPct / 100)
 
@@ -442,6 +459,7 @@ export function computeResults(
     rothBal,
     hsaBal,
     retBal,
+    brkBal,
     tradRatio,
     rothRatio,
     hsaRatio,
@@ -477,6 +495,8 @@ export function computeResults(
     itAfter,
     itSurplus,
     usTax,
+    retireRegions,
+    retireRegionComparisons,
     ssTiming,
     ssBreakdown,
     survivorCallout,

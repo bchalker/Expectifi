@@ -1,0 +1,16 @@
+.view-holdings-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.view-holdings-hint__icon {
+  flex-shrink: 0;
+  color: var(--text-faint);
+  transform: scaleX(-1);
+}

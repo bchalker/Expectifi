@@ -1,0 +1,54 @@
+.bucket-total-trend {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.bucket-total-trend__chart {
+  flex-shrink: 0;
+  display: block;
+  overflow: visible;
+}
+
+.bucket-total-trend__pct {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bucket-total-trend--up .bucket-total-trend__pct {
+  color: var(--accent-text);
+}
+
+.bucket-total-trend--down .bucket-total-trend__pct {
+  color: var(--danger);
+}
+
+.bucket-total-trend--flat .bucket-total-trend__pct {
+  color: var(--text-muted);
+}
+
+.bucket-total-trend--stack {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.bucket-total-trend--on-dark.bucket-total-trend--up .bucket-total-trend__pct {
+  color: #5fd4a4;
+}
+
+.bucket-total-trend--on-dark.bucket-total-trend--down .bucket-total-trend__pct {
+  color: #f87171;
+}
+
+.bucket-total-trend--on-dark.bucket-total-trend--flat .bucket-total-trend__pct {
+  color: rgba(255, 255, 255, 0.55);
+}

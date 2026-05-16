@@ -1,4 +1,9 @@
-import 'dotenv/config'
+import { config as loadEnv } from 'dotenv'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+loadEnv({ path: join(dirname(fileURLToPath(import.meta.url)), '.env') })
+
 import bcrypt from 'bcryptjs'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -6,16 +11,29 @@ import express from 'express'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { COOKIE_NAME, GOOGLE_CHECKOUT_COOKIE, createToken, verifyGoogleCheckoutToken, verifyToken } from './authToken.js'
 import { ensureSchema } from './db.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
-import { getStripeBackend } from './stripeBackend.js'
+import {
+  assertSubscriptionBillingConfigured,
+  cancelAllStripeSubscriptionsForCustomer,
+  completeStripeBillingSetup,
+  getStripeBackend,
+  getStripeSubscriptionPriceId,
+  isStripeBillingError,
+  repairStripeSubscriptionForCustomer,
+} from './stripeBackend.js'
+import type { SubscriptionStatus } from './stripeBilling.js'
+import { subscriptionStatusFromStripe } from './stripeBilling.js'
 import { installGoogleAuth } from './googleAuth.js'
+import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
+import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+
+installStripeWebhook(app)
 
 app.use(cors({ origin: clientOrigin, credentials: true }))
 app.use(express.json({ limit: '2mb' }))
@@ -41,6 +59,31 @@ function onboardingDoneFromRow(v: unknown): boolean {
   return n === 1
 }
 
+type UserAuthRow = {
+  id: string
+  email: string
+  display_name: string | null
+  onboarding_done: boolean | number
+  user_prefs?: unknown
+  subscription_status?: string | null
+}
+
+function normalizeSubscriptionStatus(raw: unknown): SubscriptionStatus {
+  const s = typeof raw === 'string' ? raw.trim() : ''
+  return subscriptionStatusFromStripe(s || 'none')
+}
+
+function publicAuthUser(row: UserAuthRow, emailOverride?: string) {
+  return {
+    id: row.id,
+    email: emailOverride ?? normalizeEmail(row.email),
+    displayName: row.display_name ?? null,
+    onboardingDone: onboardingDoneFromRow(row.onboarding_done),
+    planPrefs: parseUserPrefs(row.user_prefs),
+    subscriptionStatus: normalizeSubscriptionStatus(row.subscription_status),
+  }
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'retirement-calculator-api' })
 })
@@ -51,19 +94,54 @@ app.get('/api/auth/me', async (req, res) => {
     res.status(401).json({ ok: false, error: 'unauthorized' })
     return
   }
-  const { rows } = await dbQuery<{ display_name: string | null; onboarding_done: boolean }>(
-    'SELECT display_name, onboarding_done FROM users WHERE id = ? LIMIT 1',
+  const { rows } = await dbQuery<{
+    display_name: string | null
+    onboarding_done: boolean | number
+    user_prefs: unknown
+    stripe_customer_id: string | null
+    stripe_subscription_id: string | null
+    subscription_status: string | null
+  }>(
+    'SELECT display_name, onboarding_done, user_prefs, stripe_customer_id, stripe_subscription_id, subscription_status FROM users WHERE id = ? LIMIT 1',
     [u.userId],
   )
-  const row = rows[0]
+  let row = rows[0]
+  const stripe = getStripeBackend()
+  if (
+    stripe &&
+    getStripeSubscriptionPriceId() &&
+    row?.stripe_customer_id &&
+    (!row.stripe_subscription_id ||
+      normalizeSubscriptionStatus(row.subscription_status) === 'none')
+  ) {
+    try {
+      const subscriptionId = await repairStripeSubscriptionForCustomer(
+        stripe,
+        row.stripe_customer_id,
+      )
+      await dbQuery(
+        'UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
+        [subscriptionId, 'active', u.userId],
+      )
+      row = {
+        ...row,
+        stripe_subscription_id: subscriptionId,
+        subscription_status: 'active',
+      }
+    } catch {
+      /* keep stored status; user can use repair endpoint */
+    }
+  }
   res.json({
     ok: true,
-    user: {
+    user: publicAuthUser({
       id: u.userId,
       email: u.email,
-      displayName: row?.display_name ?? null,
-      onboardingDone: onboardingDoneFromRow(row?.onboarding_done),
-    },
+      display_name: row?.display_name ?? null,
+      onboarding_done: row?.onboarding_done ?? false,
+      user_prefs: row?.user_prefs,
+      subscription_status: row?.subscription_status,
+    }, u.email),
   })
 })
 
@@ -175,6 +253,15 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
     res.status(503).json({ ok: false, error: 'stripe_not_configured' })
     return
   }
+  try {
+    assertSubscriptionBillingConfigured()
+  } catch (e: unknown) {
+    if (isStripeBillingError(e) && e.code === 'subscription_price_not_configured') {
+      res.status(503).json({ ok: false, error: e.code })
+      return
+    }
+    throw e
+  }
   const { rows } = await dbQuery<{
     id: string
     email: string
@@ -215,16 +302,21 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
     return
   }
   try {
-    const customer = await stripe.customers.create({
-      email: emailNorm,
-      metadata: { app_user_id: row.id },
-    })
-    await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.id })
-    await stripe.customers.update(customer.id, {
-      invoice_settings: { default_payment_method: paymentMethodId },
-    })
-    await dbQuery('UPDATE users SET stripe_customer_id = ? WHERE id = ?', [customer.id, row.id])
-  } catch {
+    const { customerId, subscriptionId } = await completeStripeBillingSetup(
+      stripe,
+      emailNorm,
+      row.id,
+      paymentMethodId,
+    )
+    await dbQuery(
+      'UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
+      [customerId, subscriptionId, 'active', row.id],
+    )
+  } catch (e: unknown) {
+    if (isStripeBillingError(e) && e.code === 'subscription_price_not_configured') {
+      res.status(503).json({ ok: false, error: e.code })
+      return
+    }
     res.status(400).json({ ok: false, error: 'payment_failed' })
     return
   }
@@ -239,12 +331,13 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
   })
   res.json({
     ok: true,
-    user: {
+    user: publicAuthUser({
       id: row.id,
       email: emailNorm,
-      displayName: row.display_name,
-      onboardingDone: onboardingDoneFromRow(row.onboarding_done),
-    },
+      display_name: row.display_name,
+      onboarding_done: row.onboarding_done,
+      subscription_status: 'active',
+    }, emailNorm),
   })
 })
 
@@ -268,11 +361,26 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(400).json({ ok: false, error: 'payment_method_required' })
     return
   }
+  if (stripe) {
+    try {
+      assertSubscriptionBillingConfigured()
+    } catch (e: unknown) {
+      if (isStripeBillingError(e) && e.code === 'subscription_price_not_configured') {
+        res.status(503).json({ ok: false, error: e.code })
+        return
+      }
+      throw e
+    }
+  }
 
   const id = randomUUID()
   const passwordHash = await bcrypt.hash(password, 10)
   try {
-    await dbQuery('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', [id, email, passwordHash])
+    await dbQuery('INSERT INTO users (id, email, password_hash, onboarding_done) VALUES (?, ?, ?, FALSE)', [
+      id,
+      email,
+      passwordHash,
+    ])
   } catch (e: unknown) {
     if (isUniqueViolation(e)) {
       res.status(409).json({ ok: false, error: 'email_in_use' })
@@ -283,17 +391,22 @@ app.post('/api/auth/register', async (req, res) => {
 
   if (stripe) {
     try {
-      const customer = await stripe.customers.create({
+      const { customerId, subscriptionId } = await completeStripeBillingSetup(
+        stripe,
         email,
-        metadata: { app_user_id: id },
-      })
-      await stripe.paymentMethods.attach(paymentMethodIdRaw, { customer: customer.id })
-      await stripe.customers.update(customer.id, {
-        invoice_settings: { default_payment_method: paymentMethodIdRaw },
-      })
-      await dbQuery('UPDATE users SET stripe_customer_id = ? WHERE id = ?', [customer.id, id])
-    } catch {
+        id,
+        paymentMethodIdRaw,
+      )
+      await dbQuery(
+        'UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
+        [customerId, subscriptionId, 'active', id],
+      )
+    } catch (e: unknown) {
       await dbQuery('DELETE FROM users WHERE id = ?', [id])
+      if (isStripeBillingError(e) && e.code === 'subscription_price_not_configured') {
+        res.status(503).json({ ok: false, error: e.code })
+        return
+      }
       res.status(400).json({ ok: false, error: 'payment_failed' })
       return
     }
@@ -307,7 +420,17 @@ app.post('/api/auth/register', async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   })
-  res.json({ ok: true, user: { id, email, displayName: null, onboardingDone: false } })
+  res.json({
+    ok: true,
+    user: publicAuthUser({
+      id,
+      email,
+      display_name: null,
+      onboarding_done: false,
+      user_prefs: null,
+      subscription_status: stripe ? 'active' : 'none',
+    }, email),
+  })
 })
 
 app.post('/api/auth/login', async (req, res) => {
@@ -322,8 +445,11 @@ app.post('/api/auth/login', async (req, res) => {
     id: string
     password_hash: string | null
     display_name: string | null
-    onboarding_done: boolean
-  }>('SELECT id, password_hash, display_name, onboarding_done FROM users WHERE email = ? LIMIT 1', [email])
+    onboarding_done: boolean | number
+    user_prefs: unknown
+  }>('SELECT id, password_hash, display_name, onboarding_done, user_prefs FROM users WHERE email = ? LIMIT 1', [
+    email,
+  ])
   const row = rows[0]
   if (!row) {
     res.status(401).json({ ok: false, error: 'invalid_credentials' })
@@ -348,12 +474,46 @@ app.post('/api/auth/login', async (req, res) => {
   })
   res.json({
     ok: true,
-    user: {
+    user: publicAuthUser({
       id: row.id,
       email,
-      displayName: row.display_name,
-      onboardingDone: onboardingDoneFromRow(row.onboarding_done),
-    },
+      display_name: row.display_name,
+      onboarding_done: row.onboarding_done,
+      user_prefs: row.user_prefs,
+    }, email),
+  })
+})
+
+app.put('/api/user/prefs', async (req, res) => {
+  const u = await readSessionUser(req)
+  if (!u) {
+    res.status(401).json({ ok: false, error: 'unauthorized' })
+    return
+  }
+  const prefs = parseUserPrefs(req.body) as UserPrefs | null
+  if (!prefs) {
+    res.status(400).json({ ok: false, error: 'invalid_prefs' })
+    return
+  }
+  await dbQuery('UPDATE users SET user_prefs = ?, onboarding_done = TRUE WHERE id = ?', [
+    JSON.stringify(prefs),
+    u.userId,
+  ])
+  const { rows } = await dbQuery<{
+    display_name: string | null
+    onboarding_done: boolean | number
+    user_prefs: unknown
+  }>('SELECT display_name, onboarding_done, user_prefs FROM users WHERE id = ? LIMIT 1', [u.userId])
+  const row = rows[0]
+  res.json({
+    ok: true,
+    user: publicAuthUser({
+      id: u.userId,
+      email: u.email,
+      display_name: row?.display_name ?? null,
+      onboarding_done: row?.onboarding_done ?? true,
+      user_prefs: row?.user_prefs ?? prefs,
+    }, u.email),
   })
 })
 
@@ -363,24 +523,110 @@ app.post('/api/user/onboarding-complete', async (req, res) => {
     res.status(401).json({ ok: false, error: 'unauthorized' })
     return
   }
-  await dbQuery('UPDATE users SET onboarding_done = TRUE WHERE id = ?', [u.userId])
-  const { rows } = await dbQuery<{ display_name: string | null }>(
-    'SELECT display_name FROM users WHERE id = ? LIMIT 1',
-    [u.userId],
-  )
+  const prefs = parseUserPrefs(req.body)
+  if (prefs) {
+    await dbQuery('UPDATE users SET user_prefs = ?, onboarding_done = TRUE WHERE id = ?', [
+      JSON.stringify(prefs),
+      u.userId,
+    ])
+  } else {
+    await dbQuery('UPDATE users SET onboarding_done = TRUE WHERE id = ?', [u.userId])
+  }
+  const { rows } = await dbQuery<{
+    display_name: string | null
+    onboarding_done: boolean | number
+    user_prefs: unknown
+  }>('SELECT display_name, onboarding_done, user_prefs FROM users WHERE id = ? LIMIT 1', [u.userId])
   const row = rows[0]
   res.json({
     ok: true,
-    user: {
+    user: publicAuthUser({
       id: u.userId,
       email: u.email,
-      displayName: row?.display_name ?? null,
-      onboardingDone: true,
-    },
+      display_name: row?.display_name ?? null,
+      onboarding_done: row?.onboarding_done ?? true,
+      user_prefs: row?.user_prefs,
+    }, u.email),
   })
 })
 
 app.post('/api/auth/logout', (_req, res) => {
+  res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
+  res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
+  res.json({ ok: true })
+})
+
+/** Create a subscription for an existing Stripe customer (card saved before subscription billing was enabled). */
+app.post('/api/user/repair-stripe-subscription', async (req, res) => {
+  const u = await readSessionUser(req)
+  if (!u) {
+    res.status(401).json({ ok: false, error: 'unauthorized' })
+    return
+  }
+  const stripe = getStripeBackend()
+  if (!stripe) {
+    res.status(503).json({ ok: false, error: 'stripe_not_configured' })
+    return
+  }
+  if (!getStripeSubscriptionPriceId()) {
+    res.status(503).json({ ok: false, error: 'subscription_price_not_configured' })
+    return
+  }
+  const { rows } = await dbQuery<{ stripe_customer_id: string | null; stripe_subscription_id: string | null }>(
+    'SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE id = ? LIMIT 1',
+    [u.userId],
+  )
+  const customerId = rows[0]?.stripe_customer_id?.trim() || null
+  if (!customerId) {
+    res.status(400).json({ ok: false, error: 'no_stripe_customer' })
+    return
+  }
+  try {
+    const subscriptionId = await repairStripeSubscriptionForCustomer(stripe, customerId)
+    await dbQuery(
+      'UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
+      [subscriptionId, 'active', u.userId],
+    )
+    res.json({ ok: true, subscriptionId })
+  } catch (e: unknown) {
+    if (isStripeBillingError(e)) {
+      res.status(400).json({ ok: false, error: e.code })
+      return
+    }
+    res.status(400).json({ ok: false, error: 'payment_failed' })
+  }
+})
+
+app.post('/api/user/cancel-account', async (req, res) => {
+  const u = await readSessionUser(req)
+  if (!u) {
+    res.status(401).json({ ok: false, error: 'unauthorized' })
+    return
+  }
+
+  const { rows } = await dbQuery<{ stripe_customer_id: string | null }>(
+    'SELECT stripe_customer_id FROM users WHERE id = ? LIMIT 1',
+    [u.userId],
+  )
+  const stripeCustomerId = rows[0]?.stripe_customer_id?.trim() || null
+
+  const stripe = getStripeBackend()
+  if (stripe && stripeCustomerId) {
+    try {
+      await cancelAllStripeSubscriptionsForCustomer(stripe, stripeCustomerId)
+    } catch {
+      res.status(502).json({ ok: false, error: 'stripe_cancel_failed' })
+      return
+    }
+  }
+
+  try {
+    await dbQuery('DELETE FROM users WHERE id = ?', [u.userId])
+  } catch {
+    res.status(500).json({ ok: false, error: 'delete_failed' })
+    return
+  }
+
   res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
   res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
   res.json({ ok: true })
@@ -473,12 +719,21 @@ app.get('/api/quote/:symbol', async (req, res) => {
       return
     }
     const data = (await r.json()) as {
-      chart?: { result?: Array<{ meta?: { regularMarketPrice?: number; chartPreviousClose?: number; previousClose?: number } }> }
+      chart?: {
+        result?: Array<{
+          meta?: { regularMarketPrice?: number; chartPreviousClose?: number; previousClose?: number }
+          indicators?: { quote?: { close?: Array<number | null> } }
+        }>
+      }
     }
     const result = data?.chart?.result?.[0]
     const meta = result?.meta
     const price = meta?.regularMarketPrice
     const prev = meta?.chartPreviousClose ?? meta?.previousClose ?? price
+    const rawCloses = result?.indicators?.quote?.close
+    const sparkline = Array.isArray(rawCloses)
+      ? rawCloses.filter((c): c is number => typeof c === 'number' && Number.isFinite(c)).slice(-5)
+      : []
     if (typeof price !== 'number' || !Number.isFinite(price)) {
       res.status(404).json({ ok: false, error: 'no_price' })
       return
@@ -491,6 +746,7 @@ app.get('/api/quote/:symbol', async (req, res) => {
       price,
       previousClose: prevN,
       changePct,
+      sparkline,
     })
   } catch {
     res.status(500).json({ ok: false, error: 'exception' })
@@ -521,6 +777,7 @@ function installProductionClient(app: express.Application) {
 
 async function main() {
   await ensureSchema()
+  logStripeBillingConfigAtStartup()
   installProductionClient(app)
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`API listening on port ${PORT}`)

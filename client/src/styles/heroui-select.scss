@@ -178,6 +178,27 @@ button[data-slot='select-trigger'][data-disabled='true'] {
   opacity: 1;
 }
 
+/* Header toolbar — same import menu, smaller type */
+.app-select--import-menu--compact button[data-slot='select-trigger'] {
+  min-height: 2rem;
+  min-width: 8.25rem;
+  padding: 0.35rem 1.65rem 0.35rem 0.7rem;
+  font-size: var(--text-sm);
+  border-radius: 6px;
+}
+
+.app-select--import-menu--compact [data-slot='select-value'],
+.app-select--import-menu--compact [data-slot='select-value'][data-placeholder='true'] {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.app-select--import-menu--compact [data-slot='select-indicator'],
+.app-select--import-menu--compact [data-slot='select-default-indicator'] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 /* Review bucket rows — white field, content width */
 .app-select--compact {
   width: auto;

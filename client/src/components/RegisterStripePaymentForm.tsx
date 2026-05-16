@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Form, Label, TextField } from '@heroui/react'
 import {
   CardCvcElement,
@@ -78,10 +78,12 @@ function RegisterStripePaymentInner({
   const stripe = useStripe()
   const elements = useElements()
   const [busy, setBusy] = useState(false)
+  const onBusyChangeRef = useRef(onBusyChange)
+  onBusyChangeRef.current = onBusyChange
 
   useEffect(() => {
-    onBusyChange?.(busy)
-  }, [busy, onBusyChange])
+    onBusyChangeRef.current?.(busy)
+  }, [busy])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()

@@ -7,7 +7,7 @@ import {
   createToken,
 } from './authToken.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
-import { getStripeBackend } from './stripeBackend.js'
+import { getStripeBackend, getStripeSubscriptionPriceId } from './stripeBackend.js'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE_MS = 10 * 60 * 1000
@@ -124,7 +124,13 @@ async function fetchUserInfo(accessToken: string): Promise<GoogleUserInfo | null
 export function installGoogleAuth(app: Express, port: number): void {
   app.get('/api/auth/config', (_req: Request, res: Response) => {
     const cfg = googleConfig(port)
-    res.json({ ok: true, googleOAuth: Boolean(cfg) })
+    const stripe = getStripeBackend()
+    res.json({
+      ok: true,
+      googleOAuth: Boolean(cfg),
+      stripeConfigured: Boolean(stripe),
+      subscriptionBillingEnabled: Boolean(stripe && getStripeSubscriptionPriceId()),
+    })
   })
 
   app.get('/api/auth/google', (_req: Request, res: Response) => {
@@ -244,7 +250,7 @@ export function installGoogleAuth(app: Express, port: number): void {
       const id = randomUUID()
       try {
         await dbQuery(
-          'INSERT INTO users (id, email, password_hash, google_sub, display_name) VALUES (?, ?, NULL, ?, ?)',
+          'INSERT INTO users (id, email, password_hash, google_sub, display_name, onboarding_done) VALUES (?, ?, NULL, ?, ?, FALSE)',
           [id, email, googleSub, displayNameFromGoogle(info)],
         )
       } catch (e: unknown) {

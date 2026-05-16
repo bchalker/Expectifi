@@ -1,7 +1,37 @@
-import type { AppSnapshotV1 } from './appSnapshot'
+import { buildSnapshot, hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
+import type { CalculatorInputs, CalculatorUi } from './computeResults'
 
 /** Dev / pre-DB persistence for calculator inputs, UI flags, phase, and presets. */
 export const APP_STATE_STORAGE_KEY = 'retirement-calculator/app-state-v1'
+
+export type PersistedCalculatorSession = {
+  inputs: CalculatorInputs
+  ui: CalculatorUi
+  phase: 'growth' | 'income'
+  activePreset: string | null
+}
+
+export function persistCalculatorSession(session: PersistedCalculatorSession): void {
+  saveStoredAppState(buildSnapshot(session.inputs, session.ui, session.phase, session.activePreset))
+}
+
+/** Restore saved session (guest or signed-in) before applying live Fidelity CSV overrides. */
+export function loadPersistedCalculatorSession(
+  defaultInputs: CalculatorInputs,
+  defaultUi: CalculatorUi,
+): PersistedCalculatorSession | null {
+  const stored = loadStoredAppState()
+  if (!stored) return null
+  const hydrated = hydrateAppSnapshot(stored, defaultInputs)
+  if (!hydrated) return null
+  const { incomePresetEditorFocusSeq: _ignored, ...uiRest } = hydrated.ui
+  return {
+    inputs: hydrated.inputs,
+    ui: { ...defaultUi, ...uiRest },
+    phase: hydrated.phase,
+    activePreset: hydrated.activePreset,
+  }
+}
 
 export function loadStoredAppState(): AppSnapshotV1 | null {
   try {

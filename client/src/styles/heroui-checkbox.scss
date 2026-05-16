@@ -1,0 +1,72 @@
+/* HeroUI Checkbox — plain CSS when @heroui/styles checkbox tokens do not paint controls */
+
+.app-checkbox.checkbox,
+.csv-import-duplicate-notice .checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+  max-width: 100%;
+  min-height: 0;
+  flex: 0 0 auto;
+}
+
+.app-checkbox .checkbox__control,
+.csv-import-duplicate-notice .checkbox__control {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Selected state lives on the root .checkbox, not .checkbox__control */
+.app-checkbox.checkbox[data-selected='true'] .checkbox__control,
+.csv-import-duplicate-notice .checkbox[data-selected='true'] .checkbox__control,
+.app-checkbox.checkbox[aria-checked='true'] .checkbox__control,
+.csv-import-duplicate-notice .checkbox[aria-checked='true'] .checkbox__control {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.app-checkbox .checkbox__indicator,
+.csv-import-duplicate-notice .checkbox__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--surface);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-checkbox.checkbox[data-selected='true'] .checkbox__indicator,
+.csv-import-duplicate-notice .checkbox[data-selected='true'] .checkbox__indicator,
+.app-checkbox.checkbox[aria-checked='true'] .checkbox__indicator,
+.csv-import-duplicate-notice .checkbox[aria-checked='true'] .checkbox__indicator,
+.app-checkbox.checkbox[data-indeterminate='true'] .checkbox__indicator,
+.csv-import-duplicate-notice .checkbox[data-indeterminate='true'] .checkbox__indicator {
+  opacity: 1;
+}
+
+.app-checkbox .checkbox__indicator svg,
+.csv-import-duplicate-notice .checkbox__indicator svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+}
+
+.app-checkbox .checkbox__content,
+.csv-import-duplicate-notice .checkbox__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}

@@ -1,5 +1,7 @@
 import { IconAdjustments, IconMenu2, IconX } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
+import { useAppPath } from '../hooks/useAppPath'
+import { APP_PATHS, navigateApp } from '../lib/appPaths'
 import type { DrawerName } from '../lib/computeResults'
 import {
   APP_NAV_DRAWER_ITEMS,
@@ -31,6 +33,7 @@ type HeaderMarketingProps = HeaderAuthProps & {
 type HeaderAppProps = HeaderAuthProps & {
   variant: 'app'
   className?: string
+  onBrandClick?: () => void
   targetRetirementAge: number
   drawer: DrawerName | null
   snapshotOpen: boolean
@@ -44,12 +47,35 @@ type HeaderAppProps = HeaderAuthProps & {
 
 export type HeaderProps = HeaderMarketingProps | HeaderAppProps
 
-function HeaderBrand() {
+function HeaderBrand({ onBrandClick }: { onBrandClick?: () => void }) {
+  const { user } = useAuth()
+  const path = useAppPath()
+
+  const handleClick = () => {
+    if (user) {
+      onBrandClick?.()
+      navigateApp(APP_PATHS.onboarding)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (path === APP_PATHS.home) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    navigateApp(APP_PATHS.home)
+  }
+
+  const ariaLabel = user
+    ? 'HeadwayPlanner home — return to calculator'
+    : path === APP_PATHS.home
+      ? 'HeadwayPlanner — scroll to top'
+      : 'HeadwayPlanner — return to landing page'
+
   return (
-    <div className="header__brand">
-      <span className="header__mark">Eggspectifi</span>
+    <button type="button" className="header__brand" onClick={handleClick} aria-label={ariaLabel}>
+      <span className="header__mark">HeadwayPlanner</span>
       <span className="header__kicker">Hatch your retirement plan.</span>
-    </div>
+    </button>
   )
 }
 
@@ -210,7 +236,7 @@ export function Header(props: HeaderProps) {
   return (
     <header className={rootClass}>
       <div className="header__inner">
-        <HeaderBrand />
+        <HeaderBrand onBrandClick={variant === 'app' ? props.onBrandClick : undefined} />
 
         {variant === 'marketing' ? (
           <HeaderMarketingNav onMarketingAnchor={props.onMarketingAnchor} />

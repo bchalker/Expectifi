@@ -22,7 +22,7 @@ import { fmt } from '../utils/format'
 import { InlineSliderRow } from './InlineSliderRow'
 import './PositionReturnSliders.scss'
 
-const RETURN_SLIDER_MIN_PCT = -20
+const RETURN_SLIDER_MIN_PCT = -100
 const RETURN_SLIDER_MAX_PCT = 50
 const RETURN_SLIDER_STEP = 0.5
 
@@ -45,7 +45,8 @@ function fmtSignedPctFromDecimal(dec: number): string {
 }
 
 function decimalToSliderPct(dec: number): number {
-  return Math.round(dec * 1000) / 10
+  const pct = Math.round(dec * 1000) / 10
+  return Math.max(RETURN_SLIDER_MIN_PCT, Math.min(RETURN_SLIDER_MAX_PCT, pct))
 }
 
 function sliderPctToDecimal(pct: number): number {

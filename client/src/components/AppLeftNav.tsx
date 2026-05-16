@@ -117,7 +117,7 @@ export function AppLeftNav({
       >
         <div className="app-left-nav__scroll">
           <div className="app-left-nav__brand">
-            <span className="app-left-nav__mark">Eggspectifi</span>
+            <span className="app-left-nav__mark">HeadwayPlanner</span>
             <span className="app-left-nav__kicker">
               Hatch your retirement plan.
             </span>

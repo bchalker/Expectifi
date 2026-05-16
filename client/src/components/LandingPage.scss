@@ -27,8 +27,8 @@
 }
 
 .landing-page__wrap {
-  width: 100%;
-  max-width: var(--layout-marketing-max);
+  width: var(--layout-marketing-boundary);
+  max-width: 100%;
   margin-inline: auto;
   padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
   box-sizing: border-box;
@@ -100,7 +100,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 100%;
   max-width: 40rem;
+  margin-inline: auto;
 }
 
 .landing-hero__eyebrow {
@@ -250,7 +252,108 @@
   color: var(--landing-text-muted-light);
 }
 
-/* ── Pricing / FAQ anchors ── */
+/* ── Pricing card ── */
+.landing-pricing {
+  background: var(--landing-surface);
+  color: var(--landing-text-on-light);
+  padding: clamp(2rem, 5vw, 3rem) 0;
+}
+
+.landing-pricing__inner {
+  display: flex;
+  justify-content: center;
+}
+
+.landing-pricing-card {
+  width: 100%;
+  max-width: 26.25rem;
+  margin: 0;
+  padding: clamp(1.5rem, 4vw, 2rem) clamp(1.35rem, 4vw, 1.75rem);
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--landing-card);
+  border: 1px solid var(--border-strong, #ced8e0);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 rgba(28, 43, 58, 0.04),
+    0 12px 32px rgba(28, 43, 58, 0.06);
+}
+
+.landing-pricing-card__label {
+  margin: 0 0 0.65rem;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--landing-text-muted-light);
+}
+
+.landing-pricing-card__price {
+  margin: 0 0 0.5rem;
+  font-family: var(--heading);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--landing-text-on-light);
+}
+
+.landing-pricing-card__price-amount {
+  font-size: clamp(2.25rem, 6vw, 2.75rem);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.landing-pricing-card__price-period {
+  font-size: clamp(var(--text-lg), 3vw, var(--text-xl));
+  font-weight: 600;
+  color: var(--landing-text-muted-light);
+}
+
+.landing-pricing-card__sub {
+  margin: 0 0 1.35rem;
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--landing-text-muted-light);
+}
+
+.landing-pricing-card__list {
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  text-align: left;
+}
+
+.landing-pricing-card__list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--landing-text-on-light);
+}
+
+.landing-pricing-card__check {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--color-teal-dark, #0f6e56);
+}
+
+.landing-pricing-card__cta {
+  width: 100%;
+  max-width: 16rem;
+}
+
+.landing-pricing-card__note {
+  margin: 0.85rem 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--landing-text-muted-light);
+}
+
+/* ── FAQ anchors ── */
 .landing-anchor-section {
   background: var(--landing-surface);
   color: var(--landing-text-on-light);

@@ -5,6 +5,8 @@ import { positionsForBrokerage, type FidelityPositionRow } from '../lib/fidelity
 import { flattenBatches, latestBatchCustodian, loadStoredFidelityImport } from '../lib/fidelityStorage'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { CalculatorInputs } from '../lib/computeResults'
+import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
+import { useHoldingQuotes } from '../lib/holdingQuotes'
 import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityBucketHoldingsSubrows } from './FidelityBucketHoldingsSubrows'
 import { FidelityCsvImport } from './FidelityCsvImport'
@@ -48,6 +50,8 @@ export function BrokerageCard({
 
   const brokeragePositions = useMemo(() => positionsForBrokerage(fidelityRows), [fidelityRows])
   const hasFidelityBrokerage = brokeragePositions.length > 0
+  const brokerageQuoteMap = useHoldingQuotes(fidelityRows, readOnly && hasFidelityBrokerage)
+  const brokerageTrend = computeBucketTrendDisplay(brokeragePositions, brokerageQuoteMap)
 
   const importCustodian = useMemo(() => {
     void fidelityImportRev
@@ -97,7 +101,7 @@ export function BrokerageCard({
       }
       return (
         <div className="edit-row edit-row--fidelity-bucket" style={{ borderBottom: 'none' }}>
-          <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} />
+          <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
           <FidelityBucketHoldingsSubrows
             positions={brokeragePositions}
             keyPrefix="brk"
@@ -165,7 +169,7 @@ export function BrokerageCard({
     }
     return (
       <div className="edit-row edit-row--fidelity-bucket" style={{ borderBottom: 'none' }}>
-        <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} />
+        <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
         <FidelityBucketHoldingsSubrows
           positions={brokeragePositions}
           keyPrefix="brk"

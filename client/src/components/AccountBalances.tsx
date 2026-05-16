@@ -1,7 +1,7 @@
 import type { AnimationEvent, ChangeEvent, CSSProperties, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { IconArrowDown, IconChevronCompactDown } from '@tabler/icons-react'
-import { Button, ButtonGroup, ListBox, Select, useOverlayState } from '@heroui/react'
+import { IconArrowNarrowDownDashed, IconChevronCompactDown } from '@tabler/icons-react'
+import { Button, useOverlayState } from '@heroui/react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import {
   aggregateFidelityPositionsBySymbol,
@@ -21,6 +21,7 @@ import {
   type WithdrawalDisplayBucket,
 } from '../lib/withdrawalDisplayOrder'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
+import { CsvCustodianImportSelect } from './CsvCustodianImportSelect'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
@@ -31,6 +32,8 @@ import {
   schedulePortfolioWaveReveal,
 } from '../lib/portfolioWaveReveal'
 import { positionUsesCustomReturnMode } from '../lib/positionReturnModel'
+import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
+import { useHoldingQuotes } from '../lib/holdingQuotes'
 import { FidelityAggregatedSymbolTable, type FidelityAggregatedScenarioBundle } from './FidelityAggregatedSymbolTable'
 import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
@@ -70,19 +73,6 @@ type ManualBalancesDraft = {
   baseRoth: number
   baseHsa: number
   brkBal: number
-}
-
-function isPositionsCsvCustodian(id: string): id is PositionsCsvCustodian {
-  return id === 'fidelity' || id === 'schwab' || id === 'vanguard' || id === 'other'
-}
-
-function firstKeyFromSelectSelection(keys: unknown): string | null {
-  if (keys == null || keys === 'all') return null
-  if (typeof keys === 'object' && 'values' in keys && typeof (keys as { values: () => Iterator<unknown> }).values === 'function') {
-    const it = (keys as Set<unknown>).values().next()
-    return it.done || it.value == null ? null : String(it.value)
-  }
-  return String(keys)
 }
 
 type Props = {
@@ -209,6 +199,11 @@ export function AccountBalances({
     [fidelityRows],
   )
 
+  const holdingQuoteMap = useHoldingQuotes(
+    fidelityRows,
+    mergedDashboard && balanceMode === 'fidelity' && (hasAnyFidelityRetirement || hasFidelityBrokerage),
+  )
+
   const hasManualRetirementBalances =
     c.bal.bal401k > 0 ||
     c.bal.balSE401k > 0 ||
@@ -253,7 +248,6 @@ export function AccountBalances({
   const [balanceEditClosing, setBalanceEditClosing] = useState(false)
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] = useState<PositionsCsvCustodian | null>(null)
   const [csvImportLaunchNonce, setCsvImportLaunchNonce] = useState(0)
-  const [custodianSelectResetKey, setCustodianSelectResetKey] = useState(0)
   const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
     id: number
     file: File
@@ -480,7 +474,11 @@ export function AccountBalances({
   const clearCsvImportLaunchUi = useCallback(() => {
     setCsvImportPrefillCustodian(null)
     setCsvFileIngestRequest(null)
-    setCustodianSelectResetKey((k) => k + 1)
+  }, [])
+
+  const onPickCsvCustodian = useCallback((custodian: PositionsCsvCustodian) => {
+    financialsCsvPendingCustodianRef.current = custodian
+    financialsCsvFileInputRef.current?.click()
   }, [])
 
   const onCsvFileIngestConsumed = useCallback(() => {
@@ -497,7 +495,6 @@ export function AccountBalances({
       setCsvImportPrefillCustodian(c)
       setCsvImportLaunchNonce((n) => n + 1)
       setCsvFileIngestRequest({ id: Date.now(), file: f, custodian: c })
-      setCustodianSelectResetKey((k) => k + 1)
       onBalanceModeChange?.('fidelity')
       if (mergedDashboard && onFidelityApplyBalances) {
         openBalanceEditPanel('import')
@@ -646,17 +643,17 @@ export function AccountBalances({
     onBalanceModeChange?.(m)
   }
 
-  function renderRemoveAccountsButton() {
+  function renderClearAccountsButton() {
     if (!hasAnyAccountCardData || !onRemoveRetirementAccounts) return null
 
     return (
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="account-balances-remove-btn"
+        className="account-balances-header-row__clear-btn"
         onPress={() => removeAccountsModalState.open()}
       >
-        Remove accounts
+        Clear Accounts
       </Button>
     )
   }
@@ -703,33 +700,44 @@ export function AccountBalances({
     )
   }
 
+  function renderCsvImportSelect(selectClassName: string) {
+    return (
+      <>
+        <input
+          ref={financialsCsvFileInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden
+          onChange={onFinancialsCsvFileChange}
+        />
+        <CsvCustodianImportSelect className={selectClassName} onPickCustodian={onPickCsvCustodian} />
+      </>
+    )
+  }
+
   function renderBalanceEntryButtons() {
     if (!showBalanceEntryActions) return null
 
     const manualActive = mergedDashboard
       ? balanceEditPanel === 'manual' || balanceMode === 'manual'
       : balanceMode === 'manual'
-    const importActive = mergedDashboard
-      ? balanceEditPanel === 'import' || balanceMode === 'fidelity'
-      : balanceMode === 'fidelity'
 
     return (
-      <ButtonGroup size="sm" className="balance-mode-button-group" role="group" aria-label="Balance entry mode">
+      <div className="account-balances-header-row__entry">
         <Button
-          variant="outline"
-          className={manualActive ? 'balance-mode-seg-active' : undefined}
+          variant="ghost"
+          size="sm"
+          className={`account-balances-header-row__manual-btn${manualActive ? ' account-balances-header-row__manual-btn--active' : ''}`}
           onPress={() => (mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual'))}
         >
-          Manually add values
+          Manually Add
         </Button>
-        <Button
-          variant="outline"
-          className={importActive ? 'balance-mode-seg-active' : undefined}
-          onPress={() => (mergedDashboard ? toggleBalanceEditPanel('import') : setMode('fidelity'))}
-        >
-          Use imported CSV
-        </Button>
-      </ButtonGroup>
+        {renderCsvImportSelect(
+          'account-balances-header-row__import-select app-select--import-menu app-select--import-menu--compact',
+        )}
+      </div>
     )
   }
 
@@ -762,49 +770,7 @@ export function AccountBalances({
         <h2 className="account-balances-financials-entry__title">How would you like to add your financials for this?</h2>
         <div className="account-balances-financials-entry__actions">
         <div className="account-balances-financials-entry__import-row">
-          <input
-            ref={financialsCsvFileInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden
-            onChange={onFinancialsCsvFileChange}
-          />
-          <Select
-            key={custodianSelectResetKey}
-            className="account-balances-financials-entry__select app-select--import-menu"
-            variant="secondary"
-            aria-label="Import a CSV"
-            placeholder="Import a CSV"
-            onSelectionChange={(keys) => {
-              const id = firstKeyFromSelectSelection(keys)
-              if (!id || !isPositionsCsvCustodian(id)) return
-              financialsCsvPendingCustodianRef.current = id
-              financialsCsvFileInputRef.current?.click()
-            }}
-          >
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover className="app-select-import-menu__popover">
-              <ListBox className="app-select-import-menu__list">
-                <ListBox.Item id="fidelity" textValue="Fidelity">
-                  Fidelity
-                </ListBox.Item>
-                <ListBox.Item id="schwab" textValue="Charles Schwab">
-                  Charles Schwab
-                </ListBox.Item>
-                <ListBox.Item id="vanguard" textValue="Vanguard">
-                  Vanguard
-                </ListBox.Item>
-                <ListBox.Item id="other" textValue="Other">
-                  Other
-                </ListBox.Item>
-              </ListBox>
-            </Select.Popover>
-          </Select>
+          {renderCsvImportSelect('account-balances-financials-entry__select app-select--import-menu')}
         </div>
           <Button
             variant="ghost"
@@ -840,7 +806,7 @@ export function AccountBalances({
             </div>
             <div className="withdrawal-order-context__arrow-row" aria-hidden>
               <span className="withdrawal-order-context__arrow-slot">
-                <IconArrowDown size={18} stroke={1.75} className="withdrawal-order-context__arrow" />
+                <IconArrowNarrowDownDashed size={18} stroke={1.5} className="withdrawal-order-context__arrow" />
               </span>
             </div>
           </div>
@@ -861,21 +827,22 @@ export function AccountBalances({
 
   function renderFidelityTaxDisclosure(
     tax: 'pretax' | 'roth' | 'hsa',
-    def: { label: string; tag: ReactNode; total: number },
+    def: { label: string; total: number },
     withdrawalUi: boolean,
   ) {
     const bucket: WithdrawalDisplayBucket = tax
-    const { order, hint } = withdrawalUi ? metaFor(bucket) : { order: null as number | null, hint: null as string | null }
+    const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
     const positions = positionsForTaxTreatment(fidelityRows, tax)
+    const trend = computeBucketTrendDisplay(positions, holdingQuoteMap)
     const aggregated = aggregateFidelityPositionsBySymbol(positions)
     const combinedLines = positions.length > aggregated.length
 
     const summaryInner = withdrawalUi ? (
-      <WithdrawalLabeledBlock badgeOrder={order} hint={hint}>
-        <FidelityBucketAccountRow label={<>{def.label} {def.tag}</>} total={fmt(def.total)} />
+      <WithdrawalLabeledBlock badgeOrder={order} hint={null}>
+        <FidelityBucketAccountRow label={def.label} total={fmt(def.total)} trend={trend} />
       </WithdrawalLabeledBlock>
     ) : (
-      <FidelityBucketAccountRow label={<>{def.label} {def.tag}</>} total={fmt(def.total)} />
+      <FidelityBucketAccountRow label={def.label} total={fmt(def.total)} trend={trend} />
     )
 
     return (
@@ -901,25 +868,10 @@ export function AccountBalances({
 
   function renderFidelityImportedTaxBuckets(withdrawalUi: boolean) {
     const pretaxTotal = c.bal.bal401k + c.bal.balSE401k
-    const defs: { tax: 'pretax' | 'roth' | 'hsa'; label: string; tag: ReactNode; total: number }[] = [
-      {
-        tax: 'pretax',
-        label: 'Pre-tax',
-        tag: <span className="acct-tag trad">401(k), IRA, 403(b), etc.</span>,
-        total: pretaxTotal,
-      },
-      {
-        tax: 'roth',
-        label: 'Roth',
-        tag: <span className="acct-tag roth">tax-free</span>,
-        total: c.bal.balRoth,
-      },
-      {
-        tax: 'hsa',
-        label: 'HSA',
-        tag: <span className="acct-tag hsa">medical tax-free</span>,
-        total: c.bal.balHsa,
-      },
+    const defs: { tax: 'pretax' | 'roth' | 'hsa'; label: string; total: number }[] = [
+      { tax: 'pretax', label: 'Pre-tax', total: pretaxTotal },
+      { tax: 'roth', label: 'Roth', total: c.bal.balRoth },
+      { tax: 'hsa', label: 'HSA', total: c.bal.balHsa },
     ]
     const defByTax = Object.fromEntries(defs.map((d) => [d.tax, d])) as Record<'pretax' | 'roth' | 'hsa', (typeof defs)[0]>
 
@@ -1035,30 +987,19 @@ export function AccountBalances({
       return null
     }
 
-    const brkMeta = withdrawalUi ? metaFor('brokerage') : { order: null as number | null, hint: null as string | null }
+    const brkMeta = withdrawalUi ? metaFor('brokerage') : { order: null as number | null }
+    const brkTrend = computeBucketTrendDisplay(brokeragePositions, holdingQuoteMap)
 
     if (!useFidelityBrokerageView) {
       return (
         <>
           <div className="edit-row" style={{ borderBottom: scenariosBar ? undefined : 'none' }}>
             {withdrawalUi ? (
-              <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={brkMeta.hint}>
-                <span className="edit-row-label">
-                  Brokerage <span className="acct-tag taxable">taxable</span>
-                </span>
-                <div className="edit-row-right">
-                  <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(brkBal)}</span>
-                </div>
+              <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
+                <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
               </WithdrawalLabeledBlock>
             ) : (
-              <>
-                <span className="edit-row-label">
-                  Brokerage <span className="acct-tag taxable">taxable</span>
-                </span>
-                <div className="edit-row-right">
-                  <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(brkBal)}</span>
-                </div>
-              </>
+              <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
             )}
           </div>
           {scenariosBar ? (
@@ -1069,25 +1010,11 @@ export function AccountBalances({
     }
 
     const summaryInner = withdrawalUi ? (
-      <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={brkMeta.hint}>
-        <FidelityBucketAccountRow
-          label={
-            <>
-              Brokerage <span className="acct-tag taxable">taxable</span>
-            </>
-          }
-          total={fmt(brkBal)}
-        />
+      <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
+        <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} />
       </WithdrawalLabeledBlock>
     ) : (
-      <FidelityBucketAccountRow
-        label={
-          <>
-            Brokerage <span className="acct-tag taxable">taxable</span>
-          </>
-        }
-        total={fmt(brkBal)}
-      />
+      <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} />
     )
 
     const brkAggregated = aggregateFidelityPositionsBySymbol(brokeragePositions)
@@ -1119,24 +1046,9 @@ export function AccountBalances({
     const withdrawalUi = Boolean(showWithdrawalGuidance)
     const seq = withdrawalBucketOrder(retirementAge, true)
     const pretaxTotal = c.bal.bal401k + c.bal.balSE401k
-    const pretaxDef = {
-      tax: 'pretax' as const,
-      label: 'Pre-tax',
-      tag: <span className="acct-tag trad">401(k), IRA, 403(b), etc.</span>,
-      total: pretaxTotal,
-    }
-    const rothDef = {
-      tax: 'roth' as const,
-      label: 'Roth',
-      tag: <span className="acct-tag roth">tax-free</span>,
-      total: c.bal.balRoth,
-    }
-    const hsaDef = {
-      tax: 'hsa' as const,
-      label: 'HSA',
-      tag: <span className="acct-tag hsa">medical tax-free</span>,
-      total: c.bal.balHsa,
-    }
+    const pretaxDef = { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal }
+    const rothDef = { tax: 'roth' as const, label: 'Roth', total: c.bal.balRoth }
+    const hsaDef = { tax: 'hsa' as const, label: 'HSA', total: c.bal.balHsa }
 
     const nodes: ReactNode[] = []
 
@@ -1378,16 +1290,29 @@ export function AccountBalances({
     </div>
   ) : null
 
+  const headerClearAccountsBtn = renderClearAccountsButton()
+  const headerEntryButtons = showBalanceEntryActions ? renderBalanceEntryButtons() : null
+
   return (
     <>
       {mergedDashboard ? (
         <div className="rab-brokerage-stack">
           <div className="account-balances-header-row">
-            <div className="input-col-title account-balances-header-row__title">Retirement account balances</div>
+            <div className="account-balances-header-row__title-block">
+              <h2 className="account-balances-header-row__title">Retirement Account Balances</h2>
+              {hasCustomScenarioBadge ? (
+                <p className="account-balances-header-row__subtitle">
+                  <span className="account-balances-header-row__subtitle-dot" aria-hidden />
+                  with custom scenarios
+                </p>
+              ) : null}
+            </div>
             <div className="account-balances-header-row__actions">
-              {showBalanceEntryActions ? renderBalanceEntryButtons() : null}
-              {renderRemoveAccountsButton()}
-              {hasCustomScenarioBadge ? <span className="custom-scenario-active-badge">Custom scenario active</span> : null}
+              {headerClearAccountsBtn}
+              {headerClearAccountsBtn && headerEntryButtons ? (
+                <span className="account-balances-header-row__divider" aria-hidden />
+              ) : null}
+              {headerEntryButtons}
             </div>
           </div>
           <div
@@ -1406,8 +1331,11 @@ export function AccountBalances({
           <div className="input-col-title">Retirement account balances</div>
           {!readOnly && (hasRetirementAccountData || balanceMode === 'fidelity') ? (
             <div className="balance-input-toolbar">
-              {renderBalanceEntryButtons()}
-              {renderRemoveAccountsButton()}
+              {renderClearAccountsButton()}
+              {renderClearAccountsButton() && showBalanceEntryActions ? (
+                <span className="account-balances-header-row__divider" aria-hidden />
+              ) : null}
+              {showBalanceEntryActions ? renderBalanceEntryButtons() : null}
               {balanceMode === 'fidelity' ? (
                 <FidelityCsvImport
                   key={`acct-balances-import-toolbar-${csvImportLaunchNonce}`}

@@ -4,26 +4,31 @@ import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
+import {
+  calculatorInputsToUserPrefs,
+  saveLocalUserPrefs,
+  type UserPrefs,
+} from '../lib/userPrefs'
 import { formatSsAgeLabel, normalizeClaimAge, type SsClaimAge } from '../lib/socialSecurity'
-import { fmt, fmtInput, parseNum } from '../utils/format'
 import { ClaimAgeSegment } from './ClaimAgeSegment'
-import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
+import { PlanningProfileFields } from './PlanningProfileFields'
 import './ConfigDrawerBody.scss'
+import './PlanningProfileFields.scss'
 import './SidePanelShell.scss'
 import './OnboardingOverlay.scss'
 
 const BODY_CLASS = 'onboarding-overlay--open'
 const RETIRE_AGE_MAX = 80
-const MONTHLY_GOAL_SLIDER_MAX = 100_000
-const MONTHLY_GOAL_SLIDER_STEP = 100
 
 type Props = {
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  completeOnboarding: () => Promise<{ error?: string }>
+  onComplete: () => void
+  /** When set, prefs are written to the user profile on submit. */
+  saveUserPrefs?: (prefs: UserPrefs) => Promise<{ error?: string }>
 }
 
-export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Props) {
+export function OnboardingOverlay({ inputs, setInputs, onComplete, saveUserPrefs }: Props) {
   const [dob, setDob] = useState(inputs.dateOfBirth)
   const [monthlyGoal, setMonthlyGoal] = useState(inputs.monthlyIncomeGoal)
   const [ssAge, setSsAge] = useState<SsClaimAge>(() => normalizeClaimAge(inputs.ssAge))
@@ -39,14 +44,6 @@ export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Pro
       document.body.classList.remove(BODY_CLASS)
     }
   }, [])
-
-  useEffect(() => {
-    if (!isValidIsoDateString(dob)) return
-    const at = ageFromIsoDateString(dob)
-    if (at < 18 || at > 100) return
-    const lo = Math.max(50, at + 1)
-    setRetireAge((r) => Math.min(RETIRE_AGE_MAX, Math.max(lo, r)))
-  }, [dob])
 
   const dobOk = isValidIsoDateString(dob)
   const ageToday = dobOk ? ageFromIsoDateString(dob) : null
@@ -70,17 +67,38 @@ export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Pro
     setBusy(true)
     const lo = Math.max(50, ageToday! + 1)
     const targetRetirementAge = Math.min(RETIRE_AGE_MAX, Math.max(lo, Math.round(retireAge)))
-    setInputs({
+    const patch = {
       dateOfBirth: dob,
       targetRetirementAge,
       monthlyIncomeGoal: Math.max(0, monthlyGoal),
       ssAge,
       spouseClaimAge: spouseSsAge,
       married,
-    })
-    const { error } = await completeOnboarding()
+    }
+    setInputs(patch)
+    const prefs: UserPrefs = {
+      dob,
+      retirementAge: targetRetirementAge,
+      monthlyGoal: Math.max(0, monthlyGoal),
+      ssClaimingAge: ssAge,
+    }
+    if (!calculatorInputsToUserPrefs({ ...inputs, ...patch })) {
+      setBusy(false)
+      setErr('Complete all plan fields before continuing.')
+      return
+    }
+    if (saveUserPrefs) {
+      const { error } = await saveUserPrefs(prefs)
+      if (error) {
+        setBusy(false)
+        setErr(error)
+        return
+      }
+    } else {
+      saveLocalUserPrefs(prefs)
+    }
     setBusy(false)
-    if (error) setErr(error)
+    onComplete()
   }
 
   return (
@@ -108,61 +126,15 @@ export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Pro
         <SimpleBar className="side-panel-shell__scroll onboarding-overlay__scroll" autoHide={false}>
           <div className="onboarding-overlay__body">
             <div className="onboarding-overlay__section">
-              <div className="config-plan-row-duo onboarding-overlay__age-row">
-                <div className="config-plan-field">
-                  <span className="config-plan-label">Your birthday</span>
-                  <DateOfBirthSelects value={dob} onChange={setDob} />
-                  <DobAgeToday iso={dob} />
-                </div>
-                <label className="config-plan-field">
-                  <span className="config-plan-label">Your target retirement age</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    className="config-plan-input onboarding-overlay__retire-age-input"
-                    value={fmtInput(retireAge)}
-                    onChange={(e) => {
-                      const n = Math.round(parseNum(e.target.value))
-                      if (!Number.isFinite(n)) return
-                      setRetireAge(n)
-                    }}
-                    aria-label="Target retirement age"
-                  />
-                  {dobOk && ageToday !== null ? (
-                    <span className="config-plan-age-hint">Most people plan between 62 and 70.</span>
-                  ) : (
-                    <span className="config-plan-age-hint">Set your date of birth first.</span>
-                  )}
-                </label>
-              </div>
-            </div>
-
-            <div className="onboarding-overlay__section">
-              <div className="config-plan-field config-plan-field--goal">
-                <span className="config-plan-label" id="onboarding-goal-question">
-                  Monthly income goal in retirement
-                </span>
-                <div className="config-plan-savings-row">
-                  <span className="config-plan-saveval">{fmt(monthlyGoal)}</span>
-                  <input
-                    type="range"
-                    className="config-plan-savings-slider"
-                    min={0}
-                    max={MONTHLY_GOAL_SLIDER_MAX}
-                    step={MONTHLY_GOAL_SLIDER_STEP}
-                    value={Math.min(MONTHLY_GOAL_SLIDER_MAX, monthlyGoal)}
-                    onChange={(e) => {
-                      const n =
-                        Math.round(Number(e.target.value) / MONTHLY_GOAL_SLIDER_STEP) * MONTHLY_GOAL_SLIDER_STEP
-                      setMonthlyGoal(n)
-                    }}
-                    aria-labelledby="onboarding-goal-question"
-                    aria-valuemin={0}
-                    aria-valuemax={MONTHLY_GOAL_SLIDER_MAX}
-                    aria-valuenow={monthlyGoal}
-                  />
-                </div>
-              </div>
+              <PlanningProfileFields
+                variant="welcome"
+                dateOfBirth={dob}
+                onDateOfBirth={setDob}
+                targetRetirementAge={retireAge}
+                onTargetRetirementAge={setRetireAge}
+                monthlyIncomeGoal={monthlyGoal}
+                onMonthlyIncomeGoal={setMonthlyGoal}
+              />
             </div>
 
             <div className="onboarding-overlay__section">

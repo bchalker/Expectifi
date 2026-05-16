@@ -1,5 +1,6 @@
 import { approxIsoDobFromAge, isValidIsoDateString } from './ageFromDob'
 import { normalizeIncomePresets, type CalculatorInputs, type CalculatorUi } from './computeResults'
+import { normalizeRetireRegions } from './calc/retireRegions'
 import { normalizeSocialSecurityFields } from './socialSecurity'
 
 export type AppSnapshotV1 = {
@@ -56,6 +57,10 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
         : defaultInputs.dateOfBirth
   }
 
+  const legacyItalyCost =
+    typeof merged.italyCost === 'number' && Number.isFinite(merged.italyCost) ? merged.italyCost : undefined
+  delete merged.italyCost
+
   const incomePresets = normalizeIncomePresets(base.incomePresets)
   const ids = new Set(incomePresets.map((p) => p.id))
   let activePreset = typeof parsed.activePreset === 'string' ? parsed.activePreset : null
@@ -63,7 +68,7 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
     activePreset = incomePresets[0]?.id ?? null
   }
 
-  const phase = parsed.phase === 'growth' || parsed.phase === 'income' ? parsed.phase : 'income'
+  const phase = parsed.phase === 'growth' || parsed.phase === 'income' ? parsed.phase : 'growth'
   const uiRaw: Record<string, unknown> =
     parsed.ui && typeof parsed.ui === 'object' ? (parsed.ui as Record<string, unknown>) : {}
   const { incomePresetEditorFocusSeq: _ignored, ...uiRest } = uiRaw
@@ -75,6 +80,7 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
       dateOfBirth,
       incomePresets,
       positionReturnModels: Array.isArray(base.positionReturnModels) ? base.positionReturnModels : [],
+      retireRegions: normalizeRetireRegions(base.retireRegions, legacyItalyCost),
       ...normalizeSocialSecurityFields(base, defaultInputs),
     },
     ui: {

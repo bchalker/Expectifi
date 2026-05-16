@@ -95,6 +95,15 @@
   --layout-app-gutter: max(1rem, env(safe-area-inset-left, 0px));
   --layout-app-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
   --layout-app-inner-pad: 2rem;
+  /* Centered column width (viewport minus side gutters) — header + main share this */
+  --layout-app-boundary: min(
+    var(--layout-app-max),
+    calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
+  );
+  --layout-marketing-boundary: min(
+    var(--layout-marketing-max),
+    100vw
+  );
   /* Portfolio post-import reveal (keep in sync with portfolioWaveReveal.ts) */
   --portfolio-reveal-duration: 0.5s;
   --portfolio-stagger-step: 0.04s;
@@ -120,6 +129,23 @@
   :root {
     --layout-app-inner-pad: 1rem;
   }
+}
+
+/* Shared horizontal bounds — header, landing sections, app main column */
+.layout-marketing-bound {
+  width: var(--layout-marketing-boundary);
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
+  box-sizing: border-box;
+}
+
+.layout-app-bound {
+  width: var(--layout-app-boundary);
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--layout-app-inner-pad);
+  box-sizing: border-box;
 }
 
 /* Empty portfolio: reserve wave band only (hero clamp hidden); front wave height is 5px in SubHeader.scss */

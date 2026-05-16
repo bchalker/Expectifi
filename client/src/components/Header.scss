@@ -2,7 +2,7 @@
 .header {
   --header-brand-navy: #1a2332;
   --header-brand-green: #4ecb8d;
-  --header-brand-green-muted: #5dcaa5;
+  --header-brand-green-muted: #93dcc4;
 
   position: relative;
   flex-shrink: 0;
@@ -14,7 +14,6 @@
 
 .header--app {
   min-height: var(--app-top-chrome-h);
-  padding-inline: var(--layout-app-gutter) var(--layout-app-gutter-end);
   box-sizing: border-box;
 }
 
@@ -35,13 +34,15 @@
 }
 
 .header--app .header__inner {
-  max-width: var(--layout-app-max);
+  width: var(--layout-app-boundary);
+  max-width: 100%;
   margin-inline: auto;
   padding-inline: var(--layout-app-inner-pad);
 }
 
 .header--marketing .header__inner {
-  max-width: var(--layout-marketing-max);
+  width: var(--layout-marketing-boundary);
+  max-width: 100%;
   margin-inline: auto;
   padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
 }
@@ -54,7 +55,26 @@
   justify-content: center;
   gap: 1px;
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   line-height: 1.5;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header__brand:hover .header__mark {
+  color: var(--nav-text);
+}
+
+.header__brand:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
 .header__mark {

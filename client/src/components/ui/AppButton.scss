@@ -1,0 +1,71 @@
+/* Shared HeroUI button chrome — use via <AppButton /> */
+button.app-btn[data-slot='button'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 8px;
+  font-family: var(--body);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-snug);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button.app-btn[data-slot='button']:disabled,
+button.app-btn[data-slot='button'][data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.app-btn--md[data-slot='button'] {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.9rem;
+  font-size: var(--text-sm);
+}
+
+button.app-btn--sm[data-slot='button'] {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.75rem;
+  font-size: var(--text-sm);
+}
+
+button.app-btn--primary[data-slot='button'] {
+  border: none;
+  background: var(--accent);
+  color: var(--surface);
+}
+
+button.app-btn--primary[data-slot='button']:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+button.app-btn--secondary[data-slot='button'] {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+button.app-btn--secondary[data-slot='button']:hover:not(:disabled) {
+  background: var(--surface2);
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-strong));
+}
+
+button.app-btn--ghost[data-slot='button'] {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+button.app-btn--ghost[data-slot='button']:hover:not(:disabled) {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text);
+}

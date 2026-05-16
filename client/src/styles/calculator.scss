@@ -64,14 +64,14 @@
 
 /* ── LAYOUT ── */
 .main {
-  max-width: var(--layout-app-max);
-  margin: 0 auto;
+  width: var(--layout-app-boundary);
+  max-width: 100%;
+  margin-inline: auto;
   padding: 2rem var(--layout-app-inner-pad) 4rem;
+  box-sizing: border-box;
 }
 .app-scroll-stack {
   position: relative;
-  padding-left: var(--layout-app-gutter);
-  padding-right: var(--layout-app-gutter-end);
   box-sizing: border-box;
 }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -1072,8 +1072,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 .fidelity-acct-positions {
   font-size: 11px;
   color: var(--text-muted);
-  padding: 0 12px 10px;
-  border-top: 1px solid var(--border);
+  padding: 12px 12px 10px;
+
 }
 .fidelity-acct-positions table { width: 100%; border-collapse: collapse; }
 .fidelity-acct-positions th,

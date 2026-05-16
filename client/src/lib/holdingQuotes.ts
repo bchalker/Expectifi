@@ -5,6 +5,8 @@ export type HoldingQuote = {
   symbol: string
   price: number
   changePct: number
+  /** Last ~5 daily closes from market data (for mini sparklines). */
+  sparkline: number[]
 }
 
 export async function fetchHoldingQuote(symbol: string): Promise<HoldingQuote | null> {
@@ -17,12 +19,17 @@ export async function fetchHoldingQuote(symbol: string): Promise<HoldingQuote | 
       symbol?: string
       price?: number
       changePct?: number
+      sparkline?: number[]
     }
     if (!j?.ok || typeof j.price !== 'number' || !Number.isFinite(j.price)) return null
+    const sparkline = Array.isArray(j.sparkline)
+      ? j.sparkline.filter((c): c is number => typeof c === 'number' && Number.isFinite(c))
+      : []
     return {
       symbol: typeof j.symbol === 'string' ? j.symbol : s,
       price: j.price,
       changePct: typeof j.changePct === 'number' && Number.isFinite(j.changePct) ? j.changePct : 0,
+      sparkline,
     }
   } catch {
     return null

@@ -298,7 +298,7 @@ export function SnapshotPanel({
         aria-labelledby="app-top-chrome-snapshot-btn app-left-nav-snapshot-btn strip-snapshot-panel-title"
         onClose={onClose}
         closeAriaLabel="Close snapshot panel"
-        scrollKey={open ? "snapshot" : ""}
+        scrollKey="snapshot"
         shellClassName="drawer-shell--right drawer-shell--snapshot"
         bodyClassName="snapshot-panel-body"
       >

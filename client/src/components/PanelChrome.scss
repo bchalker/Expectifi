@@ -28,7 +28,9 @@
   background: var(--surface);
   overflow: hidden;
   min-height: 0;
+  min-width: 0;
   border-radius: 12px;
+  /* Only slide — width variants must stay fixed for the close animation (see SidePanelShell latch). */
   transition:
     transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1);

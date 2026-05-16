@@ -1,4 +1,4 @@
-# Eggspectifi retirement calculator — single service (API + static client) for Railway.
+# HeadwayPlanner retirement calculator — single service (API + static client) for Railway.
 FROM node:20-bookworm-slim AS build
 WORKDIR /app
 

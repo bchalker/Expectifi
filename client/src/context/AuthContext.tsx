@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from 'react'
 import { ApiRequestError, apiFetchJson } from '../lib/api'
+import type { UserPrefs } from '../lib/userPrefs'
+import { parseUserPrefs } from '../lib/userPrefs'
 
 export type AuthUser = {
   id: string
@@ -16,6 +18,19 @@ export type AuthUser = {
   displayName: string | null
   /** Server flag: welcome survey completed (Plan / SS fields editable in Configure anytime). */
   onboardingDone: boolean
+  /** Saved welcome fields from profile (DB). */
+  planPrefs: UserPrefs | null
+  /** Stripe subscription status; guests omit this field. */
+  subscriptionStatus?:
+    | 'active'
+    | 'trialing'
+    | 'past_due'
+    | 'canceled'
+    | 'unpaid'
+    | 'incomplete'
+    | 'incomplete_expired'
+    | 'paused'
+    | 'none'
 }
 
 type MeResponse = { ok: true; user: AuthUser } | { ok: false; error?: string }
@@ -31,6 +46,12 @@ function normalizeAuthUser(u: AuthUser): AuthUser {
     ...u,
     displayName: normalizeDisplayName(u.displayName),
     onboardingDone: typeof u.onboardingDone === 'boolean' ? u.onboardingDone : true,
+    planPrefs: parseUserPrefs((u as AuthUser & { planPrefs?: unknown }).planPrefs),
+    subscriptionStatus:
+      typeof (u as AuthUser & { subscriptionStatus?: unknown }).subscriptionStatus === 'string'
+        ? ((u as AuthUser & { subscriptionStatus: AuthUser['subscriptionStatus'] }).subscriptionStatus ??
+          'none')
+        : 'none',
   }
 }
 
@@ -79,6 +100,10 @@ type AuthCtx = {
   signOut: () => Promise<void>
   /** Marks welcome survey complete on the server; call after persisting plan fields to calculator state. */
   completeOnboarding: () => Promise<{ error?: string }>
+  /** Persist welcome fields to the user profile. */
+  saveUserPrefs: (prefs: UserPrefs) => Promise<{ error?: string }>
+  /** Cancel Stripe subscription and delete the signed-in account. */
+  cancelAccount: () => Promise<{ error?: string }>
 }
 
 const Ctx = createContext<AuthCtx | null>(null)
@@ -264,6 +289,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (e.code === 'payment_failed') {
           return { error: 'Card could not be saved. Check the number or try another card.' }
         }
+        if (e.code === 'subscription_price_not_configured') {
+          return {
+            error:
+              'Billing is not fully configured on the server (STRIPE_SUBSCRIPTION_PRICE_ID for $9/mo).',
+          }
+        }
       }
       return { error: 'Could not create account. Is the API running and MySQL configured?' }
     }
@@ -291,6 +322,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const saveUserPrefs = useCallback(async (prefs: UserPrefs) => {
+    try {
+      const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/user/prefs', {
+        method: 'PUT',
+        body: JSON.stringify(prefs),
+      })
+      setUser(normalizeAuthUser(data.user))
+      return {}
+    } catch {
+      return { error: 'Could not save your plan. Try again.' }
+    }
+  }, [])
+
+  const cancelAccount = useCallback(async () => {
+    try {
+      await apiFetchJson<{ ok: true }>('/api/user/cancel-account', { method: 'POST' })
+      setUser(null)
+      setGoogleCheckoutUi(null)
+      return {}
+    } catch (e) {
+      if (e instanceof ApiRequestError && e.code === 'stripe_cancel_failed') {
+        return { error: 'Could not cancel your subscription. Try again or contact support.' }
+      }
+      return { error: 'Could not cancel your account. Try again.' }
+    }
+  }, [])
+
   const signInWithGoogle = useCallback(() => {
     window.location.assign('/api/auth/google')
   }, [])
@@ -312,6 +370,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signOut,
       completeOnboarding,
+      saveUserPrefs,
+      cancelAccount,
     } satisfies AuthCtx
   }, [
     apiReady,
@@ -329,6 +389,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithGoogle,
     signOut,
     completeOnboarding,
+    saveUserPrefs,
+    cancelAccount,
   ])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

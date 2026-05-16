@@ -16,7 +16,7 @@ export const APP_NAV_DRAWER_ITEMS: readonly {
   { id: 'sstiming', label: 'SS timing', requires: ['ss'] },
   { id: 'taxfree', label: 'Tax-free withdrawals', requires: ['portfolio'] },
   { id: 'strategy', label: 'Withdrawal strategy', requires: ['portfolio'] },
-  { id: 'italy', label: 'Italy comparison', requires: ['portfolio'] },
+  { id: 'relocate', label: 'Where to retire?', requires: ['portfolio'] },
 ]
 
 export const SNAPSHOT_NAV_REQUIRES: readonly NavPanelRequirement[] = ['portfolio']

@@ -11,6 +11,36 @@
   color: var(--text);
 }
 
+.fidelity-bucket-row__start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.fidelity-bucket-row__start .view-holdings-hint {
+  margin-top: 0.05rem;
+}
+
+.fidelity-bucket-row__end {
+  align-items: flex-start;
+}
+
+.fidelity-bucket-row__values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.fidelity-bucket-row__values .bucket-total-trend {
+  width: 100%;
+}
+
 .fidelity-bucket-total {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
   color: var(--accent-text);
 }

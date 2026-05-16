@@ -1,7 +1,9 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAnimatedScalar } from '../hooks/useAnimatedScalar'
+import { buildTrendFromAmounts } from '../lib/bucketHoldingTrend'
 import { SS_STANDARD_AGES, type SsClaimAge } from '../lib/socialSecurity'
-import { fmt, fmtK } from '../utils/format'
+import { fmt } from '../utils/format'
+import { BucketTotalTrend } from './ui/BucketTotalTrend'
 import './SubHeader.scss'
 
 type Phase = 'growth' | 'income'
@@ -131,6 +133,10 @@ type Props = {
   onOpenSsConfig: () => void
   /** When false, header shows $0 — no manual balances or imported positions to project from. */
   hasPortfolioBalances: boolean
+  /** Current retirement + taxable balance (growth trend baseline). */
+  portfolioNow: number
+  /** Portfolio-only monthly withdrawal before SS (income trend baseline). */
+  monPort: number
 }
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -152,11 +158,31 @@ export function SubHeader({
   ssTimingConfigured,
   onOpenSsConfig,
   hasPortfolioBalances,
+  portfolioNow,
+  monPort,
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon)
   const totalFvAnim = useAnimatedScalar(totalFV)
+  const prevHeroEndRef = useRef<number | null>(null)
 
   const incomePhase = phase === 'income'
+
+  const heroTrend = useMemo(() => {
+    if (!hasPortfolioBalances) return null
+    if (incomePhase) {
+      if (!(monPort > 0) || !(grossMon > 0)) return null
+      return buildTrendFromAmounts(monPort, grossMon)
+    }
+    const end = totalFV
+    const last = prevHeroEndRef.current
+    const start = last != null && last > 0 && last !== end ? last : portfolioNow
+    if (!(start > 0) || !(end > 0)) return null
+    return buildTrendFromAmounts(start, end)
+  }, [hasPortfolioBalances, incomePhase, monPort, grossMon, portfolioNow, totalFV])
+
+  useEffect(() => {
+    prevHeroEndRef.current = incomePhase ? grossMon : totalFV
+  }, [incomePhase, grossMon, totalFV])
 
   const showSsClaimPicker = incomePhase && ssTimingConfigured && ssIncluded
   /** Reserve hero height/padding when SS is configured so toggling include does not shift the amount. */
@@ -209,6 +235,11 @@ export function SubHeader({
                   {incomePhase ? '/mo' : `/at ${targetRetirementAge}`}
                 </span>
               </div>
+              {heroTrend ? (
+                <div className="subheader-estimate__hero-trend" aria-hidden>
+                  <BucketTotalTrend trend={heroTrend} tone="on-dark" layout="stack" showChart showPercent={false} />
+                </div>
+              ) : null}
               <div className="subheader-estimate__meta">
                 {incomePhase ? (
                   <>
@@ -233,7 +264,7 @@ export function SubHeader({
                           </button>
                         </>
                       ) : (
-                        <button type="button" className="subheader-ss-add-btn" onClick={onOpenSsConfig}>
+                        <button type="button" className="font-xs subheader-ss-add-btn" onClick={onOpenSsConfig}>
                           Add Social Security
                         </button>
                       )}
@@ -243,7 +274,7 @@ export function SubHeader({
                 ) : (
                   <span className="subheader-estimate__note subheader-estimate__note--enter">
                     {annualSave > 0
-                      ? `Adding ${fmtK(annualSave)} per year in contributions`
+                      ? `Adding ${fmt(annualSave)} per year in contributions`
                       : 'No annual contributions'}
                   </span>
                 )}

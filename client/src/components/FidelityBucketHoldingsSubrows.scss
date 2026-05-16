@@ -14,14 +14,51 @@
 .fidelity-import-ledger:last-child {
   margin-bottom: 0;
 }
+.fidelity-import-ledger__lead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .fidelity-import-ledger-acct {
-  font-size: 12px;
-  font-weight: 700;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--text);
-  line-height: 1.25;
+  line-height: 1.3;
   word-break: break-word;
   margin: 0;
 }
+
+.fidelity-import-ledger__summary-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.fidelity-import-ledger__values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.fidelity-import-ledger__total {
+  font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--accent-text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.25;
+}
+
 .fidelity-holdings-disclosure {
   margin: 0;
 }
@@ -29,16 +66,10 @@
   cursor: pointer;
   list-style: none;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: var(--tracking-normal);
-  text-transform: none;
-  color: var(--text-muted);
   margin: 0;
   padding: 0;
   user-select: none;
@@ -51,32 +82,16 @@
   align-items: center;
   min-width: 0;
 }
-.fidelity-holdings-summary__text::before {
-  content: '';
-  display: inline-block;
-  width: 0;
-  height: 0;
-  margin-right: 6px;
-  border-left: 4px solid var(--text-faint);
-  border-top: 3px solid transparent;
-  border-bottom: 3px solid transparent;
-  transform: translateY(-1px);
-  transition: transform 0.15s;
-  flex-shrink: 0;
-}
-.fidelity-holdings-disclosure[open] > summary .fidelity-holdings-summary__text::before {
-  transform: rotate(90deg) translate(1px, 0);
-}
 .fidelity-holdings-summary__end {
   flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   max-width: 100%;
 }
 .fidelity-holdings-disclosure[open] > summary {
-  color: var(--text);
   margin-bottom: 2px;
 }
 

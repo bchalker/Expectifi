@@ -1,3 +1,4 @@
+import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hydrateAppSnapshot } from './appSnapshot'
 import { loadStoredAppState } from './appStateStorage'
 import { computeResults, type CalculatorInputs, type CalculatorUi } from './computeResults'
@@ -31,7 +32,7 @@ const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   spouseBenefit67: 0,
   spouseBenefit70: 0,
   other: 0,
-  italyCost: 0,
+  retireRegions: [defaultRetireRegionPick('italy')],
   ssInvestPct: 5,
   dateOfBirth: '',
   targetRetirementAge: 62,

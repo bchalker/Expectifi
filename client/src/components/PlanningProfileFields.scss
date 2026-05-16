@@ -1,0 +1,85 @@
+.planning-profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-profile-fields__dob {
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-profile-fields__dob .dob-select-row {
+  grid-template-columns: minmax(0, 1.45fr) minmax(4.25rem, 0.72fr) minmax(5.75rem, 1fr);
+}
+
+.planning-profile-fields__divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+.planning-profile-fields__row-duo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-profile-fields__row-duo > .config-plan-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-profile-fields__row-duo .config-plan-label {
+  white-space: nowrap;
+}
+
+.planning-profile-fields__row-duo .config-plan-savings-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.planning-profile-fields__row-duo .config-plan-saveval {
+  min-width: 0;
+}
+
+.planning-profile-fields__row-duo .config-plan-savings-slider {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.planning-profile-fields__monthly-standalone {
+  margin-bottom: 0;
+}
+
+@media (min-width: 680px) {
+  .planning-profile-fields__row-duo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .planning-profile-fields__row-duo > .config-plan-field:first-child {
+    width: auto;
+    min-width: max-content;
+  }
+
+  .planning-profile-fields__row-duo > .config-plan-field--savings,
+  .planning-profile-fields__row-duo > .config-plan-field--goal {
+    min-width: 0;
+  }
+
+  .planning-profile-fields__row-duo > .config-plan-field:first-child .config-plan-input {
+    width: 5rem;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}

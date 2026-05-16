@@ -28,6 +28,14 @@ const TRUST_ITEMS = [
   'Results in under 2 minutes',
 ] as const
 
+const PRICING_INCLUDES = [
+  'Saved scenarios you can revisit anytime',
+  'Social Security timing and claiming ages',
+  'Withdrawal strategy and tax-aware draw order',
+  'Where to retire? — compare up to 5 regions (COL & tax)',
+  'All future features as we ship them',
+] as const
+
 type Props = {
   onSignIn: () => void
   onCreateAccount: () => void
@@ -55,7 +63,8 @@ export function LandingPage({
 
       <main>
         <section className="landing-hero" aria-labelledby="landing-hero-title">
-          <div className="landing-page__wrap landing-hero__inner">
+          <div className="landing-page__wrap">
+            <div className="landing-hero__inner">
             <p className="landing-hero__eyebrow">Retirement planning, simplified</p>
             <h1 id="landing-hero-title" className="landing-hero__title">
               Find out if your <span className="landing-hero__accent">nest egg</span> is ready
@@ -68,6 +77,7 @@ export function LandingPage({
               Get started free
             </button>
             <p className="landing-hero__note">No credit card required · Takes about 2 minutes</p>
+            </div>
           </div>
         </section>
 
@@ -102,15 +112,34 @@ export function LandingPage({
           </div>
         </section>
 
-        <section id="pricing" className="landing-anchor-section" aria-labelledby="landing-pricing-title">
-          <div className="landing-page__wrap">
-            <h2 id="landing-pricing-title" className="landing-section__title landing-section__title--sm">
-              Pricing
-            </h2>
-            <p className="landing-anchor-section__body landing-anchor-section__prose">
-              Free to start — explore your plan and balances without a credit card. Create an account when you&apos;re
-              ready to save your scenario.
-            </p>
+        <section id="pricing" className="landing-pricing" aria-labelledby="landing-pricing-price">
+          <div className="landing-page__wrap landing-pricing__inner">
+            <article className="landing-pricing-card">
+              <p className="landing-pricing-card__label">Pricing</p>
+              <h2 id="landing-pricing-price" className="landing-pricing-card__price">
+                <span className="landing-pricing-card__price-amount">$9</span>
+                <span className="landing-pricing-card__price-period">/ month</span>
+              </h2>
+              <p className="landing-pricing-card__sub">
+                Everything you need to plan your retirement. Cancel anytime.
+              </p>
+              <ul className="landing-pricing-card__list">
+                {PRICING_INCLUDES.map((item) => (
+                  <li key={item} className="landing-pricing-card__list-item">
+                    <IconCircleCheck className="landing-pricing-card__check" size={18} stroke={2} aria-hidden />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="landing-btn landing-btn--primary landing-btn--lg landing-pricing-card__cta"
+                onClick={onGetStarted}
+              >
+                Get started free
+              </button>
+              <p className="landing-pricing-card__note">Free to explore — no account required to start</p>
+            </article>
           </div>
         </section>
 
@@ -147,7 +176,7 @@ export function LandingPage({
 
       <footer className="landing-footer">
         <div className="landing-page__wrap landing-footer__inner">
-          <span className="landing-footer__copy">© {new Date().getFullYear()} Eggspectifi</span>
+          <span className="landing-footer__copy">© {new Date().getFullYear()} HeadwayPlanner</span>
           <nav className="landing-footer__links" aria-label="Legal">
             <a href={APP_PATHS.home}>Privacy</a>
             <a href={APP_PATHS.home}>Terms</a>

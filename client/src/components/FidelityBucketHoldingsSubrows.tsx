@@ -1,4 +1,7 @@
 import { IconAdjustments, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
+import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
+import { BucketTotalTrend } from './ui/BucketTotalTrend'
+import { ViewHoldingsHint } from './ui/ViewHoldingsHint'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
@@ -119,11 +122,21 @@ export function FidelityBucketHoldingsSubrows({
       ) : null}
       {accountGroups.map((g) => (
         <div key={`${keyPrefix}-${g.accountName}`} className="fidelity-import-ledger">
-          {showFidelityAccountNames ? <div className="fidelity-import-ledger-acct">{g.accountName}</div> : null}
           <details className="fidelity-holdings-disclosure">
             <summary className="fidelity-holdings-summary">
-              <span className="fidelity-holdings-summary__text">Holdings/Portfolio</span>
-              {holdingsSummaryEnd ? <span className="fidelity-holdings-summary__end">{holdingsSummaryEnd}</span> : null}
+              <div className="fidelity-import-ledger__lead">
+                {showFidelityAccountNames ? (
+                  <span className="fidelity-import-ledger-acct">{g.accountName}</span>
+                ) : null}
+                {showFidelityAccountNames ? <ViewHoldingsHint /> : null}
+              </div>
+              <div className="fidelity-import-ledger__summary-end">
+                <div className="fidelity-import-ledger__values">
+                  <span className="fidelity-import-ledger__total">{fmt(g.total)}</span>
+                  <BucketTotalTrend trend={computeBucketTrendDisplay(g.rows, quoteMap)} />
+                </div>
+                {holdingsSummaryEnd ? <span className="fidelity-holdings-summary__end">{holdingsSummaryEnd}</span> : null}
+              </div>
             </summary>
             <div className="retirement-import-holdings">
               {g.rows.map((r) => {

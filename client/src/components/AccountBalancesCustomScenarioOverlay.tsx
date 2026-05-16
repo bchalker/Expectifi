@@ -35,6 +35,10 @@ function parseSignedPct(raw: string): number {
   return Number.isFinite(v) ? v : 0
 }
 
+function clampYearPct(n: number): number {
+  return Math.max(-100, Math.min(100, Math.round(n * 10) / 10))
+}
+
 function modelsMatchingPrefixes(models: PositionReturnModel[], prefixes: readonly string[]): PositionReturnModel[] {
   return models.filter((m) => prefixes.some((p) => m.id.startsWith(p)))
 }
@@ -96,13 +100,69 @@ function CustomPctField({
           className="num-input"
           aria-label="Custom annual return percent"
           value={valueStr}
-          onChange={(e) => {
-            const s = e.target.value
-            onChangeStr(s)
-            onCommitDecimal(parseSignedPct(s))
+          onChange={(e) => onChangeStr(e.target.value)}
+          onBlur={() => {
+            const nextPct = clampYearPct(parseSignedPct(valueStr))
+            onChangeStr(String(nextPct))
+            onCommitDecimal(pctToDecimal(nextPct))
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              const nextPct = clampYearPct(parseSignedPct(valueStr))
+              onChangeStr(String(nextPct))
+              onCommitDecimal(pctToDecimal(nextPct))
+            }
           }}
         />
       </div>
+    </div>
+  )
+}
+
+function YearPctField({
+  calendarYear,
+  index,
+  modelId,
+  rateDecimal,
+  onCommitDecimal,
+}: {
+  calendarYear: number
+  index: number
+  modelId: string
+  rateDecimal: number
+  onCommitDecimal: (dec: number) => void
+}) {
+  const [text, setText] = useState(() => String(decimalToPct(rateDecimal)))
+
+  useEffect(() => {
+    setText(String(decimalToPct(rateDecimal)))
+  }, [rateDecimal])
+
+  const commit = (raw: string) => {
+    const nextPct = clampYearPct(parseSignedPct(raw))
+    setText(String(nextPct))
+    onCommitDecimal(pctToDecimal(nextPct))
+  }
+
+  return (
+    <div className="custom-scenario-year-field">
+      <label htmlFor={`cs-yr-${modelId}-${index}`}>{calendarYear}</label>
+      <input
+        id={`cs-yr-${modelId}-${index}`}
+        type="text"
+        inputMode="decimal"
+        className="num-input"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => commit(text)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            commit(text)
+          }
+        }}
+      />
     </div>
   )
 }
@@ -125,22 +185,18 @@ function YearStrip({
   return (
     <div className="custom-scenario-year-strip">
       {years.map((calY, i) => (
-        <div key={calY} className="custom-scenario-year-field">
-          <label htmlFor={`cs-yr-${model.id}-${i}`}>{calY}</label>
-          <input
-            id={`cs-yr-${model.id}-${i}`}
-            type="text"
-            inputMode="decimal"
-            className="num-input"
-            value={String(decimalToPct(rates[i] ?? 0))}
-            onChange={(e) => {
-              const dec = pctToDecimal(parseSignedPct(e.target.value))
-              const nextRates = [...rates]
-              nextRates[i] = dec
-              onPatch(applyScenarioUiChoice(model, 'peryear', 0, h, 0, nextRates))
-            }}
-          />
-        </div>
+        <YearPctField
+          key={calY}
+          calendarYear={calY}
+          index={i}
+          modelId={model.id}
+          rateDecimal={rates[i] ?? 0}
+          onCommitDecimal={(dec) => {
+            const nextRates = [...rates]
+            nextRates[i] = dec
+            onPatch(applyScenarioUiChoice(model, 'peryear', 0, h, 0, nextRates))
+          }}
+        />
       ))}
     </div>
   )

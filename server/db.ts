@@ -122,9 +122,12 @@ export async function ensureSchema(): Promise<void> {
   await addColumnIfMissing('ALTER TABLE users ADD COLUMN google_sub VARCHAR(255) UNIQUE')
   await addColumnIfMissing('ALTER TABLE users ADD COLUMN display_name VARCHAR(255)')
   await addColumnIfMissing('ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(64)')
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN stripe_subscription_id VARCHAR(64)')
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN subscription_status VARCHAR(32)')
   await addColumnIfMissing(
     'ALTER TABLE users ADD COLUMN onboarding_done BOOLEAN NOT NULL DEFAULT FALSE',
   )
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN user_prefs JSONB')
 
   await p.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (

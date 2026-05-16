@@ -3,9 +3,13 @@ import { useAuth } from './context/AuthContext'
 import { useAppPath } from './hooks/useAppPath'
 import { APP_PATHS } from './lib/appPaths'
 import App from './App'
+import { GuestWelcomeGate } from './components/GuestWelcomeGate'
+import { shouldSkipWelcome } from './lib/welcomeGate'
+import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { LandingPage } from './components/LandingPage'
 import { landingNavigateOnboarding } from './components/landingNav'
+import { trackPageView } from './lib/analytics'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 
 function resolveGuestView(path: string): 'landing' | 'app' {
@@ -22,6 +26,10 @@ export default function AppRoot() {
   const guestView = useMemo(() => resolveGuestView(path), [path])
 
   const initialAuthModal: AuthModalMode | null = path === APP_PATHS.login ? 'signin' : null
+
+  useEffect(() => {
+    trackPageView(path + (typeof window !== 'undefined' ? window.location.search : ''))
+  }, [path])
 
   useEffect(() => {
     if (authLoading || user) return
@@ -76,6 +84,8 @@ export default function AppRoot() {
     return <App key={user.id} />
   }
 
+  const guestSkipWelcome = shouldSkipWelcome({ inputs: getInitialCalculatorInputs() })
+
   if (guestView === 'landing') {
     return (
       <>
@@ -93,5 +103,13 @@ export default function AppRoot() {
     )
   }
 
-  return <App key="guest" initialAuthModal={initialAuthModal} />
+  if (guestSkipWelcome) {
+    return <App key="guest" initialAuthModal={initialAuthModal} />
+  }
+
+  return (
+    <GuestWelcomeGate>
+      <App key="guest" initialAuthModal={initialAuthModal} />
+    </GuestWelcomeGate>
+  )
 }

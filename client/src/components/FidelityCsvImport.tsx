@@ -1,8 +1,10 @@
 import type { AnimationEvent } from 'react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button, ListBox, Select } from '@heroui/react'
-import { IconArrowNarrowRightDashed, IconBuildingBank, IconCheck } from '@tabler/icons-react'
+import { Checkbox, Label, ListBox, Select } from '@heroui/react'
+import { AppButton } from './ui/AppButton'
+import { IconBuildingBank, IconCheck } from '@tabler/icons-react'
+import { ViewHoldingsHint } from './ui/ViewHoldingsHint'
 import { fmt } from '../utils/format'
 import { FidelityAccountPositionsTable } from './FidelityAccountBreakdown'
 import type { ParsedFidelityCsv, AccountBucket } from '../lib/fidelityCsv'
@@ -164,6 +166,7 @@ export function FidelityCsvImport({
   const isPanel = presentation === 'panel'
   const pickInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
+  const duplicateReplaceId = useId()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalClosing, setModalClosing] = useState(false)
   const flowOpen = isPanel ? Boolean(openControlled) : modalOpen
@@ -653,15 +656,6 @@ export function FidelityCsvImport({
                     <summary>
                       <div className="csv-import-review-acct__identity">
                         <span className="fidelity-acct-fido-name csv-import-review-acct__name">{row.label}</span>
-                        <span className="csv-import-review-acct__holdings-hint">
-                          <IconArrowNarrowRightDashed
-                            className="csv-import-review-acct__holdings-icon"
-                            size={14}
-                            stroke={1.5}
-                            aria-hidden
-                          />
-                          View Holdings
-                        </span>
                       </div>
                       <div
                         className="csv-import-review-acct__bucket"
@@ -697,7 +691,10 @@ export function FidelityCsvImport({
                         </Select>
                       </div>
                       <span className="csv-import-review-acct__summary-end">
-                        <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
+                        <div className="csv-import-review-acct__values">
+                          <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
+                          <ViewHoldingsHint />
+                        </div>
                         <span
                           className={`csv-import-review-acct__check${accountChecked ? ' csv-import-review-acct__check--in' : ''}`}
                           aria-hidden={!accountChecked}
@@ -719,31 +716,6 @@ export function FidelityCsvImport({
             </div>
           ) : null}
 
-          {hasStorageDuplicate ? (
-            <div
-              style={{
-                background: 'var(--warn-light)',
-                border: '1px solid rgba(122,74,16,0.25)',
-                borderRadius: 8,
-                padding: '10px 12px',
-                marginBottom: '1rem',
-                fontSize: 12,
-                color: 'var(--warn)',
-              }}
-            >
-              <div style={{ marginBottom: 8 }}>
-                This file matches a CSV already imported. It is ignored unless you replace the earlier import.
-              </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500 }}>
-                <input
-                  type="checkbox"
-                  checked={replaceDuplicateImports}
-                  onChange={(e) => setReplaceDuplicateImports(e.target.checked)}
-                />
-                Replace earlier import when the file content matches
-              </label>
-            </div>
-          ) : null}
         </>
       ) : null}
     </>
@@ -772,10 +744,38 @@ export function FidelityCsvImport({
       <SimpleBar className="side-panel-shell__scroll csv-import-modal-scroll" autoHide={false}>
         <div className="csv-import-modal-body">{renderImportBody()}</div>
       </SimpleBar>
+      {pending && pending.parsed.rows.length > 0 && !parseError && hasStorageDuplicate ? (
+        <div className="csv-import-duplicate-notice">
+          <Checkbox
+            id={duplicateReplaceId}
+            className="app-checkbox"
+            isSelected={replaceDuplicateImports}
+            onChange={setReplaceDuplicateImports}
+            variant="secondary"
+          >
+            <Checkbox.Control>
+              <Checkbox.Indicator>
+                <IconCheck size={12} stroke={2.5} aria-hidden />
+              </Checkbox.Indicator>
+            </Checkbox.Control>
+            <Checkbox.Content>
+              <Label className="csv-import-duplicate-notice__label">
+                Seems like a duplicate. Continue replacing?
+              </Label>
+            </Checkbox.Content>
+          </Checkbox>
+        </div>
+      ) : null}
       <footer className="csv-import-modal-footer">
-        <Button size="sm" variant="ghost" isDisabled={importBusy !== null || confirmBlocking} onPress={() => closeFlow()}>
-          Cancel
-        </Button>
+        <div className="csv-import-modal-footer__row">
+          <AppButton
+            size="sm"
+            variant="ghost"
+            isDisabled={importBusy !== null || confirmBlocking}
+            onPress={() => closeFlow()}
+          >
+            Cancel
+          </AppButton>
         {pending && pending.parsed.rows.length > 0 && !parseError ? (
           <span className="csv-import-summary csv-import-summary--footer">
             {pending.parsed.rows.length} holdings found
@@ -785,19 +785,20 @@ export function FidelityCsvImport({
         )}
         <div className="csv-import-modal__footer-actions">
           {confirmOverlay.mode === 'error' ? (
-            <Button size="sm" variant="primary" onPress={() => setConfirmOverlay({ mode: 'idle' })}>
+            <AppButton size="sm" variant="primary" onPress={() => setConfirmOverlay({ mode: 'idle' })}>
               Dismiss
-            </Button>
+            </AppButton>
           ) : (
-            <Button
+            <AppButton
               size="sm"
               variant="primary"
               isDisabled={!canConfirm || importBusy !== null || confirmBlocking}
               onPress={() => void applyImportWithProgress()}
             >
               Confirm
-            </Button>
+            </AppButton>
           )}
+        </div>
         </div>
       </footer>
     </div>
@@ -827,9 +828,9 @@ export function FidelityCsvImport({
       {!hideTrigger && !isPanel ? (
         <div className={variant === 'toolbar' ? 'csv-import-root csv-import-root--toolbar' : 'csv-import-root'}>
           <div className="csv-import-trigger">
-            <Button size="sm" variant="outline" className="fidelity-import-file-btn" onPress={openFlow}>
+            <AppButton size="sm" variant="secondary" className="fidelity-import-file-btn" onPress={openFlow}>
               Import CSV
-            </Button>
+            </AppButton>
           </div>
         </div>
       ) : null}

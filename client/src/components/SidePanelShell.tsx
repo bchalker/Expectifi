@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import { CloseButton } from '@heroui/react'
 import './SidePanelShell.scss'
+
+/** Must match `transform` duration on `.drawer-shell` in PanelChrome.scss */
+const PANEL_CLOSE_MS = 280
 
 export type SidePanelShellProps = {
   open: boolean
@@ -37,6 +41,21 @@ export function SidePanelShell({
   bodyClassName = 'drawer-shell-body',
 }: SidePanelShellProps) {
   const hasFooter = footer != null && footer !== false
+  const [latchedShellClass, setLatchedShellClass] = useState(shellClassName)
+  const [latchedScrollKey, setLatchedScrollKey] = useState(scrollKey ?? '')
+
+  useEffect(() => {
+    if (open) {
+      setLatchedShellClass(shellClassName)
+      setLatchedScrollKey(scrollKey ?? '')
+      return
+    }
+    const t = window.setTimeout(() => {
+      setLatchedShellClass(shellClassName)
+      setLatchedScrollKey(scrollKey ?? '')
+    }, PANEL_CLOSE_MS)
+    return () => window.clearTimeout(t)
+  }, [open, shellClassName, scrollKey])
 
   return (
     <div
@@ -49,7 +68,7 @@ export function SidePanelShell({
         'drawer-shell',
         'side-panel-shell',
         hasFooter ? 'drawer-shell--with-footer' : '',
-        shellClassName,
+        latchedShellClass,
         open ? 'drawer-shell--open' : '',
       ]
         .filter(Boolean)
@@ -62,7 +81,7 @@ export function SidePanelShell({
         <CloseButton aria-label={closeAriaLabel} onPress={onClose} />
       </header>
       <SimpleBar
-        key={`${open}:${scrollKey ?? ''}`}
+        key={String(latchedScrollKey)}
         className="side-panel-shell__scroll"
         autoHide={false}
       >

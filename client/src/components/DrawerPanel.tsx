@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button } from '@heroui/react'
 import { useAuth } from '../context/AuthContext'
 import type { ComputedSnapshot, CalculatorInputs, CalculatorUi, DrawerName } from '../lib/computeResults'
@@ -7,7 +7,7 @@ import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import { fmt, fmtK, fmtMon } from '../utils/format'
 import { ConfigDrawerBody, type ConfigDrawerTab } from './ConfigDrawerBody'
-import { InlineSliderRow } from './InlineSliderRow'
+import { RetireRegionsBody } from './RetireRegionsBody'
 import { SidePanelShell } from './SidePanelShell'
 import './PanelChrome.scss'
 
@@ -16,7 +16,7 @@ const TITLES: Record<DrawerName, string> = {
   sstiming: 'SS timing',
   taxfree: 'Tax-free withdrawals',
   strategy: 'Withdrawal strategy',
-  italy: 'Italy comparison',
+  relocate: 'Where to retire?',
   config: 'Make your plans',
 }
 
@@ -60,10 +60,13 @@ export function DrawerPanel({
   configInitialTab,
 }: Props) {
   const open = drawer != null
+  const lastDrawerRef = useRef<DrawerName | null>(null)
+  if (drawer) lastDrawerRef.current = drawer
+  const panelDrawer = drawer ?? lastDrawerRef.current
   const { user, signOut } = useAuth()
 
   const configFooter =
-    drawer === 'config' && user?.email ? (
+    panelDrawer === 'config' && user?.email ? (
       <div className="drawer-config-footer">
         <Button
           type="button"
@@ -97,18 +100,18 @@ export function DrawerPanel({
         open={open}
         id="drawer"
         titleId="drawer-panel-title"
-        title={drawer ? TITLES[drawer] : 'Details'}
+        title={panelDrawer ? TITLES[panelDrawer] : 'Details'}
         onClose={onClose}
-        scrollKey={drawer ?? ''}
-        shellClassName={['drawer-shell--right', drawer === 'config' ? 'drawer-shell--config' : '']
+        scrollKey={panelDrawer ?? ''}
+        shellClassName={['drawer-shell--right', panelDrawer === 'config' ? 'drawer-shell--config' : '']
           .filter(Boolean)
           .join(' ')}
         bodyClassName="drawer-shell-body"
         footer={configFooter}
       >
-        {drawer ? (
+        {panelDrawer ? (
           <DrawerBody
-            id={drawer}
+            id={panelDrawer}
             c={c}
             inputs={inputs}
             setInputs={setInputs}
@@ -124,6 +127,7 @@ export function DrawerPanel({
             onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
             onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
             configInitialTab={configInitialTab}
+            onClose={onClose}
           />
         ) : null}
       </SidePanelShell>
@@ -148,6 +152,7 @@ function DrawerBody({
   onFidelityImportAppliedRetirement: _onFidelityImportAppliedRetirement,
   onFidelityImportAppliedBrokerage: _onFidelityImportAppliedBrokerage,
   configInitialTab,
+  onClose,
 }: {
   id: DrawerName
   c: ComputedSnapshot
@@ -165,6 +170,7 @@ function DrawerBody({
   onFidelityImportAppliedRetirement: () => void
   onFidelityImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
+  onClose: () => void
 }) {
   switch (id) {
     case 'config':
@@ -177,6 +183,7 @@ function DrawerBody({
           activePreset={activePreset}
           setActivePreset={setActivePreset}
           initialTab={configInitialTab}
+          onDrawerClose={onClose}
         />
       )
     case 'scenarios':
@@ -187,8 +194,8 @@ function DrawerBody({
       return <TaxFreeBody c={c} />
     case 'strategy':
       return <StrategyBody c={c} />
-    case 'italy':
-      return <ItalyBody c={c} inputs={inputs} setInputs={setInputs} />
+    case 'relocate':
+      return <RetireRegionsBody c={c} inputs={inputs} setInputs={setInputs} />
     default:
       return null
   }
@@ -330,7 +337,7 @@ function SSTimingBody({
           <div className="card-sub">Past this age, waiting to 70 beats drawing at 67</div>
         </div>
         <div className="card gold">
-          <div className="card-label">Italy consideration</div>
+          <div className="card-label">Overseas COL</div>
           <div className="card-value" style={{ fontSize: '1rem', lineHeight: 1.4 }}>
             Draw at 62
           </div>
@@ -638,101 +645,3 @@ function Cell({ k, v, color }: { k: string; v: string; color?: string }) {
   )
 }
 
-function ItalyBody({
-  c,
-  inputs,
-  setInputs,
-}: {
-  c: ComputedSnapshot
-  inputs: CalculatorInputs
-  setInputs: (p: Partial<CalculatorInputs>) => void
-}) {
-  const sur = c.itSurplus
-  return (
-    <>
-      <div className="section-title">
-        <span className="italy-flag" aria-hidden="true">
-          <span style={{ background: '#009246' }} />
-          <span style={{ background: '#fff', border: '1px solid #ddd' }} />
-          <span style={{ background: '#CE2B37' }} />
-        </span>
-        Italy retirement comparison
-      </div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-        Italy&apos;s Art. 24-bis: 7% flat tax on foreign income for new residents, valid 10 years. The US taxes citizens on worldwide income regardless of residency — the Foreign Tax Credit offsets double taxation. The real Italy advantage is lower cost of living.
-      </p>
-      <div className="grid-2" style={{ marginBottom: '1rem' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, paddingTop: 4 }}>
-          $2,000–$2,800: smaller city (Bari, Lecce, Abruzzo)
-          <br />
-          $2,800–$3,800: mid-size city (Bologna, Florence outskirts)
-          <br />
-          $4,000+: Milan, Rome, coastal hotspots
-        </div>
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <InlineSliderRow
-          name="Assumed monthly living cost (USD)"
-          valueLabel={fmtMon(inputs.italyCost)}
-          min={0}
-          max={8000}
-          step={100}
-          value={inputs.italyCost}
-          onChange={(v) => setInputs({ italyCost: v })}
-          tickLeft="$0"
-          tickMid="$4k"
-          tickRight="$8k"
-          borderBottomNone
-        />
-      </div>
-      <div
-        style={{
-          background: 'var(--text)',
-          color: 'var(--bg)',
-          borderRadius: 16,
-          padding: '1.5rem 2rem',
-          marginBottom: '1rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.48)', fontFamily: 'var(--body)', marginBottom: 4 }}>Monthly income (gross)</div>
-          <div style={{ fontFamily: 'var(--heading)', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: 'var(--color-teal-light)' }}>{fmtMon(c.grossMon)}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.48)', fontFamily: 'var(--body)', marginBottom: 4 }}>Italy 7% flat tax /mo</div>
-          <div style={{ fontFamily: 'var(--heading)', fontSize: 'clamp(1.2rem,2.5vw,1.8rem)', color: 'var(--color-amber)' }}>{fmtMon(c.itTax / 12)}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.48)', fontFamily: 'var(--body)', marginBottom: 4 }}>After-tax monthly</div>
-          <div style={{ fontFamily: 'var(--heading)', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: 'var(--color-teal-light)' }}>{fmtMon(c.itAfter)}</div>
-        </div>
-      </div>
-      <div className="grid-3">
-        <div className="card">
-          <div className="card-label">Est. living cost</div>
-          <div className="card-value">{fmtMon(inputs.italyCost)}</div>
-          <div className="card-sub">monthly (USD)</div>
-        </div>
-        <div className={`card ${sur >= 0 ? 'accent' : 'warn'}`}>
-          <div className="card-label">Monthly surplus / shortfall</div>
-          <div className="card-value" style={{ color: sur >= 0 ? 'var(--accent-text)' : 'var(--warn)' }}>
-            {(sur >= 0 ? '+' : '') + fmt(sur)}/mo
-          </div>
-          <div className="card-sub">{sur >= 0 ? 'comfortable margin above living costs' : 'shortfall — consider higher savings or selling home'}</div>
-        </div>
-        <div className="card">
-          <div className="card-label">US federal tax (same income)</div>
-          <div className="card-value">{fmtMon(c.usTax / 12)}</div>
-          <div className="card-sub">for comparison</div>
-        </div>
-      </div>
-      <div className="footnote">
-        Italy 7% flat tax under Art. 24-bis applies to qualifying new residents for up to 10 years on foreign-sourced income. US citizens still owe US federal tax — the Foreign Tax Credit (Form 1116) typically prevents true double taxation; you pay the higher rate, not both. After 10 years the flat tax expires and Italy taxes at progressive rates (23–43%). Consult a cross-border tax advisor before relocating.
-      </div>
-    </>
-  )
-}
