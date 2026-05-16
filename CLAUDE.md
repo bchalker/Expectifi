@@ -8,7 +8,7 @@ You are building a multi-tenant SaaS retirement income calculator. A working sin
 STACK
 - React 18 + Vite
 - Node.js + Express
-- MySQL (auth + user data via Express API)
+- PostgreSQL (auth + user data via Express API)
 - TypeScript throughout — no plain .js files
 - Plain CSS custom properties — no Tailwind, no CSS modules
 - Tabler Icons only — @tabler/icons-react
@@ -32,7 +32,7 @@ Required calc modules:
 - calc/events.ts — calcEventImpact() for any one-time event (IPO, inheritance, etc.)
 
 SHARED COMPONENTS
-Before writing any UI, check src/components/ui/ for an existing component. If a pattern appears more than once it must be a shared component. Required shared components: SliderRow, NumberInput, Card, SectionTitle, Badge, Toggle, DrawerPanel, NavButton, ModeButton, AccordionSection, Tooltip, EmptyState, PhaseToggle, UpgradePrompt, PlanBadge, AccountCard, EventCard, ScenarioCard, SyncStatus.
+Before writing any UI, check src/components/ui/ for an existing component. If a pattern appears more than once it must be a shared component. Required shared components: SliderRow, NumberInput, Card, SectionTitle, Badge, Toggle, DrawerPanel, NavButton, ModeButton, AccordionSection, Tooltip, EmptyState, UpgradePrompt, PlanBadge, AccountCard, EventCard, ScenarioCard, SyncStatus.
 
 Every shared component accepts a className prop. No hardcoded colors — CSS custom properties only. No hardcoded font sizes — var(--text-*) tokens only. All money and percentage displays must have font-variant-numeric: tabular-nums and font-feature-settings: "tnum". Props fully typed, no any.
 

@@ -1,5 +1,5 @@
 /**
- * Row shapes for MySQL tables managed by the Express API (`server/`).
+ * Row shapes for PostgreSQL tables managed by the Express API (`server/`).
  */
 export type ScenarioRow = {
   id: string

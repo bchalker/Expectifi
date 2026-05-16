@@ -7,9 +7,9 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { COOKIE_NAME, GOOGLE_CHECKOUT_COOKIE, createToken, verifyGoogleCheckoutToken, verifyToken } from './authToken.js'
-import { ensureSchema, getPool } from './db.js'
+import { ensureSchema } from './db.js'
+import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import { getStripeBackend } from './stripeBackend.js'
 import { installGoogleAuth } from './googleAuth.js'
 
@@ -51,19 +51,18 @@ app.get('/api/auth/me', async (req, res) => {
     res.status(401).json({ ok: false, error: 'unauthorized' })
     return
   }
-  const pool = getPool()
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT display_name AS displayName, onboarding_done AS onboardingDone FROM users WHERE id = ? LIMIT 1',
+  const { rows } = await dbQuery<{ display_name: string | null; onboarding_done: boolean }>(
+    'SELECT display_name, onboarding_done FROM users WHERE id = ? LIMIT 1',
     [u.userId],
   )
-  const row = rows[0] as { displayName: string | null; onboardingDone?: unknown } | undefined
+  const row = rows[0]
   res.json({
     ok: true,
     user: {
       id: u.userId,
       email: u.email,
-      displayName: row?.displayName ?? null,
-      onboardingDone: onboardingDoneFromRow(row?.onboardingDone),
+      displayName: row?.display_name ?? null,
+      onboardingDone: onboardingDoneFromRow(row?.onboarding_done),
     },
   })
 })
@@ -102,29 +101,26 @@ app.get('/api/auth/google/checkout-session', async (req, res) => {
     res.status(401).json({ ok: false, error: 'invalid_checkout' })
     return
   }
-  const pool = getPool()
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT id, email, display_name AS displayName, google_sub AS googleSub, stripe_customer_id AS stripeCustomerId, onboarding_done AS onboardingDone FROM users WHERE id = ? LIMIT 1',
+  const { rows } = await dbQuery<{
+    id: string
+    email: string
+    display_name: string | null
+    google_sub: string | null
+    stripe_customer_id: string | null
+    onboarding_done: boolean
+  }>(
+    'SELECT id, email, display_name, google_sub, stripe_customer_id, onboarding_done FROM users WHERE id = ? LIMIT 1',
     [claims.userId],
   )
-  const row = rows[0] as
-    | {
-        id: string
-        email: string
-        displayName: string | null
-        googleSub: string | null
-        stripeCustomerId: string | null
-        onboardingDone?: unknown
-      }
-    | undefined
-  if (!row?.googleSub) {
+  const row = rows[0]
+  if (!row?.google_sub) {
     res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
     res.status(401).json({ ok: false, error: 'invalid_user' })
     return
   }
   const emailNorm = normalizeEmail(row.email)
   const stripe = getStripeBackend()
-  const needsPayment = Boolean(stripe) && !row.stripeCustomerId
+  const needsPayment = Boolean(stripe) && !row.stripe_customer_id
   if (!needsPayment) {
     res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
     const token = await createToken(row.id, emailNorm)
@@ -141,8 +137,8 @@ app.get('/api/auth/google/checkout-session', async (req, res) => {
       user: {
         id: row.id,
         email: emailNorm,
-        displayName: row.displayName,
-        onboardingDone: onboardingDoneFromRow(row.onboardingDone),
+        displayName: row.display_name,
+        onboardingDone: onboardingDoneFromRow(row.onboarding_done),
       },
     })
     return
@@ -151,8 +147,8 @@ app.get('/api/auth/google/checkout-session', async (req, res) => {
     ok: true,
     status: 'payment_required',
     email: emailNorm,
-    displayName: row.displayName,
-    onboardingDone: onboardingDoneFromRow(row.onboardingDone),
+    displayName: row.display_name,
+    onboardingDone: onboardingDoneFromRow(row.onboarding_done),
   })
 })
 
@@ -179,28 +175,25 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
     res.status(503).json({ ok: false, error: 'stripe_not_configured' })
     return
   }
-  const pool = getPool()
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT id, email, display_name AS displayName, google_sub AS googleSub, stripe_customer_id AS stripeCustomerId, onboarding_done AS onboardingDone FROM users WHERE id = ? LIMIT 1',
+  const { rows } = await dbQuery<{
+    id: string
+    email: string
+    display_name: string | null
+    google_sub: string | null
+    stripe_customer_id: string | null
+    onboarding_done: boolean
+  }>(
+    'SELECT id, email, display_name, google_sub, stripe_customer_id, onboarding_done FROM users WHERE id = ? LIMIT 1',
     [claims.userId],
   )
-  const row = rows[0] as
-    | {
-        id: string
-        email: string
-        displayName: string | null
-        googleSub: string | null
-        stripeCustomerId: string | null
-        onboardingDone?: unknown
-      }
-    | undefined
-  if (!row?.googleSub) {
+  const row = rows[0]
+  if (!row?.google_sub) {
     res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
     res.status(401).json({ ok: false, error: 'invalid_user' })
     return
   }
   const emailNorm = normalizeEmail(row.email)
-  if (row.stripeCustomerId) {
+  if (row.stripe_customer_id) {
     res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
     const token = await createToken(row.id, emailNorm)
     res.cookie(COOKIE_NAME, token, {
@@ -215,8 +208,8 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
       user: {
         id: row.id,
         email: emailNorm,
-        displayName: row.displayName,
-        onboardingDone: onboardingDoneFromRow(row.onboardingDone),
+        displayName: row.display_name,
+        onboardingDone: onboardingDoneFromRow(row.onboarding_done),
       },
     })
     return
@@ -230,10 +223,7 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
     await stripe.customers.update(customer.id, {
       invoice_settings: { default_payment_method: paymentMethodId },
     })
-    await pool.execute<ResultSetHeader>(
-      'UPDATE users SET stripe_customer_id = ? WHERE id = ?',
-      [customer.id, row.id],
-    )
+    await dbQuery('UPDATE users SET stripe_customer_id = ? WHERE id = ?', [customer.id, row.id])
   } catch {
     res.status(400).json({ ok: false, error: 'payment_failed' })
     return
@@ -252,8 +242,8 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
     user: {
       id: row.id,
       email: emailNorm,
-      displayName: row.displayName,
-      onboardingDone: onboardingDoneFromRow(row.onboardingDone),
+      displayName: row.display_name,
+      onboardingDone: onboardingDoneFromRow(row.onboarding_done),
     },
   })
 })
@@ -279,17 +269,12 @@ app.post('/api/auth/register', async (req, res) => {
     return
   }
 
-  const pool = getPool()
   const id = randomUUID()
   const passwordHash = await bcrypt.hash(password, 10)
   try {
-    await pool.execute<ResultSetHeader>(
-      'INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)',
-      [id, email, passwordHash],
-    )
+    await dbQuery('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', [id, email, passwordHash])
   } catch (e: unknown) {
-    const code = typeof e === 'object' && e && 'code' in e ? String((e as { code: string }).code) : ''
-    if (code === 'ER_DUP_ENTRY') {
+    if (isUniqueViolation(e)) {
       res.status(409).json({ ok: false, error: 'email_in_use' })
       return
     }
@@ -306,12 +291,9 @@ app.post('/api/auth/register', async (req, res) => {
       await stripe.customers.update(customer.id, {
         invoice_settings: { default_payment_method: paymentMethodIdRaw },
       })
-      await pool.execute<ResultSetHeader>(
-        'UPDATE users SET stripe_customer_id = ? WHERE id = ?',
-        [customer.id, id],
-      )
+      await dbQuery('UPDATE users SET stripe_customer_id = ? WHERE id = ?', [customer.id, id])
     } catch {
-      await pool.execute<ResultSetHeader>('DELETE FROM users WHERE id = ?', [id])
+      await dbQuery('DELETE FROM users WHERE id = ?', [id])
       res.status(400).json({ ok: false, error: 'payment_failed' })
       return
     }
@@ -336,26 +318,22 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(400).json({ ok: false, error: 'invalid_request' })
     return
   }
-  const pool = getPool()
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT id, password_hash AS passwordHash, display_name AS displayName, onboarding_done AS onboardingDone FROM users WHERE email = ? LIMIT 1',
-    [email],
-  )
-  const row = rows[0] as {
+  const { rows } = await dbQuery<{
     id: string
-    passwordHash: string | null
-    displayName: string | null
-    onboardingDone?: unknown
-  } | undefined
+    password_hash: string | null
+    display_name: string | null
+    onboarding_done: boolean
+  }>('SELECT id, password_hash, display_name, onboarding_done FROM users WHERE email = ? LIMIT 1', [email])
+  const row = rows[0]
   if (!row) {
     res.status(401).json({ ok: false, error: 'invalid_credentials' })
     return
   }
-  if (!row.passwordHash) {
+  if (!row.password_hash) {
     res.status(401).json({ ok: false, error: 'invalid_credentials' })
     return
   }
-  const ok = await bcrypt.compare(password, row.passwordHash)
+  const ok = await bcrypt.compare(password, row.password_hash)
   if (!ok) {
     res.status(401).json({ ok: false, error: 'invalid_credentials' })
     return
@@ -373,8 +351,8 @@ app.post('/api/auth/login', async (req, res) => {
     user: {
       id: row.id,
       email,
-      displayName: row.displayName,
-      onboardingDone: onboardingDoneFromRow(row.onboardingDone),
+      displayName: row.display_name,
+      onboardingDone: onboardingDoneFromRow(row.onboarding_done),
     },
   })
 })
@@ -385,19 +363,18 @@ app.post('/api/user/onboarding-complete', async (req, res) => {
     res.status(401).json({ ok: false, error: 'unauthorized' })
     return
   }
-  const pool = getPool()
-  await pool.execute<ResultSetHeader>('UPDATE users SET onboarding_done = 1 WHERE id = ?', [u.userId])
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT display_name AS displayName FROM users WHERE id = ? LIMIT 1',
+  await dbQuery('UPDATE users SET onboarding_done = TRUE WHERE id = ?', [u.userId])
+  const { rows } = await dbQuery<{ display_name: string | null }>(
+    'SELECT display_name FROM users WHERE id = ? LIMIT 1',
     [u.userId],
   )
-  const row = rows[0] as { displayName: string | null } | undefined
+  const row = rows[0]
   res.json({
     ok: true,
     user: {
       id: u.userId,
       email: u.email,
-      displayName: row?.displayName ?? null,
+      displayName: row?.display_name ?? null,
       onboardingDone: true,
     },
   })
@@ -415,20 +392,22 @@ app.get('/api/scenarios', async (req, res) => {
     res.status(401).json({ ok: false, error: 'unauthorized' })
     return
   }
-  const pool = getPool()
-  const [rows] = await pool.execute<RowDataPacket[]>(
-    'SELECT id, user_id AS userId, name, inputs, created_at AS createdAt FROM scenarios WHERE user_id = ? ORDER BY created_at DESC',
+  const { rows } = await dbQuery<{
+    id: string
+    user_id: string
+    name: string
+    inputs: unknown
+    created_at: Date | string
+  }>(
+    'SELECT id, user_id, name, inputs, created_at FROM scenarios WHERE user_id = ? ORDER BY created_at DESC',
     [u.userId],
   )
-  const list = (rows as RowDataPacket[]).map((r: RowDataPacket) => ({
-    id: r.id as string,
-    user_id: r.userId as string,
-    name: r.name as string,
+  const list = rows.map((r) => ({
+    id: r.id,
+    user_id: r.user_id,
+    name: r.name,
     inputs: r.inputs,
-    created_at:
-      r.createdAt instanceof Date
-        ? r.createdAt.toISOString()
-        : String(r.createdAt ?? ''),
+    created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at ?? ''),
   }))
   res.json({ ok: true, scenarios: list })
 })
@@ -446,11 +425,12 @@ app.post('/api/scenarios', async (req, res) => {
     return
   }
   const id = randomUUID()
-  const pool = getPool()
-  await pool.execute<ResultSetHeader>(
-    'INSERT INTO scenarios (id, user_id, name, inputs) VALUES (?, ?, ?, ?)',
-    [id, u.userId, name, JSON.stringify(inputs)],
-  )
+  await dbQuery('INSERT INTO scenarios (id, user_id, name, inputs) VALUES (?, ?, ?, ?)', [
+    id,
+    u.userId,
+    name,
+    inputs,
+  ])
   res.json({ ok: true, id })
 })
 
@@ -465,12 +445,8 @@ app.delete('/api/scenarios/:id', async (req, res) => {
     res.status(400).json({ ok: false, error: 'invalid_request' })
     return
   }
-  const pool = getPool()
-  const [result] = await pool.execute<ResultSetHeader>(
-    'DELETE FROM scenarios WHERE id = ? AND user_id = ?',
-    [id, u.userId],
-  )
-  if (result.affectedRows === 0) {
+  const { rowCount } = await dbQuery('DELETE FROM scenarios WHERE id = ? AND user_id = ?', [id, u.userId])
+  if (rowCount === 0) {
     res.status(404).json({ ok: false, error: 'not_found' })
     return
   }

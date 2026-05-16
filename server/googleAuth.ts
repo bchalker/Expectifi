@@ -1,13 +1,12 @@
 import type { Express, Request, Response } from 'express'
 import { randomBytes, randomUUID } from 'node:crypto'
-import type { ResultSetHeader, RowDataPacket } from 'mysql2'
 import {
   COOKIE_NAME,
   GOOGLE_CHECKOUT_COOKIE,
   createGoogleCheckoutToken,
   createToken,
 } from './authToken.js'
-import { getPool } from './db.js'
+import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import { getStripeBackend } from './stripeBackend.js'
 
 const STATE_COOKIE = 'google_oauth_state'
@@ -82,14 +81,10 @@ function displayNameFromGoogle(info: GoogleUserInfo): string | null {
   return n || null
 }
 
-async function upsertGoogleDisplayName(
-  pool: ReturnType<typeof getPool>,
-  userId: string,
-  info: GoogleUserInfo,
-): Promise<void> {
+async function upsertGoogleDisplayName(userId: string, info: GoogleUserInfo): Promise<void> {
   const dn = displayNameFromGoogle(info)
   if (!dn) return
-  await pool.execute<ResultSetHeader>('UPDATE users SET display_name = ? WHERE id = ?', [dn, userId])
+  await dbQuery('UPDATE users SET display_name = ? WHERE id = ?', [dn, userId])
 }
 
 async function exchangeCode(
@@ -190,75 +185,70 @@ export function installGoogleAuth(app: Express, port: number): void {
     }
     const email = normalizeEmail(info.email)
     const googleSub = info.sub
-    const pool = getPool()
 
     try {
-      const [bySub] = await pool.execute<RowDataPacket[]>(
-        'SELECT id, email, google_sub AS googleSub, stripe_customer_id AS stripeCustomerId FROM users WHERE google_sub = ? LIMIT 1',
-        [googleSub],
-      )
-      const rowSub = bySub[0] as
-        | { id: string; email: string; googleSub: string | null; stripeCustomerId: string | null }
-        | undefined
+      const { rows: bySub } = await dbQuery<{
+        id: string
+        email: string
+        google_sub: string | null
+        stripe_customer_id: string | null
+      }>('SELECT id, email, google_sub, stripe_customer_id FROM users WHERE google_sub = ? LIMIT 1', [googleSub])
+      const rowSub = bySub[0]
       if (rowSub) {
-        await upsertGoogleDisplayName(pool, rowSub.id, info)
+        await upsertGoogleDisplayName(rowSub.id, info)
         await setSessionOrGoogleCheckoutCookie(
           res,
           cfg.clientOrigin,
           rowSub.id,
           normalizeEmail(rowSub.email),
-          rowSub.stripeCustomerId,
+          rowSub.stripe_customer_id,
         )
         return
       }
 
-      const [byEmail] = await pool.execute<RowDataPacket[]>(
-        'SELECT id, email, password_hash AS passwordHash, google_sub AS googleSub, stripe_customer_id AS stripeCustomerId FROM users WHERE email = ? LIMIT 1',
+      const { rows: byEmail } = await dbQuery<{
+        id: string
+        email: string
+        password_hash: string | null
+        google_sub: string | null
+        stripe_customer_id: string | null
+      }>(
+        'SELECT id, email, password_hash, google_sub, stripe_customer_id FROM users WHERE email = ? LIMIT 1',
         [email],
       )
-      const rowEmail = byEmail[0] as
-        | {
-            id: string
-            email: string
-            passwordHash: string | null
-            googleSub: string | null
-            stripeCustomerId: string | null
-          }
-        | undefined
+      const rowEmail = byEmail[0]
 
       if (rowEmail) {
-        if (rowEmail.googleSub && rowEmail.googleSub !== googleSub) {
+        if (rowEmail.google_sub && rowEmail.google_sub !== googleSub) {
           res.redirect(302, `${cfg.clientOrigin}/?auth_error=account_conflict`)
           return
         }
-        if (!rowEmail.googleSub) {
-          await pool.execute<ResultSetHeader>(
+        if (!rowEmail.google_sub) {
+          await dbQuery(
             'UPDATE users SET google_sub = ?, display_name = COALESCE(?, display_name) WHERE id = ?',
             [googleSub, displayNameFromGoogle(info), rowEmail.id],
           )
         } else {
-          await upsertGoogleDisplayName(pool, rowEmail.id, info)
+          await upsertGoogleDisplayName(rowEmail.id, info)
         }
         await setSessionOrGoogleCheckoutCookie(
           res,
           cfg.clientOrigin,
           rowEmail.id,
           email,
-          rowEmail.stripeCustomerId,
+          rowEmail.stripe_customer_id,
         )
         return
       }
 
       const id = randomUUID()
       try {
-        await pool.execute<ResultSetHeader>(
+        await dbQuery(
           'INSERT INTO users (id, email, password_hash, google_sub, display_name) VALUES (?, ?, NULL, ?, ?)',
           [id, email, googleSub, displayNameFromGoogle(info)],
         )
       } catch (e: unknown) {
-        const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: string }).code) : ''
-        const errno = typeof e === 'object' && e !== null && 'errno' in e ? (e as { errno: number }).errno : 0
-        if (code === 'ER_DUP_ENTRY' || errno === 1062) {
+        if (isUniqueViolation(e)) {
           res.redirect(302, `${cfg.clientOrigin}/?auth_error=email_in_use`)
           return
         }

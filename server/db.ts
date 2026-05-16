@@ -1,13 +1,15 @@
-import mysql from 'mysql2/promise'
+import pg from 'pg'
+import { isDuplicateColumn } from './dbQuery.js'
 
-let pool: mysql.Pool | null = null
+const { Pool } = pg
+
+let pool: pg.Pool | null = null
 
 function useStagingDb(): boolean {
   const v = process.env.USE_STAGING_DB?.toLowerCase()
   return v === '1' || v === 'true' || v === 'yes'
 }
 
-/** When USE_STAGING_DB is set, prefer staging_* keys, then fall back to production MYSQL_* / DATABASE_URL. */
 function firstStagingOrProd(stagingKeys: string[], prodKey: string): string | undefined {
   if (useStagingDb()) {
     for (const k of stagingKeys) {
@@ -20,7 +22,6 @@ function firstStagingOrProd(stagingKeys: string[], prodKey: string): string | un
   return undefined
 }
 
-/** Railway MySQL plugin uses MYSQLHOST (no underscore); also MYSQL_URL when services are linked. */
 function envFirst(keys: string[]): string | undefined {
   for (const k of keys) {
     const x = process.env[k]?.trim()
@@ -29,101 +30,112 @@ function envFirst(keys: string[]): string | undefined {
   return undefined
 }
 
-export function getPool(): mysql.Pool {
+export function getPool(): pg.Pool {
   if (!pool) {
     const url =
       firstStagingOrProd(['staging_DATABASE_URL', 'STAGING_DATABASE_URL'], 'DATABASE_URL') ??
-      envFirst(['MYSQL_URL', 'MYSQL_PUBLIC_URL'])
+      envFirst(['POSTGRES_URL', 'DATABASE_PRIVATE_URL'])
 
     if (url) {
-      pool = mysql.createPool(url)
+      const useSsl =
+        process.env.PGSSLMODE !== 'disable' &&
+        (process.env.NODE_ENV === 'production' ||
+          process.env.RAILWAY_ENVIRONMENT != null ||
+          /railway|supabase|neon/i.test(url))
+      pool = new Pool({
+        connectionString: url,
+        ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+      })
     } else {
       const host =
-        firstStagingOrProd(['staging_MYSQL_HOST', 'STAGING_MYSQL_HOST'], 'MYSQL_HOST') ??
-        envFirst(['MYSQLHOST', 'MYSQL_HOST']) ??
+        firstStagingOrProd(['staging_PGHOST', 'STAGING_PGHOST'], 'PGHOST') ??
+        envFirst(['POSTGRES_HOST', 'PGHOST']) ??
         '127.0.0.1'
       const portStr =
-        firstStagingOrProd(['staging_MYSQL_PORT', 'STAGING_MYSQL_PORT'], 'MYSQL_PORT') ??
-        envFirst(['MYSQLPORT', 'MYSQL_PORT'])
-      const port = portStr ? Number(portStr) : 3306
+        firstStagingOrProd(['staging_PGPORT', 'STAGING_PGPORT'], 'PGPORT') ??
+        envFirst(['POSTGRES_PORT', 'PGPORT'])
+      const port = portStr ? Number(portStr) : 5432
       const user =
-        firstStagingOrProd(['staging_MYSQL_USER', 'STAGING_MYSQL_USER'], 'MYSQL_USER') ??
-        envFirst(['MYSQLUSER', 'MYSQL_USER']) ??
-        'root'
+        firstStagingOrProd(['staging_PGUSER', 'STAGING_PGUSER'], 'PGUSER') ??
+        envFirst(['POSTGRES_USER', 'PGUSER']) ??
+        'postgres'
       const password =
-        firstStagingOrProd(['staging_MYSQL_PASSWORD', 'STAGING_MYSQL_PASSWORD'], 'MYSQL_PASSWORD') ??
-        envFirst(['MYSQLPASSWORD', 'MYSQL_PASSWORD']) ??
+        firstStagingOrProd(['staging_PGPASSWORD', 'STAGING_PGPASSWORD'], 'PGPASSWORD') ??
+        envFirst(['POSTGRES_PASSWORD', 'PGPASSWORD']) ??
         ''
       const database =
-        firstStagingOrProd(['staging_MYSQL_DATABASE', 'STAGING_MYSQL_DATABASE'], 'MYSQL_DATABASE') ??
-        envFirst(['MYSQLDATABASE', 'MYSQL_DATABASE']) ??
+        firstStagingOrProd(['staging_PGDATABASE', 'STAGING_PGDATABASE'], 'PGDATABASE') ??
+        envFirst(['POSTGRES_DB', 'PGDATABASE']) ??
         'retirement_calculator'
-      pool = mysql.createPool({
+      pool = new Pool({
         host,
         port,
         user,
         password,
         database,
-        waitForConnections: true,
-        connectionLimit: 10,
+        max: 10,
       })
     }
   }
   return pool
 }
 
+async function addColumnIfMissing(sql: string): Promise<void> {
+  const p = getPool()
+  try {
+    await p.query(sql)
+  } catch (e: unknown) {
+    if (!isDuplicateColumn(e)) throw e
+  }
+}
+
 export async function ensureSchema(): Promise<void> {
   const p = getPool()
+
   await p.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id CHAR(36) NOT NULL PRIMARY KEY,
+      id TEXT NOT NULL PRIMARY KEY,
       email VARCHAR(255) NOT NULL UNIQUE,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      password_hash VARCHAR(255),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
   `)
+
   await p.query(`
     CREATE TABLE IF NOT EXISTS scenarios (
-      id CHAR(36) NOT NULL PRIMARY KEY,
-      user_id CHAR(36) NOT NULL,
+      id TEXT NOT NULL PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       name VARCHAR(512) NOT NULL,
-      inputs JSON NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      INDEX scenarios_user_id (user_id),
-      CONSTRAINT scenarios_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-  `)
-  try {
-    await p.query('ALTER TABLE users MODIFY COLUMN password_hash VARCHAR(255) NULL')
-  } catch {
-    /* already nullable or cannot alter */
-  }
-  try {
-    await p.query('ALTER TABLE users ADD COLUMN google_sub VARCHAR(255) NULL UNIQUE')
-  } catch (e: unknown) {
-    const errno = typeof e === 'object' && e !== null && 'errno' in e ? (e as { errno: number }).errno : 0
-    if (errno !== 1060) throw e
-  }
-  try {
-    await p.query('ALTER TABLE users ADD COLUMN display_name VARCHAR(255) NULL')
-  } catch (e: unknown) {
-    const errno = typeof e === 'object' && e !== null && 'errno' in e ? (e as { errno: number }).errno : 0
-    if (errno !== 1060) throw e
-  }
-  try {
-    await p.query('ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(64) NULL')
-  } catch (e: unknown) {
-    const errno = typeof e === 'object' && e !== null && 'errno' in e ? (e as { errno: number }).errno : 0
-    if (errno !== 1060) throw e
-  }
-  try {
-    await p.query(
-      'ALTER TABLE users ADD COLUMN onboarding_done TINYINT(1) NOT NULL DEFAULT 0',
+      inputs JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
-    /* First migration only: treat existing accounts as already onboarded. */
-    await p.query('UPDATE users SET onboarding_done = 1')
-  } catch (e: unknown) {
-    const errno = typeof e === 'object' && e !== null && 'errno' in e ? (e as { errno: number }).errno : 0
-    if (errno !== 1060) throw e
+  `)
+
+  await p.query(`CREATE INDEX IF NOT EXISTS scenarios_user_id ON scenarios (user_id)`)
+
+  try {
+    await p.query('ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL')
+  } catch {
+    /* already nullable */
+  }
+
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN google_sub VARCHAR(255) UNIQUE')
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN display_name VARCHAR(255)')
+  await addColumnIfMissing('ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(64)')
+  await addColumnIfMissing(
+    'ALTER TABLE users ADD COLUMN onboarding_done BOOLEAN NOT NULL DEFAULT FALSE',
+  )
+
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id TEXT NOT NULL PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  const backfill = await p.query(
+    `INSERT INTO schema_migrations (id) VALUES ('onboarding_done_backfill') ON CONFLICT (id) DO NOTHING RETURNING id`,
+  )
+  if ((backfill.rowCount ?? 0) > 0) {
+    await p.query('UPDATE users SET onboarding_done = TRUE')
   }
 }
