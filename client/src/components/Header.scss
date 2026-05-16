@@ -1,21 +1,52 @@
-/* Primary chrome inside app-header-stack: brand | nav | profile + settings */
-.app-top-chrome {
+/* Shared top chrome — marketing landing + app calculator */
+.header {
+  --header-brand-navy: #1a2332;
+  --header-brand-green: #4ecb8d;
+  --header-brand-green-muted: #5dcaa5;
+
   position: relative;
   flex-shrink: 0;
   box-sizing: border-box;
-  height: var(--app-top-chrome-h);
-  min-height: var(--app-top-chrome-h);
-  padding: 0 max(12px, env(safe-area-inset-left, 0px)) 0 max(12px, env(safe-area-inset-right, 0px));
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
-  background: var(--nav-bg);
+  background: var(--header-brand-navy);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
-.app-top-chrome__brand {
+.header--app {
+  min-height: var(--app-top-chrome-h);
+  padding-inline: var(--layout-app-gutter) var(--layout-app-gutter-end);
+  box-sizing: border-box;
+}
+
+.header--marketing {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--app-top-chrome-h);
+  box-sizing: border-box;
+}
+
+.header--app .header__inner {
+  max-width: var(--layout-app-max);
+  margin-inline: auto;
+  padding-inline: var(--layout-app-inner-pad);
+}
+
+.header--marketing .header__inner {
+  max-width: var(--layout-marketing-max);
+  margin-inline: auto;
+  padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
+}
+
+.header__brand {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -26,7 +57,7 @@
   line-height: 1.5;
 }
 
-.app-top-chrome__mark {
+.header__mark {
   font-family: var(--heading);
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   font-weight: 600;
@@ -35,10 +66,10 @@
   white-space: nowrap;
 }
 
-.app-top-chrome__kicker {
+.header__kicker {
   font-family: var(--body);
   font-size: var(--text-xs);
-  color: var(--nav-text-muted);
+  color: var(--header-brand-green-muted);
   line-height: 1.15;
   max-width: 12rem;
   overflow: hidden;
@@ -46,7 +77,7 @@
   white-space: nowrap;
 }
 
-.app-top-chrome__menu-btn {
+.header__menu-btn {
   display: none;
   flex-shrink: 0;
   align-items: center;
@@ -66,17 +97,17 @@
     border-color 0.15s ease;
 }
 
-.app-top-chrome__menu-btn:hover {
+.header__menu-btn:hover {
   background: var(--nav-hover);
   border-color: rgba(255, 255, 255, 0.24);
 }
 
-.app-top-chrome__menu-btn:focus-visible {
+.header__menu-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
-.app-top-chrome__nav {
+.header__nav--app {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -91,11 +122,11 @@
   scrollbar-width: none;
 }
 
-.app-top-chrome__nav::-webkit-scrollbar {
+.header__nav--app::-webkit-scrollbar {
   display: none;
 }
 
-.app-top-chrome__link {
+.header__link {
   flex: 0 0 auto;
   margin: 0;
   padding: 0.45rem 0.55rem;
@@ -116,28 +147,40 @@
     color 0.15s ease;
 }
 
-.app-top-chrome__link:hover {
+.header__link:hover {
   background: var(--nav-hover);
   color: var(--nav-text);
 }
 
-.app-top-chrome__link:focus-visible {
+.header__link:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
-.app-top-chrome__link--active {
+.header__link--active {
   background: rgba(15, 110, 86, 0.32);
   color: var(--nav-text);
   box-shadow: inset 0 -2px 0 var(--color-teal-mid);
 }
 
-.app-top-chrome__link--active:hover {
+.header__link--active:hover {
   background: rgba(15, 110, 86, 0.38);
   color: var(--nav-text);
 }
 
-.app-top-chrome__tail {
+.header__link--unavailable,
+.header__link[aria-disabled='true'] {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.header__link--unavailable:hover,
+.header__link[aria-disabled='true']:hover {
+  background: transparent;
+  color: var(--nav-text-muted);
+}
+
+.header__tail {
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
@@ -146,15 +189,15 @@
   min-width: 0;
 }
 
-/* Signed-in: full header height, flush right (safe-area padding inside strip) */
-.app-top-chrome__tail:has(.app-top-chrome__account-group) {
+/* Signed-in: full header height, flush to inner container right edge */
+.header__tail:has(.header__account-group) {
   align-self: stretch;
   align-items: stretch;
-  margin-right: calc(-1 * max(12px, env(safe-area-inset-right, 0px)));
+  margin-right: calc(-1 * var(--layout-app-inner-pad));
 }
 
 /* Signed-in: name + retire + gear — one control opens Configure */
-.app-top-chrome__account-group {
+.header__account-group {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -163,7 +206,7 @@
   min-height: 0;
   height: 100%;
   margin: 0;
-  padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 0.65rem;
+  padding: 0 max(12px, var(--layout-app-gutter-end)) 0 0.65rem;
   box-sizing: border-box;
   border: none;
   border-radius: 0;
@@ -178,29 +221,29 @@
     color 0.15s ease;
 }
 
-.app-top-chrome__account-group:hover {
+.header__account-group:hover {
   background: var(--nav-account-strip-bg-hover);
   color: var(--nav-text);
 }
 
-.app-top-chrome__account-group--active {
+.header__account-group--active {
   background: var(--nav-account-strip-bg-active);
   color: var(--nav-text);
   box-shadow: inset 0 -2px 0 var(--color-teal-mid);
 }
 
-.app-top-chrome__account-group:focus-visible {
+.header__account-group:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
-.app-top-chrome__account-group--active:focus-visible {
+.header__account-group--active:focus-visible {
   box-shadow:
     inset 0 -2px 0 var(--color-teal-mid),
     0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
-.app-top-chrome__account-group__profile {
+.header__account-group__profile {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -208,7 +251,7 @@
   min-width: 0;
 }
 
-.app-top-chrome__account-group__icons {
+.header__account-group__icons {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -217,7 +260,7 @@
   color: inherit;
 }
 
-.app-top-chrome__auth {
+.header__auth {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -227,7 +270,7 @@
   min-width: 0;
 }
 
-.app-top-chrome__auth-offline {
+.header__auth-offline {
   font-family: var(--mono);
   font-size: 0.625rem;
   font-weight: 600;
@@ -237,7 +280,7 @@
   margin-right: 0.15rem;
 }
 
-.app-top-chrome__auth-email {
+.header__auth-email {
   font-family: var(--mono);
   font-size: var(--text-xs);
   color: var(--nav-text-muted);
@@ -248,7 +291,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.app-top-chrome__auth-link {
+.header__auth-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -257,7 +300,7 @@
   height: 2rem;
   min-height: 2rem;
   box-sizing: border-box;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 8px;
   background: transparent;
   color: var(--nav-text-muted);
@@ -267,15 +310,17 @@
   cursor: pointer;
   transition:
     background 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
-.app-top-chrome__auth-link:hover {
+.header__auth-link:hover {
   background: var(--nav-hover);
   color: var(--nav-text);
+  border-color: rgba(255, 255, 255, 0.32);
 }
 
-.app-top-chrome__auth-cta {
+.header__auth-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -286,8 +331,8 @@
   box-sizing: border-box;
   border: none;
   border-radius: 8px;
-  background: var(--color-teal-dark);
-  color: var(--color-card);
+  background: var(--header-brand-green);
+  color: #0f2a22;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -296,11 +341,11 @@
   transition: filter 0.15s ease;
 }
 
-.app-top-chrome__auth-cta:hover {
-  filter: brightness(1.08);
+.header__auth-cta:hover {
+  filter: brightness(1.06);
 }
 
-.app-top-chrome__auth-btn {
+.header__auth-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -322,12 +367,12 @@
     border-color 0.15s ease;
 }
 
-.app-top-chrome__auth-btn:hover {
+.header__auth-btn:hover {
   background: var(--nav-hover);
   border-color: rgba(255, 255, 255, 0.32);
 }
 
-.app-top-chrome__profile {
+.header__profile {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -336,7 +381,7 @@
   text-align: right;
 }
 
-.app-top-chrome__profile-name {
+.header__profile-name {
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -348,7 +393,7 @@
   white-space: nowrap;
 }
 
-.app-top-chrome__profile-ages {
+.header__profile-ages {
   font-family: var(--mono);
   font-size: 0.625rem;
   font-weight: 500;
@@ -358,7 +403,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.app-top-chrome__settings {
+.header__settings {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -379,64 +424,92 @@
     border-color 0.15s ease;
 }
 
-.app-top-chrome__settings:hover {
+.header__settings:hover {
   background: var(--nav-hover);
   color: var(--nav-text);
   border-color: rgba(255, 255, 255, 0.28);
 }
 
-.app-top-chrome__settings--active {
+.header__settings--active {
   background: rgba(15, 110, 86, 0.32);
   border-color: rgba(93, 202, 165, 0.45);
   color: var(--nav-text);
   box-shadow: inset 0 -2px 0 var(--color-teal-mid);
 }
 
-.app-top-chrome__settings:focus-visible {
+.header__settings:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
 }
 
+.header__nav--marketing {
+  display: none;
+}
+
+@media (min-width: 680px) {
+  .header__nav--marketing {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .header__nav--marketing .header__link {
+    font-size: var(--text-sm);
+    padding: 0.45rem 0.65rem;
+  }
+}
+
+@media (max-width: 679px) {
+  .header--marketing .header__auth-link {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
-  .app-top-chrome {
+  .header--app .header__inner {
     gap: 0.5rem;
   }
 
-  .app-top-chrome__kicker {
+  .header--app .header__kicker {
     display: none;
   }
 
-  .app-top-chrome__nav {
+  .header__nav--app {
     display: none;
   }
 
-  .app-top-chrome__menu-btn {
+  .header__menu-btn {
     display: flex;
     margin-left: auto;
   }
 
-  .app-top-chrome__tail {
+  .header--app .header__tail {
     gap: 0.5rem;
   }
 
-  .app-top-chrome__profile {
+  .header__profile {
     display: none;
   }
 
-  .app-top-chrome__account-group {
+  .header__account-group {
     display: none;
   }
 }
 
 @media (pointer: coarse) {
-  .app-top-chrome__auth-link,
-  .app-top-chrome__auth-cta,
-  .app-top-chrome__auth-btn {
+  .header__auth-link,
+  .header__auth-cta,
+  .header__auth-btn {
     min-height: 2.75rem;
     height: auto;
   }
 
-  .app-top-chrome__settings {
+  .header__settings {
     width: 2.75rem;
     height: 2.75rem;
   }
@@ -444,13 +517,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-top-chrome__link,
-  .app-top-chrome__settings,
-  .app-top-chrome__menu-btn,
-  .app-top-chrome__auth-link,
-  .app-top-chrome__auth-cta,
-  .app-top-chrome__auth-btn,
-  .app-top-chrome__account-group {
+  .header__link,
+  .header__settings,
+  .header__menu-btn,
+  .header__auth-link,
+  .header__auth-cta,
+  .header__auth-btn,
+  .header__account-group {
     transition-duration: 0.01ms;
   }
 }

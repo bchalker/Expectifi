@@ -211,7 +211,8 @@ export function SubHeader({
               </div>
               <div className="subheader-estimate__meta">
                 {incomePhase ? (
-                  <div className="subheader-ss-block">
+                  <>
+                    <div className="subheader-ss-block">
                     <div
                       className="subheader-estimate__note subheader-estimate__note--ss-row"
                       role="group"
@@ -238,6 +239,7 @@ export function SubHeader({
                       )}
                     </div>
                   </div>
+                  </>
                 ) : (
                   <span className="subheader-estimate__note subheader-estimate__note--enter">
                     {annualSave > 0

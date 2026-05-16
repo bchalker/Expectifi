@@ -1,0 +1,56 @@
+.dob-select-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(4rem, 0.72fr) minmax(5.25rem, 0.95fr);
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dob-select-row [data-slot='select'] {
+  min-width: 0;
+}
+
+.dob-select-row__day [data-slot='select-trigger'] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.dob-select-row__year [data-slot='select-trigger'] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (max-width: 480px) {
+  .dob-select-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .dob-select-row__month {
+    grid-column: 1 / -1;
+  }
+}
+
+.dob-age-today {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0;
+}
+
+.dob-age-today__label {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.dob-age-today__value {
+  font-family: var(--mono);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}

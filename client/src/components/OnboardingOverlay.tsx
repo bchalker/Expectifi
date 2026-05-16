@@ -7,6 +7,7 @@ import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import { formatSsAgeLabel, normalizeClaimAge, type SsClaimAge } from '../lib/socialSecurity'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { ClaimAgeSegment } from './ClaimAgeSegment'
+import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
 import './ConfigDrawerBody.scss'
 import './SidePanelShell.scss'
 import './OnboardingOverlay.scss'
@@ -110,17 +111,8 @@ export function OnboardingOverlay({ inputs, setInputs, completeOnboarding }: Pro
               <div className="config-plan-row-duo onboarding-overlay__age-row">
                 <div className="config-plan-field">
                   <span className="config-plan-label">Your birthday</span>
-                  <input
-                    type="date"
-                    className="config-plan-input config-plan-input--date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                  />
-                  {dobOk ? (
-                    <span className="config-plan-age-hint">Age today: {ageToday}</span>
-                  ) : (
-                    <span className="config-plan-age-hint">Use your calendar date of birth.</span>
-                  )}
+                  <DateOfBirthSelects value={dob} onChange={setDob} />
+                  <DobAgeToday iso={dob} />
                 </div>
                 <label className="config-plan-field">
                   <span className="config-plan-label">Your target retirement age</span>

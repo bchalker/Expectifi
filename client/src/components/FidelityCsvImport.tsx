@@ -2,7 +2,7 @@ import type { AnimationEvent } from 'react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, ListBox, Select } from '@heroui/react'
-import { IconBuildingBank, IconCheck, IconChevronRight } from '@tabler/icons-react'
+import { IconArrowNarrowRightDashed, IconBuildingBank, IconCheck } from '@tabler/icons-react'
 import { fmt } from '../utils/format'
 import { FidelityAccountPositionsTable } from './FidelityAccountBreakdown'
 import type { ParsedFidelityCsv, AccountBucket } from '../lib/fidelityCsv'
@@ -12,7 +12,6 @@ import {
   fidelityAccountKey,
   IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS,
   isFidelityPendingActivityRow,
-  normalizeFidelityImportSymbol,
   uniqueAccountKeysFromRows,
 } from '../lib/fidelityCsv'
 import {
@@ -34,6 +33,7 @@ import {
 } from '../lib/positionsCsvImport'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
+import { markPortfolioBalancesFlush, triggerPortfolioWaveReveal } from '../lib/portfolioWaveReveal'
 import './SidePanelShell.scss'
 import './FidelityCsvImport.scss'
 
@@ -69,54 +69,18 @@ type ImportBusyState = {
   details: string[]
 }
 
-const CONFIRM_MIN_STEP_MS = 120
-const CONFIRM_POSITION_STAGGER_MS = 75
-const CONFIRM_OVERLAY_FADE_MS = 400
-const CONFIRM_WAVE_DATASET_CLEAR_MS = 320
-
-type ConfirmStepRow = {
-  id: string
-  title: string
-  subtitle?: string
-  status: 'pending' | 'active' | 'done' | 'error'
-  errorDetail?: string
-}
+const ACCOUNT_CHECK_STAGGER_MS = 45
+const ACCOUNT_CHECK_HOLD_MS = 100
+const IMPORT_APPLY_FADE_MS = 280
 
 type ConfirmOverlayState =
   | { mode: 'idle' }
-  | { mode: 'running'; steps: ConfirmStepRow[]; positionLabels: string[]; positionRevealIndex: number }
-  | {
-      mode: 'exiting'
-      steps: ConfirmStepRow[]
-      positionLabels: string[]
-      positionRevealIndex: number
-    }
-  | { mode: 'error'; steps: ConfirmStepRow[]; failedStepIndex: number; message: string }
+  | { mode: 'applying'; checkedKeys: ReadonlySet<string> }
+  | { mode: 'exiting'; checkedKeys: ReadonlySet<string> }
+  | { mode: 'error'; message: string }
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms))
-}
-
-function brokerageFormatLabel(c: PositionsCsvCustodian): string {
-  if (c === 'fidelity') return 'Fidelity'
-  if (c === 'vanguard') return 'Vanguard'
-  if (c === 'schwab') return 'Schwab'
-  return 'Other'
-}
-
-function buildConfirmSteps(fileName: string, brokerLabel: string): ConfirmStepRow[] {
-  return [
-    { id: 'received', title: 'File received', subtitle: fileName, status: 'pending' },
-    { id: 'parse', title: 'Parsing CSV', status: 'pending' },
-    {
-      id: 'format',
-      title: 'Identifying brokerage format',
-      subtitle: `Detected: ${brokerLabel}`,
-      status: 'pending',
-    },
-    { id: 'validate', title: 'Validating holdings', status: 'pending' },
-    { id: 'positions', title: 'Loading positions', status: 'pending' },
-  ]
 }
 
 function readFileAsText(file: File): Promise<string> {
@@ -449,15 +413,13 @@ export function FidelityCsvImport({
     stagePickedCsvFile(f, custodian)
   }
 
-  const confirmBlocking = confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting'
+  const confirmBlocking =
+    confirmOverlay.mode === 'applying' || confirmOverlay.mode === 'exiting'
 
-  function patchConfirmSteps(
-    steps: ConfirmStepRow[],
-    index: number,
-    patch: Partial<ConfirmStepRow>,
-  ): ConfirmStepRow[] {
-    return steps.map((s, i) => (i === index ? { ...s, ...patch } : s))
-  }
+  const checkedAccountKeys =
+    confirmOverlay.mode === 'applying' || confirmOverlay.mode === 'exiting'
+      ? confirmOverlay.checkedKeys
+      : null
 
   async function applyImportWithProgress() {
     if (!pending?.parsed.rows.length || !custodian) return
@@ -466,163 +428,54 @@ export function FidelityCsvImport({
     const rep = replaceDuplicateImports
     const ra = { ...reviewAssignments }
     const rows = applyBucketAssignmentsToRows(p.parsed.rows, ra)
-    const positionLabels = rows
-      .filter((r) => !isFidelityPendingActivityRow(r))
-      .slice(0, 80)
-      .map((r) => {
-        const sym = normalizeFidelityImportSymbol(r.symbol) || '—'
-        const desc = r.description.trim() || 'Holding'
-        const short = desc.length > 48 ? `${desc.slice(0, 47)}…` : desc
-        return `${sym} — ${short}`
-      })
+    const accountKeys = accountReviewRows.map((row) => row.key)
 
-    setConfirmOverlay({
-      mode: 'running',
-      steps: buildConfirmSteps(p.fileName, brokerageFormatLabel(cust)),
-      positionLabels,
-      positionRevealIndex: -1,
-    })
-
-    const fail = (stepIndex: number, message: string) => {
-      setConfirmOverlay((prev) => {
-        if (prev.mode !== 'running') {
-          return {
-            mode: 'error',
-            steps: buildConfirmSteps(p.fileName, brokerageFormatLabel(cust)),
-            failedStepIndex: stepIndex,
-            message,
-          }
-        }
-        const steps = prev.steps.map((s, i) => {
-          if (i < stepIndex) return { ...s, status: 'done' as const }
-          if (i === stepIndex) return { ...s, status: 'error' as const, errorDetail: message }
-          return { ...s, status: 'pending' as const }
-        })
-        return { mode: 'error', steps, failedStepIndex: stepIndex, message }
-      })
-    }
+    setConfirmOverlay({ mode: 'applying', checkedKeys: new Set() })
 
     try {
-      for (let i = 0; i < 4; i++) {
-        await sleep(CONFIRM_MIN_STEP_MS)
-        setConfirmOverlay((prev) => {
-          if (prev.mode !== 'running') return prev
-          return { ...prev, steps: patchConfirmSteps(prev.steps, i, { status: 'active' }) }
-        })
-        await sleep(CONFIRM_MIN_STEP_MS)
-
-        if (i === 1) {
-          try {
-            if (!p.parsed.rows.length) throw new Error('CSV has no data rows.')
-            const sample = p.parsed.rows[0]
-            if (typeof sample.currentValue !== 'number' || Number.isNaN(sample.currentValue)) {
-              throw new Error('Parsed positions are invalid.')
-            }
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Parsing failed.'
-            fail(i, msg)
-            return
-          }
-        }
-
-        if (i === 3) {
-          try {
-            for (const r of rows) {
-              if (!Number.isFinite(r.currentValue)) throw new Error('One or more holdings have an invalid value.')
-            }
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Validation failed.'
-            fail(i, msg)
-            return
-          }
-        }
-
-        setConfirmOverlay((prev) => {
-          if (prev.mode !== 'running') return prev
-          return { ...prev, steps: patchConfirmSteps(prev.steps, i, { status: 'done' }) }
-        })
+      if (!p.parsed.rows.length) throw new Error('CSV has no data rows.')
+      const sample = p.parsed.rows[0]
+      if (typeof sample.currentValue !== 'number' || Number.isNaN(sample.currentValue)) {
+        throw new Error('Parsed positions are invalid.')
       }
-
-      await sleep(CONFIRM_MIN_STEP_MS)
-      setConfirmOverlay((prev) => {
-        if (prev.mode !== 'running') return prev
-        return { ...prev, steps: patchConfirmSteps(prev.steps, 4, { status: 'active' }) }
-      })
-      await sleep(CONFIRM_MIN_STEP_MS)
-
-      if (positionLabels.length > 0) {
-        setConfirmOverlay((prev) => {
-          if (prev.mode !== 'running') return prev
-          return { ...prev, positionRevealIndex: 0 }
-        })
-        for (let j = 1; j < positionLabels.length; j++) {
-          await sleep(CONFIRM_POSITION_STAGGER_MS)
-          setConfirmOverlay((prev) => {
-            if (prev.mode !== 'running') return prev
-            return { ...prev, positionRevealIndex: j }
-          })
+      for (const r of rows) {
+        if (!Number.isFinite(r.currentValue)) {
+          throw new Error('One or more holdings have an invalid value.')
         }
       }
 
-      if (positionLabels.length === 0) {
-        await sleep(CONFIRM_MIN_STEP_MS)
+      const checked = new Set<string>()
+      for (const key of accountKeys) {
+        await sleep(ACCOUNT_CHECK_STAGGER_MS)
+        checked.add(key)
+        setConfirmOverlay({ mode: 'applying', checkedKeys: new Set(checked) })
       }
 
-      setConfirmOverlay((prev) => {
-        if (prev.mode !== 'running') return prev
-        return { ...prev, steps: patchConfirmSteps(prev.steps, 4, { status: 'done' }) }
-      })
-
-      await sleep(CONFIRM_MIN_STEP_MS)
+      await sleep(ACCOUNT_CHECK_HOLD_MS)
 
       const incoming = buildIncomingBatches(p, rep, cust, ra)
       if (!incoming.length) {
-        fail(3, 'Could not build import from the current review state.')
-        return
-      }
-      let mergedBalances: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>
-      try {
-        const existing = loadStoredFidelityImport()
-        const next = mergeFidelityBatches(existing, incoming, { replaceDuplicateHashes: rep })
-        saveStoredFidelityImport(next)
-        mergedBalances = next.balances
-      } catch (err) {
-        const msg =
-          err instanceof Error
-            ? err.message
-            : 'Could not save import to this browser (storage may be full or disabled).'
-        fail(4, msg)
-        return
+        throw new Error('Could not build import from the current review state.')
       }
 
-      await sleep(CONFIRM_MIN_STEP_MS)
-      setConfirmOverlay((prev) => {
-        if (prev.mode !== 'running') return prev
-        const stepsDone = prev.steps.map((s) => ({ ...s, status: 'done' as const }))
-        const lastIdx = Math.max(0, prev.positionLabels.length - 1)
-        return {
-          mode: 'exiting',
-          steps: stepsDone,
-          positionLabels: prev.positionLabels,
-          positionRevealIndex: prev.positionLabels.length ? lastIdx : prev.positionRevealIndex,
-        }
-      })
-      document.documentElement.setAttribute('data-portfolio-import-flush', 'true')
+      const existing = loadStoredFidelityImport()
+      const next = mergeFidelityBatches(existing, incoming, { replaceDuplicateHashes: rep })
+      saveStoredFidelityImport(next)
+      const mergedBalances = next.balances
+
+      setConfirmOverlay({ mode: 'exiting', checkedKeys: new Set(accountKeys) })
+      await sleep(70)
+
+      markPortfolioBalancesFlush()
       onApplyBalances(mergedBalances)
-      window.requestAnimationFrame(() => {
-        document.documentElement.removeAttribute('data-portfolio-import-flush')
-        document.documentElement.setAttribute('data-portfolio-wave-reveal', 'true')
-      })
-      await sleep(CONFIRM_OVERLAY_FADE_MS)
+      triggerPortfolioWaveReveal()
+
+      await sleep(IMPORT_APPLY_FADE_MS)
       onImportApplied?.()
       closeFlow()
-      window.setTimeout(() => {
-        document.documentElement.removeAttribute('data-portfolio-wave-reveal')
-        document.documentElement.removeAttribute('data-portfolio-import-flush')
-      }, CONFIRM_WAVE_DATASET_CLEAR_MS)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Import failed.'
-      fail(0, msg)
+      setConfirmOverlay({ mode: 'error', message: msg })
     }
   }
 
@@ -778,10 +631,15 @@ export function FidelityCsvImport({
           ) : null}
 
           <div className="csv-import-review">
-            <div className="csv-import-review-list" role="list" aria-label="Per-account bucket assignments">
+            <div
+              className={`csv-import-review-list${confirmBlocking ? ' csv-import-review-list--applying' : ''}`}
+              role="list"
+              aria-label="Per-account bucket assignments"
+            >
               {accountReviewRows.map((row, index) => {
                 const sel = reviewAssignments[row.key]
                 const unknown = sel === 'unknown' || sel === undefined
+                const accountChecked = checkedAccountKeys?.has(row.key) ?? false
                 const accountRows = rowsThisSelection.filter(
                   (r) =>
                     fidelityAccountKey(r.accountName) === row.key && !isFidelityPendingActivityRow(r),
@@ -789,14 +647,14 @@ export function FidelityCsvImport({
                 return (
                   <details
                     key={row.key}
-                    className={`fidelity-acct-details csv-import-review-acct${unknown ? ' csv-import-review-acct--attention' : ''}`}
+                    className={`fidelity-acct-details csv-import-review-acct${unknown ? ' csv-import-review-acct--attention' : ''}${accountChecked ? ' csv-import-review-acct--checked' : ''}`}
                     style={{ animationDelay: `${index * 0.055}s` }}
                   >
                     <summary>
                       <div className="csv-import-review-acct__identity">
                         <span className="fidelity-acct-fido-name csv-import-review-acct__name">{row.label}</span>
                         <span className="csv-import-review-acct__holdings-hint">
-                          <IconChevronRight
+                          <IconArrowNarrowRightDashed
                             className="csv-import-review-acct__holdings-icon"
                             size={14}
                             stroke={1.5}
@@ -816,6 +674,7 @@ export function FidelityCsvImport({
                           aria-label={`Tax bucket for ${row.label}`}
                           placeholder="Unmapped — choose…"
                           selectedKey={unknown ? null : sel}
+                          isDisabled={confirmBlocking}
                           onSelectionChange={(keys) => {
                             const id = firstKeyFromSelectSelection(keys)
                             if (!id || !isImportBucketValue(id)) return
@@ -837,7 +696,15 @@ export function FidelityCsvImport({
                           </Select.Popover>
                         </Select>
                       </div>
-                      <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
+                      <span className="csv-import-review-acct__summary-end">
+                        <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
+                        <span
+                          className={`csv-import-review-acct__check${accountChecked ? ' csv-import-review-acct__check--in' : ''}`}
+                          aria-hidden={!accountChecked}
+                        >
+                          <IconCheck className="csv-import-review-acct__check-icon" size={18} stroke={2} />
+                        </span>
+                      </span>
                     </summary>
                     <FidelityAccountPositionsTable rows={accountRows} showScenarioColumn={false} />
                   </details>
@@ -845,6 +712,12 @@ export function FidelityCsvImport({
               })}
             </div>
           </div>
+
+          {confirmOverlay.mode === 'error' ? (
+            <div className="csv-import-error" role="alert">
+              {confirmOverlay.message}
+            </div>
+          ) : null}
 
           {hasStorageDuplicate ? (
             <div
@@ -877,9 +750,11 @@ export function FidelityCsvImport({
     )
   }
 
+  const importFlowExiting = confirmOverlay.mode === 'exiting'
+
   const flowShell = (
     <div
-      className={isPanel ? 'csv-import-panel-shell' : 'csv-import-modal-shell'}
+      className={`${isPanel ? 'csv-import-panel-shell' : 'csv-import-modal-shell'}${importFlowExiting ? ' csv-import-flow-shell--exiting' : ''}`}
       role="dialog"
       aria-modal={isPanel ? undefined : true}
       aria-labelledby="csv-import-modal-title"
@@ -909,14 +784,20 @@ export function FidelityCsvImport({
           <span />
         )}
         <div className="csv-import-modal__footer-actions">
-          <Button
-            size="sm"
-            variant="primary"
-            isDisabled={!canConfirm || importBusy !== null || confirmBlocking}
-            onPress={() => void applyImportWithProgress()}
-          >
-            Confirm
-          </Button>
+          {confirmOverlay.mode === 'error' ? (
+            <Button size="sm" variant="primary" onPress={() => setConfirmOverlay({ mode: 'idle' })}>
+              Dismiss
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="primary"
+              isDisabled={!canConfirm || importBusy !== null || confirmBlocking}
+              onPress={() => void applyImportWithProgress()}
+            >
+              Confirm
+            </Button>
+          )}
         </div>
       </footer>
     </div>
@@ -941,93 +822,6 @@ export function FidelityCsvImport({
     </div>
   ) : null
 
-  const confirmPositionLabels =
-    confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting' ? confirmOverlay.positionLabels : []
-
-  const confirmPositionRevealIndex =
-    confirmOverlay.mode === 'running' || confirmOverlay.mode === 'exiting' ? confirmOverlay.positionRevealIndex : -1
-
-  const confirmSteps = confirmOverlay.mode !== 'idle' ? confirmOverlay.steps : []
-
-  const confirmOverlayPortal =
-    confirmOverlay.mode !== 'idle' && typeof document !== 'undefined'
-      ? createPortal(
-          <div
-            className={`csv-import-confirm-overlay${confirmOverlay.mode === 'exiting' ? ' csv-import-confirm-overlay--exiting' : ''}`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="csv-import-confirm-title"
-            aria-busy={confirmOverlay.mode === 'running'}
-          >
-            <div className="csv-import-confirm-overlay__panel">
-              <h2 id="csv-import-confirm-title" className="csv-import-confirm-overlay__title">
-                {confirmOverlay.mode === 'error' ? 'Import could not finish' : 'Applying import'}
-              </h2>
-              {confirmOverlay.mode === 'error' ? (
-                <p className="csv-import-confirm-overlay__error-lead" role="alert">
-                  {confirmOverlay.message}
-                </p>
-              ) : null}
-              <ul className="csv-import-confirm-overlay__steps">
-                {confirmSteps.map((step) => (
-                  <li
-                    key={step.id}
-                    className={`csv-import-confirm-overlay__step csv-import-confirm-overlay__step--${step.status}`}
-                  >
-                    <div className="csv-import-confirm-overlay__step-row">
-                      <div className="csv-import-confirm-overlay__step-main">
-                        <div
-                          className={`csv-import-confirm-overlay__step-title-wrap${
-                            step.status === 'active' ? ' csv-import-confirm-overlay__step-title-wrap--enter' : ''
-                          }`}
-                        >
-                          <span className="csv-import-confirm-overlay__step-title">{step.title}</span>
-                          {step.subtitle ? (
-                            <span className="csv-import-confirm-overlay__step-sub">{step.subtitle}</span>
-                          ) : null}
-                        </div>
-                        {step.status === 'error' && step.errorDetail ? (
-                          <p className="csv-import-confirm-overlay__step-error">{step.errorDetail}</p>
-                        ) : null}
-                      </div>
-                      <span className="csv-import-confirm-overlay__step-status" aria-hidden>
-                        {step.status === 'done' ? (
-                          <IconCheck className="csv-import-confirm-overlay__check" size={18} stroke={1.5} />
-                        ) : null}
-                      </span>
-                    </div>
-                    {step.id === 'positions' &&
-                    (step.status === 'active' || step.status === 'done') &&
-                    confirmPositionLabels.length > 0 ? (
-                      <ul className="csv-import-confirm-overlay__holdings">
-                        {confirmPositionLabels.map((label, hi) => (
-                          <li
-                            key={`${step.id}-${hi}-${label.slice(0, 24)}`}
-                            className={`csv-import-confirm-overlay__holding${
-                              hi <= confirmPositionRevealIndex ? ' csv-import-confirm-overlay__holding--in' : ''
-                            }`}
-                          >
-                            {label}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-              {confirmOverlay.mode === 'error' ? (
-                <div className="csv-import-confirm-overlay__footer">
-                  <Button size="sm" variant="primary" onPress={() => setConfirmOverlay({ mode: 'idle' })}>
-                    Dismiss
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </div>,
-          document.body,
-        )
-      : null
-
   return (
     <>
       {!hideTrigger && !isPanel ? (
@@ -1040,7 +834,7 @@ export function FidelityCsvImport({
         </div>
       ) : null}
       {flowOpen && isPanel ? (
-        <div className="csv-import-panel-host">
+        <div className={`csv-import-panel-host${importFlowExiting ? ' csv-import-panel-host--exiting' : ''}`}>
           {busyOverlay}
           {flowShell}
         </div>
@@ -1063,7 +857,6 @@ export function FidelityCsvImport({
             document.body,
           )
         : null}
-      {confirmOverlayPortal}
     </>
   )
 }

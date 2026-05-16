@@ -26,6 +26,8 @@ export type IncomePresetStripPick =
 type Props = {
   phase: "growth" | "income";
   c: C;
+  /** Fade in yield / growth strip after subheader monthly hero (see App portfolioControlsRevealed). */
+  portfolioControlsRevealed: boolean;
   incomeMode: boolean;
   onIncomeMode: (incomeMode: boolean) => void;
   ssIncluded: boolean;
@@ -55,6 +57,7 @@ type Props = {
 export function StripHeader({
   phase,
   c,
+  portfolioControlsRevealed,
   incomeMode,
   onIncomeMode,
   ssIncluded: _ssIncluded,
@@ -113,11 +116,16 @@ export function StripHeader({
     if (phase !== "income" || incomeMode) setInflPopoverOpen(false);
   }, [phase, incomeMode]);
 
+  const showEquation = c.hasPortfolioBalances && portfolioControlsRevealed
+
   return (
-    <div className="results-strip">
+    <div
+      className={`results-strip${c.hasPortfolioBalances ? " results-strip--has-portfolio" : " results-strip--empty"}`}
+    >
       <div className="results-strip-inner results-strip-inner--equation-first">
+        {showEquation ? (
         <div
-          className={`strip-equation-row strip-equation-row--phase-${phase}`}
+          className={`strip-equation-row strip-equation-row--phase-${phase} portfolio-controls-reveal portfolio-controls-reveal--in`}
           style={{
             display: "flex",
             alignItems: "center",
@@ -128,7 +136,6 @@ export function StripHeader({
           onClick={(e) => e.stopPropagation()}
         >
           {phase === "growth" ? (
-            c.hasPortfolioBalances ? (
               <div className="strip-growth-rail">
                 <div className="strip-growth-main">
                   <GrowthSliderLabel
@@ -164,7 +171,6 @@ export function StripHeader({
                   />
                 </div>
               </div>
-            ) : null
           ) : (
           <div className="strip-income-rail">
             <div className="strip-income-main">
@@ -178,6 +184,7 @@ export function StripHeader({
                       Yield
                     </span>
                   </div>
+                  <div className="strip-equation-sliders-group">
                   <div className="range-inline-row">
                     <input
                       type="range"
@@ -351,6 +358,7 @@ export function StripHeader({
                       ) : null}
                     </span>
                   </div>
+                  </div>
                 </>
               ) : (
                 <>
@@ -362,6 +370,7 @@ export function StripHeader({
                       Withdrawal rate on portfolio
                     </span>
                   </div>
+                  <div className="strip-equation-sliders-group">
                   <div className="range-inline-row">
                     <input
                       type="range"
@@ -477,12 +486,14 @@ export function StripHeader({
                       ) : null}
                     </span>
                   </div>
+                  </div>
                 </>
               )}
             </div>
           </div>
           )}
         </div>
+        ) : null}
       </div>
     </div>
   );

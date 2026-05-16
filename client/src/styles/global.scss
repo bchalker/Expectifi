@@ -87,6 +87,23 @@
   /* Mobile slide-over width */
   --app-left-nav-w: 178px;
   --app-left-nav-edge: 14px;
+  /* Header inner + page content share these (marketing: 68rem; app: 1100px + gutters) */
+  --layout-marketing-max: 68rem;
+  --layout-marketing-gutter: max(1rem, env(safe-area-inset-left, 0px));
+  --layout-marketing-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
+  --layout-app-max: 1100px;
+  --layout-app-gutter: max(1rem, env(safe-area-inset-left, 0px));
+  --layout-app-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
+  --layout-app-inner-pad: 2rem;
+  /* Portfolio post-import reveal (keep in sync with portfolioWaveReveal.ts) */
+  --portfolio-reveal-duration: 0.5s;
+  --portfolio-stagger-step: 0.04s;
+  --portfolio-row-stagger-base: 0.02s;
+  --portfolio-strip-slider-delay: 0.16s;
+  --portfolio-strip-slider-delay-income: 0.18s;
+  --portfolio-strip-slider-delay-growth: 0.12s;
+  --portfolio-subheader-hero-delay: 0.05s;
+  --portfolio-subheader-bottom-delay: 0.14s;
   /* Stacking: chrome above dimmed panels; curve SVG transparency shows backdrop/shell, not page */
   --z-panel-backdrop: 350;
   --z-drawer-shell: 360;
@@ -97,6 +114,12 @@
   --z-onboarding: 520;
   /* Right / bottom inset for slide-over panels (drawer shell) */
   --drawer-panel-inset: 2rem;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --layout-app-inner-pad: 1rem;
+  }
 }
 
 /* Empty portfolio: reserve wave band only (hero clamp hidden); front wave height is 5px in SubHeader.scss */

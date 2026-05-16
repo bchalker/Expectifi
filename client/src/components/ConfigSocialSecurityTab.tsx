@@ -10,6 +10,7 @@ import {
 } from '../lib/socialSecurity'
 import { fmtInput, fmtMon, parseNum } from '../utils/format'
 import { ClaimAgeSegment } from './ClaimAgeSegment'
+import { DateOfBirthSelects } from './DateOfBirthSelects'
 import './ConfigSocialSecurityTab.scss'
 
 const SSA_MY_ACCOUNT_URL = 'https://www.ssa.gov/myaccount/'
@@ -166,18 +167,13 @@ export function ConfigSocialSecurityTab({ c, inputs, setInputs }: Props) {
 
             {!inputs.spouseHasOwnEarnings ? (
               <>
-                <label className="config-plan-field config-ss-spouse-dob">
+                <div className="config-plan-field config-ss-spouse-dob">
                   <span className="config-plan-label">Spouse date of birth</span>
-                  <input
-                    type="date"
-                    className="config-plan-input config-plan-input--date"
+                  <DateOfBirthSelects
                     value={spouseDob}
-                    onChange={(e) => {
-                      const v = e.target.value
-                      setInputs({ spouseDateOfBirth: v && isValidIsoDateString(v) ? v : '' })
-                    }}
+                    onChange={(iso) => setInputs({ spouseDateOfBirth: iso })}
                   />
-                </label>
+                </div>
                 <p className="config-ss-spousal-readonly">
                   Based on your benefit, your spouse qualifies for up to{' '}
                   <strong>{fmtMon(spousalEst.b67)}</strong> in spousal benefit at your full retirement age.

@@ -15,6 +15,9 @@
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
+}
+
+html:not([data-no-portfolio-subheader]) .subheader {
   transition:
     height 0.48s cubic-bezier(0.33, 1, 0.68, 1),
     min-height 0.48s cubic-bezier(0.33, 1, 0.68, 1);
@@ -49,11 +52,15 @@
   top: 0;
   height: calc(100% - var(--subheader-bubble-h));
   background: var(--subheader-band-bg);
+  transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+html:not([data-no-portfolio-subheader]) .subheader::before {
   transition:
     background 0.55s cubic-bezier(0.4, 0, 0.2, 1),
     height 0.48s cubic-bezier(0.33, 1, 0.68, 1);
-  z-index: 0;
-  pointer-events: none;
 }
 
 .subheader-waves {
@@ -71,6 +78,9 @@
   bottom: 0;
   height: var(--subheader-bubble-h);
   pointer-events: none;
+}
+
+html:not([data-no-portfolio-subheader]) .subheader-waves__bubbles {
   transition: height 0.48s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
@@ -102,11 +112,17 @@
   pointer-events: none;
   transform-origin: top center;
   transform: scaleY(1);
-  transition: transform 0.48s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Collapsed front wave before React / without transition on landing */
+html[data-no-portfolio-subheader='true'] .subheader-waves__front-scale {
+  transform: scaleY(calc(5px / var(--subheader-bubble-h)));
+  transition: none;
 }
 
 .subheader.subheader--no-balances .subheader-waves__front-scale {
   transform: scaleY(calc(5px / var(--subheader-bubble-h)));
+  transition: none;
 }
 
 html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
@@ -117,7 +133,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 /* Post-import: explicit 0 → 1 reveal (FidelityCsvImport sets data attribute during overlay fade) */
 html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
   transition: none;
-  animation: subheader-front-wave-reveal 0.3s ease forwards;
+  animation: subheader-front-wave-reveal var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes subheader-front-wave-reveal {
@@ -127,6 +143,44 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 
   to {
     transform: scaleY(1);
+  }
+}
+
+/* Post-commit: hero amount and SS row rise in after the wave (staggered). */
+html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
+html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+  opacity: 0;
+}
+
+html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
+  animation: portfolio-reveal-rise var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--portfolio-subheader-hero-delay) both;
+}
+
+html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+  animation: portfolio-reveal-fade var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--portfolio-subheader-bottom-delay) both;
+}
+
+@keyframes portfolio-reveal-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes portfolio-reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -189,7 +243,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 /* Growth/Income toggle — half over chrome above, half in hero */
 .subheader-estimate__top {
   position: absolute;
-  top: 0;
+  top: 10px;
   left: 50%;
   z-index: 3;
   display: flex;
@@ -712,5 +766,21 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   .subheader-estimate__claim-reveal {
     transition-duration: 0.01ms;
     will-change: auto;
+  }
+
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+    opacity: 1;
+  }
+
+  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+    animation: none;
+    opacity: 1;
   }
 }

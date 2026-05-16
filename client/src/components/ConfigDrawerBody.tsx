@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { CalculatorInputs, CalculatorUi, ComputedSnapshot } from '../lib/computeResults'
-import { isValidIsoDateString } from '../lib/ageFromDob'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
+import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
 import { IncomePresetScenariosCard } from './IncomePresetScenariosCard'
 import './ConfigDrawerBody.scss'
 
@@ -78,20 +78,14 @@ export function ConfigDrawerBody({
               each year across the calculator.
             </p>
             <div className="config-plan-row-duo">
-              <label className="config-plan-field">
+              <div className="config-plan-field">
                 <span className="config-plan-label">When were you born?</span>
-                <input
-                  type="date"
-                  className="config-plan-input config-plan-input--date"
+                <DateOfBirthSelects
                   value={inputs.dateOfBirth}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (!v || !isValidIsoDateString(v)) return
-                    setInputs({ dateOfBirth: v })
-                  }}
+                  onChange={(iso) => setInputs({ dateOfBirth: iso })}
                 />
-                <span className="config-plan-age-hint">Age today: {ca}</span>
-              </label>
+                <DobAgeToday iso={inputs.dateOfBirth} />
+              </div>
               <label className="config-plan-field">
                 <span className="config-plan-label">When would you like to retire?</span>
                 <input

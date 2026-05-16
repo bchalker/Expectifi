@@ -4,8 +4,8 @@
     {
       "id": "deployCommitMessage",
       "type": "promptString",
-      "description": "Commit message for this deploy (required if you have uncommitted changes)",
-      "default": "Update production"
+      "description": "Commit message (required when you have uncommitted changes; leave blank to auto-name)",
+      "default": "Deploy production updates"
     }
   ],
   "tasks": [
@@ -47,18 +47,25 @@
       }
     },
     {
-      "label": "Deploy: push to Railway",
+      "label": "Deploy: commit, build check, push to Railway",
       "type": "shell",
-      "command": "bash scripts/deploy-railway.sh \"${input:deployCommitMessage}\"",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/deploy-railway.sh",
+        "${input:deployCommitMessage}"
+      ],
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {}
       },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
         "focus": true,
-        "clear": true
+        "clear": true,
+        "echo": true,
+        "showReuseMessage": false
       }
     },
     {

@@ -134,6 +134,19 @@
   color: var(--nav-text);
 }
 
+.app-left-nav__item--unavailable,
+.app-left-nav__item[aria-disabled='true'] {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.app-left-nav__item--unavailable:hover,
+.app-left-nav__item[aria-disabled='true']:hover {
+  background: transparent;
+  color: var(--nav-text-muted);
+  box-shadow: none;
+}
+
 .app-left-nav__item-label {
   display: block;
 }

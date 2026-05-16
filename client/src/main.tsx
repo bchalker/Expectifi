@@ -3,13 +3,16 @@ import { createRoot } from 'react-dom/client'
 import { AuthProvider } from './context/AuthContext'
 import { DesignSystemProvider } from './design/DesignSystemContext'
 import './index.scss'
-import App from './App.tsx'
+import AppRoot from './AppRoot.tsx'
+import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubheader'
+
+syncNoPortfolioSubheaderDocumentAttr()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <DesignSystemProvider>
-        <App />
+        <AppRoot />
       </DesignSystemProvider>
     </AuthProvider>
   </StrictMode>,

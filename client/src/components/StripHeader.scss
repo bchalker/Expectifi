@@ -6,6 +6,73 @@
   border-bottom: 1px solid var(--border);
   padding: 1rem 0;
 }
+
+.results-strip--empty {
+  display: none;
+}
+
+@keyframes portfolio-controls-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portfolio-controls-reveal--pending {
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.portfolio-controls-reveal--in .strip-income-metric-stack,
+.portfolio-controls-reveal--in .growth-slider-label__headline-stack {
+  animation: portfolio-controls-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.portfolio-controls-reveal--in .strip-growth-rail .growth-slider-label__headline-stack {
+  animation-delay: 0s;
+}
+
+.portfolio-controls-reveal--in .strip-equation-sliders-group {
+  opacity: 0;
+  animation: portfolio-controls-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--portfolio-strip-slider-delay) both;
+}
+
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-income-metric-stack {
+  animation-delay: 0s;
+}
+
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-equation-sliders-group {
+  animation-delay: var(--portfolio-strip-slider-delay-income);
+}
+
+.portfolio-controls-reveal--in.strip-equation-row--phase-growth .strip-equation-sliders-group {
+  animation-delay: var(--portfolio-strip-slider-delay-growth);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-controls-reveal--pending {
+    max-height: none;
+  }
+
+  .portfolio-controls-reveal--in .strip-income-metric-stack,
+  .portfolio-controls-reveal--in .growth-slider-label__headline-stack,
+  .portfolio-controls-reveal--in .strip-equation-sliders-group {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
 .results-strip-inner {
   max-width: 1100px;
   margin: 0 auto;

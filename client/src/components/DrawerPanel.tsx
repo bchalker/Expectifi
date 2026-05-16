@@ -484,6 +484,18 @@ function StackItem({
 }
 
 function StrategyBody({ c }: { c: ComputedSnapshot }) {
+  if (!c.hasPortfolioBalances) {
+    return (
+      <>
+        <div className="section-title">Optimal withdrawal strategy</div>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          Add account balances or import a positions CSV to see a withdrawal sequence based on your portfolio, tax buckets,
+          and sliders.
+        </p>
+      </>
+    )
+  }
+
   const s = c.strategy
   const fmtStep = (n: number, title: string, tag: string, tagColor: string, body: string) => (
     <div key={n} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>

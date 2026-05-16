@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
+import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 import { OnboardingOverlay } from './components/OnboardingOverlay'
 import { useAuth } from './context/AuthContext'
 import { AccountBalances } from './components/AccountBalances'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
 import { IncomeInputs } from './components/IncomeInputs'
-import { AppTopChrome } from './components/AppTopChrome'
+import { Header } from './components/Header'
 import { AppLeftNav } from './components/AppLeftNav'
 import { StripHeader } from './components/StripHeader'
 import { GoalProgressBar } from './components/GoalProgressBar'
@@ -33,13 +34,17 @@ import {
   filterAllFidelityPositionReturnModels,
 } from './lib/removeRetirementAccounts'
 import { loadBalanceInputMode, saveBalanceInputMode, type BalanceInputMode } from './lib/retirementBalanceMode'
+import { getAccountsRevealDelayMs, getStripControlsRevealDelayMs } from './lib/portfolioWaveReveal'
+import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubheader'
 import { isSsConfigured, normalizeClaimAge, type SsClaimAge } from './lib/socialSecurity'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
+import { isDrawerNavAvailable, isSnapshotNavAvailable, type NavPanelContext } from './lib/appNavDrawers'
 
 /** No personal balances until the user enters or imports them (see HTML prototype — examples only). */
 const defaultInputs: CalculatorInputs = {
   base401k: 0,
   baseSE401k: 0,
+  baseTradIRA: 0,
   baseRoth: 0,
   baseHsa: 0,
   brkBal: 0,
@@ -121,7 +126,11 @@ function getInitialAppState(): InitialAppState {
   return cachedInitialAppState
 }
 
-export default function App() {
+type AppProps = {
+  initialAuthModal?: AuthModalMode | null
+}
+
+export default function App({ initialAuthModal = null }: AppProps) {
   const [inputs, setInputsState] = useState<CalculatorInputs>(() => getInitialAppState().inputs)
   const [ui, setUiState] = useState<CalculatorUi>(() => getInitialAppState().ui)
   const [phase, setPhase] = useState<'growth' | 'income'>(() => getInitialAppState().phase)
@@ -139,10 +148,16 @@ export default function App() {
   } | null>(null)
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [authModal, setAuthModal] = useState<AuthModalMode | null>(null)
+  const [authModal, setAuthModal] = useState<AuthModalMode | null>(initialAuthModal)
 
   const { loading: authLoading, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi, user, completeOnboarding } =
     useAuth()
+
+  useEffect(() => {
+    const registerIntent = consumeLandingAuthIntent()
+    if (registerIntent) setAuthModal('register')
+    else if (initialAuthModal) setAuthModal(initialAuthModal)
+  }, [initialAuthModal])
 
   useEffect(() => {
     if (authLoading) return
@@ -269,6 +284,7 @@ export default function App() {
 
   const onFidelityApplyBalances = useCallback(
     (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => {
+      setPhase('income')
       setInputsState((prev) => ({
         ...prev,
         ...(balanceMode === 'fidelity'
@@ -318,18 +334,61 @@ export default function App() {
   const showOnboarding = Boolean(user && !user.onboardingDone && !authLoading)
 
   const ssTimingConfigured = isSsConfigured(inputs)
+  const navContext: NavPanelContext = useMemo(
+    () => ({
+      hasPortfolioBalances: c.hasPortfolioBalances,
+      ssConfigured: ssTimingConfigured,
+    }),
+    [c.hasPortfolioBalances, ssTimingConfigured],
+  )
   const hasIncomeGoal = inputs.monthlyIncomeGoal > 0
+  const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)
+  const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] = useState(false)
 
   useEffect(() => {
-    const root = document.documentElement
+    syncNoPortfolioSubheaderDocumentAttr(c.hasPortfolioBalances)
+  }, [c.hasPortfolioBalances])
+
+  useEffect(() => {
+    if (!isSnapshotNavAvailable(navContext) && accordionOpen) {
+      setAccordionOpen(false)
+    }
+    if (drawer != null && drawer !== 'config' && !isDrawerNavAvailable(drawer, navContext)) {
+      setDrawer(null)
+    }
+  }, [navContext, accordionOpen, drawer])
+
+  const hadPortfolioBalancesRef = useRef(c.hasPortfolioBalances)
+
+  /** First time balances appear (manual or import), default subheader to Income gross monthly. */
+  useEffect(() => {
+    const had = hadPortfolioBalancesRef.current
+    hadPortfolioBalancesRef.current = c.hasPortfolioBalances
+    if (c.hasPortfolioBalances && !had) {
+      setPhase('income')
+    }
+  }, [c.hasPortfolioBalances])
+
+  /** Yield / return strip: headline after wave; slider row staggers in CSS (see StripHeader.scss). */
+  useEffect(() => {
     if (!c.hasPortfolioBalances) {
-      root.dataset.noPortfolioSubheader = 'true'
-    } else {
-      delete root.dataset.noPortfolioSubheader
+      setPortfolioControlsRevealed(false)
+      return
     }
-    return () => {
-      delete root.dataset.noPortfolioSubheader
+    const delayMs = getStripControlsRevealDelayMs()
+    const id = window.setTimeout(() => setPortfolioControlsRevealed(true), delayMs)
+    return () => window.clearTimeout(id)
+  }, [c.hasPortfolioBalances])
+
+  /** Retirement account card: stagger after strip yield/return sliders (see calculator.scss). */
+  useEffect(() => {
+    if (!c.hasPortfolioBalances) {
+      setPortfolioAccountsRevealed(false)
+      return
     }
+    const delayMs = getAccountsRevealDelayMs()
+    const id = window.setTimeout(() => setPortfolioAccountsRevealed(true), delayMs)
+    return () => window.clearTimeout(id)
   }, [c.hasPortfolioBalances])
 
   useEffect(() => {
@@ -356,31 +415,35 @@ export default function App() {
         className={`app-header-shell${hasIncomeGoal ? ' app-header-shell--has-goal' : ''}${phase === 'income' && ssTimingConfigured ? ' app-header-shell--ss-claim' : ''}`}
       >
         <div className="app-header-stack">
-        <AppTopChrome
+        <Header
+          variant="app"
           targetRetirementAge={inputs.targetRetirementAge}
           drawer={drawer}
           snapshotOpen={accordionOpen}
           mobileNavOpen={mobileNavOpen}
           onMobileNavToggle={() => setMobileNavOpen((o) => !o)}
           onOpenDrawer={(name) => {
+            if (!isDrawerNavAvailable(name, navContext)) return
             setAccordionOpen(false)
             setDrawer(name)
           }}
           onSnapshotToggle={() => {
+            if (!isSnapshotNavAvailable(navContext)) return
             setAccordionOpen((a) => {
               const next = !a
               if (next) setDrawer(null)
               return next
             })
           }}
+          navContext={navContext}
           onOpenConfig={() => {
             setMobileNavOpen(false)
             setAccordionOpen(false)
             setConfigTab('plan')
             setDrawer('config')
           }}
-          onOpenSignIn={openAuthSignIn}
-          onOpenRegister={openAuthRegister}
+          onSignIn={openAuthSignIn}
+          onCreateAccount={openAuthRegister}
         />
         <GoalProgressBar
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
@@ -418,10 +481,12 @@ export default function App() {
         mobileOpen={mobileNavOpen}
         onMobileOpenChange={setMobileNavOpen}
         onOpenDrawer={(name) => {
+          if (!isDrawerNavAvailable(name, navContext)) return
           setAccordionOpen(false)
           setDrawer(name)
         }}
         onSnapshotToggle={() => {
+          if (!isSnapshotNavAvailable(navContext)) return
           setAccordionOpen((a) => {
             const next = !a
             if (next) setDrawer(null)
@@ -435,11 +500,13 @@ export default function App() {
         }}
         onOpenSignIn={openAuthSignIn}
         onOpenRegister={openAuthRegister}
+        navContext={navContext}
       />
       <div className="app-scroll-stack">
       <StripHeader
         phase={phase}
         c={c}
+        portfolioControlsRevealed={portfolioControlsRevealed}
         incomeMode={ui.incomeMode}
         onIncomeMode={(incomeMode) => {
           setUi({ incomeMode })
@@ -498,20 +565,23 @@ export default function App() {
       <div className="main">
         <div className="section">
           <div
-            className="rab-brokerage-stack"
-            style={{
-              border: '1px solid var(--border-strong)',
-              borderRadius: 12,
-              padding: '12px 16px 4px',
-              marginBottom: '1.75rem',
-              background: 'var(--surface)',
-            }}
+            className={
+              c.hasPortfolioBalances
+                ? portfolioAccountsRevealed
+                  ? 'portfolio-accounts-reveal portfolio-accounts-reveal--in'
+                  : 'portfolio-accounts-reveal portfolio-accounts-reveal--pending'
+                : undefined
+            }
           >
             <AccountBalances
               readOnly
               c={c}
               inputs={inputs}
               setInputs={setInputs}
+              onManualPortfolioPlanApplied={(plan) => {
+                setInputs(plan)
+                setPhase('income')
+              }}
               onBases={(b) => setInputsState((prev) => ({ ...prev, ...b }))}
               balanceMode={balanceMode}
               onBalanceModeChange={onBalanceModeChange}
@@ -530,8 +600,15 @@ export default function App() {
             />
           </div>
 
-          {phase === 'income' ? (
-            <div id="phase-income">
+          {phase === 'income' && c.hasPortfolioBalances ? (
+            <div
+              id="phase-income"
+              className={
+                portfolioControlsRevealed
+                  ? 'portfolio-controls-reveal portfolio-controls-reveal--in'
+                  : 'portfolio-controls-reveal portfolio-controls-reveal--pending'
+              }
+            >
               <IncomeInputs c={c} ui={ui} setUi={setUi} inputs={inputs} setInputs={setInputs} />
             </div>
           ) : null}

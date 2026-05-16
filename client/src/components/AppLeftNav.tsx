@@ -1,7 +1,14 @@
 import { IconAdjustments } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { APP_NAV_DRAWER_ITEMS } from "../lib/appNavDrawers";
+import {
+  APP_NAV_DRAWER_ITEMS,
+  isSnapshotNavAvailable,
+  navItemUnavailableReason,
+  navRequirementsMet,
+  SNAPSHOT_NAV_REQUIRES,
+  type NavPanelContext,
+} from "../lib/appNavDrawers";
 import type { DrawerName } from "../lib/computeResults";
 import "./AppLeftNav.scss";
 
@@ -18,6 +25,7 @@ type Props = {
   onOpenConfig: () => void;
   onOpenSignIn: () => void;
   onOpenRegister: () => void;
+  navContext: NavPanelContext;
 };
 
 export function AppLeftNav({
@@ -31,7 +39,10 @@ export function AppLeftNav({
   onOpenConfig,
   onOpenSignIn,
   onOpenRegister,
+  navContext,
 }: Props) {
+  const snapshotAvailable = isSnapshotNavAvailable(navContext);
+  const snapshotUnavailableReason = navItemUnavailableReason(SNAPSHOT_NAV_REQUIRES, navContext);
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
   const accountLabel = user
     ? user.displayName?.trim() || user.email
@@ -118,24 +129,38 @@ export function AppLeftNav({
           <button
             id="app-left-nav-snapshot-btn"
             type="button"
-            className={`app-left-nav__item${snapshotOpen ? " app-left-nav__item--active" : ""}`}
-            aria-expanded={snapshotOpen}
+            className={`app-left-nav__item${snapshotOpen && snapshotAvailable ? " app-left-nav__item--active" : ""}${!snapshotAvailable ? " app-left-nav__item--unavailable" : ""}`}
+            aria-expanded={snapshotOpen && snapshotAvailable}
             aria-controls="strip-snapshot-panel"
-            onClick={toggleSnapshot}
+            aria-disabled={!snapshotAvailable}
+            title={snapshotUnavailableReason ?? undefined}
+            onClick={() => {
+              if (!snapshotAvailable) return;
+              toggleSnapshot();
+            }}
           >
             <span className="app-left-nav__item-label">Snapshot</span>
           </button>
           <div className="app-left-nav__rule" aria-hidden />
-          {APP_NAV_DRAWER_ITEMS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={`app-left-nav__item${drawer === id ? " app-left-nav__item--active" : ""}`}
-              onClick={() => openDrawer(id)}
-            >
-              <span className="app-left-nav__item-label">{label}</span>
-            </button>
-          ))}
+          {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
+            const available = navRequirementsMet(requires, navContext);
+            const unavailableReason = navItemUnavailableReason(requires, navContext);
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`app-left-nav__item${drawer === id && available ? " app-left-nav__item--active" : ""}${!available ? " app-left-nav__item--unavailable" : ""}`}
+                aria-disabled={!available}
+                title={unavailableReason ?? undefined}
+                onClick={() => {
+                  if (!available) return;
+                  openDrawer(id);
+                }}
+              >
+                <span className="app-left-nav__item-label">{label}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="app-left-nav__footer">
           {!loading && user?.email ? (

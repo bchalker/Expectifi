@@ -55,15 +55,17 @@ export function clearAllFidelityImportFromCard(): void {
 export function clearRetirementAccountBalances(): {
   base401k: number
   baseSE401k: number
+  baseTradIRA: number
   baseRoth: number
   baseHsa: number
 } {
-  return { base401k: 0, baseSE401k: 0, baseRoth: 0, baseHsa: 0 }
+  return { base401k: 0, baseSE401k: 0, baseTradIRA: 0, baseRoth: 0, baseHsa: 0 }
 }
 
 export function clearAllAccountBalancesFromCard(): {
   base401k: number
   baseSE401k: number
+  baseTradIRA: number
   baseRoth: number
   baseHsa: number
   brkBal: number

@@ -63,11 +63,15 @@
 .strip-card.warn .strip-card-val { color: var(--warn); }
 
 /* ── LAYOUT ── */
-.main { max-width: 1100px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+.main {
+  max-width: var(--layout-app-max);
+  margin: 0 auto;
+  padding: 2rem var(--layout-app-inner-pad) 4rem;
+}
 .app-scroll-stack {
   position: relative;
-  padding-left: max(1rem, env(safe-area-inset-left, 0px));
-  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-left: var(--layout-app-gutter);
+  padding-right: var(--layout-app-gutter-end);
   box-sizing: border-box;
 }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -75,9 +79,9 @@
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
 @media (max-width: 700px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-  .main { padding: 1.5rem 1rem 3rem; }
-  .results-strip-inner { padding: 0 1rem; }
-  .subheader { padding-left: 1rem; padding-right: 1rem; }
+  .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
+  .results-strip-inner { padding: 0 var(--layout-app-inner-pad); }
+  .subheader { padding-left: var(--layout-app-inner-pad); padding-right: var(--layout-app-inner-pad); }
 }
 @media (max-width: 480px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -589,8 +593,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 @media (max-width: 900px) {
   .inputs-grid { grid-template-columns: 1fr; }
   .results-strip-inner { padding: 0 1rem; }
-  .main { padding: 1.5rem 1rem 3rem; }
-  .subheader { padding-left: 1rem; padding-right: 1rem; }
+  .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
+  .subheader { padding-left: var(--layout-app-inner-pad); padding-right: var(--layout-app-inner-pad); }
   .strip-totals { gap: 1rem; }
   .strip-total-val,
   .strip-total-val--after-tax .strip-total-val-core {
@@ -1209,4 +1213,68 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   font-weight: 400;
   margin-top: 2px;
   display: block;
+}
+
+/* Account card: reveal after strip yield/return sliders (see portfolioWaveReveal.ts). */
+.portfolio-accounts-reveal--pending .rab-brokerage-stack {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portfolio-accounts-reveal--in .rab-brokerage-stack {
+  animation: portfolio-account-stack-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.portfolio-accounts-reveal--in .rab-brokerage-stack .account-balances-card-inner-wrap > * {
+  opacity: 0;
+  animation: portfolio-account-row-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@for $i from 1 through 12 {
+  .portfolio-accounts-reveal--in
+    .rab-brokerage-stack
+    .account-balances-card-inner-wrap
+    > *:nth-child(#{$i}) {
+    animation-delay: calc(var(--portfolio-row-stagger-base) + var(--portfolio-stagger-step) * #{$i - 1});
+  }
+}
+
+@keyframes portfolio-account-stack-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes portfolio-account-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-accounts-reveal--pending .rab-brokerage-stack {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .portfolio-accounts-reveal--in .rab-brokerage-stack {
+    animation: none;
+    opacity: 1;
+  }
+
+  .portfolio-accounts-reveal--in .rab-brokerage-stack .account-balances-card-inner-wrap > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

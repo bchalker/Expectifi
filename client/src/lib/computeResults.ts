@@ -73,6 +73,8 @@ export function normalizeIncomePresets(raw: unknown): IncomeYieldPreset[] {
 export type CalculatorInputs = {
   base401k: number
   baseSE401k: number
+  /** Traditional IRA (manual entry); rolled into pre-tax totals with 401(k) buckets. */
+  baseTradIRA: number
   baseRoth: number
   baseHsa: number
   brkBal: number
@@ -130,6 +132,7 @@ function accountDisplayBalances(bases: CalculatorInputs) {
   return {
     bal401k: bases.base401k,
     balSE401k: bases.baseSE401k,
+    balTradIRA: bases.baseTradIRA,
     balRoth: bases.baseRoth,
     balHsa: bases.baseHsa,
   }
@@ -163,7 +166,7 @@ export function activePortfolioBalances(
   fidelityRows: FidelityPositionRow[],
 ): { retBal: number; brkBal: number } {
   const bal = accountDisplayBalances(inputs)
-  let retBal = bal.bal401k + bal.balSE401k + bal.balRoth + bal.balHsa
+  let retBal = bal.bal401k + bal.balSE401k + bal.balTradIRA + bal.balRoth + bal.balHsa
   let brkBal = inputs.brkBal
   const retirementMode = balanceModes?.retirement ?? 'fidelity'
   const brokerageMode = balanceModes?.brokerage ?? 'fidelity'
@@ -235,7 +238,7 @@ export function computeResults(
   if (fidelityImp?.batches?.length) fidelityRows = flattenBatches(fidelityImp.batches)
 
   const { retBal, brkBal } = activePortfolioBalances(inputs, balanceModes, fidelityRows)
-  const tradBal = retBal > 0 ? bal.bal401k + bal.balSE401k : 0
+  const tradBal = retBal > 0 ? bal.bal401k + bal.balSE401k + bal.balTradIRA : 0
   const rothBal = retBal > 0 ? bal.balRoth : 0
   const hsaBal = retBal > 0 ? bal.balHsa : 0
 
@@ -421,6 +424,7 @@ export function computeResults(
     totalSS,
     annWd,
     taxDetail,
+    hasPortfolioBalances,
   })
 
   return {
@@ -533,6 +537,7 @@ function computeStrategyBlock({
   totalSS,
   annWd,
   taxDetail,
+  hasPortfolioBalances,
 }: {
   i: { tradBal: number; retRate: number; ss: number; tradRatio: number; rothRatio: number; hsaRatio: number }
   retFV: number
@@ -540,7 +545,25 @@ function computeStrategyBlock({
   totalSS: number
   annWd: number
   taxDetail: ReturnType<typeof calcTaxDetailed>
+  hasPortfolioBalances: boolean
 }) {
+  if (!hasPortfolioBalances) {
+    return {
+      retWdAnn: 0,
+      brkWdAnn: 0,
+      tradWdAnn: 0,
+      rothWdAnn: 0,
+      hsaWdAnn: 0,
+      rothConvRoom: 0,
+      tradBalK: 0,
+      retRatePct: (i.retRate * 100).toFixed(1),
+      tradFvK: 0,
+      combinedSS67: 0,
+      taxDetail,
+      totalSS: 0,
+    }
+  }
+
   const sum = retFV + brkFV
   const denom = sum > 0 ? sum : 1
   const retWdAnn = annWd * (retFV / denom)
@@ -550,7 +573,8 @@ function computeStrategyBlock({
   const hsaWdAnn = retWdAnn * i.hsaRatio
   const stdDed = 29200
   const bracket12top = 89075
-  const rothConvRoom = Math.max(0, bracket12top - (tradWdAnn - stdDed))
+  const taxableTrad = Math.max(0, tradWdAnn - stdDed)
+  const rothConvRoom = Math.max(0, bracket12top - taxableTrad)
   return {
     retWdAnn,
     brkWdAnn,

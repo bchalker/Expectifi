@@ -276,8 +276,9 @@ export function GrowthSliderLabel({
         </span>
         <span className="growth-slider-label__portfolio-caption">annual return on portfolio</span>
       </div>
-      {slider}
-      <p className="growth-slider-label__suffix-line">
+      <div className="strip-equation-sliders-group">
+        {slider}
+        <p className="growth-slider-label__suffix-line">
         {!hasCustom ? (
           'Default rate for all holdings'
         ) : (
@@ -307,7 +308,8 @@ export function GrowthSliderLabel({
             ) : null}
           </>
         )}
-      </p>
+        </p>
+      </div>
 
       {hasCustom && hovered && anchor
         ? createPortal(
