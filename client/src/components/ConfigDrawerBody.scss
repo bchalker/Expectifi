@@ -25,11 +25,18 @@
   margin: 0 0 1.25rem;
   padding: 0;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.config-drawer-tabs--classic::-webkit-scrollbar {
+  display: none;
 }
 
 .config-drawer-tabs--classic .tab-btn {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: max-content;
   margin: 0;
   padding: 0.65rem 0.35rem 0.55rem;
   border: none;
@@ -43,6 +50,7 @@
   font-weight: 500;
   line-height: 1.25;
   text-align: center;
+  white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:

@@ -2,7 +2,11 @@ export const APP_PATHS = {
   home: '/',
   onboarding: '/onboarding',
   login: '/login',
+  whereToRetire: '/where-to-retire',
 } as const
+
+/** Signed-in calculator dashboard (portfolio, income, configure drawers). */
+export const APP_DASHBOARD_PATH = APP_PATHS.onboarding
 
 export type AppPath = (typeof APP_PATHS)[keyof typeof APP_PATHS]
 

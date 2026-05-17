@@ -1,0 +1,28 @@
+.app-privacy-trust {
+  width: var(--layout-app-boundary);
+  max-width: 100%;
+  margin-top: auto;
+  margin-inline: auto;
+  padding: 1.25rem var(--layout-app-inner-pad) 1.5rem;
+  box-sizing: border-box;
+}
+
+.app-privacy-trust--divider {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+}
+
+.app-privacy-trust__text {
+  margin: 0;
+  width: 100%;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-muted);
+  box-sizing: border-box;
+}
+
+.app-privacy-trust__text strong {
+  font-weight: 700;
+  color: var(--text);
+}

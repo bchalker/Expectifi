@@ -58,6 +58,9 @@
   --danger-light: #fce9e9;
   --gold: var(--color-amber);
   --gold-light: var(--color-amber-bg);
+  /* Bright green on dark navy / orange chrome (goal bar, nav accent, subheader trends) */
+  --accent-green: #4ade80;
+  --nav-accent: var(--accent-green);
   /* Chrome: sidebar + subheader bar use navy */
   --nav-bg: var(--color-navy);
   /* Header account strip: darker than --nav-bg, flush to viewport right */

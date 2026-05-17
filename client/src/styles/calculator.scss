@@ -72,6 +72,9 @@
 }
 .app-scroll-stack {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   box-sizing: border-box;
 }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }

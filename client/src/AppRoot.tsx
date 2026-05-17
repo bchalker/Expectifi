@@ -14,7 +14,13 @@ import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 
 function resolveGuestView(path: string): 'landing' | 'app' {
   if (path === APP_PATHS.home) return 'landing'
-  if (path === APP_PATHS.onboarding || path === APP_PATHS.login) return 'app'
+  if (
+    path === APP_PATHS.onboarding ||
+    path === APP_PATHS.login ||
+    path === APP_PATHS.whereToRetire
+  ) {
+    return 'app'
+  }
   return 'landing'
 }
 

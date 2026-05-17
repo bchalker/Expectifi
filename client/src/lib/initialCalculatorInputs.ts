@@ -40,6 +40,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   ssInvestPct: 5,
   dateOfBirth: '',
   targetRetirementAge: 62,
+  growthGoal: 0,
   monthlyIncomeGoal: 0,
   incomePresets: [...DEFAULT_INCOME_PRESETS],
   positionReturnModels: [],
@@ -78,7 +79,7 @@ function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {
 export function getInitialCalculatorInputs(): CalculatorInputs {
   const persisted = loadPersistedCalculatorSession(defaultCalculatorInputs, defaultCalculatorUi)
   if (persisted) {
-    return mergeStoredWelcomePrefs(applyFidelityBalanceOverrides(persisted.inputs))
+    return applyFidelityBalanceOverrides(persisted.inputs)
   }
   const stored = loadStoredAppState()
   if (stored) {

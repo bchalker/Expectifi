@@ -44,9 +44,19 @@ import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
 } from './lib/initialCalculatorInputs'
-import { loadLocalUserPrefs, userPrefsToCalculatorPatch } from './lib/userPrefs'
+import {
+  calculatorInputsToUserPrefs,
+  inputsHavePlanningProfileFields,
+  loadLocalUserPrefs,
+  syncPlanningPrefsFromInputs,
+  userPrefsToCalculatorPatch,
+} from './lib/userPrefs'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
+import { useAppPath } from './hooks/useAppPath'
+import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp } from './lib/appPaths'
 import { isDrawerNavAvailable, isSnapshotNavAvailable, type NavPanelContext } from './lib/appNavDrawers'
+import { AppPrivacyTrust } from './components/AppPrivacyTrust'
+import { WhereToRetire } from './pages/WhereToRetire'
 
 const defaultInputs = defaultCalculatorInputs
 const defaultUi = defaultCalculatorUi
@@ -97,12 +107,12 @@ function mergeStoredWelcomePrefs(state: InitialAppState): InitialAppState {
 function resolveInitialAppState(): InitialAppState {
   const persisted = loadPersistedCalculatorSession(defaultInputs, defaultUi)
   if (persisted) {
-    return mergeStoredWelcomePrefs({
+    return {
       inputs: applyFidelityBalanceOverrides(persisted.inputs),
       ui: persisted.ui,
       phase: persisted.phase,
       activePreset: persisted.activePreset,
-    })
+    }
   }
   return mergeStoredWelcomePrefs(freshAppState())
 }
@@ -265,9 +275,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
     if (authLoading) return
     const id = window.setTimeout(() => {
       persistCalculatorSession({ inputs, ui, phase, activePreset })
+      syncPlanningPrefsFromInputs(inputs)
+      const prefs = calculatorInputsToUserPrefs(inputs)
+      if (user && prefs) void saveUserPrefs(prefs)
     }, 400)
     return () => window.clearTimeout(id)
-  }, [authLoading, inputs, ui, phase, activePreset])
+  }, [authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])
 
   /** Once welcome is dismissed, do not re-open when monthly goal is cleared in Configure. */
   useEffect(() => {
@@ -276,7 +289,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   useEffect(() => {
     if (!user?.planPrefs) return
-    setInputsState((s) => ({ ...s, ...userPrefsToCalculatorPatch(user.planPrefs!) }))
+    setInputsState((s) => {
+      if (inputsHavePlanningProfileFields(s)) return s
+      return { ...s, ...userPrefsToCalculatorPatch(user.planPrefs!) }
+    })
   }, [user?.id, user?.planPrefs])
 
   const getSnapshot = useCallback(
@@ -350,7 +366,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }),
     [c.hasPortfolioBalances, ssTimingConfigured],
   )
-  const hasIncomeGoal = inputs.monthlyIncomeGoal > 0
+  const path = useAppPath()
+  const isWhereToRetire = path === APP_PATHS.whereToRetire
+
+  const hasGoalBar =
+    c.hasPortfolioBalances &&
+    ((phase === 'growth' && inputs.growthGoal > 0) || (phase === 'income' && inputs.monthlyIncomeGoal > 0))
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)
   const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] = useState(false)
 
@@ -366,6 +387,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setDrawer(null)
     }
   }, [navContext, accordionOpen, drawer])
+
+  useEffect(() => {
+    if (!isWhereToRetire) return
+    setDrawer(null)
+    setAccordionOpen(false)
+    setMobileNavOpen(false)
+    setPhase('income')
+  }, [isWhereToRetire])
 
   const hadPortfolioBalancesRef = useRef(c.hasPortfolioBalances)
 
@@ -424,7 +453,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   return (
     <>
       <div
-        className={`app-header-shell${hasIncomeGoal ? ' app-header-shell--has-goal' : ''}${phase === 'income' && ssTimingConfigured ? ' app-header-shell--ss-claim' : ''}`}
+        className={`app-header-shell${hasGoalBar ? ' app-header-shell--has-goal' : ''}${phase === 'income' && ssTimingConfigured ? ' app-header-shell--ss-claim' : ''}`}
       >
         <div className="app-header-stack">
         <Header
@@ -433,6 +462,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
             setDrawer(null)
             setAccordionOpen(false)
             setMobileNavOpen(false)
+            navigateApp(APP_DASHBOARD_PATH)
           }}
           targetRetirementAge={inputs.targetRetirementAge}
           drawer={drawer}
@@ -463,9 +493,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onCreateAccount={openAuthRegister}
         />
         <GoalProgressBar
+          phase={phase}
+          growthGoal={inputs.growthGoal}
+          growthGoalProgressPct={c.growthGoalProgressPct}
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
-          afterTaxMon={c.afterTaxMon}
-          goalProgressPct={c.goalProgressPct}
+          incomeGoalProgressPct={c.incomeGoalProgressPct}
           hasPortfolioBalances={c.hasPortfolioBalances}
         />
         <SubHeader
@@ -486,10 +518,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
             setDrawer('config')
           }}
           hasPortfolioBalances={c.hasPortfolioBalances}
-          portfolioNow={c.retBal + c.brkBal}
         />
-      </div>
-      <div className="subheader-spacer" aria-hidden="true" />
+        </div>
+        <div className="subheader-spacer" aria-hidden="true" />
       </div>
       <AppLeftNav
         targetRetirementAge={inputs.targetRetirementAge}
@@ -520,6 +551,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
         navContext={navContext}
       />
       <div className="app-scroll-stack">
+      {isWhereToRetire ? (
+        <WhereToRetire c={c} />
+      ) : (
+        <>
       <StripHeader
         phase={phase}
         c={c}
@@ -640,6 +675,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
         <hr className="divider" />
       </div>
+        </>
+      )}
+        <AppPrivacyTrust dividerAbove={isWhereToRetire} />
       </div>
 
       <SnapshotPanel

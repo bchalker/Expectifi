@@ -86,8 +86,8 @@ export function ConfigDrawerBody({
         >
           <section className="config-drawer-section">
             <p className="footnote footnote--muted config-drawer-lead">
-              Your answers set your current age for projections, retirement timing, monthly goal, and how much you save
-              each year across the calculator.
+              Your answers set your current age for projections, retirement timing, growth and income goals, and how much
+              you save each year across the calculator.
             </p>
             <PlanningProfileFields
               variant="configure"
@@ -95,6 +95,8 @@ export function ConfigDrawerBody({
               onDateOfBirth={(iso) => setInputs({ dateOfBirth: iso })}
               targetRetirementAge={inputs.targetRetirementAge}
               onTargetRetirementAge={(targetRetirementAge) => setInputs({ targetRetirementAge })}
+              growthGoal={inputs.growthGoal}
+              onGrowthGoal={(growthGoal) => setInputs({ growthGoal })}
               monthlyIncomeGoal={inputs.monthlyIncomeGoal}
               onMonthlyIncomeGoal={(monthlyIncomeGoal) => setInputs({ monthlyIncomeGoal })}
               annualSave={inputs.save}

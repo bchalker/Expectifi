@@ -42,7 +42,7 @@
 }
 
 .bucket-total-trend--on-dark.bucket-total-trend--up .bucket-total-trend__pct {
-  color: #5fd4a4;
+  color: var(--accent-green);
 }
 
 .bucket-total-trend--on-dark.bucket-total-trend--down .bucket-total-trend__pct {

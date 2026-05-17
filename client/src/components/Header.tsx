@@ -5,6 +5,7 @@ import { APP_PATHS, navigateApp } from '../lib/appPaths'
 import type { DrawerName } from '../lib/computeResults'
 import {
   APP_NAV_DRAWER_ITEMS,
+  APP_NAV_ROUTE_ITEMS,
   isSnapshotNavAvailable,
   navItemUnavailableReason,
   navRequirementsMet,
@@ -74,7 +75,6 @@ function HeaderBrand({ onBrandClick }: { onBrandClick?: () => void }) {
   return (
     <button type="button" className="header__brand" onClick={handleClick} aria-label={ariaLabel}>
       <span className="header__mark">HeadwayPlanner</span>
-      <span className="header__kicker">Hatch your retirement plan.</span>
     </button>
   )
 }
@@ -186,6 +186,7 @@ function HeaderAppNav({
   onOpenDrawer,
   onSnapshotToggle,
 }: Pick<HeaderAppProps, 'drawer' | 'snapshotOpen' | 'navContext' | 'onOpenDrawer' | 'onSnapshotToggle'>) {
+  const path = useAppPath()
   const snapshotAvailable = isSnapshotNavAvailable(navContext)
   const snapshotUnavailableReason = navItemUnavailableReason(SNAPSHOT_NAV_REQUIRES, navContext)
 
@@ -206,6 +207,27 @@ function HeaderAppNav({
       >
         Snapshot
       </button>
+      {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
+        const available = navRequirementsMet(requires, navContext)
+        const unavailableReason = navItemUnavailableReason(requires, navContext)
+        const isActive = path === routePath && available
+        return (
+          <button
+            key={id}
+            type="button"
+            className={`header__link${isActive ? ' header__link--active' : ''}${!available ? ' header__link--unavailable' : ''}`}
+            aria-current={isActive ? 'page' : undefined}
+            aria-disabled={!available}
+            title={unavailableReason ?? undefined}
+            onClick={() => {
+              if (!available) return
+              navigateApp(routePath)
+            }}
+          >
+            {label}
+          </button>
+        )
+      })}
       {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
         const available = navRequirementsMet(requires, navContext)
         const unavailableReason = navItemUnavailableReason(requires, navContext)

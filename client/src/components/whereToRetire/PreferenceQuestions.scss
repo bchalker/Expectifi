@@ -1,0 +1,70 @@
+.wtr-prefs__fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.wtr-prefs__legend {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wtr-prefs__hint {
+  margin: 0 0 1rem;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.wtr-prefs__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wtr-prefs__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: var(--text-base);
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.wtr-prefs__option input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+}
+
+.wtr-prefs__option--check:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.wtr-prefs__options--radio .wtr-prefs__option:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.wtr-prefs__option--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wtr-prefs__option-hint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}

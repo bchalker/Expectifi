@@ -7,6 +7,10 @@
   box-sizing: border-box;
 }
 
+.dob-select-row--no-day {
+  grid-template-columns: minmax(0, 1.45fr) minmax(5.75rem, 1fr);
+}
+
 .dob-select-row [data-slot='select'] {
   min-width: 0;
 }
@@ -27,8 +31,17 @@
     grid-template-rows: auto auto;
   }
 
+  .dob-select-row--no-day {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+
   .dob-select-row__month {
     grid-column: 1 / -1;
+  }
+
+  .dob-select-row--no-day .dob-select-row__month {
+    grid-column: auto;
   }
 }
 

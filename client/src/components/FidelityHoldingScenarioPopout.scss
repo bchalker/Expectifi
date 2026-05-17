@@ -134,33 +134,6 @@
   min-height: 0;
 }
 
-/* Thin vertical track (match side panels) */
-.fidelity-scenario-popout__scroll .simplebar-track.simplebar-vertical {
-  width: 5px;
-  margin: 4px 2px 4px 0;
-  background: transparent;
-}
-
-.fidelity-scenario-popout__scroll .simplebar-scrollbar.simplebar-vertical {
-  width: 5px;
-}
-
-.fidelity-scenario-popout__scroll .simplebar-scrollbar:before {
-  inset: 0;
-  background: color-mix(in srgb, var(--text-muted) 42%, transparent);
-  border-radius: 99px;
-}
-
-.fidelity-scenario-popout__scroll .simplebar-track.simplebar-horizontal {
-  height: 5px;
-  margin: 0 4px 2px;
-  background: transparent;
-}
-
-.fidelity-scenario-popout__scroll .simplebar-scrollbar.simplebar-horizontal {
-  height: 5px;
-}
-
 .fidelity-scenario-popout__context {
   margin: 0;
   font-size: var(--text-xs);

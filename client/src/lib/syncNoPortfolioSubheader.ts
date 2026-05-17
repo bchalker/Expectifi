@@ -36,6 +36,7 @@ const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   ssInvestPct: 5,
   dateOfBirth: '',
   targetRetirementAge: 62,
+  growthGoal: 0,
   monthlyIncomeGoal: 0,
   incomePresets: [],
   positionReturnModels: [],

@@ -1,0 +1,16 @@
+.wtr-qol-cell__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  padding: 0.85rem 0.75rem;
+  box-sizing: border-box;
+}
+
+.wtr-qol-cell__meter {
+  max-width: 10rem;
+  margin-inline: auto;
+}

@@ -50,7 +50,7 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
     monthlyGoal: Math.round(monthlyGoal),
     ssClaimingAge: normalizeClaimAge(Math.round(ssClaimingAge)),
   }
-  return hasCompleteUserPrefs(prefs) ? prefs : null
+  return hasPlanningProfilePrefs(prefs) ? prefs : null
 }
 
 export function userPrefsToCalculatorPatch(p: UserPrefs): Partial<CalculatorInputs> {
@@ -62,14 +62,25 @@ export function userPrefsToCalculatorPatch(p: UserPrefs): Partial<CalculatorInpu
   }
 }
 
-export function calculatorInputsToUserPrefs(inputs: CalculatorInputs): UserPrefs | null {
+export function calculatorInputsToPlanningPrefs(inputs: CalculatorInputs): UserPrefs | null {
   const prefs: UserPrefs = {
     dob: inputs.dateOfBirth,
     retirementAge: inputs.targetRetirementAge,
     monthlyGoal: inputs.monthlyIncomeGoal,
     ssClaimingAge: normalizeClaimAge(inputs.ssAge),
   }
-  return hasCompleteUserPrefs(prefs) ? prefs : null
+  return hasPlanningProfilePrefs(prefs) ? prefs : null
+}
+
+export function calculatorInputsToUserPrefs(inputs: CalculatorInputs): UserPrefs | null {
+  const prefs = calculatorInputsToPlanningPrefs(inputs)
+  return prefs && hasCompleteUserPrefs(prefs) ? prefs : null
+}
+
+/** Keep headwayplanner_user_prefs aligned with Configure planning fields. */
+export function syncPlanningPrefsFromInputs(inputs: CalculatorInputs): void {
+  const prefs = calculatorInputsToPlanningPrefs(inputs)
+  if (prefs) saveLocalUserPrefs(prefs)
 }
 
 export function inputsHavePlanningProfileFields(inputs: CalculatorInputs): boolean {

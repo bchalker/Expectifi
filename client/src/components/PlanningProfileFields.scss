@@ -11,8 +11,8 @@
   min-width: 0;
 }
 
-.planning-profile-fields__dob .dob-select-row {
-  grid-template-columns: minmax(0, 1.45fr) minmax(4.25rem, 0.72fr) minmax(5.75rem, 1fr);
+.planning-profile-fields__dob .dob-select-row--no-day {
+  grid-template-columns: minmax(0, 1.45fr) minmax(5.75rem, 1fr);
 }
 
 .planning-profile-fields__divider {
@@ -55,31 +55,72 @@
   max-width: none;
 }
 
-.planning-profile-fields__monthly-standalone {
-  margin-bottom: 0;
+.planning-profile-fields__row-duo .config-plan-saveval--age {
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.planning-profile-fields__goals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.planning-profile-fields__goals-heading {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+  color: var(--text);
+}
+
+.planning-profile-fields__row-goals .config-plan-field {
+  align-items: center;
+  text-align: center;
+}
+
+.planning-profile-fields__row-goals .config-plan-label {
+  width: 100%;
+  text-align: center;
+}
+
+.planning-profile-fields__row-goals .config-plan-savings-row {
+  align-items: center;
+  width: 100%;
+}
+
+.planning-profile-fields__row-goals .config-plan-saveval {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
 }
 
 @media (min-width: 680px) {
   .planning-profile-fields__row-duo {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     align-items: start;
   }
 
-  .planning-profile-fields__row-duo > .config-plan-field:first-child {
-    width: auto;
-    min-width: max-content;
-  }
-
-  .planning-profile-fields__row-duo > .config-plan-field--savings,
-  .planning-profile-fields__row-duo > .config-plan-field--goal {
+  .planning-profile-fields__row-duo > .config-plan-field {
+    width: 100%;
     min-width: 0;
   }
 
-  .planning-profile-fields__row-duo > .config-plan-field:first-child .config-plan-input {
-    width: 5rem;
-    max-width: 100%;
-    box-sizing: border-box;
+  .planning-profile-fields__row-goals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .planning-profile-fields__row-goals > .config-plan-field {
+    width: 100%;
+    min-width: 0;
   }
 }

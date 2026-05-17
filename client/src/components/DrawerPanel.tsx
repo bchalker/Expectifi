@@ -7,7 +7,6 @@ import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import { fmt, fmtK, fmtMon } from '../utils/format'
 import { ConfigDrawerBody, type ConfigDrawerTab } from './ConfigDrawerBody'
-import { RetireRegionsBody } from './RetireRegionsBody'
 import { SidePanelShell } from './SidePanelShell'
 import './PanelChrome.scss'
 
@@ -16,7 +15,6 @@ const TITLES: Record<DrawerName, string> = {
   sstiming: 'SS timing',
   taxfree: 'Tax-free withdrawals',
   strategy: 'Withdrawal strategy',
-  relocate: 'Where to retire?',
   config: 'Make your plans',
 }
 
@@ -194,8 +192,6 @@ function DrawerBody({
       return <TaxFreeBody c={c} />
     case 'strategy':
       return <StrategyBody c={c} />
-    case 'relocate':
-      return <RetireRegionsBody c={c} inputs={inputs} setInputs={setInputs} />
     default:
       return null
   }

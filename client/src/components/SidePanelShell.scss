@@ -11,39 +11,6 @@
   min-height: 0;
 }
 
-/* Thin vertical track */
-.side-panel-shell__scroll .simplebar-track.simplebar-vertical {
-  width: 5px;
-  margin: 4px 2px 4px 0;
-  background: transparent;
-}
-
-.side-panel-shell__scroll .simplebar-scrollbar.simplebar-vertical {
-  width: 5px;
-}
-
-.side-panel-shell__scroll .simplebar-scrollbar:before {
-  inset: 0;
-  background: rgba(71, 85, 105, 0.38);
-  border-radius: 99px;
-}
-
-.side-panel-shell__scroll .simplebar-track.simplebar-horizontal {
-  height: 5px;
-  margin: 0 4px 2px;
-  background: transparent;
-}
-
-.side-panel-shell__scroll .simplebar-scrollbar.simplebar-horizontal {
-  height: 5px;
-}
-
-.side-panel-shell__scroll .simplebar-scrollbar.simplebar-horizontal:before {
-  inset: 0;
-  background: rgba(71, 85, 105, 0.38);
-  border-radius: 99px;
-}
-
 .side-panel-shell__footer {
   flex-shrink: 0;
   border-top: 1px solid var(--border);

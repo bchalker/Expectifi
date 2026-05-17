@@ -35,9 +35,11 @@ type Props = {
   value: string
   onChange: (iso: string) => void
   className?: string
+  /** When false, only month and year are shown; day defaults to the 1st. */
+  includeDay?: boolean
 }
 
-export function DateOfBirthSelects({ value, onChange, className }: Props) {
+export function DateOfBirthSelects({ value, onChange, className, includeDay = true }: Props) {
   const [parts, setParts] = useState<DobParts>(() => partsFromIsoValue(value))
 
   useEffect(() => {
@@ -58,7 +60,10 @@ export function DateOfBirthSelects({ value, onChange, className }: Props) {
   )
 
   const applyParts = (patch: Partial<DobParts>) => {
-    const next = clampDobParts({ ...parts, ...patch })
+    let next = clampDobParts({ ...parts, ...patch })
+    if (!includeDay && next.year && next.month) {
+      next = { ...next, day: '01' }
+    }
     setParts(next)
     const iso = dobPartsToIso(next)
     if (iso && isDobAgeInRange(iso)) {
@@ -68,8 +73,12 @@ export function DateOfBirthSelects({ value, onChange, className }: Props) {
     if (value) onChange('')
   }
 
+  const rowClass = ['dob-select-row', !includeDay && 'dob-select-row--no-day', className]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className={className ? `dob-select-row ${className}` : 'dob-select-row'}>
+    <div className={rowClass}>
       <Select
         className="dob-select-row__month"
         variant="secondary"
@@ -96,32 +105,34 @@ export function DateOfBirthSelects({ value, onChange, className }: Props) {
           </ListBox>
         </Select.Popover>
       </Select>
-      <Select
-        className="dob-select-row__day"
-        variant="secondary"
-        aria-label="Birth day"
-        placeholder="Day"
-        selectedKey={parts.day || null}
-        onSelectionChange={(keys) => {
-          const id = firstKeyFromSelectSelection(keys)
-          if (!id) return
-          applyParts({ day: id })
-        }}
-      >
-        <Select.Trigger>
-          <Select.Value />
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover className="app-select-import-menu__popover">
-          <ListBox className="app-select-import-menu__list">
-            {days.map((d) => (
-              <ListBox.Item key={d} id={d} textValue={d}>
-                {Number(d)}
-              </ListBox.Item>
-            ))}
-          </ListBox>
-        </Select.Popover>
-      </Select>
+      {includeDay ? (
+        <Select
+          className="dob-select-row__day"
+          variant="secondary"
+          aria-label="Birth day"
+          placeholder="Day"
+          selectedKey={parts.day || null}
+          onSelectionChange={(keys) => {
+            const id = firstKeyFromSelectSelection(keys)
+            if (!id) return
+            applyParts({ day: id })
+          }}
+        >
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="app-select-import-menu__popover">
+            <ListBox className="app-select-import-menu__list">
+              {days.map((d) => (
+                <ListBox.Item key={d} id={d} textValue={d}>
+                  {Number(d)}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
+      ) : null}
       <Select
         className="dob-select-row__year"
         variant="secondary"

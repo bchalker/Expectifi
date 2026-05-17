@@ -1,0 +1,155 @@
+.app-scroll-stack:has(.where-to-retire) {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
+  box-sizing: border-box;
+}
+
+.where-to-retire {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.where-to-retire__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: var(--layout-app-boundary);
+  max-width: 100%;
+  min-height: 0;
+  margin-inline: auto;
+  padding-top: 0;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.where-to-retire__body > .app-page-back,
+.where-to-retire__title,
+.where-to-retire__discover,
+.where-to-retire__disclaimer {
+  flex-shrink: 0;
+}
+
+.app-page--where-to-retire.main {
+  padding-top: 2.75rem;
+}
+
+.app-page--where-to-retire .app-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.app-page--where-to-retire .app-page-back:hover {
+  color: var(--text);
+}
+
+.where-to-retire__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.where-to-retire__prefs-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.where-to-retire__prefs-copy {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.where-to-retire__prefs-heading {
+  margin: 0;
+  font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.where-to-retire__prefs-count {
+  color: var(--accent-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.where-to-retire__prefs-pill {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.where-to-retire__prefs-pill:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+.where-to-retire__discover {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface2) 35%, var(--surface));
+  box-sizing: border-box;
+}
+
+.where-to-retire__discover .where-to-retire__prefs-row {
+  margin-bottom: 0rem;
+}
+
+.where-to-retire__discover .wtr-chips {
+  margin-bottom: 0rem;
+}
+
+.where-to-retire__discover .wtr-search {
+  margin-bottom: 0;
+}
+
+.where-to-retire__disclaimer {
+  margin: 2rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface2) 92%, var(--bg));
+  border: 1px solid var(--border);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+
+  a {
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}

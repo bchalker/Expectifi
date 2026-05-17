@@ -1,4 +1,7 @@
+import { APP_PATHS } from './appPaths'
 import type { DrawerName } from './computeResults'
+
+export type AppNavRouteId = 'where-to-retire'
 
 export type NavPanelRequirement = 'portfolio' | 'ss'
 
@@ -7,7 +10,14 @@ export type NavPanelContext = {
   ssConfigured: boolean
 }
 
-export const APP_NAV_DRAWER_ITEMS: readonly {
+/** Temporarily hidden from left nav until feature work resumes. */
+export const TEMP_HIDDEN_NAV_DRAWERS = new Set<DrawerName>([
+  'scenarios',
+  'sstiming',
+  'taxfree',
+])
+
+const ALL_NAV_DRAWER_ITEMS: readonly {
   id: DrawerName
   label: string
   requires: readonly NavPanelRequirement[]
@@ -16,7 +26,24 @@ export const APP_NAV_DRAWER_ITEMS: readonly {
   { id: 'sstiming', label: 'SS timing', requires: ['ss'] },
   { id: 'taxfree', label: 'Tax-free withdrawals', requires: ['portfolio'] },
   { id: 'strategy', label: 'Withdrawal strategy', requires: ['portfolio'] },
-  { id: 'relocate', label: 'Where to retire?', requires: ['portfolio'] },
+]
+
+export const APP_NAV_DRAWER_ITEMS = ALL_NAV_DRAWER_ITEMS.filter(
+  (item) => !TEMP_HIDDEN_NAV_DRAWERS.has(item.id),
+)
+
+export const APP_NAV_ROUTE_ITEMS: readonly {
+  id: AppNavRouteId
+  path: string
+  label: string
+  requires: readonly NavPanelRequirement[]
+}[] = [
+  {
+    id: 'where-to-retire',
+    path: APP_PATHS.whereToRetire,
+    label: 'Where to retire?',
+    requires: ['portfolio'],
+  },
 ]
 
 export const SNAPSHOT_NAV_REQUIRES: readonly NavPanelRequirement[] = ['portfolio']
@@ -53,7 +80,13 @@ export function navItemUnavailableReason(
 
 export function isDrawerNavAvailable(id: DrawerName, ctx: NavPanelContext): boolean {
   if (id === 'config') return true
-  const item = APP_NAV_DRAWER_ITEMS.find((entry) => entry.id === id)
+  if (TEMP_HIDDEN_NAV_DRAWERS.has(id)) return false
+  const item = ALL_NAV_DRAWER_ITEMS.find((entry) => entry.id === id)
+  return item ? navRequirementsMet(item.requires, ctx) : false
+}
+
+export function isRouteNavAvailable(id: AppNavRouteId, ctx: NavPanelContext): boolean {
+  const item = APP_NAV_ROUTE_ITEMS.find((entry) => entry.id === id)
   return item ? navRequirementsMet(item.requires, ctx) : false
 }
 

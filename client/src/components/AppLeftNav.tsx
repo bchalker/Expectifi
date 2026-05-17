@@ -3,12 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   APP_NAV_DRAWER_ITEMS,
+  APP_NAV_ROUTE_ITEMS,
   isSnapshotNavAvailable,
   navItemUnavailableReason,
   navRequirementsMet,
   SNAPSHOT_NAV_REQUIRES,
   type NavPanelContext,
 } from "../lib/appNavDrawers";
+import { useAppPath } from "../hooks/useAppPath";
+import { navigateApp } from "../lib/appPaths";
 import type { DrawerName } from "../lib/computeResults";
 import "./AppLeftNav.scss";
 
@@ -50,6 +53,7 @@ export function AppLeftNav({
       ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
       : "";
   const showRetireByInProfile = Boolean(user?.onboardingDone);
+  const path = useAppPath();
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
@@ -118,9 +122,6 @@ export function AppLeftNav({
         <div className="app-left-nav__scroll">
           <div className="app-left-nav__brand">
             <span className="app-left-nav__mark">HeadwayPlanner</span>
-            <span className="app-left-nav__kicker">
-              Hatch your retirement plan.
-            </span>
           </div>
           <div
             className="app-left-nav__rule app-left-nav__rule--after-brand"
@@ -142,6 +143,28 @@ export function AppLeftNav({
             <span className="app-left-nav__item-label">Snapshot</span>
           </button>
           <div className="app-left-nav__rule" aria-hidden />
+          {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
+            const available = navRequirementsMet(requires, navContext);
+            const unavailableReason = navItemUnavailableReason(requires, navContext);
+            const isActive = path === routePath && available;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}${!available ? " app-left-nav__item--unavailable" : ""}`}
+                aria-current={isActive ? "page" : undefined}
+                aria-disabled={!available}
+                title={unavailableReason ?? undefined}
+                onClick={() => {
+                  if (!available) return;
+                  navigateApp(routePath);
+                  closeMobile();
+                }}
+              >
+                <span className="app-left-nav__item-label">{label}</span>
+              </button>
+            );
+          })}
           {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
             const available = navRequirementsMet(requires, navContext);
             const unavailableReason = navItemUnavailableReason(requires, navContext);

@@ -13,6 +13,15 @@ export function fmtMon(n: number): string {
   return fmt(n) + '/mo'
 }
 
+/** Monthly surplus/shortfall: `+$1,234/mo` or `- $1,234/mo`. */
+export function fmtSignedMonthly(surplus: number): string {
+  const n = Math.round(surplus)
+  const amount = '$' + Math.abs(n).toLocaleString('en-US')
+  if (n > 0) return `+${amount}/mo`
+  if (n < 0) return `- ${amount}/mo`
+  return `${amount}/mo`
+}
+
 export function fmtInput(n: number): string {
   if (!Number.isFinite(n) || n === 0) return '0'
   return Math.round(n).toLocaleString('en-US')

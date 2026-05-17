@@ -1,0 +1,35 @@
+/* Thin SimpleBar tracks (side panels, modals, popouts) */
+.side-panel-shell__scroll,
+.fidelity-scenario-popout__scroll {
+  .simplebar-track.simplebar-vertical {
+    width: 3px;
+    margin: 3px 1px 3px 0;
+    background: transparent;
+  }
+
+  .simplebar-scrollbar.simplebar-vertical {
+    width: 3px;
+  }
+
+  .simplebar-scrollbar.simplebar-vertical:before {
+    inset: 0;
+    background: color-mix(in srgb, var(--text-muted) 40%, transparent);
+    border-radius: 99px;
+  }
+
+  .simplebar-track.simplebar-horizontal {
+    height: 3px;
+    margin: 0 3px 1px;
+    background: transparent;
+  }
+
+  .simplebar-scrollbar.simplebar-horizontal {
+    height: 3px;
+  }
+
+  .simplebar-scrollbar.simplebar-horizontal:before {
+    inset: 0;
+    background: color-mix(in srgb, var(--text-muted) 40%, transparent);
+    border-radius: 99px;
+  }
+}

@@ -37,7 +37,6 @@ export type DrawerName =
   | 'sstiming'
   | 'taxfree'
   | 'strategy'
-  | 'relocate'
   | 'config'
 
 /** Dividend yield preset (y = yield %, g = NAV drift %). */
@@ -116,7 +115,9 @@ export type CalculatorInputs = {
   dateOfBirth: string
   /** Planned age when you stop accumulating and model reaches portfolio FV. */
   targetRetirementAge: number
-  /** Target after-tax monthly income at retirement (0 = hide goal gauge). */
+  /** Target portfolio at retirement for growth-phase goal bar (0 = hide). */
+  growthGoal: number
+  /** Target after-tax monthly income at retirement (0 = hide income goal gauge). */
   monthlyIncomeGoal: number
   /** User-defined dividend / NAV presets for the income phase. */
   incomePresets: IncomeYieldPreset[]
@@ -237,6 +238,7 @@ export function computeResults(
     italyCost: legacyItalyCost,
     dateOfBirth,
     targetRetirementAge,
+    growthGoal,
     monthlyIncomeGoal,
   } = inputs
 
@@ -375,8 +377,13 @@ export function computeResults(
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
   const equityMon = (HOME_EQUITY * wdRate) / 12
 
-  const goalProgressPct =
+  const incomeGoalProgressPct =
     monthlyIncomeGoal > 0 ? Math.min(150, Math.round((afterTaxMon / monthlyIncomeGoal) * 1000) / 10) : null
+
+  const growthGoalProgressPct =
+    growthGoal > 0 && hasPortfolioBalances
+      ? Math.min(150, Math.round((totalFV / growthGoal) * 1000) / 10)
+      : null
 
   const incomePhase = ui.incomeMode
     ? calcIncomePhase({
@@ -448,8 +455,10 @@ export function computeResults(
     currentAge,
     targetRetirementAge,
     yearsToRetirement,
+    growthGoal,
     monthlyIncomeGoal,
-    goalProgressPct,
+    growthGoalProgressPct,
+    incomeGoalProgressPct,
     ssAge,
     wdRate,
     incYield,

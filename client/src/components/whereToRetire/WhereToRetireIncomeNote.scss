@@ -1,0 +1,46 @@
+.wtr-income-note {
+  margin: 0 auto 1rem;
+  padding: 0 1rem;
+  max-width: var(--layout-app-boundary);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: color-mix(in srgb, #fff 85%, transparent);
+  line-height: 1.5;
+}
+
+.wtr-income-note__amount {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: #fff;
+}
+
+.wtr-income-note__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.35rem;
+  border: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  color: color-mix(in srgb, #fff 90%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+
+.wtr-income-note__edit {
+  display: inline-block;
+  margin-left: 0.35rem;
+}
+
+.wtr-income-note__input {
+  width: 6.5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid color-mix(in srgb, #fff 40%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, #000 25%, transparent);
+  font-size: 1rem;
+  color: #fff;
+}

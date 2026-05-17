@@ -1,0 +1,44 @@
+.wtr-dest-mark {
+  flex-shrink: 0;
+}
+
+.wtr-dest-mark--emoji {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.wtr-dest-mark--state {
+  display: block;
+  width: 2rem;
+  height: 1.35rem;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.wtr-dest-mark--badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.35rem;
+  border-radius: 4px;
+  background: var(--navy);
+  color: var(--surface);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.wtr-search__option-mark .wtr-dest-mark--emoji {
+  font-size: 1.1rem;
+}
+
+.wtr-search__option-mark .wtr-dest-mark--state,
+.wtr-search__option-mark .wtr-dest-mark--badge {
+  width: 1.75rem;
+  height: 1.25rem;
+}

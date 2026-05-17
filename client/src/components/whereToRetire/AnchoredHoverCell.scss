@@ -1,0 +1,107 @@
+.wtr-hover-cell__trigger {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  text-align: inherit;
+  font: inherit;
+  cursor: default;
+}
+
+.wtr-hover-cell {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+.wtr-hover-cell:hover,
+.wtr-hover-cell--open,
+.wtr-hover-cell:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.wtr-hover-cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.wtr-hover-cell__corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 10px 0;
+  border-color: transparent color-mix(in srgb, var(--accent) 45%, var(--border)) transparent
+    transparent;
+  pointer-events: none;
+  transition: border-color 0.15s ease;
+}
+
+.wtr-hover-cell:hover .wtr-hover-cell__corner,
+.wtr-hover-cell--open .wtr-hover-cell__corner,
+.wtr-hover-cell:focus-visible .wtr-hover-cell__corner {
+  border-right-color: var(--accent);
+}
+
+.wtr-hover-cell__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* HeroUI Popover shell — arrow from Popover.Arrow */
+.wtr-hover-popover.popover,
+.wtr-hover-popover {
+  z-index: 450;
+  width: var(--wtr-popover-w, 280px);
+  max-width: min(var(--wtr-popover-w, 280px), 92vw);
+  max-height: var(--wtr-popover-max-h, 320px);
+  overflow: auto;
+  padding: 0;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8ed);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.18);
+  color: var(--text, #1c2b3a);
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.wtr-hover-popover__hit {
+  outline: none;
+}
+
+.wtr-hover-popover__dialog.popover__dialog {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.wtr-hover-popover__arrow {
+  fill: var(--surface, #ffffff);
+  stroke: var(--border, #e2e8ed);
+}

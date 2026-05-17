@@ -8,12 +8,17 @@ type Props = {
   /** Tooltip body (plain text or short markup). */
   content: ReactNode
   placement?: Placement
+  contentClassName?: string
 }
 
 /**
  * Shared hover/focus tooltip (HeroUI + react-aria). Use for icon-only hints such as mode descriptions.
  */
-export function Tooltip({ children, content, placement = 'top' }: Props) {
+export function Tooltip({ children, content, placement = 'top', contentClassName }: Props) {
+  const contentClass = ['max-w-[260px] text-xs leading-snug', contentClassName]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <HeroTooltip.Root delay={250} closeDelay={80}>
       <HeroTooltip.Trigger className="inline-flex shrink-0 items-center">
@@ -21,7 +26,7 @@ export function Tooltip({ children, content, placement = 'top' }: Props) {
           {children}
         </span>
       </HeroTooltip.Trigger>
-      <HeroTooltip.Content placement={placement} className="max-w-[260px] text-xs leading-snug">
+      <HeroTooltip.Content placement={placement} className={contentClass}>
         {content}
       </HeroTooltip.Content>
     </HeroTooltip.Root>
