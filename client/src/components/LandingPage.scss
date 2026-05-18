@@ -114,28 +114,6 @@
   color: var(--landing-green);
 }
 
-.landing-hero__title {
-  margin: 0 0 1.1rem;
-  font-family: var(--heading);
-  font-size: clamp(2rem, 5.5vw, 3.15rem);
-  font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-
-.landing-hero__accent {
-  color: var(--landing-green);
-}
-
-.landing-hero__sub {
-  margin: 0 0 1.75rem;
-  font-size: clamp(var(--text-base), 2.2vw, var(--text-md));
-  line-height: var(--leading-relaxed);
-  color: var(--landing-text-muted-on-navy);
-  max-width: 34rem;
-}
-
 .landing-hero__note {
   margin: 1rem 0 0;
   font-size: var(--text-sm);

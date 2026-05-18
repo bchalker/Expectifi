@@ -1,0 +1,132 @@
+.landing-hero-headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 1.75rem;
+}
+
+.landing-hero-headline__title {
+  margin: 0;
+  font-family: var(--heading);
+  font-size: clamp(2rem, 5.5vw, 3.15rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-align: center;
+  max-width: 100%;
+}
+
+.landing-hero-headline__title-line {
+  display: block;
+}
+
+.landing-hero-headline__title-line:first-of-type {
+  white-space: nowrap;
+}
+
+.landing-hero-headline__title-line:last-of-type {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.landing-hero-headline__tagline {
+  margin: 0.65rem 0 0;
+  font-family: var(--heading);
+  font-size: clamp(var(--text-base), 2.4vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--landing-text-muted-on-navy);
+  text-align: center;
+}
+
+.landing-hero-headline__location-slot {
+  display: inline-flex;
+  align-items: baseline;
+  vertical-align: baseline;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+  overflow: hidden;
+  box-sizing: content-box;
+  transition: width 400ms ease;
+}
+
+.landing-hero-headline__location-measure {
+  position: absolute;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: var(--heading);
+  font-size: 0.9em;
+  font-weight: 700;
+  line-height: inherit;
+}
+
+.landing-hero-headline__location-viewport {
+  display: inline-flex;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+  overflow: hidden;
+}
+
+.landing-hero-headline__location {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+  line-height: inherit;
+  font-family: var(--heading);
+  font-size: 0.9em;
+  font-weight: 700;
+  color: #c4610a;
+  white-space: nowrap;
+  transition:
+    transform 400ms ease,
+    opacity 400ms ease;
+}
+
+.landing-hero-headline__location--out {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+@keyframes landing-hero-location-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.landing-hero-headline__location--in {
+  animation: landing-hero-location-in 400ms ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-headline__location-slot {
+    transition: none;
+  }
+
+  .landing-hero-headline__location {
+    transition: none;
+  }
+
+  .landing-hero-headline__location--out,
+  .landing-hero-headline__location--in {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}

@@ -1,5 +1,6 @@
 import { IconCircleCheck } from '@tabler/icons-react'
 import { Header } from './Header'
+import { LandingHeroHeadline } from './LandingHeroHeadline'
 import { APP_PATHS } from '../lib/appPaths'
 import { landingNavigateOnboarding } from './landingNav'
 import './LandingPage.scss'
@@ -66,13 +67,7 @@ export function LandingPage({
           <div className="landing-page__wrap">
             <div className="landing-hero__inner">
             <p className="landing-hero__eyebrow">Retirement planning, simplified</p>
-            <h1 id="landing-hero-title" className="landing-hero__title">
-              Find out if your <span className="landing-hero__accent">nest egg</span> is ready
-            </h1>
-            <p className="landing-hero__sub">
-              Calculate your retirement income, Social Security timing, and savings runway — clear answers in under 2
-              minutes.
-            </p>
+            <LandingHeroHeadline />
             <button type="button" className="landing-btn landing-btn--primary landing-btn--lg" onClick={onGetStarted}>
               Get started free
             </button>
