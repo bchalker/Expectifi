@@ -551,6 +551,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         navContext={navContext}
       />
       <div className="app-scroll-stack">
+        <div className="app-scroll-stack__main">
       {isWhereToRetire ? (
         <WhereToRetire c={c} />
       ) : (
@@ -677,6 +678,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       </div>
         </>
       )}
+        </div>
         <AppPrivacyTrust dividerAbove={isWhereToRetire} />
       </div>
 

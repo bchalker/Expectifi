@@ -74,8 +74,16 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
   box-sizing: border-box;
+}
+
+.app-scroll-stack__main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
 }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
