@@ -69,13 +69,15 @@
 }
 
 .config-profile-tab__confirm {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: calc(var(--z-drawer-shell) + 4);
+  z-index: 20;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.75rem;
+  box-sizing: border-box;
 }
 
 .config-profile-tab__confirm-backdrop {
@@ -83,48 +85,115 @@
   inset: 0;
   border: none;
   padding: 0;
-  background: rgba(28, 24, 18, 0.45);
+  background: rgba(255, 255, 255, 0.9);
   cursor: pointer;
 }
 
 .config-profile-tab__confirm-panel {
   position: relative;
-  width: min(22rem, 100%);
-  padding: 1.25rem 1.35rem;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 20rem);
+  margin-inline: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
 }
 
 .config-profile-tab__confirm-title {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
   font-family: var(--heading);
   font-size: var(--text-lg);
   font-weight: 500;
   color: var(--text);
+  text-align: center;
 }
 
 .config-profile-tab__confirm-body {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: var(--text-sm);
   line-height: 1.55;
   color: var(--text-muted);
+  text-align: center;
 }
 
-.config-profile-tab__confirm-footer {
+.config-profile-tab__confirm-error {
+  margin: 0.75rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+}
+
+.config-profile-tab__confirm-actions {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1.25rem;
 }
 
-.config-profile-tab__confirm-btn--danger {
+.config-profile-tab__confirm-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  flex: 0 1 auto;
+  margin: 0;
+  padding: 0.75rem 1.35rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    filter 0.12s ease;
+}
+
+.config-profile-tab__confirm-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.config-profile-tab__confirm-action--danger {
   background: var(--color-danger);
   border-color: var(--color-danger);
   color: #fff;
 }
 
-.config-profile-tab__confirm-btn--danger:hover:not(:disabled) {
+.config-profile-tab__confirm-action--danger:hover:not(:disabled) {
   filter: brightness(0.95);
+}
+
+.config-profile-tab__confirm-action--danger:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.config-profile-tab__confirm-action--muted {
+  background: #e8eaed;
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  color: var(--text);
+}
+
+.config-profile-tab__confirm-action--muted:hover:not(:disabled) {
+  background: #dde1e6;
+}
+
+.config-profile-tab__confirm-action--muted:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
 }

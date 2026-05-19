@@ -45,17 +45,44 @@
   }
 }
 
-.dob-age-today {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0.4rem 0 0;
+@keyframes dob-age-today-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-0.35rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.dob-age-today__label {
-  font-family: var(--body);
-  font-size: var(--text-sm);
+.dob-age-today {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.dob-age-today__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   color: var(--text-muted);
+}
+
+.dob-age-today__icon {
+  display: block;
+}
+
+.dob-age-today--enter .dob-age-today__icon-wrap,
+.dob-age-today--enter .dob-age-today__value {
+  animation: dob-age-today-in 0.42s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+.dob-age-today--enter .dob-age-today__value {
+  animation-delay: 0.07s;
 }
 
 .dob-age-today__value {
@@ -66,4 +93,11 @@
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dob-age-today--enter .dob-age-today__icon-wrap,
+  .dob-age-today--enter .dob-age-today__value {
+    animation: none;
+  }
 }

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { IconChevronLeft, IconChevronRight, IconX } from '@tabler/icons-react'
+import SimpleBar from 'simplebar-react'
+import 'simplebar-react/dist/simplebar.min.css'
 import { getCatalogEntry, type DestinationCatalogEntry } from '../../data/destinations'
 import { US_FEDERAL_NOTE } from '../../data/retirementTaxDetail'
 import { loadProfileForKey, type DestinationProfile } from '../../lib/whereToRetire/profiles'
@@ -7,6 +9,8 @@ import { loadDestinationMonthlyCost, saveDestinationMonthlyCost } from '../../li
 import { fmtMon, fmtSignedMonthly } from '../../utils/format'
 import { DestinationMark } from './DestinationMark'
 import { DollarStrengthSparkline } from './DollarStrengthSparkline'
+import { ColSnapshotOverlay, type ColOverlayTarget } from './ColSnapshotOverlay'
+import { CostOfLivingIndexCell } from './CostOfLivingIndexCell'
 import { TaxRateCell } from './TaxRateCell'
 import './ComparisonGrid.scss'
 
@@ -16,7 +20,7 @@ const SURPLUS_ROW = {
 } as const
 
 /** Temporarily hidden grid rows — remove ids to restore. */
-const TEMP_HIDDEN_GRID_ROW_IDS = new Set(['col', 'qol'])
+const TEMP_HIDDEN_GRID_ROW_IDS = new Set(['qol'])
 
 const ALL_GRID_ROWS: { id: string; label: string; shortLabel: string; sublabel?: string }[] = [
   { id: 'afterTax', label: 'After-tax monthly income', shortLabel: 'After tax' },
@@ -77,11 +81,13 @@ function CellContent({
   col,
   scoreMeta,
   onCostChange,
+  onColOpen,
 }: {
   rowId: string
   col: ColumnState
   scoreMeta?: DestinationScoreMeta
   onCostChange: (cost: number) => void
+  onColOpen: (entry: ColumnState['entry']) => void
 }) {
   const p = col.profile
   if (col.loading) return <span className="wtr-grid__loading">Loading…</span>
@@ -131,6 +137,18 @@ function CellContent({
       return <p className="wtr-grid__note">{p.visaNotes}</p>
     case 'healthcare':
       return <p className="wtr-grid__note">{p.healthcareNotes}</p>
+    case 'col':
+      return (
+        <CostOfLivingIndexCell
+          score={p.colIndex}
+          source={p.colScoreSource}
+          breakdown={p.colBreakdown}
+          destinationName={col.entry.name}
+          estimatedLivingCostUsd={p.estimatedLivingCostUsd}
+          estimatedLivingCostLabel={p.estimatedLivingCostLabel}
+          onOpen={() => onColOpen(col.entry)}
+        />
+      )
     case 'fx':
       if (p.kind === 'us-state' || p.currencyCode === 'USD') {
         return <span className="wtr-grid__note">Uses USD</span>
@@ -238,12 +256,14 @@ function ComparisonGridMobile({
   scoreByKey,
   onRemove,
   onCostChange,
+  onColOpen,
 }: {
   columns: ColumnState[]
   grossMonthlyIncome: number
   scoreByKey: Record<string, DestinationScoreMeta>
   onRemove: (key: string) => void
   onCostChange: (key: string, cost: number) => void
+  onColOpen: (entry: DestinationCatalogEntry) => void
 }) {
   const [activeKey, setActiveKey] = useState(columns[0]?.entry.key ?? '')
 
@@ -298,6 +318,7 @@ function ComparisonGridMobile({
               className={[
                 'wtr-grid__mobile-row',
                 row.id === 'taxRate' && 'wtr-grid__mobile-row--tax',
+                row.id === 'col' && 'wtr-grid__mobile-row--col',
                 CENTER_VALUE_ROW_IDS.has(row.id) && 'wtr-grid__mobile-row--center',
               ]
                 .filter(Boolean)
@@ -318,6 +339,7 @@ function ComparisonGridMobile({
                     col={col}
                     scoreMeta={scoreByKey[col.entry.key]}
                     onCostChange={(cost) => onCostChange(col.entry.key, cost)}
+                    onColOpen={onColOpen}
                   />
                 )}
               </dd>
@@ -337,6 +359,7 @@ function ComparisonGridMobile({
 
 export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, onRemove }: Props) {
   const [costs, setCosts] = useState<Record<string, number>>({})
+  const [colOverlay, setColOverlay] = useState<ColOverlayTarget | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -443,6 +466,10 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
     setCosts((prev) => ({ ...prev, [key]: cost }))
   }, [])
 
+  const handleColOpen = useCallback((entry: DestinationCatalogEntry) => {
+    setColOverlay({ entry })
+  }, [])
+
   return (
     <div
       className="wtr-grid"
@@ -450,12 +477,15 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
       aria-label="Destination comparison"
       style={{ '--wtr-col-count': columns.length } as CSSProperties}
     >
+      <ColSnapshotOverlay target={colOverlay} onClose={() => setColOverlay(null)} />
+
       <ComparisonGridMobile
         columns={columns}
         grossMonthlyIncome={grossMonthlyIncome}
         scoreByKey={scoreByKey}
         onRemove={onRemove}
         onCostChange={handleCostChange}
+        onColOpen={handleColOpen}
       />
 
       <div className="wtr-grid__desktop">
@@ -491,14 +521,16 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
             </button>
           </>
         ) : null}
-        <div
-          ref={scrollRef}
+        <SimpleBar
           className={['wtr-grid__viewport', headStuck && 'wtr-grid__viewport--head-stuck']
             .filter(Boolean)
             .join(' ')}
-          tabIndex={0}
-          role="region"
-          aria-label="Comparison table — scroll vertically and horizontally"
+          autoHide={false}
+          scrollableNodeProps={{
+            ref: scrollRef,
+            tabIndex: 0,
+            'aria-label': 'Comparison table — scroll vertically and horizontally',
+          }}
         >
           <table className="wtr-grid__table">
             <colgroup>
@@ -536,6 +568,7 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
                   className={[
                     rowIndex % 2 === 1 && 'wtr-grid__row--alt',
                     row.id === 'taxRate' && 'wtr-grid__row--tax',
+                    row.id === 'col' && 'wtr-grid__row--col',
                     CENTER_VALUE_ROW_IDS.has(row.id) && 'wtr-grid__row--center',
                   ]
                     .filter(Boolean)
@@ -551,7 +584,13 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
                   {columns.map((col) => (
                     <td
                       key={`${col.entry.key}-${row.id}`}
-                      className="wtr-grid__data-col wtr-grid__cell"
+                      className={[
+                        'wtr-grid__data-col',
+                        'wtr-grid__cell',
+                        row.id === 'col' && 'wtr-grid__cell--col',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       headers={`wtr-col-head-${col.entry.key}`}
                     >
                       <CellContent
@@ -559,6 +598,7 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
                         col={col}
                         scoreMeta={scoreByKey[col.entry.key]}
                         onCostChange={(cost) => handleCostChange(col.entry.key, cost)}
+                        onColOpen={handleColOpen}
                       />
                     </td>
                   ))}
@@ -582,7 +622,7 @@ export function ComparisonGrid({ selectedKeys, grossMonthlyIncome, scoreByKey, o
               </tr>
             </tfoot>
           </table>
-        </div>
+        </SimpleBar>
       </div>
       </div>
     </div>

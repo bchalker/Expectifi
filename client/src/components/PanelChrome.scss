@@ -30,6 +30,7 @@
   min-height: 0;
   min-width: 0;
   border-radius: 12px;
+  isolation: isolate;
   /* Only slide — width variants must stay fixed for the close animation (see SidePanelShell latch). */
   transition:
     transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
@@ -100,13 +101,42 @@
 
 .drawer-shell-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 0.75rem;
   padding: 1.25rem 1.75rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--surface);
   z-index: 1;
+}
+
+.drawer-shell-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.drawer-shell--config .drawer-panel-title {
+  font-family: var(--heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+}
+
+.drawer-panel-subtitle {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-muted);
 }
 
 .drawer-shell-body {

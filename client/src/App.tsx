@@ -5,14 +5,12 @@ import { useAuth } from './context/AuthContext'
 import { AccountBalances } from './components/AccountBalances'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
-import { IncomeInputs } from './components/IncomeInputs'
 import { Header } from './components/Header'
 import { AppLeftNav } from './components/AppLeftNav'
 import { StripHeader } from './components/StripHeader'
 import { GoalProgressBar } from './components/GoalProgressBar'
 import { SubHeader } from './components/SubHeader'
 import './components/AppHeaderStack.scss'
-import { buildSnapshot, hydrateAppSnapshot, type AppSnapshotV1 } from './lib/appSnapshot'
 import {
   loadPersistedCalculatorSession,
   persistCalculatorSession,
@@ -38,6 +36,7 @@ import { loadBalanceInputMode, saveBalanceInputMode, type BalanceInputMode } fro
 import { getAccountsRevealDelayMs, getStripControlsRevealDelayMs } from './lib/portfolioWaveReveal'
 import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubheader'
 import { isSsConfigured, normalizeClaimAge, type SsClaimAge } from './lib/socialSecurity'
+import { heartbeatEphemeralGuestTab, initEphemeralGuestSession, teardownEphemeralGuestTab } from './lib/guestEphemeralStorage'
 import { OnboardingOverlay } from './components/OnboardingOverlay'
 import { shouldSkipWelcome } from './lib/welcomeGate'
 import {
@@ -122,13 +121,13 @@ type AppProps = {
 }
 
 export default function App({ initialAuthModal = null }: AppProps) {
-  const [inputs, setInputsState] = useState<CalculatorInputs>(() => resolveInitialAppState().inputs)
-  const [ui, setUiState] = useState<CalculatorUi>(() => resolveInitialAppState().ui)
-  const [phase, setPhase] = useState<'growth' | 'income'>(() => resolveInitialAppState().phase)
+  const [inputs, setInputsState] = useState<CalculatorInputs>(() => freshAppState().inputs)
+  const [ui, setUiState] = useState<CalculatorUi>(() => freshAppState().ui)
+  const [phase, setPhase] = useState<'growth' | 'income'>(() => freshAppState().phase)
   const [accordionOpen, setAccordionOpen] = useState(false)
   const [drawer, setDrawer] = useState<DrawerName | null>(null)
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>('profile')
-  const [activePreset, setActivePreset] = useState<string | null>(() => resolveInitialAppState().activePreset)
+  const [activePreset, setActivePreset] = useState<string | null>(() => freshAppState().activePreset)
   const [fidelityImportRev, setFidelityImportRev] = useState(0)
   const [balanceMode, setBalanceMode] = useState<BalanceInputMode>(() => loadBalanceInputMode())
   const [brokerageMode, setBrokerageMode] = useState<BrokerageBalanceMode>(() => loadBrokerageBalanceMode())
@@ -240,24 +239,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }))
   }, [])
 
-  const applySnapshot = useCallback((snap: AppSnapshotV1) => {
-    const hydrated = hydrateAppSnapshot(snap, defaultInputs)
-    if (!hydrated) return
-    setInputsState(applyFidelityBalanceOverrides(hydrated.inputs))
-    setUiState({ ...defaultUi, ...hydrated.ui })
-    setPhase(hydrated.phase)
-    setActivePreset(hydrated.activePreset)
-    persistCalculatorSession({
-      inputs: applyFidelityBalanceOverrides(hydrated.inputs),
-      ui: { ...defaultUi, ...hydrated.ui },
-      phase: hydrated.phase,
-      activePreset: hydrated.activePreset,
-    })
-  }, [])
-
   /** Rehydrate from localStorage when auth changes (guest ↔ signed-in) so CSV + plan fields survive checkout. */
   useEffect(() => {
     if (authLoading) return
+    if (!user) initEphemeralGuestSession()
     const restored = resolveInitialAppState()
     setInputsState(restored.inputs)
     setUiState(restored.ui)
@@ -269,6 +254,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setFidelityImportRev((n) => n + 1)
     }
   }, [authLoading, user?.id])
+
+  /** Ephemeral guest sessions: clear local plan data when the last guest tab closes. */
+  useEffect(() => {
+    if (authLoading || user) return
+    initEphemeralGuestSession()
+    heartbeatEphemeralGuestTab()
+    const heartbeatId = window.setInterval(() => heartbeatEphemeralGuestTab(), 20_000)
+    const onPageHide = () => teardownEphemeralGuestTab()
+    window.addEventListener('pagehide', onPageHide)
+    return () => {
+      window.clearInterval(heartbeatId)
+      window.removeEventListener('pagehide', onPageHide)
+    }
+  }, [authLoading, user])
 
   /** Persist calculator session for guests and signed-in users (Fidelity CSV lives in its own storage key). */
   useEffect(() => {
@@ -288,17 +287,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
   }, [skipWelcome])
 
   useEffect(() => {
+    if (!welcomeDone || typeof sessionStorage === 'undefined') return
+    if (sessionStorage.getItem('headwayplanner_open_import') !== '1') return
+    sessionStorage.removeItem('headwayplanner_open_import')
+    setOpenImportRequest((n) => n + 1)
+  }, [welcomeDone])
+
+  useEffect(() => {
     if (!user?.planPrefs) return
     setInputsState((s) => {
       if (inputsHavePlanningProfileFields(s)) return s
       return { ...s, ...userPrefsToCalculatorPatch(user.planPrefs!) }
     })
   }, [user?.id, user?.planPrefs])
-
-  const getSnapshot = useCallback(
-    () => buildSnapshot(inputs, ui, phase, activePreset),
-    [inputs, ui, phase, activePreset],
-  )
 
   const onFidelityApplyBalances = useCallback(
     (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => {
@@ -374,6 +375,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     ((phase === 'growth' && inputs.growthGoal > 0) || (phase === 'income' && inputs.monthlyIncomeGoal > 0))
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)
   const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] = useState(false)
+  const [openImportRequest, setOpenImportRequest] = useState(0)
 
   useEffect(() => {
     syncNoPortfolioSubheaderDocumentAttr(c.hasPortfolioBalances)
@@ -438,17 +440,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
-
-  if (user && !welcomeDone) {
-    return (
-      <OnboardingOverlay
-        inputs={inputs}
-        setInputs={setInputs}
-        saveUserPrefs={saveUserPrefs}
-        onComplete={() => setWelcomeDone(true)}
-      />
-    )
-  }
 
   return (
     <>
@@ -550,7 +541,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onOpenRegister={openAuthRegister}
         navContext={navContext}
       />
-      <div className="app-scroll-stack">
+      <div
+        className={[
+          'app-scroll-stack',
+          isWhereToRetire && 'app-scroll-stack--where-to-retire',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className="app-scroll-stack__main">
       {isWhereToRetire ? (
         <WhereToRetire c={c} />
@@ -655,23 +653,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
               brkBal={inputs.brkBal}
               brkRate={inputs.brkRate}
               brokerageMode={brokerageMode}
-              getSnapshot={getSnapshot}
-              onLoadSnapshot={applySnapshot}
+              onOpenSignIn={openAuthSignIn}
+              openImportRequest={openImportRequest || undefined}
+              onImportOpenHandled={() => setOpenImportRequest(0)}
             />
           </div>
 
-          {phase === 'income' && c.hasPortfolioBalances ? (
-            <div
-              id="phase-income"
-              className={
-                portfolioControlsRevealed
-                  ? 'portfolio-controls-reveal portfolio-controls-reveal--in'
-                  : 'portfolio-controls-reveal portfolio-controls-reveal--pending'
-              }
-            >
-              <IncomeInputs c={c} ui={ui} setUi={setUi} inputs={inputs} setInputs={setInputs} />
-            </div>
-          ) : null}
         </div>
 
         <hr className="divider" />
@@ -721,6 +708,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
         }}
         onSwitchMode={(mode) => setAuthModal(mode)}
       />
+      {!welcomeDone ? (
+        <OnboardingOverlay
+          inputs={inputs}
+          setInputs={setInputs}
+          saveUserPrefs={user ? saveUserPrefs : undefined}
+          onComplete={() => setWelcomeDone(true)}
+          onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
+        />
+      ) : null}
     </>
   )
 }

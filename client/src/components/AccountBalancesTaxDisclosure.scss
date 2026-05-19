@@ -99,10 +99,29 @@
 }
 
 .withdrawal-order-context__stack {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
   max-width: 100%;
+}
+
+.withdrawal-order-context__header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.withdrawal-order-context__scenarios {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
 }
 
 .withdrawal-order-context__title-why-row {
@@ -140,26 +159,35 @@
   color: var(--text-faint);
 }
 
-/* Match .strip-income-pct-pill (StripHeader) */
-.withdrawal-why-pill {
+/* Withdrawal header pills — shared typography (font-xs) and vertical centering */
+.withdrawal-why-pill,
+.scenarios-bar-sign-in-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin: 0;
-  padding: 3px 10px;
-  border: none;
+  padding: 0.3125rem 0.625rem;
+  min-height: 1.375rem;
   border-radius: 999px;
   box-sizing: border-box;
-  background: #e2e8f0;
-  color: #475569;
   font-family: var(--body);
-  font-size: 0.625rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
-  line-height: 1.2;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.withdrawal-why-pill {
+  border: none;
+  background: #e2e8f0;
+  color: #475569;
 }
 
 .withdrawal-why-pill:hover {
@@ -168,6 +196,23 @@
 }
 
 .withdrawal-why-pill:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.scenarios-bar-sign-in-pill {
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  color: #475569;
+}
+
+.scenarios-bar-sign-in-pill:hover {
+  background: var(--surface2);
+  border-color: color-mix(in srgb, var(--text-muted) 55%, var(--border-strong));
+  color: #334155;
+}
+
+.scenarios-bar-sign-in-pill:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }

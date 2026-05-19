@@ -8,6 +8,7 @@ import { shouldSkipWelcome } from './lib/welcomeGate'
 import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { LandingPage } from './components/LandingPage'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import { landingNavigateOnboarding } from './components/landingNav'
 import { trackPageView } from './lib/analytics'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
@@ -81,6 +82,10 @@ export default function AppRoot() {
       return null
     })
   }, [clearGoogleCheckoutUi])
+
+  if (path === APP_PATHS.privacy) {
+    return <PrivacyPolicy />
+  }
 
   if (authLoading) {
     return <div className="app-root-loading" aria-busy="true" aria-label="Loading" />

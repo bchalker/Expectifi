@@ -15,8 +15,11 @@ const TITLES: Record<DrawerName, string> = {
   sstiming: 'SS timing',
   taxfree: 'Tax-free withdrawals',
   strategy: 'Withdrawal strategy',
-  config: 'Make your plans',
+  config: 'Your Plans',
 }
+
+const CONFIG_DRAWER_SUBTITLE =
+  'We need a few details to project growth and monthly income from your balances.'
 
 type Props = {
   drawer: DrawerName | null
@@ -99,6 +102,7 @@ export function DrawerPanel({
         id="drawer"
         titleId="drawer-panel-title"
         title={panelDrawer ? TITLES[panelDrawer] : 'Details'}
+        subtitle={panelDrawer === 'config' ? CONFIG_DRAWER_SUBTITLE : undefined}
         onClose={onClose}
         scrollKey={panelDrawer ?? ''}
         shellClassName={['drawer-shell--right', panelDrawer === 'config' ? 'drawer-shell--config' : '']

@@ -38,7 +38,12 @@ export function daysInCalendarMonth(year: number, month: number): number {
 }
 
 export function defaultBirthYear(asOf: Date = new Date()): number {
-  return asOf.getFullYear() - 55
+  return asOf.getFullYear() - 50
+}
+
+/** Month/year picker defaults when no DOB is stored yet. */
+export function defaultDobPartsForPicker(asOf: Date = new Date()): DobParts {
+  return { year: String(defaultBirthYear(asOf)), month: '', day: '' }
 }
 
 /** Birth years where at least one calendar date yields age in [minAge, maxAge]. */
@@ -111,7 +116,7 @@ export function isDobPartsComplete(parts: DobParts): boolean {
 
 export function partsFromIsoValue(iso: string): DobParts {
   if (iso && isValidIsoDateString(iso)) return clampDobParts(parseIsoToDobParts(iso))
-  return { year: '', month: '', day: '' }
+  return defaultDobPartsForPicker()
 }
 
 export function dobPartsToIso(parts: DobParts): string | null {

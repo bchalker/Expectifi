@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Button, useOverlayState } from '@heroui/react'
 import { useAuth } from '../context/AuthContext'
 import './ConfigProfileTab.scss'
@@ -12,6 +13,15 @@ export function ConfigProfileTab({ onAccountCancelled }: Props) {
   const confirmState = useOverlayState()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [drawerShell, setDrawerShell] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (!confirmState.isOpen) {
+      setDrawerShell(null)
+      return
+    }
+    setDrawerShell(document.getElementById('drawer'))
+  }, [confirmState.isOpen])
 
   const onConfirmCancel = useCallback(async () => {
     setErr(null)
@@ -74,54 +84,58 @@ export function ConfigProfileTab({ onAccountCancelled }: Props) {
         Cancel account
       </Button>
 
-      {confirmState.isOpen ? (
-        <div
-          className="config-profile-tab__confirm"
-          role="alertdialog"
-          aria-modal="true"
-          aria-labelledby="config-profile-cancel-title"
-          aria-describedby="config-profile-cancel-desc"
-        >
-          <button
-            type="button"
-            className="config-profile-tab__confirm-backdrop"
-            aria-label="Dismiss"
-            disabled={busy}
-            onClick={() => confirmState.close()}
-          />
-          <div className="config-profile-tab__confirm-panel">
-            <h4 id="config-profile-cancel-title" className="config-profile-tab__confirm-title">
-              Cancel account?
-            </h4>
-            <p id="config-profile-cancel-desc" className="config-profile-tab__confirm-body">
-              Your subscription will be cancelled in Stripe and your account ({user.email}) will be deleted. This
-              cannot be undone.
-            </p>
-            <div className="config-profile-tab__confirm-footer">
-              <Button
+      {confirmState.isOpen && drawerShell
+        ? createPortal(
+            <div
+              className="config-profile-tab__confirm"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="config-profile-cancel-title"
+              aria-describedby="config-profile-cancel-desc"
+            >
+              <button
                 type="button"
-                size="sm"
-                variant="outline"
-                className="config-profile-tab__confirm-btn"
-                isDisabled={busy}
-                onPress={() => confirmState.close()}
-              >
-                Keep account
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="primary"
-                className="config-profile-tab__confirm-btn config-profile-tab__confirm-btn--danger"
-                isDisabled={busy}
-                onPress={() => void onConfirmCancel()}
-              >
-                {busy ? 'Cancelling…' : 'Yes, cancel account'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+                className="config-profile-tab__confirm-backdrop"
+                aria-label="Dismiss"
+                disabled={busy}
+                onClick={() => confirmState.close()}
+              />
+              <div className="config-profile-tab__confirm-panel">
+                <h4 id="config-profile-cancel-title" className="config-profile-tab__confirm-title">
+                  Cancel account?
+                </h4>
+                <p id="config-profile-cancel-desc" className="config-profile-tab__confirm-body">
+                  Your subscription will be cancelled in Stripe and your account ({user.email}) will be deleted. This
+                  cannot be undone.
+                </p>
+                {err ? (
+                  <p className="config-profile-tab__confirm-error" role="alert">
+                    {err}
+                  </p>
+                ) : null}
+                <div className="config-profile-tab__confirm-actions">
+                  <button
+                    type="button"
+                    className="config-profile-tab__confirm-action config-profile-tab__confirm-action--muted"
+                    disabled={busy}
+                    onClick={() => confirmState.close()}
+                  >
+                    No
+                  </button>
+                  <button
+                    type="button"
+                    className="config-profile-tab__confirm-action config-profile-tab__confirm-action--danger"
+                    disabled={busy}
+                    onClick={() => void onConfirmCancel()}
+                  >
+                    {busy ? 'Cancelling…' : 'Yes, Cancel my account'}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            drawerShell,
+          )
+        : null}
     </section>
   )
 }

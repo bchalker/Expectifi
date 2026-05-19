@@ -1,10 +1,11 @@
 import { isValidIsoDateString } from './ageFromDob'
 import type { CalculatorInputs } from './computeResults'
-import { normalizeClaimAge, type SsClaimAge } from './socialSecurity'
+import { clampClaimAge, normalizeClaimAge, type SsClaimAge } from './socialSecurity'
 
 /** Guest welcome / plan profile (localStorage). */
 const LEGACY_USER_PREFS_STORAGE_KEY = 'eggspectifi_user_prefs'
 export const USER_PREFS_STORAGE_KEY = 'headwayplanner_user_prefs'
+export const WELCOME_COMPLETED_STORAGE_KEY = 'headwayplanner_welcome_completed'
 
 export type UserPrefs = {
   dob: string
@@ -22,9 +23,8 @@ export function hasPlanningProfilePrefs(p: UserPrefs | null | undefined): boolea
   if (!isValidIsoDateString(p.dob)) return false
   const age = Math.round(p.retirementAge)
   if (!Number.isFinite(age) || age < RETIRE_AGE_MIN || age > RETIRE_AGE_MAX) return false
-  const ss = Math.round(p.ssClaimingAge)
+  const ss = clampClaimAge(p.ssClaimingAge)
   if (!Number.isFinite(ss)) return false
-  normalizeClaimAge(ss)
   return true
 }
 
@@ -48,7 +48,7 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
     dob,
     retirementAge: Math.round(retirementAge),
     monthlyGoal: Math.round(monthlyGoal),
-    ssClaimingAge: normalizeClaimAge(Math.round(ssClaimingAge)),
+    ssClaimingAge: clampClaimAge(Math.round(ssClaimingAge)),
   }
   return hasPlanningProfilePrefs(prefs) ? prefs : null
 }
@@ -58,7 +58,7 @@ export function userPrefsToCalculatorPatch(p: UserPrefs): Partial<CalculatorInpu
     dateOfBirth: p.dob,
     targetRetirementAge: Math.round(p.retirementAge),
     monthlyIncomeGoal: Math.max(0, Math.round(p.monthlyGoal)),
-    ssAge: normalizeClaimAge(p.ssClaimingAge),
+    ssAge: clampClaimAge(p.ssClaimingAge),
   }
 }
 
@@ -67,7 +67,7 @@ export function calculatorInputsToPlanningPrefs(inputs: CalculatorInputs): UserP
     dob: inputs.dateOfBirth,
     retirementAge: inputs.targetRetirementAge,
     monthlyGoal: inputs.monthlyIncomeGoal,
-    ssClaimingAge: normalizeClaimAge(inputs.ssAge),
+    ssClaimingAge: clampClaimAge(inputs.ssAge),
   }
   return hasPlanningProfilePrefs(prefs) ? prefs : null
 }
@@ -88,9 +88,39 @@ export function inputsHavePlanningProfileFields(inputs: CalculatorInputs): boole
     dob: inputs.dateOfBirth,
     retirementAge: inputs.targetRetirementAge,
     monthlyGoal: inputs.monthlyIncomeGoal,
-    ssClaimingAge: normalizeClaimAge(inputs.ssAge),
+    ssClaimingAge: clampClaimAge(inputs.ssAge),
   }
   return hasPlanningProfilePrefs(prefs)
+}
+
+export type PlanningDisplayValues = {
+  dateOfBirth: string
+  targetRetirementAge: number
+  save: number
+  growthGoal: number
+  monthlyIncomeGoal: number
+}
+
+const EMPTY_PLANNING_DISPLAY: PlanningDisplayValues = {
+  dateOfBirth: '',
+  targetRetirementAge: 0,
+  save: 0,
+  growthGoal: 0,
+  monthlyIncomeGoal: 0,
+}
+
+/** Values for planning UI — empty until onboarding or manual plan capture. */
+export function planningDisplayFromInputs(inputs: CalculatorInputs): PlanningDisplayValues {
+  if (!inputsHavePlanningProfileFields(inputs)) {
+    return { ...EMPTY_PLANNING_DISPLAY }
+  }
+  return {
+    dateOfBirth: inputs.dateOfBirth,
+    targetRetirementAge: inputs.targetRetirementAge,
+    save: inputs.save,
+    growthGoal: inputs.growthGoal,
+    monthlyIncomeGoal: inputs.monthlyIncomeGoal,
+  }
 }
 
 /** True when welcome survey fields are complete (includes a positive monthly goal). */
@@ -120,6 +150,32 @@ export function saveLocalUserPrefs(prefs: UserPrefs): void {
     localStorage.setItem(USER_PREFS_STORAGE_KEY, JSON.stringify(prefs))
   } catch {
     /* quota / private mode */
+  }
+}
+
+export function clearLocalUserPrefsStorage(): void {
+  try {
+    localStorage.removeItem(USER_PREFS_STORAGE_KEY)
+    localStorage.removeItem(LEGACY_USER_PREFS_STORAGE_KEY)
+    localStorage.removeItem(WELCOME_COMPLETED_STORAGE_KEY)
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function markWelcomeCompletedLocal(): void {
+  try {
+    localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function isWelcomeCompletedLocal(): boolean {
+  try {
+    return localStorage.getItem(WELCOME_COMPLETED_STORAGE_KEY) === '1'
+  } catch {
+    return false
   }
 }
 

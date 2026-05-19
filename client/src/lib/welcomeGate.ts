@@ -2,8 +2,7 @@ import type { CalculatorInputs } from './computeResults'
 import type { UserPrefs } from './userPrefs'
 import {
   hasCompleteUserPrefs,
-  hasPlanningProfilePrefs,
-  inputsHavePlanningProfileFields,
+  isWelcomeCompletedLocal,
   loadLocalUserPrefs,
 } from './userPrefs'
 
@@ -15,12 +14,10 @@ export type WelcomeSkipContext = {
 
 /** True when welcome survey should not be shown. */
 export function shouldSkipWelcome(ctx: WelcomeSkipContext): boolean {
-  if (ctx.inputs && inputsHavePlanningProfileFields(ctx.inputs)) return true
-  const local = loadLocalUserPrefs()
-  if (hasPlanningProfilePrefs(local) || hasCompleteUserPrefs(local)) return true
-  if (hasPlanningProfilePrefs(ctx.planPrefs ?? null) || hasCompleteUserPrefs(ctx.planPrefs ?? null)) {
-    return true
-  }
   if (ctx.onboardingDone) return true
+  if (isWelcomeCompletedLocal()) return true
+  const local = loadLocalUserPrefs()
+  if (hasCompleteUserPrefs(local)) return true
+  if (hasCompleteUserPrefs(ctx.planPrefs ?? null)) return true
   return false
 }

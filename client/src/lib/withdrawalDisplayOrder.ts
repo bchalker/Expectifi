@@ -40,12 +40,12 @@ export function withdrawalBadgeAndHint(
     case 'pretax':
       return {
         order,
-        hint: rmd ? 'RMDs required at 73' : 'fill lower tax brackets',
+        hint: rmd ? 'RMDs required at 73' : null,
       }
     case 'roth':
       return {
         order,
-        hint: 'preserve longest',
+        hint: null,
       }
     case 'hsa':
       return {

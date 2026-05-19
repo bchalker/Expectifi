@@ -11,6 +11,20 @@
   min-width: 0;
 }
 
+.planning-profile-fields__dob-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-profile-fields__dob-inline .dob-select-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .planning-profile-fields__dob .dob-select-row--no-day {
   grid-template-columns: minmax(0, 1.45fr) minmax(5.75rem, 1fr);
 }

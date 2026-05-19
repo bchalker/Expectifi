@@ -109,13 +109,13 @@
   );
   /* Portfolio post-import reveal (keep in sync with portfolioWaveReveal.ts) */
   --portfolio-reveal-duration: 0.5s;
-  --portfolio-stagger-step: 0.04s;
-  --portfolio-row-stagger-base: 0.02s;
-  --portfolio-strip-slider-delay: 0.16s;
-  --portfolio-strip-slider-delay-income: 0.18s;
-  --portfolio-strip-slider-delay-growth: 0.12s;
-  --portfolio-subheader-hero-delay: 0.05s;
-  --portfolio-subheader-bottom-delay: 0.14s;
+  --portfolio-stagger-step: 0.018s;
+  --portfolio-row-stagger-base: 0s;
+  --portfolio-strip-slider-delay: 0.09s;
+  --portfolio-strip-slider-delay-income: 0.1s;
+  --portfolio-strip-slider-delay-growth: 0.07s;
+  --portfolio-subheader-hero-delay: 0.04s;
+  --portfolio-subheader-bottom-delay: 0.08s;
   /* Stacking: chrome above dimmed panels; curve SVG transparency shows backdrop/shell, not page */
   --z-panel-backdrop: 350;
   --z-drawer-shell: 360;

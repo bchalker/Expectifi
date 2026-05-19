@@ -4,8 +4,14 @@ import type { CalculatorInputs } from './computeResults'
 
 export const SS_STANDARD_AGES = [62, 67, 70] as const
 export type SsClaimAge = (typeof SS_STANDARD_AGES)[number]
+export const SS_CLAIM_AGE_MIN = 62
+export const SS_CLAIM_AGE_MAX = 70
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const
+
+export function clampClaimAge(age: number): number {
+  return Math.min(SS_CLAIM_AGE_MAX, Math.max(SS_CLAIM_AGE_MIN, Math.round(age)))
+}
 
 export function normalizeClaimAge(age: number): SsClaimAge {
   const n = Math.round(age)
@@ -25,15 +31,16 @@ export function monthYearAtClaimAge(dateOfBirth: string, claimAge: number): stri
   return `${MONTHS_SHORT[mo]} ${y}`
 }
 
-export function formatSsAgeLabel(dateOfBirth: string, claimAge: SsClaimAge): string {
-  const when = monthYearAtClaimAge(dateOfBirth, claimAge)
-  return when ? `At ${claimAge} (${when})` : `At ${claimAge}`
+export function formatSsAgeLabel(dateOfBirth: string, claimAge: number): string {
+  const age = clampClaimAge(claimAge)
+  const when = monthYearAtClaimAge(dateOfBirth, age)
+  return when ? `At ${age} (${when})` : `At ${age}`
 }
 
 export type SsBenefitTriplet = { b62: number; b67: number; b70: number }
 
 export function benefitAtClaimAge(estimates: SsBenefitTriplet, claimAge: number): number {
-  const age = normalizeClaimAge(claimAge)
+  const age = clampClaimAge(claimAge)
   if (age <= 62) return estimates.b62
   if (age >= 70) return estimates.b70
   if (age <= 67) {

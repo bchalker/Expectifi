@@ -97,7 +97,9 @@ export function AnchoredHoverCell({
 
   useEffect(() => {
     if (!open) return
-    const viewport = cellRef.current?.closest('.wtr-grid__viewport')
+    const viewportRoot = cellRef.current?.closest('.wtr-grid__viewport')
+    const viewport =
+      viewportRoot?.querySelector<HTMLElement>('.simplebar-content-wrapper') ?? viewportRoot
     let attached = false
 
     const onScroll = () => {

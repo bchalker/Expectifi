@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Button } from '@heroui/react'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import { isDobAgeInRange } from '../lib/dateOfBirthSelect'
 import { PlanningProfileFields } from './PlanningProfileFields'
@@ -20,6 +19,7 @@ type Props = {
   initialTargetRetirementAge: number
   initialSave: number
   onContinue: (draft: ManualPlanDraft) => void
+  onCancel: () => void
 }
 
 export function ManualBalancesPlanStep({
@@ -27,6 +27,7 @@ export function ManualBalancesPlanStep({
   initialTargetRetirementAge,
   initialSave,
   onContinue,
+  onCancel,
 }: Props) {
   const [dob, setDob] = useState(initialDateOfBirth)
   const [retireAge, setRetireAge] = useState(initialTargetRetirementAge)
@@ -63,9 +64,6 @@ export function ManualBalancesPlanStep({
 
   return (
     <div className="account-balances-manual-plan-step">
-      <p className="account-balances-manual-plan-step__lead">
-        We need a few details to project growth and monthly income from your balances.
-      </p>
       <PlanningProfileFields
         variant="import-manual"
         dateOfBirth={dob}
@@ -81,11 +79,17 @@ export function ManualBalancesPlanStep({
         </p>
       ) : null}
       <div className="account-balances-manual-plan-step__actions">
-        <Button type="button" size="sm" variant="primary" onPress={handleContinue}>
+        <button type="button" className="account-balances-manual-plan-step__btn account-balances-manual-plan-step__btn--muted" onClick={onCancel}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="account-balances-manual-plan-step__btn account-balances-manual-plan-step__btn--primary"
+          onClick={handleContinue}
+        >
           Continue
-        </Button>
+        </button>
       </div>
     </div>
   )
 }
-

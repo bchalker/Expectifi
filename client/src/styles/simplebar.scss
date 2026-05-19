@@ -1,6 +1,7 @@
-/* Thin SimpleBar tracks (side panels, modals, popouts) */
+/* Thin SimpleBar tracks (side panels, modals, popouts, WTR grid) */
 .side-panel-shell__scroll,
-.fidelity-scenario-popout__scroll {
+.fidelity-scenario-popout__scroll,
+.wtr-grid__viewport {
   .simplebar-track.simplebar-vertical {
     width: 3px;
     margin: 3px 1px 3px 0;

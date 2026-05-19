@@ -13,6 +13,8 @@ export type SidePanelShellProps = {
   id?: string
   titleId: string
   title: ReactNode
+  /** Shown under the title in the drawer header (e.g. config panel). */
+  subtitle?: ReactNode
   'aria-labelledby'?: string
   onClose: () => void
   closeAriaLabel?: string
@@ -31,6 +33,7 @@ export function SidePanelShell({
   id,
   titleId,
   title,
+  subtitle,
   'aria-labelledby': ariaLabelledBy,
   onClose,
   closeAriaLabel = 'Close panel',
@@ -75,9 +78,12 @@ export function SidePanelShell({
         .join(' ')}
     >
       <header className="drawer-shell-header side-panel-shell__header">
-        <span className="drawer-panel-title" id={titleId}>
-          {title}
-        </span>
+        <div className="drawer-shell-header__text">
+          <span className="drawer-panel-title" id={titleId}>
+            {title}
+          </span>
+          {subtitle ? <p className="drawer-panel-subtitle">{subtitle}</p> : null}
+        </div>
         <CloseButton aria-label={closeAriaLabel} onPress={onClose} />
       </header>
       <SimpleBar

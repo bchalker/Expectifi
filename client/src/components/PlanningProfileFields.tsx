@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import { fmt } from '../utils/format'
+import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
+import './ui/CurrencyAmountInput.scss'
 import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
@@ -8,8 +10,6 @@ import './PlanningProfileFields.scss'
 const RETIRE_AGE_MAX = 80
 const GROWTH_GOAL_SLIDER_MAX = 5_000_000
 const GROWTH_GOAL_SLIDER_STEP = 10_000
-const MONTHLY_GOAL_SLIDER_MAX = 100_000
-const MONTHLY_GOAL_SLIDER_STEP = 100
 const ANNUAL_SAVE_MAX = 60_000
 const ANNUAL_SAVE_STEP = 500
 
@@ -83,6 +83,10 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
   }, [dateOfBirth, onTargetRetirementAge])
 
   const dobOk = isValidIsoDateString(dateOfBirth)
+  const retireUnset = targetRetirementAge < retireBounds.min
+  const retireSliderValue = retireUnset
+    ? retireBounds.min
+    : clampTargetRetirementAge(targetRetirementAge, dateOfBirth)
 
   const rootClass = ['planning-profile-fields', className].filter(Boolean).join(' ')
 
@@ -90,8 +94,10 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
     <div className={rootClass}>
       <div className="config-plan-field planning-profile-fields__dob">
         <span className="config-plan-label">When were you born?</span>
-        <DateOfBirthSelects value={dateOfBirth} onChange={onDateOfBirth} includeDay={false} />
-        <DobAgeToday iso={dateOfBirth} />
+        <div className="planning-profile-fields__dob-inline">
+          <DateOfBirthSelects value={dateOfBirth} onChange={onDateOfBirth} includeDay={false} />
+          {dobOk ? <DobAgeToday key={dateOfBirth} iso={dateOfBirth} /> : null}
+        </div>
       </div>
       <hr className="planning-profile-fields__divider" aria-hidden />
       <div className="planning-profile-fields__row-duo">
@@ -103,14 +109,16 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
             <span className="config-plan-age-hint">Set your date of birth first.</span>
           ) : (
             <div className="config-plan-savings-row">
-              <span className="config-plan-saveval config-plan-saveval--age">{targetRetirementAge}</span>
+              <span className="config-plan-saveval config-plan-saveval--age">
+                {retireUnset ? '—' : retireSliderValue}
+              </span>
               <input
                 type="range"
                 className="config-plan-savings-slider"
                 min={retireBounds.min}
                 max={retireBounds.max}
                 step={1}
-                value={clampTargetRetirementAge(targetRetirementAge, dateOfBirth)}
+                value={retireSliderValue}
                 disabled={variant === 'welcome' && !dobOk}
                 onChange={(e) =>
                   onTargetRetirementAge(clampTargetRetirementAge(Number(e.target.value), dateOfBirth))
@@ -118,7 +126,7 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
                 aria-labelledby="planning-profile-retire-age-label"
                 aria-valuemin={retireBounds.min}
                 aria-valuemax={retireBounds.max}
-                aria-valuenow={targetRetirementAge}
+                aria-valuenow={retireSliderValue}
               />
             </div>
           )}
@@ -149,31 +157,13 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           </div>
         ) : null}
         {variant === 'welcome' ? (
-          <div className="config-plan-field config-plan-field--goal">
-            <span className="config-plan-label" id="planning-profile-monthly-goal-label">
-              Monthly income goal in retirement
-            </span>
-            <div className="config-plan-savings-row">
-              <span className="config-plan-saveval">{fmt(props.monthlyIncomeGoal)}</span>
-              <input
-                type="range"
-                className="config-plan-savings-slider"
-                min={0}
-                max={MONTHLY_GOAL_SLIDER_MAX}
-                step={MONTHLY_GOAL_SLIDER_STEP}
-                value={Math.min(MONTHLY_GOAL_SLIDER_MAX, props.monthlyIncomeGoal)}
-                onChange={(e) => {
-                  const n =
-                    Math.round(Number(e.target.value) / MONTHLY_GOAL_SLIDER_STEP) * MONTHLY_GOAL_SLIDER_STEP
-                  props.onMonthlyIncomeGoal(n)
-                }}
-                aria-labelledby="planning-profile-monthly-goal-label"
-                aria-valuemin={0}
-                aria-valuemax={MONTHLY_GOAL_SLIDER_MAX}
-                aria-valuenow={props.monthlyIncomeGoal}
-              />
-            </div>
-          </div>
+          <CurrencyAmountInput
+            id="planning-profile-welcome-monthly-goal"
+            label="Monthly income goal in retirement"
+            value={props.monthlyIncomeGoal}
+            onChange={props.onMonthlyIncomeGoal}
+            showAnnualEquivalent
+          />
         ) : null}
         {variant === 'configure' ? (
           <div className="config-plan-field config-plan-field--savings">
@@ -233,29 +223,13 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
             </div>
           </div>
           <div className="config-plan-field config-plan-field--goal">
-            <span className="config-plan-label" id="planning-profile-config-monthly-goal-label">
-              Monthly Income
-            </span>
-            <div className="config-plan-savings-row">
-              <span className="config-plan-saveval">{fmt(props.monthlyIncomeGoal)}</span>
-              <input
-                type="range"
-                className="config-plan-savings-slider"
-                min={0}
-                max={MONTHLY_GOAL_SLIDER_MAX}
-                step={MONTHLY_GOAL_SLIDER_STEP}
-                value={Math.min(MONTHLY_GOAL_SLIDER_MAX, props.monthlyIncomeGoal)}
-                onChange={(e) => {
-                  const n =
-                    Math.round(Number(e.target.value) / MONTHLY_GOAL_SLIDER_STEP) * MONTHLY_GOAL_SLIDER_STEP
-                  props.onMonthlyIncomeGoal(n)
-                }}
-                aria-labelledby="planning-profile-config-monthly-goal-label"
-                aria-valuemin={0}
-                aria-valuemax={MONTHLY_GOAL_SLIDER_MAX}
-                aria-valuenow={props.monthlyIncomeGoal}
-              />
-            </div>
+            <CurrencyAmountInput
+              id="planning-profile-config-monthly-goal"
+              label="Monthly Income"
+              value={props.monthlyIncomeGoal}
+              onChange={props.onMonthlyIncomeGoal}
+              showAnnualEquivalent
+            />
           </div>
           </div>
         </section>

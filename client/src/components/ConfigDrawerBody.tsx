@@ -3,6 +3,7 @@ import type { CalculatorInputs, CalculatorUi, ComputedSnapshot } from '../lib/co
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
 import { IncomePresetScenariosCard } from './IncomePresetScenariosCard'
+import { planningDisplayFromInputs } from '../lib/userPrefs'
 import { ConfigProfileTab } from './ConfigProfileTab'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
@@ -43,6 +44,8 @@ export function ConfigDrawerBody({
   useEffect(() => {
     setTab(initialTab)
   }, [initialTab])
+
+  const planning = planningDisplayFromInputs(inputs)
 
   return (
     <div className="config-drawer-body">
@@ -85,21 +88,17 @@ export function ConfigDrawerBody({
           aria-labelledby="config-tab-plan"
         >
           <section className="config-drawer-section">
-            <p className="footnote footnote--muted config-drawer-lead">
-              Your answers set your current age for projections, retirement timing, growth and income goals, and how much
-              you save each year across the calculator.
-            </p>
             <PlanningProfileFields
               variant="configure"
-              dateOfBirth={inputs.dateOfBirth}
+              dateOfBirth={planning.dateOfBirth}
               onDateOfBirth={(iso) => setInputs({ dateOfBirth: iso })}
-              targetRetirementAge={inputs.targetRetirementAge}
+              targetRetirementAge={planning.targetRetirementAge}
               onTargetRetirementAge={(targetRetirementAge) => setInputs({ targetRetirementAge })}
-              growthGoal={inputs.growthGoal}
+              growthGoal={planning.growthGoal}
               onGrowthGoal={(growthGoal) => setInputs({ growthGoal })}
-              monthlyIncomeGoal={inputs.monthlyIncomeGoal}
+              monthlyIncomeGoal={planning.monthlyIncomeGoal}
               onMonthlyIncomeGoal={(monthlyIncomeGoal) => setInputs({ monthlyIncomeGoal })}
-              annualSave={inputs.save}
+              annualSave={planning.save}
               onAnnualSave={(save) => setInputs({ save })}
             />
           </section>

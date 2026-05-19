@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
 import { ListBox, Select } from '@heroui/react'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import {
   clampDobParts,
   dayOptionsForParts,
   DOB_MONTHS,
+  defaultDobPartsForPicker,
   dobPartsToIso,
   firstKeyFromSelectSelection,
   isDobAgeInRange,
@@ -23,11 +25,14 @@ type DobAgeTodayProps = {
 export function DobAgeToday({ iso, className }: DobAgeTodayProps) {
   if (!iso || !isValidIsoDateString(iso)) return null
   const age = ageFromIsoDateString(iso)
+  const rootClass = ['dob-age-today', 'dob-age-today--enter', className].filter(Boolean).join(' ')
   return (
-    <p className={className ? `dob-age-today ${className}` : 'dob-age-today'} aria-live="polite">
-      <span className="dob-age-today__label">Age today</span>
+    <div className={rootClass} aria-live="polite" aria-label={`Age ${age}`}>
+      <span className="dob-age-today__icon-wrap" aria-hidden>
+        <IconArrowNarrowRightDashed size={18} strokeWidth={1.5} className="dob-age-today__icon" />
+      </span>
       <span className="dob-age-today__value">{age}</span>
-    </p>
+    </div>
   )
 }
 
@@ -43,7 +48,10 @@ export function DateOfBirthSelects({ value, onChange, className, includeDay = tr
   const [parts, setParts] = useState<DobParts>(() => partsFromIsoValue(value))
 
   useEffect(() => {
-    if (!value) return
+    if (!value) {
+      setParts(defaultDobPartsForPicker())
+      return
+    }
     const fromParent = partsFromIsoValue(value)
     if (!fromParent.year) return
     setParts((prev) => {

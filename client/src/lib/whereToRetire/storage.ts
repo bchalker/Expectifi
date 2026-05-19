@@ -160,3 +160,21 @@ export function saveDestinationMonthlyCost(key: string, cost: number): void {
   if (typeof window === 'undefined') return
   localStorage.setItem(`${COST_PREFIX}${key}`, String(Math.round(cost)))
 }
+
+export function clearGuestWhereToRetireStorage(): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(DESTINATIONS_KEY)
+    localStorage.removeItem(LEGACY_DESTINATIONS_KEY)
+    localStorage.removeItem(INCOME_OVERRIDE_KEY)
+    localStorage.removeItem('wtr-preferences')
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith(COST_PREFIX)) keysToRemove.push(key)
+    }
+    for (const key of keysToRemove) localStorage.removeItem(key)
+  } catch {
+    /* ignore */
+  }
+}

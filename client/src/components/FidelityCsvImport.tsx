@@ -71,14 +71,12 @@ type ImportBusyState = {
   details: string[]
 }
 
-const ACCOUNT_CHECK_STAGGER_MS = 45
-const ACCOUNT_CHECK_HOLD_MS = 100
 const IMPORT_APPLY_FADE_MS = 280
 
 type ConfirmOverlayState =
   | { mode: 'idle' }
-  | { mode: 'applying'; checkedKeys: ReadonlySet<string> }
-  | { mode: 'exiting'; checkedKeys: ReadonlySet<string> }
+  | { mode: 'applying' }
+  | { mode: 'exiting' }
   | { mode: 'error'; message: string }
 
 function sleep(ms: number): Promise<void> {
@@ -214,9 +212,13 @@ export function FidelityCsvImport({
   function completeCloseFlow() {
     setModalClosing(false)
     onImportFlowClose?.()
-    if (isPanel) onOpenChange?.(false)
-    else setModalOpen(false)
-    resetModalInner()
+    if (isPanel) {
+      onOpenChange?.(false)
+      // Parent unmounts after close animation — resetting here flashes the custodian picker.
+    } else {
+      setModalOpen(false)
+      resetModalInner()
+    }
   }
 
   function closeFlow() {
@@ -381,24 +383,24 @@ export function FidelityCsvImport({
   const accountReviewRows = useMemo(() => {
     if (!pending?.parsed.rows.length) return [] as { key: string; label: string; total: number }[]
     const keys = uniqueAccountKeysFromRows(pending.parsed.rows)
-    return keys.map((k) => ({
-      key: k,
-      label: k === '(blank)' ? '(missing account name)' : k,
-      total: pending.parsed.rows
-        .filter((r) => fidelityAccountKey(r.accountName) === k && !isFidelityPendingActivityRow(r))
-        .reduce((s, r) => s + r.currentValue, 0),
-    }))
+    return keys
+      .map((k) => ({
+        key: k,
+        label: k === '(blank)' ? '(missing account name)' : k,
+        total: pending.parsed.rows
+          .filter((r) => fidelityAccountKey(r.accountName) === k && !isFidelityPendingActivityRow(r))
+          .reduce((s, r) => s + r.currentValue, 0),
+      }))
+      .filter((row) => row.total > 0)
   }, [pending])
 
   const reviewAssignmentsComplete = useMemo(() => {
-    if (!pending?.parsed.rows.length) return false
-    const keys = uniqueAccountKeysFromRows(pending.parsed.rows)
-    if (!keys.length) return false
-    return keys.every((k) => {
-      const b = reviewAssignments[k]
+    if (!accountReviewRows.length) return false
+    return accountReviewRows.every((row) => {
+      const b = reviewAssignments[row.key]
       return b !== undefined && b !== 'unknown'
     })
-  }, [pending, reviewAssignments])
+  }, [accountReviewRows, reviewAssignments])
 
   const rowsThisSelection = useMemo(
     () => (pending ? applyBucketAssignmentsToRows(pending.parsed.rows, reviewAssignments) : []),
@@ -419,11 +421,6 @@ export function FidelityCsvImport({
   const confirmBlocking =
     confirmOverlay.mode === 'applying' || confirmOverlay.mode === 'exiting'
 
-  const checkedAccountKeys =
-    confirmOverlay.mode === 'applying' || confirmOverlay.mode === 'exiting'
-      ? confirmOverlay.checkedKeys
-      : null
-
   async function applyImportWithProgress() {
     if (!pending?.parsed.rows.length || !custodian) return
     const p = pending
@@ -431,9 +428,7 @@ export function FidelityCsvImport({
     const rep = replaceDuplicateImports
     const ra = { ...reviewAssignments }
     const rows = applyBucketAssignmentsToRows(p.parsed.rows, ra)
-    const accountKeys = accountReviewRows.map((row) => row.key)
-
-    setConfirmOverlay({ mode: 'applying', checkedKeys: new Set() })
+    setConfirmOverlay({ mode: 'applying' })
 
     try {
       if (!p.parsed.rows.length) throw new Error('CSV has no data rows.')
@@ -447,15 +442,6 @@ export function FidelityCsvImport({
         }
       }
 
-      const checked = new Set<string>()
-      for (const key of accountKeys) {
-        await sleep(ACCOUNT_CHECK_STAGGER_MS)
-        checked.add(key)
-        setConfirmOverlay({ mode: 'applying', checkedKeys: new Set(checked) })
-      }
-
-      await sleep(ACCOUNT_CHECK_HOLD_MS)
-
       const incoming = buildIncomingBatches(p, rep, cust, ra)
       if (!incoming.length) {
         throw new Error('Could not build import from the current review state.')
@@ -466,8 +452,7 @@ export function FidelityCsvImport({
       saveStoredFidelityImport(next)
       const mergedBalances = next.balances
 
-      setConfirmOverlay({ mode: 'exiting', checkedKeys: new Set(accountKeys) })
-      await sleep(70)
+      setConfirmOverlay({ mode: 'exiting' })
 
       markPortfolioBalancesFlush()
       onApplyBalances(mergedBalances)
@@ -484,7 +469,7 @@ export function FidelityCsvImport({
 
 
   const renderImportBody = () => {
-    const showSourcePickers = !hideImportSourceUi
+    const showSourcePickers = !hideImportSourceUi && confirmOverlay.mode === 'idle'
     return (
       <>
         {custodian ? (
@@ -642,7 +627,6 @@ export function FidelityCsvImport({
               {accountReviewRows.map((row, index) => {
                 const sel = reviewAssignments[row.key]
                 const unknown = sel === 'unknown' || sel === undefined
-                const accountChecked = checkedAccountKeys?.has(row.key) ?? false
                 const accountRows = rowsThisSelection.filter(
                   (r) =>
                     fidelityAccountKey(r.accountName) === row.key && !isFidelityPendingActivityRow(r),
@@ -650,7 +634,7 @@ export function FidelityCsvImport({
                 return (
                   <details
                     key={row.key}
-                    className={`fidelity-acct-details csv-import-review-acct${unknown ? ' csv-import-review-acct--attention' : ''}${accountChecked ? ' csv-import-review-acct--checked' : ''}`}
+                    className={`fidelity-acct-details csv-import-review-acct${unknown ? ' csv-import-review-acct--attention' : ''}`}
                     style={{ animationDelay: `${index * 0.055}s` }}
                   >
                     <summary>
@@ -695,12 +679,6 @@ export function FidelityCsvImport({
                           <span className="fidelity-acct-summary-total">{fmt(row.total)}</span>
                           <ViewHoldingsHint />
                         </div>
-                        <span
-                          className={`csv-import-review-acct__check${accountChecked ? ' csv-import-review-acct__check--in' : ''}`}
-                          aria-hidden={!accountChecked}
-                        >
-                          <IconCheck className="csv-import-review-acct__check-icon" size={18} stroke={2} />
-                        </span>
                       </span>
                     </summary>
                     <FidelityAccountPositionsTable rows={accountRows} showScenarioColumn={false} />

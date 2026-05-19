@@ -507,7 +507,7 @@
   position: relative;
   inset: auto;
   width: 100%;
-  max-width: min(100%, 36rem);
+  max-width: min(100%, 40rem);
   max-height: min(92vh, 800px);
   padding: 0;
   background: transparent;
@@ -551,15 +551,6 @@
   gap: 1rem;
   padding: 0.25rem 0 0.5rem;
   text-align: left;
-}
-
-.account-balances-manual-plan-step__lead {
-  margin: 0;
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  color: var(--text-muted);
-  text-align: center;
 }
 
 .account-balances-manual-plan-step__stack {
@@ -654,8 +645,61 @@
 
 .account-balances-manual-plan-step__actions {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
   padding-top: 0.35rem;
+}
+
+.account-balances-manual-plan-step__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    filter 0.12s ease;
+}
+
+.account-balances-manual-plan-step__btn--muted {
+  background: #e8eaed;
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  color: var(--text);
+}
+
+.account-balances-manual-plan-step__btn--muted:hover {
+  background: #dde1e6;
+}
+
+.account-balances-manual-plan-step__btn--muted:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.account-balances-manual-plan-step__btn--primary {
+  background: var(--accent-text);
+  border-color: var(--accent-text);
+  color: #fff;
+}
+
+.account-balances-manual-plan-step__btn--primary:hover {
+  filter: brightness(0.95);
+}
+
+.account-balances-manual-plan-step__btn--primary:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
 }
 
 .account-balances-manual-sheet .account-balances-edit-sheet__body:has(.account-balances-manual-plan-step) {
@@ -680,6 +724,43 @@
 
 .account-balances-edit-sheet--manual .account-balances-edit-sheet__foot {
   border-top: none;
+}
+
+.account-balances-edit-sheet__foot--manual-confirm {
+  justify-content: stretch;
+  padding: 0.85rem 1rem 1rem;
+}
+
+.account-balances-manual-sheet__confirm-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--accent-text);
+  border-radius: 8px;
+  box-sizing: border-box;
+  background: var(--accent-text);
+  color: #fff;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+
+.account-balances-manual-sheet__confirm-btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.account-balances-manual-sheet__confirm-btn:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.account-balances-manual-sheet__confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .account-balances-edit-sheet--manual .edit-row--manual-balance,
@@ -779,7 +860,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: min(100%, 32rem);
+  max-width: min(100%, 40rem);
   height: min(90vh, 720px);
   max-height: 100%;
   margin-inline: auto;
@@ -807,12 +888,42 @@
 
 .account-balances-edit-sheet__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   flex-shrink: 0;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
+}
+
+.account-balances-edit-sheet__head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.account-balances-edit-sheet--manual .account-balances-edit-sheet__head:not(:has(.account-balances-edit-sheet__close)) {
+  justify-content: center;
+  text-align: center;
+}
+
+.account-balances-edit-sheet--manual
+  .account-balances-edit-sheet__head:not(:has(.account-balances-edit-sheet__close))
+  .account-balances-edit-sheet__head-text {
+  flex: 0 1 auto;
+  align-items: center;
+  max-width: 100%;
+}
+
+.account-balances-edit-sheet__subtitle {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .account-balances-edit-sheet__title {

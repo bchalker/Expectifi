@@ -8,7 +8,7 @@ import { loadBalanceInputMode } from './retirementBalanceMode'
 import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
 import { DEFAULT_INCOME_PRESETS, type CalculatorInputs, type CalculatorUi } from './computeResults'
 import { defaultRetireRegionPick } from './calc/retireRegions'
-import { loadLocalUserPrefs, userPrefsToCalculatorPatch } from './userPrefs'
+import { hasPlanningProfilePrefs, loadLocalUserPrefs, userPrefsToCalculatorPatch } from './userPrefs'
 
 export const defaultCalculatorInputs: CalculatorInputs = {
   base401k: 0,
@@ -19,7 +19,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   brkBal: 0,
   retRate: 0.07,
   brkRate: 0.07,
-  save: 18_000,
+  save: 0,
   wdRate: 0.04,
   wdInflation: 0.025,
   incYield: 0.06,
@@ -39,7 +39,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   retireRegions: [defaultRetireRegionPick('italy')],
   ssInvestPct: 5,
   dateOfBirth: '',
-  targetRetirementAge: 62,
+  targetRetirementAge: 0,
   growthGoal: 0,
   monthlyIncomeGoal: 0,
   incomePresets: [...DEFAULT_INCOME_PRESETS],
@@ -71,7 +71,7 @@ function applyFidelityBalanceOverrides(inputs: CalculatorInputs): CalculatorInpu
 
 function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {
   const prefs = loadLocalUserPrefs()
-  if (!prefs) return inputs
+  if (!prefs || !hasPlanningProfilePrefs(prefs)) return inputs
   return { ...inputs, ...userPrefsToCalculatorPatch(prefs) }
 }
 

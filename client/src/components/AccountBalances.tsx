@@ -12,7 +12,6 @@ import {
   type FidelityPositionRow,
 } from '../lib/fidelityCsv'
 import { flattenBatches, loadStoredFidelityImport } from '../lib/fidelityStorage'
-import type { AppSnapshotV1 } from '../lib/appSnapshot'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import {
@@ -22,6 +21,7 @@ import {
 } from '../lib/withdrawalDisplayOrder'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { CsvCustodianImportSelect } from './CsvCustodianImportSelect'
+import { inputsHavePlanningProfileFields, planningDisplayFromInputs } from '../lib/userPrefs'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
@@ -117,8 +117,10 @@ type Props = {
   brkBal?: number
   brkRate?: number
   brokerageMode?: BrokerageBalanceMode
-  getSnapshot?: () => AppSnapshotV1
-  onLoadSnapshot?: (s: AppSnapshotV1) => void
+  onOpenSignIn?: () => void
+  /** Increment to open the CSV import panel once (e.g. after welcome connect). */
+  openImportRequest?: number
+  onImportOpenHandled?: () => void
 }
 
 function WithdrawalLabeledBlock({
@@ -170,8 +172,9 @@ export function AccountBalances({
   brkBal,
   brkRate,
   brokerageMode,
-  getSnapshot,
-  onLoadSnapshot,
+  onOpenSignIn,
+  openImportRequest,
+  onImportOpenHandled,
 }: Props) {
   const retTotal = c.retBal
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly
@@ -234,10 +237,7 @@ export function AccountBalances({
     )
   }, [mergedPositionModels, inputs])
 
-  const scenariosBar =
-    mergedDashboard && getSnapshot && onLoadSnapshot ? (
-      <ScenariosBar getSnapshot={getSnapshot} onLoadSnapshot={onLoadSnapshot} />
-    ) : null
+  const scenariosBar = mergedDashboard ? <ScenariosBar onOpenSignIn={onOpenSignIn} /> : null
 
   const [fidelityScenarioPanel, setFidelityScenarioPanel] = useState<{
     symbol: string
@@ -265,7 +265,7 @@ export function AccountBalances({
     balances: ManualBalancesDraft
     plan: ManualPlanDraft
   } | null>(null)
-  const manualConfirmBusy = manualConfirmPhase !== false
+  const manualConfirmBusy = manualConfirmPhase === 'progress'
 
   const canEditBalances = Boolean(
     mergedDashboard && onBases && onBalanceModeChange && onFidelityApplyBalances,
@@ -330,13 +330,17 @@ export function AccountBalances({
   }, [onBases, onBalanceModeChange, onManualPortfolioPlanApplied])
 
   const requestBalanceEditClose = useCallback(() => {
+    if (balanceEditPanel === 'manual' && manualConfirmPhase === 'plan') {
+      setManualConfirmPhase(false)
+      return
+    }
     if (!balanceEditPanel || balanceEditClosing || manualConfirmBusy) return
     const prefersReducedMotion =
       typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion && (balanceEditPanel === 'import' || balanceEditPanel === 'manual')) {
       if (balanceEditPanel === 'manual' && manualConfirmPendingRef.current) {
         commitPendingManualPortfolio()
-        markPortfolioBalancesFlush()
+        markPortfolioBalancesFlush({ afterManualPlanModal: true })
         manualConfirmPendingRef.current = false
         schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS)
       }
@@ -344,7 +348,14 @@ export function AccountBalances({
       return
     }
     setBalanceEditClosing(true)
-  }, [balanceEditPanel, balanceEditClosing, manualConfirmBusy, commitPendingManualPortfolio, finalizeBalanceEditClose])
+  }, [
+    balanceEditPanel,
+    balanceEditClosing,
+    manualConfirmBusy,
+    manualConfirmPhase,
+    commitPendingManualPortfolio,
+    finalizeBalanceEditClose,
+  ])
 
   const onBalanceEditSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
@@ -353,7 +364,7 @@ export function AccountBalances({
         if (!balanceEditClosing) return
         if (manualConfirmPendingRef.current) {
           commitPendingManualPortfolio()
-          markPortfolioBalancesFlush()
+          markPortfolioBalancesFlush({ afterManualPlanModal: true })
           manualConfirmPendingRef.current = false
           finalizeBalanceEditClose()
           schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS + PORTFOLIO_REVEAL_START_DELAY_MS)
@@ -404,6 +415,15 @@ export function AccountBalances({
     [brkBal, c.bal.bal401k, c.bal.balHsa, c.bal.balRoth, c.bal.balSE401k, c.bal.balTradIRA, inputs, onBalanceModeChange],
   )
 
+  const lastOpenImportRequestRef = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    if (!openImportRequest || !mergedDashboard || !onFidelityApplyBalances) return
+    if (lastOpenImportRequestRef.current === openImportRequest) return
+    lastOpenImportRequestRef.current = openImportRequest
+    openBalanceEditPanel('import')
+    onImportOpenHandled?.()
+  }, [openImportRequest, mergedDashboard, onFidelityApplyBalances, openBalanceEditPanel, onImportOpenHandled])
+
   const runManualConfirmSequence = useCallback(async () => {
     if (!manualDraft || manualConfirmRunRef.current) return
     manualConfirmRunRef.current = true
@@ -433,7 +453,7 @@ export function AccountBalances({
         typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
       if (prefersReducedMotion) {
         commitPendingManualPortfolio()
-        markPortfolioBalancesFlush()
+        markPortfolioBalancesFlush({ afterManualPlanModal: true })
         manualConfirmPendingRef.current = false
         finalizeBalanceEditClose()
         schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS)
@@ -639,6 +659,16 @@ export function AccountBalances({
     }
   }
 
+  const manualRetirementRows = manualBalanceRows.filter((r) => r.key !== 'brokerage')
+
+  function manualRowHasBalance(row: ManualBalanceRow): boolean {
+    return display(row.key) > 0
+  }
+
+  function visibleManualRetirementRows(): ManualBalanceRow[] {
+    return manualRetirementRows.filter(manualRowHasBalance)
+  }
+
   function setMode(m: BalanceInputMode) {
     onBalanceModeChange?.(m)
   }
@@ -791,18 +821,23 @@ export function AccountBalances({
       <>
         <div className="withdrawal-order-context">
           <div className="withdrawal-order-context__stack">
-            <div className="withdrawal-order-context__title-why-row">
-              <span className="withdrawal-order-context__text">Recommended withdrawal order for age {retirementAge}</span>
-              <button
-                type="button"
-                className="withdrawal-why-pill"
-                aria-expanded={withdrawalExplainerOpen}
-                aria-controls="withdrawal-order-explainer"
-                title="Why this order?"
-                onClick={() => setWithdrawalExplainerOpen((o) => !o)}
-              >
-                Why?
-              </button>
+            <div className="withdrawal-order-context__header-row">
+              <div className="withdrawal-order-context__title-why-row">
+                <span className="withdrawal-order-context__text">Recommended withdrawal order for age {retirementAge}</span>
+                <button
+                  type="button"
+                  className="withdrawal-why-pill"
+                  aria-expanded={withdrawalExplainerOpen}
+                  aria-controls="withdrawal-order-explainer"
+                  title="Why this order?"
+                  onClick={() => setWithdrawalExplainerOpen((o) => !o)}
+                >
+                  Why?
+                </button>
+              </div>
+              {scenariosBar ? (
+                <div className="withdrawal-order-context__scenarios">{scenariosBar}</div>
+              ) : null}
             </div>
             <div className="withdrawal-order-context__arrow-row" aria-hidden>
               <span className="withdrawal-order-context__arrow-slot">
@@ -868,16 +903,25 @@ export function AccountBalances({
 
   function renderFidelityImportedTaxBuckets(withdrawalUi: boolean) {
     const pretaxTotal = c.bal.bal401k + c.bal.balSE401k
-    const defs: { tax: 'pretax' | 'roth' | 'hsa'; label: string; total: number }[] = [
-      { tax: 'pretax', label: 'Pre-tax', total: pretaxTotal },
-      { tax: 'roth', label: 'Roth', total: c.bal.balRoth },
-      { tax: 'hsa', label: 'HSA', total: c.bal.balHsa },
-    ]
-    const defByTax = Object.fromEntries(defs.map((d) => [d.tax, d])) as Record<'pretax' | 'roth' | 'hsa', (typeof defs)[0]>
+    const defs = (
+      [
+        { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal },
+        { tax: 'roth' as const, label: 'Roth', total: c.bal.balRoth },
+        { tax: 'hsa' as const, label: 'HSA', total: c.bal.balHsa },
+      ] as const
+    ).filter((d) => d.total > 0)
+    const defByTax = Object.fromEntries(defs.map((d) => [d.tax, d])) as Partial<
+      Record<'pretax' | 'roth' | 'hsa', (typeof defs)[0]>
+    >
 
     if (withdrawalUi) {
       const seq = withdrawalBucketOrder(retirementAge, false)
-      return seq.flatMap((b) => (b === 'brokerage' ? [] : [renderFidelityTaxDisclosure(b, defByTax[b], true)]))
+      return seq.flatMap((b) => {
+        if (b === 'brokerage') return []
+        const def = defByTax[b]
+        if (!def) return []
+        return [renderFidelityTaxDisclosure(b, def, true)]
+      })
     }
 
     return defs.map((d) => renderFidelityTaxDisclosure(d.tax, d, false))
@@ -954,8 +998,9 @@ export function AccountBalances({
 
     if (readOnly) {
       if (balanceMode === 'manual') {
-        return manualBalanceRows.map((row, idx) =>
-          renderManualBalanceEditRow(row, idx, { readOnly: true, omitLastBorder: !mergedDashboard }),
+        const rows = visibleManualRetirementRows()
+        return rows.map((row, idx) =>
+          renderManualBalanceEditRow(row, idx, { readOnly: true, omitLastBorder: !mergedDashboard && idx === rows.length - 1 }),
         )
       }
       return renderFidelityImportedTaxBuckets(showWithdrawalGuidance && !mergedDashboard)
@@ -993,7 +1038,7 @@ export function AccountBalances({
     if (!useFidelityBrokerageView) {
       return (
         <>
-          <div className="edit-row" style={{ borderBottom: scenariosBar ? undefined : 'none' }}>
+          <div className="edit-row" style={{ borderBottom: 'none' }}>
             {withdrawalUi ? (
               <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
                 <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
@@ -1002,9 +1047,6 @@ export function AccountBalances({
               <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
             )}
           </div>
-          {scenariosBar ? (
-            <div style={{ padding: '8px 0 4px', borderTop: '1px solid var(--border)' }}>{scenariosBar}</div>
-          ) : null}
         </>
       )
     }
@@ -1032,9 +1074,6 @@ export function AccountBalances({
             activeScenarioSymbol={fidelityScenarioPanel?.symbol ?? null}
             onScenarioOpen={onFidelityScenarioOpen}
           />
-          {scenariosBar ? (
-            <div style={{ padding: '8px 0 4px', borderTop: '1px solid var(--border)' }}>{scenariosBar}</div>
-          ) : null}
         </div>
       </details>
     )
@@ -1065,18 +1104,20 @@ export function AccountBalances({
         }
         if (!hasRetirementAccountData) continue
         if (step === 'pretax') {
-          for (const row of manualBalanceRows.filter((r) => r.key === 'ret401k' || r.key === 'se401k' || r.key === 'tradIra')) {
+          for (const row of visibleManualRetirementRows().filter(
+            (r) => r.key === 'ret401k' || r.key === 'se401k' || r.key === 'tradIra',
+          )) {
             nodes.push(renderManualAccountRow(row, withdrawalUi, 'pretax', undefined))
           }
           continue
         }
         if (step === 'roth') {
-          const rothRow = manualBalanceRows.find((r) => r.key === 'roth')
+          const rothRow = visibleManualRetirementRows().find((r) => r.key === 'roth')
           if (rothRow) nodes.push(renderManualAccountRow(rothRow, withdrawalUi, 'roth', undefined))
           continue
         }
         if (step === 'hsa') {
-          const hsaRow = manualBalanceRows.find((r) => r.key === 'hsa')
+          const hsaRow = visibleManualRetirementRows().find((r) => r.key === 'hsa')
           if (hsaRow) nodes.push(renderManualAccountRow(hsaRow, withdrawalUi, 'hsa', 'none'))
         }
       }
@@ -1092,15 +1133,15 @@ export function AccountBalances({
       }
       if (!hasRetirementAccountData) continue
       if (step === 'pretax') {
-        nodes.push(renderFidelityTaxDisclosure('pretax', pretaxDef, withdrawalUi))
+        if (pretaxDef.total > 0) nodes.push(renderFidelityTaxDisclosure('pretax', pretaxDef, withdrawalUi))
         continue
       }
       if (step === 'roth') {
-        nodes.push(renderFidelityTaxDisclosure('roth', rothDef, withdrawalUi))
+        if (rothDef.total > 0) nodes.push(renderFidelityTaxDisclosure('roth', rothDef, withdrawalUi))
         continue
       }
       if (step === 'hsa') {
-        nodes.push(renderFidelityTaxDisclosure('hsa', hsaDef, withdrawalUi))
+        if (hsaDef.total > 0) nodes.push(renderFidelityTaxDisclosure('hsa', hsaDef, withdrawalUi))
       }
     }
 
@@ -1156,21 +1197,30 @@ export function AccountBalances({
         >
           <div className="account-balances-manual-panel-host">
             <header className="account-balances-edit-sheet__head">
-              <h2 className="account-balances-edit-sheet__title" id="account-balances-manual-title">
-                {manualConfirmPhase === 'plan'
-                  ? 'Your plan details'
-                  : manualConfirmPhase === 'progress'
-                    ? 'Saving balances'
-                    : 'Manual balances'}
-              </h2>
-              <button
-                type="button"
-                className="account-balances-edit-sheet__close"
-                disabled={manualConfirmBusy}
-                onClick={requestBalanceEditClose}
-              >
-                Close
-              </button>
+              <div className="account-balances-edit-sheet__head-text">
+                <h2 className="account-balances-edit-sheet__title" id="account-balances-manual-title">
+                  {manualConfirmPhase === 'plan'
+                    ? 'Your Plans'
+                    : manualConfirmPhase === 'progress'
+                      ? 'Saving balances'
+                      : 'Manual balances'}
+                </h2>
+                {manualConfirmPhase === 'plan' ? (
+                  <p className="account-balances-edit-sheet__subtitle">
+                    We need a few details to project growth and monthly income from your balances.
+                  </p>
+                ) : null}
+              </div>
+              {manualConfirmPhase === false ? (
+                <button
+                  type="button"
+                  className="account-balances-edit-sheet__close"
+                  disabled={balanceEditClosing}
+                  onClick={requestBalanceEditClose}
+                >
+                  Close
+                </button>
+              ) : null}
             </header>
             <div className="account-balances-edit-sheet__body">
               {manualConfirmPhase === 'progress' ? (
@@ -1194,12 +1244,14 @@ export function AccountBalances({
                     />
                   </div>
                 </div>
-              ) : manualConfirmPhase === 'plan' ? (
+              ) : manualConfirmPhase === 'plan' && inputs ? (
                 <ManualBalancesPlanStep
-                  initialDateOfBirth={inputs?.dateOfBirth ?? ''}
-                  initialTargetRetirementAge={inputs?.targetRetirementAge ?? c.targetRetirementAge}
-                  initialSave={inputs?.save ?? 18_000}
+                  key={inputsHavePlanningProfileFields(inputs) ? 'captured' : 'empty'}
+                  initialDateOfBirth={planningDisplayFromInputs(inputs).dateOfBirth}
+                  initialTargetRetirementAge={planningDisplayFromInputs(inputs).targetRetirementAge}
+                  initialSave={planningDisplayFromInputs(inputs).save}
                   onContinue={completeManualPlanStep}
+                  onCancel={() => setManualConfirmPhase(false)}
                 />
               ) : (
                 manualBalanceRows.map((row, idx) =>
@@ -1208,15 +1260,15 @@ export function AccountBalances({
               )}
             </div>
             {manualConfirmPhase === false ? (
-              <footer className="account-balances-edit-sheet__foot">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  isDisabled={balanceEditClosing}
-                  onPress={confirmManualBalances}
+              <footer className="account-balances-edit-sheet__foot account-balances-edit-sheet__foot--manual-confirm">
+                <button
+                  type="button"
+                  className="account-balances-manual-sheet__confirm-btn"
+                  disabled={balanceEditClosing}
+                  onClick={confirmManualBalances}
                 >
-                  Confirm
-                </Button>
+                  Confirm and show me the details
+                </button>
               </footer>
             ) : null}
           </div>
@@ -1257,13 +1309,23 @@ export function AccountBalances({
   const manualEntryFaded =
     mergedDashboard && balanceEditPanel === 'manual' && !balanceEditClosing
 
+  const importPanelObscuresEmptyEntry =
+    mergedDashboard && balanceEditPanel === 'import' && Boolean(onFidelityApplyBalances)
+
   if (mergedDashboard && !c.hasPortfolioBalances) {
     return (
       <>
         <div
-          className={`account-balances-financials-shell${balanceEditPanelOpen ? ' account-balances-financials-shell--panel-open' : ''}${manualEntryFaded ? ' account-balances-financials-shell--manual-open' : ''}`}
+          className={[
+            'account-balances-financials-shell',
+            balanceEditPanelOpen && 'account-balances-financials-shell--panel-open',
+            manualEntryFaded && 'account-balances-financials-shell--manual-open',
+            importPanelObscuresEmptyEntry && 'account-balances-financials-shell--import-open',
+          ]
+            .filter(Boolean)
+            .join(' ')}
         >
-          {renderRetirementBalancesEmptyState()}
+          {!importPanelObscuresEmptyEntry ? renderRetirementBalancesEmptyState() : null}
         </div>
         {renderMergedDashboardOverlays()}
       </>

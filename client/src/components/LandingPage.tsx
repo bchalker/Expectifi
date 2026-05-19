@@ -173,7 +173,7 @@ export function LandingPage({
         <div className="landing-page__wrap landing-footer__inner">
           <span className="landing-footer__copy">© {new Date().getFullYear()} HeadwayPlanner</span>
           <nav className="landing-footer__links" aria-label="Legal">
-            <a href={APP_PATHS.home}>Privacy</a>
+            <a href={APP_PATHS.privacy}>Privacy</a>
             <a href={APP_PATHS.home}>Terms</a>
             <a href={APP_PATHS.home}>Contact</a>
           </nav>
