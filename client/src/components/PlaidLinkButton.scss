@@ -56,19 +56,10 @@
   line-height: 1.35;
 }
 
-.account-balances-financials-entry__plaid-row {
-  width: 100%;
-  max-width: 20rem;
-}
-
-.account-balances-financials-entry__or {
+.plaid-link-btn__info {
   margin: 0;
   font-family: var(--body);
   font-size: var(--text-sm);
-  color: var(--text-faint);
-  text-align: center;
-}
-
-.account-balances-header-row__plaid {
-  flex-shrink: 0;
+  color: var(--text-muted);
+  line-height: 1.35;
 }

@@ -50,6 +50,14 @@ function stripPlaidBatches(
   }
 }
 
+/** Remove one Plaid item's batch from local import storage; returns updated calculator balances. */
+export function removePlaidItemFromLocalStorage(itemId: string) {
+  const existing = loadStoredFidelityImport()
+  const next = stripPlaidBatches(existing, [itemId])
+  if (next && next !== existing) saveStoredFidelityImport(next)
+  return next?.balances ?? null
+}
+
 /** Merge Plaid holdings into local import storage and return calculator balance totals. */
 export function applyPlaidHoldingsSnapshot(snapshot: PlaidHoldingsSnapshot) {
   const batch = snapshotToBatch(snapshot)

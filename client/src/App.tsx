@@ -26,6 +26,7 @@ import {
   type CalculatorUi,
   type DrawerName,
 } from './lib/computeResults'
+import { clearStoredManualAccounts } from './lib/manualAccountEntries'
 import { loadStoredFidelityImport } from './lib/fidelityStorage'
 import {
   clearAllAccountBalancesFromCard,
@@ -38,7 +39,7 @@ import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubhe
 import { isSsConfigured, normalizeClaimAge, type SsClaimAge } from './lib/socialSecurity'
 import { heartbeatEphemeralGuestTab, initEphemeralGuestSession, teardownEphemeralGuestTab } from './lib/guestEphemeralStorage'
 import { OnboardingOverlay } from './components/OnboardingOverlay'
-import { shouldSkipWelcome } from './lib/welcomeGate'
+import { shouldSkipWelcome, shouldShowWelcomeOverlay, peekForceOnboardingSession, consumeForceOnboardingSession } from './lib/welcomeGate'
 import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
@@ -121,14 +122,16 @@ type AppProps = {
 }
 
 export default function App({ initialAuthModal = null }: AppProps) {
-  const [inputs, setInputsState] = useState<CalculatorInputs>(() => freshAppState().inputs)
-  const [ui, setUiState] = useState<CalculatorUi>(() => freshAppState().ui)
-  const [phase, setPhase] = useState<'growth' | 'income'>(() => freshAppState().phase)
+  const initialApp = useMemo(() => resolveInitialAppState(), [])
+  const [inputs, setInputsState] = useState<CalculatorInputs>(() => initialApp.inputs)
+  const [ui, setUiState] = useState<CalculatorUi>(() => initialApp.ui)
+  const [phase, setPhase] = useState<'growth' | 'income'>(() => initialApp.phase)
   const [accordionOpen, setAccordionOpen] = useState(false)
   const [drawer, setDrawer] = useState<DrawerName | null>(null)
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>('profile')
-  const [activePreset, setActivePreset] = useState<string | null>(() => freshAppState().activePreset)
+  const [activePreset, setActivePreset] = useState<string | null>(() => initialApp.activePreset)
   const [fidelityImportRev, setFidelityImportRev] = useState(0)
+  const [manualAccountsRev, setManualAccountsRev] = useState(0)
   const [balanceMode, setBalanceMode] = useState<BalanceInputMode>(() => loadBalanceInputMode())
   const [brokerageMode, setBrokerageMode] = useState<BrokerageBalanceMode>(() => loadBrokerageBalanceMode())
   const [returnEditorOpen, setReturnEditorOpen] = useState<{
@@ -143,12 +146,40 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const { loading: authLoading, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi, user, saveUserPrefs } =
     useAuth()
 
-  const skipWelcome = shouldSkipWelcome({
-    onboardingDone: user?.onboardingDone,
-    planPrefs: user?.planPrefs ?? null,
-    inputs,
-  })
-  const [welcomeDone, setWelcomeDone] = useState(skipWelcome)
+  const path = useAppPath()
+  const welcomeCtx = useMemo(
+    () => ({
+      onboardingDone: user?.onboardingDone,
+      planPrefs: user?.planPrefs ?? null,
+      inputs,
+    }),
+    [user?.onboardingDone, user?.planPrefs, inputs],
+  )
+  const welcomeBlockedRef = useRef(peekForceOnboardingSession())
+
+  const [showWelcome, setShowWelcome] = useState(() =>
+    shouldShowWelcomeOverlay({
+      onboardingDone: user?.onboardingDone,
+      planPrefs: user?.planPrefs ?? null,
+      inputs: initialApp.inputs,
+    }),
+  )
+
+  useEffect(() => {
+    if (consumeForceOnboardingSession()) {
+      welcomeBlockedRef.current = true
+      setShowWelcome(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (path !== APP_PATHS.onboarding) return
+    if (shouldSkipWelcome(welcomeCtx)) return
+    welcomeBlockedRef.current = true
+    setShowWelcome(true)
+  }, [path, welcomeCtx])
+
+  const welcomeDone = !showWelcome
 
   const sessionRef = useRef({ inputs, ui, phase, activePreset })
   useEffect(() => {
@@ -281,10 +312,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
     return () => window.clearTimeout(id)
   }, [authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])
 
-  /** Once welcome is dismissed, do not re-open when monthly goal is cleared in Configure. */
+  /** After auth + session hydrate, auto-dismiss welcome only when truly complete. */
   useEffect(() => {
-    if (skipWelcome) setWelcomeDone(true)
-  }, [skipWelcome])
+    if (authLoading) return
+    if (welcomeBlockedRef.current) return
+    if (peekForceOnboardingSession()) return
+    setShowWelcome(shouldShowWelcomeOverlay(welcomeCtx))
+  }, [authLoading, welcomeCtx])
 
   useEffect(() => {
     if (!welcomeDone || typeof sessionStorage === 'undefined') return
@@ -337,6 +371,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const onRemoveRetirementAccounts = useCallback(() => {
     clearAllFidelityImportFromCard()
+    clearStoredManualAccounts()
     saveBalanceInputMode('manual')
     saveBrokerageBalanceMode('manual')
     setBalanceMode('manual')
@@ -347,6 +382,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       positionReturnModels: filterAllFidelityPositionReturnModels(prev.positionReturnModels),
     }))
     setFidelityImportRev((n) => n + 1)
+    setManualAccountsRev((n) => n + 1)
   }, [])
 
   const onFidelityImportAppliedBrokerage = useCallback(() => {
@@ -360,17 +396,18 @@ export default function App({ initialAuthModal = null }: AppProps) {
   )
 
   const ssTimingConfigured = isSsConfigured(inputs)
+  const dashboardHasPortfolio = welcomeDone && c.hasPortfolioBalances
   const navContext: NavPanelContext = useMemo(
     () => ({
-      hasPortfolioBalances: c.hasPortfolioBalances,
-      ssConfigured: ssTimingConfigured,
+      hasPortfolioBalances: dashboardHasPortfolio,
+      ssConfigured: welcomeDone && ssTimingConfigured,
     }),
-    [c.hasPortfolioBalances, ssTimingConfigured],
+    [dashboardHasPortfolio, welcomeDone, ssTimingConfigured],
   )
-  const path = useAppPath()
   const isWhereToRetire = path === APP_PATHS.whereToRetire
 
   const hasGoalBar =
+    welcomeDone &&
     c.hasPortfolioBalances &&
     ((phase === 'growth' && inputs.growthGoal > 0) || (phase === 'income' && inputs.monthlyIncomeGoal > 0))
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)
@@ -378,8 +415,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const [openImportRequest, setOpenImportRequest] = useState(0)
 
   useEffect(() => {
-    syncNoPortfolioSubheaderDocumentAttr(c.hasPortfolioBalances)
-  }, [c.hasPortfolioBalances])
+    syncNoPortfolioSubheaderDocumentAttr(welcomeDone && c.hasPortfolioBalances)
+  }, [welcomeDone, c.hasPortfolioBalances])
 
   useEffect(() => {
     if (!isSnapshotNavAvailable(navContext) && accordionOpen) {
@@ -402,34 +439,35 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   /** First time balances appear (manual or import), default to Growth (portfolio at retirement). */
   useEffect(() => {
+    if (!welcomeDone) return
     const had = hadPortfolioBalancesRef.current
     hadPortfolioBalancesRef.current = c.hasPortfolioBalances
     if (c.hasPortfolioBalances && !had) {
       setPhase('growth')
     }
-  }, [c.hasPortfolioBalances])
+  }, [welcomeDone, c.hasPortfolioBalances])
 
   /** Yield / return strip: headline after wave; slider row staggers in CSS (see StripHeader.scss). */
   useEffect(() => {
-    if (!c.hasPortfolioBalances) {
+    if (!welcomeDone || !c.hasPortfolioBalances) {
       setPortfolioControlsRevealed(false)
       return
     }
     const delayMs = getStripControlsRevealDelayMs()
     const id = window.setTimeout(() => setPortfolioControlsRevealed(true), delayMs)
     return () => window.clearTimeout(id)
-  }, [c.hasPortfolioBalances])
+  }, [welcomeDone, c.hasPortfolioBalances])
 
   /** Retirement account card: stagger after strip yield/return sliders (see calculator.scss). */
   useEffect(() => {
-    if (!c.hasPortfolioBalances) {
+    if (!welcomeDone || !c.hasPortfolioBalances) {
       setPortfolioAccountsRevealed(false)
       return
     }
     const delayMs = getAccountsRevealDelayMs()
     const id = window.setTimeout(() => setPortfolioAccountsRevealed(true), delayMs)
     return () => window.clearTimeout(id)
-  }, [c.hasPortfolioBalances])
+  }, [welcomeDone, c.hasPortfolioBalances])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return
@@ -444,7 +482,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
   return (
     <>
       <div
-        className={`app-header-shell${hasGoalBar ? ' app-header-shell--has-goal' : ''}${phase === 'income' && ssTimingConfigured ? ' app-header-shell--ss-claim' : ''}`}
+        className={[
+          'app-header-shell',
+          hasGoalBar && 'app-header-shell--has-goal',
+          phase === 'income' && welcomeDone && ssTimingConfigured && 'app-header-shell--ss-claim',
+          !welcomeDone && 'app-header-shell--onboarding',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <div className="app-header-stack">
         <Header
@@ -483,14 +528,16 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onSignIn={openAuthSignIn}
           onCreateAccount={openAuthRegister}
         />
+        {hasGoalBar ? (
         <GoalProgressBar
           phase={phase}
           growthGoal={inputs.growthGoal}
           growthGoalProgressPct={c.growthGoalProgressPct}
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
           incomeGoalProgressPct={c.incomeGoalProgressPct}
-          hasPortfolioBalances={c.hasPortfolioBalances}
+          hasPortfolioBalances={dashboardHasPortfolio}
         />
+        ) : null}
         <SubHeader
           phase={phase}
           onPhase={setPhase}
@@ -501,14 +548,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onSsIncluded={(v) => setUi({ ssIncluded: v })}
           ssClaimAge={normalizeClaimAge(inputs.ssAge)}
           onSsClaimAgeChange={(age: SsClaimAge) => setInputs({ ssAge: age })}
-          ssTimingConfigured={ssTimingConfigured}
+          ssTimingConfigured={welcomeDone && ssTimingConfigured}
           onOpenSsConfig={() => {
             setMobileNavOpen(false)
             setAccordionOpen(false)
             setConfigTab('social-security')
             setDrawer('config')
           }}
-          hasPortfolioBalances={c.hasPortfolioBalances}
+          hasPortfolioBalances={dashboardHasPortfolio}
         />
         </div>
         <div className="subheader-spacer" aria-hidden="true" />
@@ -544,15 +591,16 @@ export default function App({ initialAuthModal = null }: AppProps) {
       <div
         className={[
           'app-scroll-stack',
-          isWhereToRetire && 'app-scroll-stack--where-to-retire',
+          isWhereToRetire && welcomeDone && 'app-scroll-stack--where-to-retire',
+          !welcomeDone && 'app-scroll-stack--onboarding',
         ]
           .filter(Boolean)
           .join(' ')}
       >
         <div className="app-scroll-stack__main">
-      {isWhereToRetire ? (
+      {welcomeDone && isWhereToRetire ? (
         <WhereToRetire c={c} />
-      ) : (
+      ) : welcomeDone ? (
         <>
       <StripHeader
         phase={phase}
@@ -644,6 +692,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               balanceMode={balanceMode}
               onBalanceModeChange={onBalanceModeChange}
               fidelityImportRev={fidelityImportRev}
+              manualAccountsRev={manualAccountsRev}
               onFidelityApplyBalances={onFidelityApplyBalances}
               onFidelityImportApplied={onFidelityImportAppliedRetirement}
               onRemoveRetirementAccounts={onRemoveRetirementAccounts}
@@ -664,7 +713,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <hr className="divider" />
       </div>
         </>
-      )}
+      ) : null}
         </div>
         <AppPrivacyTrust dividerAbove={isWhereToRetire} />
       </div>
@@ -712,14 +761,24 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <OnboardingOverlay
           inputs={inputs}
           setInputs={setInputs}
+          setUi={setUi}
           saveUserPrefs={user ? saveUserPrefs : undefined}
-          onComplete={() => setWelcomeDone(true)}
+          onComplete={() => {
+            welcomeBlockedRef.current = false
+            setShowWelcome(false)
+          }}
           onCancel={() => {
             const fresh = freshAppState()
             setInputsState(fresh.inputs)
-            setWelcomeDone(true)
+            welcomeBlockedRef.current = false
+            setShowWelcome(false)
           }}
           onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
+          onAccountsSaved={() => {
+            saveBalanceInputMode('manual')
+            setBalanceMode('manual')
+            setManualAccountsRev((n) => n + 1)
+          }}
         />
       ) : null}
     </>

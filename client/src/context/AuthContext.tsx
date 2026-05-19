@@ -45,7 +45,7 @@ function normalizeAuthUser(u: AuthUser): AuthUser {
   return {
     ...u,
     displayName: normalizeDisplayName(u.displayName),
-    onboardingDone: typeof u.onboardingDone === 'boolean' ? u.onboardingDone : true,
+    onboardingDone: typeof u.onboardingDone === 'boolean' ? u.onboardingDone : false,
     planPrefs: parseUserPrefs((u as AuthUser & { planPrefs?: unknown }).planPrefs),
     subscriptionStatus:
       typeof (u as AuthUser & { subscriptionStatus?: unknown }).subscriptionStatus === 'string'
@@ -200,12 +200,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' })
-      if (res.status === 401) {
+      if (!res.ok) {
         setUser(null)
         return
       }
       const data = (await res.json()) as MeResponse
-      if (data.ok) setUser(normalizeAuthUser(data.user))
+      if (data.ok && data.user) setUser(normalizeAuthUser(data.user))
       else setUser(null)
     } catch {
       setUser(null)
@@ -254,11 +254,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/login', {
+      await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       })
-      setUser(normalizeAuthUser(data.user))
+      await refreshSession()
       return {}
     } catch (e) {
       if (e instanceof ApiRequestError && e.code === 'invalid_credentials') {
@@ -266,7 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return { error: 'Could not sign in. Is the API running?' }
     }
-  }, [])
+  }, [refreshSession])
 
   const signUp = useCallback(async (email: string, password: string, paymentMethodId?: string) => {
     try {

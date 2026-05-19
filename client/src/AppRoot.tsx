@@ -4,7 +4,7 @@ import { useAppPath } from './hooks/useAppPath'
 import { APP_PATHS } from './lib/appPaths'
 import App from './App'
 import { GuestWelcomeGate } from './components/GuestWelcomeGate'
-import { shouldSkipWelcome } from './lib/welcomeGate'
+import { isOnboardingComplete, markForceOnboardingSession } from './lib/welcomeGate'
 import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { LandingPage } from './components/LandingPage'
@@ -83,6 +83,14 @@ export default function AppRoot() {
     })
   }, [clearGoogleCheckoutUi])
 
+  useEffect(() => {
+    if (authLoading || user) return
+    if (path !== APP_PATHS.onboarding) return
+    if (!isOnboardingComplete({ inputs: getInitialCalculatorInputs() })) {
+      markForceOnboardingSession()
+    }
+  }, [authLoading, user, path])
+
   if (path === APP_PATHS.privacy) {
     return <PrivacyPolicy />
   }
@@ -95,7 +103,7 @@ export default function AppRoot() {
     return <App key={user.id} />
   }
 
-  const guestSkipWelcome = shouldSkipWelcome({ inputs: getInitialCalculatorInputs() })
+  const guestSkipWelcome = isOnboardingComplete({ inputs: getInitialCalculatorInputs() })
 
   if (guestView === 'landing') {
     return (

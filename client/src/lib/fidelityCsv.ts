@@ -621,6 +621,60 @@ export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]):
   return out
 }
 
+export type FidelityHoldingAccountBreakdown = {
+  accountKey: string
+  accountLabel: string
+  quantity: number
+  currentValue: number
+  costBasis: number | null
+}
+
+/** Short label for a source account row (Plaid "Institution — Account ·••1234" or CSV account name). */
+export function shortSourceAccountLabel(accountName: string): string {
+  const dash = accountName.indexOf(' — ')
+  if (dash >= 0) {
+    const rest = accountName.slice(dash + 3)
+    const dot = rest.indexOf(' ·')
+    const accountPart = (dot >= 0 ? rest.slice(0, dot) : rest).trim()
+    if (accountPart) return accountPart
+    return accountName.slice(0, dash).trim()
+  }
+  return accountName.trim()
+}
+
+/** Per-account lines for one aggregated symbol row (multiple Plaid/CSV source accounts). */
+export function breakdownAggregateByAccount(row: AggregatedFidelitySymbolRow): FidelityHoldingAccountBreakdown[] {
+  const byAccount = new Map<string, FidelityPositionRow[]>()
+  for (const r of row.contributingRows) {
+    const key = fidelityAccountKey(r.accountName)
+    const list = byAccount.get(key) ?? []
+    list.push(r)
+    byAccount.set(key, list)
+  }
+  const out: FidelityHoldingAccountBreakdown[] = []
+  for (const [accountKey, accountRows] of byAccount) {
+    const quantity = accountRows.reduce((s, x) => s + x.quantity, 0)
+    const currentValue = accountRows.reduce((s, x) => s + x.currentValue, 0)
+    const costParts = accountRows
+      .map((x) => x.costBasis)
+      .filter((x): x is number => x != null && Number.isFinite(x))
+    out.push({
+      accountKey,
+      accountLabel: shortSourceAccountLabel(accountRows[0]?.accountName ?? accountKey),
+      quantity,
+      currentValue,
+      costBasis: costParts.length ? costParts.reduce((s, x) => s + x, 0) : null,
+    })
+  }
+  out.sort((a, b) => b.currentValue - a.currentValue)
+  return out
+}
+
+export function aggregateRowHasAccountBreakdown(row: AggregatedFidelitySymbolRow): boolean {
+  const keys = new Set(row.contributingRows.map((r) => fidelityAccountKey(r.accountName)))
+  return keys.size > 1
+}
+
 /** Rows assigned to a retirement calculator bucket (excludes brokerage / unknown). */
 export function positionsForRetirementBucket(
   rows: FidelityPositionRow[],

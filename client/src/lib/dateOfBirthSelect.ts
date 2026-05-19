@@ -41,9 +41,12 @@ export function defaultBirthYear(asOf: Date = new Date()): number {
   return asOf.getFullYear() - 50
 }
 
+/** Year row scroll anchor when the year dropdown opens with no selection yet. */
+export const DOB_YEAR_LIST_SCROLL_ANCHOR = 1976
+
 /** Month/year picker defaults when no DOB is stored yet. */
-export function defaultDobPartsForPicker(asOf: Date = new Date()): DobParts {
-  return { year: String(defaultBirthYear(asOf)), month: '', day: '' }
+export function defaultDobPartsForPicker(): DobParts {
+  return { year: '', month: '', day: '' }
 }
 
 /** Birth years where at least one calendar date yields age in [minAge, maxAge]. */

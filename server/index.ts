@@ -89,6 +89,65 @@ function publicAuthUser(row: UserAuthRow, emailOverride?: string) {
   }
 }
 
+type UserSubscriptionRow = {
+  display_name: string | null
+  onboarding_done: boolean | number
+  user_prefs: unknown
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  subscription_status: string | null
+}
+
+/** Repair missing subscription metadata from Stripe when possible. */
+async function hydrateUserSubscriptionRow(
+  userId: string,
+  row: UserSubscriptionRow | undefined,
+): Promise<UserSubscriptionRow | undefined> {
+  if (!row) return row
+  const stripe = getStripeBackend()
+  if (
+    stripe &&
+    getStripeSubscriptionPriceId() &&
+    row.stripe_customer_id &&
+    (!row.stripe_subscription_id || normalizeSubscriptionStatus(row.subscription_status) === 'none')
+  ) {
+    try {
+      const subscriptionId = await repairStripeSubscriptionForCustomer(stripe, row.stripe_customer_id)
+      await dbQuery(
+        'UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
+        [subscriptionId, 'active', userId],
+      )
+      return {
+        ...row,
+        stripe_subscription_id: subscriptionId,
+        subscription_status: 'active',
+      }
+    } catch {
+      /* keep stored status */
+    }
+  }
+  return row
+}
+
+async function loadAuthUserProfile(userId: string, email: string) {
+  const { rows } = await dbQuery<UserSubscriptionRow>(
+    'SELECT display_name, onboarding_done, user_prefs, stripe_customer_id, stripe_subscription_id, subscription_status FROM users WHERE id = ? LIMIT 1',
+    [userId],
+  )
+  const row = await hydrateUserSubscriptionRow(userId, rows[0])
+  return publicAuthUser(
+    {
+      id: userId,
+      email,
+      display_name: row?.display_name ?? null,
+      onboarding_done: row?.onboarding_done ?? false,
+      user_prefs: row?.user_prefs,
+      subscription_status: row?.subscription_status,
+    },
+    email,
+  )
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'retirement-calculator-api' })
 })
@@ -96,58 +155,10 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/auth/me', async (req, res) => {
   const u = await readSessionUser(req)
   if (!u) {
-    res.status(401).json({ ok: false, error: 'unauthorized' })
+    res.json({ ok: false })
     return
   }
-  const { rows } = await dbQuery<{
-    display_name: string | null
-    onboarding_done: boolean | number
-    user_prefs: unknown
-    stripe_customer_id: string | null
-    stripe_subscription_id: string | null
-    subscription_status: string | null
-  }>(
-    'SELECT display_name, onboarding_done, user_prefs, stripe_customer_id, stripe_subscription_id, subscription_status FROM users WHERE id = ? LIMIT 1',
-    [u.userId],
-  )
-  let row = rows[0]
-  const stripe = getStripeBackend()
-  if (
-    stripe &&
-    getStripeSubscriptionPriceId() &&
-    row?.stripe_customer_id &&
-    (!row.stripe_subscription_id ||
-      normalizeSubscriptionStatus(row.subscription_status) === 'none')
-  ) {
-    try {
-      const subscriptionId = await repairStripeSubscriptionForCustomer(
-        stripe,
-        row.stripe_customer_id,
-      )
-      await dbQuery(
-        'UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
-        [subscriptionId, 'active', u.userId],
-      )
-      row = {
-        ...row,
-        stripe_subscription_id: subscriptionId,
-        subscription_status: 'active',
-      }
-    } catch {
-      /* keep stored status; user can use repair endpoint */
-    }
-  }
-  res.json({
-    ok: true,
-    user: publicAuthUser({
-      id: u.userId,
-      email: u.email,
-      display_name: row?.display_name ?? null,
-      onboarding_done: row?.onboarding_done ?? false,
-      user_prefs: row?.user_prefs,
-      subscription_status: row?.subscription_status,
-    }, u.email),
-  })
+  res.json({ ok: true, user: await loadAuthUserProfile(u.userId, u.email) })
 })
 
 app.post('/api/stripe/signup-setup-intent', async (_req, res) => {
@@ -479,13 +490,7 @@ app.post('/api/auth/login', async (req, res) => {
   })
   res.json({
     ok: true,
-    user: publicAuthUser({
-      id: row.id,
-      email,
-      display_name: row.display_name,
-      onboarding_done: row.onboarding_done,
-      user_prefs: row.user_prefs,
-    }, email),
+    user: await loadAuthUserProfile(row.id, email),
   })
 })
 
@@ -504,22 +509,7 @@ app.put('/api/user/prefs', async (req, res) => {
     JSON.stringify(prefs),
     u.userId,
   ])
-  const { rows } = await dbQuery<{
-    display_name: string | null
-    onboarding_done: boolean | number
-    user_prefs: unknown
-  }>('SELECT display_name, onboarding_done, user_prefs FROM users WHERE id = ? LIMIT 1', [u.userId])
-  const row = rows[0]
-  res.json({
-    ok: true,
-    user: publicAuthUser({
-      id: u.userId,
-      email: u.email,
-      display_name: row?.display_name ?? null,
-      onboarding_done: row?.onboarding_done ?? true,
-      user_prefs: row?.user_prefs ?? prefs,
-    }, u.email),
-  })
+  res.json({ ok: true, user: await loadAuthUserProfile(u.userId, u.email) })
 })
 
 app.post('/api/user/onboarding-complete', async (req, res) => {
@@ -537,22 +527,7 @@ app.post('/api/user/onboarding-complete', async (req, res) => {
   } else {
     await dbQuery('UPDATE users SET onboarding_done = TRUE WHERE id = ?', [u.userId])
   }
-  const { rows } = await dbQuery<{
-    display_name: string | null
-    onboarding_done: boolean | number
-    user_prefs: unknown
-  }>('SELECT display_name, onboarding_done, user_prefs FROM users WHERE id = ? LIMIT 1', [u.userId])
-  const row = rows[0]
-  res.json({
-    ok: true,
-    user: publicAuthUser({
-      id: u.userId,
-      email: u.email,
-      display_name: row?.display_name ?? null,
-      onboarding_done: row?.onboarding_done ?? true,
-      user_prefs: row?.user_prefs,
-    }, u.email),
-  })
+  res.json({ ok: true, user: await loadAuthUserProfile(u.userId, u.email) })
 })
 
 app.post('/api/auth/logout', (_req, res) => {

@@ -17,9 +17,10 @@ type Props = {
   onChange: (age: number) => void
   ariaLabel: string
   dateOfBirth?: string
+  disabled?: boolean
 }
 
-export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth }: Props) {
+export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth, disabled = false }: Props) {
   const age = clampClaimAge(value)
   const valueLabel =
     dateOfBirth && isValidIsoDateString(dateOfBirth)
@@ -27,7 +28,7 @@ export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth }: Prop
       : `At ${age}`
 
   return (
-    <div className="claim-age-slider">
+    <div className={`claim-age-slider${disabled ? ' claim-age-slider--disabled' : ''}`}>
       <p className="claim-age-slider__value" aria-live="polite">
         {valueLabel}
       </p>
@@ -39,6 +40,7 @@ export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth }: Prop
           max={SS_CLAIM_AGE_MAX}
           step={1}
           value={age}
+          disabled={disabled}
           onChange={(e) => onChange(clampClaimAge(Number(e.target.value)))}
           aria-label={ariaLabel}
           aria-valuemin={SS_CLAIM_AGE_MIN}

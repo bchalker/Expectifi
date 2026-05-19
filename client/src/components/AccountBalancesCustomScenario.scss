@@ -327,28 +327,90 @@
   width: 100%;
 }
 
-.account-balances-financials-entry__import-row {
+.account-balances-financials-entry__choices {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: 20rem;
+  margin-inline: auto;
+}
+
+.financials-entry-choice-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.financials-entry-choice {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  width: auto;
-  max-width: 100%;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.financials-entry-choice:hover:not(:disabled),
+.financials-entry-choice:focus-visible:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.financials-entry-choice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.financials-entry-choice-wrap--pro-gated {
+  gap: 0.25rem;
+}
+
+.financials-entry-choice--pro-gated {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-style: dashed;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.financials-entry-choice--pro-gated:hover:not(:disabled),
+.financials-entry-choice--pro-gated:focus-visible:not(:disabled) {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.financials-entry-choice__pro-note {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-faint);
+  text-align: center;
+  line-height: 1.35;
 }
 
 .account-balances-financials-entry__select {
-  width: auto;
+  width: 100%;
   min-width: 0;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-}
-
-.account-balances-financials-entry__manual-btn {
-  min-height: auto;
-  height: auto;
-  padding: 0.35rem 0.65rem;
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-muted);
 }
 
 .account-balances-edit-sheet {

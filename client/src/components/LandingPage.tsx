@@ -66,7 +66,6 @@ export function LandingPage({
         <section className="landing-hero" aria-labelledby="landing-hero-title">
           <div className="landing-page__wrap">
             <div className="landing-hero__inner">
-            <p className="landing-hero__eyebrow">Retirement planning, simplified</p>
             <LandingHeroHeadline />
             <button type="button" className="landing-btn landing-btn--primary landing-btn--lg" onClick={onGetStarted}>
               Get started free

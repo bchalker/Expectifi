@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { IconCheck } from '@tabler/icons-react'
 import { fmt, fmtInput, parseNum } from '../../utils/format'
 import './CurrencyAmountInput.scss'
+import '../OnboardingFieldShell.scss'
 
 type Props = {
   id: string
@@ -15,6 +17,16 @@ type Props = {
   hint?: string
   className?: string
   disabled?: boolean
+  /** When true, show value as read-only text instead of an input. */
+  readOnly?: boolean
+  /** When true, render the $ prefix outside the input box (sibling to the left). */
+  externalPrefix?: boolean
+  /** Example-scale copy shown when value is 0 (field stays empty until the user types). */
+  placeholder?: string
+  /** Welcome/onboarding: grey when empty, white + checkmark when value > 0. */
+  showFillState?: boolean
+  /** Inline validation message shown beneath the input row. */
+  error?: string
 }
 
 export function CurrencyAmountInput({
@@ -27,23 +39,126 @@ export function CurrencyAmountInput({
   hint,
   className,
   disabled = false,
+  readOnly = false,
+  externalPrefix = false,
+  placeholder,
+  showFillState = false,
+  error,
 }: Props) {
   const [focused, setFocused] = useState(false)
-  const display = focused ? fmtInput(value) : fmt(value).replace(/^\$/, '')
+  const showPlaceholder = placeholder != null && value === 0
+  const filled = showFillState && value > 0
+  const display = showPlaceholder
+    ? ''
+    : focused
+      ? fmtInput(value)
+      : fmt(value).replace(/^\$/, '')
 
-  return (
-    <div className={['currency-amount-input', className].filter(Boolean).join(' ')}>
-      <label className="currency-amount-input__label" htmlFor={id}>
-        {label}
-      </label>
-      <div className="num-input-wrap currency-amount-input__wrap">
-        <span className="num-input-prefix">$</span>
+  if (readOnly) {
+    const readonlyValue = fmt(value).replace(/^\$/, '')
+    const readonlyBody = showFillState ? (
+      <div
+        className={[
+          'onboarding-field-shell',
+          'onboarding-field-shell--readonly',
+          filled ? 'onboarding-field-shell--filled' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <p className="onboarding-field-shell__readonly-value" aria-labelledby={id}>
+          {externalPrefix ? readonlyValue : fmt(value)}
+        </p>
+        {filled ? (
+          <span className="onboarding-field-shell__check" aria-hidden>
+            <IconCheck size={14} strokeWidth={2} />
+          </span>
+        ) : null}
+      </div>
+    ) : (
+      <p className="currency-amount-input__readonly-value" aria-labelledby={id}>
+        {externalPrefix ? readonlyValue : fmt(value)}
+      </p>
+    )
+
+    return (
+      <div className={['currency-amount-input', 'currency-amount-input--readonly', className].filter(Boolean).join(' ')}>
+        <span className="currency-amount-input__label" id={id}>
+          {label}
+        </span>
+        {externalPrefix ? (
+          <div className="currency-amount-input__value-group">
+            <div className="currency-amount-input__amount-row currency-amount-input__amount-row--external-prefix">
+              <span className="currency-amount-input__prefix-outside">$</span>
+              {readonlyBody}
+            </div>
+          </div>
+        ) : (
+          readonlyBody
+        )}
+        {hint ? <p className="currency-amount-input__hint">{hint}</p> : null}
+      </div>
+    )
+  }
+
+  const annualHint = showAnnualEquivalent ? (
+    <p
+      className={[
+        'currency-amount-input__annual-hint',
+        value > 0 ? 'currency-amount-input__annual-hint--visible' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-hidden={value <= 0}
+    >
+      {fmt(Math.round(value) * 12)}
+      /year
+    </p>
+  ) : valueIsAnnual ? (
+    <p
+      className={[
+        'currency-amount-input__annual-hint',
+        value > 0 ? 'currency-amount-input__annual-hint--visible' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-hidden={value <= 0}
+    >
+      {fmt(Math.round(value))}/year
+    </p>
+  ) : null
+
+  const amountRow = (
+    <div
+      className={[
+        'currency-amount-input__amount-row',
+        externalPrefix ? 'currency-amount-input__amount-row--external-prefix' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {externalPrefix ? <span className="currency-amount-input__prefix-outside">$</span> : null}
+      <div
+        className={[
+          showFillState ? 'onboarding-field-shell' : 'num-input-wrap',
+          'currency-amount-input__wrap',
+          showFillState && filled ? 'onboarding-field-shell--filled' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {!externalPrefix ? <span className="num-input-prefix">$</span> : null}
         <input
           id={id}
           type="text"
           inputMode="decimal"
-          className="num-input currency-amount-input__field"
+          className={
+            showFillState
+              ? 'onboarding-field-shell__input currency-amount-input__field'
+              : 'num-input currency-amount-input__field'
+          }
           value={display}
+          placeholder={placeholder}
           disabled={disabled}
           onFocus={() => setFocused(true)}
           onBlur={() => {
@@ -52,16 +167,32 @@ export function CurrencyAmountInput({
           }}
           onChange={(e) => onChange(Math.round(parseNum(e.target.value)))}
         />
+        {showFillState && filled ? (
+          <span className="onboarding-field-shell__check" aria-hidden>
+            <IconCheck size={14} strokeWidth={2} />
+          </span>
+        ) : null}
       </div>
-      {showAnnualEquivalent ? (
-        <p className="currency-amount-input__annual-hint">
-          {fmt(Math.round(value) * 12)}
-          /year
-        </p>
-      ) : null}
-      {valueIsAnnual ? (
-        <p className="currency-amount-input__annual-hint">{fmt(Math.round(value))}/year</p>
-      ) : null}
+    </div>
+  )
+
+  return (
+    <div className={['currency-amount-input', className].filter(Boolean).join(' ')}>
+      <label className="currency-amount-input__label" htmlFor={id}>
+        {label}
+      </label>
+      {externalPrefix ? (
+        <div className="currency-amount-input__value-group">
+          {amountRow}
+          {annualHint}
+        </div>
+      ) : (
+        <>
+          {amountRow}
+          {annualHint}
+        </>
+      )}
+      {error ? <p className="currency-amount-input__error" role="alert">{error}</p> : null}
       {hint ? <p className="currency-amount-input__hint">{hint}</p> : null}
     </div>
   )

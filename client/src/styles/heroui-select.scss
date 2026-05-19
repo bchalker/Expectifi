@@ -199,6 +199,17 @@ button[data-slot='select-trigger'][data-disabled='true'] {
   height: 0.875rem;
 }
 
+/* Financials empty-state choice stack — full-width import trigger */
+.app-select--import-menu--entry {
+  width: 100%;
+}
+
+.app-select--import-menu--entry button[data-slot='select-trigger'] {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
 /* Review bucket rows — white field, content width */
 .app-select--compact {
   width: auto;

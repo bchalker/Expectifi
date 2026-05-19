@@ -46,6 +46,14 @@
   color: var(--bg);
 }
 
+.household-mode-segment--disabled {
+  opacity: 0.5;
+}
+
+.household-mode-segment--disabled .household-mode-segment__tab {
+  cursor: not-allowed;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .household-mode-segment__thumb {
     transition: none;

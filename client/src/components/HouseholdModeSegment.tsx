@@ -6,6 +6,7 @@ export type HouseholdMode = 'solo' | 'spouse'
 type Props = {
   value: HouseholdMode
   onChange: (mode: HouseholdMode) => void
+  disabled?: boolean
 }
 
 const OPTIONS: { id: HouseholdMode; label: string }[] = [
@@ -13,7 +14,7 @@ const OPTIONS: { id: HouseholdMode; label: string }[] = [
   { id: 'spouse', label: 'With Spouse' },
 ]
 
-export function HouseholdModeSegment({ value, onChange }: Props) {
+export function HouseholdModeSegment({ value, onChange, disabled = false }: Props) {
   const trackRef = useRef<HTMLDivElement>(null)
   const tabRefs = useRef<Record<HouseholdMode, HTMLButtonElement | null>>({ solo: null, spouse: null })
   const [thumb, setThumb] = useState({ left: 0, width: 0 })
@@ -41,7 +42,12 @@ export function HouseholdModeSegment({ value, onChange }: Props) {
   }, [measureThumb, value])
 
   return (
-    <div ref={trackRef} className="household-mode-segment" role="group" aria-label="Household planning mode">
+    <div
+      ref={trackRef}
+      className={`household-mode-segment${disabled ? ' household-mode-segment--disabled' : ''}`}
+      role="group"
+      aria-label="Household planning mode"
+    >
       <div
         className="household-mode-segment__thumb"
         aria-hidden
@@ -56,6 +62,7 @@ export function HouseholdModeSegment({ value, onChange }: Props) {
           type="button"
           className={`household-mode-segment__tab${value === opt.id ? ' household-mode-segment__tab--on' : ''}`}
           aria-pressed={value === opt.id}
+          disabled={disabled}
           onClick={() => onChange(opt.id)}
         >
           {opt.label}

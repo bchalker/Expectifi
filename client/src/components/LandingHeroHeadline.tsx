@@ -79,7 +79,7 @@ export function LandingHeroHeadline() {
         </span>
         <span className="landing-hero-headline__title-line">on your expected savings?</span>
       </h1>
-      <p className="landing-hero-headline__tagline">Find out if your nest egg is ready.</p>
+      <p className="landing-hero-headline__tagline">Every nest egg looks different. Let&apos;s look at yours.</p>
     </div>
   )
 }

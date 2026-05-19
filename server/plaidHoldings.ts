@@ -34,17 +34,115 @@ export type PlaidHoldingsSnapshot = {
   }
 }
 
-function plaidSubtypeToBucket(subtype: string | null | undefined, type: string | null | undefined): PlaidAccountBucket {
-  const s = String(subtype ?? '').toLowerCase()
-  const t = String(type ?? '').toLowerCase()
+function normalizePlaidToken(raw: string | null | undefined): string {
+  return String(raw ?? '')
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .trim()
+}
 
+/** Map Plaid account subtype/type to calculator buckets (matches fidelityCsv heuristics). */
+export function plaidSubtypeToBucket(
+  subtype: string | null | undefined,
+  type: string | null | undefined,
+): PlaidAccountBucket {
+  const s = normalizePlaidToken(subtype)
+  const t = normalizePlaidToken(type)
+
+  if (/\bhsa\b|health savings/.test(s)) return 'hsa'
   if (/\broth\b/.test(s)) return 'roth'
-  if (/\bhsa\b/.test(s)) return 'hsa'
-  if (/\bsep\b|\bsimple\b|\bsolo\b|\bself[-\s]?employ/.test(s)) return 'se401k'
-  if (/\b401\b|\b403\b|\b457\b|\bpension\b|\btsp\b/.test(s)) return 'trad401k'
+
+  if (
+    /\bsep\b/.test(s) ||
+    /\bsimple\b/.test(s) ||
+    /\bsolo\b/.test(s) ||
+    /\bself[-\s]?employ/.test(s) ||
+    /\bone[-\s]?participant\b/.test(s)
+  ) {
+    return 'se401k'
+  }
+
+  if (
+    /401\s*k|401k|401a|403\s*b|403b|457\s*b|457b|pension|profit sharing|tsp|thrift savings|defined contribution/.test(
+      s,
+    )
+  ) {
+    return 'trad401k'
+  }
+
   if (/\bira\b|\bkeogh\b/.test(s)) return 'trad401k'
-  if (t === 'investment' || t === 'brokerage' || /\bbrokerage\b|\bcash management\b/.test(s)) return 'brokerage'
+
+  if (
+    /\bbrokerage\b/.test(s) ||
+    /\bcash management\b/.test(s) ||
+    /\bindividual\b/.test(s) ||
+    /\binvesting\b/.test(s) ||
+    /\btaxable\b/.test(s) ||
+    t === 'brokerage'
+  ) {
+    return 'brokerage'
+  }
+
   return 'unknown'
+}
+
+/** Fallback when Plaid omits subtype — infer from institution account label. */
+export function plaidAccountNameToBucket(accountName: string): PlaidAccountBucket {
+  const n = accountName.toLowerCase()
+
+  if (/\broth\b/.test(n)) return 'roth'
+  if (/\bhsa\b|health savings/.test(n)) return 'hsa'
+
+  if (
+    /\bbrokerage\b/.test(n) ||
+    /\bindividual\b/.test(n) ||
+    /\binvesting\b/.test(n) ||
+    /\bnon-?retirement\b/.test(n) ||
+    /\btaxable\b/.test(n)
+  ) {
+    return 'brokerage'
+  }
+
+  if (
+    /\bsep\b/.test(n) ||
+    /\bsimple\b/.test(n) ||
+    /\bself[-\s]?employ/.test(n) ||
+    /\bsolo\s*401/.test(n) ||
+    /\bse\s*401/.test(n) ||
+    /\bone[-\s]?participant\b/.test(n)
+  ) {
+    return 'se401k'
+  }
+
+  if (
+    /\b401\b/.test(n) ||
+    /\b401\s*k\b/.test(n) ||
+    /\b403\s*b\b/.test(n) ||
+    /\b403b\b/.test(n) ||
+    /\brollover\b/.test(n) ||
+    /\btraditional\b/.test(n) ||
+    /\btsp\b/.test(n) ||
+    /\bprofit\s*sharing\b/.test(n) ||
+    /\b457\b/.test(n) ||
+    /\bretirement\b/.test(n) ||
+    /\bpension\b/.test(n)
+  ) {
+    return 'trad401k'
+  }
+
+  if (/\bira\b/.test(n)) return 'trad401k'
+
+  return 'unknown'
+}
+
+export function resolvePlaidAccountBucket(
+  account: InvestmentAccount,
+  institutionName: string,
+): PlaidAccountBucket {
+  const fromPlaid = plaidSubtypeToBucket(account.subtype ?? null, account.type ?? null)
+  if (fromPlaid !== 'unknown') return fromPlaid
+  const label = accountLabel(institutionName, account)
+  return plaidAccountNameToBucket(label)
 }
 
 function accountLabel(institutionName: string, account: InvestmentAccount): string {
@@ -99,14 +197,12 @@ export function buildPlaidHoldingsSnapshot(args: {
   const secMap = securityById(securities)
   const byAccount = holdingsByAccount(holdings)
   const rows: PlaidPositionRow[] = []
-  const seenAccountIds = new Set<string>()
 
   for (const account of accounts) {
     const accountId = account.account_id
     if (!accountId) continue
-    seenAccountIds.add(accountId)
     const label = accountLabel(institutionName, account)
-    const bucket = plaidSubtypeToBucket(account.subtype ?? null, account.type ?? null)
+    const bucket = resolvePlaidAccountBucket(account, institutionName)
     const accountHoldings = byAccount.get(accountId) ?? []
 
     if (accountHoldings.length === 0) {
@@ -122,7 +218,7 @@ export function buildPlaidHoldingsSnapshot(args: {
         costBasis: null,
         dailyChangeDollar: null,
         dailyChangePercent: null,
-        calculatorBucket: bucket,
+        calculatorBucket: bucket === 'unknown' ? undefined : bucket,
       })
       continue
     }
@@ -151,7 +247,7 @@ export function buildPlaidHoldingsSnapshot(args: {
         costBasis,
         dailyChangeDollar: null,
         dailyChangePercent: null,
-        calculatorBucket: bucket,
+        calculatorBucket: bucket === 'unknown' ? undefined : bucket,
       })
     }
   }

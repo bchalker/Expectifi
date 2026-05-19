@@ -1,0 +1,111 @@
+/* Welcome form fields — do not use global .num-input-wrap (calculator.scss overrides). */
+
+.onboarding-field-shell {
+  --onboarding-field-inset: 0.65rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--onboarding-field-inset);
+  overflow: visible;
+  background: var(--surface2);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  transition: background-color 0.22s ease;
+}
+
+.onboarding-field-shell--filled {
+  background: #fff;
+  padding-right: calc(var(--onboarding-field-inset) + 1.15rem);
+}
+
+.onboarding-field-shell__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text);
+  cursor: text;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.onboarding-field-shell__input::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+.onboarding-field-shell:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(15, 110, 86, 0.18);
+}
+
+.onboarding-field-shell__check {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  right: var(--onboarding-field-inset);
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  color: #15803d;
+  pointer-events: none;
+  animation: onboarding-field-check-in 0.22s ease forwards;
+}
+
+.onboarding-field-shell__check svg {
+  stroke: #15803d;
+}
+
+@keyframes onboarding-field-check-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.88);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+.onboarding-field-shell--readonly {
+  min-height: 2.75rem;
+}
+
+.onboarding-field-shell__readonly-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-field-shell {
+    transition: none;
+  }
+
+  .onboarding-field-shell__check {
+    animation: none;
+  }
+}

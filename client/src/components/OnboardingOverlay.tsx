@@ -1,39 +1,57 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { IconCheck } from '@tabler/icons-react'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
-import type { CalculatorInputs } from '../lib/computeResults'
+import type { CalculatorInputs, CalculatorUi } from '../lib/computeResults'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import {
-  calculatorInputsToUserPrefs,
+  calculatorInputsToPlanningPrefs,
   markWelcomeCompletedLocal,
   saveLocalUserPrefs,
   type UserPrefs,
 } from '../lib/userPrefs'
 import { clampClaimAge } from '../lib/socialSecurity'
 import {
-  defaultWelcomeBirthIso,
-  welcomeBenchmarkInputsPatch,
   WELCOME_BENCHMARK,
 } from '../lib/welcomeBenchmarkDefaults'
 import { ClaimAgeSlider } from './ClaimAgeSlider'
 import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
-import { HouseholdModeSegment, type HouseholdMode } from './HouseholdModeSegment'
+import { SpouseClaimModeSegment, type SpouseClaimMode } from './SpouseClaimModeSegment'
+import {
+  hasValidManualAccountEntries,
+  normalizedManualAccountEntries,
+  OnboardingAccountsStep,
+} from './OnboardingAccountsStep'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
-import { parseNum } from '../utils/format'
+import { fmt, parseNum } from '../utils/format'
+import {
+  aggregateManualAccountsToBases,
+  loadStoredManualAccounts,
+  newManualAccountEntry,
+  saveCompletedManualAccounts,
+} from '../lib/manualAccountEntries'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 import './SidePanelShell.scss'
 import './ui/CurrencyAmountInput.scss'
 import './ClaimAgeSlider.scss'
+import './SpouseClaimModeSegment.scss'
+import './OnboardingAccountsStep.scss'
 import './OnboardingOverlay.scss'
+import './OnboardingFieldShell.scss'
 
 const BODY_CLASS = 'onboarding-overlay--open'
 const RETIRE_AGE_MAX = 80
 
+const WELCOME_FIELD_PLACEHOLDERS = {
+  householdIncome: 'e.g. 85,000',
+  monthlyContribution: 'e.g. 1,500',
+  monthlyIncomeGoal: 'e.g. 5,000',
+} as const
+
 const WELCOME_FIELD_HINTS = {
   dob: 'We use your age to estimate how many years your money needs to work for you.',
-  currentSavings:
-    'Include 401(k), IRA, brokerage, and savings accounts. A rough estimate is totally fine — you can refine this later.',
   householdIncome:
     'Your combined pre-tax income. This helps us understand your current lifestyle and what retirement might look like.',
   monthlyContribution:
@@ -41,20 +59,27 @@ const WELCOME_FIELD_HINTS = {
   targetRetirementAge:
     '67 is the full Social Security benefit age for most people born after 1960, but this is your plan — adjust it to match your vision.',
   monthlyIncomeGoal:
-    "How much you'd like available each month in retirement, after taxes. A ballpark figure is enough to see what's possible.",
+    'A ballpark is fine.',
   ssBenefit:
-    'Your estimated monthly benefit at age 67. The average is around $1,800 — ssa.gov has a free estimator if you want your exact number.',
+    'Your estimated monthly benefit at your chosen claiming age. The average at 67 is around $1,800 — ssa.gov has a free estimator if you want your exact number.',
   ssClaimAge:
     'Claiming earlier means a smaller monthly check; waiting until 70 increases it. There is no single right answer — pick what fits your plan.',
-  householdMode:
-    'Planning with a spouse lets us factor in their savings and Social Security alongside yours.',
+  includeSpouse:
+    'Include your spouse to factor in their Social Security alongside yours.',
+  spouseClaimModeTooltip:
+    "Social Security pays whichever is higher — your spouse's own earned benefit or 50% of yours. Choose spousal benefit if your spouse had lower lifetime earnings.",
 } as const
 
-type Step = 'profile' | 'social-security' | 'income-goal'
+const SPOUSE_CLAIM_MODE_TOOLTIP = WELCOME_FIELD_HINTS.spouseClaimModeTooltip
+
+const ACCOUNTS_REQUIRED_MSG = 'Enter at least one account type and balance to continue.'
+
+type Step = 'profile' | 'accounts' | 'social-security' | 'income-goal'
 
 type Props = {
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
+  setUi?: (p: Partial<CalculatorUi>) => void
   onComplete: () => void
   /** Dismiss welcome without saving; dashboard stays empty. */
   onCancel?: () => void
@@ -62,6 +87,8 @@ type Props = {
   saveUserPrefs?: (prefs: UserPrefs) => Promise<{ error?: string }>
   /** After welcome, open the account import flow on the dashboard. */
   onConnectAccounts?: () => void
+  /** After Your Accounts step saves typed account rows. */
+  onAccountsSaved?: () => void
 }
 
 function ssTripletFromMonthlyAt67(monthlyAt67: number) {
@@ -72,42 +99,65 @@ function ssTripletFromMonthlyAt67(monthlyAt67: number) {
 }
 
 function initialFormFromInputs(inputs: CalculatorInputs) {
-  const bench = welcomeBenchmarkInputsPatch()
-  const dob = inputs.dateOfBirth || bench.dateOfBirth || defaultWelcomeBirthIso()
-  const savings =
-    inputs.base401k + inputs.baseSE401k + inputs.baseTradIRA + inputs.baseRoth + inputs.baseHsa + inputs.brkBal ||
-    WELCOME_BENCHMARK.currentSavings
+  const dob = inputs.dateOfBirth || ''
+  const storedAccounts = loadStoredManualAccounts()
+  const hasSsBenefits = inputs.ssBenefit62 > 0 && inputs.ssBenefit67 > 0 && inputs.ssBenefit70 > 0
   return {
     dob,
-    currentSavings: savings,
-    householdIncome: inputs.other > 0 ? inputs.other : WELCOME_BENCHMARK.householdIncomeAnnual,
-    monthlyContribution:
-      inputs.save > 0 ? Math.round(inputs.save / 12) : WELCOME_BENCHMARK.monthlyContribution,
+    householdIncome: inputs.other > 0 ? inputs.other : 0,
+    monthlyContribution: inputs.save > 0 ? Math.round(inputs.save / 12) : 0,
     retireAge: inputs.targetRetirementAge || WELCOME_BENCHMARK.targetRetirementAge,
-    monthlyGoal: inputs.monthlyIncomeGoal || WELCOME_BENCHMARK.monthlyIncomeGoal,
+    monthlyGoal: inputs.monthlyIncomeGoal > 0 ? inputs.monthlyIncomeGoal : 0,
+    includeSs: hasSsBenefits,
     ssAge: inputs.ssAge ? clampClaimAge(inputs.ssAge) : 67,
-    ssBenefitMonthly: inputs.ssBenefit67 || WELCOME_BENCHMARK.ssBenefitMonthlyAt67,
-    householdMode: (inputs.married ? 'spouse' : 'solo') as HouseholdMode,
-    spouseDob: inputs.spouseDateOfBirth || defaultWelcomeBirthIso(),
-    spouseSavings: 0,
+    ssBenefitMonthly: inputs.ssBenefit67 > 0 ? inputs.ssBenefit67 : 0,
+    includeSpouse: inputs.married,
+    spouseClaimMode: (inputs.spouseHasOwnEarnings === false ? 'spousal' : 'own') as SpouseClaimMode,
+    spouseDob: inputs.spouseDateOfBirth || '',
     spouseSsBenefitMonthly: inputs.spouseBenefit67 || Math.round(WELCOME_BENCHMARK.ssBenefitMonthlyAt67 * 0.5),
     spouseSsAge: inputs.spouseClaimAge ? clampClaimAge(inputs.spouseClaimAge) : 67,
+    accountEntries:
+      storedAccounts?.entries.length && storedAccounts.onboardingCompleted
+        ? storedAccounts.entries
+        : [newManualAccountEntry()],
+    accountsStepCompleted: storedAccounts?.onboardingCompleted ?? false,
+    accountsStepSkipped: storedAccounts?.onboardingSkipped ?? false,
   }
 }
 
+function effectiveSpouseBenefitMonthly(form: ReturnType<typeof initialFormFromInputs>): number {
+  if (form.spouseClaimMode === 'spousal') {
+    return Math.round(form.ssBenefitMonthly * 0.5)
+  }
+  return form.spouseSsBenefitMonthly
+}
+
+function accountBasesFromForm(form: ReturnType<typeof initialFormFromInputs>) {
+  if (!form.accountsStepCompleted) {
+    return {
+      base401k: 0,
+      baseSE401k: 0,
+      baseTradIRA: 0,
+      baseRoth: 0,
+      baseHsa: 0,
+      brkBal: 0,
+    }
+  }
+  return aggregateManualAccountsToBases(form.accountEntries)
+}
+
 function formToCalculatorPatch(form: ReturnType<typeof initialFormFromInputs>): Partial<CalculatorInputs> {
-  const ss = ssTripletFromMonthlyAt67(form.ssBenefitMonthly)
-  const spouseSs = ssTripletFromMonthlyAt67(form.spouseSsBenefitMonthly)
-  const married = form.householdMode === 'spouse'
+  const ss = form.includeSs ? ssTripletFromMonthlyAt67(form.ssBenefitMonthly) : { b62: 0, b67: 0, b70: 0 }
+  const married = form.includeSpouse
+  const spouseHasOwnEarnings = form.spouseClaimMode === 'own'
+  const spouseSs =
+    form.includeSs && married && spouseHasOwnEarnings
+      ? ssTripletFromMonthlyAt67(form.spouseSsBenefitMonthly)
+      : { b62: 0, b67: 0, b70: 0 }
   return {
     dateOfBirth: form.dob,
     targetRetirementAge: form.retireAge,
-    base401k: form.currentSavings,
-    baseSE401k: 0,
-    baseTradIRA: 0,
-    baseRoth: married ? form.spouseSavings : 0,
-    baseHsa: 0,
-    brkBal: 0,
+    ...accountBasesFromForm(form),
     save: form.monthlyContribution * 12,
     monthlyIncomeGoal: form.monthlyGoal,
     other: form.householdIncome,
@@ -118,7 +168,7 @@ function formToCalculatorPatch(form: ReturnType<typeof initialFormFromInputs>): 
     married,
     spouseDateOfBirth: married ? form.spouseDob : '',
     spouseClaimAge: form.spouseSsAge,
-    spouseHasOwnEarnings: true,
+    spouseHasOwnEarnings,
     spouseBenefit62: married ? spouseSs.b62 : 0,
     spouseBenefit67: married ? spouseSs.b67 : 0,
     spouseBenefit70: married ? spouseSs.b70 : 0,
@@ -128,15 +178,23 @@ function formToCalculatorPatch(form: ReturnType<typeof initialFormFromInputs>): 
 export function OnboardingOverlay({
   inputs,
   setInputs,
+  setUi,
   onComplete,
   onCancel,
   saveUserPrefs,
   onConnectAccounts,
+  onAccountsSaved,
 }: Props) {
   const [step, setStep] = useState<Step>('profile')
   const [form, setForm] = useState(() => initialFormFromInputs(inputs))
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [accountsValidationShown, setAccountsValidationShown] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     document.body.classList.add(BODY_CLASS)
@@ -150,14 +208,15 @@ export function OnboardingOverlay({
   const ageOk = ageToday !== null && ageToday >= 18 && ageToday <= 100
   const retireLo = dobOk && ageToday !== null ? Math.max(50, ageToday + 1) : 50
   const retireOk = Number.isFinite(form.retireAge) && form.retireAge >= retireLo && form.retireAge <= RETIRE_AGE_MAX
-  const profileValid = dobOk && ageOk && retireOk && form.currentSavings >= 0
-  const spouseDobOk = form.householdMode === 'solo' || isValidIsoDateString(form.spouseDob)
+  const profileFieldsOk = dobOk && ageOk && retireOk
+  const profileValid = profileFieldsOk
+  const accountsValid = hasValidManualAccountEntries(form.accountEntries)
+  const spouseDobOk = !form.includeSpouse || isValidIsoDateString(form.spouseDob)
+  const spouseBenefitOk =
+    !form.includeSpouse || form.spouseClaimMode === 'spousal' || form.spouseSsBenefitMonthly > 0
   const ssValid =
-    form.ssBenefitMonthly > 0 &&
-    spouseDobOk &&
-    (form.householdMode === 'solo' || form.spouseSsBenefitMonthly > 0)
-  const goalValid = form.monthlyGoal > 0
-  const dashboardVisible = step === 'income-goal'
+    !form.includeSs ||
+    (form.ssBenefitMonthly > 0 && spouseDobOk && spouseBenefitOk)
 
   async function persistAndFinish(openConnect = false) {
     setErr(null)
@@ -168,13 +227,17 @@ export function OnboardingOverlay({
     const targetRetirementAge = Math.min(RETIRE_AGE_MAX, Math.max(lo, Math.round(form.retireAge)))
     const finalPatch = { ...patch, targetRetirementAge }
     setInputs(finalPatch)
+    setUi?.({ ssIncluded: form.includeSs })
+    if (form.accountsStepCompleted) {
+      onAccountsSaved?.()
+    }
     const prefs: UserPrefs = {
       dob: form.dob,
       retirementAge: targetRetirementAge,
       monthlyGoal: Math.max(0, form.monthlyGoal),
       ssClaimingAge: form.ssAge,
     }
-    if (!calculatorInputsToUserPrefs({ ...inputs, ...finalPatch })) {
+    if (!calculatorInputsToPlanningPrefs({ ...inputs, ...finalPatch })) {
       setBusy(false)
       setErr('Complete all plan fields before continuing.')
       return
@@ -197,7 +260,7 @@ export function OnboardingOverlay({
 
   function onProfileContinue() {
     setErr(null)
-    if (!profileValid) {
+    if (!profileFieldsOk) {
       setErr(
         !dobOk || !ageOk
           ? 'Enter a valid date of birth (you must be between 18 and 100).'
@@ -205,34 +268,55 @@ export function OnboardingOverlay({
       )
       return
     }
+    setStep('accounts')
+  }
+
+  function onAccountsBack() {
+    setErr(null)
+    setAccountsValidationShown(false)
+    setStep('profile')
+  }
+
+  function onAccountsContinue() {
+    setErr(null)
+    if (!accountsValid) {
+      setAccountsValidationShown(true)
+      return
+    }
+    const entries = normalizedManualAccountEntries(form.accountEntries)
+    saveCompletedManualAccounts(entries)
+    setForm((f) => ({
+      ...f,
+      accountEntries: entries,
+      accountsStepCompleted: true,
+      accountsStepSkipped: false,
+    }))
+    setAccountsValidationShown(false)
     setStep('social-security')
   }
 
   function onSsContinue() {
     setErr(null)
     if (!ssValid) {
-      if (form.ssBenefitMonthly <= 0) {
+      if (form.includeSs && form.ssBenefitMonthly <= 0) {
         setErr('Enter your expected Social Security benefit.')
         return
       }
-      if (!spouseDobOk) {
+      if (form.includeSs && !spouseDobOk) {
         setErr('Enter a valid date of birth for your spouse.')
         return
       }
-      setErr('Complete all Social Security fields before continuing.')
+      if (form.includeSs) {
+        setErr('Complete all Social Security fields before continuing.')
+      }
       return
     }
-    setInputs(formToCalculatorPatch(form))
     setStep('income-goal')
   }
 
   function onFinishWelcome() {
     setErr(null)
-    if (!profileValid || !ssValid || !goalValid) {
-      if (!goalValid) {
-        setErr('Enter your monthly income goal in retirement.')
-        return
-      }
+    if (!profileValid || !ssValid) {
       setErr('Complete all fields before continuing.')
       return
     }
@@ -242,39 +326,65 @@ export function OnboardingOverlay({
   function handleCancel() {
     if (busy) return
     setErr(null)
-    markWelcomeCompletedLocal()
     onCancel?.()
   }
 
   const headerTitle =
     step === 'profile'
       ? 'Welcome.'
-      : step === 'social-security'
-        ? 'Social Security'
-        : 'Your income goal'
+      : step === 'accounts'
+        ? "Let's see what you're working with"
+        : step === 'social-security'
+          ? 'Social Security'
+          : 'Almost there:'
 
   const headerSubtitle =
     step === 'profile'
       ? 'To get started, tell us a little about you'
-      : step === 'social-security'
-        ? 'Help us estimate your benefits in retirement'
-        : 'One last thing — how much would you like each month in retirement?'
+      : step === 'accounts'
+        ? null
+        : step === 'social-security'
+          ? 'Help us estimate your benefits in retirement'
+          : null
 
-  return (
+  const spouseBenefitDisplay = effectiveSpouseBenefitMonthly(form)
+  const ssFieldsActive = form.includeSs
+  const retireAgeFilled = Number.isFinite(form.retireAge) && form.retireAge > 0
+  const accountsTotal = form.accountEntries.reduce(
+    (sum, entry) => sum + Math.max(0, Math.round(entry.balance)),
+    0,
+  )
+
+  if (!mounted) return null
+
+  return createPortal(
     <div
-      className={`onboarding-overlay${dashboardVisible ? ' onboarding-overlay--dashboard-visible' : ''}`}
+      className={[
+        'onboarding-overlay',
+        'onboarding-overlay--in-app',
+        step === 'income-goal' ? ' onboarding-overlay--income-goal' : '',
+      ]
+        .filter(Boolean)
+        .join('')}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-overlay-title"
     >
-      <div className="onboarding-overlay__backdrop" aria-hidden />
       <div className="onboarding-overlay__panel">
         <header className="onboarding-overlay__header">
           <div className="onboarding-overlay__title-stack">
             <h2 id="onboarding-overlay-title" className="onboarding-overlay__title">
               {headerTitle}
             </h2>
-            <p className="onboarding-overlay__subtitle">{headerSubtitle}</p>
+            {headerSubtitle ? (
+              <p className="onboarding-overlay__subtitle">{headerSubtitle}</p>
+            ) : null}
+            {step === 'accounts' ? (
+              <p className="onboarding-overlay__accounts-import-note">
+                Add each account type and balance. You can easily connect accounts (via csv import or auto-connection)
+                after setup.
+              </p>
+            ) : null}
           </div>
         </header>
 
@@ -286,7 +396,11 @@ export function OnboardingOverlay({
                   <div className="config-plan-field planning-profile-fields__dob">
                     <span className="config-plan-label">When were you born?</span>
                     <div className="planning-profile-fields__dob-inline">
-                      <DateOfBirthSelects value={form.dob} onChange={(iso) => setForm((f) => ({ ...f, dob: iso }))} includeDay={false} />
+                      <DateOfBirthSelects
+                        value={form.dob}
+                        onChange={(iso) => setForm((f) => ({ ...f, dob: iso }))}
+                        includeDay={false}
+                      />
                       {dobOk ? <DobAgeToday key={form.dob} iso={form.dob} /> : null}
                     </div>
                     <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.dob}</p>
@@ -295,124 +409,189 @@ export function OnboardingOverlay({
 
                 <div className="onboarding-overlay__field-grid">
                   <CurrencyAmountInput
-                    id="welcome-current-savings"
-                    label="Current savings"
-                    value={form.currentSavings}
-                    onChange={(n) => setForm((f) => ({ ...f, currentSavings: n }))}
-                    hint={WELCOME_FIELD_HINTS.currentSavings}
-                  />
-                  <CurrencyAmountInput
                     id="welcome-household-income"
                     label="Household income"
                     value={form.householdIncome}
                     onChange={(n) => setForm((f) => ({ ...f, householdIncome: n }))}
+                    placeholder={WELCOME_FIELD_PLACEHOLDERS.householdIncome}
                     hint={WELCOME_FIELD_HINTS.householdIncome}
+                    externalPrefix
+                    showFillState
                   />
                   <CurrencyAmountInput
                     id="welcome-monthly-contribution"
                     label="Monthly contribution"
                     value={form.monthlyContribution}
                     onChange={(n) => setForm((f) => ({ ...f, monthlyContribution: n }))}
+                    placeholder={WELCOME_FIELD_PLACEHOLDERS.monthlyContribution}
                     showAnnualEquivalent
                     hint={WELCOME_FIELD_HINTS.monthlyContribution}
+                    externalPrefix
+                    showFillState
                   />
                   <div className="config-plan-field">
                     <label className="config-plan-label" htmlFor="welcome-retire-age">
                       Target retirement age
                     </label>
-                    <div className="num-input-wrap onboarding-overlay__age-input-wrap">
+                    <div
+                      className={[
+                        'onboarding-field-shell',
+                        'onboarding-overlay__age-input-wrap',
+                        retireAgeFilled ? 'onboarding-field-shell--filled' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
                       <input
                         id="welcome-retire-age"
                         type="text"
                         inputMode="decimal"
-                        className="num-input onboarding-overlay__age-input"
+                        className="onboarding-field-shell__input onboarding-overlay__age-input"
                         value={String(form.retireAge)}
                         onChange={(e) => setForm((f) => ({ ...f, retireAge: Math.round(parseNum(e.target.value)) }))}
                       />
+                      {retireAgeFilled ? (
+                        <span className="onboarding-field-shell__check" aria-hidden>
+                          <IconCheck size={14} strokeWidth={2} />
+                        </span>
+                      ) : null}
                     </div>
                     <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.targetRetirementAge}</p>
                   </div>
                 </div>
               </>
+            ) : step === 'accounts' ? (
+              <OnboardingAccountsStep
+                entries={form.accountEntries}
+                onChange={(accountEntries) => setForm((f) => ({ ...f, accountEntries }))}
+                validationError={accountsValidationShown && !accountsValid ? ACCOUNTS_REQUIRED_MSG : null}
+              />
             ) : step === 'social-security' ? (
               <>
-                <div className="onboarding-overlay__field-grid onboarding-overlay__field-grid--ss">
-                  <CurrencyAmountInput
-                    id="welcome-ss-benefit"
-                    className="onboarding-overlay__field--wide"
-                    label="Expected Social Security benefit (at 67)"
-                    value={form.ssBenefitMonthly}
-                    onChange={(n) => setForm((f) => ({ ...f, ssBenefitMonthly: n }))}
-                    hint={WELCOME_FIELD_HINTS.ssBenefit}
-                  />
-                </div>
-
-                <div className="onboarding-overlay__section">
-                  <div className="config-plan-field">
-                    <span className="config-plan-label">When do you plan to claim Social Security?</span>
-                    <ClaimAgeSlider
-                      value={form.ssAge}
-                      onChange={(age) => setForm((f) => ({ ...f, ssAge: age }))}
-                      ariaLabel="Your Social Security claiming age"
-                      dateOfBirth={form.dob}
-                    />
-                    <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.ssClaimAge}</p>
+                <div className="onboarding-overlay__section onboarding-overlay__section--ss-toggle">
+                  <div className="onboarding-overlay__ss-toggle-row">
+                    <span className="config-plan-label" id="welcome-include-ss-label">
+                      Include Social Security
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-labelledby="welcome-include-ss-label"
+                      aria-checked={form.includeSs}
+                      className={`onboarding-overlay__ss-toggle${form.includeSs ? ' onboarding-overlay__ss-toggle--on' : ''}`}
+                      onClick={() => setForm((f) => ({ ...f, includeSs: !f.includeSs }))}
+                    >
+                      <span className="onboarding-overlay__ss-toggle-track" aria-hidden />
+                    </button>
                   </div>
                 </div>
 
-                <div className="onboarding-overlay__section">
-                  <span className="config-plan-label">Planning household</span>
-                  <HouseholdModeSegment
-                    value={form.householdMode}
-                    onChange={(mode) => setForm((f) => ({ ...f, householdMode: mode }))}
-                  />
-                  <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.householdMode}</p>
-                  {form.householdMode === 'spouse' ? (
-                    <div className="onboarding-overlay__spouse-fields">
-                      <div className="config-plan-field planning-profile-fields__dob">
-                        <span className="config-plan-label">Spouse date of birth</span>
-                        <DateOfBirthSelects
-                          value={form.spouseDob}
-                          onChange={(iso) => setForm((f) => ({ ...f, spouseDob: iso }))}
-                          includeDay={false}
-                        />
-                      </div>
-                      <CurrencyAmountInput
-                        id="welcome-spouse-savings"
-                        label="Spouse current savings"
-                        value={form.spouseSavings}
-                        onChange={(n) => setForm((f) => ({ ...f, spouseSavings: n }))}
+                <div
+                  className={`onboarding-overlay__ss-fields${form.includeSs ? '' : ' onboarding-overlay__ss-fields--disabled'}`}
+                >
+                  <div className="onboarding-overlay__ss-claim-row">
+                    <div className="config-plan-field">
+                      <span className="config-plan-label">When do you plan to claim Social Security?</span>
+                      <ClaimAgeSlider
+                        value={form.ssAge}
+                        onChange={(age) => setForm((f) => ({ ...f, ssAge: age }))}
+                        ariaLabel="Your Social Security claiming age"
+                        dateOfBirth={form.dob}
+                        disabled={!form.includeSs}
                       />
-                      <CurrencyAmountInput
-                        id="welcome-spouse-ss"
-                        label="Spouse expected Social Security (at 67)"
-                        value={form.spouseSsBenefitMonthly}
-                        onChange={(n) => setForm((f) => ({ ...f, spouseSsBenefitMonthly: n }))}
-                        showAnnualEquivalent
-                      />
-                      <div className="config-plan-field">
-                        <span className="config-plan-label">Spouse claiming age</span>
-                        <ClaimAgeSlider
-                          value={form.spouseSsAge}
-                          onChange={(age) => setForm((f) => ({ ...f, spouseSsAge: age }))}
-                          ariaLabel="Spouse Social Security claiming age"
-                          dateOfBirth={form.spouseDob}
-                        />
-                      </div>
+                      <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.ssClaimAge}</p>
                     </div>
-                  ) : null}
+                    <CurrencyAmountInput
+                      id="welcome-ss-benefit"
+                      label={`Expected benefit at ${form.ssAge}`}
+                      value={form.ssBenefitMonthly}
+                      onChange={(n) => setForm((f) => ({ ...f, ssBenefitMonthly: n }))}
+                      hint={WELCOME_FIELD_HINTS.ssBenefit}
+                      disabled={!form.includeSs}
+                      externalPrefix
+                      showFillState
+                    />
+                  </div>
+
+                  <div className="onboarding-overlay__section onboarding-overlay__section--spouse">
+                    <div className="onboarding-overlay__ss-toggle-row">
+                      <span className="config-plan-label" id="welcome-include-spouse-label">
+                        Include my spouse
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-labelledby="welcome-include-spouse-label"
+                        aria-checked={form.includeSpouse}
+                        disabled={!ssFieldsActive}
+                        className={`onboarding-overlay__ss-toggle${form.includeSpouse ? ' onboarding-overlay__ss-toggle--on' : ''}`}
+                        onClick={() => setForm((f) => ({ ...f, includeSpouse: !f.includeSpouse }))}
+                      >
+                        <span className="onboarding-overlay__ss-toggle-track" aria-hidden />
+                      </button>
+                    </div>
+                    <p className="onboarding-overlay__field-hint">{WELCOME_FIELD_HINTS.includeSpouse}</p>
+
+                    {form.includeSpouse ? (
+                      <div className="onboarding-overlay__spouse-fields">
+                        <span className="config-plan-label" id="welcome-spouse-claim-mode-label">
+                          How will your spouse claim Social Security?
+                        </span>
+                        <SpouseClaimModeSegment
+                          value={form.spouseClaimMode}
+                          onChange={(mode) => setForm((f) => ({ ...f, spouseClaimMode: mode }))}
+                          spousalHint={SPOUSE_CLAIM_MODE_TOOLTIP}
+                          disabled={!ssFieldsActive}
+                        />
+
+                        <div className="config-plan-field planning-profile-fields__dob">
+                          <span className="config-plan-label">Spouse date of birth</span>
+                          <DateOfBirthSelects
+                            value={form.spouseDob}
+                            onChange={(iso) => setForm((f) => ({ ...f, spouseDob: iso }))}
+                            includeDay={false}
+                          />
+                        </div>
+
+                        <div className="onboarding-overlay__ss-claim-row">
+                          <div className="config-plan-field">
+                            <span className="config-plan-label">When will your spouse claim Social Security?</span>
+                            <ClaimAgeSlider
+                              value={form.spouseSsAge}
+                              onChange={(age) => setForm((f) => ({ ...f, spouseSsAge: age }))}
+                              ariaLabel="Spouse Social Security claiming age"
+                              dateOfBirth={form.spouseDob}
+                              disabled={!ssFieldsActive}
+                            />
+                          </div>
+                          <CurrencyAmountInput
+                            id="welcome-spouse-ss"
+                            label={`Expected benefit at ${form.spouseSsAge}`}
+                            value={spouseBenefitDisplay}
+                            onChange={(n) => setForm((f) => ({ ...f, spouseSsBenefitMonthly: n }))}
+                            readOnly={form.spouseClaimMode === 'spousal'}
+                            disabled={!ssFieldsActive}
+                            externalPrefix
+                            showFillState
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="onboarding-overlay__field-grid onboarding-overlay__field-grid--goal">
+              <div className="onboarding-overlay__goal-step">
                 <CurrencyAmountInput
                   id="welcome-monthly-goal"
-                  className="onboarding-overlay__field--wide"
-                  label="Monthly income goal in retirement"
+                  className="onboarding-overlay__goal-input"
+                  label="How much would you like each month in retirement, after taxes?"
                   value={form.monthlyGoal}
                   onChange={(n) => setForm((f) => ({ ...f, monthlyGoal: n }))}
-                  showAnnualEquivalent
+                  placeholder={WELCOME_FIELD_PLACEHOLDERS.monthlyIncomeGoal}
+                  externalPrefix
                   hint={WELCOME_FIELD_HINTS.monthlyIncomeGoal}
+                  showFillState
                 />
               </div>
             )}
@@ -438,12 +617,37 @@ export function OnboardingOverlay({
               <button
                 type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!profileValid || busy}
+                disabled={!profileFieldsOk || busy}
                 onClick={onProfileContinue}
               >
-                Continue to Social Security
+                Continue
               </button>
             </div>
+          ) : step === 'accounts' ? (
+            <>
+              <div className="onboarding-overlay__accounts-total">
+                <span className="onboarding-overlay__accounts-total-label">Total across all accounts</span>
+                <span className="onboarding-overlay__accounts-total-value">{fmt(accountsTotal)}</span>
+              </div>
+              <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                  disabled={busy}
+                  onClick={onAccountsBack}
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={busy}
+                  onClick={onAccountsContinue}
+                >
+                  Continue
+                </button>
+              </div>
+            </>
           ) : step === 'social-security' ? (
             <div className="onboarding-overlay__footer-actions">
               <button
@@ -452,7 +656,7 @@ export function OnboardingOverlay({
                 disabled={busy}
                 onClick={() => {
                   setErr(null)
-                  setStep('profile')
+                  setStep('accounts')
                 }}
               >
                 Back
@@ -482,7 +686,7 @@ export function OnboardingOverlay({
               <button
                 type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!goalValid || busy}
+                disabled={busy}
                 onClick={onFinishWelcome}
               >
                 {busy ? 'Saving…' : 'Continue to dashboard'}
@@ -491,6 +695,7 @@ export function OnboardingOverlay({
           )}
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

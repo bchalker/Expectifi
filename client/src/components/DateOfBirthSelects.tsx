@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
 import { ListBox, Select } from '@heroui/react'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
@@ -6,6 +6,7 @@ import {
   clampDobParts,
   dayOptionsForParts,
   DOB_MONTHS,
+  DOB_YEAR_LIST_SCROLL_ANCHOR,
   defaultDobPartsForPicker,
   dobPartsToIso,
   firstKeyFromSelectSelection,
@@ -46,6 +47,7 @@ type Props = {
 
 export function DateOfBirthSelects({ value, onChange, className, includeDay = true }: Props) {
   const [parts, setParts] = useState<DobParts>(() => partsFromIsoValue(value))
+  const defaultYearItemRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!value) {
@@ -85,10 +87,17 @@ export function DateOfBirthSelects({ value, onChange, className, includeDay = tr
     .filter(Boolean)
     .join(' ')
 
+  function scrollYearListToDefault() {
+    if (parts.year) return
+    requestAnimationFrame(() => {
+      defaultYearItemRef.current?.scrollIntoView({ block: 'center' })
+    })
+  }
+
   return (
     <div className={rowClass}>
       <Select
-        className="dob-select-row__month"
+        className={['dob-select-row__month', parts.month ? 'dob-select--filled' : ''].filter(Boolean).join(' ')}
         variant="secondary"
         aria-label="Birth month"
         placeholder="Month"
@@ -115,7 +124,7 @@ export function DateOfBirthSelects({ value, onChange, className, includeDay = tr
       </Select>
       {includeDay ? (
         <Select
-          className="dob-select-row__day"
+          className={['dob-select-row__day', parts.day ? 'dob-select--filled' : ''].filter(Boolean).join(' ')}
           variant="secondary"
           aria-label="Birth day"
           placeholder="Day"
@@ -142,11 +151,14 @@ export function DateOfBirthSelects({ value, onChange, className, includeDay = tr
         </Select>
       ) : null}
       <Select
-        className="dob-select-row__year"
+        className={['dob-select-row__year', parts.year ? 'dob-select--filled' : ''].filter(Boolean).join(' ')}
         variant="secondary"
         aria-label="Birth year"
         placeholder="Year"
         selectedKey={parts.year || null}
+        onOpenChange={(isOpen) => {
+          if (isOpen) scrollYearListToDefault()
+        }}
         onSelectionChange={(keys) => {
           const id = firstKeyFromSelectSelection(keys)
           if (!id) return
@@ -160,7 +172,12 @@ export function DateOfBirthSelects({ value, onChange, className, includeDay = tr
         <Select.Popover className="app-select-import-menu__popover">
           <ListBox className="app-select-import-menu__list">
             {years.map((y) => (
-              <ListBox.Item key={String(y)} id={String(y)} textValue={String(y)}>
+              <ListBox.Item
+                key={String(y)}
+                id={String(y)}
+                textValue={String(y)}
+                ref={y === DOB_YEAR_LIST_SCROLL_ANCHOR ? defaultYearItemRef : undefined}
+              >
                 {y}
               </ListBox.Item>
             ))}
