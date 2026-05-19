@@ -8,6 +8,7 @@ import {
 } from './authToken.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import { getStripeBackend, getStripeSubscriptionPriceId } from './stripeBackend.js'
+import { isPlaidConfigured } from './plaidClient.js'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE_MS = 10 * 60 * 1000
@@ -130,6 +131,7 @@ export function installGoogleAuth(app: Express, port: number): void {
       googleOAuth: Boolean(cfg),
       stripeConfigured: Boolean(stripe),
       subscriptionBillingEnabled: Boolean(stripe && getStripeSubscriptionPriceId()),
+      plaidConfigured: isPlaidConfigured(),
     })
   })
 

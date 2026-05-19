@@ -1,0 +1,74 @@
+.plaid-link-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.plaid-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.plaid-link-btn:hover:not(:disabled),
+.plaid-link-btn:focus-visible:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.plaid-link-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.plaid-link-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  min-height: 36px;
+  padding-inline: 0.65rem;
+}
+
+.plaid-link-btn--toolbar {
+  min-height: 32px;
+}
+
+.plaid-link-btn__err {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--danger, #b91c1c);
+  line-height: 1.35;
+}
+
+.account-balances-financials-entry__plaid-row {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.account-balances-financials-entry__or {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.account-balances-header-row__plaid {
+  flex-shrink: 0;
+}

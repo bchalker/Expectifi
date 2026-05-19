@@ -130,6 +130,19 @@ export async function ensureSchema(): Promise<void> {
   await addColumnIfMissing('ALTER TABLE users ADD COLUMN user_prefs JSONB')
 
   await p.query(`
+    CREATE TABLE IF NOT EXISTS plaid_items (
+      id TEXT NOT NULL PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      access_token_enc TEXT NOT NULL,
+      institution_id TEXT,
+      institution_name TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await p.query(`CREATE INDEX IF NOT EXISTS plaid_items_user_id ON plaid_items (user_id)`)
+
+  await p.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT NOT NULL PRIMARY KEY,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -56,6 +56,8 @@ type Props = {
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
   onComplete: () => void
+  /** Dismiss welcome without saving; dashboard stays empty. */
+  onCancel?: () => void
   /** When set, prefs are written to the user profile on submit. */
   saveUserPrefs?: (prefs: UserPrefs) => Promise<{ error?: string }>
   /** After welcome, open the account import flow on the dashboard. */
@@ -127,6 +129,7 @@ export function OnboardingOverlay({
   inputs,
   setInputs,
   onComplete,
+  onCancel,
   saveUserPrefs,
   onConnectAccounts,
 }: Props) {
@@ -234,6 +237,13 @@ export function OnboardingOverlay({
       return
     }
     void persistAndFinish(false)
+  }
+
+  function handleCancel() {
+    if (busy) return
+    setErr(null)
+    markWelcomeCompletedLocal()
+    onCancel?.()
   }
 
   const headerTitle =
@@ -416,14 +426,24 @@ export function OnboardingOverlay({
             </p>
           ) : null}
           {step === 'profile' ? (
-            <button
-              type="button"
-              className="onboarding-overlay__cta"
-              disabled={!profileValid || busy}
-              onClick={onProfileContinue}
-            >
-              Continue to Social Security
-            </button>
+            <div className="onboarding-overlay__footer-actions">
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                disabled={busy}
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                disabled={!profileValid || busy}
+                onClick={onProfileContinue}
+              >
+                Continue to Social Security
+              </button>
+            </div>
           ) : step === 'social-security' ? (
             <div className="onboarding-overlay__footer-actions">
               <button

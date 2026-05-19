@@ -714,6 +714,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
           setInputs={setInputs}
           saveUserPrefs={user ? saveUserPrefs : undefined}
           onComplete={() => setWelcomeDone(true)}
+          onCancel={() => {
+            const fresh = freshAppState()
+            setInputsState(fresh.inputs)
+            setWelcomeDone(true)
+          }}
           onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
         />
       ) : null}

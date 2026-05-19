@@ -14,6 +14,8 @@ export type FidelityImportBatch = {
   rows: FidelityPositionRow[]
   /** Source custodian for this file (defaults to fidelity for legacy batches). */
   custodian?: PositionsCsvCustodian
+  /** When synced from Plaid, ties this batch to a Plaid Item for replacement on re-sync. */
+  plaidItemId?: string
 }
 
 export type StoredFidelityImportV1 = {
@@ -173,6 +175,7 @@ export function mergeFidelityBatches(
       importedAt: inc.importedAt,
       rows: inc.rows,
       custodian: inc.custodian,
+      plaidItemId: inc.plaidItemId,
     })
   }
 

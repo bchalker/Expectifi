@@ -38,7 +38,9 @@ import { FidelityAggregatedSymbolTable, type FidelityAggregatedScenarioBundle } 
 import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
 import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
+import { PlaidLinkButton } from './PlaidLinkButton'
 import { ScenariosBar } from './ScenariosBar'
+import { useAuth } from '../context/AuthContext'
 import './AccountBalancesTaxDisclosure.scss'
 import './AccountBalancesCustomScenario.scss'
 
@@ -176,6 +178,7 @@ export function AccountBalances({
   openImportRequest,
   onImportOpenHandled,
 }: Props) {
+  const { user } = useAuth()
   const retTotal = c.retBal
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly
   const fidelityScenarioEditingEnabled = Boolean(readOnly && inputs && setInputs && balanceMode === 'fidelity')
@@ -747,6 +750,24 @@ export function AccountBalances({
     )
   }
 
+  function renderPlaidConnectButton(variant: 'primary' | 'toolbar' = 'primary', className?: string) {
+    if (!onFidelityApplyBalances) return null
+    return (
+      <PlaidLinkButton
+        className={className}
+        variant={variant}
+        isSignedIn={Boolean(user)}
+        onOpenSignIn={onOpenSignIn}
+        onApplyBalances={onFidelityApplyBalances}
+        onImportApplied={() => {
+          onBalanceModeChange?.('fidelity')
+          onFidelityImportApplied?.()
+          if (balanceEditPanel === 'import') requestBalanceEditClose()
+        }}
+      />
+    )
+  }
+
   function renderBalanceEntryButtons() {
     if (!showBalanceEntryActions) return null
 
@@ -767,6 +788,7 @@ export function AccountBalances({
         {renderCsvImportSelect(
           'account-balances-header-row__import-select app-select--import-menu app-select--import-menu--compact',
         )}
+        {renderPlaidConnectButton('toolbar', 'account-balances-header-row__plaid')}
       </div>
     )
   }
@@ -799,9 +821,13 @@ export function AccountBalances({
         </div>
         <h2 className="account-balances-financials-entry__title">How would you like to add your financials for this?</h2>
         <div className="account-balances-financials-entry__actions">
-        <div className="account-balances-financials-entry__import-row">
-          {renderCsvImportSelect('account-balances-financials-entry__select app-select--import-menu')}
-        </div>
+          <div className="account-balances-financials-entry__plaid-row">
+            {renderPlaidConnectButton('primary')}
+          </div>
+          <p className="account-balances-financials-entry__or">or import a CSV</p>
+          <div className="account-balances-financials-entry__import-row">
+            {renderCsvImportSelect('account-balances-financials-entry__select app-select--import-menu')}
+          </div>
           <Button
             variant="ghost"
             size="sm"

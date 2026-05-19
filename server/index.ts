@@ -29,6 +29,7 @@ import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
 import { fetchLivingCostSnapshot } from './livingCostScraper.js'
+import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
 
 const LIVING_COST_PATH_RE = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/i
 
@@ -42,6 +43,7 @@ app.use(cors({ origin: clientOrigin, credentials: true }))
 app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)
+installPlaidRoutes(app, readSessionUser)
 
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase()
@@ -805,6 +807,7 @@ function installProductionClient(app: express.Application) {
 async function main() {
   await ensureSchema()
   logStripeBillingConfigAtStartup()
+  logPlaidConfigAtStartup()
   installProductionClient(app)
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`API listening on port ${PORT}`)
