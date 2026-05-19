@@ -8,18 +8,18 @@ import './LandingPage.scss'
 const HOW_IT_WORKS_STEPS = [
   {
     n: 1,
-    title: 'Tell us about you',
-    body: 'Your age, target retirement year, and monthly income goal.',
+    title: 'Answer a few questions',
+    body: "No account needed. Just your age, income, and what you've saved. Takes about 60 seconds.",
   },
   {
     n: 2,
-    title: 'Add your nest egg',
-    body: 'Enter your 401k, IRA, Roth, HSA, and brokerage balances.',
+    title: 'See your real numbers',
+    body: 'Your projected balance, monthly income, and retirement runway, calculated instantly from what you told us.',
   },
   {
     n: 3,
-    title: 'See your picture',
-    body: 'Get a clear snapshot of your runway, gaps, and Social Security timing.',
+    title: 'Refine as you go',
+    body: 'Connect accounts, adjust assumptions, add a spouse. The more you put in, the sharper your picture gets.',
   },
 ] as const
 
