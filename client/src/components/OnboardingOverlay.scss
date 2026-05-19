@@ -362,6 +362,10 @@ body.onboarding-overlay--open {
   .onboarding-overlay__spouse-fields > * {
     animation: none;
   }
+
+  .onboarding-overlay__accounts-total {
+    animation: none;
+  }
 }
 
 .onboarding-overlay__results-hero {

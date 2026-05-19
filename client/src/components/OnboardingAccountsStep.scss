@@ -285,6 +285,19 @@
   margin: 0;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid var(--border);
+  animation: onboarding-accounts-total-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes onboarding-accounts-total-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .onboarding-overlay__accounts-total-label {

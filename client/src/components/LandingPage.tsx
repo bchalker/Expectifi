@@ -33,7 +33,8 @@ const PRICING_INCLUDES = [
   'Saved scenarios you can revisit anytime',
   'Social Security timing and claiming ages',
   'Withdrawal strategy and tax-aware draw order',
-  'Where to retire? — compare up to 5 regions (COL & tax)',
+  'Where to retire? — compare regions (COL & tax)',
+  'Plaid connection for auto-updates',
   'All future features as we ship them',
 ] as const
 
@@ -114,9 +115,6 @@ export function LandingPage({
                 <span className="landing-pricing-card__price-amount">$9</span>
                 <span className="landing-pricing-card__price-period">/ month</span>
               </h2>
-              <p className="landing-pricing-card__sub">
-                Everything you need to plan your retirement. Cancel anytime.
-              </p>
               <ul className="landing-pricing-card__list">
                 {PRICING_INCLUDES.map((item) => (
                   <li key={item} className="landing-pricing-card__list-item">

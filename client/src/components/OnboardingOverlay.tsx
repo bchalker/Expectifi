@@ -111,7 +111,7 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
     includeSs: hasSsBenefits,
     ssAge: inputs.ssAge ? clampClaimAge(inputs.ssAge) : 67,
     ssBenefitMonthly: inputs.ssBenefit67 > 0 ? inputs.ssBenefit67 : 0,
-    includeSpouse: inputs.married,
+    includeSpouse: false,
     spouseClaimMode: (inputs.spouseHasOwnEarnings === false ? 'spousal' : 'own') as SpouseClaimMode,
     spouseDob: inputs.spouseDateOfBirth || '',
     spouseSsBenefitMonthly: inputs.spouseBenefit67 || Math.round(WELCOME_BENCHMARK.ssBenefitMonthlyAt67 * 0.5),
