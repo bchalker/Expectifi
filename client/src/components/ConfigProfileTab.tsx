@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, useOverlayState } from '@heroui/react'
+import { IconCloudUpload } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
+import { AppButton } from './ui/AppButton'
 import './ConfigProfileTab.scss'
 
 type Props = {
   onAccountCancelled?: () => void
+  onOpenSignIn?: () => void
+  onOpenRegister?: () => void
 }
 
-export function ConfigProfileTab({ onAccountCancelled }: Props) {
-  const { user, cancelAccount } = useAuth()
+export function ConfigProfileTab({ onAccountCancelled, onOpenSignIn, onOpenRegister }: Props) {
+  const { user, cancelAccount, loading } = useAuth()
   const confirmState = useOverlayState()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -37,10 +41,40 @@ export function ConfigProfileTab({ onAccountCancelled }: Props) {
   }, [cancelAccount, confirmState, onAccountCancelled])
 
   if (!user?.email) {
+    if (loading) return null
+
     return (
-      <p className="footnote footnote--muted config-profile-tab__lead">
-        Sign in to manage your account and subscription.
-      </p>
+      <section className="config-profile-tab config-profile-tab--guest" aria-labelledby="config-profile-guest-heading">
+        <div className="config-profile-tab__empty-icon-wrap" aria-hidden>
+          <IconCloudUpload size={24} stroke={1.5} />
+        </div>
+        <h3 id="config-profile-guest-heading" className="config-profile-tab__empty-title">
+          Create an account to save your plan
+        </h3>
+        <p className="config-profile-tab__empty-lead">
+          Your progress stays on this device until you sign up. An account keeps everything backed up and ready when
+          you return.
+        </p>
+        <ul className="config-profile-tab__empty-list">
+          <li>Plan settings, Social Security, and income presets</li>
+          <li>Account balances and CSV imports</li>
+          <li>Custom return scenarios per holding</li>
+        </ul>
+        <div className="config-profile-tab__empty-actions">
+          <AppButton
+            type="button"
+            size="sm"
+            variant="primary"
+            className="config-profile-tab__empty-cta"
+            onPress={onOpenRegister}
+          >
+            Create account
+          </AppButton>
+          <button type="button" className="config-profile-tab__empty-signin" onClick={onOpenSignIn}>
+            Already have an account? Sign in
+          </button>
+        </div>
+      </section>
     )
   }
 

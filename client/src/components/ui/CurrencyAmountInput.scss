@@ -21,7 +21,8 @@
   width: 100%;
 }
 
-.currency-amount-input__amount-row--external-prefix {
+.currency-amount-input__amount-row--external-prefix,
+.currency-amount-input__amount-row--external-affixes {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
@@ -40,9 +41,19 @@
   margin-inline: auto;
 }
 
-.currency-amount-input__amount-row--external-prefix .currency-amount-input__wrap {
+.currency-amount-input__amount-row--external-prefix .currency-amount-input__wrap,
+.currency-amount-input__amount-row--external-affixes .currency-amount-input__wrap {
   width: auto;
   flex: 0 1 auto;
+}
+
+.currency-amount-input__suffix-outside {
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  pointer-events: none;
+  user-select: none;
 }
 
 .currency-amount-input__prefix-outside {

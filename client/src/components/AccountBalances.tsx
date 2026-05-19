@@ -264,7 +264,6 @@ export function AccountBalances({
   const [balanceEditPanel, setBalanceEditPanel] = useState<'manual' | 'import' | null>(null)
   const [balanceEditClosing, setBalanceEditClosing] = useState(false)
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] = useState<PositionsCsvCustodian | null>(null)
-  const [csvImportLaunchNonce, setCsvImportLaunchNonce] = useState(0)
   const [openManageRequest, setOpenManageRequest] = useState(0)
   const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
     id: number
@@ -438,9 +437,9 @@ export function AccountBalances({
     if (!openImportRequest || !mergedDashboard || !onFidelityApplyBalances) return
     if (lastOpenImportRequestRef.current === openImportRequest) return
     lastOpenImportRequestRef.current = openImportRequest
-    openBalanceEditPanel('import')
+    setOpenManageRequest((n) => n + 1)
     onImportOpenHandled?.()
-  }, [openImportRequest, mergedDashboard, onFidelityApplyBalances, openBalanceEditPanel, onImportOpenHandled])
+  }, [openImportRequest, mergedDashboard, onFidelityApplyBalances, onImportOpenHandled])
 
   const runManualConfirmSequence = useCallback(async () => {
     if (!manualDraft || manualConfirmRunRef.current) return
@@ -531,7 +530,6 @@ export function AccountBalances({
       financialsCsvPendingCustodianRef.current = null
       if (!f || !c) return
       setCsvImportPrefillCustodian(c)
-      setCsvImportLaunchNonce((n) => n + 1)
       setCsvFileIngestRequest({ id: Date.now(), file: f, custodian: c })
       onBalanceModeChange?.('fidelity')
       if (mergedDashboard && onFidelityApplyBalances) {
@@ -1292,7 +1290,6 @@ export function AccountBalances({
           onAnimationEnd={onBalanceEditSheetAnimationEnd}
         >
           <FidelityCsvImport
-            key={`acct-balances-import-${csvImportLaunchNonce}`}
             presentation="panel"
             open
             hideTrigger
@@ -1321,21 +1318,16 @@ export function AccountBalances({
 
   const totalRetirementBar = !configureInputsOnly && hasRetirementAccountData ? (
     <div
-      style={{
-        background: 'var(--surface2)',
-        borderRadius: 8,
-        padding: '8px 12px',
-        marginTop: mergedDashboard ? 10 : 0,
-        marginBottom: mergedDashboard ? 10 : stackWithBrokerage ? '0.5rem' : '1.75rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-      }}
+      className={[
+        'account-balances-total-retirement',
+        mergedDashboard ? 'account-balances-total-retirement--merged' : '',
+        !mergedDashboard && stackWithBrokerage ? 'account-balances-total-retirement--stack-with-brokerage' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
-      <span style={{ fontFamily: 'var(--body)', fontSize: 11, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-        Total retirement
-      </span>
-      <span style={{ fontFamily: 'var(--heading)', fontSize: '1.1rem', fontWeight: 500 }}>{fmt(retTotal)}</span>
+      <span className="account-balances-total-retirement__label">Total retirement</span>
+      <span className="account-balances-total-retirement__value">{fmt(retTotal)}</span>
     </div>
   ) : null
 
@@ -1349,7 +1341,7 @@ export function AccountBalances({
             hasPortfolioBalances={c.hasPortfolioBalances}
             fidelityImportRev={fidelityImportRev}
             onConnectAccounts={() => setOpenManageRequest((n) => n + 1)}
-            onImportCsv={() => openBalanceEditPanel('import')}
+            onImportCsv={() => setOpenManageRequest((n) => n + 1)}
           />
           <div className="account-balances-header-row">
             <div className="account-balances-header-row__title-block">
@@ -1382,7 +1374,6 @@ export function AccountBalances({
               {showBalanceEntryActions ? renderAccountBalancesManageMenu() : null}
               {balanceMode === 'fidelity' ? (
                 <FidelityCsvImport
-                  key={`acct-balances-import-toolbar-${csvImportLaunchNonce}`}
                   variant="toolbar"
                   initialCustodian={csvImportPrefillCustodian}
                   fileIngestRequest={csvFileIngestRequest}

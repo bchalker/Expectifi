@@ -98,8 +98,11 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
                       </Select.Value>
                       <Select.Indicator />
                     </Select.Trigger>
-                    <Select.Popover className="app-select-import-menu__popover">
-                      <ListBox className="app-select-import-menu__list">
+                    <Select.Popover
+                      placement="bottom start"
+                      className="app-select-import-menu__popover onboarding-accounts-step__type-popover"
+                    >
+                      <ListBox className="app-select-import-menu__list onboarding-accounts-step__type-list">
                         {typeOptions.map((opt) => (
                           <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
                             <span className="onboarding-accounts-step__type-option">

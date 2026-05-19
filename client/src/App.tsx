@@ -527,6 +527,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           }}
           onSignIn={openAuthSignIn}
           onCreateAccount={openAuthRegister}
+          welcomeDone={welcomeDone}
         />
         {hasGoalBar ? (
         <GoalProgressBar
@@ -587,6 +588,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onOpenSignIn={openAuthSignIn}
         onOpenRegister={openAuthRegister}
         navContext={navContext}
+        welcomeDone={welcomeDone}
       />
       <div
         className={[
@@ -748,6 +750,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
         onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
         configInitialTab={configTab}
+        onOpenSignIn={openAuthSignIn}
+        onOpenRegister={openAuthRegister}
       />
       <AuthModal
         open={authModal}

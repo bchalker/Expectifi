@@ -523,11 +523,14 @@
 @media (prefers-reduced-motion: reduce) {
   .header__link,
   .header__settings,
+  .header__settings--slide-in,
+  .header__account-group--slide-in,
   .header__menu-btn,
   .header__auth-link,
   .header__auth-cta,
   .header__auth-btn,
   .header__account-group {
     transition-duration: 0.01ms;
+    animation: none;
   }
 }

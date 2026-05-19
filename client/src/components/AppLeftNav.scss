@@ -1,4 +1,10 @@
 /* Mobile only: slide-over sheet (desktop nav lives in AppTopChrome) */
+@media (min-width: 761px) {
+  .app-left-nav,
+  .app-left-nav__backdrop {
+    display: none !important;
+  }
+}
 
 .app-left-nav__backdrop {
   position: fixed;
@@ -231,6 +237,23 @@
   justify-content: flex-start;
 }
 
+.app-left-nav__settings-btn--slide-in,
+.app-left-nav__account-group--slide-in {
+  animation: app-left-nav-settings-slide-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes app-left-nav-settings-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .app-left-nav__settings-btn {
   display: flex;
   align-items: center;
@@ -423,6 +446,10 @@
 @media (prefers-reduced-motion: reduce) {
   .app-left-nav__item {
     transition-duration: 0.01ms;
+  }
+  .app-left-nav__settings-btn--slide-in,
+  .app-left-nav__account-group--slide-in {
+    animation: none;
   }
   .app-left-nav__auth-link,
   .app-left-nav__auth-cta,

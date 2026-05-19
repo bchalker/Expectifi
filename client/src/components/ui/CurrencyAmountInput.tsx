@@ -21,6 +21,8 @@ type Props = {
   readOnly?: boolean
   /** When true, render the $ prefix outside the input box (sibling to the left). */
   externalPrefix?: boolean
+  /** Optional suffix outside the input box (e.g. "/mo"). */
+  externalSuffix?: string
   /** Example-scale copy shown when value is 0 (field stays empty until the user types). */
   placeholder?: string
   /** Welcome/onboarding: grey when empty, white + checkmark when value > 0. */
@@ -41,6 +43,7 @@ export function CurrencyAmountInput({
   disabled = false,
   readOnly = false,
   externalPrefix = false,
+  externalSuffix,
   placeholder,
   showFillState = false,
   error,
@@ -86,11 +89,14 @@ export function CurrencyAmountInput({
         <span className="currency-amount-input__label" id={id}>
           {label}
         </span>
-        {externalPrefix ? (
+        {externalPrefix || externalSuffix ? (
           <div className="currency-amount-input__value-group">
-            <div className="currency-amount-input__amount-row currency-amount-input__amount-row--external-prefix">
+            <div className="currency-amount-input__amount-row currency-amount-input__amount-row--external-affixes">
               <span className="currency-amount-input__prefix-outside">$</span>
               {readonlyBody}
+              {externalSuffix ? (
+                <span className="currency-amount-input__suffix-outside">{externalSuffix}</span>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -132,6 +138,9 @@ export function CurrencyAmountInput({
     <div
       className={[
         'currency-amount-input__amount-row',
+        externalPrefix || externalSuffix
+          ? 'currency-amount-input__amount-row--external-affixes'
+          : '',
         externalPrefix ? 'currency-amount-input__amount-row--external-prefix' : '',
       ]
         .filter(Boolean)
@@ -173,6 +182,9 @@ export function CurrencyAmountInput({
           </span>
         ) : null}
       </div>
+      {externalSuffix ? (
+        <span className="currency-amount-input__suffix-outside">{externalSuffix}</span>
+      ) : null}
     </div>
   )
 
@@ -181,7 +193,7 @@ export function CurrencyAmountInput({
       <label className="currency-amount-input__label" htmlFor={id}>
         {label}
       </label>
-      {externalPrefix ? (
+      {externalPrefix || externalSuffix ? (
         <div className="currency-amount-input__value-group">
           {amountRow}
           {annualHint}

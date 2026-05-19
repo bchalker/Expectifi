@@ -1,5 +1,6 @@
 import { IconAdjustments, IconMenu2, IconX } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
+import { useWelcomeSettingsReveal } from '../hooks/useWelcomeSettingsReveal'
 import { useAppPath } from '../hooks/useAppPath'
 import { APP_PATHS, navigateApp } from '../lib/appPaths'
 import type { DrawerName } from '../lib/computeResults'
@@ -43,6 +44,7 @@ type HeaderAppProps = HeaderAuthProps & {
   onOpenDrawer: (name: DrawerName) => void
   onSnapshotToggle: () => void
   onOpenConfig: () => void
+  welcomeDone?: boolean
   navContext: NavPanelContext
 }
 
@@ -86,13 +88,16 @@ function HeaderAuthTail({
   drawer,
   onOpenConfig,
   targetRetirementAge,
+  welcomeDone = true,
 }: HeaderAuthProps & {
   variant: HeaderProps['variant']
   drawer?: DrawerName | null
   onOpenConfig?: () => void
   targetRetirementAge?: number
+  welcomeDone?: boolean
 }) {
   const { apiReady, loading, user, googleCheckoutUi } = useAuth()
+  const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone)
   const accountLabel = user
     ? user.displayName?.trim() || user.email
     : googleCheckoutUi
@@ -101,12 +106,18 @@ function HeaderAuthTail({
   const showRetireByInProfile = Boolean(user?.onboardingDone)
   const isApp = variant === 'app'
 
-  if (!loading && user?.email && isApp && onOpenConfig) {
+  if (!loading && user?.email && isApp && onOpenConfig && showSettings) {
     return (
       <div className="header__tail">
         <button
           type="button"
-          className={`header__account-group${drawer === 'config' ? ' header__account-group--active' : ''}`}
+          className={[
+            'header__account-group',
+            drawer === 'config' ? 'header__account-group--active' : '',
+            slideIn ? 'header__account-group--slide-in' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           aria-label="Open configure: planning, Social Security, and income presets"
           aria-expanded={drawer === 'config'}
           aria-controls="drawer"
@@ -144,10 +155,16 @@ function HeaderAuthTail({
             Create account
           </button>
         </div>
-        {isApp && onOpenConfig ? (
+        {isApp && onOpenConfig && showSettings ? (
           <button
             type="button"
-            className={`header__settings${drawer === 'config' ? ' header__settings--active' : ''}`}
+            className={[
+              'header__settings',
+              drawer === 'config' ? 'header__settings--active' : '',
+              slideIn ? 'header__settings--slide-in' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             aria-label="Configure: planning, Social Security, and income presets"
             aria-expanded={drawer === 'config'}
             aria-controls="drawer"
@@ -296,6 +313,7 @@ export function Header(props: HeaderProps) {
           drawer={variant === 'app' ? props.drawer : undefined}
           onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
           targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
+          welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
         />
       </div>
     </header>

@@ -39,6 +39,8 @@ type Props = {
   onFidelityImportAppliedRetirement: () => void
   onFidelityImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
+  onOpenSignIn?: () => void
+  onOpenRegister?: () => void
 }
 
 export function DrawerPanel({
@@ -59,6 +61,8 @@ export function DrawerPanel({
   onFidelityImportAppliedRetirement,
   onFidelityImportAppliedBrokerage,
   configInitialTab,
+  onOpenSignIn,
+  onOpenRegister,
 }: Props) {
   const open = drawer != null
   const lastDrawerRef = useRef<DrawerName | null>(null)
@@ -130,6 +134,8 @@ export function DrawerPanel({
             onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
             configInitialTab={configInitialTab}
             onClose={onClose}
+            onOpenSignIn={onOpenSignIn}
+            onOpenRegister={onOpenRegister}
           />
         ) : null}
       </SidePanelShell>
@@ -155,6 +161,8 @@ function DrawerBody({
   onFidelityImportAppliedBrokerage: _onFidelityImportAppliedBrokerage,
   configInitialTab,
   onClose,
+  onOpenSignIn,
+  onOpenRegister,
 }: {
   id: DrawerName
   c: ComputedSnapshot
@@ -173,6 +181,8 @@ function DrawerBody({
   onFidelityImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
   onClose: () => void
+  onOpenSignIn?: () => void
+  onOpenRegister?: () => void
 }) {
   switch (id) {
     case 'config':
@@ -186,6 +196,8 @@ function DrawerBody({
           setActivePreset={setActivePreset}
           initialTab={configInitialTab}
           onDrawerClose={onClose}
+          onOpenSignIn={onOpenSignIn}
+          onOpenRegister={onOpenRegister}
         />
       )
     case 'scenarios':

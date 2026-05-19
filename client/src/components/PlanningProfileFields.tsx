@@ -2,14 +2,16 @@ import { useEffect, useMemo } from 'react'
 import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
 import { fmt } from '../utils/format'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
-import './ui/CurrencyAmountInput.scss'
 import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
+import { WelcomeGoalStepFields } from './WelcomeGoalStepFields'
+import { WelcomeProfileStepFields } from './WelcomeProfileStepFields'
+import './ui/CurrencyAmountInput.scss'
+import './WelcomeProfileStepFields.scss'
+import './WelcomeGoalStepFields.scss'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 
 const RETIRE_AGE_MAX = 80
-const GROWTH_GOAL_SLIDER_MAX = 5_000_000
-const GROWTH_GOAL_SLIDER_STEP = 10_000
 const ANNUAL_SAVE_MAX = 60_000
 const ANNUAL_SAVE_STEP = 500
 
@@ -55,12 +57,12 @@ type ImportManualProps = SharedProps & {
 
 type ConfigureProps = SharedProps & {
   variant: 'configure'
-  growthGoal: number
-  onGrowthGoal: (amount: number) => void
+  householdIncome: number
+  onHouseholdIncome: (amount: number) => void
+  monthlyContribution: number
+  onMonthlyContribution: (amount: number) => void
   monthlyIncomeGoal: number
   onMonthlyIncomeGoal: (amount: number) => void
-  annualSave: number
-  onAnnualSave: (amount: number) => void
 }
 
 type WelcomeProps = SharedProps & {
@@ -76,11 +78,12 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
   const retireBounds = useMemo(() => retireAgeBounds(dateOfBirth), [dateOfBirth])
 
   useEffect(() => {
+    if (variant !== 'configure' && variant !== 'import-manual') return
     const next = clampTargetRetirementAge(targetRetirementAge, dateOfBirth)
     if (next !== targetRetirementAge) onTargetRetirementAge(next)
     // Only re-clamp when DOB changes — not on each retirement-age keystroke.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- targetRetirementAge read at DOB change time
-  }, [dateOfBirth, onTargetRetirementAge])
+  }, [dateOfBirth, onTargetRetirementAge, variant])
 
   const dobOk = isValidIsoDateString(dateOfBirth)
   const retireUnset = targetRetirementAge < retireBounds.min
@@ -89,6 +92,28 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
     : clampTargetRetirementAge(targetRetirementAge, dateOfBirth)
 
   const rootClass = ['planning-profile-fields', className].filter(Boolean).join(' ')
+
+  if (variant === 'configure') {
+    return (
+      <div className={rootClass}>
+        <WelcomeProfileStepFields
+          dateOfBirth={dateOfBirth}
+          onDateOfBirth={onDateOfBirth}
+          householdIncome={props.householdIncome}
+          onHouseholdIncome={props.onHouseholdIncome}
+          monthlyContribution={props.monthlyContribution}
+          onMonthlyContribution={props.onMonthlyContribution}
+        />
+        <hr className="planning-profile-fields__divider" aria-hidden />
+        <WelcomeGoalStepFields
+          monthlyGoal={props.monthlyIncomeGoal}
+          onMonthlyGoalChange={props.onMonthlyIncomeGoal}
+          retireAge={targetRetirementAge}
+          onRetireAgeChange={onTargetRetirementAge}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className={rootClass}>
@@ -165,75 +190,7 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
             showAnnualEquivalent
           />
         ) : null}
-        {variant === 'configure' ? (
-          <div className="config-plan-field config-plan-field--savings">
-            <span className="config-plan-label" id="planning-profile-config-annual-save-label">
-              Annual contributions
-            </span>
-            <div className="config-plan-savings-row">
-              <span className="config-plan-saveval">{fmt(props.annualSave)}</span>
-              <input
-                type="range"
-                className="config-plan-savings-slider"
-                min={0}
-                max={ANNUAL_SAVE_MAX}
-                step={ANNUAL_SAVE_STEP}
-                value={props.annualSave}
-                onChange={(e) =>
-                  props.onAnnualSave(Math.round(Number(e.target.value) / ANNUAL_SAVE_STEP) * ANNUAL_SAVE_STEP)
-                }
-                aria-labelledby="planning-profile-config-annual-save-label"
-                aria-valuemin={0}
-                aria-valuemax={ANNUAL_SAVE_MAX}
-                aria-valuenow={props.annualSave}
-              />
-            </div>
-          </div>
-        ) : null}
       </div>
-      {variant === 'configure' ? (
-        <section className="planning-profile-fields__goals" aria-labelledby="planning-profile-goals-heading">
-          <h3 className="planning-profile-fields__goals-heading" id="planning-profile-goals-heading">
-            Goals
-          </h3>
-          <div className="planning-profile-fields__row-duo planning-profile-fields__row-goals">
-          <div className="config-plan-field config-plan-field--goal">
-            <span className="config-plan-label" id="planning-profile-config-growth-goal-label">
-              Growth
-            </span>
-            <div className="config-plan-savings-row">
-              <span className="config-plan-saveval">{fmt(props.growthGoal)}</span>
-              <input
-                type="range"
-                className="config-plan-savings-slider"
-                min={0}
-                max={GROWTH_GOAL_SLIDER_MAX}
-                step={GROWTH_GOAL_SLIDER_STEP}
-                value={Math.min(GROWTH_GOAL_SLIDER_MAX, props.growthGoal)}
-                onChange={(e) => {
-                  const n =
-                    Math.round(Number(e.target.value) / GROWTH_GOAL_SLIDER_STEP) * GROWTH_GOAL_SLIDER_STEP
-                  props.onGrowthGoal(n)
-                }}
-                aria-labelledby="planning-profile-config-growth-goal-label"
-                aria-valuemin={0}
-                aria-valuemax={GROWTH_GOAL_SLIDER_MAX}
-                aria-valuenow={props.growthGoal}
-              />
-            </div>
-          </div>
-          <div className="config-plan-field config-plan-field--goal">
-            <CurrencyAmountInput
-              id="planning-profile-config-monthly-goal"
-              label="Monthly Income"
-              value={props.monthlyIncomeGoal}
-              onChange={props.onMonthlyIncomeGoal}
-              showAnnualEquivalent
-            />
-          </div>
-          </div>
-        </section>
-      ) : null}
     </div>
   )
 }

@@ -185,7 +185,9 @@ export function FidelityCsvImport({
   }, [])
   const [replaceDuplicateImports, setReplaceDuplicateImports] = useState(false)
   const [reviewAssignments, setReviewAssignments] = useState<Record<string, AccountBucket>>({})
-  const [hideImportSourceUi, setHideImportSourceUi] = useState(false)
+  const [hideImportSourceUi, setHideImportSourceUi] = useState(
+    () => Boolean(fileIngestRequest) || isPanel,
+  )
   const lastFileIngestIdRef = useRef<number | null>(null)
 
   function resetModalInner(options?: { seedCustodianFromProps?: boolean }) {
@@ -469,7 +471,13 @@ export function FidelityCsvImport({
 
 
   const renderImportBody = () => {
-    const showSourcePickers = !hideImportSourceUi && confirmOverlay.mode === 'idle'
+    const showSourcePickers =
+      !isPanel &&
+      !hideImportSourceUi &&
+      confirmOverlay.mode === 'idle' &&
+      !stagedFile &&
+      !pending &&
+      !importBusy
     return (
       <>
         {custodian ? (
@@ -529,7 +537,6 @@ export function FidelityCsvImport({
           <div className="csv-import-upload">
             <label htmlFor={fileInputId} className="csv-import-upload__label">
               Choose CSV file
-              {stagedFile ? <span className="csv-import-upload__filename">{stagedFile.name}</span> : null}
             </label>
           </div>
         ) : null}
@@ -714,7 +721,7 @@ export function FidelityCsvImport({
           Import positions CSV
         </h2>
         <p className="csv-import-modal__lead">
-          {hideImportSourceUi
+          {isPanel || hideImportSourceUi || stagedFile || pending
             ? 'Review each account and map it to the correct tax bucket, then confirm.'
             : 'Choose your custodian, then select a single positions export file.'}
         </p>

@@ -1,234 +1,118 @@
-import { Switch } from '@heroui/react'
-import { isValidIsoDateString } from '../lib/ageFromDob'
-import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
+import { useEffect, useState } from 'react'
+import type { CalculatorInputs } from '../lib/computeResults'
 import {
-  formatSsAgeLabel,
-  normalizeClaimAge,
-  spousalBenefitTripletFromUser,
-  resolveUserEstimates,
-  type SsClaimAge,
+  clampClaimAge,
+  ssTripletFromMonthlyAt67,
 } from '../lib/socialSecurity'
-import { fmtInput, fmtMon, parseNum } from '../utils/format'
-import { ClaimAgeSegment } from './ClaimAgeSegment'
-import { DateOfBirthSelects } from './DateOfBirthSelects'
-import './ConfigSocialSecurityTab.scss'
-
-const SSA_MY_ACCOUNT_URL = 'https://www.ssa.gov/myaccount/'
+import { SocialSecuritySetupFields } from './SocialSecuritySetupFields'
+import type { SpouseClaimMode } from './SpouseClaimModeSegment'
 
 type Props = {
-  c: ComputedSnapshot
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
 }
 
-function SsAmountRow({
-  dateOfBirth,
-  claimAge,
-  value,
-  onChange,
-}: {
-  dateOfBirth: string
-  claimAge: SsClaimAge
-  value: number
-  onChange: (n: number) => void
-}) {
-  const label = formatSsAgeLabel(dateOfBirth, claimAge)
-  return (
-    <label className="config-ss-amount-row">
-      <span className="config-ss-amount-row__label">{label}</span>
-      <span className="num-input-wrap config-ss-amount-row__input">
-        <span className="num-input-prefix">$</span>
-        <input
-          type="text"
-          inputMode="decimal"
-          className="num-input"
-          value={fmtInput(value)}
-          onChange={(e) => onChange(Math.max(0, parseNum(e.target.value)))}
-          placeholder="0"
-        />
-        <span className="config-ss-amount-row__suffix">/mo</span>
-      </span>
-    </label>
-  )
+function hasSsBenefits(inputs: CalculatorInputs): boolean {
+  return inputs.ssBenefit62 > 0 || inputs.ssBenefit67 > 0 || inputs.ssBenefit70 > 0
 }
 
-export function ConfigSocialSecurityTab({ c, inputs, setInputs }: Props) {
+export function ConfigSocialSecurityTab({ inputs, setInputs }: Props) {
+  const [includeSs, setIncludeSs] = useState(() => hasSsBenefits(inputs))
+
+  useEffect(() => {
+    if (hasSsBenefits(inputs)) setIncludeSs(true)
+  }, [inputs.ssBenefit62, inputs.ssBenefit67, inputs.ssBenefit70])
+
   const dob = inputs.dateOfBirth
+  const ssAge = clampClaimAge(inputs.ssAge || 67)
+  const ssBenefitMonthly = inputs.ssBenefit67 > 0 ? inputs.ssBenefit67 : 0
+  const includeSpouse = inputs.married
+  const spouseClaimMode: SpouseClaimMode = inputs.spouseHasOwnEarnings === false ? 'spousal' : 'own'
   const spouseDob = inputs.spouseDateOfBirth || ''
-  const userEst = resolveUserEstimates(inputs)
-  const spousalEst = spousalBenefitTripletFromUser(userEst)
-  const breakdown = c.ssBreakdown
-  const survivor = c.survivorCallout
+  const spouseSsAge = clampClaimAge(inputs.spouseClaimAge || 67)
+  const spouseBenefitMonthly = inputs.spouseBenefit67 > 0 ? inputs.spouseBenefit67 : 0
 
-  const spouseClaimAge = normalizeClaimAge(inputs.spouseClaimAge)
-
-  const setUserBenefit = (age: SsClaimAge, amount: number) => {
-    if (age === 62) setInputs({ ssBenefit62: amount })
-    else if (age === 67) setInputs({ ssBenefit67: amount })
-    else setInputs({ ssBenefit70: amount })
+  const onIncludeSsChange = (value: boolean) => {
+    setIncludeSs(value)
+    if (!value) {
+      setInputs({
+        ssBenefit62: 0,
+        ssBenefit67: 0,
+        ssBenefit70: 0,
+      })
+    }
   }
 
-  const setSpouseBenefit = (age: SsClaimAge, amount: number) => {
-    if (age === 62) setInputs({ spouseBenefit62: amount })
-    else if (age === 67) setInputs({ spouseBenefit67: amount })
-    else setInputs({ spouseBenefit70: amount })
+  const onSsBenefitChange = (amount: number) => {
+    const triplet = ssTripletFromMonthlyAt67(amount)
+    setInputs({
+      ssBenefit62: triplet.b62,
+      ssBenefit67: triplet.b67,
+      ssBenefit70: triplet.b70,
+    })
+  }
+
+  const onIncludeSpouseChange = (value: boolean) => {
+    if (!value) {
+      setInputs({
+        married: false,
+        spouseDateOfBirth: '',
+        spouseBenefit62: 0,
+        spouseBenefit67: 0,
+        spouseBenefit70: 0,
+      })
+      return
+    }
+    setInputs({ married: true })
+  }
+
+  const onSpouseClaimModeChange = (mode: SpouseClaimMode) => {
+    const spouseHasOwnEarnings = mode === 'own'
+    if (!spouseHasOwnEarnings) {
+      setInputs({
+        spouseHasOwnEarnings: false,
+        spouseBenefit62: 0,
+        spouseBenefit67: 0,
+        spouseBenefit70: 0,
+      })
+      return
+    }
+    setInputs({ spouseHasOwnEarnings: true })
+  }
+
+  const onSpouseBenefitChange = (amount: number) => {
+    const triplet = ssTripletFromMonthlyAt67(amount)
+    setInputs({
+      spouseBenefit62: triplet.b62,
+      spouseBenefit67: triplet.b67,
+      spouseBenefit70: triplet.b70,
+    })
   }
 
   return (
     <div className="config-ss-tab">
       <p className="footnote footnote--muted config-drawer-lead">
-        Enter monthly benefit estimates from your SSA account. Your claiming age is set on the Income dashboard when Social
-        Security is included in expected monthly income.
+        Help us estimate your benefits in retirement.
       </p>
-
-      {!isValidIsoDateString(dob) ? (
-        <p className="config-ss-tab__warn">Set your date of birth on the Plan tab to show benefit ages and calendar years.</p>
-      ) : null}
-
-      <div className="config-ss-block">
-        <div className="config-ss-block__title">Your estimates</div>
-        <div className="config-ss-amounts">
-          <SsAmountRow
-            dateOfBirth={dob}
-            claimAge={62}
-            value={inputs.ssBenefit62}
-            onChange={(n) => setUserBenefit(62, n)}
-          />
-          <SsAmountRow
-            dateOfBirth={dob}
-            claimAge={67}
-            value={inputs.ssBenefit67}
-            onChange={(n) => setUserBenefit(67, n)}
-          />
-          <SsAmountRow
-            dateOfBirth={dob}
-            claimAge={70}
-            value={inputs.ssBenefit70}
-            onChange={(n) => setUserBenefit(70, n)}
-          />
-        </div>
-        <p className="config-ss-helper">
-          <a href={SSA_MY_ACCOUNT_URL} target="_blank" rel="noopener noreferrer" className="config-ss-helper__link">
-            Find these numbers at ssa.gov/myaccount →
-          </a>
-        </p>
-        <p className="config-ss-note">
-          These are today&apos;s estimates. SSA recalculates annually based on your earnings history.
-        </p>
-      </div>
-
-      <div className="config-ss-block config-ss-block--married">
-        <div className="config-ss-married-row">
-          <span className="config-plan-label" id="config-ss-married-label">
-            Are you married?
-          </span>
-          <Switch
-            isSelected={inputs.married}
-            onChange={(selected) => setInputs({ married: selected })}
-            size="sm"
-            aria-labelledby="config-ss-married-label"
-          >
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-          </Switch>
-          <span className="config-ss-married-state" aria-hidden>
-            {inputs.married ? 'Yes' : 'No'}
-          </span>
-        </div>
-
-        {inputs.married ? (
-          <>
-            <div className="config-ss-spousal-benefits">
-              <div className="config-ss-married-row">
-                <span className="config-plan-label" id="config-ss-spousal-benefits-label">
-                  Will they receive spousal benefits?
-                </span>
-                <Switch
-                  isSelected={!inputs.spouseHasOwnEarnings}
-                  onChange={(selected) => setInputs({ spouseHasOwnEarnings: !selected })}
-                  size="sm"
-                  aria-labelledby="config-ss-spousal-benefits-label"
-                >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
-                <span className="config-ss-married-state" aria-hidden>
-                  {!inputs.spouseHasOwnEarnings ? 'Yes' : 'No'}
-                </span>
-              </div>
-              <p className="footnote footnote--muted config-ss-spousal-benefits__explain">
-                Spousal benefits are monthly payments from Social Security to your spouse based on your work record (up
-                to about half of your full retirement age benefit). They apply when your spouse does not get a higher
-                benefit from their own earnings history.
-              </p>
-            </div>
-
-            {!inputs.spouseHasOwnEarnings ? (
-              <>
-                <div className="config-plan-field config-ss-spouse-dob">
-                  <span className="config-plan-label">Spouse date of birth</span>
-                  <DateOfBirthSelects
-                    value={spouseDob}
-                    onChange={(iso) => setInputs({ spouseDateOfBirth: iso })}
-                  />
-                </div>
-                <p className="config-ss-spousal-readonly">
-                  Based on your benefit, your spouse qualifies for up to{' '}
-                  <strong>{fmtMon(spousalEst.b67)}</strong> in spousal benefit at your full retirement age.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="config-ss-amounts">
-                  <SsAmountRow
-                    dateOfBirth={spouseDob}
-                    claimAge={62}
-                    value={inputs.spouseBenefit62}
-                    onChange={(n) => setSpouseBenefit(62, n)}
-                  />
-                  <SsAmountRow
-                    dateOfBirth={spouseDob}
-                    claimAge={67}
-                    value={inputs.spouseBenefit67}
-                    onChange={(n) => setSpouseBenefit(67, n)}
-                  />
-                  <SsAmountRow
-                    dateOfBirth={spouseDob}
-                    claimAge={70}
-                    value={inputs.spouseBenefit70}
-                    onChange={(n) => setSpouseBenefit(70, n)}
-                  />
-                </div>
-                {breakdown?.spouseResolution?.comparisonNote ? (
-                  <p className="config-ss-comparison">{breakdown.spouseResolution.comparisonNote}</p>
-                ) : null}
-              </>
-            )}
-
-            <div className="config-ss-claim-row">
-              <span className="config-plan-label">Spouse claiming age</span>
-              <ClaimAgeSegment
-                value={spouseClaimAge}
-                onChange={(age) => setInputs({ spouseClaimAge: age })}
-                ariaLabel="Spouse Social Security claiming age"
-              />
-            </div>
-          </>
-        ) : null}
-      </div>
-
-      {survivor ? (
-        <div className="config-ss-survivor" role="note">
-          <p className="config-ss-survivor__text">
-            If you pass first, your spouse&apos;s monthly income drops from{' '}
-            <strong>{fmtMon(survivor.householdBothMonthly)}</strong> to{' '}
-            <strong>{fmtMon(survivor.householdIfUserDiesFirst)}</strong>. Delaying your SS claim to age 70 would increase
-            their survivor benefit to <strong>{fmtMon(survivor.survivorIfUserClaims70)}</strong>.
-          </p>
-        </div>
-      ) : null}
+      <SocialSecuritySetupFields
+        includeSs={includeSs}
+        onIncludeSsChange={onIncludeSsChange}
+        ssAge={ssAge}
+        onSsAgeChange={(age) => setInputs({ ssAge: age })}
+        ssBenefitMonthly={ssBenefitMonthly}
+        onSsBenefitMonthlyChange={onSsBenefitChange}
+        dateOfBirth={dob}
+        includeSpouse={includeSpouse}
+        onIncludeSpouseChange={onIncludeSpouseChange}
+        spouseClaimMode={spouseClaimMode}
+        onSpouseClaimModeChange={onSpouseClaimModeChange}
+        spouseDob={spouseDob}
+        onSpouseDobChange={(iso) => setInputs({ spouseDateOfBirth: iso })}
+        spouseSsAge={spouseSsAge}
+        onSpouseSsAgeChange={(age) => setInputs({ spouseClaimAge: age })}
+        spouseBenefitMonthly={spouseBenefitMonthly}
+        onSpouseBenefitMonthlyChange={onSpouseBenefitChange}
+      />
     </div>
   )
 }

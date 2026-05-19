@@ -152,6 +152,43 @@
   margin-bottom: 12px;
 }
 
+.config-drawer-body .currency-amount-input__label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input,
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__goal-input {
+  align-items: stretch;
+  text-align: left;
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__label,
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__retire-age .config-plan-label {
+  text-align: left;
+  width: 100%;
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__value-group {
+  align-items: flex-start;
+  margin-inline: 0;
+  width: 100%;
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__amount-row--external-affixes {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__hint,
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__hint {
+  text-align: left;
+}
+
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__retire-age {
+  align-items: stretch;
+}
+
 .config-plan-age-hint {
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -162,9 +199,10 @@
 .config-plan-label {
   font-family: var(--body);
   font-size: var(--text-sm);
+  font-weight: 600;
   letter-spacing: var(--tracking-normal);
   text-transform: none;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .config-plan-input {

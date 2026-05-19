@@ -39,6 +39,16 @@ export function formatSsAgeLabel(dateOfBirth: string, claimAge: number): string 
 
 export type SsBenefitTriplet = { b62: number; b67: number; b70: number }
 
+/** Derive SSA-style 62 / 67 / 70 estimates from a single full-retirement-age monthly amount. */
+export function ssTripletFromMonthlyAt67(monthlyAt67: number): SsBenefitTriplet {
+  const b67 = Math.round(monthlyAt67)
+  return {
+    b62: Math.round(b67 * 0.7),
+    b67,
+    b70: Math.round(b67 * 1.24),
+  }
+}
+
 export function benefitAtClaimAge(estimates: SsBenefitTriplet, claimAge: number): number {
   const age = clampClaimAge(claimAge)
   if (age <= 62) return estimates.b62

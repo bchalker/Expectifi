@@ -1,0 +1,117 @@
+.welcome-goal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-goal-fields__goal-input {
+  width: 100%;
+}
+
+.welcome-goal-fields__retire-age {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.welcome-goal-fields__hint {
+  margin: 0.35rem 0 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.welcome-goal-fields__age-input-wrap {
+  width: 100%;
+}
+
+.welcome-goal-fields--centered {
+  align-items: center;
+  max-width: 24rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.welcome-goal-fields--centered .welcome-goal-fields__goal-input,
+.welcome-goal-fields--centered .currency-amount-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__label,
+.welcome-goal-fields--centered .welcome-goal-fields__retire-age .config-plan-label {
+  font-size: var(--text-md);
+  text-align: center;
+  width: 100%;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__value-group {
+  align-items: center;
+  margin-inline: auto;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__amount-row--external-affixes {
+  gap: 0.45rem;
+  width: auto;
+  justify-content: center;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__amount-row--external-affixes .onboarding-field-shell {
+  flex: 0 1 auto;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__prefix-outside {
+  font-size: 1.375rem;
+  color: var(--text-muted);
+}
+
+.welcome-goal-fields--centered .currency-amount-input__suffix-outside {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+
+.welcome-goal-fields--centered .onboarding-field-shell {
+  width: auto;
+  min-width: 10rem;
+  border-radius: 8px;
+}
+
+.welcome-goal-fields--centered .onboarding-field-shell__input,
+.welcome-goal-fields--centered .currency-amount-input__field {
+  width: 100%;
+  min-width: 4.5rem;
+  font-size: 1.375rem;
+  text-align: left;
+}
+
+.welcome-goal-fields--centered .currency-amount-input__hint,
+.welcome-goal-fields--centered .welcome-goal-fields__hint {
+  max-width: 22rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.welcome-goal-fields--centered .welcome-goal-fields__retire-age {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.welcome-goal-fields--centered .welcome-goal-fields__age-input-wrap {
+  width: auto;
+}
+
+@media (min-width: 680px) {
+  .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__retire-age {
+    max-width: 14rem;
+  }
+}

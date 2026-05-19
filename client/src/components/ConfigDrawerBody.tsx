@@ -27,10 +27,12 @@ type Props = {
   setActivePreset: (id: string | null) => void
   initialTab?: ConfigDrawerTab
   onDrawerClose?: () => void
+  onOpenSignIn?: () => void
+  onOpenRegister?: () => void
 }
 
 export function ConfigDrawerBody({
-  c,
+  c: _c,
   inputs,
   setInputs,
   ui,
@@ -38,6 +40,8 @@ export function ConfigDrawerBody({
   setActivePreset,
   initialTab = 'plan',
   onDrawerClose,
+  onOpenSignIn,
+  onOpenRegister,
 }: Props) {
   const [tab, setTab] = useState<ConfigDrawerTab>(initialTab)
 
@@ -75,7 +79,11 @@ export function ConfigDrawerBody({
           aria-labelledby="config-tab-profile"
         >
           <section className="config-drawer-section">
-            <ConfigProfileTab onAccountCancelled={onDrawerClose} />
+            <ConfigProfileTab
+              onAccountCancelled={onDrawerClose}
+              onOpenSignIn={onOpenSignIn}
+              onOpenRegister={onOpenRegister}
+            />
           </section>
         </div>
       ) : null}
@@ -94,12 +102,12 @@ export function ConfigDrawerBody({
               onDateOfBirth={(iso) => setInputs({ dateOfBirth: iso })}
               targetRetirementAge={planning.targetRetirementAge}
               onTargetRetirementAge={(targetRetirementAge) => setInputs({ targetRetirementAge })}
-              growthGoal={planning.growthGoal}
-              onGrowthGoal={(growthGoal) => setInputs({ growthGoal })}
+              householdIncome={inputs.other}
+              onHouseholdIncome={(other) => setInputs({ other })}
+              monthlyContribution={planning.save > 0 ? Math.round(planning.save / 12) : 0}
+              onMonthlyContribution={(amount) => setInputs({ save: amount * 12 })}
               monthlyIncomeGoal={planning.monthlyIncomeGoal}
               onMonthlyIncomeGoal={(monthlyIncomeGoal) => setInputs({ monthlyIncomeGoal })}
-              annualSave={planning.save}
-              onAnnualSave={(save) => setInputs({ save })}
             />
           </section>
         </div>
@@ -113,7 +121,7 @@ export function ConfigDrawerBody({
           aria-labelledby="config-tab-social-security"
         >
           <section className="config-drawer-section">
-            <ConfigSocialSecurityTab c={c} inputs={inputs} setInputs={setInputs} />
+            <ConfigSocialSecurityTab inputs={inputs} setInputs={setInputs} />
           </section>
         </div>
       ) : null}

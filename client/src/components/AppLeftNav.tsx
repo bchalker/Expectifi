@@ -11,11 +11,18 @@ import {
   type NavPanelContext,
 } from "../lib/appNavDrawers";
 import { useAppPath } from "../hooks/useAppPath";
+import { useWelcomeSettingsReveal } from "../hooks/useWelcomeSettingsReveal";
 import { navigateApp } from "../lib/appPaths";
 import type { DrawerName } from "../lib/computeResults";
 import "./AppLeftNav.scss";
 
 const MOBILE_NAV_BODY_CLASS = "app-left-nav--mobile-open-body";
+const DESKTOP_NAV_MQ = "(min-width: 761px)";
+
+function readIsDesktopNav(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia(DESKTOP_NAV_MQ).matches;
+}
 
 type Props = {
   targetRetirementAge: number;
@@ -29,6 +36,7 @@ type Props = {
   onOpenSignIn: () => void;
   onOpenRegister: () => void;
   navContext: NavPanelContext;
+  welcomeDone?: boolean;
 };
 
 export function AppLeftNav({
@@ -43,10 +51,12 @@ export function AppLeftNav({
   onOpenSignIn,
   onOpenRegister,
   navContext,
+  welcomeDone = true,
 }: Props) {
   const snapshotAvailable = isSnapshotNavAvailable(navContext);
   const snapshotUnavailableReason = navItemUnavailableReason(SNAPSHOT_NAV_REQUIRES, navContext);
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
+  const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone);
   const accountLabel = user
     ? user.displayName?.trim() || user.email
     : googleCheckoutUi
@@ -54,11 +64,11 @@ export function AppLeftNav({
       : "";
   const showRetireByInProfile = Boolean(user?.onboardingDone);
   const path = useAppPath();
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(readIsDesktopNav);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(min-width: 761px)");
+    const mq = window.matchMedia(DESKTOP_NAV_MQ);
     const sync = () => setIsDesktop(mq.matches);
     sync();
     mq.addEventListener("change", sync);
@@ -186,10 +196,16 @@ export function AppLeftNav({
           })}
         </div>
         <div className="app-left-nav__footer">
-          {!loading && user?.email ? (
+          {!loading && user?.email && showSettings ? (
             <button
               type="button"
-              className={`app-left-nav__account-group${drawer === "config" ? " app-left-nav__account-group--active" : ""}`}
+              className={[
+                "app-left-nav__account-group",
+                drawer === "config" ? "app-left-nav__account-group--active" : "",
+                slideIn ? "app-left-nav__account-group--slide-in" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               aria-label="Open configure: planning, Social Security, and income presets"
               aria-expanded={drawer === "config"}
               aria-controls="drawer"
@@ -247,18 +263,26 @@ export function AppLeftNav({
                   </button>
                 </div>
               </div>
-              <div className="app-left-nav__footer-actions">
-                <button
-                  type="button"
-                  className={`app-left-nav__settings-btn${drawer === "config" ? " app-left-nav__settings-btn--active" : ""}`}
-                  aria-label="Configure: planning, Social Security, and income presets"
-                  aria-expanded={drawer === "config"}
-                  aria-controls="drawer"
-                  onClick={openConfig}
-                >
-                  <IconAdjustments size={18} stroke={1.65} aria-hidden />
-                </button>
-              </div>
+              {showSettings ? (
+                <div className="app-left-nav__footer-actions">
+                  <button
+                    type="button"
+                    className={[
+                      "app-left-nav__settings-btn",
+                      drawer === "config" ? "app-left-nav__settings-btn--active" : "",
+                      slideIn ? "app-left-nav__settings-btn--slide-in" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-label="Configure: planning, Social Security, and income presets"
+                    aria-expanded={drawer === "config"}
+                    aria-controls="drawer"
+                    onClick={openConfig}
+                  >
+                    <IconAdjustments size={18} stroke={1.65} aria-hidden />
+                  </button>
+                </div>
+              ) : null}
             </>
           ) : null}
         </div>

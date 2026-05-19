@@ -340,13 +340,20 @@ export function AccountBalancesManageMenu({
                   </li>
                 ) : !showPlaidConnect && !hasPaidSubscription ? (
                   <li role="none">
-                    <span className="account-balances-manage__item account-balances-manage__item--disabled">
+                    <span
+                      className="account-balances-manage__item account-balances-manage__item--disabled"
+                      aria-label={
+                        user
+                          ? 'Connect with Plaid — Subscribe to Pro to connect'
+                          : 'Connect with Plaid — Pro subscribers only'
+                      }
+                    >
+                      <span className="account-balances-manage__pro-pill" aria-hidden>
+                        PRO
+                      </span>
                       <IconLink size={16} stroke={1.5} aria-hidden />
                       Connect with Plaid
                     </span>
-                    <p className="account-balances-manage__pro-note">
-                      {user ? 'Subscribe to Pro to connect' : 'Pro subscribers only'}
-                    </p>
                   </li>
                 ) : null}
 

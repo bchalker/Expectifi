@@ -16,8 +16,41 @@
 }
 
 .dob-select-row [data-slot='select-trigger'] {
+  display: inline-flex;
+  align-items: center;
   background: var(--surface2);
   transition: background-color 0.15s ease;
+}
+
+.dob-select-row [data-slot='select-value'] {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  line-height: 1.25;
+}
+
+/* Popover is portaled to document.body — do not scope under .onboarding-overlay */
+.dob-select-menu__popover,
+.dob-select-menu__popover.popover,
+.dob-select-menu__popover .popover__dialog {
+  border: none !important;
+  outline: none !important;
+}
+
+.dob-select-menu__popover [data-slot='list-box'] {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none;
+}
+
+.dob-select-row [data-slot='select-trigger']:focus,
+.dob-select-row [data-slot='select-trigger']:focus-visible,
+.dob-select-row [data-slot='select-trigger'][data-focus='true'],
+.dob-select-row [data-slot='select-trigger'][data-pressed='true'],
+.dob-select-row [data-slot='select-trigger'][data-open='true'] {
+  border-color: var(--border-strong);
+  box-shadow: none;
+  outline: none;
 }
 
 .dob-select-row .dob-select--filled [data-slot='select-trigger'] {
