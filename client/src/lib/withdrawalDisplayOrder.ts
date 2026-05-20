@@ -25,11 +25,17 @@ export function withdrawalBadgeAndHint(
   bucket: WithdrawalDisplayBucket,
   retirementAge: number,
   includeBrokerage: boolean,
+  presentBuckets?: Iterable<WithdrawalDisplayBucket>,
 ): WithdrawalBadgeHint {
   const rmd = isWithdrawalRmdPhase(retirementAge)
-  const fullOrder = withdrawalBucketOrder(retirementAge, includeBrokerage)
-  const idx = fullOrder.indexOf(bucket)
-  const order = bucket === 'hsa' ? null : idx >= 0 ? idx + 1 : null
+  const order =
+    presentBuckets != null
+      ? withdrawalOrderAmongPresent(bucket, retirementAge, includeBrokerage, presentBuckets)
+      : (() => {
+          const fullOrder = withdrawalBucketOrder(retirementAge, includeBrokerage)
+          const idx = fullOrder.indexOf(bucket)
+          return bucket === 'hsa' ? null : idx >= 0 ? idx + 1 : null
+        })()
 
   switch (bucket) {
     case 'brokerage':
@@ -55,4 +61,20 @@ export function withdrawalBadgeAndHint(
     default:
       return { order: null, hint: null }
   }
+}
+
+/** Number badges only among buckets that have balances; preserves strategy order. HSA is never numbered. */
+export function withdrawalOrderAmongPresent(
+  bucket: WithdrawalDisplayBucket,
+  retirementAge: number,
+  includeBrokerage: boolean,
+  presentBuckets: Iterable<WithdrawalDisplayBucket>,
+): number | null {
+  if (bucket === 'hsa') return null
+  const present = new Set(presentBuckets)
+  const seq = withdrawalBucketOrder(retirementAge, includeBrokerage).filter(
+    (b) => present.has(b) && b !== 'hsa',
+  )
+  const idx = seq.indexOf(bucket)
+  return idx >= 0 ? idx + 1 : null
 }

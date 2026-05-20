@@ -576,6 +576,34 @@ export function AccountBalances({
     hasAnyAccountCardData &&
     (mergedDashboard || (balanceMode === 'fidelity' && hasAnyFidelityRetirement))
 
+  const presentWithdrawalBuckets = useMemo((): WithdrawalDisplayBucket[] => {
+    const buckets = new Set<WithdrawalDisplayBucket>()
+    if (balanceMode === 'manual' && manualAccountEntries.length > 0) {
+      for (const entry of manualAccountEntries) {
+        if (entry.type == null || entry.balance <= 0) continue
+        buckets.add(getAccountTypeMeta(entry.type).withdrawalBucket)
+      }
+    } else {
+      const pretaxTotal = c.bal.bal401k + c.bal.balSE401k + c.bal.balTradIRA
+      if (pretaxTotal > 0) buckets.add('pretax')
+      if (c.bal.balRoth > 0) buckets.add('roth')
+      if (c.bal.balHsa > 0) buckets.add('hsa')
+      if ((brkBal ?? 0) > 0 || hasFidelityBrokerage) buckets.add('brokerage')
+    }
+    return withdrawalBucketOrder(retirementAge, true).filter((b) => buckets.has(b))
+  }, [
+    balanceMode,
+    manualAccountEntries,
+    c.bal.bal401k,
+    c.bal.balSE401k,
+    c.bal.balTradIRA,
+    c.bal.balRoth,
+    c.bal.balHsa,
+    brkBal,
+    hasFidelityBrokerage,
+    retirementAge,
+  ])
+
   const showBalanceEntryActions = mergedDashboard ? canEditBalances : !readOnly && Boolean(onBalanceModeChange)
 
   function bucketBaseKey(key: BucketKey): keyof ManualBalancesDraft {
@@ -803,7 +831,7 @@ export function AccountBalances({
   }
 
   function metaFor(bucket: WithdrawalDisplayBucket) {
-    return withdrawalBadgeAndHint(bucket, retirementAge, true)
+    return withdrawalBadgeAndHint(bucket, retirementAge, true, presentWithdrawalBuckets)
   }
 
   function renderFidelityTaxDisclosure(

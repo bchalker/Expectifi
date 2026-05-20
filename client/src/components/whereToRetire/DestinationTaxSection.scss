@@ -1,0 +1,49 @@
+.wtr-dest-tax__empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wtr-dest-tax__hero .wtr-tax-cell--static {
+  margin-bottom: 0.65rem;
+}
+
+.wtr-dest-tax__hero-rows {
+  margin-top: 0;
+}
+
+.wtr-dest-tax__after-tax {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wtr-dest-tax__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.wtr-dest-tax__note {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.wtr-dest-tax__flags {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wtr-dest-tax__flags li + li {
+  margin-top: 0.25rem;
+}
+
+.wtr-dest-tax__disclaimer {
+  grid-column: 1 / -1;
+}

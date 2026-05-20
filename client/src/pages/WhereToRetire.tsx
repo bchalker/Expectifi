@@ -1,197 +1,123 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { IconArrowLeft } from "@tabler/icons-react";
-import { ComparisonGrid } from "../components/whereToRetire/ComparisonGrid";
-import { DestinationSearch } from "../components/whereToRetire/DestinationSearch";
-import { PreferenceOverlay } from "../components/whereToRetire/PreferenceOverlay";
-import { PreferencePanel } from "../components/whereToRetire/PreferencePanel";
-import { RecommendationChips } from "../components/whereToRetire/RecommendationChips";
-import type { DestinationCatalogEntry } from "../data/destinations";
-import type { ComputedSnapshot } from "../lib/computeResults";
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { IconArrowLeft } from '@tabler/icons-react'
+import { AnimatedCount } from '../components/ui/AnimatedCount'
+import { BudgetExplorationHero } from '../components/whereToRetire/BudgetExplorationHero'
+import { RetirementMapExplorer } from '../components/whereToRetire/RetirementMapExplorer'
+import { WtrMapFilterButton } from '../components/whereToRetire/WtrMapFilterButton'
+import { WtrComparisonTableView } from '../components/whereToRetire/WtrComparisonTableView'
+import type { ComputedSnapshot } from '../lib/computeResults'
+import { APP_DASHBOARD_PATH, navigateApp } from '../lib/appPaths'
 import {
-  getTopRecommendations,
-  scoreDestinations,
-} from "../lib/destinationScorer";
-import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
+  ALL_DESTINATION_REGIONS,
+  countActiveMapFilters,
+  countFitsIncomeWithFilters,
+  DEFAULT_MAP_FILTERS,
+  type MapFilters,
+} from '../lib/whereToRetire/cityMapScoring'
 import {
-  hasCompletedPreferences,
-  loadPreferences,
-  type WtrPreferences,
-} from "../lib/whereToRetire/preferences";
-import {
-  dedupeDestinationKeys,
-  loadDestinationState,
-  markKeyManual,
-  setAutoPopulatedKeys,
-  type StoredDestinationState,
-} from "../lib/whereToRetire/storage";
-import "./WhereToRetire.scss";
+  defaultExplorationIncomeRange,
+  getTotalMapCityCount,
+  isDefaultExplorationIncomeRange,
+  type ExplorationIncomeRange,
+} from '../lib/whereToRetire/budgetExplorationStats'
+import type { MapCity } from '../utils/costOfLiving'
+import './WhereToRetire.scss'
+
+const MAX_COMPARE_CITIES = 5
+
+type WtrViewMode = 'map' | 'compare'
 
 type Props = {
-  c: ComputedSnapshot;
-};
-
-function applyTopRecommendations(
-  prefs: WtrPreferences,
-  grossMonthlyIncome: number,
-  prev: StoredDestinationState,
-  autoCount = 3,
-): StoredDestinationState {
-  const manualKeys = prev.manualKeys.filter((k) => prev.keys.includes(k));
-  const exclude = new Set(manualKeys);
-  const top = getTopRecommendations(
-    prefs,
-    grossMonthlyIncome,
-    autoCount,
-    exclude,
-  );
-  const autoKeys = top.map((t) => t.key);
-  const keys = dedupeDestinationKeys([...manualKeys, ...autoKeys]);
-  return { keys, manualKeys, autoKeys };
+  c: ComputedSnapshot
 }
 
 export function WhereToRetire({ c }: Props) {
-  const grossMonthlyIncome = c.grossMon;
-
-  const [prefs, setPrefs] = useState<WtrPreferences | null>(() =>
-    loadPreferences(),
-  );
-  const [showOverlay, setShowOverlay] = useState(
-    () => !hasCompletedPreferences(),
-  );
-  const [prefPanelOpen, setPrefPanelOpen] = useState(false);
-
-  const [destState, setDestState] = useState<StoredDestinationState>(() =>
-    loadDestinationState(),
-  );
-
-  const scored = useMemo(
-    () =>
-      scoreDestinations(
-        prefs ?? {
-          completed: true,
-          skipped: true,
-          regionScope: "both",
-          priorities: [],
-          dealbreakers: [],
-        },
-        grossMonthlyIncome,
-      ),
-    [prefs, grossMonthlyIncome],
-  );
-
-  const scoreByKey = useMemo(() => {
-    const map: Record<string, { topReason: string }> = {};
-    for (const s of scored) {
-      map[s.key] = { topReason: s.topReason };
-    }
-    return map;
-  }, [scored]);
-
-  const recommendedCount = useMemo(() => {
-    if (!prefs || prefs.skipped) return 0;
-    return scored.length;
-  }, [prefs, scored.length]);
-
-  const chipDestinations = useMemo(() => {
-    const inGrid = new Set(destState.keys);
-    return scored.filter((s) => !inGrid.has(s.key));
-  }, [scored, destState.keys]);
-
-  const handlePrefsComplete = useCallback(
-    (nextPrefs: WtrPreferences) => {
-      setPrefs(nextPrefs);
-      setShowOverlay(false);
-      setDestState((prev) => {
-        const next = applyTopRecommendations(
-          nextPrefs,
-          grossMonthlyIncome,
-          prev,
-        );
-        setAutoPopulatedKeys(next.autoKeys, next.manualKeys);
-        return next;
-      });
-    },
-    [grossMonthlyIncome],
-  );
-
-  const handlePrefsSave = useCallback(
-    (nextPrefs: WtrPreferences) => {
-      setPrefs(nextPrefs);
-      setDestState((prev) => {
-        const next = applyTopRecommendations(
-          nextPrefs,
-          grossMonthlyIncome,
-          prev,
-        );
-        setAutoPopulatedKeys(next.autoKeys, next.manualKeys);
-        return next;
-      });
-    },
-    [grossMonthlyIncome],
-  );
-
-  const persistState = useCallback((state: StoredDestinationState) => {
-    setDestState(state);
-    setAutoPopulatedKeys(state.autoKeys, state.manualKeys);
-  }, []);
+  const grossMonthlyIncome = c.grossMon
+  const [viewMode, setViewMode] = useState<WtrViewMode>('map')
+  const [compareIds, setCompareIds] = useState<string[]>([])
+  const [baselineCity, setBaselineCity] = useState<MapCity | null>(null)
+  const totalMapCities = useMemo(() => getTotalMapCityCount(), [])
+  const [explorationRange, setExplorationRange] = useState<ExplorationIncomeRange>(
+    () => defaultExplorationIncomeRange(grossMonthlyIncome),
+  )
+  const explorationIncomeMax = explorationRange.max
+  const [mapFilters, setMapFilters] = useState<MapFilters>(() => ({
+    ...DEFAULT_MAP_FILTERS,
+    regions: [...ALL_DESTINATION_REGIONS],
+  }))
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
-    if (showOverlay || !prefs) return;
-    if (destState.keys.length > 0) return;
-    const next = applyTopRecommendations(prefs, grossMonthlyIncome, destState);
-    persistState(next);
-  }, [showOverlay, prefs, grossMonthlyIncome, destState, persistState]);
+    setExplorationRange(defaultExplorationIncomeRange(grossMonthlyIncome))
+  }, [grossMonthlyIncome])
 
-  const onRemove = useCallback(
-    (key: string) => {
-      const manualKeys = destState.manualKeys.filter((k) => k !== key);
-      const autoKeys = destState.autoKeys.filter((k) => k !== key);
-      const keys = destState.keys.filter((k) => k !== key);
-      persistState({ keys, manualKeys, autoKeys });
-    },
-    [destState, persistState],
-  );
+  const showingCityCount = useMemo(
+    () => countFitsIncomeWithFilters(explorationIncomeMax, mapFilters),
+    [explorationIncomeMax, mapFilters],
+  )
 
-  const addDestination = useCallback(
-    (entry: DestinationCatalogEntry, fromManual = true) => {
-      if (destState.keys.includes(entry.key)) return;
+  const activeFilterCount = useMemo(
+    () =>
+      countActiveMapFilters(mapFilters) +
+      (isDefaultExplorationIncomeRange(grossMonthlyIncome, explorationRange) ? 0 : 1),
+    [grossMonthlyIncome, explorationRange, mapFilters],
+  )
 
-      const manualKeys = fromManual
-        ? [...destState.manualKeys, entry.key]
-        : destState.manualKeys;
-      const autoKeys = fromManual
-        ? destState.autoKeys
-        : [...destState.autoKeys, entry.key];
-      const keys = dedupeDestinationKeys([...destState.keys, entry.key]);
-      persistState({ keys, manualKeys, autoKeys });
-      if (fromManual) markKeyManual(entry.key);
-    },
-    [destState, persistState],
-  );
+  const toggleFiltersPanel = useCallback(() => {
+    setFiltersOpen((open) => !open)
+    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+    window.setTimeout(() => window.dispatchEvent(new Event('resize')), 340)
+  }, [])
 
-  const onAddFromSearch = useCallback(
-    (entry: DestinationCatalogEntry) => addDestination(entry, true),
-    [addDestination],
-  );
+  useEffect(() => {
+    if (!filtersOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFiltersOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [filtersOpen])
 
-  const onAddFromChip = useCallback(
-    (key: string) => {
-      const entry = scored.find((s) => s.key === key)?.entry;
-      if (entry) addDestination(entry, false);
-    },
-    [addDestination, scored],
-  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const onMqChange = () => {
+      if (mq.matches) setFiltersOpen(false)
+    }
+    onMqChange()
+    mq.addEventListener('change', onMqChange)
+    return () => mq.removeEventListener('change', onMqChange)
+  }, [])
+
+  const toggleCompare = useCallback((cityId: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(cityId)) return prev.filter((id) => id !== cityId)
+      if (prev.length >= MAX_COMPARE_CITIES) return prev
+      return [...prev, cityId]
+    })
+  }, [])
+
+  const clearCompare = useCallback(() => {
+    setCompareIds([])
+    setBaselineCity(null)
+  }, [])
+
+  const removeCompare = useCallback((cityId: string) => {
+    setCompareIds((prev) => prev.filter((id) => id !== cityId))
+  }, [])
 
   return (
     <div className="where-to-retire">
-      {showOverlay ? (
-        <PreferenceOverlay
-          onComplete={handlePrefsComplete}
-          onSkip={handlePrefsComplete}
-        />
-      ) : null}
-
-      <div className="where-to-retire__body main app-page app-page--where-to-retire">
+      <div
+        className={[
+          'where-to-retire__body',
+          'main',
+          'app-page',
+          'app-page--where-to-retire',
+          'where-to-retire__body--map',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <button
           type="button"
           className="app-page-back"
@@ -201,54 +127,98 @@ export function WhereToRetire({ c }: Props) {
           Back to dashboard
         </button>
 
-        <h1 className="where-to-retire__title">
-          Where can you live on your retirement income?
-        </h1>
-
-        <section
-          className="where-to-retire__discover"
-          aria-label="Recommended destinations and search"
-        >
-          <div className="where-to-retire__prefs-row">
-            <div className="where-to-retire__prefs-copy">
-              <h2 className="where-to-retire__prefs-heading">
-                {prefs && !prefs.skipped ? (
-                  <>
-                    There are{" "}
-                    <span className="where-to-retire__prefs-count">
-                      {recommendedCount} recommended
-                    </span>{" "}
-                    locations that best fit your preferences
-                  </>
-                ) : (
-                  "Set your preferences to see recommended locations"
-                )}
-              </h2>
-            </div>
-            <button
-              type="button"
-              className="where-to-retire__prefs-pill"
-              onClick={() => setPrefPanelOpen(true)}
-            >
-              {prefs && !prefs.skipped ? "Edit preferences" : "Set preferences"}
-            </button>
-          </div>
-          <RecommendationChips chips={chipDestinations} onAdd={onAddFromChip} />
-          <DestinationSearch
-            selectedKeys={destState.keys}
-            preferences={prefs}
-            grossMonthlyIncome={grossMonthlyIncome}
-            onAdd={onAddFromSearch}
-          />
-        </section>
-
-        <ComparisonGrid
-          selectedKeys={destState.keys}
-          grossMonthlyIncome={grossMonthlyIncome}
-          scoreByKey={scoreByKey}
-          onRemove={onRemove}
+        <BudgetExplorationHero
+          section="intro"
+          planMonthlyIncome={grossMonthlyIncome}
+          explorationRange={explorationRange}
+          onExplorationRangeChange={setExplorationRange}
         />
+        <div
+          className={[
+            'where-to-retire__main-panel',
+            viewMode === 'compare' && 'where-to-retire__main-panel--compare-open',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <BudgetExplorationHero
+            section="panelSummary"
+            embedded
+            planMonthlyIncome={grossMonthlyIncome}
+            explorationRange={explorationRange}
+            onExplorationRangeChange={setExplorationRange}
+          />
+          <div className="where-to-retire__income-toolbar">
+            <div className="where-to-retire__showing-count" aria-live="polite">
+              <p className="where-to-retire__showing-count-primary">
+                Showing{' '}
+                <AnimatedCount
+                  value={showingCityCount}
+                  className="where-to-retire__showing-count-num"
+                />{' '}
+                cities
+              </p>
+              <p className="where-to-retire__showing-count-sub">
+                Based on the range slider and filters
+              </p>
+            </div>
+            <div className="where-to-retire__income-toolbar-slider">
+              <BudgetExplorationHero
+                section="slider"
+                embedded
+                planMonthlyIncome={grossMonthlyIncome}
+                explorationRange={explorationRange}
+                onExplorationRangeChange={setExplorationRange}
+              />
+            </div>
+            <div className="where-to-retire__income-toolbar-actions">
+              <WtrMapFilterButton
+                active={activeFilterCount > 0}
+                activeFilterCount={activeFilterCount}
+                filtersOpen={filtersOpen}
+                onToggle={toggleFiltersPanel}
+              />
+            </div>
+          </div>
+          <div className="where-to-retire__main-panel-map">
+            <RetirementMapExplorer
+              explorationRange={explorationRange}
+              filters={mapFilters}
+              onFiltersChange={setMapFilters}
+              filtersOpen={filtersOpen}
+              onFiltersOpenChange={setFiltersOpen}
+              compareIds={compareIds}
+              compareOverlayOpen={viewMode === 'compare'}
+              onToggleCompare={toggleCompare}
+              onClearCompare={clearCompare}
+              onViewComparison={() => setViewMode('compare')}
+            />
+            {viewMode === 'compare' ? (
+              <div
+                className="where-to-retire__compare-overlay"
+                role="dialog"
+                aria-modal="true"
+                aria-label="City comparison"
+              >
+                <WtrComparisonTableView
+                  monthlyIncome={explorationIncomeMax}
+                  compareIds={compareIds}
+                  baselineCity={baselineCity}
+                  onBaselineCityChange={setBaselineCity}
+                  onBackToMap={() => setViewMode('map')}
+                  onClearAll={clearCompare}
+                  onRemoveCompare={removeCompare}
+                />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
+      <footer className="where-to-retire__footer">
+        <p className="where-to-retire__catalog-note">
+          {totalMapCities.toLocaleString()} cities in our worldwide catalog.
+        </p>
         <p className="where-to-retire__disclaimer" role="note">
           All figures are educational estimates only — not tax, legal,
           financial, or immigration advice. Consult qualified professionals
@@ -269,13 +239,7 @@ export function WhereToRetire({ c }: Props) {
             Tax Foundation
           </a>
         </p>
-      </div>
-
-      <PreferencePanel
-        open={prefPanelOpen}
-        onClose={() => setPrefPanelOpen(false)}
-        onSave={handlePrefsSave}
-      />
+      </footer>
     </div>
-  );
+  )
 }

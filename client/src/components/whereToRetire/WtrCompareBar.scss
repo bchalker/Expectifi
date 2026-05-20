@@ -1,0 +1,59 @@
+.wtr-compare-bar {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  z-index: 280;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(calc(100% - 2rem), 24rem);
+  padding: 0.65rem 0.85rem 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--color-navy) 22%, transparent);
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.wtr-compare-bar__label {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.wtr-compare-bar__cta {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0.4rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--accent-contrast, #fff);
+  cursor: pointer;
+}
+
+.wtr-compare-bar__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.wtr-compare-bar__clear:hover {
+  background: var(--surface2);
+  color: var(--text);
+}

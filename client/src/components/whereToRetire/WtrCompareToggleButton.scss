@@ -1,0 +1,101 @@
+.wtr-compare-corner__wrap {
+  display: contents;
+}
+
+.wtr-compare-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 15;
+  width: 2.75rem;
+  height: 2.75rem;
+  pointer-events: none;
+}
+
+.wtr-compare-corner__wedge {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  filter: drop-shadow(0 2px 5px rgb(28 43 58 / 0.16));
+  transition: filter 0.15s ease;
+}
+
+.wtr-compare-corner--selected .wtr-compare-corner__wedge {
+  filter: drop-shadow(0 3px 8px rgb(28 43 58 / 0.22));
+}
+
+.wtr-compare-corner:hover:not(.wtr-compare-corner--disabled) .wtr-compare-corner__wedge {
+  filter: drop-shadow(0 3px 8px rgb(28 43 58 / 0.2));
+}
+
+.wtr-compare-corner--disabled {
+  opacity: 0.45;
+}
+
+.wtr-compare-toggle {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: none;
+}
+
+.wtr-compare-toggle:disabled {
+  cursor: not-allowed;
+}
+
+.wtr-compare-corner--selected .wtr-compare-toggle {
+  color: #4ade80;
+}
+
+.wtr-compare-corner:hover:not(.wtr-compare-corner--disabled) .wtr-compare-toggle:not(:disabled) {
+  color: var(--text);
+}
+
+.wtr-compare-corner--selected:hover:not(.wtr-compare-corner--disabled) .wtr-compare-toggle {
+  color: #86efac;
+}
+
+.wtr-compare-corner--panel {
+  z-index: 5;
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+.wtr-compare-corner--card {
+  z-index: 4;
+  width: 3rem;
+  height: 3rem;
+  border-top-right-radius: 12px;
+  overflow: visible;
+}
+
+.wtr-compare-corner--card .wtr-compare-corner__wedge {
+  border-top-right-radius: 12px;
+}
+
+.wtr-compare-corner--card .wtr-compare-toggle {
+  top: 0;
+  right: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.3rem 0.3rem 0 0;
+  box-sizing: border-box;
+}

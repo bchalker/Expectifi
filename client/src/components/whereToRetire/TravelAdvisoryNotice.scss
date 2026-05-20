@@ -1,0 +1,26 @@
+.wtr-travel-advisory {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, #ca8a04 35%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, #fef9c3 55%, var(--surface));
+  box-sizing: border-box;
+}
+
+.wtr-travel-advisory__text {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: color-mix(in srgb, #713f12 75%, var(--text));
+}
+
+.wtr-travel-advisory__link {
+  font-weight: 600;
+  color: color-mix(in srgb, #854d0e 90%, var(--accent-text));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.wtr-travel-advisory__link:hover {
+  color: var(--accent-text);
+}

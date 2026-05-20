@@ -21,9 +21,39 @@ type FrankfurterTimeseries = {
   rates?: Record<string, Record<string, number>>
 }
 
-type OpenErApiLatest = {
+type OpenErApiLatestResponse = {
   result?: string
+  base_code?: string
+  time_last_update_utc?: string
   rates?: Record<string, number>
+}
+
+export type OpenErApiLatest = {
+  baseCode: string
+  rates: Record<string, number>
+  updatedUtc: string
+}
+
+export type LocalCurrencyInfo = {
+  currencyCode: string
+  currencyName: string
+  rate: number
+  updatedUtc: string
+}
+
+const OPEN_ER_API_URL = 'https://open.er-api.com/v6/latest/USD'
+const LATEST_CACHE_KEY = 'open-er-latest-usd'
+
+let latestFetchPromise: Promise<OpenErApiLatest | null> | null = null
+
+const currencyDisplayNames =
+  typeof Intl !== 'undefined' ? new Intl.DisplayNames(['en'], { type: 'currency' }) : null
+
+export function getCurrencyDisplayName(currencyCode: string): string {
+  const code = currencyCode.toUpperCase()
+  const fromIntl = currencyDisplayNames?.of(code)
+  if (fromIntl && fromIntl !== code) return fromIntl
+  return code
 }
 
 function endDate(): string {
@@ -81,14 +111,68 @@ async function fetchFrankfurterHistory(currencyCode: string): Promise<DollarStre
   return seriesFromPoints(points, sym, true)
 }
 
+async function fetchOpenErApiLatestAll(): Promise<OpenErApiLatest | null> {
+  const cached = readApiCache<OpenErApiLatest>(NAMESPACE, LATEST_CACHE_KEY)
+  if (cached?.rates && Object.keys(cached.rates).length) return cached
+
+  if (!latestFetchPromise) {
+    latestFetchPromise = (async () => {
+      try {
+        const res = await fetch(OPEN_ER_API_URL)
+        if (!res.ok) return null
+        const json = (await res.json()) as OpenErApiLatestResponse
+        if (json.result !== 'success' || !json.rates) return null
+
+        const payload: OpenErApiLatest = {
+          baseCode: json.base_code ?? 'USD',
+          rates: json.rates,
+          updatedUtc: json.time_last_update_utc ?? '',
+        }
+        writeApiCache(NAMESPACE, LATEST_CACHE_KEY, payload)
+        return payload
+      } catch {
+        return null
+      } finally {
+        latestFetchPromise = null
+      }
+    })()
+  }
+
+  return latestFetchPromise
+}
+
 async function fetchOpenErApiLatest(currencyCode: string): Promise<number | null> {
   const sym = currencyCode.toUpperCase()
-  const res = await fetch('https://open.er-api.com/v6/latest/USD')
-  if (!res.ok) return null
-  const json = (await res.json()) as OpenErApiLatest
-  if (json.result !== 'success' || !json.rates) return null
-  const rate = json.rates[sym]
+  const latest = await fetchOpenErApiLatestAll()
+  if (!latest) return null
+  const rate = latest.rates[sym]
   return typeof rate === 'number' && rate > 0 ? rate : null
+}
+
+/** Latest USD base rates from open.er-api.com (cached 24h). */
+export async function getOpenErApiLatest(): Promise<OpenErApiLatest | null> {
+  return fetchOpenErApiLatestAll()
+}
+
+/** Spot rate and currency name for a non-USD currency code. */
+export async function getLocalCurrencyInfo(
+  currencyCode: string,
+): Promise<LocalCurrencyInfo | null> {
+  const sym = currencyCode.toUpperCase()
+  if (!sym || sym === 'USD') return null
+
+  const latest = await fetchOpenErApiLatestAll()
+  if (!latest) return null
+
+  const rate = latest.rates[sym]
+  if (typeof rate !== 'number' || rate <= 0) return null
+
+  return {
+    currencyCode: sym,
+    currencyName: getCurrencyDisplayName(sym),
+    rate,
+    updatedUtc: latest.updatedUtc,
+  }
 }
 
 /** USD vs local currency — Frankfurter history when supported, else open.er-api spot rate. */

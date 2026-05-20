@@ -16,6 +16,8 @@
   --color-text-muted: #5f5e5a;
   --color-text-hint: #888780;
   --color-danger: #a32d2d;
+  --color-text-success: #15803d;
+  --color-text-danger: var(--color-danger);
 
   /* Design system source tokens — edit via Design panel (localStorage) */
   --ds-font-body: var(--font-sans);
