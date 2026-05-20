@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
-import { IconArrowBackUp, IconInfoCircle } from '@tabler/icons-react'
+import { IconArrowBackUp } from '@tabler/icons-react'
+import { Tooltip } from '../Tooltip'
 import { AnimatedCount } from '../ui/AnimatedCount'
 import {
   clampExplorationIncomeRange,
   computeBudgetExplorationStats,
   defaultExplorationIncomeRange,
+  resolveExplorationIncomeCeiling,
   INCOME_EXPLORE_MAX,
   INCOME_EXPLORE_MIN,
   INCOME_EXPLORE_STEP,
@@ -52,15 +54,21 @@ export function BudgetExplorationHero({
     [planMonthlyIncome],
   )
 
+  const incomeCeiling = useMemo(
+    () => resolveExplorationIncomeCeiling(planMonthlyIncome, explorationRange),
+    [planMonthlyIncome, explorationRange],
+  )
+
   const stats = useMemo(
-    () => computeBudgetExplorationStats(rangeMax),
-    [rangeMax],
+    () => computeBudgetExplorationStats(incomeCeiling),
+    [incomeCeiling],
   )
 
   const fillLeft = incomeSliderPct(rangeMin)
   const fillWidth = Math.max(0, incomeSliderPct(rangeMax) - fillLeft)
   const planMarkerPct = incomeSliderPct(planMonthlyIncome)
-  const showPlanTickOnTrack = planMarkerPct >= 10 && planMarkerPct <= 92
+  const planMarkTooltip = `${fmtMon(planMonthlyIncome)} projected income`
+  const resetTooltip = `Reset to ${fmtMon(planMonthlyIncome)} income`
   const isPlanRange =
     rangeMin === planRange.min && rangeMax === planRange.max
 
@@ -79,8 +87,9 @@ export function BudgetExplorationHero({
   const introBlock = showIntro ? (
     <>
       <p className="wtr-budget-hero__note">
-        <IconInfoCircle size={16} stroke={1.5} aria-hidden />
-        Based on your projected retirement income
+        <span className="wtr-budget-hero__note-pill">
+          Based on your projected retirement income
+        </span>
       </p>
 
       <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
@@ -114,77 +123,89 @@ export function BudgetExplorationHero({
           <span className="wtr-budget-hero__slider-kicker">
             {isPlanRange ? 'Monthly income range' : 'Custom: Monthly income range'}
           </span>
-          <span className="wtr-budget-hero__slider-amount" aria-live="polite">
-            {formatRangeDisplay(rangeMin, rangeMax)}
-          </span>
+          <div className="wtr-budget-hero__slider-amount-row">
+            <span className="wtr-budget-hero__slider-amount" aria-live="polite">
+              {isPlanRange
+                ? fmtMon(planMonthlyIncome)
+                : formatRangeDisplay(rangeMin, rangeMax)}
+            </span>
+            {!isPlanRange ? (
+              <Tooltip
+                content={resetTooltip}
+                placement="top"
+                showArrow
+                contentClassName="wtr-budget-hero__plan-tooltip"
+              >
+                <button
+                  type="button"
+                  className="wtr-budget-hero__reset"
+                  aria-label={resetTooltip}
+                  onClick={() => onExplorationRangeChange(planRange)}
+                >
+                  <IconArrowBackUp size={16} stroke={1} aria-hidden />
+                </button>
+              </Tooltip>
+            ) : null}
+          </div>
         </div>
 
         <div className="wtr-budget-hero__slider-main">
-        <div className="wtr-budget-hero__track-wrap">
-          <div className="wtr-budget-hero__track" aria-hidden />
-          <div
-            className="wtr-budget-hero__fill"
-            style={{ left: `${fillLeft}%`, width: `${fillWidth}%` }}
-            aria-hidden
-          />
-          <div
-            className="wtr-budget-hero__plan-mark"
-            style={{ left: `${planMarkerPct}%` }}
-            title={`Your projected income: ${fmtMon(planMonthlyIncome)}`}
-            aria-hidden
-          />
-          <input
-            type="range"
-            className="wtr-budget-hero__input wtr-budget-hero__input--min"
-            min={INCOME_EXPLORE_MIN}
-            max={INCOME_EXPLORE_MAX}
-            step={INCOME_EXPLORE_STEP}
-            value={rangeMin}
-            aria-label="Minimum monthly income"
-            onChange={(e) => setMin(Number(e.target.value))}
-          />
-          <input
-            type="range"
-            className="wtr-budget-hero__input wtr-budget-hero__input--max"
-            min={INCOME_EXPLORE_MIN}
-            max={INCOME_EXPLORE_MAX}
-            step={INCOME_EXPLORE_STEP}
-            value={rangeMax}
-            aria-label="Maximum monthly income"
-            onChange={(e) => setMax(Number(e.target.value))}
-          />
-        </div>
-
-        <div className="wtr-budget-hero__ticks">
-          <span className="wtr-budget-hero__tick-min">
+        <div className="wtr-budget-hero__slider-rail">
+          <span className="wtr-budget-hero__tick-edge wtr-budget-hero__tick-edge--min">
             {fmtMon(INCOME_EXPLORE_MIN)}
-            {!showPlanTickOnTrack ? (
-              <span className="wtr-budget-hero__tick-plan-inline">
-                · {fmtMon(planMonthlyIncome)}
-              </span>
-            ) : null}
           </span>
-          {showPlanTickOnTrack ? (
-            <span
-              className="wtr-budget-hero__tick-plan"
+          <div className="wtr-budget-hero__track-wrap">
+            <div className="wtr-budget-hero__track" aria-hidden />
+            <div
+              className="wtr-budget-hero__fill"
+              style={{ left: `${fillLeft}%`, width: `${fillWidth}%` }}
+              aria-hidden
+            />
+            <div
+              className="wtr-budget-hero__plan-mark-wrap"
               style={{ left: `${planMarkerPct}%` }}
             >
-              {fmtMon(planMonthlyIncome)}
-            </span>
-          ) : null}
-          <span className="wtr-budget-hero__tick-max">{fmtMon(INCOME_EXPLORE_MAX)}</span>
+              <Tooltip
+                content={planMarkTooltip}
+                placement="top"
+                showArrow
+                contentClassName="wtr-budget-hero__plan-tooltip"
+              >
+                <button
+                  type="button"
+                  className="wtr-budget-hero__plan-mark-hit"
+                  aria-label={planMarkTooltip}
+                >
+                  <span className="wtr-budget-hero__plan-mark" aria-hidden />
+                </button>
+              </Tooltip>
+            </div>
+            <input
+              type="range"
+              className="wtr-budget-hero__input wtr-budget-hero__input--min"
+              min={INCOME_EXPLORE_MIN}
+              max={INCOME_EXPLORE_MAX}
+              step={INCOME_EXPLORE_STEP}
+              value={rangeMin}
+              aria-label="Minimum monthly income"
+              onChange={(e) => setMin(Number(e.target.value))}
+            />
+            <input
+              type="range"
+              className="wtr-budget-hero__input wtr-budget-hero__input--max"
+              min={INCOME_EXPLORE_MIN}
+              max={INCOME_EXPLORE_MAX}
+              step={INCOME_EXPLORE_STEP}
+              value={rangeMax}
+              aria-label="Maximum monthly income"
+              onChange={(e) => setMax(Number(e.target.value))}
+            />
+          </div>
+          <span className="wtr-budget-hero__tick-edge wtr-budget-hero__tick-edge--max">
+            {fmtMon(INCOME_EXPLORE_MAX)}
+          </span>
         </div>
 
-        {!isPlanRange ? (
-          <button
-            type="button"
-            className="wtr-budget-hero__reset"
-            onClick={() => onExplorationRangeChange(planRange)}
-          >
-            <IconArrowBackUp size={16} stroke={1.5} aria-hidden />
-            Reset to your projected {fmtMon(planMonthlyIncome)} income
-          </button>
-        ) : null}
         </div>
     </div>
   ) : null

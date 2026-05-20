@@ -39,7 +39,7 @@
   box-sizing: border-box;
 }
 
-.where-to-retire__body > .app-page-back,
+.where-to-retire__body > .where-to-retire__panel-back,
 .where-to-retire__body > .wtr-budget-hero,
 .where-to-retire__body > .wtr-budget-hero--intro,
 .where-to-retire__body > .where-to-retire__discover,
@@ -74,6 +74,11 @@
   box-shadow: 0 2px 10px rgb(28 43 58 / 0.06);
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.where-to-retire__body > .where-to-retire__panel-back {
+  align-self: flex-start;
+  margin: 0 0 0.4rem;
 }
 
 .where-to-retire__compare-overlay {
@@ -149,7 +154,7 @@
 }
 
 .where-to-retire__body--map .where-to-retire__main-panel {
-  min-height: min(72dvh, 820px);
+  min-height: min(88dvh, 980px);
 }
 
 .where-to-retire__main-panel-map {
@@ -181,7 +186,7 @@
 }
 
 .where-to-retire__body--map .where-to-retire__view-panel {
-  min-height: min(72dvh, 820px);
+  min-height: min(88dvh, 980px);
 }
 
 .where-to-retire__view-panel .where-to-retire__view-bar {
@@ -325,7 +330,6 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-bottom: 1rem;
   padding: 0;
   border: none;
   background: transparent;

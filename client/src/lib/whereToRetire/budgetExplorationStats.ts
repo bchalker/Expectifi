@@ -123,6 +123,20 @@ export function isDefaultExplorationIncomeRange(
   return range.min === planRange.min && range.max === planRange.max
 }
 
+/**
+ * Income used for budget fit / city counts. At the default (plan) slider position, uses exact
+ * projected income so counts match hero stats — the slider snaps to $50 steps (e.g. $316 → $300).
+ */
+export function resolveExplorationIncomeCeiling(
+  planMonthlyIncome: number,
+  range: ExplorationIncomeRange,
+): number {
+  if (isDefaultExplorationIncomeRange(planMonthlyIncome, range)) {
+    return planMonthlyIncome
+  }
+  return range.max
+}
+
 export function clampExplorationIncomeRange(
   min: number,
   max: number,

@@ -13,12 +13,32 @@ export function apartmentAreaDualLabel(): string {
   return `${apartmentAreaSqFt()} sq ft (${APARTMENT_AREA_SQM} sq m)`
 }
 
-export function utilitiesCardSubtitle(): string {
-  return `Electricity, water & heating (based on ${apartmentAreaSqFt()} sq ft / ${APARTMENT_AREA_SQM} sq m apartment)`
+export function foodCardEstimateLines(): { headline: string; basis: string } {
+  return {
+    headline: 'Monthly estimate',
+    basis: 'based on 45 inexpensive meals/month',
+  }
 }
 
-export function foodCardSubtitle(): string {
-  return 'Based on 45 inexpensive meals/month'
+export function rentCardEstimateLines(): { headline: string; basis: string } {
+  return {
+    headline: 'Monthly estimate',
+    basis: '1BR rent (outside center)',
+  }
+}
+
+export function transportCardEstimateLines(): { headline: string; basis: string } {
+  return {
+    headline: 'Monthly estimate',
+    basis: 'Monthly transit pass',
+  }
+}
+
+export function utilitiesCardEstimateLines(): { headline: string; basis: string } {
+  return {
+    headline: 'Monthly estimate',
+    basis: `Electricity, water & heating (${apartmentAreaSqFt()} sq ft)`,
+  }
 }
 
 export function formatGasolineDualPrice(pricePerLiter: number): string {

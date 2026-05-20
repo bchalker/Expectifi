@@ -14,9 +14,18 @@ import {
 import { formatGasolineDualPrice } from '../../utils/units'
 import type { ScoredMapCity } from './cityMapScoring'
 import {
-  getDestinationTaxVisaContent,
-  getTaxVisaRowValue,
-} from './destinationTaxVisaContent'
+  getDemographicsRowNumericValue,
+  getDemographicsRowValue,
+  getDemographicsData,
+  type DemographicsCountryData,
+} from '../../utils/demographics'
+import {
+  getQoLRowNumericValue,
+  getQoLRowValue,
+  getQualityOfLifeData,
+  type QualityOfLifeCountryData,
+} from '../../utils/qualityOfLife'
+import { getTaxVisaData, getTaxVisaRowValue, type TaxVisaCountryData } from '../../utils/taxVisa'
 import { getCountryTaxForCityCountry } from './countryTaxForCity'
 
 export type ComparisonRowKind = 'section' | 'data'
@@ -39,7 +48,9 @@ export type ComparisonColumnData = {
   surplus: number
   topReason: string
   colIndex: number | null
-  taxVisa: ReturnType<typeof getDestinationTaxVisaContent>
+  taxVisa: TaxVisaCountryData | null
+  qualityOfLife: QualityOfLifeCountryData | null
+  demographics: DemographicsCountryData | null
   practical: {
     english: number
     healthcare: number
@@ -130,7 +141,9 @@ export function buildComparisonColumnData(
     surplus: afterTax - scored.monthlyBudget,
     topReason: topReasonForScored(scored),
     colIndex: colIndexForCountry(city.country),
-    taxVisa: getDestinationTaxVisaContent(city.country),
+    taxVisa: getTaxVisaData(city.country),
+    qualityOfLife: getQualityOfLifeData(city.country),
+    demographics: getDemographicsData(city.country),
     practical: practicalScoresForCountry(city.country),
     climate,
     dollarStrength,
@@ -208,6 +221,27 @@ export const COMPARISON_TABLE_ROWS: ComparisonRowDef[] = [
   { id: 'exemptions', kind: 'data', label: 'Key retirement income exemptions', highlight: 'none' },
   { id: 'visa', kind: 'data', label: 'Visa / residency requirement', highlight: 'none' },
   { id: 'healthcare', kind: 'data', label: 'Healthcare notes for US expats', highlight: 'none' },
+  { id: 'sec-qol', kind: 'section', label: 'Quality of Life' },
+  { id: 'qolOverall', kind: 'data', label: 'Overall QoL score', highlight: 'higher-green' },
+  { id: 'qolSafety', kind: 'data', label: 'Safety index', highlight: 'higher-green' },
+  { id: 'qolHealthcare', kind: 'data', label: 'Healthcare index', highlight: 'higher-green' },
+  { id: 'qolClimate', kind: 'data', label: 'Climate index', highlight: 'higher-green' },
+  {
+    id: 'qolPollution',
+    kind: 'data',
+    label: 'Air quality — lower is better',
+    highlight: 'lower-green',
+  },
+  { id: 'qolPurchasingPower', kind: 'data', label: 'Purchasing power index', highlight: 'higher-green' },
+  { id: 'sec-people-culture', kind: 'section', label: 'People & Culture' },
+  { id: 'demoDominantReligion', kind: 'data', label: 'Dominant religion', highlight: 'none' },
+  { id: 'demoChristianPct', kind: 'data', label: 'Christian %', highlight: 'higher-green' },
+  { id: 'demoMuslimPct', kind: 'data', label: 'Muslim %', highlight: 'none' },
+  { id: 'demoUnaffiliatedPct', kind: 'data', label: 'Unaffiliated %', highlight: 'none' },
+  { id: 'demoEnglish', kind: 'data', label: 'English proficiency', highlight: 'higher-green' },
+  { id: 'demoMedianAge', kind: 'data', label: 'Median age', highlight: 'none' },
+  { id: 'demoUrbanPct', kind: 'data', label: 'Urban population %', highlight: 'none' },
+  { id: 'demoExpatCommunity', kind: 'data', label: 'Expat community size', highlight: 'none' },
   { id: 'sec-practical', kind: 'section', label: 'Practical' },
   { id: 'english', kind: 'data', label: 'English friendliness rating', highlight: 'higher-green' },
   { id: 'healthcareScore', kind: 'data', label: 'Healthcare quality score', highlight: 'higher-green' },
@@ -298,9 +332,27 @@ export function getComparisonCellNumericValue(
       return col.practical.healthcare
     case 'visaEase':
       return col.practical.visa
+    case 'qolOverall':
+    case 'qolSafety':
+    case 'qolHealthcare':
+    case 'qolClimate':
+    case 'qolPollution':
+    case 'qolPurchasingPower':
+      return getQoLRowNumericValue(col.qualityOfLife, rowId)
+    case 'demoChristianPct':
+    case 'demoMuslimPct':
+    case 'demoUnaffiliatedPct':
+    case 'demoMedianAge':
+    case 'demoUrbanPct':
+    case 'demoEnglish':
+      return getDemographicsRowNumericValue(col.demographics, rowId)
     default:
       return null
   }
+}
+
+export function isComparisonEnglishBadgeRow(rowId: string): boolean {
+  return rowId === 'demoEnglish'
 }
 
 export function getComparisonCellDisplay(
@@ -398,6 +450,22 @@ export function getComparisonCellDisplay(
       return getTaxVisaRowValue(col.taxVisa, 'visa')
     case 'healthcare':
       return getTaxVisaRowValue(col.taxVisa, 'healthcare')
+    case 'qolOverall':
+    case 'qolSafety':
+    case 'qolHealthcare':
+    case 'qolClimate':
+    case 'qolPollution':
+    case 'qolPurchasingPower':
+      return getQoLRowValue(col.qualityOfLife, rowId)
+    case 'demoDominantReligion':
+    case 'demoChristianPct':
+    case 'demoMuslimPct':
+    case 'demoUnaffiliatedPct':
+    case 'demoEnglish':
+    case 'demoMedianAge':
+    case 'demoUrbanPct':
+    case 'demoExpatCommunity':
+      return getDemographicsRowValue(col.demographics, rowId)
     case 'english':
       return `${col.practical.english} / 100`
     case 'healthcareScore':
@@ -421,7 +489,11 @@ export function getComparisonHighlightClass(
       key: c.key,
       n: getComparisonCellNumericValue(row.id, c, monthlyIncome),
     }))
-    .filter((v): v is { key: string; n: number } => v.n != null && v.n > 0)
+    .filter((v): v is { key: string; n: number } => {
+      if (v.n == null) return false
+      if (row.id.startsWith('qol') || row.id.startsWith('demo')) return true
+      return v.n > 0
+    })
 
   if (values.length < 2) return null
 

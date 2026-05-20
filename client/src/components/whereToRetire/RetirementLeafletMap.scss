@@ -5,12 +5,13 @@
   border-radius: 0;
   overflow: hidden;
   border: none;
-  background: var(--color-navy);
+  background: var(--surface2);
 }
 
 .wtr-leaflet-map__canvas.leaflet-container {
   width: 100% !important;
-  background: var(--color-navy);
+  height: 100% !important;
+  background: var(--surface2);
   z-index: 0;
 }
 
@@ -22,10 +23,10 @@
 .wtr-leaflet-pin {
   display: block;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.92);
+  border: 2px solid var(--surface);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(0, 0, 0, 0.2);
+    0 2px 6px color-mix(in srgb, var(--color-navy) 22%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-navy) 12%, transparent);
   box-sizing: border-box;
   cursor: pointer;
   transition:
@@ -68,30 +69,40 @@
 }
 
 .wtr-leaflet-pin--selected {
-  transform: scale(1.15);
+  transform: scale(1.12);
   box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--accent-green) 55%, transparent),
-    0 4px 14px rgba(0, 0, 0, 0.5);
+    0 0 0 2px color-mix(in srgb, var(--accent-green) 45%, transparent),
+    0 3px 10px color-mix(in srgb, var(--color-navy) 24%, transparent);
+}
+
+.wtr-leaflet-pin--detail {
+  transform: scale(1.35);
+  border-width: 3px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent-green) 70%, transparent),
+    0 0 0 7px color-mix(in srgb, var(--accent-green) 22%, transparent),
+    0 6px 16px color-mix(in srgb, var(--color-navy) 32%, transparent);
+  z-index: 2;
 }
 
 .leaflet-container a {
-  color: var(--color-teal-light);
+  color: var(--accent);
 }
 
 .leaflet-control-attribution {
   font-size: 10px !important;
-  background: color-mix(in srgb, var(--color-navy) 80%, transparent) !important;
-  color: rgba(255, 255, 255, 0.55) !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  color: var(--text-muted) !important;
 }
 
 .leaflet-control-zoom a {
-  background: color-mix(in srgb, var(--color-navy) 92%, #000) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background: color-mix(in srgb, var(--color-navy) 75%, #000) !important;
+  background: var(--surface2) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

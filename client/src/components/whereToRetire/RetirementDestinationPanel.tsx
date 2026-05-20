@@ -1,42 +1,58 @@
-import { useState, type ReactNode } from 'react'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { useWtrPageScrollLock } from '../../hooks/useWtrPageScrollLock'
 import {
   IconBarbell,
   IconBolt,
-  IconBriefcase,
   IconBus,
-  IconGlassFull,
   IconHome,
+  IconMovie,
   IconToolsKitchen2,
-  IconWifi,
   IconX,
 } from '@tabler/icons-react'
 import { WtrCompareToggleButton } from './WtrCompareToggleButton'
 import { useCityClimate } from '../../hooks/useCityClimate'
-import { useDestinationLiveData } from '../../hooks/useDestinationLiveData'
-import type { LocalCurrencyInfo } from '../../lib/api/exchangeRates'
-import { formatUsdToLocalRate } from '../../lib/api/exchangeRates'
 import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { matchTier } from '../../lib/whereToRetire/cityMapScoring'
-import type { CityData, MapCity } from '../../utils/costOfLiving'
+import type { CityData } from '../../utils/costOfLiving'
 import {
+  buildBudgetBreakdownDisplay,
+  calculateMonthlyBudget,
   countryToFlagEmoji,
   formatUsd,
   formatUsdOrDash,
+  getMonthlyBudgetComponents,
   hasTravelAdvisory,
 } from '../../utils/costOfLiving'
 import { TravelAdvisoryNotice } from './TravelAdvisoryNotice'
 import {
-  foodCardSubtitle,
+  foodCardEstimateLines,
+  rentCardEstimateLines,
+  transportCardEstimateLines,
+  utilitiesCardEstimateLines,
   formatGasolineDualPrice,
-  utilitiesCardSubtitle,
 } from '../../utils/units'
 import { ClimateCard } from './ClimateCard'
+import { ColBudgetBreakdownBar } from './ColBudgetBreakdownBar'
+import { ColCategoryCard, COL_CATEGORY_ICON_SIZE, type ColCategoryCardProps } from './ColCategoryCard'
+import { DestinationPeopleCultureTab } from './DestinationPeopleCultureTab'
+import { DestinationQualityOfLifeTab } from './DestinationQualityOfLifeTab'
 import { DestinationTaxVisaTab } from './DestinationTaxVisaTab'
 import { FitGauge } from './FitGauge'
+import { WtrCityListPagination } from './WtrCityListPagination'
 import './ClimateCard.scss'
+import './ColBudgetBreakdownBar.scss'
+import './ColCategoryCard.scss'
+import './DestinationPeopleCultureTab.scss'
+import './DestinationQualityOfLifeTab.scss'
 import './RetirementDestinationPanel.scss'
+import './WtrCityListPagination.scss'
+
+export type DestinationListPageNav = {
+  page: number
+  pageSize: number
+  totalCount: number
+  onPageChange: (page: number) => void
+}
 
 type Props = {
   scored: ScoredMapCity | null
@@ -46,23 +62,27 @@ type Props = {
   compareSelected: boolean
   compareAtMax: boolean
   onToggleCompare: () => void
+  listPageNav: DestinationListPageNav | null
 }
 
-type PanelTab = 'col' | 'taxVisa' | 'qol'
+type PanelTab = 'col' | 'weather' | 'taxVisa' | 'qol' | 'peopleCulture'
 
-type DataRow = {
-  label: string
-  value: string
+function panelStaggerStyle(index: number): CSSProperties {
+  return { '--wtr-panel-i': index } as CSSProperties
 }
 
-type DetailCard = {
-  kind: 'detail'
-  id: string
-  title: string
-  subtitle?: string
-  icon: ReactNode
-  rows: DataRow[]
-}
+const PANEL_TABS: { id: PanelTab; label: string; tabId: string; panelId: string }[] = [
+  { id: 'col', label: 'Cost of Living', tabId: 'wtr-dest-tab-col', panelId: 'wtr-dest-tabpanel-col' },
+  { id: 'weather', label: 'Weather', tabId: 'wtr-dest-tab-weather', panelId: 'wtr-dest-tabpanel-weather' },
+  { id: 'taxVisa', label: 'Tax & Visa', tabId: 'wtr-dest-tab-tax-visa', panelId: 'wtr-dest-tabpanel-tax-visa' },
+  { id: 'qol', label: 'Quality of Life', tabId: 'wtr-dest-tab-qol', panelId: 'wtr-dest-tabpanel-qol' },
+  {
+    id: 'peopleCulture',
+    label: 'People & Culture',
+    tabId: 'wtr-dest-tab-people-culture',
+    panelId: 'wtr-dest-tabpanel-people-culture',
+  },
+]
 
 type StatCard = {
   kind: 'stat'
@@ -73,150 +93,113 @@ type StatCard = {
   icon: ReactNode
 }
 
-type PanelCard = DetailCard | StatCard
+type ColCategoryPanelCard = ColCategoryCardProps & { id: string }
 
-const CARD_ICON_SIZE = 24
+type PanelCard = ColCategoryPanelCard | StatCard
 
-function monthlyFoodEstimate(city: CityData): number {
-  return Math.round(city.meal_inexpensive_restaurant * 45)
+function isStatCard(card: PanelCard): card is StatCard {
+  return 'kind' in card && card.kind === 'stat'
 }
 
-function buildColCards(city: CityData): PanelCard[] {
+const STAT_ICON_SIZE = 24
+
+function buildColBudgetCards(city: CityData): ColCategoryPanelCard[] {
+  const components = getMonthlyBudgetComponents(city)
+  const icon = COL_CATEGORY_ICON_SIZE
+
   return [
     {
-      kind: 'detail',
       id: 'rent',
+      variant: 'hero',
       title: 'Rent',
-      icon: <IconHome size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
+      icon: <IconHome size={icon} stroke={1.5} aria-hidden />,
+      monthlyEstimate: city.rent_1br_outside_centre,
+      estimateLines: rentCardEstimateLines(),
       rows: [
-        { label: '1BR rent, outside center', value: formatUsdOrDash(city.rent_1br_outside_centre) },
-        { label: '1BR rent, city center', value: formatUsdOrDash(city.rent_1br_city_centre) },
-        { label: '3BR rent, outside center', value: formatUsdOrDash(city.rent_3br_outside_centre) },
+        { label: '1BR rent (city center)', value: formatUsdOrDash(city.rent_1br_city_centre) },
+        { label: '3BR rent (outside center)', value: formatUsdOrDash(city.rent_3br_outside_centre) },
       ],
     },
     {
-      kind: 'detail',
       id: 'food',
+      variant: 'hero',
       title: 'Food',
-      subtitle: foodCardSubtitle(),
-      icon: <IconToolsKitchen2 size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
+      icon: <IconToolsKitchen2 size={icon} stroke={1.5} aria-hidden />,
+      monthlyEstimate: Math.round(components.food),
+      estimateLines: foodCardEstimateLines(),
       rows: [
-        { label: 'Monthly estimate', value: formatUsdOrDash(monthlyFoodEstimate(city)) },
         { label: 'Inexpensive restaurant meal', value: formatUsdOrDash(city.meal_inexpensive_restaurant) },
-        { label: 'McMeal at McDonald\'s', value: formatUsdOrDash(city.mcmeal) },
+        { label: "McMeal at McDonald's", value: formatUsdOrDash(city.mcmeal) },
         { label: 'Cappuccino', value: formatUsdOrDash(city.cappuccino) },
         { label: 'Domestic beer (draft)', value: formatUsdOrDash(city.domestic_beer_draught) },
         { label: 'Imported beer (bottle)', value: formatUsdOrDash(city.imported_beer_bottle) },
         { label: 'Wine (mid-range bottle)', value: formatUsdOrDash(city.wine_bottle_midrange) },
       ],
+      footerRow: {
+        label: 'Mid-range dinner for 2',
+        value: formatUsdOrDash(city.meal_midrange_restaurant_for2),
+        note: 'Three courses, no drinks',
+      },
     },
     {
-      kind: 'detail',
       id: 'transport',
+      variant: 'hero',
       title: 'Transport',
-      icon: <IconBus size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
-      rows: [
-        { label: 'Monthly transit pass', value: formatUsdOrDash(city.transport_monthly_pass) },
-        { label: 'Gasoline', value: formatGasolineDualPrice(city.gasoline_1L) },
-      ],
+      icon: <IconBus size={icon} stroke={1.5} aria-hidden />,
+      monthlyEstimate: city.transport_monthly_pass,
+      estimateLines: transportCardEstimateLines(),
+      rows: [{ label: 'Gasoline', value: formatGasolineDualPrice(city.gasoline_1L) }],
     },
     {
-      kind: 'detail',
-      id: 'utilities',
-      title: 'Utilities',
-      subtitle: utilitiesCardSubtitle(),
-      icon: <IconBolt size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
+      id: 'utilities-internet',
+      variant: 'hero',
+      title: 'Utilities and Internet',
+      icon: <IconBolt size={icon} stroke={1.5} aria-hidden />,
+      monthlyEstimate: components.utilitiesInternet,
+      estimateLines: utilitiesCardEstimateLines(),
       rows: [
         { label: 'Utilities (monthly)', value: formatUsdOrDash(city.utilities_monthly_85m2) },
+        { label: 'Broadband (60 Mbps)', value: formatUsdOrDash(city.internet_60mbps_monthly) },
       ],
     },
-    {
-      kind: 'stat',
-      id: 'internet',
-      label: 'Internet (60 Mbps)',
-      value: formatUsdOrDash(city.internet_60mbps_monthly),
-      subtitle: 'Monthly broadband',
-      icon: <IconWifi size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
-    },
+  ]
+}
+
+function buildColSupplementalCards(city: CityData): StatCard[] {
+  return [
     {
       kind: 'stat',
       id: 'gym',
       label: 'Gym membership',
       value: formatUsdOrDash(city.gym_monthly),
       subtitle: 'Monthly, one adult',
-      icon: <IconBarbell size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
+      icon: <IconBarbell size={STAT_ICON_SIZE} stroke={1.5} aria-hidden />,
     },
     {
       kind: 'stat',
-      id: 'dining',
-      label: 'Mid-range dinner for 2',
-      value: formatUsdOrDash(city.meal_midrange_restaurant_for2),
-      subtitle: 'Three courses, no drinks',
-      icon: <IconGlassFull size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
+      id: 'leisure',
+      label: 'Leisure',
+      value: formatUsdOrDash(city.cinema_ticket),
+      subtitle: 'Cinema ticket',
+      icon: <IconMovie size={STAT_ICON_SIZE} stroke={1.5} aria-hidden />,
     },
   ]
 }
 
-function buildQolCards(city: MapCity, monthlyIncome: number, currency: LocalCurrencyInfo | null): DetailCard[] {
-  const salaryRatio =
-    city.avg_monthly_net_salary > 0
-      ? `${Math.round((monthlyIncome / city.avg_monthly_net_salary) * 100)}% of local avg.`
-      : '—'
-
-  const economyRows: DataRow[] = [
-    { label: 'Avg. monthly net salary', value: formatUsdOrDash(city.avg_monthly_net_salary) },
-    { label: 'Your income vs. locals', value: salaryRatio },
-  ]
-
-  if (currency) {
-    economyRows.push(
-      { label: 'Local currency', value: `${currency.currencyName} (${currency.currencyCode})` },
-      {
-        label: 'Exchange rate',
-        value: `1 USD ≈ ${formatUsdToLocalRate(currency.rate, currency.currencyCode)} ${currency.currencyCode}`,
-      },
-    )
-  }
-
-  return [
-    {
-      kind: 'detail',
-      id: 'lifestyle',
-      title: 'Leisure',
-      icon: <IconBarbell size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
-      rows: [{ label: 'Cinema ticket', value: formatUsdOrDash(city.cinema_ticket) }],
-    },
-    {
-      kind: 'detail',
-      id: 'economy',
-      title: 'Local economy',
-      icon: <IconBriefcase size={CARD_ICON_SIZE} stroke={1.5} aria-hidden />,
-      rows: economyRows,
-    },
-  ]
-}
-
-function DetailCardSection({ card }: { card: DetailCard }) {
+function StatCardSection({
+  card,
+  className,
+  style,
+}: {
+  card: StatCard
+  className?: string
+  style?: CSSProperties
+}) {
   return (
-    <article className="wtr-dest-panel__card">
-      <span className="wtr-dest-panel__card-icon-top">{card.icon}</span>
-      <h4 className="wtr-dest-panel__card-title wtr-dest-panel__card-title--centered">{card.title}</h4>
-      {card.subtitle ? <p className="wtr-dest-panel__card-subtitle wtr-dest-panel__card-subtitle--centered">{card.subtitle}</p> : null}
-      <dl className="wtr-dest-panel__card-rows">
-        {card.rows.map((row) => (
-          <div key={row.label} className="wtr-dest-panel__card-row">
-            <dt className="wtr-dest-panel__card-row-label">{row.label}</dt>
-            <dd className="wtr-dest-panel__card-row-value">{row.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </article>
-  )
-}
-
-function StatCardSection({ card }: { card: StatCard }) {
-  return (
-    <article className="wtr-dest-panel__card wtr-dest-panel__card--stat">
+    <article
+      className={['wtr-dest-panel__card', 'wtr-dest-panel__card--stat', className].filter(Boolean).join(' ')}
+      style={style}
+    >
       <span className="wtr-dest-panel__card-icon-top">{card.icon}</span>
       <p className="wtr-dest-panel__stat-label">{card.label}</p>
       <p className="wtr-dest-panel__stat-value">{card.value}</p>
@@ -225,55 +208,71 @@ function StatCardSection({ card }: { card: StatCard }) {
   )
 }
 
-function PanelCardSection({ card }: { card: PanelCard }) {
-  if (card.kind === 'stat') return <StatCardSection card={card} />
-  return <DetailCardSection card={card} />
+function ColPanelCardSection({
+  card,
+  staggerIndex,
+}: {
+  card: PanelCard
+  staggerIndex: number
+}) {
+  const staggerClass = 'wtr-dest-panel__stagger-item'
+  const staggerStyle = panelStaggerStyle(staggerIndex)
+  if (isStatCard(card)) {
+    return <StatCardSection card={card} className={staggerClass} style={staggerStyle} />
+  }
+  const { id: _id, ...categoryProps } = card
+  return <ColCategoryCard {...categoryProps} className={staggerClass} style={staggerStyle} />
 }
 
-export function RetirementDestinationPanel({
+type CityViewProps = {
+  scored: ScoredMapCity
+  monthlyIncome: number
+  budgetBreakdown: NonNullable<ReturnType<typeof buildBudgetBreakdownDisplay>>
+  onClose: () => void
+  compareSelected: boolean
+  compareAtMax: boolean
+  onToggleCompare: () => void
+  listPageNav: DestinationListPageNav | null
+}
+
+/** Remounts when city.id changes so scroll content never stacks on prev/next navigation. */
+function DestinationPanelCityView({
   scored,
   monthlyIncome,
-  open,
+  budgetBreakdown,
   onClose,
   compareSelected,
   compareAtMax,
   onToggleCompare,
-}: Props) {
+  listPageNav,
+}: CityViewProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>('col')
-  const { currency } = useDestinationLiveData(scored?.city ?? null)
-  const { climate, loading: climateLoading, failed: climateFailed } = useCityClimate(scored?.city ?? null)
+  const { climate, loading: climateLoading, failed: climateFailed } = useCityClimate(scored.city)
 
-  if (!scored) return null
-
-  const { city, monthlyBudget, affordabilityScore, colExplanation } = scored
+  const { city, affordabilityScore, colExplanation } = scored
+  const panelMonthlyBudget = calculateMonthlyBudget(city)
+  const monthlySurplus = Math.max(0, Math.round(monthlyIncome - panelMonthlyBudget))
   const tier = matchTier(affordabilityScore)
   const flagEmoji = countryToFlagEmoji(city.country)
-  const colCards = buildColCards(city)
-  const qolCards = buildQolCards(city, monthlyIncome, currency)
+  const colBudgetCards = buildColBudgetCards(city)
+  const colSupplementalCards = buildColSupplementalCards(city)
   const showTravelAdvisory = hasTravelAdvisory(city.country)
 
   return (
     <>
-      <button
-        type="button"
-        className={`wtr-dest-panel__backdrop${open ? ' wtr-dest-panel__backdrop--open' : ''}`}
-        aria-label="Close destination details"
-        onClick={onClose}
+      <WtrCompareToggleButton
+        className="wtr-compare-corner--panel"
+        selected={compareSelected}
+        atMax={compareAtMax}
+        cityName={city.city}
+        onToggle={onToggleCompare}
       />
-      <aside
-        className={`wtr-dest-panel${open ? ' wtr-dest-panel--open' : ''}`}
-        aria-hidden={!open}
-        aria-labelledby="wtr-dest-panel-title"
-      >
-        <WtrCompareToggleButton
-          className="wtr-compare-corner--panel"
-          selected={compareSelected}
-          atMax={compareAtMax}
-          cityName={city.city}
-          onToggle={onToggleCompare}
-        />
+      <div className="wtr-dest-panel__layout">
         <header className="wtr-dest-panel__sticky-head">
-          <div className="wtr-dest-panel__header">
+          <div
+            className="wtr-dest-panel__header wtr-dest-panel__stagger-item"
+            style={panelStaggerStyle(0)}
+          >
             <div className="wtr-dest-panel__title-row">
               <span className="wtr-dest-panel__flag" aria-hidden>
                 {flagEmoji}
@@ -293,110 +292,220 @@ export function RetirementDestinationPanel({
           </div>
 
           <section className="wtr-dest-panel__summary" aria-label="Monthly budget estimate">
-            <p className={`wtr-dest-panel__summary-total wtr-dest-panel__summary-total--${tier}`}>
-              {formatUsd(monthlyBudget)}
-            </p>
+            <div className="wtr-dest-panel__summary-total-block">
+              <p className="wtr-dest-panel__summary-total">
+                {formatUsd(panelMonthlyBudget)}
+                <span className="wtr-dest-panel__summary-total-suffix">/mo</span>
+              </p>
+              {monthlySurplus > 0 ? (
+                <span className="wtr-dest-panel__summary-surplus">
+                  + {formatUsd(monthlySurplus)} surplus
+                </span>
+              ) : null}
+            </div>
             <div className="wtr-dest-panel__summary-copy">
-              <h3 className="wtr-dest-panel__section-title">Estimated monthly budget</h3>
+              <FitGauge
+                className="wtr-dest-panel__summary-gauge"
+                label="Retirement income fit score"
+                score={affordabilityScore}
+                tier={tier}
+              />
               <p className="wtr-dest-panel__summary-note">
-                Single-person estimate based on rent outside city center, food, transport, utilities, and internet.
+                Single-person estimate based on rent outside city center, food, transport, utilities, and internet.{' '}
+                <strong>{colExplanation}</strong>
               </p>
             </div>
           </section>
         </header>
 
-        <SimpleBar key={city.id} className="wtr-dest-panel__scroll" autoHide={false}>
+        <div className="wtr-dest-panel__scroll">
           <div className="wtr-dest-panel__body">
-            <div className="wtr-dest-panel__tabs" role="tablist" aria-label="Destination details">
-              <button
-                type="button"
-                role="tab"
-                id="wtr-dest-tab-col"
-                aria-selected={activeTab === 'col'}
-                aria-controls="wtr-dest-tabpanel-col"
-                className={`wtr-dest-panel__tab${activeTab === 'col' ? ' wtr-dest-panel__tab--active' : ''}`}
-                onClick={() => setActiveTab('col')}
-              >
-                Cost of Living
-              </button>
-              <button
-                type="button"
-                role="tab"
-                id="wtr-dest-tab-tax-visa"
-                aria-selected={activeTab === 'taxVisa'}
-                aria-controls="wtr-dest-tabpanel-tax-visa"
-                className={`wtr-dest-panel__tab${activeTab === 'taxVisa' ? ' wtr-dest-panel__tab--active' : ''}`}
-                onClick={() => setActiveTab('taxVisa')}
-              >
-                Tax & Visa
-              </button>
-              <button
-                type="button"
-                role="tab"
-                id="wtr-dest-tab-qol"
-                aria-selected={activeTab === 'qol'}
-                aria-controls="wtr-dest-tabpanel-qol"
-                className={`wtr-dest-panel__tab${activeTab === 'qol' ? ' wtr-dest-panel__tab--active' : ''}`}
-                onClick={() => setActiveTab('qol')}
-              >
-                Quality of Life
-              </button>
+            <div
+              className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
+              style={panelStaggerStyle(2)}
+              role="tablist"
+              aria-label="Destination details"
+            >
+              {PANEL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={tab.tabId}
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={tab.panelId}
+                  className={`wtr-dest-panel__tab${activeTab === tab.id ? ' wtr-dest-panel__tab--active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
             <div
-              id={
-                activeTab === 'col'
-                  ? 'wtr-dest-tabpanel-col'
-                  : activeTab === 'taxVisa'
-                    ? 'wtr-dest-tabpanel-tax-visa'
-                    : 'wtr-dest-tabpanel-qol'
-              }
+              key={`${city.id}-${activeTab}`}
+              id={PANEL_TABS.find((t) => t.id === activeTab)?.panelId}
               role="tabpanel"
-              aria-labelledby={
-                activeTab === 'col'
-                  ? 'wtr-dest-tab-col'
-                  : activeTab === 'taxVisa'
-                    ? 'wtr-dest-tab-tax-visa'
-                    : 'wtr-dest-tab-qol'
-              }
-              className="wtr-dest-panel__tabpanel"
+              aria-labelledby={PANEL_TABS.find((t) => t.id === activeTab)?.tabId}
+              className="wtr-dest-panel__tabpanel wtr-dest-panel__tabpanel--enter"
             >
               {activeTab === 'col' ? (
                 <>
-                  <section className="wtr-dest-panel__gauges" aria-label="Retirement income fit score">
-                    <FitGauge
-                      label="Retirement income fit score"
-                      score={affordabilityScore}
-                      explanation={colExplanation}
-                      tier={matchTier(affordabilityScore)}
-                    />
-                  </section>
-                  <div className="wtr-dest-panel__cards">
-                    {colCards.map((card) => (
-                      <PanelCardSection key={card.id} card={card} />
-                    ))}
-                    <ClimateCard climate={climate} loading={climateLoading} failed={climateFailed} />
+                  <div className="wtr-dest-panel__col-stack">
+                    <div className="wtr-dest-panel__cards wtr-dest-panel__cards--budget">
+                      {colBudgetCards.map((card, index) => (
+                        <ColPanelCardSection
+                          key={card.id}
+                          card={card}
+                          staggerIndex={index}
+                        />
+                      ))}
+                    </div>
+                    <div className="wtr-dest-panel__col-extras">
+                      <p
+                        className="wtr-dest-panel__col-extras-note wtr-dest-panel__stagger-item"
+                        style={panelStaggerStyle(colBudgetCards.length)}
+                      >
+                        Not included in budget estimate
+                      </p>
+                      <div className="wtr-dest-panel__cards wtr-dest-panel__cards--extras">
+                        {colSupplementalCards.map((card, index) => (
+                          <ColPanelCardSection
+                            key={card.id}
+                            card={card}
+                            staggerIndex={colBudgetCards.length + 1 + index}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  {showTravelAdvisory ? <TravelAdvisoryNotice /> : null}
+                  {showTravelAdvisory ? (
+                    <div
+                      className="wtr-dest-panel__stagger-item"
+                      style={panelStaggerStyle(
+                        colBudgetCards.length + 1 + colSupplementalCards.length,
+                      )}
+                    >
+                      <TravelAdvisoryNotice />
+                    </div>
+                  ) : null}
                 </>
-              ) : activeTab === 'taxVisa' ? (
-                <DestinationTaxVisaTab country={city.country} />
-              ) : (
-                <div className="wtr-dest-panel__cards">
-                  {qolCards.map((card) => (
-                    <DetailCardSection key={card.id} card={card} />
-                  ))}
+              ) : activeTab === 'weather' ? (
+                <div className="wtr-dest-panel__weather">
+                  <ClimateCard
+                    climate={climate}
+                    loading={climateLoading}
+                    failed={climateFailed}
+                    staggerClassName="wtr-dest-panel__stagger-item"
+                    staggerStyle={panelStaggerStyle}
+                  />
                 </div>
+              ) : activeTab === 'taxVisa' ? (
+                <DestinationTaxVisaTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : activeTab === 'qol' ? (
+                <DestinationQualityOfLifeTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : (
+                <DestinationPeopleCultureTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
               )}
             </div>
           </div>
-        </SimpleBar>
+        </div>
 
         <footer className="wtr-dest-panel__footer">
+          {activeTab === 'col' ? <ColBudgetBreakdownBar breakdown={budgetBreakdown} /> : null}
+          {listPageNav ? (
+            <WtrCityListPagination
+              className="wtr-list-pagination--dest-panel"
+              page={listPageNav.page}
+              pageSize={listPageNav.pageSize}
+              totalCount={listPageNav.totalCount}
+              onPageChange={listPageNav.onPageChange}
+            />
+          ) : null}
           <p className="wtr-dest-panel__data-source">
-            Estimates based on real prices reported by locals. Updated periodically. All amounts in USD.
+            Estimates based on real prices reported by locals. Updated periodically. All amounts in
+            USD.
           </p>
         </footer>
+      </div>
+    </>
+  )
+}
+
+export function RetirementDestinationPanel({
+  scored,
+  monthlyIncome,
+  open,
+  onClose,
+  compareSelected,
+  compareAtMax,
+  onToggleCompare,
+  listPageNav,
+}: Props) {
+  const [slideOpen, setSlideOpen] = useState(false)
+  useWtrPageScrollLock(open)
+
+  useEffect(() => {
+    if (!open) {
+      setSlideOpen(false)
+      return
+    }
+    let frame2 = 0
+    const frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => setSlideOpen(true))
+    })
+    return () => {
+      cancelAnimationFrame(frame1)
+      cancelAnimationFrame(frame2)
+    }
+  }, [open])
+
+  const budgetBreakdown = useMemo(
+    () => (scored ? buildBudgetBreakdownDisplay(scored.city) : null),
+    [scored],
+  )
+
+  if (!scored || !budgetBreakdown) return null
+
+  return (
+    <>
+      <button
+        type="button"
+        className={`wtr-dest-panel__backdrop${slideOpen ? ' wtr-dest-panel__backdrop--open' : ''}`}
+        aria-label="Close destination details"
+        onClick={onClose}
+        tabIndex={open ? 0 : -1}
+      />
+      <aside
+        className={`wtr-dest-panel${slideOpen ? ' wtr-dest-panel--open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!open}
+        aria-labelledby="wtr-dest-panel-title"
+      >
+        <DestinationPanelCityView
+          key={scored.city.id}
+          scored={scored}
+          monthlyIncome={monthlyIncome}
+          budgetBreakdown={budgetBreakdown}
+          onClose={onClose}
+          compareSelected={compareSelected}
+          compareAtMax={compareAtMax}
+          onToggleCompare={onToggleCompare}
+          listPageNav={listPageNav}
+        />
       </aside>
     </>
   )

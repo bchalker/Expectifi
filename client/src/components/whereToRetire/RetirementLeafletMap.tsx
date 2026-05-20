@@ -5,15 +5,25 @@ import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import 'leaflet/dist/leaflet.css'
 import './RetirementLeafletMap.scss'
 
+const DETAIL_FOCUS_ZOOM = 8
+/** Leaflet `flyTo` / `flyToBounds` duration in seconds */
+const DETAIL_FLY_DURATION_S = 1.35
+const BOUNDS_FLY_DURATION_S = 1.1
+
 type Props = {
-  heightPx: number
   destinations: ScoredMapCity[]
   selectedId: string | null
+  /** When true, emphasize the selected pin and fly to that city; when false, fit all destinations. */
+  detailPanelOpen: boolean
   fitKey: string
   onSelect: (id: string) => void
 }
 
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+function detailFocusId(selectedId: string | null, detailPanelOpen: boolean): string | null {
+  return detailPanelOpen && selectedId ? selectedId : null
+}
+
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 const TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
 
@@ -27,7 +37,7 @@ function pinIcon(tier: ScoredMapCity['tier'], sizePx: number, cityId: string, sc
   })
 }
 
-function MapResizeFix({ heightPx }: { heightPx: number }) {
+function MapResizeFix() {
   const map = useMap()
   useEffect(() => {
     const invalidate = () => {
@@ -36,40 +46,55 @@ function MapResizeFix({ heightPx }: { heightPx: number }) {
     invalidate()
     const id = window.setTimeout(invalidate, 0)
     const id2 = window.setTimeout(invalidate, 250)
+
+    const host = map.getContainer().parentElement
+    const ro =
+      host && typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(invalidate)
+        : null
+    if (host && ro) ro.observe(host)
+
     window.addEventListener('resize', invalidate)
     return () => {
       window.clearTimeout(id)
       window.clearTimeout(id2)
+      ro?.disconnect()
       window.removeEventListener('resize', invalidate)
     }
-  }, [map, heightPx])
+  }, [map])
   return null
 }
 
 function MapSelectionFocus({
   destinations,
-  selectedId,
+  focusId,
 }: {
   destinations: ScoredMapCity[]
-  selectedId: string | null
+  focusId: string | null
 }) {
   const map = useMap()
-  const prevSelectedRef = useRef<string | null>(null)
+  const prevFocusRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!selectedId) {
-      prevSelectedRef.current = null
+    if (!focusId) {
+      prevFocusRef.current = null
       return
     }
-    if (selectedId === prevSelectedRef.current) return
-    prevSelectedRef.current = selectedId
+    if (focusId === prevFocusRef.current) return
+    prevFocusRef.current = focusId
 
-    const hit = destinations.find((d) => d.city.id === selectedId)
+    const hit = destinations.find((d) => d.city.id === focusId)
     if (!hit) return
-    map.flyTo([hit.city.lat, hit.city.lng], Math.max(map.getZoom(), 4), {
-      duration: 0.6,
+
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    map.flyTo([hit.city.lat, hit.city.lng], DETAIL_FOCUS_ZOOM, {
+      duration: prefersReduced ? 0 : DETAIL_FLY_DURATION_S,
+      easeLinearity: 0.35,
     })
-  }, [destinations, map, selectedId])
+  }, [destinations, focusId, map])
 
   return null
 }
@@ -77,24 +102,27 @@ function MapSelectionFocus({
 function MapBoundsFit({
   destinations,
   fitKey,
-  selectedId,
+  focusId,
 }: {
   destinations: ScoredMapCity[]
   fitKey: string
-  selectedId: string | null
+  focusId: string | null
 }) {
   const map = useMap()
 
   useEffect(() => {
-    if (selectedId) return
+    if (focusId) return
 
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const duration = prefersReduced ? 0 : 0.75
+    const duration = prefersReduced ? 0 : BOUNDS_FLY_DURATION_S
 
     if (!destinations.length) {
-      map.flyTo([20, 0], 2, { duration: prefersReduced ? 0 : 0.5 })
+      map.flyTo([20, 0], 2, {
+        duration: prefersReduced ? 0 : BOUNDS_FLY_DURATION_S * 0.85,
+        easeLinearity: 0.35,
+      })
       return
     }
 
@@ -102,34 +130,37 @@ function MapBoundsFit({
     map.flyToBounds(L.latLngBounds(latLngs).pad(0.25), {
       padding: [40, 40],
       duration,
+      easeLinearity: 0.35,
       maxZoom: 6,
     })
-  }, [destinations, fitKey, map, selectedId])
+  }, [destinations, fitKey, focusId, map])
 
   return null
 }
 
-function syncPinSelection(map: L.Map, selectedId: string | null) {
+function syncPinSelection(map: L.Map, focusId: string | null) {
   map.getContainer().querySelectorAll<HTMLElement>('.wtr-leaflet-pin').forEach((el) => {
     const id = el.getAttribute('data-city-id')
-    el.classList.toggle('wtr-leaflet-pin--selected', id != null && id === selectedId)
+    const isFocused = id != null && id === focusId
+    el.classList.toggle('wtr-leaflet-pin--selected', isFocused)
+    el.classList.toggle('wtr-leaflet-pin--detail', isFocused)
   })
 }
 
 /** Toggle selected pin styling without recreating marker icons (avoids re-running enter animation). */
 function MapPinSelectionStyles({
-  selectedId,
+  focusId,
   pinCount,
 }: {
-  selectedId: string | null
+  focusId: string | null
   pinCount: number
 }) {
   const map = useMap()
 
   useEffect(() => {
-    const id = window.setTimeout(() => syncPinSelection(map, selectedId), 0)
+    const id = window.setTimeout(() => syncPinSelection(map, focusId), 0)
     return () => window.clearTimeout(id)
-  }, [map, selectedId, pinCount])
+  }, [focusId, map, pinCount])
 
   return null
 }
@@ -163,12 +194,19 @@ function MapPinEnterAnimation({ fitKey, pinCount }: { fitKey: string; pinCount: 
   return null
 }
 
-export function RetirementLeafletMap({ heightPx, destinations, selectedId, fitKey, onSelect }: Props) {
+export function RetirementLeafletMap({
+  destinations,
+  selectedId,
+  detailPanelOpen,
+  fitKey,
+  onSelect,
+}: Props) {
+  const focusId = detailFocusId(selectedId, detailPanelOpen)
+
   return (
-    <div className="wtr-leaflet-map" style={{ height: heightPx }}>
+    <div className="wtr-leaflet-map">
       <MapContainer
         className="wtr-leaflet-map__canvas"
-        style={{ height: heightPx, width: '100%' }}
         center={[20, 0]}
         zoom={2}
         minZoom={2}
@@ -176,15 +214,16 @@ export function RetirementLeafletMap({ heightPx, destinations, selectedId, fitKe
         scrollWheelZoom
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
-        <MapResizeFix heightPx={heightPx} />
-        <MapBoundsFit destinations={destinations} fitKey={fitKey} selectedId={selectedId} />
-        <MapSelectionFocus destinations={destinations} selectedId={selectedId} />
-        <MapPinSelectionStyles selectedId={selectedId} pinCount={destinations.length} />
+        <MapResizeFix />
+        <MapBoundsFit destinations={destinations} fitKey={fitKey} focusId={focusId} />
+        <MapSelectionFocus destinations={destinations} focusId={focusId} />
+        <MapPinSelectionStyles focusId={focusId} pinCount={destinations.length} />
         <MapPinEnterAnimation fitKey={fitKey} pinCount={destinations.length} />
         {destinations.map((item) => (
           <Marker
             key={item.city.id}
             position={[item.city.lat, item.city.lng]}
+            zIndexOffset={focusId === item.city.id ? 1000 : 0}
             icon={pinIcon(item.tier, item.pinSizePx, item.city.id, item.affordabilityScore)}
             eventHandlers={{
               click: () => onSelect(item.city.id),

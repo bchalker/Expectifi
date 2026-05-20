@@ -1,0 +1,175 @@
+.wtr-col-category-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0.85rem 0.9rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-card);
+}
+
+.wtr-col-category-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  margin-bottom: 0.85rem;
+  text-align: center;
+}
+
+.wtr-col-category-card__head-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.wtr-col-category-card__head-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.wtr-col-category-card__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.wtr-col-category-card__title {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.wtr-col-category-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wtr-col-category-card__body--no-footer {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.wtr-col-category-card__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+.wtr-col-category-card__hero-value {
+  margin: 0;
+  font-family: var(--heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.wtr-col-category-card__hero-label {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  color: var(--text-muted);
+}
+
+.wtr-col-category-card__rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.wtr-col-category-card__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.wtr-col-category-card__row dt {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.wtr-col-category-card__row dd {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--text);
+  text-align: right;
+  line-height: 1.3;
+}
+
+.wtr-col-category-card__food-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface2);
+}
+
+.wtr-col-category-card__food-foot-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+.wtr-col-category-card__food-foot-label {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.wtr-col-category-card__food-foot-note {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  color: var(--text-muted);
+}
+
+.wtr-col-category-card__food-foot-value {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.wtr-col-category-card__subtitle {
+  margin: 0 0 0.15rem;
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+

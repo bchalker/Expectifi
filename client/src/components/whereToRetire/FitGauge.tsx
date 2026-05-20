@@ -5,25 +5,34 @@ import './FitGauge.scss'
 type Props = {
   label: string
   score: number
-  explanation: ReactNode
+  explanation?: ReactNode
   tier: MatchTier
   className?: string
 }
 
 export function FitGauge({ label, score, explanation, tier, className }: Props) {
+  const fillPct = Math.max(0, Math.min(100, score))
+
   return (
     <div className={['wtr-fit-gauge', className].filter(Boolean).join(' ')}>
-      <div className="wtr-fit-gauge__head">
+      <div className="wtr-fit-gauge__row">
         <span className="wtr-fit-gauge__label">{label}</span>
+        <div
+          className="wtr-fit-gauge__track"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={fillPct}
+          aria-label={`${label}: ${fillPct} out of 100`}
+        >
+          <div
+            className={`wtr-fit-gauge__fill wtr-fit-gauge__fill--${tier}`}
+            style={{ width: `${fillPct}%` }}
+          />
+        </div>
         <span className={`wtr-fit-gauge__score wtr-fit-gauge__score--${tier}`}>{score}</span>
       </div>
-      <div className="wtr-fit-gauge__track" aria-hidden>
-        <div
-          className={`wtr-fit-gauge__fill wtr-fit-gauge__fill--${tier}`}
-          style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
-        />
-      </div>
-      <div className="wtr-fit-gauge__explanation">{explanation}</div>
+      {explanation ? <div className="wtr-fit-gauge__explanation">{explanation}</div> : null}
     </div>
   )
 }

@@ -1,0 +1,99 @@
+.wtr-qol-tab {
+  padding-bottom: 0.25rem;
+}
+
+.wtr-qol-tab__empty {
+  margin: 1.5rem 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.wtr-dest-panel__cards--qol-overall {
+  width: 100%;
+}
+
+.wtr-dest-panel__cards--qol-overall > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.wtr-qol-overall-card {
+  width: 100%;
+  padding: 1rem 1rem 1.1rem;
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: color-mix(in srgb, var(--color-teal-bg) 40%, var(--color-card));
+  box-sizing: border-box;
+}
+
+.wtr-qol-overall-card .wtr-col-category-card__head {
+  margin-bottom: 1rem;
+}
+
+.wtr-qol-overall-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.wtr-qol-overall-card__score {
+  margin: 0;
+  text-align: center;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-qol-overall-card__score-value {
+  font-family: var(--heading);
+  font-size: var(--text-hero);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wtr-qol-overall-card__score-denom {
+  font-family: var(--body);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.wtr-qol-overall-card__source {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.wtr-qol-card__bar-track {
+  width: 100%;
+  max-width: 14rem;
+  height: 0.45rem;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 55%, transparent);
+  overflow: hidden;
+}
+
+.wtr-qol-card__bar-track--prominent {
+  max-width: none;
+  width: 100%;
+  height: 0.55rem;
+  margin: 0;
+  background: color-mix(in srgb, var(--border) 45%, var(--color-card));
+}
+
+.wtr-qol-card__bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, var(--wtr-match-strong));
+}
+
+.wtr-qol-overall-card .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}

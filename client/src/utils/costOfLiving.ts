@@ -200,13 +200,118 @@ export function getAllMapCities(): MapCity[] {
   return cachedMapCities
 }
 
+export const BUDGET_CATEGORY_KEYS = ['rent', 'food', 'transport', 'utilitiesInternet'] as const
+
+export type BudgetCategoryKey = (typeof BUDGET_CATEGORY_KEYS)[number]
+
+export type MonthlyBudgetComponents = {
+  rent: number
+  food: number
+  transport: number
+  utilitiesInternet: number
+}
+
+export function getMonthlyBudgetComponents(city: CityData): MonthlyBudgetComponents {
+  return {
+    rent: city.rent_1br_outside_centre,
+    food: city.meal_inexpensive_restaurant * 45,
+    transport: city.transport_monthly_pass,
+    utilitiesInternet: city.utilities_monthly_85m2 + city.internet_60mbps_monthly,
+  }
+}
+
 export function calculateMonthlyBudget(city: CityData): number {
-  const food = city.meal_inexpensive_restaurant * 45
-  const transport = city.transport_monthly_pass
-  const utilities = city.utilities_monthly_85m2
-  const internet = city.internet_60mbps_monthly
-  const rent = city.rent_1br_outside_centre
-  return Math.round(food + transport + utilities + internet + rent)
+  const components = getMonthlyBudgetComponents(city)
+  return Math.round(
+    components.rent + components.food + components.transport + components.utilitiesInternet,
+  )
+}
+
+export type BudgetBarPercents = {
+  rent: number
+  food: number
+  transport: number
+  utilitiesInternet: number
+  /** Rounding gap when four category % sum to less than 100 (typically 0–3%). */
+  remaining: number
+}
+
+export type BudgetBreakdownDisplay = {
+  total: number
+  components: MonthlyBudgetComponents
+  barPercents: BudgetBarPercents
+}
+
+/** Bar + legend: each category % = round(value / total × 100); remaining absorbs under-100 rounding only. */
+export function buildBudgetBarPercents(
+  components: MonthlyBudgetComponents,
+  total: number,
+): BudgetBarPercents {
+  if (total <= 0) {
+    return { rent: 0, food: 0, transport: 0, utilitiesInternet: 0, remaining: 0 }
+  }
+
+  const entries: { key: BudgetCategoryKey; amount: number; pct: number }[] = BUDGET_CATEGORY_KEYS.map(
+    (key) => ({
+      key,
+      amount: components[key],
+      pct: Math.round((components[key] / total) * 100),
+    }),
+  )
+
+  let sumFour = entries.reduce((sum, entry) => sum + entry.pct, 0)
+  let remaining = Math.max(0, 100 - sumFour)
+
+  if (sumFour > 100) {
+    const excess = sumFour - 100
+    const largest = entries.reduce((best, entry) => (entry.amount > best.amount ? entry : best))
+    largest.pct -= excess
+    sumFour -= excess
+    remaining = 0
+  }
+
+  const barPercents: BudgetBarPercents = {
+    rent: entries.find((e) => e.key === 'rent')!.pct,
+    food: entries.find((e) => e.key === 'food')!.pct,
+    transport: entries.find((e) => e.key === 'transport')!.pct,
+    utilitiesInternet: entries.find((e) => e.key === 'utilitiesInternet')!.pct,
+    remaining,
+  }
+
+  if (import.meta.env.DEV) {
+    console.log('[WTR budget bar]', {
+      total,
+      rent: components.rent,
+      food: components.food,
+      transport: components.transport,
+      utilitiesInternet: components.utilitiesInternet,
+      rentPct: barPercents.rent,
+      foodPct: barPercents.food,
+      transportPct: barPercents.transport,
+      utilitiesPct: barPercents.utilitiesInternet,
+      remainingPct: barPercents.remaining,
+      sumOfFour: barPercents.rent + barPercents.food + barPercents.transport + barPercents.utilitiesInternet,
+      sumWithRemaining:
+        barPercents.rent +
+        barPercents.food +
+        barPercents.transport +
+        barPercents.utilitiesInternet +
+        barPercents.remaining,
+    })
+  }
+
+  return barPercents
+}
+
+export function buildBudgetBreakdownDisplay(city: CityData): BudgetBreakdownDisplay {
+  const components = getMonthlyBudgetComponents(city)
+  const total = calculateMonthlyBudget(city)
+
+  return {
+    total,
+    components,
+    barPercents: buildBudgetBarPercents(components, total),
+  }
 }
 
 export function calculateAffordabilityScore(city: CityData, monthlyIncome: number): number {

@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, KeyboardEvent } from 'react'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { countryToFlagEmoji, hasTravelAdvisory } from '../../utils/costOfLiving'
@@ -32,9 +32,17 @@ export function RetirementDestinationCard({
   const { city, affordabilityScore, tier } = scored
   const showAdvisory = hasTravelAdvisory(city.country)
 
+  const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onSelect()
+    }
+  }
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={[
         'wtr-dest-card',
         active && 'wtr-dest-card--active',
@@ -49,6 +57,7 @@ export function RetirementDestinationCard({
           : undefined
       }
       onClick={onSelect}
+      onKeyDown={handleCardKeyDown}
       aria-pressed={active}
     >
       {showCompareToggle && onToggleCompare ? (
@@ -85,6 +94,6 @@ export function RetirementDestinationCard({
           />
         </span>
       </div>
-    </button>
+    </div>
   )
 }

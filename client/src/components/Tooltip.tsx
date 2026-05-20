@@ -9,12 +9,20 @@ type Props = {
   content: ReactNode
   placement?: Placement
   contentClassName?: string
+  /** Point at trigger with HeroUI overlay arrow. */
+  showArrow?: boolean
 }
 
 /**
  * Shared hover/focus tooltip (HeroUI + react-aria). Use for icon-only hints such as mode descriptions.
  */
-export function Tooltip({ children, content, placement = 'top', contentClassName }: Props) {
+export function Tooltip({
+  children,
+  content,
+  placement = 'top',
+  contentClassName,
+  showArrow = false,
+}: Props) {
   const contentClass = ['max-w-[260px] text-xs leading-snug', contentClassName]
     .filter(Boolean)
     .join(' ')
@@ -26,8 +34,9 @@ export function Tooltip({ children, content, placement = 'top', contentClassName
           {children}
         </span>
       </HeroTooltip.Trigger>
-      <HeroTooltip.Content placement={placement} className={contentClass}>
+      <HeroTooltip.Content placement={placement} showArrow={showArrow} className={contentClass}>
         {content}
+        {showArrow ? <HeroTooltip.Arrow /> : null}
       </HeroTooltip.Content>
     </HeroTooltip.Root>
   )

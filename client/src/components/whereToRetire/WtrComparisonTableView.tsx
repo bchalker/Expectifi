@@ -5,8 +5,11 @@ import {
   COMPARISON_TABLE_ROWS,
   getComparisonCellDisplay,
   getComparisonHighlightClass,
+  isComparisonEnglishBadgeRow,
   type ComparisonColumnData,
 } from '../../lib/whereToRetire/comparisonTableModel'
+import { EnglishProficiencyBadge } from './DestinationPeopleCultureTab'
+import './DestinationPeopleCultureTab.scss'
 import { matchTier, scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { countryToFlagEmoji, getAllMapCities, type MapCity } from '../../utils/costOfLiving'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
@@ -21,6 +24,31 @@ type Props = {
   onClearAll: () => void
   onRemoveCompare: (cityId: string) => void
   toolbarEnd?: ReactNode
+}
+
+function ComparisonCellValue({
+  rowId,
+  col,
+  monthlyIncome,
+}: {
+  rowId: string
+  col: ComparisonColumnData
+  monthlyIncome: number
+}) {
+  if (isComparisonEnglishBadgeRow(rowId)) {
+    const level = col.demographics?.demographics.english_proficiency
+    if (!level) return <span className="wtr-compare-table__cell-value">—</span>
+    return (
+      <span className="wtr-compare-table__cell-value wtr-compare-table__cell-value--badge">
+        <EnglishProficiencyBadge level={level} />
+      </span>
+    )
+  }
+  return (
+    <span className="wtr-compare-table__cell-value">
+      {getComparisonCellDisplay(rowId, col, monthlyIncome)}
+    </span>
+  )
 }
 
 type CityHeaderProps = {
@@ -393,9 +421,11 @@ export function WtrComparisonTableView({
                         loading && (row.id === 'climateType' || row.id === 'climateTemps') ? (
                           <span className="wtr-compare-table__loading">…</span>
                         ) : (
-                          <span className="wtr-compare-table__cell-value">
-                            {getComparisonCellDisplay(row.id, baselineCol, monthlyIncome)}
-                          </span>
+                          <ComparisonCellValue
+                            rowId={row.id}
+                            col={baselineCol}
+                            monthlyIncome={monthlyIncome}
+                          />
                         )
                       ) : (
                         <span className="wtr-compare-table__cell-value wtr-compare-table__cell-value--empty">
@@ -420,9 +450,11 @@ export function WtrComparisonTableView({
                           {loading && (row.id === 'climateType' || row.id === 'climateTemps') ? (
                             <span className="wtr-compare-table__loading">…</span>
                           ) : (
-                            <span className="wtr-compare-table__cell-value">
-                              {getComparisonCellDisplay(row.id, col, monthlyIncome)}
-                            </span>
+                            <ComparisonCellValue
+                              rowId={row.id}
+                              col={col}
+                              monthlyIncome={monthlyIncome}
+                            />
                           )}
                         </td>
                       )

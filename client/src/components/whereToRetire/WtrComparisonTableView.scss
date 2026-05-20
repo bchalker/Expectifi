@@ -467,6 +467,11 @@
   color: var(--text-muted);
 }
 
+.wtr-compare-table__cell-value--badge {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .wtr-compare-table__cell--lowest {
   background: color-mix(in srgb, #22c55e 12%, var(--surface)) !important;
 }

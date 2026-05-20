@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { IconSun } from '@tabler/icons-react'
 import type { CityClimate } from '../../lib/api/openMeteo'
 import { formatTemp } from '../../lib/api/openMeteo'
@@ -8,6 +8,8 @@ type Props = {
   climate: CityClimate | null
   loading: boolean
   failed: boolean
+  staggerClassName?: string
+  staggerStyle?: (index: number) => CSSProperties
 }
 
 function monthBarHeight(value: number, min: number, max: number): number {
@@ -15,12 +17,54 @@ function monthBarHeight(value: number, min: number, max: number): number {
   return 12 + ((value - min) / (max - min)) * 88
 }
 
-export function ClimateCard({ climate, loading, failed }: Props) {
+function staggerSectionProps(
+  index: number,
+  baseClass: string | undefined,
+  staggerClassName: string | undefined,
+  staggerStyle: ((index: number) => CSSProperties) | undefined,
+): { className?: string; style?: CSSProperties } {
+  if (!staggerClassName || !staggerStyle) {
+    return baseClass ? { className: baseClass } : {}
+  }
+  return {
+    className: baseClass ? `${baseClass} ${staggerClassName}` : staggerClassName,
+    style: staggerStyle(index),
+  }
+}
+
+function StaggerSection({
+  index,
+  baseClass,
+  staggerClassName,
+  staggerStyle,
+  children,
+}: {
+  index: number
+  baseClass?: string
+  staggerClassName?: string
+  staggerStyle?: (index: number) => CSSProperties
+  children: ReactNode
+}) {
+  const props = staggerSectionProps(index, baseClass, staggerClassName, staggerStyle)
+  return <div {...props}>{children}</div>
+}
+
+export function ClimateCard({
+  climate,
+  loading,
+  failed,
+  staggerClassName,
+  staggerStyle,
+}: Props) {
   const [tempUnit, setTempUnit] = useState<'c' | 'f'>('f')
 
   if (failed) {
     return (
-      <p className="wtr-climate-card__unavailable" role="status">
+      <p
+        className="wtr-climate-card__unavailable"
+        role="status"
+        {...staggerSectionProps(0, 'wtr-climate-card__unavailable', staggerClassName, staggerStyle)}
+      >
         Climate data unavailable
       </p>
     )
@@ -28,18 +72,40 @@ export function ClimateCard({ climate, loading, failed }: Props) {
 
   if (loading) {
     return (
-      <article className="wtr-climate-card wtr-climate-card--loading" aria-busy="true" aria-label="Loading climate data">
-        <div className="wtr-climate-card__skeleton-head" />
-        <div className="wtr-climate-card__skeleton-bars">
-          {Array.from({ length: 12 }, (_, i) => (
-            <span key={i} className="wtr-climate-card__skeleton-bar" />
-          ))}
-        </div>
-        <div className="wtr-climate-card__skeleton-rows">
-          <span />
-          <span />
-          <span />
-        </div>
+      <article
+        className="wtr-climate-card wtr-climate-card--loading"
+        aria-busy="true"
+        aria-label="Loading climate data"
+      >
+        <StaggerSection
+          index={0}
+          staggerClassName={staggerClassName}
+          staggerStyle={staggerStyle}
+        >
+          <div className="wtr-climate-card__skeleton-head" />
+        </StaggerSection>
+        <StaggerSection
+          index={1}
+          staggerClassName={staggerClassName}
+          staggerStyle={staggerStyle}
+        >
+          <div className="wtr-climate-card__skeleton-bars">
+            {Array.from({ length: 12 }, (_, i) => (
+              <span key={i} className="wtr-climate-card__skeleton-bar" />
+            ))}
+          </div>
+        </StaggerSection>
+        <StaggerSection
+          index={2}
+          staggerClassName={staggerClassName}
+          staggerStyle={staggerStyle}
+        >
+          <div className="wtr-climate-card__skeleton-rows">
+            <span />
+            <span />
+            <span />
+          </div>
+        </StaggerSection>
       </article>
     )
   }
@@ -51,7 +117,10 @@ export function ClimateCard({ climate, loading, failed }: Props) {
 
   return (
     <article className="wtr-climate-card" aria-label="Typical climate">
-      <header className="wtr-climate-card__head">
+      <header
+        className="wtr-climate-card__head"
+        {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
+      >
         <span className="wtr-climate-card__icon" aria-hidden>
           <IconSun size={24} stroke={1.5} />
         </span>
@@ -79,7 +148,11 @@ export function ClimateCard({ climate, loading, failed }: Props) {
         </div>
       </header>
 
-      <div className="wtr-climate-card__chart" aria-hidden>
+      <div
+        className="wtr-climate-card__chart"
+        aria-hidden
+        {...staggerSectionProps(1, undefined, staggerClassName, staggerStyle)}
+      >
         {climate.monthly.map((month) => {
           const lowPct = monthBarHeight(month.avgLowC, tempMin, tempMax)
           const highPct = monthBarHeight(month.avgHighC, tempMin, tempMax)
@@ -97,7 +170,10 @@ export function ClimateCard({ climate, loading, failed }: Props) {
         })}
       </div>
 
-      <dl className="wtr-climate-card__stats">
+      <dl
+        className="wtr-climate-card__stats"
+        {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
+      >
         <div className="wtr-climate-card__stat">
           <dt>Annual average</dt>
           <dd>{formatTemp(climate.annualAvgTempC, tempUnit)}</dd>
@@ -112,7 +188,10 @@ export function ClimateCard({ climate, loading, failed }: Props) {
         </div>
       </dl>
 
-      <p className="wtr-climate-card__range-note">
+      <p
+        className="wtr-climate-card__range-note"
+        {...staggerSectionProps(3, undefined, staggerClassName, staggerStyle)}
+      >
         Monthly avg. highs{' '}
         {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
         {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} (1990–2020)

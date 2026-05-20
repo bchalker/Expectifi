@@ -31,13 +31,14 @@
   position: relative;
   display: flex;
   flex: 1 1 auto;
-  min-height: 420px;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
   background: var(--surface);
 }
 
-.where-to-retire__view-panel .wtr-explorer__map-row {
-  min-height: 0;
+.where-to-retire__main-panel .wtr-explorer__map-row {
+  min-height: 28rem;
 }
 
 .wtr-explorer__list-panel {
@@ -70,6 +71,14 @@
   min-width: var(--wtr-list-panel-w);
   height: 100%;
   min-height: 0;
+}
+
+.wtr-explorer__list-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .wtr-explorer__list-head {
@@ -192,6 +201,8 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
 }

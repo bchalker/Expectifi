@@ -1,145 +1,152 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { IconArrowLeft } from '@tabler/icons-react'
-import { AnimatedCount } from '../components/ui/AnimatedCount'
-import { BudgetExplorationHero } from '../components/whereToRetire/BudgetExplorationHero'
-import { RetirementMapExplorer } from '../components/whereToRetire/RetirementMapExplorer'
-import { WtrMapFilterButton } from '../components/whereToRetire/WtrMapFilterButton'
-import { WtrComparisonTableView } from '../components/whereToRetire/WtrComparisonTableView'
-import type { ComputedSnapshot } from '../lib/computeResults'
-import { APP_DASHBOARD_PATH, navigateApp } from '../lib/appPaths'
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { IconArrowLeft } from "@tabler/icons-react";
+import { AnimatedCount } from "../components/ui/AnimatedCount";
+import { BudgetExplorationHero } from "../components/whereToRetire/BudgetExplorationHero";
+import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
+import { WtrMapFilterButton } from "../components/whereToRetire/WtrMapFilterButton";
+import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
+import type { ComputedSnapshot } from "../lib/computeResults";
+import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
 import {
   ALL_DESTINATION_REGIONS,
   countActiveMapFilters,
   countFitsIncomeWithFilters,
   DEFAULT_MAP_FILTERS,
   type MapFilters,
-} from '../lib/whereToRetire/cityMapScoring'
+} from "../lib/whereToRetire/cityMapScoring";
 import {
   defaultExplorationIncomeRange,
   getTotalMapCityCount,
   isDefaultExplorationIncomeRange,
+  resolveExplorationIncomeCeiling,
   type ExplorationIncomeRange,
-} from '../lib/whereToRetire/budgetExplorationStats'
-import type { MapCity } from '../utils/costOfLiving'
-import './WhereToRetire.scss'
+} from "../lib/whereToRetire/budgetExplorationStats";
+import type { MapCity } from "../utils/costOfLiving";
+import "./WhereToRetire.scss";
 
-const MAX_COMPARE_CITIES = 5
+const MAX_COMPARE_CITIES = 5;
 
-type WtrViewMode = 'map' | 'compare'
+type WtrViewMode = "map" | "compare";
 
 type Props = {
-  c: ComputedSnapshot
-}
+  c: ComputedSnapshot;
+};
 
 export function WhereToRetire({ c }: Props) {
-  const grossMonthlyIncome = c.grossMon
-  const [viewMode, setViewMode] = useState<WtrViewMode>('map')
-  const [compareIds, setCompareIds] = useState<string[]>([])
-  const [baselineCity, setBaselineCity] = useState<MapCity | null>(null)
-  const totalMapCities = useMemo(() => getTotalMapCityCount(), [])
-  const [explorationRange, setExplorationRange] = useState<ExplorationIncomeRange>(
-    () => defaultExplorationIncomeRange(grossMonthlyIncome),
-  )
-  const explorationIncomeMax = explorationRange.max
+  const grossMonthlyIncome = c.grossMon;
+  const [viewMode, setViewMode] = useState<WtrViewMode>("map");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
+  const totalMapCities = useMemo(() => getTotalMapCityCount(), []);
+  const [explorationRange, setExplorationRange] =
+    useState<ExplorationIncomeRange>(() =>
+      defaultExplorationIncomeRange(grossMonthlyIncome),
+    );
+  const explorationIncomeCeiling = useMemo(
+    () => resolveExplorationIncomeCeiling(grossMonthlyIncome, explorationRange),
+    [grossMonthlyIncome, explorationRange],
+  );
   const [mapFilters, setMapFilters] = useState<MapFilters>(() => ({
     ...DEFAULT_MAP_FILTERS,
     regions: [...ALL_DESTINATION_REGIONS],
-  }))
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  }));
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
-    setExplorationRange(defaultExplorationIncomeRange(grossMonthlyIncome))
-  }, [grossMonthlyIncome])
+    setExplorationRange(defaultExplorationIncomeRange(grossMonthlyIncome));
+  }, [grossMonthlyIncome]);
 
   const showingCityCount = useMemo(
-    () => countFitsIncomeWithFilters(explorationIncomeMax, mapFilters),
-    [explorationIncomeMax, mapFilters],
-  )
+    () => countFitsIncomeWithFilters(explorationIncomeCeiling, mapFilters),
+    [explorationIncomeCeiling, mapFilters],
+  );
 
   const activeFilterCount = useMemo(
     () =>
       countActiveMapFilters(mapFilters) +
-      (isDefaultExplorationIncomeRange(grossMonthlyIncome, explorationRange) ? 0 : 1),
+      (isDefaultExplorationIncomeRange(grossMonthlyIncome, explorationRange)
+        ? 0
+        : 1),
     [grossMonthlyIncome, explorationRange, mapFilters],
-  )
+  );
 
   const toggleFiltersPanel = useCallback(() => {
-    setFiltersOpen((open) => !open)
-    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
-    window.setTimeout(() => window.dispatchEvent(new Event('resize')), 340)
-  }, [])
+    setFiltersOpen((open) => !open);
+    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+  }, []);
 
   useEffect(() => {
-    if (!filtersOpen) return
+    if (!filtersOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setFiltersOpen(false)
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [filtersOpen])
+      if (event.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [filtersOpen]);
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
+    const mq = window.matchMedia("(min-width: 1024px)");
     const onMqChange = () => {
-      if (mq.matches) setFiltersOpen(false)
-    }
-    onMqChange()
-    mq.addEventListener('change', onMqChange)
-    return () => mq.removeEventListener('change', onMqChange)
-  }, [])
+      if (mq.matches) setFiltersOpen(false);
+    };
+    onMqChange();
+    mq.addEventListener("change", onMqChange);
+    return () => mq.removeEventListener("change", onMqChange);
+  }, []);
 
   const toggleCompare = useCallback((cityId: string) => {
     setCompareIds((prev) => {
-      if (prev.includes(cityId)) return prev.filter((id) => id !== cityId)
-      if (prev.length >= MAX_COMPARE_CITIES) return prev
-      return [...prev, cityId]
-    })
-  }, [])
+      if (prev.includes(cityId)) return prev.filter((id) => id !== cityId);
+      if (prev.length >= MAX_COMPARE_CITIES) return prev;
+      return [...prev, cityId];
+    });
+  }, []);
 
   const clearCompare = useCallback(() => {
-    setCompareIds([])
-    setBaselineCity(null)
-  }, [])
+    setCompareIds([]);
+    setBaselineCity(null);
+  }, []);
 
   const removeCompare = useCallback((cityId: string) => {
-    setCompareIds((prev) => prev.filter((id) => id !== cityId))
-  }, [])
+    setCompareIds((prev) => prev.filter((id) => id !== cityId));
+  }, []);
 
   return (
     <div className="where-to-retire">
       <div
         className={[
-          'where-to-retire__body',
-          'main',
-          'app-page',
-          'app-page--where-to-retire',
-          'where-to-retire__body--map',
+          "where-to-retire__body",
+          "main",
+          "app-page",
+          "app-page--where-to-retire",
+          "where-to-retire__body--map",
         ]
           .filter(Boolean)
-          .join(' ')}
+          .join(" ")}
       >
-        <button
-          type="button"
-          className="app-page-back"
-          onClick={() => navigateApp(APP_DASHBOARD_PATH)}
-        >
-          <IconArrowLeft size={16} stroke={1.5} aria-hidden />
-          Back to dashboard
-        </button>
-
         <BudgetExplorationHero
           section="intro"
           planMonthlyIncome={grossMonthlyIncome}
           explorationRange={explorationRange}
           onExplorationRangeChange={setExplorationRange}
         />
+        <button
+          type="button"
+          className="app-page-back where-to-retire__panel-back"
+          onClick={() => navigateApp(APP_DASHBOARD_PATH)}
+        >
+          <IconArrowLeft size={16} stroke={1.5} aria-hidden />
+          Back to dashboard
+        </button>
         <div
           className={[
-            'where-to-retire__main-panel',
-            viewMode === 'compare' && 'where-to-retire__main-panel--compare-open',
+            "where-to-retire__main-panel",
+            viewMode === "compare" &&
+              "where-to-retire__main-panel--compare-open",
           ]
             .filter(Boolean)
-            .join(' ')}
+            .join(" ")}
         >
           <BudgetExplorationHero
             section="panelSummary"
@@ -151,11 +158,11 @@ export function WhereToRetire({ c }: Props) {
           <div className="where-to-retire__income-toolbar">
             <div className="where-to-retire__showing-count" aria-live="polite">
               <p className="where-to-retire__showing-count-primary">
-                Showing{' '}
+                Showing{" "}
                 <AnimatedCount
                   value={showingCityCount}
                   className="where-to-retire__showing-count-num"
-                />{' '}
+                />{" "}
                 cities
               </p>
               <p className="where-to-retire__showing-count-sub">
@@ -183,17 +190,18 @@ export function WhereToRetire({ c }: Props) {
           <div className="where-to-retire__main-panel-map">
             <RetirementMapExplorer
               explorationRange={explorationRange}
+              monthlyIncomeCeiling={explorationIncomeCeiling}
               filters={mapFilters}
               onFiltersChange={setMapFilters}
               filtersOpen={filtersOpen}
               onFiltersOpenChange={setFiltersOpen}
               compareIds={compareIds}
-              compareOverlayOpen={viewMode === 'compare'}
+              compareOverlayOpen={viewMode === "compare"}
               onToggleCompare={toggleCompare}
               onClearCompare={clearCompare}
-              onViewComparison={() => setViewMode('compare')}
+              onViewComparison={() => setViewMode("compare")}
             />
-            {viewMode === 'compare' ? (
+            {viewMode === "compare" ? (
               <div
                 className="where-to-retire__compare-overlay"
                 role="dialog"
@@ -201,11 +209,11 @@ export function WhereToRetire({ c }: Props) {
                 aria-label="City comparison"
               >
                 <WtrComparisonTableView
-                  monthlyIncome={explorationIncomeMax}
+                  monthlyIncome={explorationIncomeCeiling}
                   compareIds={compareIds}
                   baselineCity={baselineCity}
                   onBaselineCityChange={setBaselineCity}
-                  onBackToMap={() => setViewMode('map')}
+                  onBackToMap={() => setViewMode("map")}
                   onClearAll={clearCompare}
                   onRemoveCompare={removeCompare}
                 />
@@ -222,7 +230,7 @@ export function WhereToRetire({ c }: Props) {
         <p className="where-to-retire__disclaimer" role="note">
           All figures are educational estimates only — not tax, legal,
           financial, or immigration advice. Consult qualified professionals
-          before relocating. Sources:{' '}
+          before relocating. Sources:{" "}
           <a
             href="https://www.irs.gov/individuals/international-taxpayers"
             target="_blank"
@@ -230,7 +238,7 @@ export function WhereToRetire({ c }: Props) {
           >
             IRS
           </a>
-          {' · '}
+          {" · "}
           <a
             href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
             target="_blank"
@@ -241,5 +249,5 @@ export function WhereToRetire({ c }: Props) {
         </p>
       </footer>
     </div>
-  )
+  );
 }

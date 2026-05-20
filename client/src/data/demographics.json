@@ -1,0 +1,877 @@
+{
+  "metadata": {
+    "last_updated": "2026-05",
+    "religion_source": "Pew Research Center Global Religious Composition 2020",
+    "demographics_source": "World Bank, UN Population Division 2024",
+    "disclaimer": "Religion percentages are estimates. Demographics are approximate. Source: Pew Research Center 2020, World Bank 2024."
+  },
+  "countries": {
+    "Portugal": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 84, "Unaffiliated": 13, "Muslim": 1, "Other": 2},
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. Protestant and international English-language services in Lisbon and Porto."
+      },
+      "demographics": {
+        "population": "10.2M",
+        "median_age": 46,
+        "urban_pct": 67,
+        "english_proficiency": "High",
+        "expat_population": "Large — estimated 80,000+ Americans and growing",
+        "official_language": "Portuguese",
+        "common_languages": "Portuguese; English widely spoken in cities and tourist areas"
+      }
+    },
+    "Spain": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 70, "Unaffiliated": 26, "Muslim": 3, "Other": 1},
+        "christian_note": "Predominantly Roman Catholic, increasingly secular",
+        "expat_worship": "Catholic churches everywhere. International English churches in major cities and expat areas."
+      },
+      "demographics": {
+        "population": "47.4M",
+        "median_age": 44,
+        "urban_pct": 81,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large — over 300,000 Americans and major British expat community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in tourist areas and cities; Catalan in Barcelona"
+      }
+    },
+    "Italy": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 80, "Unaffiliated": 16, "Muslim": 3, "Other": 1},
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. English-language Mass available in major cities. Protestant services in larger cities."
+      },
+      "demographics": {
+        "population": "60.4M",
+        "median_age": 46,
+        "urban_pct": 71,
+        "english_proficiency": "Moderate",
+        "expat_population": "Large — major American expat presence in Florence, Rome, Milan",
+        "official_language": "Italian",
+        "common_languages": "Italian; English in tourist areas; limited outside cities"
+      }
+    },
+    "Greece": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 90, "Muslim": 5, "Unaffiliated": 4, "Other": 1},
+        "christian_note": "Predominantly Greek Orthodox",
+        "expat_worship": "Greek Orthodox churches everywhere. Catholic and Protestant churches in Athens and major tourist islands."
+      },
+      "demographics": {
+        "population": "10.7M",
+        "median_age": 46,
+        "urban_pct": 80,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Growing — significant expat scene in Athens, Crete, and islands",
+        "official_language": "Greek",
+        "common_languages": "Greek; English widely spoken in tourist areas and among educated population"
+      }
+    },
+    "France": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 61, "Unaffiliated": 29, "Muslim": 8, "Other": 2},
+        "christian_note": "Predominantly Roman Catholic, highly secular society",
+        "expat_worship": "Catholic churches everywhere. American Church in Paris. Protestant and other services in major cities."
+      },
+      "demographics": {
+        "population": "67.8M",
+        "median_age": 42,
+        "urban_pct": 81,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large — major American expat community especially in Paris and south",
+        "official_language": "French",
+        "common_languages": "French; English in Paris and tourist areas; limited in rural areas"
+      }
+    },
+    "Croatia": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 88, "Unaffiliated": 9, "Muslim": 2, "Other": 1},
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. Limited non-Catholic options outside Zagreb."
+      },
+      "demographics": {
+        "population": "3.9M",
+        "median_age": 44,
+        "urban_pct": 58,
+        "english_proficiency": "High",
+        "expat_population": "Growing — Dubrovnik and coastal areas popular with expats",
+        "official_language": "Croatian",
+        "common_languages": "Croatian; English very widely spoken especially in tourist areas"
+      }
+    },
+    "Hungary": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 62, "Unaffiliated": 35, "Other": 3},
+        "christian_note": "Mix of Catholic and Protestant (Reformed/Lutheran)",
+        "expat_worship": "Catholic and Protestant churches available. International English churches in Budapest."
+      },
+      "demographics": {
+        "population": "9.7M",
+        "median_age": 44,
+        "urban_pct": 72,
+        "english_proficiency": "Moderate",
+        "expat_population": "Moderate — Budapest has growing expat scene",
+        "official_language": "Hungarian",
+        "common_languages": "Hungarian; English in Budapest; limited outside capital"
+      }
+    },
+    "Czech Republic": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 66, "Christian": 30, "Other": 4},
+        "christian_note": "One of the most secular countries in Europe",
+        "expat_worship": "Catholic and Protestant churches available. International English services in Prague."
+      },
+      "demographics": {
+        "population": "10.9M",
+        "median_age": 43,
+        "urban_pct": 74,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Large — Prague has very large expat community",
+        "official_language": "Czech",
+        "common_languages": "Czech; English widely spoken in Prague; limited outside"
+      }
+    },
+    "Poland": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 91, "Unaffiliated": 8, "Other": 1},
+        "christian_note": "Predominantly Roman Catholic, one of Europe's most religious countries",
+        "expat_worship": "Catholic churches everywhere. International English services in Warsaw and Krakow."
+      },
+      "demographics": {
+        "population": "38.0M",
+        "median_age": 42,
+        "urban_pct": 60,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Growing — Warsaw and Krakow popular with expats",
+        "official_language": "Polish",
+        "common_languages": "Polish; English increasingly common especially among younger people"
+      }
+    },
+    "Romania": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 93, "Unaffiliated": 5, "Other": 2},
+        "christian_note": "Predominantly Romanian Orthodox",
+        "expat_worship": "Orthodox churches everywhere. Catholic and Protestant services available. Limited English services."
+      },
+      "demographics": {
+        "population": "19.2M",
+        "median_age": 43,
+        "urban_pct": 55,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Small but growing — Bucharest has emerging expat scene",
+        "official_language": "Romanian",
+        "common_languages": "Romanian; English increasingly spoken in cities especially by younger people"
+      }
+    },
+    "Bulgaria": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 72, "Muslim": 14, "Unaffiliated": 13, "Other": 1},
+        "christian_note": "Predominantly Bulgarian Orthodox",
+        "expat_worship": "Orthodox churches everywhere. Limited English-language services."
+      },
+      "demographics": {
+        "population": "6.5M",
+        "median_age": 44,
+        "urban_pct": 76,
+        "english_proficiency": "Moderate",
+        "expat_population": "Small — Black Sea coast has British expat community",
+        "official_language": "Bulgarian",
+        "common_languages": "Bulgarian; English in Sofia and tourist areas"
+      }
+    },
+    "Serbia": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 93, "Muslim": 4, "Unaffiliated": 2, "Other": 1},
+        "christian_note": "Predominantly Serbian Orthodox",
+        "expat_worship": "Orthodox churches everywhere. Growing international community in Belgrade with some English services."
+      },
+      "demographics": {
+        "population": "6.8M",
+        "median_age": 43,
+        "urban_pct": 57,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Growing — Belgrade has rapidly growing digital nomad and expat scene",
+        "official_language": "Serbian",
+        "common_languages": "Serbian; English widely spoken in Belgrade especially among younger population"
+      }
+    },
+    "Georgia": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 83, "Muslim": 11, "Unaffiliated": 4, "Other": 2},
+        "christian_note": "Predominantly Georgian Orthodox, one of the world's oldest Christian nations",
+        "expat_worship": "Georgian Orthodox churches everywhere. Growing international community in Tbilisi with some English services."
+      },
+      "demographics": {
+        "population": "3.7M",
+        "median_age": 38,
+        "urban_pct": 60,
+        "english_proficiency": "Moderate",
+        "expat_population": "Large and rapidly growing — major digital nomad destination since 2022",
+        "official_language": "Georgian",
+        "common_languages": "Georgian; Russian (older generation); English growing rapidly especially in Tbilisi"
+      }
+    },
+    "Morocco": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 99, "Christian": 1, "Other": 0},
+        "christian_note": "Predominantly Sunni Muslim. Small Christian expat community.",
+        "expat_worship": "Mosques everywhere. Catholic and Protestant churches available in Casablanca, Rabat, Marrakech for expats."
+      },
+      "demographics": {
+        "population": "37.5M",
+        "median_age": 30,
+        "urban_pct": 65,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Moderate — Marrakech and Essaouira have established Western expat communities",
+        "official_language": "Arabic, Tamazight",
+        "common_languages": "Arabic; French widely spoken; English limited but growing"
+      }
+    },
+    "Tunisia": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 99, "Christian": 1, "Other": 0},
+        "christian_note": "Predominantly Sunni Muslim. Small Christian expat community.",
+        "expat_worship": "Mosques everywhere. Catholic churches available in Tunis and coastal cities for expats."
+      },
+      "demographics": {
+        "population": "12.1M",
+        "median_age": 32,
+        "urban_pct": 70,
+        "english_proficiency": "Low",
+        "expat_population": "Small — limited but some European expats in coastal areas",
+        "official_language": "Arabic",
+        "common_languages": "Arabic; French widely spoken; English limited"
+      }
+    },
+    "Egypt": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 91, "Christian": 9, "Other": 0},
+        "christian_note": "Predominantly Sunni Muslim. Significant Coptic Christian minority (~9%).",
+        "expat_worship": "Mosques everywhere. Coptic, Catholic, and Protestant churches available especially in Cairo."
+      },
+      "demographics": {
+        "population": "105M",
+        "median_age": 25,
+        "urban_pct": 43,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Moderate — Cairo and Red Sea coast have expat communities",
+        "official_language": "Arabic",
+        "common_languages": "Arabic; English in Cairo tourist and business areas; French also spoken"
+      }
+    },
+    "Turkey": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 98, "Christian": 1, "Unaffiliated": 1, "Other": 0},
+        "christian_note": "Predominantly Sunni Muslim. Small historic Christian minority.",
+        "expat_worship": "Mosques everywhere. Catholic, Protestant, and Orthodox churches in Istanbul and major cities."
+      },
+      "demographics": {
+        "population": "85.3M",
+        "median_age": 32,
+        "urban_pct": 77,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large — Istanbul and coastal areas (Bodrum, Antalya) have major expat communities",
+        "official_language": "Turkish",
+        "common_languages": "Turkish; English in tourist areas and Istanbul; limited elsewhere"
+      }
+    },
+    "Mexico": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 88, "Unaffiliated": 9, "Other": 3},
+        "christian_note": "Predominantly Roman Catholic with growing Protestant/Evangelical presence",
+        "expat_worship": "Catholic churches everywhere. English-language Protestant and non-denominational churches in major expat areas."
+      },
+      "demographics": {
+        "population": "128M",
+        "median_age": 29,
+        "urban_pct": 81,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Very large — over 1.5 million Americans live in Mexico",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English widely spoken in expat areas and tourist zones"
+      }
+    },
+    "Colombia": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 86, "Unaffiliated": 11, "Other": 3},
+        "christian_note": "Predominantly Roman Catholic with growing Evangelical presence",
+        "expat_worship": "Catholic churches everywhere. Growing English-language church options in Medellin and Bogota."
+      },
+      "demographics": {
+        "population": "51.9M",
+        "median_age": 31,
+        "urban_pct": 81,
+        "english_proficiency": "Low",
+        "expat_population": "Large and rapidly growing — Medellin is a top expat destination globally",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in expat neighborhoods of Medellin and Bogota"
+      }
+    },
+    "Panama": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 86, "Unaffiliated": 7, "Other": 7},
+        "christian_note": "Mix of Roman Catholic and growing Protestant/Evangelical",
+        "expat_worship": "Catholic churches everywhere. English-language churches in Panama City and expat areas. Large English-speaking community."
+      },
+      "demographics": {
+        "population": "4.4M",
+        "median_age": 29,
+        "urban_pct": 69,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large relative to population — major retirement destination with large American community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English widely spoken in Panama City and expat areas; dollar economy reduces language barrier"
+      }
+    },
+    "Costa Rica": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 78, "Unaffiliated": 16, "Other": 6},
+        "christian_note": "Mix of Roman Catholic and Protestant/Evangelical",
+        "expat_worship": "Catholic churches everywhere. Active English-language church community especially in expat areas."
+      },
+      "demographics": {
+        "population": "5.2M",
+        "median_age": 33,
+        "urban_pct": 82,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large relative to population — major US retirement destination",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in tourist and expat areas; good English-speaking infrastructure"
+      }
+    },
+    "Ecuador": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 87, "Unaffiliated": 10, "Other": 3},
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. English-language church options in Cuenca expat community."
+      },
+      "demographics": {
+        "population": "18.0M",
+        "median_age": 28,
+        "urban_pct": 64,
+        "english_proficiency": "Low",
+        "expat_population": "Large — Cuenca has one of Latin America's largest expat communities per capita",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in Cuenca expat areas; limited elsewhere"
+      }
+    },
+    "Dominican Republic": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 87, "Unaffiliated": 11, "Other": 2},
+        "christian_note": "Mix of Roman Catholic and Protestant",
+        "expat_worship": "Catholic churches everywhere. English-language services in expat and tourist areas."
+      },
+      "demographics": {
+        "population": "11.2M",
+        "median_age": 27,
+        "urban_pct": 84,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Moderate — Santo Domingo and Punta Cana have expat communities",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in tourist zones and Santo Domingo"
+      }
+    },
+    "Uruguay": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 47, "Christian": 47, "Other": 6},
+        "christian_note": "One of Latin America's most secular countries. Mix of Catholic and Protestant.",
+        "expat_worship": "Catholic and Protestant churches available. Small but established expat community with some English services."
+      },
+      "demographics": {
+        "population": "3.5M",
+        "median_age": 36,
+        "urban_pct": 95,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Small but growing — Montevideo increasingly popular with South American expats and some Americans",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; limited English outside tourist areas"
+      }
+    },
+    "Argentina": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 75, "Unaffiliated": 19, "Other": 6},
+        "christian_note": "Predominantly Roman Catholic with growing Evangelical presence",
+        "expat_worship": "Catholic churches everywhere. English-language churches in Buenos Aires expat areas."
+      },
+      "demographics": {
+        "population": "45.8M",
+        "median_age": 32,
+        "urban_pct": 92,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large — Buenos Aires has significant American and European expat community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in Buenos Aires expat areas; Italian cultural influence"
+      }
+    },
+    "Brazil": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 87, "Unaffiliated": 8, "Other": 5},
+        "christian_note": "Mix of Roman Catholic and rapidly growing Evangelical/Pentecostal",
+        "expat_worship": "Catholic and Evangelical churches everywhere. English-language services in major cities."
+      },
+      "demographics": {
+        "population": "215M",
+        "median_age": 33,
+        "urban_pct": 88,
+        "english_proficiency": "Low",
+        "expat_population": "Moderate — Sao Paulo and Florianopolis have expat communities",
+        "official_language": "Portuguese",
+        "common_languages": "Portuguese; English limited outside major business areas"
+      }
+    },
+    "Peru": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 87, "Unaffiliated": 9, "Other": 4},
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. English-language services in Lima expat areas."
+      },
+      "demographics": {
+        "population": "33.4M",
+        "median_age": 30,
+        "urban_pct": 78,
+        "english_proficiency": "Low",
+        "expat_population": "Small but growing — Lima and Cusco have expat communities",
+        "official_language": "Spanish, Quechua",
+        "common_languages": "Spanish; English in Lima tourist areas and Cusco"
+      }
+    },
+    "Chile": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 72, "Unaffiliated": 24, "Other": 4},
+        "christian_note": "Mix of Roman Catholic and growing Evangelical/Pentecostal",
+        "expat_worship": "Catholic churches everywhere. English-language services in Santiago expat areas."
+      },
+      "demographics": {
+        "population": "19.5M",
+        "median_age": 35,
+        "urban_pct": 88,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Small — Santiago has professional expat community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in business areas of Santiago"
+      }
+    },
+    "Thailand": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {"Buddhist": 93, "Muslim": 5, "Christian": 1, "Other": 1},
+        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority in south.",
+        "expat_worship": "Buddhist temples everywhere. Churches in Bangkok and Chiang Mai. International English-language services available."
+      },
+      "demographics": {
+        "population": "71.7M",
+        "median_age": 40,
+        "urban_pct": 53,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Very large — estimated 60,000+ Americans; massive international expat community",
+        "official_language": "Thai",
+        "common_languages": "Thai; English in tourist areas, Bangkok, and Chiang Mai expat zones"
+      }
+    },
+    "Malaysia": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 64, "Buddhist": 18, "Christian": 9, "Hindu": 6, "Other": 3},
+        "christian_note": "Officially Islamic but constitutionally protects freedom of religion. Diverse religious landscape.",
+        "expat_worship": "Mosques, Buddhist temples, churches, and Hindu temples all present. English-language churches widely available."
+      },
+      "demographics": {
+        "population": "33.6M",
+        "median_age": 30,
+        "urban_pct": 78,
+        "english_proficiency": "High",
+        "expat_population": "Very large — major expat destination; English is widely spoken",
+        "official_language": "Malay (Bahasa Malaysia)",
+        "common_languages": "Malay, English (widely spoken), Mandarin, Tamil — very multilingual country"
+      }
+    },
+    "Vietnam": {
+      "religion": {
+        "dominant": "Unaffiliated/Folk",
+        "breakdown": {"Unaffiliated/Folk": 73, "Buddhist": 15, "Christian": 8, "Other": 4},
+        "christian_note": "Mix of folk religion, Buddhism, and Christianity. Relatively secular in practice.",
+        "expat_worship": "Buddhist pagodas everywhere. Catholic churches common. English-language services in Hanoi and Ho Chi Minh City."
+      },
+      "demographics": {
+        "population": "97.5M",
+        "median_age": 31,
+        "urban_pct": 38,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large and growing — Da Nang and Hoi An popular with Western expats",
+        "official_language": "Vietnamese",
+        "common_languages": "Vietnamese; English growing especially in expat areas and among younger people"
+      }
+    },
+    "Philippines": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 90, "Muslim": 6, "Other": 4},
+        "christian_note": "Predominantly Roman Catholic (80%). Most Christian country in Asia.",
+        "expat_worship": "Catholic churches everywhere. Wide variety of Protestant denominations. Very familiar Christian culture for Americans."
+      },
+      "demographics": {
+        "population": "114M",
+        "median_age": 25,
+        "urban_pct": 48,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large — major American expat community; English is official language",
+        "official_language": "Filipino (Tagalog), English",
+        "common_languages": "English and Filipino both official; English universally spoken"
+      }
+    },
+    "Indonesia": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 87, "Christian": 10, "Hindu": 2, "Buddhist": 1},
+        "christian_note": "World's largest Muslim country. Significant Christian minority especially in Bali (Hindu) and eastern islands.",
+        "expat_worship": "Bali is predominantly Hindu — unique in Indonesia. Churches in Christian areas. Mosques everywhere."
+      },
+      "demographics": {
+        "population": "276M",
+        "median_age": 30,
+        "urban_pct": 58,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large in Bali — massive international expat and digital nomad community",
+        "official_language": "Indonesian (Bahasa Indonesia)",
+        "common_languages": "Indonesian; English in Bali tourist areas; limited elsewhere"
+      }
+    },
+    "Japan": {
+      "religion": {
+        "dominant": "Unaffiliated/Shinto-Buddhist",
+        "breakdown": {"Unaffiliated/Shinto-Buddhist": 72, "Buddhist": 25, "Christian": 2, "Other": 1},
+        "christian_note": "Most Japanese practice both Shinto and Buddhist traditions without strong religious identity. Very few Christians.",
+        "expat_worship": "Buddhist temples and Shinto shrines everywhere. Churches in major cities. International English services in Tokyo and Osaka."
+      },
+      "demographics": {
+        "population": "124.5M",
+        "median_age": 49,
+        "urban_pct": 92,
+        "english_proficiency": "Low",
+        "expat_population": "Moderate — Tokyo has large expat community; limited outside major cities",
+        "official_language": "Japanese",
+        "common_languages": "Japanese; English in tourist areas; limited elsewhere; signage often in English"
+      }
+    },
+    "South Korea": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 57, "Christian": 28, "Buddhist": 14, "Other": 1},
+        "christian_note": "Surprisingly large Christian population. Mix of Protestant and Catholic.",
+        "expat_worship": "Many churches including large English-language congregations in Seoul. Buddhist temples widely available."
+      },
+      "demographics": {
+        "population": "51.7M",
+        "median_age": 44,
+        "urban_pct": 82,
+        "english_proficiency": "Moderate",
+        "expat_population": "Moderate — Seoul has expat community; growing K-culture interest driving more arrivals",
+        "official_language": "Korean",
+        "common_languages": "Korean; English in Seoul business and expat areas; growing English proficiency"
+      }
+    },
+    "Taiwan": {
+      "religion": {
+        "dominant": "Buddhism/Taoism",
+        "breakdown": {"Buddhist/Taoist/Folk": 71, "Christian": 4, "Unaffiliated": 24, "Other": 1},
+        "christian_note": "Mix of Buddhist, Taoist, and folk religion. Small but active Christian community.",
+        "expat_worship": "Buddhist and Taoist temples everywhere. English-language churches available in Taipei."
+      },
+      "demographics": {
+        "population": "23.6M",
+        "median_age": 43,
+        "urban_pct": 79,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Growing — Taipei has active expat community especially tech workers",
+        "official_language": "Mandarin Chinese",
+        "common_languages": "Mandarin; English widely spoken among educated population; Taiwanese Hokkien also spoken"
+      }
+    },
+    "Singapore": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {"Buddhist": 31, "Christian": 19, "Unaffiliated": 18, "Muslim": 15, "Taoist": 8, "Hindu": 5, "Other": 4},
+        "christian_note": "Highly diverse religious landscape. Freedom of religion strongly protected.",
+        "expat_worship": "All major religions well represented. Wide variety of English-language churches and international religious services."
+      },
+      "demographics": {
+        "population": "5.9M",
+        "median_age": 42,
+        "urban_pct": 100,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large relative to population — about 30% of residents are foreign nationals",
+        "official_language": "English, Mandarin, Malay, Tamil",
+        "common_languages": "English is primary language of business and government; truly multilingual city-state"
+      }
+    },
+    "Hong Kong": {
+      "religion": {
+        "dominant": "Buddhism/Taoism",
+        "breakdown": {"Buddhist/Taoist": 56, "Christian": 12, "Unaffiliated": 28, "Other": 4},
+        "christian_note": "Significant Christian minority. Wide variety of denominations and international churches.",
+        "expat_worship": "Buddhist temples, Christian churches of all denominations, mosques all present. Large English-language Christian community."
+      },
+      "demographics": {
+        "population": "7.4M",
+        "median_age": 46,
+        "urban_pct": 100,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large — historically major expat hub; note changed political environment post-2020",
+        "official_language": "Chinese (Cantonese), English",
+        "common_languages": "Cantonese and English both official; Mandarin increasingly important"
+      }
+    },
+    "India": {
+      "religion": {
+        "dominant": "Hinduism",
+        "breakdown": {"Hindu": 80, "Muslim": 15, "Christian": 2, "Sikh": 2, "Other": 1},
+        "christian_note": "Predominantly Hindu. Significant Muslim minority. Christians concentrated in Kerala and Goa.",
+        "expat_worship": "Hindu temples everywhere. Churches in Goa and Kerala. Mosques widely available. All major religions present."
+      },
+      "demographics": {
+        "population": "1.43B",
+        "median_age": 28,
+        "urban_pct": 36,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Large Indian-American diaspora returning; limited Western expat community outside major cities",
+        "official_language": "Hindi, English (and 21 other official languages)",
+        "common_languages": "English widely spoken in business and educated circles; Hindi dominant; huge regional language diversity"
+      }
+    },
+    "Cambodia": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {"Buddhist": 97, "Muslim": 2, "Christian": 1},
+        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority (Cham people).",
+        "expat_worship": "Buddhist temples everywhere. Small number of churches in Phnom Penh and Siem Reap."
+      },
+      "demographics": {
+        "population": "17.0M",
+        "median_age": 26,
+        "urban_pct": 25,
+        "english_proficiency": "Moderate",
+        "expat_population": "Moderate — Phnom Penh and Siem Reap have established expat communities",
+        "official_language": "Khmer",
+        "common_languages": "Khmer; English widely spoken in expat and tourist areas"
+      }
+    },
+    "Panama": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 86, "Unaffiliated": 7, "Other": 7},
+        "christian_note": "Mix of Roman Catholic and Protestant/Evangelical",
+        "expat_worship": "Catholic churches everywhere. English-language churches in Panama City. Large English-speaking population."
+      },
+      "demographics": {
+        "population": "4.4M",
+        "median_age": 29,
+        "urban_pct": 69,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large relative to population — top retirement destination",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English widely spoken in Panama City and expat areas"
+      }
+    },
+    "United Arab Emirates": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 76, "Christian": 9, "Hindu": 6, "Buddhist": 2, "Other": 7},
+        "christian_note": "Officially Islamic but very diverse due to large expat population. All major religions practiced by expats.",
+        "expat_worship": "Mosques everywhere. Churches, temples, and gurdwaras for expat communities. Religious tolerance for expats."
+      },
+      "demographics": {
+        "population": "9.9M",
+        "median_age": 34,
+        "urban_pct": 87,
+        "english_proficiency": "Very High",
+        "expat_population": "Enormous — about 90% of UAE population are foreign nationals",
+        "official_language": "Arabic",
+        "common_languages": "Arabic official; English is the language of business and widely spoken; huge multilingual expat community"
+      }
+    },
+    "Malta": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 91, "Unaffiliated": 6, "Other": 3},
+        "christian_note": "Predominantly Roman Catholic. One of Europe's most religious countries.",
+        "expat_worship": "Catholic churches everywhere. English-language services widely available. Official English-speaking country."
+      },
+      "demographics": {
+        "population": "0.5M",
+        "median_age": 42,
+        "urban_pct": 95,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large relative to population — major expat hub especially British and EU",
+        "official_language": "Maltese, English",
+        "common_languages": "English and Maltese both official; English universally spoken"
+      }
+    },
+    "Cyprus": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 82, "Muslim": 13, "Unaffiliated": 4, "Other": 1},
+        "christian_note": "Predominantly Greek Orthodox. Turkish Cypriot Muslim minority in north.",
+        "expat_worship": "Orthodox churches everywhere. English-language services available due to large British community."
+      },
+      "demographics": {
+        "population": "1.3M",
+        "median_age": 38,
+        "urban_pct": 67,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large relative to population — major British expat destination",
+        "official_language": "Greek, Turkish",
+        "common_languages": "Greek; English very widely spoken due to British colonial history and large expat community"
+      }
+    },
+    "New Zealand": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 49, "Christian": 44, "Hindu": 3, "Muslim": 2, "Other": 2},
+        "christian_note": "Increasingly secular. Mix of Protestant and Catholic denominations.",
+        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available."
+      },
+      "demographics": {
+        "population": "5.1M",
+        "median_age": 38,
+        "urban_pct": 87,
+        "english_proficiency": "Native",
+        "expat_population": "Large relative to population — major destination for British, Australian, and American expats",
+        "official_language": "English, Maori, NZ Sign Language",
+        "common_languages": "English primary; Maori cultural presence; highly multicultural"
+      }
+    },
+    "Australia": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 44, "Christian": 44, "Muslim": 3, "Hindu": 3, "Buddhist": 3, "Other": 3},
+        "christian_note": "Highly secular and diverse. Mix of Catholic, Anglican, and other denominations.",
+        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available."
+      },
+      "demographics": {
+        "population": "26.5M",
+        "median_age": 38,
+        "urban_pct": 86,
+        "english_proficiency": "Native",
+        "expat_population": "Very large — major destination for British, American, and Asian expats",
+        "official_language": "English (de facto)",
+        "common_languages": "English primary; highly multicultural with many community languages"
+      }
+    },
+    "United States": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 64, "Unaffiliated": 28, "Jewish": 2, "Muslim": 1, "Other": 5},
+        "christian_note": "Mix of Protestant, Catholic, and other denominations. Declining but still majority Christian.",
+        "expat_worship": "All denominations and faiths available everywhere. No special consideration needed."
+      },
+      "demographics": {
+        "population": "335M",
+        "median_age": 38,
+        "urban_pct": 83,
+        "english_proficiency": "Native",
+        "expat_population": "You are home",
+        "official_language": "English (de facto)",
+        "common_languages": "English; Spanish widely spoken; highly multicultural"
+      }
+    },
+    "Canada": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 55, "Unaffiliated": 29, "Muslim": 4, "Hindu": 3, "Sikh": 2, "Other": 7},
+        "christian_note": "Mix of Catholic and Protestant. Increasingly secular and diverse.",
+        "expat_worship": "All denominations widely available. English-language worship universally available."
+      },
+      "demographics": {
+        "population": "38.8M",
+        "median_age": 41,
+        "urban_pct": 82,
+        "english_proficiency": "Native",
+        "expat_population": "Very large — major destination for American expats and immigrants",
+        "official_language": "English, French",
+        "common_languages": "English primary; French in Quebec; highly multicultural"
+      }
+    },
+    "United Kingdom": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {"Unaffiliated": 53, "Christian": 40, "Muslim": 5, "Hindu": 1, "Other": 1},
+        "christian_note": "Increasingly secular. Church of England, Catholic, and other denominations present.",
+        "expat_worship": "All denominations available. English-language worship universally available."
+      },
+      "demographics": {
+        "population": "67.7M",
+        "median_age": 40,
+        "urban_pct": 84,
+        "english_proficiency": "Native",
+        "expat_population": "Very large American expat community especially in London",
+        "official_language": "English",
+        "common_languages": "English; Welsh in Wales; Scottish Gaelic in Scotland; highly multicultural"
+      }
+    },
+    "Germany": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 55, "Unaffiliated": 37, "Muslim": 6, "Other": 2},
+        "christian_note": "Mix of Catholic (south) and Protestant/Lutheran (north). Increasingly secular.",
+        "expat_worship": "Catholic and Protestant churches everywhere. International English-language services in major cities."
+      },
+      "demographics": {
+        "population": "83.8M",
+        "median_age": 45,
+        "urban_pct": 77,
+        "english_proficiency": "High",
+        "expat_population": "Very large — major expat destination, especially Berlin",
+        "official_language": "German",
+        "common_languages": "German; English widely spoken especially among younger population and in cities"
+      }
+    },
+    "South Africa": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {"Christian": 86, "Unaffiliated": 8, "Muslim": 2, "Hindu": 1, "Other": 3},
+        "christian_note": "Predominantly Christian with diverse denominations.",
+        "expat_worship": "Christian churches of all denominations widely available. English-language services very common."
+      },
+      "demographics": {
+        "population": "60.0M",
+        "median_age": 28,
+        "urban_pct": 68,
+        "english_proficiency": "High",
+        "expat_population": "Moderate — Cape Town has significant expat community",
+        "official_language": "11 official languages including English, Zulu, Xhosa, Afrikaans",
+        "common_languages": "English widely spoken in business and urban areas; Afrikaans; Zulu and other Bantu languages"
+      }
+    }
+  }
+}
