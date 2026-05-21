@@ -10,7 +10,7 @@
 }
 
 .where-to-retire__main-panel .wtr-list-pagination {
-  padding: 0.55rem var(--wtr-panel-inline-pad, 1.25rem) 0.65rem;
+  // padding: 0.55rem var(--wtr-panel-inline-pad, 1.25rem) 0.65rem;
 }
 
 .wtr-list-pagination__range {
@@ -83,4 +83,51 @@
 .wtr-list-pagination__btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.wtr-list-pagination--compact {
+  gap: 0;
+  padding: 0;
+  border-top: none;
+}
+
+.wtr-list-pagination--dest-panel {
+  margin: 0;
+  // padding: 0.75rem 1rem;
+  border-top: none;
+  background: transparent;
+}
+
+.wtr-list-pagination__controls--with-note {
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.wtr-list-pagination__center-note {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0.35rem;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.wtr-list-pagination--dest-panel .wtr-list-pagination__btn {
+  border: none;
+  border-radius: 0;
+  background: var(--surface);
+}
+
+.wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev {
+  box-shadow: 6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+}
+
+.wtr-list-pagination--dest-panel .wtr-list-pagination__btn--next {
+  box-shadow: -6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+}
+
+.wtr-list-pagination--dest-panel .wtr-list-pagination__btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
 }

@@ -259,6 +259,7 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
       <div className="wtr-map-filters__row wtr-map-filters__row--switches">
         <FilterSwitchCard
           label="English speaking"
+          subtitle="Native or fluent"
           pressed={filters.englishSpeaking}
           onToggle={() => onChange({ ...filters, englishSpeaking: !filters.englishSpeaking })}
         />
@@ -294,6 +295,7 @@ export function WtrMapFiltersInline({ filters, onChange }: FilterChangeProps) {
       <RegionScopeGroup filters={filters} onChange={onChange} />
       <FilterSwitchCard
         label="English speaking"
+        subtitle="Native or fluent"
         pressed={filters.englishSpeaking}
         onToggle={() => onChange({ ...filters, englishSpeaking: !filters.englishSpeaking })}
       />

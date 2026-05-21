@@ -87,10 +87,7 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
 
   if (!data) {
     return (
-      <p
-        className="wtr-people-culture__empty"
-        {...staggerSectionProps(0, 'wtr-people-culture__empty', staggerClassName, staggerStyle)}
-      >
+      <p {...staggerSectionProps(0, 'wtr-people-culture__empty', staggerClassName, staggerStyle)}>
         {DEMOGRAPHICS_UNAVAILABLE_MESSAGE}
       </p>
     )

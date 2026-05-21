@@ -7,6 +7,8 @@ type Props = {
   totalCount: number
   onPageChange: (page: number) => void
   className?: string
+  /** Centered copy between prev/next (hides range and page labels). */
+  centerNote?: string
 }
 
 export function WtrCityListPagination({
@@ -15,6 +17,7 @@ export function WtrCityListPagination({
   totalCount,
   onPageChange,
   className = '',
+  centerNote,
 }: Props) {
   const pageCount = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1
   const safePage = Math.min(page, Math.max(0, pageCount - 1))
@@ -24,34 +27,55 @@ export function WtrCityListPagination({
   const prevDisabled = safePage <= 0
   const nextDisabled = safePage >= pageCount - 1 || totalCount === 0
 
+  const compact = Boolean(centerNote)
+
   return (
     <nav
-      className={['wtr-list-pagination', className].filter(Boolean).join(' ')}
+      className={[
+        'wtr-list-pagination',
+        compact && 'wtr-list-pagination--compact',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       aria-label="City list pages"
     >
-      <p className="wtr-list-pagination__range">
-        <span className="wtr-list-pagination__range-nums">
-          {rangeStart}–{rangeEnd}
-        </span>{' '}
-        of{' '}
-        <span className="wtr-list-pagination__range-total">{totalCount}</span>
-      </p>
-      <div className="wtr-list-pagination__controls">
+      {!compact ? (
+        <p className="wtr-list-pagination__range">
+          <span className="wtr-list-pagination__range-nums">
+            {rangeStart}–{rangeEnd}
+          </span>{' '}
+          of{' '}
+          <span className="wtr-list-pagination__range-total">{totalCount}</span>
+        </p>
+      ) : null}
+      <div
+        className={[
+          'wtr-list-pagination__controls',
+          compact && 'wtr-list-pagination__controls--with-note',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <button
           type="button"
-          className="wtr-list-pagination__btn"
+          className="wtr-list-pagination__btn wtr-list-pagination__btn--prev"
           disabled={prevDisabled}
           aria-label="Previous page"
           onClick={() => onPageChange(safePage - 1)}
         >
           <IconChevronLeft size={18} stroke={1.5} aria-hidden />
         </button>
-        <span className="wtr-list-pagination__page-label">
-          Page {safePage + 1} of {pageCount}
-        </span>
+        {compact ? (
+          <p className="wtr-list-pagination__center-note">{centerNote}</p>
+        ) : (
+          <span className="wtr-list-pagination__page-label">
+            Page {safePage + 1} of {pageCount}
+          </span>
+        )}
         <button
           type="button"
-          className="wtr-list-pagination__btn"
+          className="wtr-list-pagination__btn wtr-list-pagination__btn--next"
           disabled={nextDisabled}
           aria-label="Next page"
           onClick={() => onPageChange(safePage + 1)}

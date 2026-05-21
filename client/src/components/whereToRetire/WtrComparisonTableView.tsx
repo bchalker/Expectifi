@@ -5,10 +5,13 @@ import {
   COMPARISON_TABLE_ROWS,
   getComparisonCellDisplay,
   getComparisonHighlightClass,
+  isComparisonDirectFlightsBadgeRow,
   isComparisonEnglishBadgeRow,
   type ComparisonColumnData,
 } from '../../lib/whereToRetire/comparisonTableModel'
+import { DirectFlightsBadge } from './DestinationGettingThereTab'
 import { EnglishProficiencyBadge } from './DestinationPeopleCultureTab'
+import './DestinationGettingThereTab.scss'
 import './DestinationPeopleCultureTab.scss'
 import { matchTier, scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { countryToFlagEmoji, getAllMapCities, type MapCity } from '../../utils/costOfLiving'
@@ -41,6 +44,14 @@ function ComparisonCellValue({
     return (
       <span className="wtr-compare-table__cell-value wtr-compare-table__cell-value--badge">
         <EnglishProficiencyBadge level={level} />
+      </span>
+    )
+  }
+  if (isComparisonDirectFlightsBadgeRow(rowId)) {
+    if (!col.gettingThere) return <span className="wtr-compare-table__cell-value">—</span>
+    return (
+      <span className="wtr-compare-table__cell-value wtr-compare-table__cell-value--badge">
+        <DirectFlightsBadge direct={col.gettingThere.direct_from_us} />
       </span>
     )
   }

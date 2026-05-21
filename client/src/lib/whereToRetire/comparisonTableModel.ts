@@ -23,8 +23,16 @@ import {
   getQoLRowNumericValue,
   getQoLRowValue,
   getQualityOfLifeData,
+  getQoLBarColorClass,
+  getQoLOverallBarColorClass,
   type QualityOfLifeCountryData,
 } from '../../utils/qualityOfLife'
+import {
+  getGettingThereRowNumericValue,
+  getGettingThereRowValue,
+  getGettingThereData,
+  type GettingThereCountryData,
+} from '../../utils/gettingThere'
 import { getTaxVisaData, getTaxVisaRowValue, type TaxVisaCountryData } from '../../utils/taxVisa'
 import { getCountryTaxForCityCountry } from './countryTaxForCity'
 
@@ -51,6 +59,7 @@ export type ComparisonColumnData = {
   taxVisa: TaxVisaCountryData | null
   qualityOfLife: QualityOfLifeCountryData | null
   demographics: DemographicsCountryData | null
+  gettingThere: GettingThereCountryData | null
   practical: {
     english: number
     healthcare: number
@@ -144,6 +153,7 @@ export function buildComparisonColumnData(
     taxVisa: getTaxVisaData(city.country),
     qualityOfLife: getQualityOfLifeData(city.country),
     demographics: getDemographicsData(city.country),
+    gettingThere: getGettingThereData(city.country),
     practical: practicalScoresForCountry(city.country),
     climate,
     dollarStrength,
@@ -210,6 +220,12 @@ export const COMPARISON_TABLE_ROWS: ComparisonRowDef[] = [
   { id: 'sec-climate', kind: 'section', label: 'Climate' },
   { id: 'climateType', kind: 'data', label: 'Climate type label', highlight: 'none' },
   { id: 'climateTemps', kind: 'data', label: 'Average monthly temperatures Jan-Dec', highlight: 'none' },
+  { id: 'sec-getting-there', kind: 'section', label: 'Getting There' },
+  { id: 'travelDirect', kind: 'data', label: 'Direct flights from US', highlight: 'higher-green' },
+  { id: 'travelEastCoast', kind: 'data', label: 'Flight time East Coast (hours)', highlight: 'lower-green' },
+  { id: 'travelWestCoast', kind: 'data', label: 'Flight time West Coast (hours)', highlight: 'lower-green' },
+  { id: 'travelVisaFree', kind: 'data', label: 'Visa-free days', highlight: 'higher-green' },
+  { id: 'travelAirport', kind: 'data', label: 'Main airport code', highlight: 'none' },
   { id: 'sec-tax', kind: 'section', label: 'Tax & Visa' },
   {
     id: 'taxRate',
@@ -222,17 +238,18 @@ export const COMPARISON_TABLE_ROWS: ComparisonRowDef[] = [
   { id: 'visa', kind: 'data', label: 'Visa / residency requirement', highlight: 'none' },
   { id: 'healthcare', kind: 'data', label: 'Healthcare notes for US expats', highlight: 'none' },
   { id: 'sec-qol', kind: 'section', label: 'Quality of Life' },
-  { id: 'qolOverall', kind: 'data', label: 'Overall QoL score', highlight: 'higher-green' },
-  { id: 'qolSafety', kind: 'data', label: 'Safety index', highlight: 'higher-green' },
-  { id: 'qolHealthcare', kind: 'data', label: 'Healthcare index', highlight: 'higher-green' },
-  { id: 'qolClimate', kind: 'data', label: 'Climate index', highlight: 'higher-green' },
+  { id: 'qolOverall', kind: 'data', label: 'Overall QoL score', highlight: 'none' },
+  { id: 'qolSafety', kind: 'data', label: 'Safety index', highlight: 'none' },
+  { id: 'qolHealthcare', kind: 'data', label: 'Healthcare index', highlight: 'none' },
+  { id: 'qolClimate', kind: 'data', label: 'Climate index', highlight: 'none' },
   {
     id: 'qolPollution',
     kind: 'data',
     label: 'Air quality — lower is better',
-    highlight: 'lower-green',
+    highlight: 'none',
   },
-  { id: 'qolPurchasingPower', kind: 'data', label: 'Purchasing power index', highlight: 'higher-green' },
+  { id: 'qolTraffic', kind: 'data', label: 'Traffic & commute index', highlight: 'none' },
+  { id: 'qolPurchasingPower', kind: 'data', label: 'Purchasing power index', highlight: 'none' },
   { id: 'sec-people-culture', kind: 'section', label: 'People & Culture' },
   { id: 'demoDominantReligion', kind: 'data', label: 'Dominant religion', highlight: 'none' },
   { id: 'demoChristianPct', kind: 'data', label: 'Christian %', highlight: 'higher-green' },
@@ -346,6 +363,11 @@ export function getComparisonCellNumericValue(
     case 'demoUrbanPct':
     case 'demoEnglish':
       return getDemographicsRowNumericValue(col.demographics, rowId)
+    case 'travelEastCoast':
+    case 'travelWestCoast':
+    case 'travelVisaFree':
+    case 'travelDirect':
+      return getGettingThereRowNumericValue(col.gettingThere, rowId)
     default:
       return null
   }
@@ -353,6 +375,10 @@ export function getComparisonCellNumericValue(
 
 export function isComparisonEnglishBadgeRow(rowId: string): boolean {
   return rowId === 'demoEnglish'
+}
+
+export function isComparisonDirectFlightsBadgeRow(rowId: string): boolean {
+  return rowId === 'travelDirect'
 }
 
 export function getComparisonCellDisplay(
@@ -466,6 +492,12 @@ export function getComparisonCellDisplay(
     case 'demoUrbanPct':
     case 'demoExpatCommunity':
       return getDemographicsRowValue(col.demographics, rowId)
+    case 'travelDirect':
+    case 'travelEastCoast':
+    case 'travelWestCoast':
+    case 'travelVisaFree':
+    case 'travelAirport':
+      return getGettingThereRowValue(col.gettingThere, rowId)
     case 'english':
       return `${col.practical.english} / 100`
     case 'healthcareScore':
@@ -484,6 +516,49 @@ export function getComparisonHighlightClass(
   monthlyIncome: number,
 ): string | null {
   if (row.kind !== 'data' || !row.highlight || row.highlight === 'none') return null
+
+  // Handle QoL rows with custom color logic based on score type
+  const col = columns.find((c) => c.key === colKey)
+  if (col && row.id.startsWith('qol')) {
+    switch (row.id) {
+      case 'qolOverall':
+        return getQoLOverallBarColorClass(col.qualityOfLife?.quality_of_life_index ?? 0).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolSafety':
+        return getQoLBarColorClass(col.qualityOfLife?.safety_index ?? 0, false).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolHealthcare':
+        return getQoLBarColorClass(col.qualityOfLife?.healthcare_index ?? 0, false).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolClimate':
+        return getQoLBarColorClass(col.qualityOfLife?.climate_index ?? 0, false).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolPollution':
+        return getQoLBarColorClass(col.qualityOfLife?.pollution_index ?? 0, true).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolTraffic':
+        return getQoLBarColorClass(col.qualityOfLife?.traffic_commute_index ?? 0, true).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+      case 'qolPurchasingPower':
+        return getQoLBarColorClass(col.qualityOfLife?.purchasing_power_index ?? 0, false).replace(
+          'wtr-qol-card__bar-fill--',
+          'wtr-compare-table__cell--qol-',
+        )
+    }
+  }
+
   const values = columns
     .map((c) => ({
       key: c.key,
@@ -491,7 +566,9 @@ export function getComparisonHighlightClass(
     }))
     .filter((v): v is { key: string; n: number } => {
       if (v.n == null) return false
-      if (row.id.startsWith('qol') || row.id.startsWith('demo')) return true
+      if (row.id.startsWith('demo') || row.id.startsWith('travel')) {
+        return true
+      }
       return v.n > 0
     })
 

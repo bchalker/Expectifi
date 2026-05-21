@@ -1,7 +1,8 @@
 import type { CSSProperties, KeyboardEvent } from 'react'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { IconAlertTriangle, IconPlane } from '@tabler/icons-react'
 import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { countryToFlagEmoji, hasTravelAdvisory } from '../../utils/costOfLiving'
+import { formatEastCoastFlightHint } from '../../utils/gettingThere'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
 import { WtrCompareToggleButton } from './WtrCompareToggleButton'
 import './RetirementDestinationCard.scss'
@@ -31,6 +32,7 @@ export function RetirementDestinationCard({
 }: Props) {
   const { city, affordabilityScore, tier } = scored
   const showAdvisory = hasTravelAdvisory(city.country)
+  const flightHint = formatEastCoastFlightHint(city.country)
 
   const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -86,6 +88,12 @@ export function RetirementDestinationCard({
               </span>
             ) : null}
           </span>
+          {flightHint ? (
+            <span className="wtr-dest-card__flight-hint">
+              <IconPlane className="wtr-dest-card__flight-icon" size={14} stroke={1.5} aria-hidden />
+              {flightHint}
+            </span>
+          ) : null}
           <span className="wtr-dest-card__region">{city.country}</span>
           <WtrAffordabilityScoreBar
             score={affordabilityScore}

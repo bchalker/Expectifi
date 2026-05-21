@@ -13,9 +13,8 @@ export function apartmentAreaDualLabel(): string {
   return `${apartmentAreaSqFt()} sq ft (${APARTMENT_AREA_SQM} sq m)`
 }
 
-export function foodCardEstimateLines(): { headline: string; basis: string } {
+export function foodCardEstimateLines(): { basis: string } {
   return {
-    headline: 'Monthly estimate',
     basis: 'based on 45 inexpensive meals/month',
   }
 }
@@ -24,13 +23,6 @@ export function rentCardEstimateLines(): { headline: string; basis: string } {
   return {
     headline: 'Monthly estimate',
     basis: '1BR rent (outside center)',
-  }
-}
-
-export function transportCardEstimateLines(): { headline: string; basis: string } {
-  return {
-    headline: 'Monthly estimate',
-    basis: 'Monthly transit pass',
   }
 }
 
@@ -45,4 +37,11 @@ export function formatGasolineDualPrice(pricePerLiter: number): string {
   if (!Number.isFinite(pricePerLiter) || pricePerLiter <= 0) return '—'
   const perGallon = pricePerLiter * LITERS_PER_US_GALLON
   return `${formatUsdOrDash(perGallon)}/gal (${formatUsdOrDash(pricePerLiter)}/L)`
+}
+
+/** Hero display for transport card: e.g. "$5 ($1)". */
+export function formatGasolineHeroValue(pricePerLiter: number): string {
+  if (!Number.isFinite(pricePerLiter) || pricePerLiter <= 0) return '—'
+  const perGallon = pricePerLiter * LITERS_PER_US_GALLON
+  return `${formatUsdOrDash(perGallon)} (${formatUsdOrDash(pricePerLiter)})`
 }

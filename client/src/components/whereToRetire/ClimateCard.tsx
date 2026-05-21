@@ -61,7 +61,6 @@ export function ClimateCard({
   if (failed) {
     return (
       <p
-        className="wtr-climate-card__unavailable"
         role="status"
         {...staggerSectionProps(0, 'wtr-climate-card__unavailable', staggerClassName, staggerStyle)}
       >
@@ -117,10 +116,7 @@ export function ClimateCard({
 
   return (
     <article className="wtr-climate-card" aria-label="Typical climate">
-      <header
-        className="wtr-climate-card__head"
-        {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
-      >
+      <header {...staggerSectionProps(0, 'wtr-climate-card__head', staggerClassName, staggerStyle)}>
         <span className="wtr-climate-card__icon" aria-hidden>
           <IconSun size={24} stroke={1.5} />
         </span>
@@ -149,9 +145,8 @@ export function ClimateCard({
       </header>
 
       <div
-        className="wtr-climate-card__chart"
         aria-hidden
-        {...staggerSectionProps(1, undefined, staggerClassName, staggerStyle)}
+        {...staggerSectionProps(1, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}
       >
         {climate.monthly.map((month) => {
           const lowPct = monthBarHeight(month.avgLowC, tempMin, tempMax)
@@ -170,10 +165,7 @@ export function ClimateCard({
         })}
       </div>
 
-      <dl
-        className="wtr-climate-card__stats"
-        {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
-      >
+      <dl {...staggerSectionProps(2, 'wtr-climate-card__stats', staggerClassName, staggerStyle)}>
         <div className="wtr-climate-card__stat">
           <dt>Annual average</dt>
           <dd>{formatTemp(climate.annualAvgTempC, tempUnit)}</dd>
@@ -188,10 +180,7 @@ export function ClimateCard({
         </div>
       </dl>
 
-      <p
-        className="wtr-climate-card__range-note"
-        {...staggerSectionProps(3, undefined, staggerClassName, staggerStyle)}
-      >
+      <p {...staggerSectionProps(3, 'wtr-climate-card__range-note', staggerClassName, staggerStyle)}>
         Monthly avg. highs{' '}
         {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
         {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} (1990–2020)

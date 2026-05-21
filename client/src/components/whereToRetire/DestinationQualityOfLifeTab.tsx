@@ -1,31 +1,14 @@
-import { useMemo, type CSSProperties, type ReactNode } from 'react'
-import {
-  IconArrowDownDashed,
-  IconCar,
-  IconHeartRateMonitor,
-  IconShieldCheck,
-  IconSun,
-  IconWallet,
-  IconWind,
-} from '@tabler/icons-react'
+import { useMemo, type CSSProperties } from 'react'
 import {
   getQualityOfLifeData,
-  interpretClimate,
-  interpretHealthcare,
-  interpretPollution,
-  interpretPurchasingPower,
-  interpretSafety,
-  interpretTraffic,
   QOL_OVERALL_MAX,
-  QOL_TAB_SOURCE_FOOTER,
   QOL_UNAVAILABLE_MESSAGE,
-  qolBarFillPercent,
+  qolBarColor,
+  qolOverallBadgeLabel,
+  qolOverallColor,
   type QualityOfLifeCountryData,
 } from '../../utils/qualityOfLife'
-import './ColCategoryCard.scss'
 import './DestinationQualityOfLifeTab.scss'
-
-const QOL_ICON_SIZE = 18
 
 type Props = {
   country: string
@@ -33,13 +16,10 @@ type Props = {
   staggerStyle?: (index: number) => CSSProperties
 }
 
-type ScoreCardConfig = {
-  id: string
+type MetricRowConfig = {
   label: string
   score: number
-  interpretation: string
-  invertBar: boolean
-  icon: ReactNode
+  inverted: boolean
 }
 
 function staggerSectionProps(
@@ -57,181 +37,44 @@ function staggerSectionProps(
   }
 }
 
-function formatScore(score: number): string {
+function formatMetricScore(score: number): string {
   return Number.isInteger(score) ? `${score}` : score.toFixed(1)
 }
 
-function QoLProgressBar({
-  fillPct,
-  valueNow,
-  max,
-  label,
-  prominent = false,
-}: {
-  fillPct: number
-  valueNow: number
-  max: number
-  label: string
-  prominent?: boolean
-}) {
+function buildMetricRows(data: QualityOfLifeCountryData): MetricRowConfig[] {
+  return [
+    { label: 'Safety', score: data.safety_index, inverted: false },
+    { label: 'Healthcare', score: data.healthcare_index, inverted: false },
+    { label: 'Climate', score: data.climate_index, inverted: false },
+    { label: 'Air quality', score: data.pollution_index, inverted: true },
+    { label: 'Purchasing', score: data.purchasing_power_index, inverted: false },
+    { label: 'Traffic', score: data.traffic_commute_index, inverted: true },
+  ]
+}
+
+function QoLMetricRow({ label, score, inverted }: MetricRowConfig) {
+  const fillPct = Math.min(100, Math.max(0, score))
+  const color = qolBarColor(score, inverted)
+
   return (
-    <div
-      className={[
-        'wtr-qol-card__bar-track',
-        prominent ? 'wtr-qol-card__bar-track--prominent' : null,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      role="progressbar"
-      aria-valuemin={0}
-      aria-valuemax={max}
-      aria-valuenow={valueNow}
-      aria-label={label}
-    >
-      <div className="wtr-qol-card__bar-fill" style={{ width: `${fillPct}%` }} />
+    <div className="wtr-qol-tab__metric-row">
+      <span className="wtr-qol-tab__metric-label">{label}</span>
+      <div
+        className="wtr-qol-tab__metric-track"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={score}
+        aria-label={`${label}: ${formatMetricScore(score)} out of 100`}
+      >
+        <div
+          className="wtr-qol-tab__metric-fill"
+          style={{ width: `${fillPct}%`, background: color }}
+        />
+      </div>
+      <span className="wtr-qol-tab__metric-value tabular-nums">{formatMetricScore(score)}</span>
     </div>
   )
-}
-
-function QoLCategoryCardHead({ title, icon }: { title: string; icon: ReactNode }) {
-  return (
-    <header className="wtr-col-category-card__head">
-      <div className="wtr-col-category-card__head-row">
-        <span className="wtr-col-category-card__icon" aria-hidden>
-          {icon}
-        </span>
-        <h4 className="wtr-col-category-card__title">{title}</h4>
-      </div>
-      <span className="wtr-col-category-card__head-arrow" aria-hidden>
-        <IconArrowDownDashed size={20} stroke={2} />
-      </span>
-    </header>
-  )
-}
-
-function QoLOverallCard({
-  data,
-  className,
-  style,
-}: {
-  data: QualityOfLifeCountryData
-  className?: string
-  style?: CSSProperties
-}) {
-  const overallFill = Math.min(100, (data.quality_of_life_index / QOL_OVERALL_MAX) * 100)
-  const scoreValue = formatScore(data.quality_of_life_index)
-  const scoreLabel = `${scoreValue} / ${QOL_OVERALL_MAX}`
-
-  return (
-    <article
-      className={['wtr-col-category-card', 'wtr-qol-overall-card', className].filter(Boolean).join(' ')}
-      style={style}
-      aria-labelledby="wtr-qol-overall-heading"
-    >
-      <QoLCategoryCardHead
-        title="Overall quality of life score"
-        icon={<IconSun size={QOL_ICON_SIZE} stroke={1.5} />}
-      />
-      <div className="wtr-qol-overall-card__body">
-        <p id="wtr-qol-overall-heading" className="wtr-qol-overall-card__score tabular-nums">
-          <span className="wtr-qol-overall-card__score-value">{scoreValue}</span>
-          <span className="wtr-qol-overall-card__score-denom"> / {QOL_OVERALL_MAX}</span>
-        </p>
-        <QoLProgressBar
-          fillPct={overallFill}
-          valueNow={data.quality_of_life_index}
-          max={QOL_OVERALL_MAX}
-          label={`Overall quality of life: ${scoreLabel}`}
-          prominent
-        />
-        <p className="wtr-qol-overall-card__source">Numbeo 2024</p>
-      </div>
-    </article>
-  )
-}
-
-function QoLMetricCard({
-  config,
-  className,
-  style,
-}: {
-  config: ScoreCardConfig
-  className?: string
-  style?: CSSProperties
-}) {
-  const fillPct = qolBarFillPercent(config.score, config.invertBar)
-  const scoreLabel = formatScore(config.score)
-
-  return (
-    <article className={['wtr-col-category-card', className].filter(Boolean).join(' ')} style={style}>
-      <QoLCategoryCardHead title={config.label} icon={config.icon} />
-      <div className="wtr-col-category-card__body wtr-col-category-card__body--no-footer">
-        <div className="wtr-col-category-card__hero">
-          <p className="wtr-col-category-card__hero-value">{scoreLabel}</p>
-          <QoLProgressBar
-            fillPct={fillPct}
-            valueNow={config.score}
-            max={100}
-            label={`${config.label}: ${scoreLabel} out of 100`}
-          />
-          <p className="wtr-col-category-card__hero-label">{config.interpretation}</p>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-function buildScoreCards(data: QualityOfLifeCountryData): ScoreCardConfig[] {
-  return [
-    {
-      id: 'safety',
-      label: 'Safety',
-      score: data.safety_index,
-      interpretation: interpretSafety(data.safety_index),
-      invertBar: false,
-      icon: <IconShieldCheck size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-    {
-      id: 'healthcare',
-      label: 'Healthcare quality',
-      score: data.healthcare_index,
-      interpretation: interpretHealthcare(data.healthcare_index),
-      invertBar: false,
-      icon: <IconHeartRateMonitor size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-    {
-      id: 'climate',
-      label: 'Climate',
-      score: data.climate_index,
-      interpretation: interpretClimate(data.climate_index),
-      invertBar: false,
-      icon: <IconSun size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-    {
-      id: 'pollution',
-      label: 'Air & environment',
-      score: data.pollution_index,
-      interpretation: interpretPollution(data.pollution_index),
-      invertBar: true,
-      icon: <IconWind size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-    {
-      id: 'purchasing',
-      label: 'Purchasing power',
-      score: data.purchasing_power_index,
-      interpretation: interpretPurchasingPower(data.purchasing_power_index),
-      invertBar: false,
-      icon: <IconWallet size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-    {
-      id: 'traffic',
-      label: 'Traffic & commute',
-      score: data.traffic_commute_index,
-      interpretation: interpretTraffic(data.traffic_commute_index),
-      invertBar: true,
-      icon: <IconCar size={QOL_ICON_SIZE} stroke={1.5} />,
-    },
-  ]
 }
 
 export function DestinationQualityOfLifeTab({ country, staggerClassName, staggerStyle }: Props) {
@@ -239,41 +82,68 @@ export function DestinationQualityOfLifeTab({ country, staggerClassName, stagger
 
   if (!data) {
     return (
-      <p
-        className="wtr-qol-tab__empty"
-        {...staggerSectionProps(0, 'wtr-qol-tab__empty', staggerClassName, staggerStyle)}
-      >
+      <p {...staggerSectionProps(0, 'wtr-qol-tab__empty', staggerClassName, staggerStyle)}>
         {QOL_UNAVAILABLE_MESSAGE}
       </p>
     )
   }
 
-  const cards = buildScoreCards(data)
+  const overallScore = data.quality_of_life_index
+  const overallColor = qolOverallColor(overallScore)
+  const overallFillPct = Math.min(100, (overallScore / QOL_OVERALL_MAX) * 100)
+  const tierLabel = qolOverallBadgeLabel(overallScore)
+  const metrics = buildMetricRows(data)
 
   return (
-    <div className="wtr-dest-panel__col-stack wtr-qol-tab">
-      <div className="wtr-dest-panel__cards wtr-dest-panel__cards--qol-overall">
-        <QoLOverallCard
-          data={data}
-          {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
-        />
-      </div>
+    <div className="wtr-qol-tab">
+      <section
+        className="wtr-qol-tab__overall"
+        style={{ '--wtr-qol-accent': overallColor } as CSSProperties}
+        {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
+      >
+        <div className="wtr-qol-tab__overall-head">
+          <span className="wtr-qol-tab__overall-meta">Overall quality of life</span>
+          <span className="wtr-qol-tab__overall-source">Numbeo 2024</span>
+        </div>
 
-      <div className="wtr-dest-panel__cards">
-        {cards.map((card, index) => (
-          <QoLMetricCard
-            key={card.id}
-            config={card}
-            {...staggerSectionProps(index + 1, undefined, staggerClassName, staggerStyle)}
+        <div className="wtr-qol-tab__overall-score-row">
+          <div className="wtr-qol-tab__overall-score-block tabular-nums">
+            <span className="wtr-qol-tab__overall-score">{formatMetricScore(overallScore)}</span>
+            <span className="wtr-qol-tab__overall-denom">/ {QOL_OVERALL_MAX}</span>
+          </div>
+          <span className="wtr-qol-tab__overall-tier">{tierLabel}</span>
+        </div>
+
+        <div
+          className="wtr-qol-tab__overall-track"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={QOL_OVERALL_MAX}
+          aria-valuenow={overallScore}
+          aria-label={`Overall quality of life: ${formatMetricScore(overallScore)} out of ${QOL_OVERALL_MAX}`}
+        >
+          <div
+            className="wtr-qol-tab__overall-fill"
+            style={{ width: `${overallFillPct}%`, background: overallColor }}
           />
+        </div>
+      </section>
+
+      <div
+        className="wtr-qol-tab__metrics"
+        {...staggerSectionProps(1, undefined, staggerClassName, staggerStyle)}
+      >
+        {metrics.map((row) => (
+          <QoLMetricRow key={row.label} {...row} />
         ))}
       </div>
 
       <p
-        className="wtr-dest-panel__data-source"
-        {...staggerSectionProps(cards.length + 1, 'wtr-dest-panel__data-source', staggerClassName, staggerStyle)}
+        className="wtr-qol-tab__footer"
+        {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
       >
-        {QOL_TAB_SOURCE_FOOTER}
+        Source: Numbeo Quality of Life Index 2024. Scores are crowdsourced estimates. Country-level
+        data — city conditions may vary.
       </p>
     </div>
   )

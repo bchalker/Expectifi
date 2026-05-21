@@ -1,4 +1,8 @@
-import { IconCircleDashedPlus, IconCirclePlusFilled } from '@tabler/icons-react'
+import {
+  IconArrowNarrowRightDashed,
+  IconCircleDashedPlus,
+  IconCirclePlusFilled,
+} from '@tabler/icons-react'
 import { Tooltip } from '../Tooltip'
 import './WtrCompareToggleButton.scss'
 
@@ -45,6 +49,12 @@ export function WtrCompareToggleButton({
           onToggle()
         }}
       >
+        <span className="wtr-compare-toggle__label-group">
+          <span className="wtr-compare-toggle__label">Compare</span>
+          <span className="wtr-compare-toggle__arrow" aria-hidden>
+            <IconArrowNarrowRightDashed size={14} stroke={1.5} />
+          </span>
+        </span>
         {selected ? (
           <IconCirclePlusFilled size={18} aria-hidden />
         ) : (

@@ -16,6 +16,8 @@
   --color-text-muted: #5f5e5a;
   --color-text-hint: #888780;
   --color-text-tertiary: var(--color-text-hint);
+  --color-text-secondary: var(--color-text-muted);
+  --color-border-tertiary: color-mix(in srgb, var(--color-border) 65%, transparent);
   --color-danger: #a32d2d;
   --color-text-success: #15803d;
   --color-text-danger: var(--color-danger);

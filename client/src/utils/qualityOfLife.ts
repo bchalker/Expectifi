@@ -68,9 +68,56 @@ export function interpretPurchasingPower(score: number): string {
 
 export function interpretTraffic(score: number): string {
   if (score < 20) return 'Very low traffic, easy commutes'
-  if (score < 36) return 'Moderate traffic'
+  if (score < 35) return 'Moderate traffic'
   if (score <= 50) return 'Heavy traffic in peak hours'
   return 'Severe traffic congestion'
+}
+
+/** Hex bar fill for QoL metrics (0–100). Green = good, red = bad. */
+export function qolBarColor(score: number, inverted = false): string {
+  const clamped = Math.min(100, Math.max(0, score))
+  if (inverted) {
+    return clamped < 25 ? '#22c55e' : clamped < 50 ? '#f59e0b' : '#ef4444'
+  }
+  return clamped >= 75 ? '#22c55e' : clamped >= 50 ? '#f59e0b' : '#ef4444'
+}
+
+/** Overall QoL index color (0–220). */
+export function qolOverallColor(score: number): string {
+  if (score >= 160) return '#22c55e'
+  if (score >= 120) return '#f59e0b'
+  return '#ef4444'
+}
+
+export function qolOverallBadgeLabel(score: number): string {
+  if (score >= 160) return 'Excellent'
+  if (score >= 120) return 'Moderate'
+  return 'Below average'
+}
+
+/** Get bar color class for a QoL metric based on score and type. */
+export function getQoLBarColorClass(score: number, inverted = false): string {
+  const clamped = Math.min(100, Math.max(0, score))
+
+  if (inverted) {
+    // Lower = better. High scores are bad.
+    if (clamped < 25) return 'wtr-qol-card__bar-fill--success'
+    if (clamped < 50) return 'wtr-qol-card__bar-fill--warning'
+    return 'wtr-qol-card__bar-fill--danger'
+  } else {
+    // Higher = better. High scores are good.
+    if (clamped >= 75) return 'wtr-qol-card__bar-fill--success'
+    if (clamped >= 50) return 'wtr-qol-card__bar-fill--warning'
+    return 'wtr-qol-card__bar-fill--danger'
+  }
+}
+
+/** Get bar color for overall QoL score (0-220 scale). */
+export function getQoLOverallBarColorClass(score: number): string {
+  const clamped = Math.min(QOL_OVERALL_MAX, Math.max(0, score))
+  if (clamped >= 160) return 'wtr-qol-card__bar-fill--success'
+  if (clamped >= 120) return 'wtr-qol-card__bar-fill--warning'
+  return 'wtr-qol-card__bar-fill--danger'
 }
 
 /** 0–100 bar fill; lower raw score = fuller bar when inverted. */

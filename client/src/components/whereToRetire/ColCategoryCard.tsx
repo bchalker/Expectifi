@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { IconArrowDownDashed } from '@tabler/icons-react'
 import { formatUsdOrDash } from '../../utils/costOfLiving'
 import './ColCategoryCard.scss'
 
@@ -20,8 +19,10 @@ type HeroCardProps = {
   variant: 'hero'
   title: string
   icon: ReactNode
-  monthlyEstimate: number
-  estimateLines: { headline: string; basis: string }
+  monthlyEstimate?: number
+  heroValue?: string
+  heroUnit?: string
+  estimateLines?: { headline?: string; basis: string }
   rows: RowLine[]
   footerRow?: HeroFooterRow
 }
@@ -48,21 +49,29 @@ export function ColCategoryCard(
           <span className="wtr-col-category-card__icon">{icon}</span>
           <h4 className="wtr-col-category-card__title">{title}</h4>
         </div>
-        <span className="wtr-col-category-card__head-arrow" aria-hidden>
-          <IconArrowDownDashed size={20} stroke={2} />
-        </span>
       </header>
 
       <div className="wtr-col-category-card__body wtr-col-category-card__body--no-footer">
         {props.variant === 'hero' ? (
           <>
             <div className="wtr-col-category-card__hero">
-              <p className="wtr-col-category-card__hero-value">{formatUsdOrDash(props.monthlyEstimate)}</p>
-              <p className="wtr-col-category-card__hero-label">
-                {props.estimateLines.headline}
-                <br />
-                {props.estimateLines.basis}
+              <p className="wtr-col-category-card__hero-value">
+                {props.heroValue ?? formatUsdOrDash(props.monthlyEstimate ?? 0)}
               </p>
+              {props.heroUnit ? (
+                <p className="wtr-col-category-card__hero-unit">{props.heroUnit}</p>
+              ) : null}
+              {props.estimateLines ? (
+                <p className="wtr-col-category-card__hero-label">
+                  {props.estimateLines.headline ? (
+                    <>
+                      {props.estimateLines.headline}
+                      <br />
+                    </>
+                  ) : null}
+                  {props.estimateLines.basis}
+                </p>
+              ) : null}
             </div>
             <dl className="wtr-col-category-card__rows">
               {props.rows.map((row) => (

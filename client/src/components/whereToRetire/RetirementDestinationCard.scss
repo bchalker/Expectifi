@@ -51,7 +51,7 @@
 }
 
 .wtr-dest-card--has-compare .wtr-dest-card__top {
-  padding-right: 1.85rem;
+  padding-right: 4.5rem;
 }
 
 .wtr-dest-card__rank {
@@ -109,6 +109,20 @@
   line-height: 1.2;
   color: color-mix(in srgb, #854d0e 90%, var(--text));
   white-space: nowrap;
+}
+
+.wtr-dest-card__flight-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  color: var(--text-muted);
+}
+
+.wtr-dest-card__flight-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
 }
 
 .wtr-dest-card__region {
