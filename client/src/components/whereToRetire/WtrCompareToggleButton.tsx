@@ -1,5 +1,6 @@
 import {
   IconArrowNarrowRightDashed,
+  IconCheck,
   IconCircleDashedPlus,
   IconCirclePlusFilled,
 } from '@tabler/icons-react'
@@ -22,6 +23,7 @@ export function WtrCompareToggleButton({
   className,
 }: Props) {
   const disabled = atMax && !selected
+  const isPanel = className?.includes('wtr-compare-corner--panel') ?? false
   const label = selected
     ? `Remove ${cityName} from comparison`
     : `Add ${cityName} to comparison`
@@ -56,7 +58,11 @@ export function WtrCompareToggleButton({
           </span>
         </span>
         {selected ? (
-          <IconCirclePlusFilled size={18} aria-hidden />
+          isPanel ? (
+            <IconCheck size={18} stroke={2} aria-hidden />
+          ) : (
+            <IconCirclePlusFilled size={18} aria-hidden />
+          )
         ) : (
           <IconCircleDashedPlus size={18} stroke={1} aria-hidden />
         )}

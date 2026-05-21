@@ -1,23 +1,21 @@
-import type { CSSProperties, KeyboardEvent } from 'react'
-import { IconAlertTriangle, IconPlane } from '@tabler/icons-react'
-import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
-import { countryToFlagEmoji, hasTravelAdvisory } from '../../utils/costOfLiving'
-import { formatEastCoastFlightHint } from '../../utils/gettingThere'
-import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
-import { WtrCompareToggleButton } from './WtrCompareToggleButton'
-import './RetirementDestinationCard.scss'
+import type { CSSProperties, KeyboardEvent } from "react";
+import { IconAlertTriangle, IconPlane } from "@tabler/icons-react";
+import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
+import {
+  countryToFlagEmoji,
+  hasTravelAdvisory,
+} from "../../utils/costOfLiving";
+import { formatEastCoastFlightHint } from "../../utils/gettingThere";
+import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
+import "./RetirementDestinationCard.scss";
 
 type Props = {
-  scored: ScoredMapCity
-  rank: number
-  active: boolean
-  staggerIndex?: number
-  onSelect: () => void
-  showCompareToggle?: boolean
-  compareSelected?: boolean
-  compareAtMax?: boolean
-  onToggleCompare?: () => void
-}
+  scored: ScoredMapCity;
+  rank: number;
+  active: boolean;
+  staggerIndex?: number;
+  onSelect: () => void;
+};
 
 export function RetirementDestinationCard({
   scored,
@@ -25,59 +23,45 @@ export function RetirementDestinationCard({
   active,
   staggerIndex,
   onSelect,
-  showCompareToggle = false,
-  compareSelected = false,
-  compareAtMax = false,
-  onToggleCompare,
 }: Props) {
-  const { city, affordabilityScore, tier } = scored
-  const showAdvisory = hasTravelAdvisory(city.country)
-  const flightHint = formatEastCoastFlightHint(city.country)
+  const { city, affordabilityScore, tier } = scored;
+  const showAdvisory = hasTravelAdvisory(city.country);
+  const flightHint = formatEastCoastFlightHint(city.country);
 
   const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      onSelect()
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect();
     }
-  }
+  };
 
   return (
     <div
       role="button"
       tabIndex={0}
       className={[
-        'wtr-dest-card',
-        active && 'wtr-dest-card--active',
-        showCompareToggle && 'wtr-dest-card--has-compare',
+        "wtr-dest-card",
+        active && "wtr-dest-card--active",
         `wtr-dest-card--${tier}`,
       ]
         .filter(Boolean)
-        .join(' ')}
+        .join(" ")}
       style={
         staggerIndex != null
-          ? ({ '--wtr-card-i': staggerIndex } as CSSProperties)
+          ? ({ "--wtr-card-i": staggerIndex } as CSSProperties)
           : undefined
       }
       onClick={onSelect}
       onKeyDown={handleCardKeyDown}
       aria-pressed={active}
     >
-      {showCompareToggle && onToggleCompare ? (
-        <WtrCompareToggleButton
-          className="wtr-compare-corner--card"
-          selected={compareSelected}
-          atMax={compareAtMax}
-          cityName={city.city}
-          onToggle={onToggleCompare}
-        />
-      ) : null}
       <div className="wtr-dest-card__top">
-        <span className="wtr-dest-card__rank" aria-hidden>
-          {rank}
-        </span>
-        <span className="wtr-dest-card__flag" aria-hidden>
-          {countryToFlagEmoji(city.country)}
-        </span>
+        <div className="wtr-dest-card__rank-col">
+          <span className="wtr-dest-card__rank" aria-hidden>
+            {rank}
+          </span>
+          <span className="wtr-dest-card__rank-sep" aria-hidden />
+        </div>
         <span className="wtr-dest-card__body">
           <span className="wtr-dest-card__name-row">
             <span className="wtr-dest-card__name">{city.city}</span>
@@ -88,13 +72,23 @@ export function RetirementDestinationCard({
               </span>
             ) : null}
           </span>
+          <span className="wtr-dest-card__country">
+            <span className="wtr-dest-card__flag" aria-hidden>
+              {countryToFlagEmoji(city.country)}
+            </span>
+            <span className="wtr-dest-card__country-name">{city.country}</span>
+          </span>
           {flightHint ? (
             <span className="wtr-dest-card__flight-hint">
-              <IconPlane className="wtr-dest-card__flight-icon" size={14} stroke={1.5} aria-hidden />
+              <IconPlane
+                className="wtr-dest-card__flight-icon"
+                size={14}
+                stroke={1.5}
+                aria-hidden
+              />
               {flightHint}
             </span>
           ) : null}
-          <span className="wtr-dest-card__region">{city.country}</span>
           <WtrAffordabilityScoreBar
             score={affordabilityScore}
             tier={tier}
@@ -103,5 +97,5 @@ export function RetirementDestinationCard({
         </span>
       </div>
     </div>
-  )
+  );
 }

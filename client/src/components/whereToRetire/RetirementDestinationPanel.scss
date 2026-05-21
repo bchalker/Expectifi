@@ -1,28 +1,3 @@
-.wtr-dest-panel__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  border: none;
-  padding: 0;
-  background: color-mix(in srgb, var(--color-navy) 45%, transparent);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 0.32s;
-  cursor: pointer;
-}
-
-.wtr-dest-panel__backdrop--open {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition:
-    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 0s;
-}
-
 .wtr-dest-panel {
   position: relative;
   --wtr-match-strong: var(--color-text-success);
@@ -68,6 +43,92 @@
     visibility 0s linear 0s;
 }
 
+.wtr-dest-panel__actions {
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+  z-index: 16;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0rem;
+}
+
+.wtr-dest-panel__actions .wtr-compare-corner--panel {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 5.5rem;
+  height: 2.75rem;
+  pointer-events: none;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wtr-dest-panel__actions .wtr-compare-corner--panel:hover:not(.wtr-compare-corner--disabled) {
+  width: 6.35rem;
+}
+
+.wtr-dest-panel__actions .wtr-compare-corner--panel .wtr-compare-corner__wedge {
+  display: none;
+}
+
+.wtr-dest-panel__actions .wtr-compare-corner--panel .wtr-compare-toggle {
+  --wtr-compare-inset: 0;
+
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border-radius: 8px 0 0 8px;
+  background: var(--surface);
+}
+
+.wtr-dest-panel__actions .wtr-compare-corner--panel.wtr-compare-corner--selected .wtr-compare-toggle {
+  color: var(--color-text-success, var(--wtr-match-strong));
+}
+
+.wtr-dest-panel__actions
+  .wtr-compare-corner--panel.wtr-compare-corner--selected:hover:not(.wtr-compare-corner--disabled)
+  .wtr-compare-toggle {
+  color: var(--color-text-success, var(--wtr-match-strong));
+}
+
+.wtr-dest-panel__close {
+  position: relative;
+  top: auto;
+  right: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0 8px 0px 8px;
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.wtr-dest-panel__close:hover {
+  background: color-mix(in srgb, var(--border) 40%, var(--surface2));
+  color: var(--text);
+}
+
+.wtr-dest-panel__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 @keyframes wtr-dest-panel-stagger-in {
   from {
     opacity: 0;
@@ -98,7 +159,7 @@
 .wtr-dest-panel__sticky-head {
   grid-row: 1;
   flex-shrink: 0;
-  padding: 1rem 5.5rem 0.85rem 1rem;
+  padding: 1rem 12rem 0.85rem 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   z-index: 1;
@@ -200,20 +261,6 @@
   min-width: 0;
 }
 
-.wtr-dest-panel__body:has(.wtr-qol-tab) {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  padding-bottom: 0.85rem;
-}
-
-.wtr-dest-panel__tabpanel:has(.wtr-qol-tab) {
-  flex: 1 1 auto;
-  min-height: 0;
-  gap: 0;
-}
-
 .wtr-dest-panel__footer {
   grid-row: 3;
   --wtr-panel-stagger-base: 0.22s;
@@ -308,7 +355,7 @@
 .wtr-dest-panel__tab {
   flex: 0 0 auto;
   width: 100%;
-  min-height: 44px;
+  min-height: 36px;
   padding: 0;
   border: none;
   border-left: 2px solid transparent;
@@ -371,6 +418,25 @@
   gap: 0.85rem;
 }
 
+.wtr-dest-panel__tabpanel:has(.wtr-qol-tab) {
+  flex: 1 1 auto;
+  min-height: 100%;
+  gap: 0;
+}
+
+.wtr-dest-panel__body:has(.wtr-qol-tab) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 100%;
+}
+
+.wtr-dest-panel__tab-content .simplebar-content:has(.wtr-qol-tab) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .wtr-dest-panel__weather .wtr-climate-card,
 .wtr-dest-panel__weather .wtr-climate-card__unavailable {
   grid-column: unset;
@@ -381,7 +447,7 @@
 .wtr-dest-panel__col-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 2rem;
 }
 
 .wtr-dest-panel__col-extras {
@@ -534,8 +600,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wtr-dest-panel,
-  .wtr-dest-panel__backdrop {
+  .wtr-dest-panel {
     transition: none;
   }
 

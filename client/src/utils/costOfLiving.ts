@@ -214,7 +214,7 @@ export type MonthlyBudgetComponents = {
 export function getMonthlyBudgetComponents(city: CityData): MonthlyBudgetComponents {
   return {
     rent: city.rent_1br_outside_centre,
-    food: city.meal_inexpensive_restaurant * 45,
+    food: Math.round(city.meal_inexpensive_restaurant * 45),
     transport: city.transport_monthly_pass,
     utilitiesInternet: city.utilities_monthly_85m2 + city.internet_60mbps_monthly,
   }

@@ -4,14 +4,9 @@ import './ColCategoryCard.scss'
 
 const ICON_SIZE = 18
 
-type RowLine = {
+export type ColCategoryRowLine = {
   label: string
-  value: string
-}
-
-type HeroFooterRow = {
-  label: string
-  value: string
+  value?: string
   note?: string
 }
 
@@ -19,12 +14,11 @@ type HeroCardProps = {
   variant: 'hero'
   title: string
   icon: ReactNode
-  monthlyEstimate?: number
-  heroValue?: string
-  heroUnit?: string
-  estimateLines?: { headline?: string; basis: string }
-  rows: RowLine[]
-  footerRow?: HeroFooterRow
+  headerSubtitle?: string
+  headerAmount?: string
+  panelTitle?: string
+  rows: ColCategoryRowLine[]
+  footerPill?: ReactNode
 }
 
 type RowsCardProps = {
@@ -32,7 +26,7 @@ type RowsCardProps = {
   title: string
   icon: ReactNode
   subtitle?: string
-  rows: RowLine[]
+  rows: ColCategoryRowLine[]
 }
 
 export type ColCategoryCardProps = HeroCardProps | RowsCardProps
@@ -42,75 +36,109 @@ export function ColCategoryCard(
 ) {
   const { title, icon, className, style } = props
 
-  return (
-    <article className={['wtr-col-category-card', className].filter(Boolean).join(' ')} style={style}>
-      <header className="wtr-col-category-card__head">
-        <div className="wtr-col-category-card__head-row">
-          <span className="wtr-col-category-card__icon">{icon}</span>
-          <h4 className="wtr-col-category-card__title">{title}</h4>
-        </div>
-      </header>
-
-      <div className="wtr-col-category-card__body wtr-col-category-card__body--no-footer">
-        {props.variant === 'hero' ? (
-          <>
-            <div className="wtr-col-category-card__hero">
-              <p className="wtr-col-category-card__hero-value">
-                {props.heroValue ?? formatUsdOrDash(props.monthlyEstimate ?? 0)}
-              </p>
-              {props.heroUnit ? (
-                <p className="wtr-col-category-card__hero-unit">{props.heroUnit}</p>
-              ) : null}
-              {props.estimateLines ? (
-                <p className="wtr-col-category-card__hero-label">
-                  {props.estimateLines.headline ? (
-                    <>
-                      {props.estimateLines.headline}
-                      <br />
-                    </>
-                  ) : null}
-                  {props.estimateLines.basis}
-                </p>
+  const renderRows = () => (
+    <dl className="wtr-col-category-card__rows">
+      {props.variant === 'hero'
+        ? props.rows.map((row) => (
+            <div
+              key={row.label}
+              className={[
+                'wtr-col-category-card__row',
+                row.value == null && 'wtr-col-category-card__row--label-only',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <dt className="wtr-col-category-card__row-label">
+                <span>{row.label}</span>
+                {row.note ? <span className="wtr-col-category-card__row-note">{row.note}</span> : null}
+              </dt>
+              {row.value != null ? (
+                <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
               ) : null}
             </div>
-            <dl className="wtr-col-category-card__rows">
-              {props.rows.map((row) => (
-                <div key={row.label} className="wtr-col-category-card__row">
-                  <dt>{row.label}</dt>
-                  <dd>{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-            {props.footerRow ? (
-              <div className="wtr-col-category-card__food-foot">
-                <div className="wtr-col-category-card__food-foot-copy">
-                  <p className="wtr-col-category-card__food-foot-label">{props.footerRow.label}</p>
-                  {props.footerRow.note ? (
-                    <p className="wtr-col-category-card__food-foot-note">{props.footerRow.note}</p>
+          ))
+        : null}
+    </dl>
+  )
+
+  return (
+    <article className={['wtr-col-category-card', className].filter(Boolean).join(' ')} style={style}>
+      {props.variant === 'hero' ? (
+        <>
+          <header className="wtr-col-category-card__head">
+            <div className="wtr-col-category-card__head-main">
+              <div className="wtr-col-category-card__head-intro">
+                <span className="wtr-col-category-card__icon" aria-hidden>
+                  {icon}
+                </span>
+                <div className="wtr-col-category-card__head-text">
+                  <h4 className="wtr-col-category-card__title">{title}</h4>
+                  {props.headerSubtitle ? (
+                    <p className="wtr-col-category-card__header-sub">{props.headerSubtitle}</p>
                   ) : null}
                 </div>
-                <p className="wtr-col-category-card__food-foot-value">{props.footerRow.value}</p>
               </div>
-            ) : null}
-          </>
-        ) : null}
+              {props.headerAmount != null ? (
+                <p className="wtr-col-category-card__head-amount tabular-nums">{props.headerAmount}</p>
+              ) : null}
+            </div>
+          </header>
 
-        {props.variant === 'rows' ? (
-          <>
+          <div className="wtr-col-category-card__body">
+            <div
+              className={[
+                'wtr-col-category-card__group',
+                props.footerPill == null && 'wtr-col-category-card__group--no-footer',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {props.panelTitle ? (
+                <p className="wtr-col-category-card__group-title">{props.panelTitle}</p>
+              ) : null}
+              {renderRows()}
+            </div>
+            {props.footerPill != null ? (
+              <div className="wtr-col-category-card__footer-pill">{props.footerPill}</div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
+
+      {props.variant === 'rows' ? (
+        <>
+          <header className="wtr-col-category-card__head">
+            <div className="wtr-col-category-card__head-row">
+              <span className="wtr-col-category-card__icon" aria-hidden>
+                {icon}
+              </span>
+              <h4 className="wtr-col-category-card__title">{title}</h4>
+            </div>
+          </header>
+          <div className="wtr-col-category-card__body">
             {props.subtitle ? <p className="wtr-col-category-card__subtitle">{props.subtitle}</p> : null}
             <dl className="wtr-col-category-card__rows">
               {props.rows.map((row) => (
                 <div key={row.label} className="wtr-col-category-card__row">
-                  <dt>{row.label}</dt>
-                  <dd>{row.value}</dd>
+                  <dt className="wtr-col-category-card__row-label">
+                    <span>{row.label}</span>
+                  </dt>
+                  {row.value != null ? (
+                    <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
+                  ) : null}
                 </div>
               ))}
             </dl>
-          </>
-        ) : null}
-      </div>
+          </div>
+        </>
+      ) : null}
     </article>
   )
 }
 
 export const COL_CATEGORY_ICON_SIZE = ICON_SIZE
+
+export function formatColCategoryAmount(amount: number): string {
+  return formatUsdOrDash(amount)
+}

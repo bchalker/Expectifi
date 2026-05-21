@@ -1,42 +1,56 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
-import { AnimatedCount } from '../ui/AnimatedCount'
-import type { ExplorationIncomeRange } from '../../lib/whereToRetire/budgetExplorationStats'
-import { scoreAndFilterMapCities, type MapFilters } from '../../lib/whereToRetire/cityMapScoring'
-import { RetirementDestinationCard } from './RetirementDestinationCard'
-import { RetirementDestinationPanel } from './RetirementDestinationPanel'
-import { WtrCompareBar } from './WtrCompareBar'
-import { RetirementLeafletMap } from './RetirementLeafletMap'
-import { RetirementMapFilters, WtrMapFiltersInline, WtrMapSortSelect } from './RetirementMapFilters'
-import { WtrCityListPagination } from './WtrCityListPagination'
-import './RetirementMapExplorer.scss'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { AnimatedCount } from "../ui/AnimatedCount";
+import type { ExplorationIncomeRange } from "../../lib/whereToRetire/budgetExplorationStats";
+import {
+  scoreAndFilterMapCities,
+  type MapFilters,
+} from "../../lib/whereToRetire/cityMapScoring";
+import { RetirementDestinationCard } from "./RetirementDestinationCard";
+import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
+import { WtrCompareBar } from "./WtrCompareBar";
+import { RetirementLeafletMap } from "./RetirementLeafletMap";
+import {
+  RetirementMapFilters,
+  WtrMapFiltersInline,
+  WtrMapSortSelect,
+} from "./RetirementMapFilters";
+import { WtrCityListPagination } from "./WtrCityListPagination";
+import "./RetirementMapExplorer.scss";
 
 type Props = {
-  explorationRange: ExplorationIncomeRange
+  explorationRange: ExplorationIncomeRange;
   /** Budget ceiling for fit scores and filtering (exact plan income at default slider). */
-  monthlyIncomeCeiling: number
-  filters: MapFilters
-  onFiltersChange: (next: MapFilters | ((prev: MapFilters) => MapFilters)) => void
-  headerSlot?: ReactNode
-  filtersOpen: boolean
-  onFiltersOpenChange: (open: boolean) => void
-  compareIds: string[]
-  compareOverlayOpen?: boolean
-  onToggleCompare: (cityId: string) => void
-  onClearCompare: () => void
-  onViewComparison: () => void
-}
+  monthlyIncomeCeiling: number;
+  filters: MapFilters;
+  onFiltersChange: (
+    next: MapFilters | ((prev: MapFilters) => MapFilters),
+  ) => void;
+  headerSlot?: ReactNode;
+  filtersOpen: boolean;
+  onFiltersOpenChange: (open: boolean) => void;
+  compareIds: string[];
+  compareOverlayOpen?: boolean;
+  onToggleCompare: (cityId: string) => void;
+  onClearCompare: () => void;
+  onViewComparison: () => void;
+};
 
-const LIST_PAGE_SIZE = 25
+const LIST_PAGE_SIZE = 25;
 
 function notifyMapResize() {
-  requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
-  window.setTimeout(() => window.dispatchEvent(new Event('resize')), 340)
+  requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+  window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
 }
 
-const MAX_COMPARE_CITIES = 5
+const MAX_COMPARE_CITIES = 5;
 
 export function RetirementMapExplorer({
   explorationRange,
@@ -52,42 +66,42 @@ export function RetirementMapExplorer({
   onClearCompare,
   onViewComparison,
 }: Props) {
-  const chromeRef = useRef<HTMLDivElement>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [panelOpen, setPanelOpen] = useState(false)
-  const [listPanelOpen, setListPanelOpen] = useState(true)
-  const [listPage, setListPage] = useState(0)
+  const chromeRef = useRef<HTMLDivElement>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [listPanelOpen, setListPanelOpen] = useState(true);
+  const [listPage, setListPage] = useState(0);
   const filteredCities = useMemo(
     () => scoreAndFilterMapCities(monthlyIncomeCeiling, filters),
     [filters, monthlyIncomeCeiling],
-  )
+  );
 
   const listPageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredCities.length / LIST_PAGE_SIZE)),
     [filteredCities.length],
-  )
+  );
 
-  const safeListPage = Math.min(listPage, listPageCount - 1)
+  const safeListPage = Math.min(listPage, listPageCount - 1);
 
   const listCities = useMemo(() => {
-    const start = safeListPage * LIST_PAGE_SIZE
-    return filteredCities.slice(start, start + LIST_PAGE_SIZE)
-  }, [filteredCities, safeListPage])
+    const start = safeListPage * LIST_PAGE_SIZE;
+    return filteredCities.slice(start, start + LIST_PAGE_SIZE);
+  }, [filteredCities, safeListPage]);
 
   const structuralFiltersKey = useMemo(
     () =>
       [
         explorationRange.min,
         explorationRange.max,
-        filters.fitsMyIncome ? '1' : '0',
+        filters.fitsMyIncome ? "1" : "0",
         filters.climate,
-        [...filters.regions].sort().join(','),
+        [...filters.regions].sort().join(","),
         filters.regionScope,
         filters.sortBy,
-        filters.englishSpeaking ? '1' : '0',
-        filters.medicareAccess ? '1' : '0',
-        filters.hideAdvisories ? '1' : '0',
-      ].join('|'),
+        filters.englishSpeaking ? "1" : "0",
+        filters.medicareAccess ? "1" : "0",
+        filters.hideAdvisories ? "1" : "0",
+      ].join("|"),
     [
       explorationRange.max,
       explorationRange.min,
@@ -100,101 +114,141 @@ export function RetirementMapExplorer({
       filters.regions,
       filters.sortBy,
     ],
-  )
+  );
 
-  const listCardsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setListPage(0)
-  }, [structuralFiltersKey])
+  const listCardsRef = useRef<HTMLDivElement>(null);
+  const listBodyRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = listCardsRef.current
-    if (!el) return
-    el.classList.remove('wtr-explorer__list-cards--refresh')
-    void el.offsetHeight
-    el.classList.add('wtr-explorer__list-cards--refresh')
-  }, [structuralFiltersKey, safeListPage])
+    setListPage(0);
+  }, [structuralFiltersKey]);
 
   useEffect(() => {
-    if (!selectedId) return
+    setListPage((page) => Math.min(page, Math.max(0, listPageCount - 1)));
+  }, [listPageCount]);
+
+  useEffect(() => {
+    const el = listCardsRef.current;
+    if (!el) return;
+    el.classList.remove("wtr-explorer__list-cards--refresh");
+    void el.offsetHeight;
+    el.classList.add("wtr-explorer__list-cards--refresh");
+  }, [structuralFiltersKey, safeListPage]);
+
+  useEffect(() => {
+    if (!selectedId) return;
     if (!filteredCities.some((item) => item.city.id === selectedId)) {
-      setSelectedId(null)
-      setPanelOpen(false)
+      setSelectedId(null);
+      setPanelOpen(false);
     }
-  }, [filteredCities, selectedId])
+  }, [filteredCities, selectedId]);
 
   const selectedScored = useMemo(
     () => filteredCities.find((s) => s.city.id === selectedId) ?? null,
     [filteredCities, selectedId],
-  )
+  );
+
+  const scrollListToTop = useCallback(() => {
+    listScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
+  const changeListPage = useCallback(
+    (page: number) => {
+      const pageCount = Math.max(
+        1,
+        Math.ceil(filteredCities.length / LIST_PAGE_SIZE),
+      );
+      const safePage = Math.max(0, Math.min(page, pageCount - 1));
+      setListPage(safePage);
+      scrollListToTop();
+      const start = safePage * LIST_PAGE_SIZE;
+      const pageIds = new Set(
+        filteredCities
+          .slice(start, start + LIST_PAGE_SIZE)
+          .map((item) => item.city.id),
+      );
+      if (selectedId != null && !pageIds.has(selectedId)) {
+        setSelectedId(null);
+        setPanelOpen(false);
+      }
+    },
+    [filteredCities, scrollListToTop, selectedId],
+  );
 
   const goToListPage = useCallback(
     (page: number) => {
-      const pageCount = Math.max(1, Math.ceil(filteredCities.length / LIST_PAGE_SIZE))
-      const safePage = Math.max(0, Math.min(page, pageCount - 1))
-      setListPage(safePage)
-      const firstOnPage = filteredCities[safePage * LIST_PAGE_SIZE]
+      const pageCount = Math.max(
+        1,
+        Math.ceil(filteredCities.length / LIST_PAGE_SIZE),
+      );
+      const safePage = Math.max(0, Math.min(page, pageCount - 1));
+      setListPage(safePage);
+      scrollListToTop();
+      const firstOnPage = filteredCities[safePage * LIST_PAGE_SIZE];
       if (firstOnPage) {
-        setSelectedId(firstOnPage.city.id)
-        setPanelOpen(true)
+        setSelectedId(firstOnPage.city.id);
+        setPanelOpen(true);
       }
     },
-    [filteredCities],
-  )
+    [filteredCities, scrollListToTop],
+  );
 
   const destinationListPageNav = useMemo(() => {
-    if (filteredCities.length <= LIST_PAGE_SIZE) return null
+    if (filteredCities.length <= LIST_PAGE_SIZE) return null;
     return {
       page: safeListPage,
       pageSize: LIST_PAGE_SIZE,
       totalCount: filteredCities.length,
       onPageChange: goToListPage,
-    }
-  }, [filteredCities.length, goToListPage, safeListPage])
+    };
+  }, [filteredCities.length, goToListPage, safeListPage]);
 
-  const openDestination = useCallback((id: string) => {
-    setSelectedId(id)
-    setPanelOpen(true)
-    const index = filteredCities.findIndex((s) => s.city.id === id)
-    if (index >= 0) setListPage(Math.floor(index / LIST_PAGE_SIZE))
-  }, [filteredCities])
+  const openDestination = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      setPanelOpen(true);
+      const index = filteredCities.findIndex((s) => s.city.id === id);
+      if (index >= 0) setListPage(Math.floor(index / LIST_PAGE_SIZE));
+    },
+    [filteredCities],
+  );
 
   const closePanel = useCallback(() => {
-    setPanelOpen(false)
-  }, [])
+    setPanelOpen(false);
+  }, []);
 
   const collapseListPanel = useCallback(() => {
-    setListPanelOpen(false)
-  }, [])
+    setListPanelOpen(false);
+  }, []);
 
   const expandListPanel = useCallback(() => {
-    setListPanelOpen(true)
-  }, [])
+    setListPanelOpen(true);
+  }, []);
 
   const closeFiltersPanel = useCallback(() => {
-    onFiltersOpenChange(false)
-    notifyMapResize()
-  }, [onFiltersOpenChange])
+    onFiltersOpenChange(false);
+    notifyMapResize();
+  }, [onFiltersOpenChange]);
 
   useEffect(() => {
-    if (!filtersOpen) return
+    if (!filtersOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeFiltersPanel()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [filtersOpen, closeFiltersPanel])
+      if (event.key === "Escape") closeFiltersPanel();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [filtersOpen, closeFiltersPanel]);
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
+    const mq = window.matchMedia("(min-width: 1024px)");
     const onMqChange = () => {
-      if (mq.matches) onFiltersOpenChange(false)
-    }
-    onMqChange()
-    mq.addEventListener('change', onMqChange)
-    return () => mq.removeEventListener('change', onMqChange)
-  }, [onFiltersOpenChange])
+      if (mq.matches) onFiltersOpenChange(false);
+    };
+    onMqChange();
+    mq.addEventListener("change", onMqChange);
+    return () => mq.removeEventListener("change", onMqChange);
+  }, [onFiltersOpenChange]);
 
   return (
     <div className="wtr-explorer">
@@ -207,12 +261,12 @@ export function RetirementMapExplorer({
 
       <div
         className={[
-          'wtr-explorer__map-row',
-          !listPanelOpen && 'wtr-explorer__map-row--list-collapsed',
-          filtersOpen && 'wtr-explorer__map-row--filters-open',
+          "wtr-explorer__map-row",
+          !listPanelOpen && "wtr-explorer__map-row--list-collapsed",
+          filtersOpen && "wtr-explorer__map-row--filters-open",
         ]
           .filter(Boolean)
-          .join(' ')}
+          .join(" ")}
       >
         {filtersOpen ? (
           <button
@@ -245,6 +299,18 @@ export function RetirementMapExplorer({
           aria-label="City list"
           aria-hidden={!listPanelOpen}
         >
+          {listPanelOpen ? (
+            <button
+              type="button"
+              className="wtr-explorer__list-collapse"
+              aria-expanded={listPanelOpen}
+              aria-controls="wtr-explorer-list-panel"
+              aria-label="Hide city list"
+              onClick={collapseListPanel}
+            >
+              <IconChevronLeft size={18} stroke={1.5} aria-hidden />
+            </button>
+          ) : null}
           <div className="wtr-explorer__list-panel-inner">
             <header className="wtr-explorer__list-head">
               <WtrMapSortSelect
@@ -252,26 +318,17 @@ export function RetirementMapExplorer({
                 filters={filters}
                 onChange={onFiltersChange}
               />
-              <button
-                type="button"
-                className="wtr-explorer__list-collapse"
-                aria-expanded={listPanelOpen}
-                aria-controls="wtr-explorer-list-panel"
-                aria-label="Hide city list"
-                onClick={collapseListPanel}
-              >
-                <IconChevronLeft size={18} stroke={1.5} aria-hidden />
-              </button>
             </header>
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
-                No cities match your filters. Try clearing filters or adjusting your income scenario above.
+                No cities match your filters. Try clearing filters or adjusting
+                your income scenario above.
               </p>
             ) : (
-              <div className="wtr-explorer__list-body">
-                <SimpleBar
-                  className="wtr-explorer__list-scroll"
-                  autoHide={false}
+              <div ref={listBodyRef} className="wtr-explorer__list-body">
+                <div
+                  ref={listScrollRef}
+                  className="wtr-explorer__list-scroll wtr-scroll-y--hover"
                 >
                   <div className="wtr-explorer__list-scroll-inner">
                     <div
@@ -286,20 +343,18 @@ export function RetirementMapExplorer({
                           active={selectedId === item.city.id}
                           staggerIndex={index}
                           onSelect={() => openDestination(item.city.id)}
-                          showCompareToggle
-                          compareSelected={compareIds.includes(item.city.id)}
-                          compareAtMax={compareIds.length >= MAX_COMPARE_CITIES}
-                          onToggleCompare={() => onToggleCompare(item.city.id)}
                         />
                       ))}
                     </div>
                   </div>
-                </SimpleBar>
+                </div>
                 <WtrCityListPagination
-                  page={safeListPage}
+                  className="wtr-list-pagination--dest-panel wtr-list-pagination--explorer-list"
+                  page={listPage}
                   pageSize={LIST_PAGE_SIZE}
                   totalCount={filteredCities.length}
-                  onPageChange={setListPage}
+                  onPageChange={changeListPage}
+                  showRange={false}
                 />
               </div>
             )}
@@ -336,7 +391,7 @@ export function RetirementMapExplorer({
         }
         compareAtMax={compareIds.length >= MAX_COMPARE_CITIES}
         onToggleCompare={() => {
-          if (selectedScored) onToggleCompare(selectedScored.city.id)
+          if (selectedScored) onToggleCompare(selectedScored.city.id);
         }}
         listPageNav={destinationListPageNav}
       />
@@ -349,5 +404,5 @@ export function RetirementMapExplorer({
         />
       ) : null}
     </div>
-  )
+  );
 }

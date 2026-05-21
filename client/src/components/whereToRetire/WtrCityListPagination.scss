@@ -131,3 +131,21 @@
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 6%, var(--surface));
 }
+
+/* Explorer list: page label only, no footer padding */
+.wtr-list-pagination--dest-panel.wtr-list-pagination--explorer-list {
+  position: relative;
+  z-index: 2;
+  gap: 0;
+  padding: 0;
+  background: var(--surface);
+  box-shadow: 0 -8px 20px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+}
+
+.wtr-list-pagination--dest-panel.wtr-list-pagination--explorer-list .wtr-list-pagination__controls {
+  width: 100%;
+}
+
+.wtr-list-pagination--dest-panel.wtr-list-pagination--explorer-list .wtr-list-pagination__page-label {
+  padding: 0.55rem 0.65rem;
+}

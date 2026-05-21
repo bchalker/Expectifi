@@ -23,8 +23,6 @@ import {
   getQoLRowNumericValue,
   getQoLRowValue,
   getQualityOfLifeData,
-  getQoLBarColorClass,
-  getQoLOverallBarColorClass,
   type QualityOfLifeCountryData,
 } from '../../utils/qualityOfLife'
 import {
@@ -238,18 +236,17 @@ export const COMPARISON_TABLE_ROWS: ComparisonRowDef[] = [
   { id: 'visa', kind: 'data', label: 'Visa / residency requirement', highlight: 'none' },
   { id: 'healthcare', kind: 'data', label: 'Healthcare notes for US expats', highlight: 'none' },
   { id: 'sec-qol', kind: 'section', label: 'Quality of Life' },
-  { id: 'qolOverall', kind: 'data', label: 'Overall QoL score', highlight: 'none' },
-  { id: 'qolSafety', kind: 'data', label: 'Safety index', highlight: 'none' },
-  { id: 'qolHealthcare', kind: 'data', label: 'Healthcare index', highlight: 'none' },
-  { id: 'qolClimate', kind: 'data', label: 'Climate index', highlight: 'none' },
+  { id: 'qolOverall', kind: 'data', label: 'Overall QoL score', highlight: 'higher-green' },
+  { id: 'qolSafety', kind: 'data', label: 'Safety index', highlight: 'higher-green' },
+  { id: 'qolHealthcare', kind: 'data', label: 'Healthcare index', highlight: 'higher-green' },
+  { id: 'qolClimate', kind: 'data', label: 'Climate index', highlight: 'higher-green' },
   {
     id: 'qolPollution',
     kind: 'data',
     label: 'Air quality — lower is better',
-    highlight: 'none',
+    highlight: 'lower-green',
   },
-  { id: 'qolTraffic', kind: 'data', label: 'Traffic & commute index', highlight: 'none' },
-  { id: 'qolPurchasingPower', kind: 'data', label: 'Purchasing power index', highlight: 'none' },
+  { id: 'qolPurchasingPower', kind: 'data', label: 'Purchasing power index', highlight: 'higher-green' },
   { id: 'sec-people-culture', kind: 'section', label: 'People & Culture' },
   { id: 'demoDominantReligion', kind: 'data', label: 'Dominant religion', highlight: 'none' },
   { id: 'demoChristianPct', kind: 'data', label: 'Christian %', highlight: 'higher-green' },
@@ -516,49 +513,6 @@ export function getComparisonHighlightClass(
   monthlyIncome: number,
 ): string | null {
   if (row.kind !== 'data' || !row.highlight || row.highlight === 'none') return null
-
-  // Handle QoL rows with custom color logic based on score type
-  const col = columns.find((c) => c.key === colKey)
-  if (col && row.id.startsWith('qol')) {
-    switch (row.id) {
-      case 'qolOverall':
-        return getQoLOverallBarColorClass(col.qualityOfLife?.quality_of_life_index ?? 0).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolSafety':
-        return getQoLBarColorClass(col.qualityOfLife?.safety_index ?? 0, false).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolHealthcare':
-        return getQoLBarColorClass(col.qualityOfLife?.healthcare_index ?? 0, false).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolClimate':
-        return getQoLBarColorClass(col.qualityOfLife?.climate_index ?? 0, false).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolPollution':
-        return getQoLBarColorClass(col.qualityOfLife?.pollution_index ?? 0, true).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolTraffic':
-        return getQoLBarColorClass(col.qualityOfLife?.traffic_commute_index ?? 0, true).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-      case 'qolPurchasingPower':
-        return getQoLBarColorClass(col.qualityOfLife?.purchasing_power_index ?? 0, false).replace(
-          'wtr-qol-card__bar-fill--',
-          'wtr-compare-table__cell--qol-',
-        )
-    }
-  }
-
   const values = columns
     .map((c) => ({
       key: c.key,
@@ -566,7 +520,7 @@ export function getComparisonHighlightClass(
     }))
     .filter((v): v is { key: string; n: number } => {
       if (v.n == null) return false
-      if (row.id.startsWith('demo') || row.id.startsWith('travel')) {
+      if (row.id.startsWith('qol') || row.id.startsWith('demo') || row.id.startsWith('travel')) {
         return true
       }
       return v.n > 0

@@ -1,0 +1,32 @@
+/* Thin scrollbars: hidden until hover/focus-within (Firefox + WebKit) */
+.wtr-scroll-y--hover {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover,
+  &:focus-within {
+    scrollbar-color: color-mix(in srgb, var(--text-muted) 50%, transparent) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 99px;
+  }
+
+  &:hover::-webkit-scrollbar-thumb,
+  &:focus-within::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--text-muted) 50%, transparent);
+  }
+}

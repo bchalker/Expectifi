@@ -166,6 +166,13 @@
   overflow: hidden;
 }
 
+/* Let list-panel collapse tab protrude past the panel edge */
+.where-to-retire__body--map .where-to-retire__view-panel,
+.where-to-retire__body--map .where-to-retire__main-panel-map,
+.where-to-retire__body--map .where-to-retire__main-panel-map .wtr-explorer {
+  overflow: visible;
+}
+
 .where-to-retire__main-panel-map .wtr-explorer {
   flex: 1 1 auto;
   min-height: 0;

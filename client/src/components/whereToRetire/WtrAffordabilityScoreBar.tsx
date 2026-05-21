@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { IconShieldCheck } from '@tabler/icons-react'
+import { IconShieldCheckFilled } from '@tabler/icons-react'
 import type { MatchTier } from '../../lib/whereToRetire/cityMapScoring'
 import './WtrAffordabilityScoreBar.scss'
 
@@ -31,7 +31,7 @@ export function WtrAffordabilityScoreBar({ score, tier, className }: Props) {
       <span className="wtr-afford-score__num">{clamped}</span>
       {isPerfect ? (
         <span className="wtr-afford-score__verified" aria-label="Perfect retirement income fit score">
-          <IconShieldCheck size={12} stroke={2} aria-hidden />
+          <IconShieldCheckFilled size={14} aria-hidden />
         </span>
       ) : null}
     </div>

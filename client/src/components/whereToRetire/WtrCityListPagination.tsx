@@ -9,6 +9,8 @@ type Props = {
   className?: string
   /** Centered copy between prev/next (hides range and page labels). */
   centerNote?: string
+  /** Show "1–25 of N" above controls (default true). */
+  showRange?: boolean
 }
 
 export function WtrCityListPagination({
@@ -18,6 +20,7 @@ export function WtrCityListPagination({
   onPageChange,
   className = '',
   centerNote,
+  showRange = true,
 }: Props) {
   const pageCount = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1
   const safePage = Math.min(page, Math.max(0, pageCount - 1))
@@ -40,7 +43,7 @@ export function WtrCityListPagination({
         .join(' ')}
       aria-label="City list pages"
     >
-      {!compact ? (
+      {!compact && showRange ? (
         <p className="wtr-list-pagination__range">
           <span className="wtr-list-pagination__range-nums">
             {rangeStart}–{rangeEnd}
