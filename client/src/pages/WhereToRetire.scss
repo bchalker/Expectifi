@@ -62,6 +62,7 @@
 
 .where-to-retire__main-panel {
   --wtr-panel-inline-pad: 1.25rem;
+  --wtr-map-area-min-h: 36rem;
 
   display: flex;
   flex: 1 1 auto;
@@ -154,7 +155,7 @@
 }
 
 .where-to-retire__body--map .where-to-retire__main-panel {
-  min-height: min(88dvh, 980px);
+  min-height: min(92dvh, 1040px);
 }
 
 .where-to-retire__main-panel-map {
@@ -162,7 +163,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
+  min-height: var(--wtr-map-area-min-h, 36rem);
   overflow: hidden;
 }
 

@@ -38,7 +38,7 @@
 }
 
 .where-to-retire__main-panel .wtr-explorer__map-row {
-  min-height: 28rem;
+  min-height: var(--wtr-map-area-min-h, 36rem);
 }
 
 .wtr-explorer__list-panel {
