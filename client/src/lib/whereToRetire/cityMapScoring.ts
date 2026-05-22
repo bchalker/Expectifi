@@ -49,6 +49,22 @@ import {
   type RetirementScoreResult,
 } from '../../utils/retirementScore'
 import { buildRetirementIncomeFitExplanation } from './retirementIncomeFitScore'
+import {
+  DEFAULT_HEALTH_INS_MONTHLY_USD,
+  monthlyOutflowForMapCity,
+  passesVisaQualifyingMapFilter,
+} from './mapIncomeFit'
+import { isoRegionToDestinationRegion } from '../regionUtils'
+import { getExcludedCountries } from '../retirementStorage'
+import {
+  passesWhereToLookCountry,
+  type MapWhereToLook,
+} from './whereToLookCountries'
+
+export { DEFAULT_HEALTH_INS_MONTHLY_USD } from './mapIncomeFit'
+
+export type { MapWhereToLook } from './whereToLookCountries'
+export { MAP_WHERE_TO_LOOK_OPTIONS } from './whereToLookCountries'
 
 export type { EnglishProficiencyFilter }
 
@@ -78,26 +94,6 @@ export const ALL_DESTINATION_REGIONS: DestinationRegion[] = [
 
 export type MapRegionScope = 'us-only' | 'international-only' | 'both'
 
-/** Toolbar preset for map geography (US / macro regions / worldwide). */
-export type MapWhereToLook = 'us' | 'europe' | 'latin-america' | 'asia' | 'all'
-
-export const WHERE_TO_LOOK_EUROPE_REGIONS: DestinationRegion[] = [
-  'europe',
-  'eastern-europe',
-]
-
-export const WHERE_TO_LOOK_ASIA_REGIONS: DestinationRegion[] = ['southeast-asia']
-
-export const WHERE_TO_LOOK_LATIN_AMERICA_REGIONS: DestinationRegion[] = ['latin-america']
-
-export const MAP_WHERE_TO_LOOK_OPTIONS: { id: MapWhereToLook; label: string }[] = [
-  { id: 'us', label: 'US' },
-  { id: 'europe', label: 'Europe' },
-  { id: 'latin-america', label: 'Latin America' },
-  { id: 'asia', label: 'Asia' },
-  { id: 'all', label: 'All' },
-]
-
 export type MapSortBy =
   | 'affordability-fit'
   | 'lowest-budget'
@@ -109,6 +105,7 @@ export type MapSortBy =
 export type MapFilters = {
   fitsMyIncome: boolean
   regions: DestinationRegion[]
+  whereToLook: MapWhereToLook
   climate: ClimateFilter
   regionScope: MapRegionScope
   sortBy: MapSortBy
@@ -125,11 +122,18 @@ export type MapFilters = {
   directFromUsOnly: boolean
   visaFreeDays: VisaFreeDaysFilter
   minRetirementScore: MinRetirementScoreFilter
+  /** Include health insurance in income-fit cost (retirement catalog cities). */
+  includeHealthIns: boolean
+  /** Monthly health insurance estimate when `includeHealthIns` is true. */
+  healthInsMonthlyUsd: number
+  /** Only cities that meet visa income rules in the income-fit model. */
+  visaQualifyingOnly: boolean
 }
 
 export const DEFAULT_MAP_FILTERS: MapFilters = {
   fitsMyIncome: false,
   regions: [...ALL_DESTINATION_REGIONS],
+  whereToLook: 'all',
   climate: 'any',
   regionScope: 'both',
   sortBy: 'affordability-fit',
@@ -145,6 +149,9 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   directFromUsOnly: false,
   visaFreeDays: 'any',
   minRetirementScore: 'any',
+  includeHealthIns: true,
+  healthInsMonthlyUsd: DEFAULT_HEALTH_INS_MONTHLY_USD,
+  visaQualifyingOnly: false,
 }
 
 const US_COUNTRY = 'United States'
@@ -204,12 +211,25 @@ function passesMapDealbreakers(country: string, filters: MapFilters): boolean {
   return true
 }
 
-function compareMapCities(a: ScoredMapCity, b: ScoredMapCity, sortBy: MapSortBy, monthlyIncome: number): number {
+function compareMapCities(
+  a: ScoredMapCity,
+  b: ScoredMapCity,
+  sortBy: MapSortBy,
+  monthlyIncome: number,
+  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+): number {
   switch (sortBy) {
     case 'lowest-budget':
-      return a.monthlyBudget - b.monthlyBudget
+      return (
+        monthlyOutflowForMapCity(a, monthlyIncome, filters) -
+        monthlyOutflowForMapCity(b, monthlyIncome, filters)
+      )
     case 'highest-surplus':
-      return (monthlyIncome - b.monthlyBudget) - (monthlyIncome - a.monthlyBudget)
+      return (
+        monthlyIncome -
+        monthlyOutflowForMapCity(b, monthlyIncome, filters) -
+        (monthlyIncome - monthlyOutflowForMapCity(a, monthlyIncome, filters))
+      )
     case 'quality-of-life':
       return qolScoreForCountry(b.city.country) - qolScoreForCountry(a.city.country)
     case 'healthcare-access':
@@ -239,32 +259,6 @@ export type ScoredMapCity = {
   colExplanation: string
 }
 
-const EUROPE = new Set([
-  'Portugal', 'Spain', 'Italy', 'France', 'Germany', 'Greece', 'Croatia',
-  'Hungary', 'Czech Republic', 'Poland', 'Estonia', 'Latvia', 'Lithuania',
-  'Slovenia', 'Slovakia', 'Romania', 'Bulgaria', 'Serbia', 'Montenegro',
-  'Albania', 'North Macedonia', 'Georgia', 'Armenia', 'Turkey',
-])
-
-const LATIN_AMERICA = new Set([
-  'Mexico', 'Colombia', 'Panama', 'Costa Rica', 'Ecuador', 'Peru', 'Uruguay',
-  'Argentina', 'Brazil', 'Chile', 'Dominican Republic',
-])
-
-const SOUTHEAST_ASIA = new Set([
-  'Thailand', 'Vietnam', 'Malaysia', 'Indonesia', 'Philippines', 'Cambodia',
-  'Myanmar',
-])
-
-const EASTERN_EUROPE = new Set([
-  'Ukraine', 'Moldova', 'Belarus', 'Russia', 'Kazakhstan', 'Uzbekistan',
-  'Azerbaijan',
-])
-
-const MIDDLE_EAST_AFRICA = new Set([
-  'Morocco', 'Egypt', 'Jordan', 'United Arab Emirates', 'South Africa',
-  'Kenya', 'Tunisia', 'Lebanon',
-])
 
 const WARM_YEAR_ROUND = new Set([
   'Thailand', 'Malaysia', 'Indonesia', 'Philippines', 'Vietnam', 'Cambodia',
@@ -291,12 +285,60 @@ export function pinSizeForScore(score: number): number {
 }
 
 export function regionFromCountry(country: string): DestinationRegion | null {
-  if (EUROPE.has(country)) return 'europe'
-  if (LATIN_AMERICA.has(country)) return 'latin-america'
-  if (SOUTHEAST_ASIA.has(country)) return 'southeast-asia'
-  if (EASTERN_EUROPE.has(country)) return 'eastern-europe'
-  if (MIDDLE_EAST_AFRICA.has(country)) return 'middle-east-africa'
-  return null
+  const iso = countryToIsoCode(country)
+  if (!iso) return null
+  return isoRegionToDestinationRegion(iso)
+}
+
+export function isCityExcludedByCountry(
+  country: string,
+  excludedCountries: string[],
+): boolean {
+  return excludedCountries.includes(country)
+}
+
+export function passesExclusionFilters(
+  city: MapCity,
+  excludedCountries: string[],
+): boolean {
+  return !isCityExcludedByCountry(city.country, excludedCountries)
+}
+
+export type MapCityVisibilityCounts = {
+  totalCities: number
+  visibleCount: number
+  visibleCountryCount: number
+  excludedByCountryCount: number
+}
+
+export function countMapCityVisibility(
+  monthlyIncome: number,
+  filters: MapFilters,
+  excludedCountries: string[] = getExcludedCountries(),
+): MapCityVisibilityCounts {
+  const all = getAllMapCities()
+  let visibleCount = 0
+  let excludedByCountryCount = 0
+  const visibleCountries = new Set<string>()
+
+  for (const city of all) {
+    if (isCityExcludedByCountry(city.country, excludedCountries)) {
+      excludedByCountryCount += 1
+      continue
+    }
+    const scored = scoreMapCity(city, monthlyIncome)
+    if (passesMapFilters(scored, filters, monthlyIncome)) {
+      visibleCount += 1
+      visibleCountries.add(city.country)
+    }
+  }
+
+  return {
+    totalCities: all.length,
+    visibleCount,
+    visibleCountryCount: visibleCountries.size,
+    excludedByCountryCount,
+  }
 }
 
 function climateFromCountry(country: string): ClimateFilter | null {
@@ -354,58 +396,33 @@ export function regionsAreDefault(regions: DestinationRegion[]): boolean {
   return ALL_DESTINATION_REGIONS.every((r) => regions.includes(r))
 }
 
-function regionsMatchPreset(
-  regions: DestinationRegion[],
-  preset: readonly DestinationRegion[],
-): boolean {
-  if (regions.length !== preset.length) return false
-  return preset.every((r) => regions.includes(r))
-}
-
 export function resolveWhereToLook(filters: MapFilters): MapWhereToLook {
-  if (filters.regionScope === 'us-only') return 'us'
-  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_LATIN_AMERICA_REGIONS)) {
-    return 'latin-america'
-  }
-  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_ASIA_REGIONS)) return 'asia'
-  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_EUROPE_REGIONS)) return 'europe'
-  return 'all'
+  return filters.whereToLook
 }
 
 export function applyWhereToLook(filters: MapFilters, choice: MapWhereToLook): MapFilters {
+  const base = {
+    ...filters,
+    whereToLook: choice,
+    regions: [...ALL_DESTINATION_REGIONS],
+  }
+
   switch (choice) {
     case 'us':
       return {
-        ...filters,
+        ...base,
         regionScope: 'us-only',
-        regions: [...ALL_DESTINATION_REGIONS],
-      }
-    case 'europe':
-      return {
-        ...filters,
-        regionScope: 'international-only',
-        regions: [...WHERE_TO_LOOK_EUROPE_REGIONS],
-        medicareAccess: false,
-      }
-    case 'latin-america':
-      return {
-        ...filters,
-        regionScope: 'international-only',
-        regions: [...WHERE_TO_LOOK_LATIN_AMERICA_REGIONS],
-        medicareAccess: false,
-      }
-    case 'asia':
-      return {
-        ...filters,
-        regionScope: 'international-only',
-        regions: [...WHERE_TO_LOOK_ASIA_REGIONS],
-        medicareAccess: false,
       }
     case 'all':
       return {
-        ...filters,
+        ...base,
         regionScope: 'both',
-        regions: [...ALL_DESTINATION_REGIONS],
+        medicareAccess: false,
+      }
+    default:
+      return {
+        ...base,
+        regionScope: 'international-only',
         medicareAccess: false,
       }
   }
@@ -413,9 +430,7 @@ export function applyWhereToLook(filters: MapFilters, choice: MapWhereToLook): M
 
 export function countActiveMapFilters(filters: MapFilters): number {
   let count = 0
-  if (resolveWhereToLook(filters) !== 'all') count += 1
-  else if (!regionsAreDefault(filters.regions)) count += 1
-  else if (filters.regionScope !== 'both') count += 1
+  if (filters.whereToLook !== 'all') count += 1
   if (filters.climate !== 'any') count += 1
   if (filters.sortBy !== 'affordability-fit') count += 1
   if (filters.englishProficiency !== 'any') count += 1
@@ -430,6 +445,9 @@ export function countActiveMapFilters(filters: MapFilters): number {
   if (filters.directFromUsOnly) count += 1
   if (filters.visaFreeDays !== 'any') count += 1
   if (filters.minRetirementScore !== 'any') count += 1
+  if (!filters.includeHealthIns) count += 1
+  if (filters.healthInsMonthlyUsd !== DEFAULT_HEALTH_INS_MONTHLY_USD) count += 1
+  if (filters.visaQualifyingOnly) count += 1
   return count
 }
 
@@ -440,6 +458,7 @@ export function hasNonDefaultMapFilters(filters: MapFilters): boolean {
 export function mapFiltersKey(filters: MapFilters): string {
   return [
     filters.fitsMyIncome ? '1' : '0',
+    filters.whereToLook,
     filters.climate,
     [...filters.regions].sort().join(','),
     filters.regionScope,
@@ -456,6 +475,9 @@ export function mapFiltersKey(filters: MapFilters): string {
     filters.directFromUsOnly ? '1' : '0',
     filters.visaFreeDays,
     filters.minRetirementScore,
+    filters.includeHealthIns ? '1' : '0',
+    String(filters.healthInsMonthlyUsd),
+    filters.visaQualifyingOnly ? '1' : '0',
   ].join('|')
 }
 
@@ -464,19 +486,20 @@ export function passesMapFilters(
   filters: MapFilters,
   monthlyIncome: number,
 ): boolean {
-  const { city, monthlyBudget } = scored
+  const { city } = scored
+  const monthlyOutflow = monthlyOutflowForMapCity(scored, monthlyIncome, filters)
 
-  if (monthlyBudget > monthlyIncome) return false
+  if (monthlyOutflow > monthlyIncome) return false
 
-  // Continent buckets exclude the US — only when user narrows regions (not "all regions")
-  if (!regionsAreDefault(filters.regions) && city.country !== US_COUNTRY) {
-    const region = regionFromCountry(city.country)
-    if (!region || !filters.regions.includes(region)) return false
-  }
+  if (!passesVisaQualifyingMapFilter(scored, monthlyIncome, filters)) return false
+
+  if (!passesWhereToLookCountry(city.country, filters.whereToLook)) return false
 
   if (!passesClimate(city.country, filters.climate)) return false
 
-  if (!passesRegionScope(city.country, filters.regionScope)) return false
+  if (filters.whereToLook === 'all' && !passesRegionScope(city.country, filters.regionScope)) {
+    return false
+  }
 
   if (!passesMapDealbreakers(city.country, filters)) return false
 
@@ -499,11 +522,13 @@ export function scoreAndFilterMapCities(
   monthlyIncome: number,
   filters: MapFilters,
   limit?: number,
+  excludedCountries: string[] = getExcludedCountries(),
 ): ScoredMapCity[] {
   const scored = getAllMapCities()
+    .filter((city) => passesExclusionFilters(city, excludedCountries))
     .map((city) => scoreMapCity(city, monthlyIncome))
     .filter((item) => passesMapFilters(item, filters, monthlyIncome))
-    .sort((a, b) => compareMapCities(a, b, filters.sortBy, monthlyIncome))
+    .sort((a, b) => compareMapCities(a, b, filters.sortBy, monthlyIncome, filters))
 
   return limit != null ? scored.slice(0, limit) : scored
 }
@@ -512,6 +537,12 @@ export function scoreAndFilterMapCities(
 export function countVisibleMapCities(
   monthlyIncome: number,
   filters: MapFilters,
+  excludedCountries?: string[],
 ): number {
-  return scoreAndFilterMapCities(monthlyIncome, filters).length
+  return scoreAndFilterMapCities(
+    monthlyIncome,
+    filters,
+    undefined,
+    excludedCountries,
+  ).length
 }

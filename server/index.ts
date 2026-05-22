@@ -28,10 +28,7 @@ import { subscriptionStatusFromStripe } from './stripeBilling.js'
 import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
-import { fetchLivingCostSnapshot } from './livingCostScraper.js'
 import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
-
-const LIVING_COST_PATH_RE = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/i
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -677,30 +674,6 @@ app.delete('/api/scenarios/:id', async (req, res) => {
     return
   }
   res.json({ ok: true })
-})
-
-/** Cost-of-living snapshot scraped from livingcost.org (server-rendered HTML). */
-app.get('/api/where-to-retire/living-cost', async (req, res) => {
-  const path = typeof req.query.path === 'string' ? req.query.path.trim().toLowerCase() : ''
-  if (!path || path.length > 96 || !LIVING_COST_PATH_RE.test(path)) {
-    res.status(400).json({ ok: false, error: 'invalid_path' })
-    return
-  }
-  try {
-    const snapshot = await fetchLivingCostSnapshot(path)
-    res.json({ ok: true, snapshot })
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'exception'
-    if (msg.startsWith('upstream_404')) {
-      res.status(404).json({ ok: false, error: 'not_found' })
-      return
-    }
-    if (msg.startsWith('upstream_')) {
-      res.status(502).json({ ok: false, error: 'upstream' })
-      return
-    }
-    res.status(500).json({ ok: false, error: 'fetch_failed' })
-  }
 })
 
 /** Delayed live quote (Yahoo chart) for dashboard holdings — CORS-safe via this server. */

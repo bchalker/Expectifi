@@ -1,8 +1,10 @@
+import { useEffect, useMemo, useState } from 'react'
 import { IconCheck } from '@tabler/icons-react'
 import {
   WELCOME_PLANNING_HINTS,
   WELCOME_PLANNING_PLACEHOLDERS,
 } from '../lib/welcomePlanningFieldCopy'
+import { clampTargetRetirementAge, retireAgeBoundsForDob } from '../lib/userPrefs'
 import { parseNum } from '../utils/format'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
 import './WelcomeGoalStepFields.scss'
@@ -14,6 +16,7 @@ type Props = {
   onMonthlyGoalChange: (amount: number) => void
   retireAge: number
   onRetireAgeChange: (age: number) => void
+  dateOfBirth?: string
   centered?: boolean
   showFillState?: boolean
   className?: string
@@ -24,11 +27,35 @@ export function WelcomeGoalStepFields({
   onMonthlyGoalChange,
   retireAge,
   onRetireAgeChange,
+  dateOfBirth = '',
   centered = false,
   showFillState = false,
   className,
 }: Props) {
+  const [ageFocused, setAgeFocused] = useState(false)
+  const [ageDraft, setAgeDraft] = useState('')
+  const bounds = useMemo(() => retireAgeBoundsForDob(dateOfBirth), [dateOfBirth])
+
+  useEffect(() => {
+    if (ageFocused) return
+    setAgeDraft(retireAge > 0 ? String(retireAge) : '')
+  }, [retireAge, ageFocused])
+
   const retireAgeFilled = Number.isFinite(retireAge) && retireAge > 0
+  const ageDisplay = ageFocused ? ageDraft : retireAge > 0 ? String(retireAge) : ''
+
+  const commitRetireAgeDraft = () => {
+    const raw = ageDraft.trim()
+    if (!raw) {
+      const fallback = retireAge > 0 ? retireAge : bounds.min
+      onRetireAgeChange(clampTargetRetirementAge(fallback, dateOfBirth))
+      setAgeDraft(String(clampTargetRetirementAge(fallback, dateOfBirth)))
+      return
+    }
+    const next = clampTargetRetirementAge(parseNum(raw), dateOfBirth)
+    onRetireAgeChange(next)
+    setAgeDraft(String(next))
+  }
 
   return (
     <div
@@ -68,10 +95,23 @@ export function WelcomeGoalStepFields({
           <input
             id="welcome-planning-retire-age"
             type="text"
-            inputMode="decimal"
+            inputMode="numeric"
             className="onboarding-field-shell__input welcome-goal-fields__age-input"
-            value={String(retireAge)}
-            onChange={(e) => onRetireAgeChange(Math.round(parseNum(e.target.value)))}
+            value={ageDisplay}
+            min={bounds.min}
+            max={bounds.max}
+            aria-valuemin={bounds.min}
+            aria-valuemax={bounds.max}
+            aria-valuenow={retireAge > 0 ? retireAge : undefined}
+            onFocus={() => {
+              setAgeFocused(true)
+              setAgeDraft(retireAge > 0 ? String(retireAge) : '')
+            }}
+            onChange={(e) => setAgeDraft(e.target.value.replace(/[^\d]/g, ''))}
+            onBlur={() => {
+              setAgeFocused(false)
+              commitRetireAgeDraft()
+            }}
           />
           {retireAgeFilled ? (
             <span className="onboarding-field-shell__check" aria-hidden>

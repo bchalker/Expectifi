@@ -11,16 +11,16 @@ import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
 import {
   ALL_DESTINATION_REGIONS,
   countActiveMapFilters,
-  countFitsIncomeWithFilters,
+  countMapCityVisibility,
   DEFAULT_MAP_FILTERS,
   type MapFilters,
 } from "../lib/whereToRetire/cityMapScoring";
 import {
   defaultExplorationIncome,
-  getTotalMapCityCount,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
 } from "../lib/whereToRetire/budgetExplorationStats";
+import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
 import type { MapCity } from "../utils/costOfLiving";
 import "./WhereToRetire.scss";
 
@@ -37,7 +37,7 @@ export function WhereToRetire({ c }: Props) {
   const [viewMode, setViewMode] = useState<WtrViewMode>("map");
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
-  const totalMapCities = useMemo(() => getTotalMapCityCount(), []);
+  const storage = useRetirementMapStorage();
   const [explorationIncome, setExplorationIncome] = useState(() =>
     defaultExplorationIncome(grossMonthlyIncome),
   );
@@ -56,9 +56,14 @@ export function WhereToRetire({ c }: Props) {
     setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
   }, [grossMonthlyIncome]);
 
-  const showingCityCount = useMemo(
-    () => countFitsIncomeWithFilters(mapExplorationIncome, mapFilters),
-    [mapExplorationIncome, mapFilters],
+  const visibilityCounts = useMemo(
+    () =>
+      countMapCityVisibility(
+        mapExplorationIncome,
+        mapFilters,
+        storage.excludedCountries,
+      ),
+    [mapExplorationIncome, mapFilters, storage.excludedCountries],
   );
 
   const activeFilterCount = useMemo(
@@ -66,8 +71,14 @@ export function WhereToRetire({ c }: Props) {
       countActiveMapFilters(mapFilters) +
       (isAtProjectedExplorationIncome(grossMonthlyIncome, explorationIncome)
         ? 0
-        : 1),
-    [grossMonthlyIncome, explorationIncome, mapFilters],
+        : 1) +
+      (storage.excludedCountries.length > 0 ? 1 : 0),
+    [
+      grossMonthlyIncome,
+      explorationIncome,
+      mapFilters,
+      storage.excludedCountries.length,
+    ],
   );
 
   const toggleFiltersPanel = useCallback(() => {
@@ -151,15 +162,19 @@ export function WhereToRetire({ c }: Props) {
           <div className="where-to-retire__income-toolbar">
             <div className="where-to-retire__showing-count" aria-live="polite">
               <p className="where-to-retire__showing-count-primary">
-                Showing{" "}
                 <AnimatedCount
-                  value={showingCityCount}
+                  value={visibilityCounts.visibleCount}
                   className="where-to-retire__showing-count-num"
                 />{" "}
                 cities
               </p>
               <p className="where-to-retire__showing-count-sub">
-                Based on the range slider and filters
+                from{" "}
+                <AnimatedCount
+                  value={visibilityCounts.visibleCountryCount}
+                  className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
+                />{" "}
+                countries
               </p>
             </div>
             <div className="where-to-retire__income-toolbar-slider">
@@ -186,18 +201,32 @@ export function WhereToRetire({ c }: Props) {
             filters={mapFilters}
             onChange={setMapFilters}
             anchorRef={filterButtonRef}
+            monthlyIncome={mapExplorationIncome}
+            excludedCountries={storage.excludedCountries}
+            favoriteCities={storage.favoriteCities}
+            onAddExcludedCountry={storage.addExcludedCountry}
+            onRemoveExcludedCountry={storage.removeExcludedCountry}
+            onClearExcludedCountries={storage.clearExcludedCountries}
+            onRemoveFavorite={storage.removeFavoriteCity}
           />
           <div className="where-to-retire__main-panel-map">
             <RetirementMapExplorer
               explorationIncome={mapExplorationIncome}
               filters={mapFilters}
               onFiltersChange={setMapFilters}
+              excludedCountries={storage.excludedCountries}
+              onAddExcludedCountry={storage.addExcludedCountry}
+              isFavoritedCity={storage.isFavoritedCity}
+              onToggleFavoriteCity={storage.toggleFavoriteCity}
+              favoriteCities={storage.favoriteCities}
               filtersOpen={filtersOpen}
               onFiltersOpenChange={setFiltersOpen}
               compareIds={compareIds}
               compareOverlayOpen={viewMode === "compare"}
-              explorerViewMode={viewMode}
-              onExplorerViewModeChange={setViewMode}
+              explorerViewMode={viewMode === "compare" ? "compare" : "map"}
+              onExplorerViewModeChange={(mode) =>
+                setViewMode(mode === "compare" ? "compare" : "map")
+              }
               onToggleCompare={toggleCompare}
               onClearCompare={clearCompare}
               onViewComparison={() => setViewMode("compare")}
@@ -226,7 +255,8 @@ export function WhereToRetire({ c }: Props) {
 
       <footer className="where-to-retire__footer">
         <p className="where-to-retire__catalog-note">
-          {totalMapCities.toLocaleString()} cities in our worldwide catalog.
+          {visibilityCounts.totalCities.toLocaleString()} cities in our worldwide
+          catalog.
         </p>
         <p className="where-to-retire__disclaimer" role="note">
           All figures are educational estimates only — not tax, legal,

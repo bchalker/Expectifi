@@ -1,4 +1,4 @@
-import { isValidIsoDateString } from './ageFromDob'
+import { ageFromIsoDateString, isValidIsoDateString } from './ageFromDob'
 import type { CalculatorInputs } from './computeResults'
 import { clampClaimAge, normalizeClaimAge, type SsClaimAge } from './socialSecurity'
 
@@ -14,8 +14,26 @@ export type UserPrefs = {
   ssClaimingAge: number
 }
 
-const RETIRE_AGE_MIN = 50
-const RETIRE_AGE_MAX = 80
+export const RETIRE_AGE_MIN = 50
+export const RETIRE_AGE_MAX = 80
+
+export function retireAgeBoundsForDob(dateOfBirth: string): { min: number; max: number } {
+  if (!isValidIsoDateString(dateOfBirth)) {
+    return { min: RETIRE_AGE_MIN, max: RETIRE_AGE_MAX }
+  }
+  const at = ageFromIsoDateString(dateOfBirth)
+  if (at < 18 || at > 100) {
+    return { min: RETIRE_AGE_MIN, max: RETIRE_AGE_MAX }
+  }
+  return { min: Math.max(RETIRE_AGE_MIN, at + 1), max: RETIRE_AGE_MAX }
+}
+
+export function clampTargetRetirementAge(age: number, dateOfBirth: string): number {
+  const n = Math.round(age)
+  if (!Number.isFinite(n)) return RETIRE_AGE_MIN
+  const { min, max } = retireAgeBoundsForDob(dateOfBirth)
+  return Math.min(max, Math.max(min, n))
+}
 
 /** DOB, retirement age, and SS claiming — goal may be zero after configure. */
 export function hasPlanningProfilePrefs(p: UserPrefs | null | undefined): boolean {
@@ -101,22 +119,11 @@ export type PlanningDisplayValues = {
   monthlyIncomeGoal: number
 }
 
-const EMPTY_PLANNING_DISPLAY: PlanningDisplayValues = {
-  dateOfBirth: '',
-  targetRetirementAge: 0,
-  save: 0,
-  growthGoal: 0,
-  monthlyIncomeGoal: 0,
-}
-
-/** Values for planning UI — empty until onboarding or manual plan capture. */
+/** Values for planning UI — always mirror live calculator inputs (avoids resetting fields mid-edit). */
 export function planningDisplayFromInputs(inputs: CalculatorInputs): PlanningDisplayValues {
-  if (!inputsHavePlanningProfileFields(inputs)) {
-    return { ...EMPTY_PLANNING_DISPLAY }
-  }
   return {
-    dateOfBirth: inputs.dateOfBirth,
-    targetRetirementAge: inputs.targetRetirementAge,
+    dateOfBirth: inputs.dateOfBirth ?? '',
+    targetRetirementAge: inputs.targetRetirementAge ?? 0,
     save: inputs.save,
     growthGoal: inputs.growthGoal,
     monthlyIncomeGoal: inputs.monthlyIncomeGoal,

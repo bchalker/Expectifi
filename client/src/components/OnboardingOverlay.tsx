@@ -455,6 +455,7 @@ export function OnboardingOverlay({
                 onRetireAgeChange={(retireAge) =>
                   setForm((f) => ({ ...f, retireAge }))
                 }
+                dateOfBirth={form.dob}
                 centered
                 showFillState
               />

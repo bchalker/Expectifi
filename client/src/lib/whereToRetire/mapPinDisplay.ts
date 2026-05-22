@@ -11,9 +11,17 @@ export type MapPinColorView = 'score' | 'budget' | 'expat'
 
 export type BudgetFitBand = 'well-within' | 'comfortable' | 'tight' | 'over-budget'
 
+export type MapPinBandClass =
+  | RetirementScoreBand
+  | BudgetFitBand
+  | ExpatCommunityPinTier
+  | 'favorite'
+
+export const FAVORITE_PIN_COLOR = '#f59e0b'
+
 export type MapPinDisplay = {
   pinColor: string
-  bandClass: RetirementScoreBand | BudgetFitBand | ExpatCommunityPinTier
+  bandClass: MapPinBandClass
   displayScore: number
   bandLabel: string
   tooltipScoreLabel: string
@@ -104,7 +112,7 @@ function expatDisplay(country: string): MapPinDisplay {
   }
 }
 
-export function resolveMapPinDisplay(
+function baseMapPinDisplay(
   scored: ScoredMapCity,
   view: MapPinColorView,
   monthlyIncome: number,
@@ -121,6 +129,23 @@ export function resolveMapPinDisplay(
     displayScore: scored.displayScore,
     bandLabel: scored.bandLabel,
     tooltipScoreLabel: `Retirement score ${scored.displayScore}`,
+  }
+}
+
+export function resolveMapPinDisplay(
+  scored: ScoredMapCity,
+  view: MapPinColorView,
+  monthlyIncome: number,
+  isFavorite = false,
+): MapPinDisplay {
+  const base = baseMapPinDisplay(scored, view, monthlyIncome)
+  if (!isFavorite) return base
+  return {
+    ...base,
+    pinColor: FAVORITE_PIN_COLOR,
+    bandClass: 'favorite',
+    bandLabel: 'Favorite',
+    tooltipScoreLabel: `${base.tooltipScoreLabel} · Saved favorite`,
   }
 }
 

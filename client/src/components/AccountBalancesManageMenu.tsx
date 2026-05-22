@@ -166,6 +166,12 @@ export type AccountBalancesManageMenuProps = {
   onPickCsvCustodian: (custodian: PositionsCsvCustodian) => void
   onClearAccounts: () => void
   onImportApplied?: () => void
+  /** Shown above connect actions when manual balances would be replaced. */
+  manualReplaceNotice?: string | null
+  /** Gate CSV import / Plaid before replacing manual amounts. */
+  onRequestReplaceManual?: (proceed: () => void) => void
+  /** Gate manual entry before replacing imported / linked data. */
+  onRequestReplaceImport?: (proceed: () => void) => void
   className?: string
   /** Increment to open the Manage menu programmatically. */
   openRequest?: number
@@ -177,6 +183,9 @@ export function AccountBalancesManageMenu({
   onPickCsvCustodian,
   onClearAccounts,
   onImportApplied,
+  manualReplaceNotice = null,
+  onRequestReplaceManual,
+  onRequestReplaceImport,
   className,
   openRequest,
 }: AccountBalancesManageMenuProps) {
@@ -255,13 +264,20 @@ export function AccountBalancesManageMenu({
 
   const handlePlaidConnect = useCallback(() => {
     if (!showPlaidConnect || ctx?.linkBusy) return
-    close()
-    if (ctx) {
-      void ctx.startAddAccount()
+    const run = () => {
+      close()
+      if (ctx) {
+        void ctx.startAddAccount()
+        return
+      }
+      onImportApplied?.()
+    }
+    if (onRequestReplaceManual) {
+      onRequestReplaceManual(run)
       return
     }
-    onImportApplied?.()
-  }, [close, ctx, onImportApplied, showPlaidConnect])
+    run()
+  }, [close, ctx, onImportApplied, onRequestReplaceManual, showPlaidConnect])
 
   const syncTooltip = lastHealthySync ? (
     <>
@@ -321,6 +337,12 @@ export function AccountBalancesManageMenu({
               {ctx?.linkInfo ? (
                 <p className="account-balances-manage__info" role="status">
                   {ctx.linkInfo}
+                </p>
+              ) : null}
+
+              {manualReplaceNotice ? (
+                <p className="account-balances-manage__replace-notice" role="note">
+                  {manualReplaceNotice}
                 </p>
               ) : null}
 
@@ -400,7 +422,11 @@ export function AccountBalancesManageMenu({
                     type="button"
                     className="account-balances-manage__item"
                     role="menuitem"
-                    onClick={() => runAndClose(onManualAdd)}
+                    onClick={() => {
+                      const run = () => runAndClose(onManualAdd)
+                      if (onRequestReplaceImport) onRequestReplaceImport(run)
+                      else run()
+                    }}
                   >
                     <IconPencil size={16} stroke={1.5} aria-hidden />
                     Manually Add

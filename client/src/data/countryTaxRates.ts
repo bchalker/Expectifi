@@ -1,7 +1,10 @@
 /** International tax planning constants — simplified US expat model. */
 
+import healthInsuranceByIso from './healthInsuranceByIso.json'
 import { COUNTRY_RETIREMENT_TAX_DETAIL } from './countryRetirementTaxDetail'
 import type { RetirementTaxDetail } from './retirementTaxDetail'
+
+const HEALTH_INS_BY_ISO = healthInsuranceByIso as Record<string, number>
 
 export type CountryTaxEntry = {
   code: string
@@ -16,6 +19,8 @@ export type CountryTaxEntry = {
   healthcareNotes: string
   teleportSlug: string
   defaultMonthlyCostUsd: number
+  /** Monthly private health insurance estimate (USD) from combined destination data. */
+  healthInsuranceEstimateUsd: number
   lastVerified: string
   sourceUrl: string
   retirementTaxDetail: RetirementTaxDetail
@@ -77,6 +82,7 @@ function c(
       'International private insurance typical until eligible for local systems. Medicare generally does not cover care abroad except limited emergencies.',
     teleportSlug,
     defaultMonthlyCostUsd,
+    healthInsuranceEstimateUsd: HEALTH_INS_BY_ISO[code] ?? 175,
     lastVerified: detail.lastVerified,
     sourceUrl: detail.sourceUrl,
     retirementTaxDetail: detail,

@@ -15,11 +15,17 @@ import {
   type MapFilters,
   type ScoredMapCity,
 } from "../../lib/whereToRetire/cityMapScoring";
+import { lookupRetirementCity } from "../../lib/whereToRetire/retirementCityLookup";
+import { countryToIsoCode } from "../../utils/costOfLiving";
 import { expatCommunitySortRank } from "../../utils/expatInfo";
 import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import { RetirementDestinationCard } from "./RetirementDestinationCard";
 import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
 import { WtrCompareBar, type CompareBarCity } from "./WtrCompareBar";
+import {
+  mapIncomeFitDisplayForCity,
+  monthlyOutflowForMapCity,
+} from "../../lib/whereToRetire/mapIncomeFit";
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
 import { useMapPinColorView } from "../../hooks/useMapPinColorView";
 import { RetirementLeafletMap } from "./RetirementLeafletMap";
@@ -48,6 +54,15 @@ type Props = {
   onToggleCompare: (cityId: string) => void;
   onClearCompare: () => void;
   onViewComparison: () => void;
+  excludedCountries: string[];
+  onAddExcludedCountry: (country: string) => void;
+  favoriteCities: { city: string; country: string }[];
+  isFavoritedCity: (city: string, country: string) => boolean;
+  onToggleFavoriteCity: (entry: {
+    city: string;
+    country: string;
+    country_iso: string;
+  }) => void;
 };
 
 const LIST_PAGE_SIZE = 25;
@@ -62,6 +77,8 @@ const MAX_COMPARE_CITIES = 5;
 function sortCitiesForPinView(
   cities: ScoredMapCity[],
   pinColorView: MapPinColorView,
+  monthlyIncome: number,
+  filters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">,
 ): ScoredMapCity[] {
   if (pinColorView === "expat") {
     return [...cities].sort(
@@ -69,6 +86,13 @@ function sortCitiesForPinView(
         expatCommunitySortRank(b.city.country) -
           expatCommunitySortRank(a.city.country) ||
         b.retirementScore - a.retirementScore,
+    );
+  }
+  if (pinColorView === "budget") {
+    return [...cities].sort(
+      (a, b) =>
+        monthlyOutflowForMapCity(a, monthlyIncome, filters) -
+        monthlyOutflowForMapCity(b, monthlyIncome, filters),
     );
   }
   return cities;
@@ -88,8 +112,21 @@ export function RetirementMapExplorer({
   onToggleCompare,
   onClearCompare,
   onViewComparison,
+  excludedCountries,
+  onAddExcludedCountry,
+  favoriteCities,
+  isFavoritedCity,
+  onToggleFavoriteCity,
 }: Props) {
   const { pinColorView, onPinColorViewChange } = useMapPinColorView();
+
+  const favoritedKeySet = useMemo(
+    () =>
+      new Set(
+        favoriteCities.map((f) => `${f.city}\u0001${f.country}`),
+      ),
+    [favoriteCities],
+  );
 
   const handlePinColorViewChange = useCallback(
     (view: MapPinColorView) => {
@@ -104,6 +141,9 @@ export function RetirementMapExplorer({
             ? { ...base, regionScope: "international-only" }
             : base;
         });
+      }
+      if (view === "budget" && filters.sortBy !== "lowest-budget") {
+        onFiltersChange((prev) => ({ ...prev, sortBy: "lowest-budget" }));
       }
     },
     [onPinColorViewChange, onFiltersChange],
@@ -121,6 +161,12 @@ export function RetirementMapExplorer({
         : base;
     });
   }, [pinColorView, filters.regionScope, onFiltersChange]);
+
+  useEffect(() => {
+    if (filters.whereToLook !== "us" || pinColorView !== "expat") return;
+    onPinColorViewChange("score");
+  }, [filters.whereToLook, pinColorView, onPinColorViewChange]);
+
   const chromeRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -129,10 +175,12 @@ export function RetirementMapExplorer({
   const filteredCities = useMemo(
     () =>
       sortCitiesForPinView(
-        scoreAndFilterMapCities(explorationIncome, filters),
+        scoreAndFilterMapCities(explorationIncome, filters, undefined, excludedCountries),
         pinColorView,
+        explorationIncome,
+        filters,
       ),
-    [explorationIncome, filters, pinColorView],
+    [explorationIncome, filters, pinColorView, excludedCountries],
   );
 
   const listPageCount = useMemo(
@@ -162,6 +210,7 @@ export function RetirementMapExplorer({
         explorationIncome,
         filters.fitsMyIncome ? "1" : "0",
         filters.climate,
+        filters.whereToLook,
         [...filters.regions].sort().join(","),
         filters.regionScope,
         filters.sortBy,
@@ -177,11 +226,16 @@ export function RetirementMapExplorer({
         filters.directFromUsOnly ? "1" : "0",
         filters.visaFreeDays,
         filters.minRetirementScore,
+        filters.includeHealthIns ? "1" : "0",
+        String(filters.healthInsMonthlyUsd),
+        filters.visaQualifyingOnly ? "1" : "0",
         pinColorView,
+        excludedCountries.join(","),
       ].join("|"),
     [
       explorationIncome,
       filters.climate,
+      filters.whereToLook,
       filters.englishProficiency,
       filters.foreignTax,
       filters.safety,
@@ -191,6 +245,9 @@ export function RetirementMapExplorer({
       filters.directFromUsOnly,
       filters.visaFreeDays,
       filters.minRetirementScore,
+      filters.includeHealthIns,
+      filters.healthInsMonthlyUsd,
+      filters.visaQualifyingOnly,
       filters.fitsMyIncome,
       filters.hideAdvisories,
       filters.medicareAccess,
@@ -199,6 +256,7 @@ export function RetirementMapExplorer({
       filters.retirementVisa,
       filters.sortBy,
       pinColorView,
+      excludedCountries,
     ],
   );
 
@@ -239,6 +297,17 @@ export function RetirementMapExplorer({
   const selectedScored = useMemo(
     () => filteredCities.find((s) => s.city.id === selectedId) ?? null,
     [filteredCities, selectedId],
+  );
+
+  const handleExcludeCountry = useCallback(
+    (country: string) => {
+      onAddExcludedCountry(country);
+      if (selectedScored?.city.country === country) {
+        setSelectedId(null);
+        setPanelOpen(false);
+      }
+    },
+    [onAddExcludedCountry, selectedScored?.city.country],
   );
 
   const scrollListToTop = useCallback(() => {
@@ -359,6 +428,7 @@ export function RetirementMapExplorer({
             destinations={filteredCities}
             monthlyIncome={explorationIncome}
             pinColorView={pinColorView}
+            favoritedKeySet={favoritedKeySet}
             selectedId={selectedId}
             detailPanelOpen={panelOpen && selectedScored != null}
             fitKey={structuralFiltersKey}
@@ -389,6 +459,10 @@ export function RetirementMapExplorer({
               {pinColorView === "expat" ? (
                 <p className="wtr-explorer__list-sort-label">
                   Sort by expat community size
+                </p>
+              ) : pinColorView === "budget" ? (
+                <p className="wtr-explorer__list-sort-label">
+                  Sorted by lowest monthly cost
                 </p>
               ) : (
                 <WtrMapSortSelect
@@ -423,7 +497,32 @@ export function RetirementMapExplorer({
                           rank={safeListPage * LIST_PAGE_SIZE + index + 1}
                           active={selectedId === item.city.id}
                           staggerIndex={index}
+                          incomeFit={mapIncomeFitDisplayForCity(
+                            item.city.city,
+                            item.city.country,
+                            explorationIncome,
+                            filters,
+                          )}
                           onSelect={() => openDestination(item.city.id)}
+                          isFavorited={isFavoritedCity(
+                            item.city.city,
+                            item.city.country,
+                          )}
+                          onToggleFavorite={() => {
+                            const recordIso = lookupRetirementCity(
+                              item.city.city,
+                              item.city.country,
+                            )?.country_iso;
+                            const iso =
+                              recordIso ??
+                              countryToIsoCode(item.city.country) ??
+                              "";
+                            onToggleFavoriteCity({
+                              city: item.city.city,
+                              country: item.city.country,
+                              country_iso: iso,
+                            });
+                          }}
                         />
                       ))}
                     </div>
@@ -473,6 +572,13 @@ export function RetirementMapExplorer({
         compareAtMax={compareIds.length >= MAX_COMPARE_CITIES}
         onToggleCompare={() => {
           if (selectedScored) onToggleCompare(selectedScored.city.id);
+        }}
+        isCountryExcluded={
+          selectedScored != null &&
+          excludedCountries.includes(selectedScored.city.country)
+        }
+        onExcludeCountry={() => {
+          if (selectedScored) handleExcludeCountry(selectedScored.city.country);
         }}
         listPageNav={destinationListPageNav}
       />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { LocalCurrencyInfo } from '../lib/api/exchangeRates'
-import { getLocalCurrencyInfo } from '../lib/api/exchangeRates'
+import { getLocalCurrencyInfo, getUsdExchangeHistory } from '../lib/api/exchangeRates'
 import { countryToCurrencyCode, type MapCity } from '../utils/costOfLiving'
 
 type DestinationLiveData = {
@@ -26,13 +26,18 @@ export function useDestinationLiveData(city: MapCity | null): DestinationLiveDat
     const currencyCode = countryToCurrencyCode(city.country)
 
     void (async () => {
-      const nextCurrency = currencyCode
-        ? await getLocalCurrencyInfo(currencyCode)
-        : null
+      const nextCurrency =
+        currencyCode && currencyCode !== 'USD'
+          ? await getLocalCurrencyInfo(currencyCode)
+          : null
 
       if (cancelled) return
       setCurrency(nextCurrency)
       setLoading(false)
+
+      if (currencyCode && currencyCode !== 'USD') {
+        void getUsdExchangeHistory(currencyCode)
+      }
     })()
 
     return () => {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
-import { ageFromIsoDateString, isValidIsoDateString } from '../lib/ageFromDob'
+import { isValidIsoDateString } from '../lib/ageFromDob'
+import { clampTargetRetirementAge, retireAgeBoundsForDob } from '../lib/userPrefs'
 import { fmt } from '../utils/format'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
 import { DateOfBirthSelects, DobAgeToday } from './DateOfBirthSelects'
@@ -11,32 +12,8 @@ import './WelcomeGoalStepFields.scss'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 
-const RETIRE_AGE_MAX = 80
 const ANNUAL_SAVE_MAX = 60_000
 const ANNUAL_SAVE_STEP = 500
-
-function retireAgeBounds(dateOfBirth: string): { min: number; max: number } {
-  if (!isValidIsoDateString(dateOfBirth)) {
-    return { min: 50, max: RETIRE_AGE_MAX }
-  }
-  const at = ageFromIsoDateString(dateOfBirth)
-  if (at < 18 || at > 100) {
-    return { min: 50, max: RETIRE_AGE_MAX }
-  }
-  return { min: Math.max(50, at + 1), max: RETIRE_AGE_MAX }
-}
-
-function clampTargetRetirementAge(age: number, dateOfBirth: string): number {
-  const n = Math.round(age)
-  if (!Number.isFinite(n)) return 62
-  if (!isValidIsoDateString(dateOfBirth)) {
-    return Math.min(RETIRE_AGE_MAX, Math.max(50, n))
-  }
-  const at = ageFromIsoDateString(dateOfBirth)
-  if (at < 18 || at > 100) return Math.min(RETIRE_AGE_MAX, Math.max(50, n))
-  const lo = Math.max(50, at + 1)
-  return Math.min(RETIRE_AGE_MAX, Math.max(lo, n))
-}
 
 export type PlanningProfileVariant = 'import-manual' | 'configure' | 'welcome'
 
@@ -75,7 +52,7 @@ export type PlanningProfileFieldsProps = ImportManualProps | ConfigureProps | We
 
 export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
   const { variant, dateOfBirth, onDateOfBirth, targetRetirementAge, onTargetRetirementAge, className } = props
-  const retireBounds = useMemo(() => retireAgeBounds(dateOfBirth), [dateOfBirth])
+  const retireBounds = useMemo(() => retireAgeBoundsForDob(dateOfBirth), [dateOfBirth])
 
   useEffect(() => {
     if (variant !== 'configure' && variant !== 'import-manual') return
@@ -110,6 +87,7 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           onMonthlyGoalChange={props.onMonthlyIncomeGoal}
           retireAge={targetRetirementAge}
           onRetireAgeChange={onTargetRetirementAge}
+          dateOfBirth={dateOfBirth}
         />
       </div>
     )

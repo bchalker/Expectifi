@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from "react";
-import { IconAlertTriangle, IconPlane } from "@tabler/icons-react";
+import { IconAlertTriangle, IconHeart, IconHeartFilled, IconPlane } from "@tabler/icons-react";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
 import {
   resolveMapPinDisplay,
@@ -16,7 +16,9 @@ import {
   getExpatDestinationInfo,
   isDomesticRetirementDestination,
 } from "../../utils/expatInfo";
+import type { MapIncomeFitDisplay } from "../../lib/whereToRetire/mapIncomeFit";
 import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
+import { WtrIncomeFitBadges } from "./WtrIncomeFitBadges";
 import "./RetirementDestinationCard.scss";
 
 type Props = {
@@ -26,7 +28,10 @@ type Props = {
   rank: number;
   active: boolean;
   staggerIndex?: number;
+  incomeFit?: MapIncomeFitDisplay | null;
   onSelect: () => void;
+  isFavorited?: boolean;
+  onToggleFavorite?: () => void;
 };
 
 export function RetirementDestinationCard({
@@ -36,7 +41,10 @@ export function RetirementDestinationCard({
   rank,
   active,
   staggerIndex,
+  incomeFit = null,
   onSelect,
+  isFavorited = false,
+  onToggleFavorite,
 }: Props) {
   const { city } = scored;
   const display = resolveMapPinDisplay(scored, pinColorView, monthlyIncome);
@@ -89,12 +97,41 @@ export function RetirementDestinationCard({
         <span className="wtr-dest-card__body">
           <span className="wtr-dest-card__name-row">
             <span className="wtr-dest-card__name">{city.city}</span>
-            {showAdvisory ? (
-              <span className="wtr-dest-card__advisory-badge">
-                <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
-                Travel advisory
-              </span>
-            ) : null}
+            <span className="wtr-dest-card__name-actions">
+              {showAdvisory ? (
+                <span className="wtr-dest-card__advisory-badge">
+                  <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
+                  Travel advisory
+                </span>
+              ) : null}
+              {onToggleFavorite ? (
+                <button
+                  type="button"
+                  className={[
+                    "wtr-dest-card__favorite-btn",
+                    isFavorited && "wtr-dest-card__favorite-btn--active",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-label={
+                    isFavorited
+                      ? `Remove ${city.city} from favorites`
+                      : `Save ${city.city} to favorites`
+                  }
+                  aria-pressed={isFavorited}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite();
+                  }}
+                >
+                  {isFavorited ? (
+                    <IconHeartFilled size={16} stroke={1.5} aria-hidden />
+                  ) : (
+                    <IconHeart size={16} stroke={1.5} aria-hidden />
+                  )}
+                </button>
+              ) : null}
+            </span>
           </span>
           <span className="wtr-dest-card__country">
             <span className="wtr-dest-card__flag" aria-hidden>
@@ -136,9 +173,11 @@ export function RetirementDestinationCard({
                   : (bandClass as BudgetFitBand)
               }
               bandColor={pinColor}
+              valueSuffix={pinColorView === "budget" ? "%" : undefined}
               className="wtr-dest-card__score"
             />
           )}
+          {incomeFit ? <WtrIncomeFitBadges fit={incomeFit} variant="list" /> : null}
         </span>
       </div>
     </div>

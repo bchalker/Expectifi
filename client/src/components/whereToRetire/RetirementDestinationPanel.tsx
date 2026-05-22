@@ -26,8 +26,10 @@ import {
 } from "@tabler/icons-react";
 import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
 import { WtrCompareToggleButton } from "./WtrCompareToggleButton";
+import { WtrExcludeCountryIcon } from "./WtrExcludeCountryIcon";
 import { useCityClimate } from "../../hooks/useCityClimate";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
+import { calculateRetirementScore } from "../../utils/retirementScore";
 import type { CityData } from "../../utils/costOfLiving";
 import {
   buildBudgetBreakdownDisplay,
@@ -54,6 +56,7 @@ import {
 } from "./ColCategoryCard";
 import { ColExtrasList, type ColExtraLineItem } from "./ColExtrasList";
 import { DestinationGettingThereTab } from "./DestinationGettingThereTab";
+import { DestinationExchangeRate } from "./DestinationExchangeRate";
 import { DestinationExpatLifeTab } from "./DestinationExpatLifeTab";
 import { DestinationPeopleCultureTab } from "./DestinationPeopleCultureTab";
 import { DestinationQualityOfLifeTab } from "./DestinationQualityOfLifeTab";
@@ -86,6 +89,8 @@ type Props = {
   compareSelected: boolean;
   compareAtMax: boolean;
   onToggleCompare: () => void;
+  isCountryExcluded?: boolean;
+  onExcludeCountry?: () => void;
   listPageNav: DestinationListPageNav | null;
 };
 
@@ -361,6 +366,8 @@ type CityViewProps = {
   scored: ScoredMapCity;
   monthlyIncome: number;
   budgetBreakdown: NonNullable<ReturnType<typeof buildBudgetBreakdownDisplay>>;
+  isCountryExcluded?: boolean;
+  onExcludeCountry?: () => void;
   listPageNav: DestinationListPageNav | null;
 };
 
@@ -369,6 +376,8 @@ function DestinationPanelCityView({
   scored,
   monthlyIncome,
   budgetBreakdown,
+  isCountryExcluded = false,
+  onExcludeCountry,
   listPageNav,
 }: CityViewProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>("col");
@@ -380,17 +389,24 @@ function DestinationPanelCityView({
     failed: climateFailed,
   } = useCityClimate(scored.city);
 
-  const {
-    city,
-    displayScore,
-    incomeFitScore,
-    qolNormalized,
-    warnings,
-    band,
-    bandColor,
-    bandLabel,
-  } = scored;
-  const panelMonthlyBudget = calculateMonthlyBudget(city);
+  const { city } = scored;
+
+  const panelMonthlyBudget = useMemo(
+    () => calculateMonthlyBudget(city),
+    [city],
+  );
+
+  const headerScore = useMemo(
+    () =>
+      calculateRetirementScore(
+        monthlyIncome,
+        panelMonthlyBudget,
+        null,
+        city.country,
+      ),
+    [monthlyIncome, panelMonthlyBudget, city.country],
+  );
+
   const monthlySurplus = Math.max(
     0,
     Math.round(monthlyIncome - panelMonthlyBudget),
@@ -402,207 +418,216 @@ function DestinationPanelCityView({
 
   return (
     <div className="wtr-dest-panel__layout">
-        <header className="wtr-dest-panel__sticky-head">
-          <div
-            className="wtr-dest-panel__header wtr-dest-panel__stagger-item"
-            style={panelStaggerStyle(0)}
-          >
-            <div className="wtr-dest-panel__title-row">
-              <span className="wtr-dest-panel__flag" aria-hidden>
-                {flagEmoji}
-              </span>
-              <div className="wtr-dest-panel__titles">
-                <h2 id="wtr-dest-panel-title" className="wtr-dest-panel__name">
-                  {city.city}
-                </h2>
+      <header className="wtr-dest-panel__sticky-head">
+        <div
+          className="wtr-dest-panel__header wtr-dest-panel__stagger-item"
+          style={panelStaggerStyle(0)}
+        >
+          <div className="wtr-dest-panel__title-row">
+            <span className="wtr-dest-panel__flag" aria-hidden>
+              {flagEmoji}
+            </span>
+            <div className="wtr-dest-panel__titles">
+              <h2 id="wtr-dest-panel-title" className="wtr-dest-panel__name">
+                {city.city}
+              </h2>
+              <div className="wtr-dest-panel__country-row">
                 <p className="wtr-dest-panel__country">{city.country}</p>
+                {onExcludeCountry && !isCountryExcluded ? (
+                  <WtrExcludeCountryIcon
+                    country={city.country}
+                    onExclude={onExcludeCountry}
+                  />
+                ) : null}
               </div>
             </div>
           </div>
-
-          <section
-            className="wtr-dest-panel__summary"
-            aria-label="Monthly budget estimate"
-          >
-            <div className="wtr-dest-panel__summary-total-block">
-              <p className="wtr-dest-panel__summary-total">
-                {formatUsd(panelMonthlyBudget)}
-                <span className="wtr-dest-panel__summary-total-suffix">
-                  /mo
-                </span>
-              </p>
-              {monthlySurplus > 0 ? (
-                <span className="wtr-dest-panel__summary-surplus">
-                  + {formatUsd(monthlySurplus)} surplus
-                </span>
-              ) : null}
-            </div>
-            <div className="wtr-dest-panel__summary-copy">
-              <RetirementScoreHeader
-                className="wtr-dest-panel__summary-score"
-                displayScore={displayScore}
-                incomeFitScore={incomeFitScore}
-                qolNormalized={qolNormalized}
-                warnings={warnings}
-                band={band}
-                bandColor={bandColor}
-                bandLabel={bandLabel}
-              />
-            </div>
-          </section>
-        </header>
-
-        <div className="wtr-dest-panel__scroll">
-          {mobileNav ? (
-            <div
-              className="wtr-dest-panel__tab-nav wtr-dest-panel__stagger-item"
-              style={panelStaggerStyle(2)}
-            >
-              <DestinationPanelTabSelect
-                activeTab={activeTab}
-                onChange={setActiveTab}
-              />
-            </div>
-          ) : (
-            <div
-              className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
-              style={panelStaggerStyle(2)}
-              role="tablist"
-              aria-label="Destination details"
-              aria-orientation="vertical"
-            >
-              {PANEL_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  id={tab.tabId}
-                  aria-selected={activeTab === tab.id}
-                  aria-controls={tab.panelId}
-                  className={`wtr-dest-panel__tab${activeTab === tab.id ? " wtr-dest-panel__tab--active" : ""}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <span className="wtr-dest-panel__tab-inner">
-                    <span className="wtr-dest-panel__tab-label">
-                      {tab.label}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          <SimpleBar className="wtr-dest-panel__tab-content" autoHide={false}>
-            <div className="wtr-dest-panel__body">
-              <div
-                key={`${city.id}-${activeTab}`}
-                id={activeTabMeta?.panelId}
-                role={mobileNav ? "region" : "tabpanel"}
-                aria-label={
-                  mobileNav ? `${activeTabMeta?.label ?? "Section"} details` : undefined
-                }
-                aria-labelledby={
-                  mobileNav ? undefined : activeTabMeta?.tabId
-                }
-                className="wtr-dest-panel__tabpanel wtr-dest-panel__tabpanel--enter"
-              >
-                {activeTab === "col" ? (
-                  <>
-                    <div className="wtr-dest-panel__col-stack">
-                      <div className="wtr-dest-panel__cards wtr-dest-panel__cards--budget">
-                        {colBudgetCards.map((card, index) => (
-                          <ColCategoryPanelSection
-                            key={card.id}
-                            card={card}
-                            staggerIndex={index}
-                          />
-                        ))}
-                      </div>
-                      <div className="wtr-dest-panel__col-extras">
-                        <p
-                          className="wtr-dest-panel__col-extras-note wtr-dest-panel__stagger-item"
-                          style={panelStaggerStyle(colBudgetCards.length)}
-                        >
-                          Not included in budget estimate
-                        </p>
-                        <ColExtrasList
-                          items={colSupplementalItems}
-                          className="wtr-dest-panel__stagger-item"
-                          style={panelStaggerStyle(colBudgetCards.length + 1)}
-                        />
-                      </div>
-                    </div>
-                    {showTravelAdvisory ? (
-                      <div
-                        className="wtr-dest-panel__stagger-item"
-                        style={panelStaggerStyle(colBudgetCards.length + 2)}
-                      >
-                        <TravelAdvisoryNotice />
-                      </div>
-                    ) : null}
-                  </>
-                ) : activeTab === "weather" ? (
-                  <div className="wtr-dest-panel__weather">
-                    <ClimateCard
-                      climate={climate}
-                      loading={climateLoading}
-                      failed={climateFailed}
-                      staggerClassName="wtr-dest-panel__stagger-item"
-                      staggerStyle={panelStaggerStyle}
-                    />
-                  </div>
-                ) : activeTab === "gettingThere" ? (
-                  <DestinationGettingThereTab
-                    country={city.country}
-                    staggerClassName="wtr-dest-panel__stagger-item"
-                    staggerStyle={panelStaggerStyle}
-                  />
-                ) : activeTab === "taxVisa" ? (
-                  <DestinationTaxVisaTab
-                    country={city.country}
-                    staggerClassName="wtr-dest-panel__stagger-item"
-                    staggerStyle={panelStaggerStyle}
-                  />
-                ) : activeTab === "qol" ? (
-                  <DestinationQualityOfLifeTab
-                    country={city.country}
-                    staggerClassName="wtr-dest-panel__stagger-item"
-                    staggerStyle={panelStaggerStyle}
-                  />
-                ) : activeTab === "peopleCulture" ? (
-                  <DestinationPeopleCultureTab
-                    country={city.country}
-                    staggerClassName="wtr-dest-panel__stagger-item"
-                    staggerStyle={panelStaggerStyle}
-                  />
-                ) : (
-                  <DestinationExpatLifeTab
-                    city={city.city}
-                    country={city.country}
-                    staggerClassName="wtr-dest-panel__stagger-item"
-                    staggerStyle={panelStaggerStyle}
-                  />
-                )}
-              </div>
-            </div>
-          </SimpleBar>
         </div>
 
-        <footer className="wtr-dest-panel__footer">
-          {activeTab === "col" ? (
-            <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
-          ) : null}
-          {listPageNav ? (
-            <WtrCityListPagination
-              className="wtr-list-pagination--dest-panel"
-              page={listPageNav.page}
-              pageSize={listPageNav.pageSize}
-              totalCount={listPageNav.totalCount}
-              onPageChange={listPageNav.onPageChange}
-              centerNote="Estimates based on real prices reported by locals. Updated periodically. All amounts in USD."
+        <section
+          className="wtr-dest-panel__summary"
+          aria-label="Monthly budget and retirement score"
+        >
+          <div className="wtr-dest-panel__summary-budget">
+            <p className="wtr-dest-panel__summary-total tabular-nums">
+              {formatUsd(panelMonthlyBudget)}
+            </p>
+            {monthlySurplus > 0 ? (
+              <>
+                <hr className="wtr-dest-panel__summary-divider" />
+                <p className="wtr-dest-panel__summary-surplus tabular-nums">
+                  + {formatUsd(monthlySurplus)} surplus
+                </p>
+              </>
+            ) : null}
+          </div>
+          <RetirementScoreHeader
+            className="wtr-dest-panel__summary-score"
+            displayScore={headerScore.displayScore}
+            incomeFitScore={headerScore.incomeFitScore}
+            qolNormalized={headerScore.qolNormalized}
+            warnings={headerScore.warnings}
+            band={headerScore.band}
+            bandColor={headerScore.bandColor}
+            bandLabel={headerScore.bandLabel}
+          />
+        </section>
+      </header>
+
+      <div className="wtr-dest-panel__scroll">
+        {mobileNav ? (
+          <div
+            className="wtr-dest-panel__tab-nav wtr-dest-panel__stagger-item"
+            style={panelStaggerStyle(2)}
+          >
+            <DestinationPanelTabSelect
+              activeTab={activeTab}
+              onChange={setActiveTab}
             />
-          ) : null}
-        </footer>
+          </div>
+        ) : (
+          <div
+            className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
+            style={panelStaggerStyle(2)}
+            role="tablist"
+            aria-label="Destination details"
+            aria-orientation="vertical"
+          >
+            {PANEL_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                id={tab.tabId}
+                aria-selected={activeTab === tab.id}
+                aria-controls={tab.panelId}
+                className={`wtr-dest-panel__tab${activeTab === tab.id ? " wtr-dest-panel__tab--active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="wtr-dest-panel__tab-inner">
+                  <span className="wtr-dest-panel__tab-label">{tab.label}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <SimpleBar className="wtr-dest-panel__tab-content" autoHide={false}>
+          <div className="wtr-dest-panel__body">
+            <div
+              key={`${city.id}-${activeTab}`}
+              id={activeTabMeta?.panelId}
+              role={mobileNav ? "region" : "tabpanel"}
+              aria-label={
+                mobileNav
+                  ? `${activeTabMeta?.label ?? "Section"} details`
+                  : undefined
+              }
+              aria-labelledby={mobileNav ? undefined : activeTabMeta?.tabId}
+              className="wtr-dest-panel__tabpanel wtr-dest-panel__tabpanel--enter"
+            >
+              {activeTab === "col" ? (
+                <>
+                  <DestinationExchangeRate
+                    city={city}
+                    staggerClassName="wtr-dest-panel__stagger-item"
+                    staggerStyle={panelStaggerStyle}
+                  />
+                  <div className="wtr-dest-panel__col-stack">
+                    <div className="wtr-dest-panel__cards wtr-dest-panel__cards--budget">
+                      {colBudgetCards.map((card, index) => (
+                        <ColCategoryPanelSection
+                          key={card.id}
+                          card={card}
+                          staggerIndex={index}
+                        />
+                      ))}
+                    </div>
+                    <div className="wtr-dest-panel__col-extras">
+                      <p
+                        className="wtr-dest-panel__col-extras-note wtr-dest-panel__stagger-item"
+                        style={panelStaggerStyle(colBudgetCards.length)}
+                      >
+                        Optional lifestyle costs
+                      </p>
+                      <ColExtrasList
+                        items={colSupplementalItems}
+                        className="wtr-dest-panel__stagger-item"
+                        style={panelStaggerStyle(colBudgetCards.length + 1)}
+                      />
+                    </div>
+                  </div>
+                  {showTravelAdvisory ? (
+                    <div
+                      className="wtr-dest-panel__stagger-item"
+                      style={panelStaggerStyle(colBudgetCards.length + 2)}
+                    >
+                      <TravelAdvisoryNotice />
+                    </div>
+                  ) : null}
+                </>
+              ) : activeTab === "weather" ? (
+                <div className="wtr-dest-panel__weather">
+                  <ClimateCard
+                    climate={climate}
+                    loading={climateLoading}
+                    failed={climateFailed}
+                    staggerClassName="wtr-dest-panel__stagger-item"
+                    staggerStyle={panelStaggerStyle}
+                  />
+                </div>
+              ) : activeTab === "gettingThere" ? (
+                <DestinationGettingThereTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : activeTab === "taxVisa" ? (
+                <DestinationTaxVisaTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : activeTab === "qol" ? (
+                <DestinationQualityOfLifeTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : activeTab === "peopleCulture" ? (
+                <DestinationPeopleCultureTab
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              ) : (
+                <DestinationExpatLifeTab
+                  city={city.city}
+                  country={city.country}
+                  staggerClassName="wtr-dest-panel__stagger-item"
+                  staggerStyle={panelStaggerStyle}
+                />
+              )}
+            </div>
+          </div>
+        </SimpleBar>
+      </div>
+
+      <footer className="wtr-dest-panel__footer">
+        {activeTab === "col" ? (
+          <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
+        ) : null}
+        {listPageNav ? (
+          <WtrCityListPagination
+            className="wtr-list-pagination--dest-panel"
+            page={listPageNav.page}
+            pageSize={listPageNav.pageSize}
+            totalCount={listPageNav.totalCount}
+            onPageChange={listPageNav.onPageChange}
+            centerNote="Estimates based on real prices reported by locals. Updated periodically. All amounts in USD."
+          />
+        ) : null}
+      </footer>
     </div>
   );
 }
@@ -615,6 +640,8 @@ export function RetirementDestinationPanel({
   compareSelected,
   compareAtMax,
   onToggleCompare,
+  isCountryExcluded = false,
+  onExcludeCountry,
   listPageNav,
 }: Props) {
   const [slideOpen, setSlideOpen] = useState(false);
@@ -680,6 +707,8 @@ export function RetirementDestinationPanel({
         scored={scored}
         monthlyIncome={monthlyIncome}
         budgetBreakdown={budgetBreakdown}
+        isCountryExcluded={isCountryExcluded}
+        onExcludeCountry={onExcludeCountry}
         listPageNav={listPageNav}
       />
     </aside>

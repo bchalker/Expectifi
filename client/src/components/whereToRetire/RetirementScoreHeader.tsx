@@ -1,53 +1,26 @@
-import type { CSSProperties } from 'react'
-import {
-  retirementScoreBandFromScore,
-  type RetirementScoreBand,
-} from '../../utils/retirementScore'
-import './RetirementScoreHeader.scss'
+import type { CSSProperties } from "react";
+import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
+import { ScoreMeterRow } from "../ui/ScoreMeterRow";
+import type { RetirementScoreBand } from "../../utils/retirementScore";
+import "./RetirementScoreHeader.scss";
 
 type Props = {
   /** Capped score for badge, main bar, and band. */
-  displayScore: number
-  incomeFitScore: number
-  qolNormalized: number
-  band: RetirementScoreBand
-  bandColor: string
-  bandLabel: string
-  warnings?: string[]
-  className?: string
+  displayScore: number;
+  incomeFitScore: number;
+  qolNormalized: number;
+  band: RetirementScoreBand;
+  bandColor: string;
+  bandLabel: string;
+  warnings?: string[];
+  className?: string;
+};
+
+function bandPillLabel(label: string): string {
+  return label.replace(/\s+fit$/i, "");
 }
 
-type MiniRowProps = {
-  label: string
-  score: number
-}
-
-function ScoreMiniRow({ label, score }: MiniRowProps) {
-  const clamped = Math.max(0, Math.min(100, Math.round(score)))
-  const { bandColor } = retirementScoreBandFromScore(clamped)
-
-  return (
-    <div className="wtr-score-header__mini">
-      <span className="wtr-score-header__mini-label">{label}</span>
-      <div
-        className="wtr-score-header__mini-bar"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={clamped}
-        aria-label={`${label}: ${clamped} out of 100`}
-      >
-        {clamped > 0 ? (
-          <div
-            className="wtr-score-header__mini-fill"
-            style={{ width: `${clamped}%`, background: bandColor }}
-          />
-        ) : null}
-      </div>
-      <span className="wtr-score-header__mini-value tabular-nums">{clamped}</span>
-    </div>
-  )
-}
+const PANEL_METER_VALUE_COLOR = "var(--color-text-success, var(--wtr-match-strong))";
 
 export function RetirementScoreHeader({
   displayScore,
@@ -59,62 +32,67 @@ export function RetirementScoreHeader({
   warnings = [],
   className,
 }: Props) {
-  const mainScore = Math.max(0, Math.min(100, Math.round(displayScore)))
+  const mainScore = Math.max(0, Math.min(100, Math.round(displayScore)));
+  const pillLabel = bandPillLabel(bandLabel);
 
   return (
     <div
-      className={['wtr-score-header', `wtr-score-header--${band}`, className]
+      className={[
+        "wtr-score-header",
+        "wtr-score-header--panel",
+        `wtr-score-header--${band}`,
+        className,
+      ]
         .filter(Boolean)
-        .join(' ')}
-      style={{ '--wtr-band-color': bandColor } as CSSProperties}
+        .join(" ")}
+      style={{ "--wtr-band-color": bandColor } as CSSProperties}
+      aria-label={`Retirement score ${mainScore} percent, ${bandLabel}`}
     >
-      <span className="wtr-score-header__title">Retirement score</span>
-
-      <div className="wtr-score-header__body">
-        <div className="wtr-score-header__detail">
-          <div
-            className="wtr-score-header__main-track"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={mainScore}
-            aria-label={`Retirement score: ${mainScore} out of 100`}
-          >
-            <div
-              className="wtr-score-header__main-fill"
-              style={{ width: `${mainScore}%` }}
-            />
-          </div>
-
-          <p className="wtr-score-header__band-label">{bandLabel}</p>
-
-          {warnings.length > 0 ? (
-            <ul className="wtr-score-header__cap-warnings">
-              {warnings.map((warning) => (
-                <li key={warning} className="wtr-score-header__cap-warning">
-                  {warning}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          <div className="wtr-score-header__breakdown">
-            <ScoreMiniRow label="Income fit" score={incomeFitScore} />
-            <ScoreMiniRow label="Quality of life" score={qolNormalized} />
-          </div>
+      <div className="wtr-score-header__panel-metrics">
+        <div className="wtr-score-header__breakdown">
+          <ScoreMeterRow
+            label="Cost of Living"
+            score={incomeFitScore}
+            valueColor={PANEL_METER_VALUE_COLOR}
+          />
+          <ScoreMeterRow
+            label="Quality of life"
+            score={qolNormalized}
+            valueColor={PANEL_METER_VALUE_COLOR}
+          />
         </div>
 
-        <div className="wtr-score-header__badge-col">
-          <div
-            className="wtr-score-header__score-badge"
-            style={{ background: bandColor }}
-            aria-label={`Retirement score ${mainScore}, ${bandLabel}`}
-          >
-            <span className="wtr-score-header__score-badge-value">{mainScore}</span>
-          </div>
-          <span className="wtr-score-header__score-denom">/ 100</span>
-        </div>
+        {warnings.length > 0 ? (
+          <ul className="wtr-score-header__cap-warnings">
+            {warnings.map((warning) => (
+              <li key={warning} className="wtr-score-header__cap-warning">
+                {warning}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      <span className="wtr-score-header__panel-sep" aria-hidden>
+        <IconArrowNarrowRightDashed size={18} stroke={1.5} />
+      </span>
+
+      <div className="wtr-score-header__panel-score-card">
+        <p className="wtr-score-header__panel-score">
+          <span className="wtr-score-header__panel-score-value tabular-nums">
+            {mainScore}
+          </span>
+          <span className="wtr-score-header__panel-score-pct" aria-hidden>
+            %
+          </span>
+        </p>
+        <span
+          className="wtr-score-header__panel-band-pill"
+          style={{ background: bandColor }}
+        >
+          {pillLabel}
+        </span>
       </div>
     </div>
-  )
+  );
 }

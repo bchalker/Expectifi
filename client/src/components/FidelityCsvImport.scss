@@ -380,6 +380,26 @@
   justify-content: flex-end;
 }
 
+.csv-import-manual-replace-notice {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.4rem 1.25rem;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+.csv-import-manual-replace-notice .checkbox {
+  min-height: 0;
+}
+
+.csv-import-manual-replace-notice__label {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
 .csv-import-duplicate-notice {
   flex-shrink: 0;
   margin: 0;

@@ -292,7 +292,8 @@
   color: var(--text-muted);
 }
 
-.account-balances-manage__info {
+.account-balances-manage__info,
+.account-balances-manage__replace-notice {
   margin: 0 0 0.35rem;
   padding: 0.45rem 0.55rem;
   border-radius: 8px;

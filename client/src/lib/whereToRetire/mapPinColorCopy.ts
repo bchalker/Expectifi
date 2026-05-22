@@ -1,4 +1,5 @@
 import type { MapPinColorView } from './mapPinDisplay'
+import type { MapWhereToLook } from './whereToLookCountries'
 import {
   BUDGET_PIN_LEGEND,
   EXPAT_PIN_LEGEND,
@@ -62,6 +63,16 @@ export const MAP_PIN_VIEW_OPTIONS: { id: MapPinColorView; label: string }[] = [
   { id: 'budget', label: VIEW_BUTTON_LABELS.budget },
   { id: 'expat', label: VIEW_BUTTON_LABELS.expat },
 ]
+
+/** Expat pin data is international; hide that view for US-only geography. */
+export function mapPinViewOptionsForWhereToLook(
+  whereToLook: MapWhereToLook,
+): { id: MapPinColorView; label: string }[] {
+  if (whereToLook === 'us') {
+    return MAP_PIN_VIEW_OPTIONS.filter((opt) => opt.id !== 'expat')
+  }
+  return MAP_PIN_VIEW_OPTIONS
+}
 
 export function mapPinViewChromeCopy(view: MapPinColorView): MapPinViewChromeCopy {
   return VIEW_COPY[view]

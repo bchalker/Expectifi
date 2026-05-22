@@ -1,5 +1,3 @@
-import type { DestinationCatalogEntry } from '../../data/destinations'
-
 const DESTINATIONS_KEY = 'wtr-destinations'
 const LEGACY_DESTINATIONS_KEY = 'where-to-retire-destinations'
 const COST_PREFIX = 'where-to-retire-cost:'
@@ -142,23 +140,6 @@ export function saveIncomeOverride(value: number | null): void {
     return
   }
   localStorage.setItem(INCOME_OVERRIDE_KEY, String(Math.round(value)))
-}
-
-export function loadDestinationMonthlyCost(entry: DestinationCatalogEntry): number {
-  if (typeof window === 'undefined') return entry.defaultMonthlyCostUsd
-  try {
-    const raw = localStorage.getItem(`${COST_PREFIX}${entry.key}`)
-    if (raw == null) return entry.defaultMonthlyCostUsd
-    const n = Number(raw)
-    return Number.isFinite(n) && n >= 0 ? n : entry.defaultMonthlyCostUsd
-  } catch {
-    return entry.defaultMonthlyCostUsd
-  }
-}
-
-export function saveDestinationMonthlyCost(key: string, cost: number): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(`${COST_PREFIX}${key}`, String(Math.round(cost)))
 }
 
 export function clearGuestWhereToRetireStorage(): void {

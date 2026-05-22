@@ -1,20 +1,23 @@
-import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
-import type { MapFilters } from '../../lib/whereToRetire/cityMapScoring'
-import type { MapPinColorView } from '../../lib/whereToRetire/mapPinDisplay'
+import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import {
-  MAP_PIN_VIEW_OPTIONS,
+  resolveWhereToLook,
+  type MapFilters,
+} from "../../lib/whereToRetire/cityMapScoring";
+import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
+import {
   mapPinViewChromeCopy,
-} from '../../lib/whereToRetire/mapPinColorCopy'
-import { WtrMapWhereToLookGroup } from './WtrMapWhereToLookGroup'
-import './WtrMapPinColorChrome.scss'
+  mapPinViewOptionsForWhereToLook,
+} from "../../lib/whereToRetire/mapPinColorCopy";
+import { WtrMapWhereToLookGroup } from "./WtrMapWhereToLookGroup";
+import "./WtrMapPinColorChrome.scss";
 
 type Props = {
-  pinColorView: MapPinColorView
-  onPinColorViewChange: (view: MapPinColorView) => void
-  filters: MapFilters
-  onFiltersChange: (filters: MapFilters) => void
-  className?: string
-}
+  pinColorView: MapPinColorView;
+  onPinColorViewChange: (view: MapPinColorView) => void;
+  filters: MapFilters;
+  onFiltersChange: (filters: MapFilters) => void;
+  className?: string;
+};
 
 export function WtrMapPinColorChrome({
   pinColorView,
@@ -23,27 +26,34 @@ export function WtrMapPinColorChrome({
   onFiltersChange,
   className,
 }: Props) {
-  const { title, description } = mapPinViewChromeCopy(pinColorView)
+  const whereToLook = resolveWhereToLook(filters);
+  const pinViewOptions = mapPinViewOptionsForWhereToLook(whereToLook);
+  const { title, description } = mapPinViewChromeCopy(pinColorView);
 
   return (
     <section
-      className={['wtr-pin-color-chrome', className].filter(Boolean).join(' ')}
+      className={["wtr-pin-color-chrome", className].filter(Boolean).join(" ")}
       aria-label="Map pin coloring"
     >
       <div className="wtr-pin-color-chrome__toolbar">
         <div className="wtr-pin-color-chrome__toolbar-block">
           <h2 className="wtr-pin-color-chrome__heading">{title}</h2>
-          <div className="wtr-pin-color-chrome__view-group" role="group" aria-label="Map view">
-            {MAP_PIN_VIEW_OPTIONS.map((opt) => (
+          <div
+            className="wtr-pin-color-chrome__view-group"
+            role="group"
+            aria-label="Map view"
+          >
+            {pinViewOptions.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
                 className={[
-                  'wtr-pin-color-chrome__view-btn',
-                  pinColorView === opt.id && 'wtr-pin-color-chrome__view-btn--active',
+                  "wtr-pin-color-chrome__view-btn",
+                  pinColorView === opt.id &&
+                    "wtr-pin-color-chrome__view-btn--active",
                 ]
                   .filter(Boolean)
-                  .join(' ')}
+                  .join(" ")}
                 aria-pressed={pinColorView === opt.id}
                 onClick={() => onPinColorViewChange(opt.id)}
               >
@@ -62,12 +72,12 @@ export function WtrMapPinColorChrome({
           <WtrMapWhereToLookGroup
             filters={filters}
             onChange={onFiltersChange}
-            disableUs={pinColorView === 'expat'}
+            disableUs={pinColorView === "expat"}
           />
         </div>
       </div>
 
       <p className="wtr-pin-color-chrome__description">{description}</p>
     </section>
-  )
+  );
 }

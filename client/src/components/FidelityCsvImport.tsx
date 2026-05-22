@@ -36,6 +36,7 @@ import {
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import { markPortfolioBalancesFlush, triggerPortfolioWaveReveal } from '../lib/portfolioWaveReveal'
+import { CSV_IMPORT_MANUAL_ACK_MSG } from '../lib/portfolioSourceExclusivity'
 import './SidePanelShell.scss'
 import './FidelityCsvImport.scss'
 
@@ -56,6 +57,8 @@ type Props = {
   /** Parent picked custodian + file (e.g. empty-state flow): skip custodian grid and immediate file row. */
   fileIngestRequest?: { id: number; file: File; custodian: PositionsCsvCustodian } | null
   onFileIngestConsumed?: () => void
+  /** When true, show that confirming will clear manual balance entry. */
+  showManualReplaceNotice?: boolean
 }
 
 type PendingImport = {
@@ -160,11 +163,13 @@ export function FidelityCsvImport({
   onImportFlowClose,
   fileIngestRequest = null,
   onFileIngestConsumed,
+  showManualReplaceNotice = false,
 }: Props) {
   const isPanel = presentation === 'panel'
   const pickInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const duplicateReplaceId = useId()
+  const manualReplaceAckId = useId()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalClosing, setModalClosing] = useState(false)
   const flowOpen = isPanel ? Boolean(openControlled) : modalOpen
@@ -184,6 +189,7 @@ export function FidelityCsvImport({
     }
   }, [])
   const [replaceDuplicateImports, setReplaceDuplicateImports] = useState(false)
+  const [manualReplaceAcknowledged, setManualReplaceAcknowledged] = useState(false)
   const [reviewAssignments, setReviewAssignments] = useState<Record<string, AccountBucket>>({})
   const [hideImportSourceUi, setHideImportSourceUi] = useState(
     () => Boolean(fileIngestRequest) || isPanel,
@@ -199,6 +205,7 @@ export function FidelityCsvImport({
     setPending(null)
     setParseError(null)
     setReplaceDuplicateImports(false)
+    setManualReplaceAcknowledged(false)
     setReviewAssignments({})
     setConfirmOverlay({ mode: 'idle' })
     if (pickInputRef.current) pickInputRef.current.value = ''
@@ -257,6 +264,7 @@ export function FidelityCsvImport({
     setParseError(null)
     setPending(null)
     setReplaceDuplicateImports(false)
+    setManualReplaceAcknowledged(false)
     if (c === 'other') {
       void readFileAsText(f).then((text) => {
         setHeaderOptions(peekCsvHeaderLabels(text))
@@ -300,6 +308,7 @@ export function FidelityCsvImport({
     }
 
     let cancelled = false
+    setManualReplaceAcknowledged(false)
     ;(async () => {
       setParseError(null)
       setImportBusy({
@@ -410,8 +419,11 @@ export function FidelityCsvImport({
   )
 
   const hasStorageDuplicate = Boolean(pending?.duplicateInStorage)
+  const manualReplaceAckOk = !showManualReplaceNotice || manualReplaceAcknowledged
   const canConfirm =
-    Boolean(pending?.parsed.rows.length && !parseError && incomingBatches.length > 0) && reviewAssignmentsComplete
+    Boolean(pending?.parsed.rows.length && !parseError && incomingBatches.length > 0) &&
+    reviewAssignmentsComplete &&
+    manualReplaceAckOk
 
   function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -508,6 +520,7 @@ export function FidelityCsvImport({
                     setPending(null)
                     setParseError(null)
                     setReplaceDuplicateImports(false)
+                    setManualReplaceAcknowledged(false)
                     setOtherMap(EMPTY_OTHER)
                     setHeaderOptions([])
                     if (pickInputRef.current) pickInputRef.current.value = ''
@@ -729,6 +742,26 @@ export function FidelityCsvImport({
       <SimpleBar className="side-panel-shell__scroll csv-import-modal-scroll" autoHide={false}>
         <div className="csv-import-modal-body">{renderImportBody()}</div>
       </SimpleBar>
+      {showManualReplaceNotice && pending && pending.parsed.rows.length > 0 && !parseError ? (
+        <div className="csv-import-manual-replace-notice">
+          <Checkbox
+            id={manualReplaceAckId}
+            className="app-checkbox"
+            isSelected={manualReplaceAcknowledged}
+            onChange={setManualReplaceAcknowledged}
+            variant="secondary"
+          >
+            <Checkbox.Control>
+              <Checkbox.Indicator>
+                <IconCheck size={12} stroke={2.5} aria-hidden />
+              </Checkbox.Indicator>
+            </Checkbox.Control>
+            <Checkbox.Content>
+              <Label className="csv-import-manual-replace-notice__label">{CSV_IMPORT_MANUAL_ACK_MSG}</Label>
+            </Checkbox.Content>
+          </Checkbox>
+        </div>
+      ) : null}
       {pending && pending.parsed.rows.length > 0 && !parseError && hasStorageDuplicate ? (
         <div className="csv-import-duplicate-notice">
           <Checkbox

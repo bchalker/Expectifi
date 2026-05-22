@@ -337,18 +337,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const onFidelityApplyBalances = useCallback(
     (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => {
+      clearStoredManualAccounts()
+      setManualAccountsRev((n) => n + 1)
+      saveBalanceInputMode('fidelity')
+      saveBrokerageBalanceMode('fidelity')
+      setBalanceMode('fidelity')
+      setBrokerageMode('fidelity')
       setPhase('growth')
       setInputsState((prev) => {
         const next = {
           ...prev,
-          ...(balanceMode === 'fidelity'
-            ? {
-                base401k: b.base401k,
-                baseSE401k: b.baseSE401k,
-                baseRoth: b.baseRoth,
-                baseHsa: b.baseHsa,
-              }
-            : {}),
+          base401k: b.base401k,
+          baseSE401k: b.baseSE401k,
+          baseRoth: b.baseRoth,
+          baseHsa: b.baseHsa,
           brkBal: b.brkBal,
         }
         persistCalculatorSession({
@@ -360,7 +362,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         return next
       })
     },
-    [balanceMode],
+    [],
   )
 
   const onFidelityImportAppliedRetirement = useCallback(() => {
@@ -700,6 +702,18 @@ export default function App({ initialAuthModal = null }: AppProps) {
               manualAccountsRev={manualAccountsRev}
               onFidelityApplyBalances={onFidelityApplyBalances}
               onFidelityImportApplied={onFidelityImportAppliedRetirement}
+              onClearImportedForManual={() => {
+                clearAllFidelityImportFromCard()
+                saveBalanceInputMode('manual')
+                saveBrokerageBalanceMode('manual')
+                setInputsState((prev) => ({
+                  ...prev,
+                  positionReturnModels: filterAllFidelityPositionReturnModels(
+                    prev.positionReturnModels,
+                  ),
+                }))
+                setFidelityImportRev((n) => n + 1)
+              }}
               onRemoveRetirementAccounts={onRemoveRetirementAccounts}
               openReturnEditorRequest={returnEditorOpen}
               onReturnEditorOpenHandled={onReturnEditorOpenHandled}

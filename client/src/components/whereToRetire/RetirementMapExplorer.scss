@@ -3,7 +3,7 @@
   --wtr-match-moderate: var(--color-teal-mid);
   --wtr-match-stretch: var(--color-amber);
   --wtr-match-poor: var(--color-text-danger);
-  --wtr-list-panel-w: 18rem;
+  --wtr-list-panel-w: 22.5rem;
 
   display: flex;
   flex: 1 1 auto;
@@ -297,6 +297,30 @@
   align-self: stretch;
 }
 
+.wtr-explorer__hide-undo {
+  margin: 0.5rem 0.65rem 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.wtr-explorer__hide-undo-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-text, var(--color-teal-dark));
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .wtr-explorer__list-scroll-inner {
   box-sizing: border-box;
   min-width: 0;
@@ -354,7 +378,7 @@
   }
 
   to {
-    width: var(--wtr-afford-pct);
+    width: var(--score-meter-pct);
   }
 }
 
@@ -370,15 +394,15 @@
   }
 }
 
-.wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__bar {
+.wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__fill {
   width: 0;
   transition: none;
   animation: wtr-afford-fill-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: calc(0.1s + var(--wtr-card-i, 0) * 28ms);
 }
 
-.wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__num,
-.wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__verified {
+.wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__value,
+.wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__verified {
   opacity: 0;
   animation: wtr-afford-meta-in 0.22s ease forwards;
   animation-delay: calc(0.34s + var(--wtr-card-i, 0) * 28ms);
@@ -390,12 +414,22 @@
 
 .wtr-explorer__list-panel .wtr-dest-card {
   min-height: 52px;
-  padding: 0.55rem 0.65rem 0.6rem;
+  padding: 0.65rem 0.85rem 0.7rem;
   border: none;
   border-radius: 0;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   box-shadow: none;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__rank {
+  min-width: 1.5rem;
+  font-size: var(--text-lg);
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__meta-pill--visa {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wtr-explorer__list-panel .wtr-dest-card:last-child {
@@ -473,13 +507,13 @@
     animation: none;
   }
 
-  .wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__bar {
-    width: var(--wtr-afford-pct);
+  .wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__fill {
+    width: var(--score-meter-pct);
     animation: none;
   }
 
-  .wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__num,
-  .wtr-explorer__list-cards--refresh .wtr-dest-card .wtr-afford-score__verified {
+  .wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__value,
+  .wtr-explorer__list-cards--refresh .wtr-dest-card .score-meter-row__verified {
     opacity: 1;
     animation: none;
   }

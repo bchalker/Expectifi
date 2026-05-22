@@ -26,6 +26,12 @@ import {
 } from '../lib/withdrawalDisplayOrder'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { inputsHavePlanningProfileFields, planningDisplayFromInputs } from '../lib/userPrefs'
+import {
+  hasImportedPortfolioData,
+  hasManualPortfolioAmounts,
+  IMPORT_REMOVED_ON_MANUAL_MSG,
+  MANUAL_REMOVED_ON_CONNECT_MSG,
+} from '../lib/portfolioSourceExclusivity'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
@@ -43,6 +49,8 @@ import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
 import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
 import { AccountBalancesManageMenu } from './AccountBalancesManageMenu'
+import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideExamples'
+import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
 import { PlaidConnectionProvider } from './PlaidConnectionHeader'
 import { ScenariosBar } from './ScenariosBar'
@@ -71,6 +79,11 @@ function ManualBalanceRowLabel({ label, taxKind, taxDesc, tone }: Pick<ManualBal
       </p>
     </div>
   )
+}
+
+/** Pre-tax display total — must match `retBal` (includes Traditional IRA). */
+function retirementPretaxDisplayTotal(bal: ComputedSnapshot['bal']): number {
+  return bal.bal401k + bal.balSE401k + bal.balTradIRA
 }
 
 type ManualBalancesDraft = {
@@ -104,6 +117,8 @@ type Props = {
   stackWithBrokerage?: boolean
   onFidelityApplyBalances?: (partial: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
   onFidelityImportApplied?: () => void
+  /** Clear CSV/Plaid import storage when user commits manual amounts. */
+  onClearImportedForManual?: () => void
   /** Clear manual balances, stored import, and per-holding return overrides for this card. */
   onRemoveRetirementAccounts?: () => void
   /** When true, show balances and Fidelity breakdown only (no mode toggle, CSV import, or manual fields). */
@@ -170,6 +185,7 @@ export function AccountBalances({
   stackWithBrokerage,
   onFidelityApplyBalances,
   onFidelityImportApplied,
+  onClearImportedForManual,
   onRemoveRetirementAccounts,
   readOnly = false,
   inputs,
@@ -186,7 +202,6 @@ export function AccountBalances({
   openImportRequest,
   onImportOpenHandled,
 }: Props) {
-  const retTotal = c.retBal
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly
   const fidelityScenarioEditingEnabled = Boolean(readOnly && inputs && setInputs && balanceMode === 'fidelity')
   const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false)
@@ -242,6 +257,12 @@ export function AccountBalances({
 
   const hasAnyAccountCardData = hasRetirementAccountData || Boolean(hasBrokerageAccountData)
 
+  /** Merged dashboard lists brokerage in the same card — footer matches sum of all rows. */
+  const portfolioTotal =
+    mergedDashboard && hasBrokerageAccountData ? c.retBal + (brkBal ?? 0) : c.retBal
+  const portfolioTotalLabel =
+    mergedDashboard && hasBrokerageAccountData ? 'Total balances' : 'Total retirement'
+
   const mergedPositionModels = useMemo(() => {
     if (!mergedDashboard || !inputs) return []
     return computeMergedDashboardPositionModels(inputs, fidelityRows, c.yearsToRetirement, c.retirementCalendarYear)
@@ -253,6 +274,17 @@ export function AccountBalances({
       positionUsesCustomReturnMode(m, blendedRateForDashboardPositionId(m.id, inputs.retRate, inputs.brkRate)),
     )
   }, [mergedPositionModels, inputs])
+
+  const aggregatedHoldingsForGuide = useMemo(
+    () => aggregatedHoldingsForScenarioGuide(fidelityRows),
+    [fidelityRows],
+  )
+
+  const showImportedHoldingsScenarioGuide =
+    mergedDashboard &&
+    fidelityScenarioEditingEnabled &&
+    balanceMode === 'fidelity' &&
+    aggregatedHoldingsForGuide.length > 0
 
   const scenariosBar = mergedDashboard ? <ScenariosBar onOpenSignIn={onOpenSignIn} /> : null
 
@@ -289,6 +321,44 @@ export function AccountBalances({
   )
 
   const removeAccountsModalState = useOverlayState()
+  const [replaceSourceConfirm, setReplaceSourceConfirm] = useState<{
+    message: string
+    proceed: () => void
+  } | null>(null)
+
+  const portfolioModes = useMemo(
+    () => ({ retirement: balanceMode, brokerage: brokerageMode ?? 'fidelity' }),
+    [balanceMode, brokerageMode],
+  )
+
+  const willRemoveManualOnConnect = useMemo(() => {
+    if (!inputs) return false
+    return hasManualPortfolioAmounts(inputs, portfolioModes)
+  }, [inputs, portfolioModes])
+
+  const willRemoveImportOnManual = useMemo(() => hasImportedPortfolioData(), [])
+
+  const guardReplaceManual = useCallback(
+    (proceed: () => void) => {
+      if (!willRemoveManualOnConnect) {
+        proceed()
+        return
+      }
+      setReplaceSourceConfirm({ message: MANUAL_REMOVED_ON_CONNECT_MSG, proceed })
+    },
+    [willRemoveManualOnConnect],
+  )
+
+  const guardReplaceImport = useCallback(
+    (proceed: () => void) => {
+      if (!willRemoveImportOnManual) {
+        proceed()
+        return
+      }
+      setReplaceSourceConfirm({ message: IMPORT_REMOVED_ON_MANUAL_MSG, proceed })
+    },
+    [willRemoveImportOnManual],
+  )
 
   const confirmRemoveAccounts = useCallback(() => {
     removeAccountsModalState.close()
@@ -340,11 +410,12 @@ export function AccountBalances({
   const commitPendingManualPortfolio = useCallback(() => {
     const pending = pendingManualCommitRef.current
     if (!pending || !onBases) return
+    onClearImportedForManual?.()
     onManualPortfolioPlanApplied?.(pending.plan)
     onBases(pending.balances)
     onBalanceModeChange?.('manual')
     pendingManualCommitRef.current = null
-  }, [onBases, onBalanceModeChange, onManualPortfolioPlanApplied])
+  }, [onBases, onBalanceModeChange, onClearImportedForManual, onManualPortfolioPlanApplied])
 
   const requestBalanceEditClose = useCallback(() => {
     if (balanceEditPanel === 'manual' && manualConfirmPhase === 'plan') {
@@ -522,21 +593,28 @@ export function AccountBalances({
     setCsvFileIngestRequest(null)
   }, [])
 
-  const onFinancialsCsvFileChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0]
-      e.target.value = ''
-      const c = financialsCsvPendingCustodianRef.current
-      financialsCsvPendingCustodianRef.current = null
-      if (!f || !c) return
-      setCsvImportPrefillCustodian(c)
-      setCsvFileIngestRequest({ id: Date.now(), file: f, custodian: c })
+  const launchCsvImportFromFile = useCallback(
+    (file: File, custodian: PositionsCsvCustodian) => {
+      setCsvImportPrefillCustodian(custodian)
+      setCsvFileIngestRequest({ id: Date.now(), file, custodian })
       onBalanceModeChange?.('fidelity')
       if (mergedDashboard && onFidelityApplyBalances) {
         openBalanceEditPanel('import')
       }
     },
     [mergedDashboard, onBalanceModeChange, onFidelityApplyBalances, openBalanceEditPanel],
+  )
+
+  const onFinancialsCsvFileChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const f = e.target.files?.[0]
+      e.target.value = ''
+      const custodian = financialsCsvPendingCustodianRef.current
+      financialsCsvPendingCustodianRef.current = null
+      if (!f || !custodian) return
+      launchCsvImportFromFile(f, custodian)
+    },
+    [launchCsvImportFromFile],
   )
 
   useEffect(() => {
@@ -584,7 +662,7 @@ export function AccountBalances({
         buckets.add(getAccountTypeMeta(entry.type).withdrawalBucket)
       }
     } else {
-      const pretaxTotal = c.bal.bal401k + c.bal.balSE401k + c.bal.balTradIRA
+      const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
       if (pretaxTotal > 0) buckets.add('pretax')
       if (c.bal.balRoth > 0) buckets.add('roth')
       if (c.bal.balHsa > 0) buckets.add('hsa')
@@ -717,6 +795,57 @@ export function AccountBalances({
     onBalanceModeChange?.(m)
   }
 
+  function renderReplaceSourceConfirmOverlay() {
+    if (!replaceSourceConfirm) return null
+
+    return (
+      <div
+        className="account-balances-remove-overlay"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="account-balances-replace-source-title"
+        aria-describedby="account-balances-replace-source-desc"
+      >
+        <button
+          type="button"
+          className="account-balances-remove-overlay__backdrop"
+          aria-label="Cancel"
+          onClick={() => setReplaceSourceConfirm(null)}
+        />
+        <div className="account-balances-remove-overlay__panel">
+          <h2 id="account-balances-replace-source-title" className="account-balances-remove-overlay__title">
+            Replace current balances?
+          </h2>
+          <p id="account-balances-replace-source-desc" className="account-balances-remove-overlay__body">
+            {replaceSourceConfirm.message}
+          </p>
+          <div className="account-balances-remove-overlay__footer">
+            <Button
+              variant="outline"
+              size="sm"
+              className="account-balances-remove-overlay__btn"
+              onPress={() => setReplaceSourceConfirm(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="account-balances-remove-overlay__btn"
+              onPress={() => {
+                const proceed = replaceSourceConfirm.proceed
+                setReplaceSourceConfirm(null)
+                proceed()
+              }}
+            >
+              Continue
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   function renderRemoveAccountsConfirmOverlay() {
     if (!onRemoveRetirementAccounts || !removeAccountsModalState.isOpen) return null
 
@@ -775,7 +904,12 @@ export function AccountBalances({
         />
         <AccountBalancesManageMenu
           canClearAccounts={Boolean(hasAnyAccountCardData && onRemoveRetirementAccounts)}
-          onManualAdd={() => (mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual'))}
+          manualReplaceNotice={null}
+          onRequestReplaceManual={guardReplaceManual}
+          onRequestReplaceImport={guardReplaceImport}
+          onManualAdd={() =>
+            mergedDashboard ? toggleBalanceEditPanel('manual') : setMode('manual')
+          }
           onPickCsvCustodian={onPickCsvCustodian}
           onClearAccounts={() => removeAccountsModalState.open()}
           openRequest={openManageRequest}
@@ -876,7 +1010,7 @@ export function AccountBalances({
   }
 
   function renderFidelityImportedTaxBuckets(withdrawalUi: boolean) {
-    const pretaxTotal = c.bal.bal401k + c.bal.balSE401k
+    const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
     const defs = (
       [
         { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal },
@@ -1100,7 +1234,7 @@ export function AccountBalances({
 
     const withdrawalUi = Boolean(showWithdrawalGuidance)
     const seq = withdrawalBucketOrder(retirementAge, true)
-    const pretaxTotal = c.bal.bal401k + c.bal.balSE401k
+    const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
     const pretaxDef = { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal }
     const rothDef = { tax: 'roth' as const, label: 'Roth', total: c.bal.balRoth }
     const hsaDef = { tax: 'hsa' as const, label: 'HSA', total: c.bal.balHsa }
@@ -1333,9 +1467,11 @@ export function AccountBalances({
               onFidelityImportApplied?.()
               requestBalanceEditClose()
             }}
+            showManualReplaceNotice={willRemoveManualOnConnect}
           />
         </aside>
       ) : null}
+      {renderReplaceSourceConfirmOverlay()}
       {renderRemoveAccountsConfirmOverlay()}
     </div>
   )
@@ -1344,7 +1480,7 @@ export function AccountBalances({
     return <>{renderMergedDashboardOverlays()}</>
   }
 
-  const totalRetirementBar = !configureInputsOnly && hasRetirementAccountData ? (
+  const totalRetirementBar = !configureInputsOnly && (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData) ? (
     <div
       className={[
         'account-balances-total-retirement',
@@ -1354,8 +1490,8 @@ export function AccountBalances({
         .filter(Boolean)
         .join(' ')}
     >
-      <span className="account-balances-total-retirement__label">Total retirement</span>
-      <span className="account-balances-total-retirement__value">{fmt(retTotal)}</span>
+      <span className="account-balances-total-retirement__label">{portfolioTotalLabel}</span>
+      <span className="account-balances-total-retirement__value">{fmt(portfolioTotal)}</span>
     </div>
   ) : null
 
@@ -1383,6 +1519,9 @@ export function AccountBalances({
             </div>
             <div className="account-balances-header-row__actions">{headerManageMenu}</div>
           </div>
+          {showImportedHoldingsScenarioGuide ? (
+            <ImportedHoldingsScenarioGuide holdings={aggregatedHoldingsForGuide} />
+          ) : null}
           <div
             className={`account-balances-card-inner-wrap${
               balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
@@ -1424,6 +1563,7 @@ export function AccountBalances({
           >
             {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
             {renderBalanceRows()}
+            {renderReplaceSourceConfirmOverlay()}
             {renderRemoveAccountsConfirmOverlay()}
           </div>
           {totalRetirementBar}

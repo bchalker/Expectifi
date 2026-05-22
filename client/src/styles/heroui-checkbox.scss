@@ -1,7 +1,8 @@
 /* HeroUI Checkbox — plain CSS when @heroui/styles checkbox tokens do not paint controls */
 
 .app-checkbox.checkbox,
-.csv-import-duplicate-notice .checkbox {
+.csv-import-duplicate-notice .checkbox,
+.csv-import-manual-replace-notice .checkbox {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -12,7 +13,8 @@
 }
 
 .app-checkbox .checkbox__control,
-.csv-import-duplicate-notice .checkbox__control {
+.csv-import-duplicate-notice .checkbox__control,
+.csv-import-manual-replace-notice .checkbox__control {
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
@@ -31,14 +33,17 @@
 /* Selected state lives on the root .checkbox, not .checkbox__control */
 .app-checkbox.checkbox[data-selected='true'] .checkbox__control,
 .csv-import-duplicate-notice .checkbox[data-selected='true'] .checkbox__control,
+.csv-import-manual-replace-notice .checkbox[data-selected='true'] .checkbox__control,
 .app-checkbox.checkbox[aria-checked='true'] .checkbox__control,
-.csv-import-duplicate-notice .checkbox[aria-checked='true'] .checkbox__control {
+.csv-import-duplicate-notice .checkbox[aria-checked='true'] .checkbox__control,
+.csv-import-manual-replace-notice .checkbox[aria-checked='true'] .checkbox__control {
   border-color: var(--accent);
   background: var(--accent);
 }
 
 .app-checkbox .checkbox__indicator,
-.csv-import-duplicate-notice .checkbox__indicator {
+.csv-import-duplicate-notice .checkbox__indicator,
+.csv-import-manual-replace-notice .checkbox__indicator {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,22 +56,27 @@
 
 .app-checkbox.checkbox[data-selected='true'] .checkbox__indicator,
 .csv-import-duplicate-notice .checkbox[data-selected='true'] .checkbox__indicator,
+.csv-import-manual-replace-notice .checkbox[data-selected='true'] .checkbox__indicator,
 .app-checkbox.checkbox[aria-checked='true'] .checkbox__indicator,
 .csv-import-duplicate-notice .checkbox[aria-checked='true'] .checkbox__indicator,
+.csv-import-manual-replace-notice .checkbox[aria-checked='true'] .checkbox__indicator,
 .app-checkbox.checkbox[data-indeterminate='true'] .checkbox__indicator,
-.csv-import-duplicate-notice .checkbox[data-indeterminate='true'] .checkbox__indicator {
+.csv-import-duplicate-notice .checkbox[data-indeterminate='true'] .checkbox__indicator,
+.csv-import-manual-replace-notice .checkbox[data-indeterminate='true'] .checkbox__indicator {
   opacity: 1;
 }
 
 .app-checkbox .checkbox__indicator svg,
-.csv-import-duplicate-notice .checkbox__indicator svg {
+.csv-import-duplicate-notice .checkbox__indicator svg,
+.csv-import-manual-replace-notice .checkbox__indicator svg {
   width: 0.75rem;
   height: 0.75rem;
   flex-shrink: 0;
 }
 
 .app-checkbox .checkbox__content,
-.csv-import-duplicate-notice .checkbox__content {
+.csv-import-duplicate-notice .checkbox__content,
+.csv-import-manual-replace-notice .checkbox__content {
   flex: 1 1 auto;
   min-width: 0;
 }

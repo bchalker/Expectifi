@@ -1,12 +1,12 @@
-/** Manually maintained COL / QoL (0–10) when Teleport API is unavailable. Last reviewed 2025-01. */
+/** Manually maintained COL / QoL (0–10) per urban-area slug. Last reviewed 2025-01. */
 
-export type TeleportFallbackScores = {
+export type CatalogUrbanScores = {
   col: number
   qol: number
 }
 
-/** Teleport-style scores: higher = more affordable COL; QoL = livability. */
-export const TELEPORT_FALLBACK_SCORES: Record<string, TeleportFallbackScores> = {
+/** Higher COL score = more affordable; QoL = livability (0–10 scale). */
+export const CATALOG_URBAN_SCORES: Record<string, CatalogUrbanScores> = {
   'albuquerque-nm': { col: 6.4, qol: 6.6 },
   'anchorage-ak': { col: 4.8, qol: 6.5 },
   'athens-gr': { col: 6.8, qol: 7.0 },
@@ -86,8 +86,13 @@ export const TELEPORT_FALLBACK_SCORES: Record<string, TeleportFallbackScores> = 
   'cebu-ph': { col: 8.3, qol: 6.7 },
 }
 
-const DEFAULT_FALLBACK: TeleportFallbackScores = { col: 6.0, qol: 6.5 }
+const DEFAULT_SCORES: CatalogUrbanScores = { col: 6.0, qol: 6.5 }
 
-export function getTeleportFallback(citySlug: string): TeleportFallbackScores {
-  return TELEPORT_FALLBACK_SCORES[citySlug] ?? DEFAULT_FALLBACK
+export function getCatalogUrbanScores(citySlug: string): CatalogUrbanScores {
+  return CATALOG_URBAN_SCORES[citySlug] ?? DEFAULT_SCORES
+}
+
+/** @deprecated Use getCatalogUrbanScores */
+export function getTeleportFallback(citySlug: string): CatalogUrbanScores {
+  return getCatalogUrbanScores(citySlug)
 }

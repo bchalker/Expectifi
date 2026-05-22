@@ -22,6 +22,7 @@ type Props = {
   destinations: ScoredMapCity[]
   monthlyIncome: number
   pinColorView: MapPinColorView
+  favoritedKeySet: ReadonlySet<string>
   selectedId: string | null
   /** When true, emphasize the selected pin and fly to that city; when false, fit all destinations. */
   detailPanelOpen: boolean
@@ -213,17 +214,27 @@ function MapPinColorSync({
   destinations,
   monthlyIncome,
   pinColorView,
+  favoritedKeySet,
 }: {
   destinations: ScoredMapCity[]
   monthlyIncome: number
   pinColorView: MapPinColorView
+  favoritedKeySet: ReadonlySet<string>
 }) {
   const map = useMap()
 
   useEffect(() => {
     const id = window.setTimeout(() => {
       destinations.forEach((item) => {
-        const display = resolveMapPinDisplay(item, pinColorView, monthlyIncome)
+        const isFavorite = favoritedKeySet.has(
+          `${item.city.city}\u0001${item.city.country}`,
+        )
+        const display = resolveMapPinDisplay(
+          item,
+          pinColorView,
+          monthlyIncome,
+          isFavorite,
+        )
         const el = map
           .getContainer()
           .querySelector<HTMLElement>(
@@ -244,7 +255,7 @@ function MapPinColorSync({
       })
     }, 0)
     return () => window.clearTimeout(id)
-  }, [destinations, monthlyIncome, pinColorView, map])
+  }, [destinations, monthlyIncome, pinColorView, favoritedKeySet, map])
 
   return null
 }
@@ -253,6 +264,7 @@ export function RetirementLeafletMap({
   destinations,
   monthlyIncome,
   pinColorView,
+  favoritedKeySet,
   selectedId,
   detailPanelOpen,
   fitKey,
@@ -263,12 +275,17 @@ export function RetirementLeafletMap({
   const pinDisplays = useMemo(
     () =>
       new Map(
-        destinations.map((item) => [
-          item.city.id,
-          resolveMapPinDisplay(item, pinColorView, monthlyIncome),
-        ]),
+        destinations.map((item) => {
+          const isFavorite = favoritedKeySet.has(
+            `${item.city.city}\u0001${item.city.country}`,
+          )
+          return [
+            item.city.id,
+            resolveMapPinDisplay(item, pinColorView, monthlyIncome, isFavorite),
+          ]
+        }),
       ),
-    [destinations, monthlyIncome, pinColorView],
+    [destinations, monthlyIncome, pinColorView, favoritedKeySet],
   )
 
   return (
@@ -294,6 +311,7 @@ export function RetirementLeafletMap({
           destinations={destinations}
           monthlyIncome={monthlyIncome}
           pinColorView={pinColorView}
+          favoritedKeySet={favoritedKeySet}
         />
         {destinations.map((item) => {
           const display = pinDisplays.get(item.city.id)!

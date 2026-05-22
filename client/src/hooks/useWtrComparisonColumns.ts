@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getCityClimateForPlace } from '../lib/api/openMeteo'
-import { formatUsdToLocalRate, getLocalCurrencyInfo } from '../lib/api/exchangeRates'
+import {
+  formatUsdToLocalRate,
+  getLocalCurrencyInfo,
+  getUsdExchangeHistory,
+} from '../lib/api/exchangeRates'
 import {
   buildComparisonColumnData,
-  loadDollarStrengthForCountry,
   type ComparisonColumnData,
 } from '../lib/whereToRetire/comparisonTableModel'
 import { scoreMapCity, type ScoredMapCity } from '../lib/whereToRetire/cityMapScoring'
@@ -48,9 +51,12 @@ export function useWtrComparisonColumns(
       const next: typeof extras = {}
       await Promise.all(
         allTargets.map(async (city) => {
+          const currencyCode = countryToCurrencyCode(city.country)
           const [climate, fx] = await Promise.all([
             getCityClimateForPlace(city.city, city.country, city.lat, city.lng),
-            Promise.resolve(loadDollarStrengthForCountry(city.country)),
+            currencyCode && currencyCode !== 'USD'
+              ? getUsdExchangeHistory(currencyCode)
+              : Promise.resolve(null),
           ])
           next[city.id] = { climate, fx }
         }),

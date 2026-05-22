@@ -98,10 +98,12 @@ export function ConfigDrawerBody({
           <section className="config-drawer-section">
             <PlanningProfileFields
               variant="configure"
-              dateOfBirth={planning.dateOfBirth}
+              dateOfBirth={inputs.dateOfBirth}
               onDateOfBirth={(iso) => setInputs({ dateOfBirth: iso })}
-              targetRetirementAge={planning.targetRetirementAge}
-              onTargetRetirementAge={(targetRetirementAge) => setInputs({ targetRetirementAge })}
+              targetRetirementAge={inputs.targetRetirementAge}
+              onTargetRetirementAge={(targetRetirementAge) =>
+                setInputs({ targetRetirementAge })
+              }
               householdIncome={inputs.other}
               onHouseholdIncome={(other) => setInputs({ other })}
               monthlyContribution={planning.save > 0 ? Math.round(planning.save / 12) : 0}
