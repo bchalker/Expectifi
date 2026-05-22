@@ -1,4 +1,6 @@
 .wtr-fit-gauge {
+  --wtr-band-color: var(--color-text-danger);
+
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -31,23 +33,8 @@
 .wtr-fit-gauge__fill {
   height: 100%;
   border-radius: inherit;
+  background: var(--wtr-band-color);
   transition: width 0.35s ease;
-}
-
-.wtr-fit-gauge__fill--strong {
-  background: var(--wtr-match-strong);
-}
-
-.wtr-fit-gauge__fill--moderate {
-  background: var(--wtr-match-moderate);
-}
-
-.wtr-fit-gauge__fill--stretch {
-  background: var(--wtr-match-stretch);
-}
-
-.wtr-fit-gauge__fill--poor {
-  background: var(--wtr-match-poor);
 }
 
 .wtr-fit-gauge__score {
@@ -57,22 +44,7 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   line-height: 1.25;
-}
-
-.wtr-fit-gauge__score--strong {
-  color: var(--wtr-match-strong);
-}
-
-.wtr-fit-gauge__score--moderate {
-  color: var(--wtr-match-moderate);
-}
-
-.wtr-fit-gauge__score--stretch {
-  color: var(--wtr-match-stretch);
-}
-
-.wtr-fit-gauge__score--poor {
-  color: var(--wtr-match-poor);
+  color: var(--wtr-band-color);
 }
 
 .wtr-fit-gauge__explanation {

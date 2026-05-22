@@ -11,13 +11,48 @@ import {
   type MapCity,
 } from '../../utils/costOfLiving'
 import {
-  buildRetirementIncomeFitExplanation,
-  calculateRetirementIncomeFitScore,
-  matchRetirementIncomeFitTier,
-  type RetirementIncomeFitTier,
-} from './retirementIncomeFitScore'
+  passesEnglishProficiencyMapFilter,
+  type EnglishProficiencyFilter,
+} from '../../utils/englishProficiency'
+import {
+  hasRetirementVisaProgram,
+  passesForeignTaxMapFilter,
+  type ForeignTaxFilter,
+} from '../../utils/mapTaxVisaFilters'
+import {
+  passesDirectFlightsFilter,
+  passesGoodAirFilter,
+  passesHealthcareFilter,
+  passesMaxFlightTimeFilter,
+  passesMinRetirementScoreFilter,
+  passesSafetyFilter,
+  passesVisaFreeDaysFilter,
+  type HealthcareFilter,
+  type MaxFlightTimeFilter,
+  type MinRetirementScoreFilter,
+  type SafetyFilter,
+  type VisaFreeDaysFilter,
+} from '../../utils/mapDestinationFilters'
 
-export type MatchTier = RetirementIncomeFitTier
+export type { ForeignTaxFilter }
+export type {
+  HealthcareFilter,
+  MaxFlightTimeFilter,
+  MinRetirementScoreFilter,
+  SafetyFilter,
+  VisaFreeDaysFilter,
+} from '../../utils/mapDestinationFilters'
+import {
+  calculateRetirementScore,
+  retirementScoreBandFromScore,
+  type RetirementScoreBand,
+  type RetirementScoreResult,
+} from '../../utils/retirementScore'
+import { buildRetirementIncomeFitExplanation } from './retirementIncomeFitScore'
+
+export type { EnglishProficiencyFilter }
+
+export type MatchTier = RetirementScoreBand
 
 export type ClimateFilter =
   | 'any'
@@ -43,6 +78,26 @@ export const ALL_DESTINATION_REGIONS: DestinationRegion[] = [
 
 export type MapRegionScope = 'us-only' | 'international-only' | 'both'
 
+/** Toolbar preset for map geography (US / macro regions / worldwide). */
+export type MapWhereToLook = 'us' | 'europe' | 'latin-america' | 'asia' | 'all'
+
+export const WHERE_TO_LOOK_EUROPE_REGIONS: DestinationRegion[] = [
+  'europe',
+  'eastern-europe',
+]
+
+export const WHERE_TO_LOOK_ASIA_REGIONS: DestinationRegion[] = ['southeast-asia']
+
+export const WHERE_TO_LOOK_LATIN_AMERICA_REGIONS: DestinationRegion[] = ['latin-america']
+
+export const MAP_WHERE_TO_LOOK_OPTIONS: { id: MapWhereToLook; label: string }[] = [
+  { id: 'us', label: 'US' },
+  { id: 'europe', label: 'Europe' },
+  { id: 'latin-america', label: 'Latin America' },
+  { id: 'asia', label: 'Asia' },
+  { id: 'all', label: 'All' },
+]
+
 export type MapSortBy =
   | 'affordability-fit'
   | 'lowest-budget'
@@ -57,10 +112,19 @@ export type MapFilters = {
   climate: ClimateFilter
   regionScope: MapRegionScope
   sortBy: MapSortBy
-  englishSpeaking: boolean
+  englishProficiency: EnglishProficiencyFilter
+  foreignTax: ForeignTaxFilter
+  retirementVisa: boolean
   medicareAccess: boolean
   /** When true, cities in travel-advisory countries are hidden. */
   hideAdvisories: boolean
+  safety: SafetyFilter
+  healthcare: HealthcareFilter
+  goodAirOnly: boolean
+  maxFlightTime: MaxFlightTimeFilter
+  directFromUsOnly: boolean
+  visaFreeDays: VisaFreeDaysFilter
+  minRetirementScore: MinRetirementScoreFilter
 }
 
 export const DEFAULT_MAP_FILTERS: MapFilters = {
@@ -69,19 +133,19 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   climate: 'any',
   regionScope: 'both',
   sortBy: 'affordability-fit',
-  englishSpeaking: false,
+  englishProficiency: 'any',
+  foreignTax: 'any',
+  retirementVisa: false,
   medicareAccess: false,
   hideAdvisories: false,
+  safety: 'any',
+  healthcare: 'any',
+  goodAirOnly: false,
+  maxFlightTime: 'any',
+  directFromUsOnly: false,
+  visaFreeDays: 'any',
+  minRetirementScore: 'any',
 }
-
-const ENGLISH_SPEAKING_COUNTRIES = new Set([
-  'United Kingdom',
-  'Ireland',
-  'Australia',
-  'New Zealand',
-  'Canada',
-  'Costa Rica',
-])
 
 const US_COUNTRY = 'United States'
 
@@ -125,7 +189,13 @@ function passesRegionScope(country: string, scope: MapRegionScope): boolean {
 }
 
 function passesMapDealbreakers(country: string, filters: MapFilters): boolean {
-  if (filters.englishSpeaking && !ENGLISH_SPEAKING_COUNTRIES.has(country)) {
+  if (!passesEnglishProficiencyMapFilter(country, filters.englishProficiency)) {
+    return false
+  }
+  if (!passesForeignTaxMapFilter(country, filters.foreignTax)) {
+    return false
+  }
+  if (filters.retirementVisa && !hasRetirementVisaProgram(country)) {
     return false
   }
   if (filters.medicareAccess && country !== US_COUNTRY) {
@@ -148,14 +218,22 @@ function compareMapCities(a: ScoredMapCity, b: ScoredMapCity, sortBy: MapSortBy,
       return dollarTrendForCountry(b.city.country) - dollarTrendForCountry(a.city.country)
     case 'affordability-fit':
     default:
-      return b.affordabilityScore - a.affordabilityScore
+      return b.retirementScore - a.retirementScore
   }
 }
 
 export type ScoredMapCity = {
   city: MapCity
   monthlyBudget: number
-  affordabilityScore: number
+  score: RetirementScoreResult
+  retirementScore: number
+  displayScore: number
+  incomeFitScore: number
+  qolNormalized: number
+  warnings: string[]
+  band: RetirementScoreBand
+  bandColor: string
+  bandLabel: string
   tier: MatchTier
   pinSizePx: number
   colExplanation: string
@@ -204,7 +282,7 @@ const FOUR_SEASONS = new Set([
 ])
 
 export function matchTier(score: number): MatchTier {
-  return matchRetirementIncomeFitTier(score)
+  return retirementScoreBandFromScore(score).band
 }
 
 export function pinSizeForScore(score: number): number {
@@ -240,20 +318,34 @@ function passesClimate(country: string, climate: ClimateFilter): boolean {
 
 export function scoreMapCity(city: MapCity, monthlyIncome: number): ScoredMapCity {
   const monthlyBudget = calculateMonthlyBudget(city)
-  const affordabilityScore = calculateRetirementIncomeFitScore(monthlyIncome, monthlyBudget)
+  const score = calculateRetirementScore(monthlyIncome, monthlyBudget, null, city.country)
 
   return {
     city,
     monthlyBudget,
-    affordabilityScore,
-    tier: matchTier(affordabilityScore),
-    pinSizePx: pinSizeForScore(affordabilityScore),
-    colExplanation: buildRetirementIncomeFitExplanation(monthlyIncome, affordabilityScore),
+    score,
+    retirementScore: score.rawRetirementScore,
+    displayScore: score.displayScore,
+    incomeFitScore: score.incomeFitScore,
+    qolNormalized: score.qolNormalized,
+    warnings: score.warnings,
+    band: score.band,
+    bandColor: score.bandColor,
+    bandLabel: score.bandLabel,
+    tier: score.band,
+    pinSizePx: pinSizeForScore(score.displayScore),
+    colExplanation: buildRetirementIncomeFitExplanation(
+      monthlyIncome,
+      score.incomeFitScore,
+    ),
   }
 }
 
 /** @deprecated Use countVisibleMapCities — kept for call-site clarity. */
-export function countFitsIncomeWithFilters(monthlyIncome: number, filters: MapFilters): number {
+export function countFitsIncomeWithFilters(
+  monthlyIncome: number,
+  filters: MapFilters,
+): number {
   return countVisibleMapCities(monthlyIncome, filters)
 }
 
@@ -262,15 +354,82 @@ export function regionsAreDefault(regions: DestinationRegion[]): boolean {
   return ALL_DESTINATION_REGIONS.every((r) => regions.includes(r))
 }
 
+function regionsMatchPreset(
+  regions: DestinationRegion[],
+  preset: readonly DestinationRegion[],
+): boolean {
+  if (regions.length !== preset.length) return false
+  return preset.every((r) => regions.includes(r))
+}
+
+export function resolveWhereToLook(filters: MapFilters): MapWhereToLook {
+  if (filters.regionScope === 'us-only') return 'us'
+  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_LATIN_AMERICA_REGIONS)) {
+    return 'latin-america'
+  }
+  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_ASIA_REGIONS)) return 'asia'
+  if (regionsMatchPreset(filters.regions, WHERE_TO_LOOK_EUROPE_REGIONS)) return 'europe'
+  return 'all'
+}
+
+export function applyWhereToLook(filters: MapFilters, choice: MapWhereToLook): MapFilters {
+  switch (choice) {
+    case 'us':
+      return {
+        ...filters,
+        regionScope: 'us-only',
+        regions: [...ALL_DESTINATION_REGIONS],
+      }
+    case 'europe':
+      return {
+        ...filters,
+        regionScope: 'international-only',
+        regions: [...WHERE_TO_LOOK_EUROPE_REGIONS],
+        medicareAccess: false,
+      }
+    case 'latin-america':
+      return {
+        ...filters,
+        regionScope: 'international-only',
+        regions: [...WHERE_TO_LOOK_LATIN_AMERICA_REGIONS],
+        medicareAccess: false,
+      }
+    case 'asia':
+      return {
+        ...filters,
+        regionScope: 'international-only',
+        regions: [...WHERE_TO_LOOK_ASIA_REGIONS],
+        medicareAccess: false,
+      }
+    case 'all':
+      return {
+        ...filters,
+        regionScope: 'both',
+        regions: [...ALL_DESTINATION_REGIONS],
+        medicareAccess: false,
+      }
+  }
+}
+
 export function countActiveMapFilters(filters: MapFilters): number {
   let count = 0
-  if (!regionsAreDefault(filters.regions)) count += 1
+  if (resolveWhereToLook(filters) !== 'all') count += 1
+  else if (!regionsAreDefault(filters.regions)) count += 1
+  else if (filters.regionScope !== 'both') count += 1
   if (filters.climate !== 'any') count += 1
-  if (filters.regionScope !== 'both') count += 1
   if (filters.sortBy !== 'affordability-fit') count += 1
-  if (filters.englishSpeaking) count += 1
+  if (filters.englishProficiency !== 'any') count += 1
+  if (filters.foreignTax !== 'any') count += 1
+  if (filters.retirementVisa) count += 1
   if (filters.medicareAccess) count += 1
   if (filters.hideAdvisories) count += 1
+  if (filters.safety !== 'any') count += 1
+  if (filters.healthcare !== 'any') count += 1
+  if (filters.goodAirOnly) count += 1
+  if (filters.maxFlightTime !== 'any') count += 1
+  if (filters.directFromUsOnly) count += 1
+  if (filters.visaFreeDays !== 'any') count += 1
+  if (filters.minRetirementScore !== 'any') count += 1
   return count
 }
 
@@ -285,9 +444,18 @@ export function mapFiltersKey(filters: MapFilters): string {
     [...filters.regions].sort().join(','),
     filters.regionScope,
     filters.sortBy,
-    filters.englishSpeaking ? '1' : '0',
+    filters.englishProficiency,
+    filters.foreignTax,
+    filters.retirementVisa ? '1' : '0',
     filters.medicareAccess ? '1' : '0',
     filters.hideAdvisories ? '1' : '0',
+    filters.safety,
+    filters.healthcare,
+    filters.goodAirOnly ? '1' : '0',
+    filters.maxFlightTime,
+    filters.directFromUsOnly ? '1' : '0',
+    filters.visaFreeDays,
+    filters.minRetirementScore,
   ].join('|')
 }
 
@@ -314,6 +482,16 @@ export function passesMapFilters(
 
   if (filters.hideAdvisories && hasTravelAdvisory(city.country)) return false
 
+  if (!passesSafetyFilter(city.country, filters.safety)) return false
+  if (!passesHealthcareFilter(city.country, filters.healthcare)) return false
+  if (!passesGoodAirFilter(city.country, filters.goodAirOnly)) return false
+  if (!passesMaxFlightTimeFilter(city.country, filters.maxFlightTime)) return false
+  if (!passesDirectFlightsFilter(city.country, filters.directFromUsOnly)) return false
+  if (!passesVisaFreeDaysFilter(city.country, filters.visaFreeDays)) return false
+  if (!passesMinRetirementScoreFilter(scored.retirementScore, filters.minRetirementScore)) {
+    return false
+  }
+
   return true
 }
 
@@ -330,7 +508,7 @@ export function scoreAndFilterMapCities(
   return limit != null ? scored.slice(0, limit) : scored
 }
 
-/** Cities at or below income with optional map filters (income always enforced). */
+/** Cities at or below income with optional map filters. */
 export function countVisibleMapCities(
   monthlyIncome: number,
   filters: MapFilters,

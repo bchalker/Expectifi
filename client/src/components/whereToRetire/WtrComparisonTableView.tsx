@@ -11,9 +11,10 @@ import {
 } from '../../lib/whereToRetire/comparisonTableModel'
 import { DirectFlightsBadge } from './DestinationGettingThereTab'
 import { EnglishProficiencyBadge } from './DestinationPeopleCultureTab'
+import { getEnglishProficiency } from '../../utils/englishProficiency'
 import './DestinationGettingThereTab.scss'
 import './DestinationPeopleCultureTab.scss'
-import { matchTier, scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
+import { scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { countryToFlagEmoji, getAllMapCities, type MapCity } from '../../utils/costOfLiving'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
 import './WtrComparisonTableView.scss'
@@ -39,7 +40,7 @@ function ComparisonCellValue({
   monthlyIncome: number
 }) {
   if (isComparisonEnglishBadgeRow(rowId)) {
-    const level = col.demographics?.demographics.english_proficiency
+    const level = getEnglishProficiency(col.city.country)
     if (!level) return <span className="wtr-compare-table__cell-value">—</span>
     return (
       <span className="wtr-compare-table__cell-value wtr-compare-table__cell-value--badge">
@@ -95,10 +96,11 @@ function CityColumnHeader({
   const mapCity = col?.city ?? (isBaseline ? baselineCity : null)
   const isEmptyBaseline = isBaseline && !mapCity
   const cityLabel = mapCity?.city ?? 'Select current city'
-  const headerScore =
-    col?.scored.affordabilityScore ??
-    (mapCity ? scoreMapCity(mapCity, monthlyIncome).affordabilityScore : null)
-  const tier = headerScore != null ? matchTier(headerScore) : null
+  const headerScored =
+    col?.scored ?? (mapCity ? scoreMapCity(mapCity, monthlyIncome) : null)
+  const headerScore = headerScored?.displayScore ?? null
+  const headerBand = headerScored?.band ?? null
+  const headerBandColor = headerScored?.bandColor ?? null
 
   useEffect(() => {
     if (!dropdownOpen || !isBaseline) return
@@ -206,10 +208,11 @@ function CityColumnHeader({
               </span>
               <span className="wtr-compare-table__col-country">{mapCity!.country}</span>
             </div>
-            {headerScore != null && tier != null ? (
+            {headerScore != null && headerBand != null && headerBandColor != null ? (
               <WtrAffordabilityScoreBar
                 score={headerScore}
-                tier={tier}
+                band={headerBand}
+                bandColor={headerBandColor}
                 className="wtr-compare-table__col-score"
               />
             ) : null}

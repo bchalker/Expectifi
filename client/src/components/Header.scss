@@ -2,6 +2,8 @@
 .header {
   --header-brand-navy: #1a2332;
   --header-brand-green: #4ecb8d;
+  /* Matches subheader income-phase wave gradient stop (SubHeader.tsx) */
+  --header-income-orange: #c4610a;
 
   position: relative;
   flex-shrink: 0;
@@ -339,18 +341,21 @@
   box-sizing: border-box;
   border: none;
   border-radius: 8px;
-  background: var(--header-brand-green);
-  color: #0f2a22;
+  background: var(--header-income-orange);
+  color: #fff;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: filter 0.15s ease;
+  transition:
+    background 0.15s ease,
+    filter 0.15s ease;
 }
 
 .header__auth-cta:hover {
-  filter: brightness(1.06);
+  background: color-mix(in srgb, var(--header-income-orange) 88%, #000);
+  color: #fff;
 }
 
 .header__auth-btn {

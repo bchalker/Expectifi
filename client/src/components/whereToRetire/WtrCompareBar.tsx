@@ -1,30 +1,83 @@
-import { IconX } from '@tabler/icons-react'
+import { IconArrowRight, IconMapPin } from '@tabler/icons-react'
+import { Tooltip } from '../Tooltip'
 import './WtrCompareBar.scss'
 
-type Props = {
-  count: number
-  onViewComparison: () => void
-  onClearAll: () => void
+export type CompareBarCity = {
+  id: string
+  name: string
 }
 
-export function WtrCompareBar({ count, onViewComparison, onClearAll }: Props) {
-  if (count <= 0) return null
+type Props = {
+  cities: CompareBarCity[]
+  onViewComparison: () => void
+  onClearAll: () => void
+  className?: string
+}
 
-  const label = count === 1 ? 'Compare 1 city' : `Compare ${count} cities`
+function cityCountLabel(count: number): string {
+  return count === 1 ? '1 city' : `${count} cities`
+}
+
+function compareCtaLabel(count: number): string {
+  return count === 1
+    ? 'View 1 Comparison'
+    : `View ${count} Comparisons`
+}
+
+function CompareCityList({ cities }: { cities: CompareBarCity[] }) {
+  if (cities.length === 0) {
+    return <p className="wtr-compare-bar__tooltip-empty">No cities selected</p>
+  }
 
   return (
-    <div className="wtr-compare-bar" role="status" aria-live="polite">
-      <p className="wtr-compare-bar__label">{label}</p>
-      <button type="button" className="wtr-compare-bar__cta" onClick={onViewComparison}>
-        View comparison
-      </button>
+    <ul className="wtr-compare-bar__tooltip-list">
+      {cities.map((city) => (
+        <li key={city.id} className="wtr-compare-bar__tooltip-item">
+          {city.name}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export function WtrCompareBar({ cities, onViewComparison, onClearAll, className }: Props) {
+  const count = cities.length
+  if (count <= 0) return null
+
+  return (
+    <div
+      className={['wtr-compare-bar', className].filter(Boolean).join(' ')}
+      role="status"
+      aria-live="polite"
+    >
+      <Tooltip
+        content={<CompareCityList cities={cities} />}
+        placement="bottom"
+        contentClassName="wtr-compare-bar__tooltip-content"
+      >
+        <span className="wtr-compare-bar__count">
+          <IconMapPin size={16} stroke={1.5} aria-hidden />
+          <span className="wtr-compare-bar__count-label">{cityCountLabel(count)}</span>
+        </span>
+      </Tooltip>
+
       <button
         type="button"
-        className="wtr-compare-bar__clear"
+        className="wtr-compare-bar__clear-btn"
         onClick={onClearAll}
         aria-label="Clear all cities from comparison"
       >
-        <IconX size={18} stroke={1.5} aria-hidden />
+        Clear
+      </button>
+
+      <button
+        type="button"
+        className="wtr-compare-bar__compare-btn"
+        onClick={onViewComparison}
+        aria-label={compareCtaLabel(count)}
+      >
+        <span>{compareCtaLabel(count)}</span>
+        <IconArrowRight size={16} stroke={1.5} aria-hidden />
       </button>
     </div>
   )

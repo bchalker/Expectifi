@@ -235,9 +235,9 @@
   background: var(--color-amber-bg);
 }
 
-.wtr-people-culture__english-badge--red {
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-card));
+.wtr-people-culture__english-badge--muted {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 12%, var(--color-card));
 }
 
 .wtr-people-culture__expat-copy {

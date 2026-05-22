@@ -1,0 +1,194 @@
+.wtr-expat-life__empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.wtr-expat-life__group {
+  margin-bottom: 1.15rem;
+}
+
+.wtr-expat-life__section-title {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.wtr-expat-life__community-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+
+.wtr-expat-life__size-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.wtr-expat-life__size-badge--green {
+  color: var(--color-text-success);
+  background: color-mix(in srgb, var(--color-text-success) 14%, var(--color-card));
+}
+
+.wtr-expat-life__size-badge--teal {
+  color: var(--color-teal-dark);
+  background: var(--color-teal-bg);
+}
+
+.wtr-expat-life__size-badge--amber {
+  color: var(--color-amber-dark);
+  background: var(--color-amber-bg);
+}
+
+.wtr-expat-life__size-badge--muted {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 12%, var(--color-card));
+}
+
+.wtr-expat-life__americans {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.wtr-expat-life__area-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.wtr-expat-life__area-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+}
+
+.wtr-expat-life__area-pill--more {
+  color: var(--text-muted);
+  border-style: dashed;
+}
+
+.wtr-expat-life__vibe {
+  margin: 0;
+  padding: 0.65rem 0 0.65rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.wtr-expat-life__rows {
+  margin: 0 0 1.15rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.wtr-expat-life__row {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.wtr-expat-life__row dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wtr-expat-life__row dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wtr-expat-life__cost-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-amber-dark) 35%, var(--border));
+  border-radius: 10px;
+  background: var(--color-amber-bg);
+  box-sizing: border-box;
+}
+
+.wtr-expat-life__cost-icon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--color-amber-dark);
+}
+
+.wtr-expat-life__cost-callout p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.wtr-expat-life__fb-list,
+.wtr-expat-life__forum-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wtr-expat-life__forum-list {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.wtr-expat-life__fb-link,
+.wtr-expat-life__forum-link {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.35rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.wtr-expat-life__fb-link:hover,
+.wtr-expat-life__forum-link:hover {
+  text-decoration: underline;
+}
+
+.wtr-expat-life__internations-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text-success);
+  background: color-mix(in srgb, var(--color-text-success) 14%, var(--color-card));
+  text-decoration: none;
+}
+
+.wtr-expat-life__internations-badge:hover {
+  text-decoration: underline;
+}

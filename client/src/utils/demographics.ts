@@ -81,29 +81,6 @@ export function getReligionLegendItems(
   return getReligionBarSegments(breakdown).filter((seg) => seg.pct > LEGEND_MIN_PCT)
 }
 
-export type EnglishProficiencyTone = 'green' | 'teal' | 'amber' | 'red'
-
-export function getEnglishProficiencyTone(level: string): EnglishProficiencyTone {
-  const normalized = level.trim().toLowerCase()
-  if (normalized === 'very high' || normalized === 'native') return 'green'
-  if (normalized === 'high' || normalized === 'moderate-high') return 'teal'
-  if (normalized === 'moderate') return 'amber'
-  return 'red'
-}
-
-/** Numeric rank for comparison highlighting (higher = better English). */
-export function getEnglishProficiencyRank(level: string): number | null {
-  const normalized = level.trim().toLowerCase()
-  if (!normalized) return null
-  if (normalized === 'native' || normalized === 'very high') return 5
-  if (normalized === 'high') return 4
-  if (normalized === 'moderate-high') return 3.5
-  if (normalized === 'moderate') return 3
-  if (normalized === 'low-moderate') return 2
-  if (normalized === 'low') return 1
-  return null
-}
-
 export function getReligionBreakdownPct(
   data: DemographicsCountryData | null,
   key: ReligionKey,
@@ -129,7 +106,7 @@ export function getDemographicsRowValue(
     case 'demoUnaffiliatedPct':
       return formatPct(data.religion.breakdown.Unaffiliated)
     case 'demoEnglish':
-      return data.demographics.english_proficiency
+      return '—'
     case 'demoMedianAge':
       return `${data.demographics.median_age}`
     case 'demoUrbanPct':
@@ -158,7 +135,7 @@ export function getDemographicsRowNumericValue(
     case 'demoUrbanPct':
       return data.demographics.urban_pct
     case 'demoEnglish':
-      return getEnglishProficiencyRank(data.demographics.english_proficiency)
+      return null
     default:
       return null
   }

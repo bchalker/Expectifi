@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { AnimatedCount } from "../components/ui/AnimatedCount";
 import { BudgetExplorationHero } from "../components/whereToRetire/BudgetExplorationHero";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
 import { WtrMapFilterButton } from "../components/whereToRetire/WtrMapFilterButton";
+import { RetirementMapFilters } from "../components/whereToRetire/RetirementMapFilters";
 import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
@@ -15,11 +16,10 @@ import {
   type MapFilters,
 } from "../lib/whereToRetire/cityMapScoring";
 import {
-  defaultExplorationIncomeRange,
+  defaultExplorationIncome,
   getTotalMapCityCount,
-  isDefaultExplorationIncomeRange,
-  resolveExplorationIncomeCeiling,
-  type ExplorationIncomeRange,
+  isAtProjectedExplorationIncome,
+  resolveExplorationIncome,
 } from "../lib/whereToRetire/budgetExplorationStats";
 import type { MapCity } from "../utils/costOfLiving";
 import "./WhereToRetire.scss";
@@ -38,36 +38,36 @@ export function WhereToRetire({ c }: Props) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
   const totalMapCities = useMemo(() => getTotalMapCityCount(), []);
-  const [explorationRange, setExplorationRange] =
-    useState<ExplorationIncomeRange>(() =>
-      defaultExplorationIncomeRange(grossMonthlyIncome),
-    );
-  const explorationIncomeCeiling = useMemo(
-    () => resolveExplorationIncomeCeiling(grossMonthlyIncome, explorationRange),
-    [grossMonthlyIncome, explorationRange],
+  const [explorationIncome, setExplorationIncome] = useState(() =>
+    defaultExplorationIncome(grossMonthlyIncome),
+  );
+  const mapExplorationIncome = useMemo(
+    () => resolveExplorationIncome(grossMonthlyIncome, explorationIncome),
+    [grossMonthlyIncome, explorationIncome],
   );
   const [mapFilters, setMapFilters] = useState<MapFilters>(() => ({
     ...DEFAULT_MAP_FILTERS,
     regions: [...ALL_DESTINATION_REGIONS],
   }));
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    setExplorationRange(defaultExplorationIncomeRange(grossMonthlyIncome));
+    setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
   }, [grossMonthlyIncome]);
 
   const showingCityCount = useMemo(
-    () => countFitsIncomeWithFilters(explorationIncomeCeiling, mapFilters),
-    [explorationIncomeCeiling, mapFilters],
+    () => countFitsIncomeWithFilters(mapExplorationIncome, mapFilters),
+    [mapExplorationIncome, mapFilters],
   );
 
   const activeFilterCount = useMemo(
     () =>
       countActiveMapFilters(mapFilters) +
-      (isDefaultExplorationIncomeRange(grossMonthlyIncome, explorationRange)
+      (isAtProjectedExplorationIncome(grossMonthlyIncome, explorationIncome)
         ? 0
         : 1),
-    [grossMonthlyIncome, explorationRange, mapFilters],
+    [grossMonthlyIncome, explorationIncome, mapFilters],
   );
 
   const toggleFiltersPanel = useCallback(() => {
@@ -128,8 +128,8 @@ export function WhereToRetire({ c }: Props) {
         <BudgetExplorationHero
           section="intro"
           planMonthlyIncome={grossMonthlyIncome}
-          explorationRange={explorationRange}
-          onExplorationRangeChange={setExplorationRange}
+          explorationIncome={explorationIncome}
+          onExplorationIncomeChange={setExplorationIncome}
         />
         <button
           type="button"
@@ -148,13 +148,6 @@ export function WhereToRetire({ c }: Props) {
             .filter(Boolean)
             .join(" ")}
         >
-          <BudgetExplorationHero
-            section="panelSummary"
-            embedded
-            planMonthlyIncome={grossMonthlyIncome}
-            explorationRange={explorationRange}
-            onExplorationRangeChange={setExplorationRange}
-          />
           <div className="where-to-retire__income-toolbar">
             <div className="where-to-retire__showing-count" aria-live="polite">
               <p className="where-to-retire__showing-count-primary">
@@ -172,14 +165,14 @@ export function WhereToRetire({ c }: Props) {
             <div className="where-to-retire__income-toolbar-slider">
               <BudgetExplorationHero
                 section="slider"
-                embedded
                 planMonthlyIncome={grossMonthlyIncome}
-                explorationRange={explorationRange}
-                onExplorationRangeChange={setExplorationRange}
+                explorationIncome={explorationIncome}
+                onExplorationIncomeChange={setExplorationIncome}
               />
             </div>
             <div className="where-to-retire__income-toolbar-actions">
               <WtrMapFilterButton
+                ref={filterButtonRef}
                 active={activeFilterCount > 0}
                 activeFilterCount={activeFilterCount}
                 filtersOpen={filtersOpen}
@@ -187,16 +180,24 @@ export function WhereToRetire({ c }: Props) {
               />
             </div>
           </div>
+          <RetirementMapFilters
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            filters={mapFilters}
+            onChange={setMapFilters}
+            anchorRef={filterButtonRef}
+          />
           <div className="where-to-retire__main-panel-map">
             <RetirementMapExplorer
-              explorationRange={explorationRange}
-              monthlyIncomeCeiling={explorationIncomeCeiling}
+              explorationIncome={mapExplorationIncome}
               filters={mapFilters}
               onFiltersChange={setMapFilters}
               filtersOpen={filtersOpen}
               onFiltersOpenChange={setFiltersOpen}
               compareIds={compareIds}
               compareOverlayOpen={viewMode === "compare"}
+              explorerViewMode={viewMode}
+              onExplorerViewModeChange={setViewMode}
               onToggleCompare={toggleCompare}
               onClearCompare={clearCompare}
               onViewComparison={() => setViewMode("compare")}
@@ -209,7 +210,7 @@ export function WhereToRetire({ c }: Props) {
                 aria-label="City comparison"
               >
                 <WtrComparisonTableView
-                  monthlyIncome={explorationIncomeCeiling}
+                  monthlyIncome={mapExplorationIncome}
                   compareIds={compareIds}
                   baselineCity={baselineCity}
                   onBaselineCityChange={setBaselineCity}

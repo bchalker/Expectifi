@@ -21,6 +21,24 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --goal-bar-h: 0px;
 }
 
+/* Where to Retire: chrome + optional goal bar only (no subheader wave / amounts). */
+.app-header-shell--where-to-retire {
+  --subheader-h: 0px;
+  --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h));
+}
+
+/* Align top chrome with map / dashboard column (--wtr-content-max in global.scss). */
+.app-header-shell--where-to-retire .header--app .header__inner,
+.app-header-shell--where-to-retire .goal-progress-bar__row {
+  width: var(--wtr-content-boundary);
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.app-header-shell--where-to-retire.app-header-shell--ss-claim {
+  --subheader-h: 0px;
+}
+
 @media (max-width: 520px) {
   .app-header-shell--has-goal {
     --goal-bar-h: 3.35rem;

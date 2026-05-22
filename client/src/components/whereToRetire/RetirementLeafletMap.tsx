@@ -1,9 +1,17 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import L from 'leaflet'
-import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
+import {
+  resolveMapPinDisplay,
+  type MapPinColorView,
+} from '../../lib/whereToRetire/mapPinDisplay'
+import { WtrMapPinLegend } from './WtrMapPinLegend'
+import { WtrMapPinTooltip } from './WtrMapPinTooltip'
 import 'leaflet/dist/leaflet.css'
 import './RetirementLeafletMap.scss'
+import './WtrMapPinLegend.scss'
+import './WtrMapPinTooltip.scss'
 
 const DETAIL_FOCUS_ZOOM = 8
 /** Leaflet `flyTo` / `flyToBounds` duration in seconds */
@@ -12,6 +20,8 @@ const BOUNDS_FLY_DURATION_S = 1.1
 
 type Props = {
   destinations: ScoredMapCity[]
+  monthlyIncome: number
+  pinColorView: MapPinColorView
   selectedId: string | null
   /** When true, emphasize the selected pin and fly to that city; when false, fit all destinations. */
   detailPanelOpen: boolean
@@ -27,11 +37,15 @@ const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
 const TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
 
-function pinIcon(tier: ScoredMapCity['tier'], sizePx: number, cityId: string, score: number) {
-  const title = `Retirement income fit score: ${score}`
+function pinIcon(
+  bandClass: string,
+  pinColor: string,
+  sizePx: number,
+  cityId: string,
+) {
   return L.divIcon({
     className: 'wtr-leaflet-pin-host',
-    html: `<span class="wtr-leaflet-pin wtr-leaflet-pin--${tier}" data-city-id="${cityId}" title="${title}" style="width:${sizePx}px;height:${sizePx}px"></span>`,
+    html: `<span class="wtr-leaflet-pin wtr-leaflet-pin--${bandClass}" data-city-id="${cityId}" style="width:${sizePx}px;height:${sizePx}px;background:${pinColor}"></span>`,
     iconSize: [sizePx, sizePx],
     iconAnchor: [sizePx / 2, sizePx / 2],
   })
@@ -165,7 +179,7 @@ function MapPinSelectionStyles({
   return null
 }
 
-/** Pin enter animation only when filters change (fitKey), not on selection. */
+/** Pin enter animation only when filters change (fitKey), not on selection or color view. */
 function MapPinEnterAnimation({ fitKey, pinCount }: { fitKey: string; pinCount: number }) {
   const map = useMap()
 
@@ -194,8 +208,51 @@ function MapPinEnterAnimation({ fitKey, pinCount }: { fitKey: string; pinCount: 
   return null
 }
 
+/** Re-apply pin background colors when score/budget view or income changes (icons are not recreated). */
+function MapPinColorSync({
+  destinations,
+  monthlyIncome,
+  pinColorView,
+}: {
+  destinations: ScoredMapCity[]
+  monthlyIncome: number
+  pinColorView: MapPinColorView
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      destinations.forEach((item) => {
+        const display = resolveMapPinDisplay(item, pinColorView, monthlyIncome)
+        const el = map
+          .getContainer()
+          .querySelector<HTMLElement>(
+            `.wtr-leaflet-pin[data-city-id="${CSS.escape(item.city.id)}"]`,
+          )
+        if (!el) return
+        const isSelected = el.classList.contains('wtr-leaflet-pin--selected')
+        const isDetail = el.classList.contains('wtr-leaflet-pin--detail')
+        el.className = [
+          'wtr-leaflet-pin',
+          `wtr-leaflet-pin--${display.bandClass}`,
+          isSelected && 'wtr-leaflet-pin--selected',
+          isDetail && 'wtr-leaflet-pin--detail',
+        ]
+          .filter(Boolean)
+          .join(' ')
+        el.style.background = display.pinColor
+      })
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [destinations, monthlyIncome, pinColorView, map])
+
+  return null
+}
+
 export function RetirementLeafletMap({
   destinations,
+  monthlyIncome,
+  pinColorView,
   selectedId,
   detailPanelOpen,
   fitKey,
@@ -203,8 +260,22 @@ export function RetirementLeafletMap({
 }: Props) {
   const focusId = detailFocusId(selectedId, detailPanelOpen)
 
+  const pinDisplays = useMemo(
+    () =>
+      new Map(
+        destinations.map((item) => [
+          item.city.id,
+          resolveMapPinDisplay(item, pinColorView, monthlyIncome),
+        ]),
+      ),
+    [destinations, monthlyIncome, pinColorView],
+  )
+
   return (
     <div className="wtr-leaflet-map">
+      <div className="wtr-leaflet-map__legend-overlay">
+        <WtrMapPinLegend view={pinColorView} variant="overlay" />
+      </div>
       <MapContainer
         className="wtr-leaflet-map__canvas"
         center={[20, 0]}
@@ -219,17 +290,34 @@ export function RetirementLeafletMap({
         <MapSelectionFocus destinations={destinations} focusId={focusId} />
         <MapPinSelectionStyles focusId={focusId} pinCount={destinations.length} />
         <MapPinEnterAnimation fitKey={fitKey} pinCount={destinations.length} />
-        {destinations.map((item) => (
-          <Marker
-            key={item.city.id}
-            position={[item.city.lat, item.city.lng]}
-            zIndexOffset={focusId === item.city.id ? 1000 : 0}
-            icon={pinIcon(item.tier, item.pinSizePx, item.city.id, item.affordabilityScore)}
-            eventHandlers={{
-              click: () => onSelect(item.city.id),
-            }}
-          />
-        ))}
+        <MapPinColorSync
+          destinations={destinations}
+          monthlyIncome={monthlyIncome}
+          pinColorView={pinColorView}
+        />
+        {destinations.map((item) => {
+          const display = pinDisplays.get(item.city.id)!
+          return (
+            <Marker
+              key={`${item.city.id}-${pinColorView}-${display.pinColor}`}
+              position={[item.city.lat, item.city.lng]}
+              zIndexOffset={focusId === item.city.id ? 1000 : 0}
+              icon={pinIcon(display.bandClass, display.pinColor, item.pinSizePx, item.city.id)}
+              eventHandlers={{
+                click: () => onSelect(item.city.id),
+              }}
+            >
+              <Tooltip
+                className="wtr-pin-tooltip-host"
+                direction="top"
+                offset={[0, -6]}
+                opacity={1}
+              >
+                <WtrMapPinTooltip scored={item} display={display} />
+              </Tooltip>
+            </Marker>
+          )
+        })}
       </MapContainer>
     </div>
   )

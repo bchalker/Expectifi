@@ -105,52 +105,27 @@ export function clampExplorationIncome(
   return Math.min(INCOME_EXPLORE_MAX, Math.max(floor, stepped))
 }
 
-export type ExplorationIncomeRange = {
-  min: number
-  max: number
+export function defaultExplorationIncome(planMonthlyIncome: number): number {
+  return planMonthlyIncome
 }
 
-export function defaultExplorationIncomeRange(planMonthlyIncome: number): ExplorationIncomeRange {
-  const plan = clampExplorationIncome(planMonthlyIncome)
-  return { min: plan, max: plan }
-}
-
-export function isDefaultExplorationIncomeRange(
+export function isAtProjectedExplorationIncome(
   planMonthlyIncome: number,
-  range: ExplorationIncomeRange,
+  explorationIncome: number,
 ): boolean {
-  const planRange = defaultExplorationIncomeRange(planMonthlyIncome)
-  return range.min === planRange.min && range.max === planRange.max
+  return explorationIncome === planMonthlyIncome
 }
 
 /**
- * Income used for budget fit / city counts. At the default (plan) slider position, uses exact
- * projected income so counts match hero stats — the slider snaps to $50 steps (e.g. $316 → $300).
+ * Income for map filtering and fit scores. At the projected slider position uses
+ * exact plan income; when moved uses the stepped slider value.
  */
-export function resolveExplorationIncomeCeiling(
+export function resolveExplorationIncome(
   planMonthlyIncome: number,
-  range: ExplorationIncomeRange,
+  explorationIncome: number,
 ): number {
-  if (isDefaultExplorationIncomeRange(planMonthlyIncome, range)) {
+  if (isAtProjectedExplorationIncome(planMonthlyIncome, explorationIncome)) {
     return planMonthlyIncome
   }
-  return range.max
-}
-
-export function clampExplorationIncomeRange(
-  min: number,
-  max: number,
-): ExplorationIncomeRange {
-  let clampedMin = clampExplorationIncome(min)
-  let clampedMax = clampExplorationIncome(max)
-  if (clampedMax < clampedMin + INCOME_EXPLORE_STEP) {
-    clampedMax = Math.min(
-      INCOME_EXPLORE_MAX,
-      clampedMin + INCOME_EXPLORE_STEP,
-    )
-  }
-  if (clampedMin > clampedMax - INCOME_EXPLORE_STEP) {
-    clampedMin = Math.max(INCOME_EXPLORE_MIN, clampedMax - INCOME_EXPLORE_STEP)
-  }
-  return { min: clampedMin, max: clampedMax }
+  return explorationIncome
 }

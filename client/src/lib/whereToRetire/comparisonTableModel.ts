@@ -20,6 +20,11 @@ import {
   type DemographicsCountryData,
 } from '../../utils/demographics'
 import {
+  englishFriendlinessScoreForCountry,
+  getEnglishProficiencyDisplayValue,
+  getEnglishProficiencyRankForCountry,
+} from '../../utils/englishProficiency'
+import {
   getQoLRowNumericValue,
   getQoLRowValue,
   getQualityOfLifeData,
@@ -70,15 +75,6 @@ export type ComparisonColumnData = {
   exchangeRateLabel: string | null
 }
 
-const ENGLISH_SPEAKING = new Set([
-  'United Kingdom',
-  'Ireland',
-  'Australia',
-  'New Zealand',
-  'Canada',
-  'Costa Rica',
-])
-
 function teleportSlugForCountry(country: string): string {
   const iso = countryToIsoCode(country)
   if (!iso) return ''
@@ -113,7 +109,7 @@ function practicalScoresForCountry(country: string) {
   const key = countryToIsoCode(country)
   const catalogKey = key ? `country:${key}` : ''
   return {
-    english: ENGLISH_SPEAKING.has(country) ? 82 : 48,
+    english: englishFriendlinessScoreForCountry(country),
     healthcare: catalogKey ? getHealthcareRating(catalogKey) : 70,
     visa: 68,
   }
@@ -353,12 +349,13 @@ export function getComparisonCellNumericValue(
     case 'qolPollution':
     case 'qolPurchasingPower':
       return getQoLRowNumericValue(col.qualityOfLife, rowId)
+    case 'demoEnglish':
+      return getEnglishProficiencyRankForCountry(col.city.country)
     case 'demoChristianPct':
     case 'demoMuslimPct':
     case 'demoUnaffiliatedPct':
     case 'demoMedianAge':
     case 'demoUrbanPct':
-    case 'demoEnglish':
       return getDemographicsRowNumericValue(col.demographics, rowId)
     case 'travelEastCoast':
     case 'travelWestCoast':
@@ -485,6 +482,7 @@ export function getComparisonCellDisplay(
     case 'demoMuslimPct':
     case 'demoUnaffiliatedPct':
     case 'demoEnglish':
+      return getEnglishProficiencyDisplayValue(col.city.country)
     case 'demoMedianAge':
     case 'demoUrbanPct':
     case 'demoExpatCommunity':

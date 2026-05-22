@@ -1,30 +1,56 @@
-import qualityOfLifeDataset from '../data/quality-of-life.json'
+import qualityOfLifeCombined from '../data/quality-of-life.json'
+
+export type QualityOfLifeSource = 'numbeo_2024' | 'world_bank_proxy'
 
 export type QualityOfLifeCountryData = {
   quality_of_life_index: number
   purchasing_power_index: number
   safety_index: number
   healthcare_index: number
-  cost_of_living_index: number
-  property_price_to_income_ratio: number
-  traffic_commute_index: number
   pollution_index: number
   climate_index: number
+  traffic_commute_index: number
+  source: QualityOfLifeSource
+  /** Present on Numbeo rows; omitted on some World Bank proxy rows. */
+  cost_of_living_index?: number
+  property_price_to_income_ratio?: number
 }
 
-type QualityOfLifeDataset = Record<string, QualityOfLifeCountryData>
+type QualityOfLifeCombinedFile = {
+  metadata: {
+    last_updated: string
+    total_countries: number
+    numbeo_countries: number
+    world_bank_proxy_countries: number
+    disclaimer: string
+  }
+  countries: Record<string, QualityOfLifeCountryData>
+}
 
-const dataset = qualityOfLifeDataset as QualityOfLifeDataset
+const combined = qualityOfLifeCombined as unknown as QualityOfLifeCombinedFile
+const dataset = combined.countries
 
+/** Raw overall index ceiling (pre-normalization). */
 export const QOL_OVERALL_MAX = 220
+
+/** Display scale for overall QoL (matches retirement score breakdown). */
+export const QOL_NORMALIZED_MAX = 100
 
 export const QOL_UNAVAILABLE_MESSAGE =
   'Quality of life data not yet available for this country.'
 
-export const QOL_TAB_SOURCE_FOOTER =
-  'Source: Numbeo Quality of Life Index 2024. Scores are crowdsourced estimates. Country-level data — city conditions may vary.'
+export const QOL_WORLD_BANK_PROXY_NOTE =
+  'Estimated from World Bank indicators — limited Numbeo data available for this country'
 
-/** Numbeo country-level quality of life metrics (keys match `city.country`, e.g. "Portugal"). */
+export const QOL_TAB_SOURCE_FOOTER =
+  'Sources: Numbeo Quality of Life Index 2024 and World Bank proxy indicators where Numbeo data is unavailable. Scores normalized to 0-100 scale. Country-level data — city conditions may vary.'
+
+/** Map raw overall index (0–220) to 0–100 for display and retirement scoring. */
+export function qolNormalizedFromIndex(index: number): number {
+  return Math.min(QOL_NORMALIZED_MAX, Math.round((index / QOL_OVERALL_MAX) * QOL_NORMALIZED_MAX))
+}
+
+/** Country-level quality of life (keys match `city.country`, e.g. "Portugal"). */
 export function getQualityOfLifeData(country: string): QualityOfLifeCountryData | null {
   const trimmed = country.trim()
   if (!trimmed) return null
@@ -91,10 +117,11 @@ export type QoLMetricKey =
   | 'purchasing'
   | 'traffic'
 
-/** Overall index bands on 0–220 scale. */
-export function qolOverallScoreBand(index: number): { band: QoLOverallBand; label: string } {
-  if (index >= 154) return { band: 'excellent', label: 'Excellent' }
-  if (index >= 99) return { band: 'moderate', label: 'Moderate' }
+/** Overall index bands on normalized 0–100 scale (same thresholds as former 154 / 99 on 220). */
+export function qolOverallScoreBand(rawIndex: number): { band: QoLOverallBand; label: string } {
+  const normalized = qolNormalizedFromIndex(rawIndex)
+  if (normalized >= 70) return { band: 'excellent', label: 'Excellent' }
+  if (normalized >= 45) return { band: 'moderate', label: 'Moderate' }
   return { band: 'below-average', label: 'Below average' }
 }
 
@@ -136,7 +163,7 @@ export function getQoLRowValue(data: QualityOfLifeCountryData | null, rowId: str
   if (!data) return '—'
   switch (rowId) {
     case 'qolOverall':
-      return `${formatQoLIndex(data.quality_of_life_index)} / ${QOL_OVERALL_MAX}`
+      return `${formatQoLIndex(qolNormalizedFromIndex(data.quality_of_life_index))} / ${QOL_NORMALIZED_MAX}`
     case 'qolSafety':
       return formatQoLIndex(data.safety_index)
     case 'qolHealthcare':
@@ -159,7 +186,7 @@ export function getQoLRowNumericValue(
   if (!data) return null
   switch (rowId) {
     case 'qolOverall':
-      return data.quality_of_life_index
+      return qolNormalizedFromIndex(data.quality_of_life_index)
     case 'qolSafety':
       return data.safety_index
     case 'qolHealthcare':

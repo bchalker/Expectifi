@@ -1,0 +1,73 @@
+.wtr-pin-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 8.5rem;
+  max-width: 14rem;
+  padding: 0.15rem 0.1rem;
+  font-family: var(--body);
+  line-height: 1.25;
+}
+
+.wtr-pin-tooltip__name {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wtr-pin-tooltip__country {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.wtr-pin-tooltip__budget {
+  margin: 0.1rem 0 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--text);
+}
+
+.wtr-pin-tooltip__budget-suffix {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.wtr-pin-tooltip__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.wtr-pin-tooltip__badge-score {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-pin-tooltip__badge-label {
+  opacity: 0.95;
+}
+
+.leaflet-tooltip.wtr-pin-tooltip-host {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  color: var(--text);
+}
+
+.leaflet-tooltip.wtr-pin-tooltip-host::before {
+  border-top-color: var(--surface);
+}

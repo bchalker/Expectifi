@@ -6,13 +6,13 @@ import type {
   StaticGauge,
 } from '../../data/curatedRetirementDestinations'
 import {
-  buildRetirementIncomeFitExplanation,
-  calculateRetirementIncomeFitScore,
-  matchRetirementIncomeFitTier,
-  type RetirementIncomeFitTier,
-} from './retirementIncomeFitScore'
+  calculateRetirementScore,
+  retirementScoreBandFromScore,
+  type RetirementScoreBand,
+} from '../../utils/retirementScore'
+import { buildRetirementIncomeFitExplanation } from './retirementIncomeFitScore'
 
-export type MatchTier = RetirementIncomeFitTier
+export type MatchTier = RetirementScoreBand
 
 export type MapFilters = {
   climates: ClimatePreference[]
@@ -39,7 +39,7 @@ export type FitGaugeItem = {
 }
 
 export function matchTier(score: number): MatchTier {
-  return matchRetirementIncomeFitTier(score)
+  return retirementScoreBandFromScore(score).band
 }
 
 export function tierCssModifier(tier: MatchTier): string {
@@ -52,9 +52,9 @@ export function computeColGauge(
 ): CostOfLivingGauge {
   const income = Math.max(0, userMonthlyIncome)
   const cost = Math.max(500, avgExpatCostUsd)
-  const score = calculateRetirementIncomeFitScore(income, cost)
-  const explanation = buildRetirementIncomeFitExplanation(income, score)
-  return { score, explanation }
+  const result = calculateRetirementScore(income, cost, null)
+  const explanation = buildRetirementIncomeFitExplanation(income, result.incomeFitScore)
+  return { score: result.retirementScore, explanation }
 }
 
 export function computeOverallScore(

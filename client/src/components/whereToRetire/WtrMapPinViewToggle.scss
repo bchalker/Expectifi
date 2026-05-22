@@ -1,0 +1,48 @@
+.wtr-map-pin-view-toggle .mode-button-group {
+  flex-wrap: nowrap;
+  gap: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.wtr-map-pin-view-toggle .mode-button {
+  min-height: 100%;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid var(--border-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.wtr-map-pin-view-toggle .mode-button:last-child {
+  border-right: none;
+}
+
+.wtr-map-pin-view-toggle .mode-button:not(.mode-button--active) {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.wtr-map-pin-view-toggle .mode-button--active {
+  background: var(--strip-drawer);
+  border-color: var(--strip-drawer);
+  color: var(--surface);
+  z-index: 1;
+}
+
+.wtr-map-pin-view-toggle .mode-button:hover:not(.mode-button--active):not(:disabled) {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+@media (max-width: 680px) {
+  .wtr-map-pin-view-toggle .mode-button {
+    padding-inline: 0.5rem;
+    font-size: var(--text-xs);
+  }
+}

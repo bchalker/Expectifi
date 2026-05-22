@@ -8,27 +8,32 @@ import {
 } from "react";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
-import type { ExplorationIncomeRange } from "../../lib/whereToRetire/budgetExplorationStats";
 import {
+  applyWhereToLook,
+  resolveWhereToLook,
   scoreAndFilterMapCities,
   type MapFilters,
+  type ScoredMapCity,
 } from "../../lib/whereToRetire/cityMapScoring";
+import { expatCommunitySortRank } from "../../utils/expatInfo";
+import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import { RetirementDestinationCard } from "./RetirementDestinationCard";
 import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
-import { WtrCompareBar } from "./WtrCompareBar";
+import { WtrCompareBar, type CompareBarCity } from "./WtrCompareBar";
+import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
+import { useMapPinColorView } from "../../hooks/useMapPinColorView";
 import { RetirementLeafletMap } from "./RetirementLeafletMap";
-import {
-  RetirementMapFilters,
-  WtrMapFiltersInline,
-  WtrMapSortSelect,
-} from "./RetirementMapFilters";
+import { WtrMapPinColorChrome } from "./WtrMapPinColorChrome";
+import { WtrMapSortSelect } from "./RetirementMapFilters";
 import { WtrCityListPagination } from "./WtrCityListPagination";
 import "./RetirementMapExplorer.scss";
+import "./WtrMapPinColorChrome.scss";
+
+export type WtrExplorerViewMode = "map" | "compare";
 
 type Props = {
-  explorationRange: ExplorationIncomeRange;
-  /** Budget ceiling for fit scores and filtering (exact plan income at default slider). */
-  monthlyIncomeCeiling: number;
+  /** Resolved income for map pins, scores, and list (slider value). */
+  explorationIncome: number;
   filters: MapFilters;
   onFiltersChange: (
     next: MapFilters | ((prev: MapFilters) => MapFilters),
@@ -38,6 +43,8 @@ type Props = {
   onFiltersOpenChange: (open: boolean) => void;
   compareIds: string[];
   compareOverlayOpen?: boolean;
+  explorerViewMode: WtrExplorerViewMode;
+  onExplorerViewModeChange: (mode: WtrExplorerViewMode) => void;
   onToggleCompare: (cityId: string) => void;
   onClearCompare: () => void;
   onViewComparison: () => void;
@@ -52,9 +59,23 @@ function notifyMapResize() {
 
 const MAX_COMPARE_CITIES = 5;
 
+function sortCitiesForPinView(
+  cities: ScoredMapCity[],
+  pinColorView: MapPinColorView,
+): ScoredMapCity[] {
+  if (pinColorView === "expat") {
+    return [...cities].sort(
+      (a, b) =>
+        expatCommunitySortRank(b.city.country) -
+          expatCommunitySortRank(a.city.country) ||
+        b.retirementScore - a.retirementScore,
+    );
+  }
+  return cities;
+}
+
 export function RetirementMapExplorer({
-  explorationRange,
-  monthlyIncomeCeiling,
+  explorationIncome,
   filters,
   onFiltersChange,
   headerSlot,
@@ -62,18 +83,56 @@ export function RetirementMapExplorer({
   onFiltersOpenChange,
   compareIds,
   compareOverlayOpen = false,
+  explorerViewMode,
+  onExplorerViewModeChange,
   onToggleCompare,
   onClearCompare,
   onViewComparison,
 }: Props) {
+  const { pinColorView, onPinColorViewChange } = useMapPinColorView();
+
+  const handlePinColorViewChange = useCallback(
+    (view: MapPinColorView) => {
+      onPinColorViewChange(view);
+      if (view === "expat") {
+        onFiltersChange((prev) => {
+          const base =
+            resolveWhereToLook(prev) === "us"
+              ? applyWhereToLook(prev, "all")
+              : prev;
+          return base.regionScope === "both"
+            ? { ...base, regionScope: "international-only" }
+            : base;
+        });
+      }
+    },
+    [onPinColorViewChange, onFiltersChange],
+  );
+
+  useEffect(() => {
+    if (pinColorView !== "expat" || filters.regionScope !== "both") return;
+    onFiltersChange((prev) => {
+      const base =
+        resolveWhereToLook(prev) === "us"
+          ? applyWhereToLook(prev, "all")
+          : prev;
+      return base.regionScope === "both"
+        ? { ...base, regionScope: "international-only" }
+        : base;
+    });
+  }, [pinColorView, filters.regionScope, onFiltersChange]);
   const chromeRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [listPanelOpen, setListPanelOpen] = useState(true);
   const [listPage, setListPage] = useState(0);
   const filteredCities = useMemo(
-    () => scoreAndFilterMapCities(monthlyIncomeCeiling, filters),
-    [filters, monthlyIncomeCeiling],
+    () =>
+      sortCitiesForPinView(
+        scoreAndFilterMapCities(explorationIncome, filters),
+        pinColorView,
+      ),
+    [explorationIncome, filters, pinColorView],
   );
 
   const listPageCount = useMemo(
@@ -88,31 +147,58 @@ export function RetirementMapExplorer({
     return filteredCities.slice(start, start + LIST_PAGE_SIZE);
   }, [filteredCities, safeListPage]);
 
+  const compareBarCities = useMemo<CompareBarCity[]>(
+    () =>
+      resolveCompareScored(compareIds, explorationIncome).map((scored) => ({
+        id: scored.city.id,
+        name: `${scored.city.city}, ${scored.city.country}`,
+      })),
+    [compareIds, explorationIncome],
+  );
+
   const structuralFiltersKey = useMemo(
     () =>
       [
-        explorationRange.min,
-        explorationRange.max,
+        explorationIncome,
         filters.fitsMyIncome ? "1" : "0",
         filters.climate,
         [...filters.regions].sort().join(","),
         filters.regionScope,
         filters.sortBy,
-        filters.englishSpeaking ? "1" : "0",
+        filters.englishProficiency,
+        filters.foreignTax,
+        filters.retirementVisa ? "1" : "0",
         filters.medicareAccess ? "1" : "0",
         filters.hideAdvisories ? "1" : "0",
+        filters.safety,
+        filters.healthcare,
+        filters.goodAirOnly ? "1" : "0",
+        filters.maxFlightTime,
+        filters.directFromUsOnly ? "1" : "0",
+        filters.visaFreeDays,
+        filters.minRetirementScore,
+        pinColorView,
       ].join("|"),
     [
-      explorationRange.max,
-      explorationRange.min,
+      explorationIncome,
       filters.climate,
-      filters.englishSpeaking,
+      filters.englishProficiency,
+      filters.foreignTax,
+      filters.safety,
+      filters.healthcare,
+      filters.goodAirOnly,
+      filters.maxFlightTime,
+      filters.directFromUsOnly,
+      filters.visaFreeDays,
+      filters.minRetirementScore,
       filters.fitsMyIncome,
       filters.hideAdvisories,
       filters.medicareAccess,
       filters.regionScope,
       filters.regions,
+      filters.retirementVisa,
       filters.sortBy,
+      pinColorView,
     ],
   );
 
@@ -123,6 +209,12 @@ export function RetirementMapExplorer({
   useEffect(() => {
     setListPage(0);
   }, [structuralFiltersKey]);
+
+  useEffect(() => {
+    if (explorerViewMode === "compare" && compareIds.length === 0) {
+      onExplorerViewModeChange("map");
+    }
+  }, [compareIds.length, explorerViewMode, onExplorerViewModeChange]);
 
   useEffect(() => {
     setListPage((page) => Math.min(page, Math.max(0, listPageCount - 1)));
@@ -240,52 +332,33 @@ export function RetirementMapExplorer({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [filtersOpen, closeFiltersPanel]);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const onMqChange = () => {
-      if (mq.matches) onFiltersOpenChange(false);
-    };
-    onMqChange();
-    mq.addEventListener("change", onMqChange);
-    return () => mq.removeEventListener("change", onMqChange);
-  }, [onFiltersOpenChange]);
-
   return (
     <div className="wtr-explorer">
       <div ref={chromeRef} className="wtr-explorer__chrome">
         {headerSlot ? (
           <div className="wtr-explorer__chrome-slot">{headerSlot}</div>
         ) : null}
-        <WtrMapFiltersInline filters={filters} onChange={onFiltersChange} />
+        <WtrMapPinColorChrome
+          pinColorView={pinColorView}
+          onPinColorViewChange={handlePinColorViewChange}
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+        />
       </div>
 
       <div
         className={[
           "wtr-explorer__map-row",
           !listPanelOpen && "wtr-explorer__map-row--list-collapsed",
-          filtersOpen && "wtr-explorer__map-row--filters-open",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        {filtersOpen ? (
-          <button
-            type="button"
-            className="wtr-explorer__filter-backdrop"
-            aria-label="Close filters"
-            onClick={closeFiltersPanel}
-          />
-        ) : null}
-
-        <RetirementMapFilters
-          open={filtersOpen}
-          onClose={closeFiltersPanel}
-          filters={filters}
-          onChange={onFiltersChange}
-        />
         <div className="wtr-explorer__map-stage">
           <RetirementLeafletMap
             destinations={filteredCities}
+            monthlyIncome={explorationIncome}
+            pinColorView={pinColorView}
             selectedId={selectedId}
             detailPanelOpen={panelOpen && selectedScored != null}
             fitKey={structuralFiltersKey}
@@ -313,11 +386,17 @@ export function RetirementMapExplorer({
           ) : null}
           <div className="wtr-explorer__list-panel-inner">
             <header className="wtr-explorer__list-head">
-              <WtrMapSortSelect
-                className="wtr-map-filters__sort-select--list-head"
-                filters={filters}
-                onChange={onFiltersChange}
-              />
+              {pinColorView === "expat" ? (
+                <p className="wtr-explorer__list-sort-label">
+                  Sort by expat community size
+                </p>
+              ) : (
+                <WtrMapSortSelect
+                  className="wtr-map-filters__sort-select--list-head"
+                  filters={filters}
+                  onChange={onFiltersChange}
+                />
+              )}
             </header>
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
@@ -337,8 +416,10 @@ export function RetirementMapExplorer({
                     >
                       {listCities.map((item, index) => (
                         <RetirementDestinationCard
-                          key={item.city.id}
+                          key={`${item.city.id}-${pinColorView}`}
                           scored={item}
+                          monthlyIncome={explorationIncome}
+                          pinColorView={pinColorView}
                           rank={safeListPage * LIST_PAGE_SIZE + index + 1}
                           active={selectedId === item.city.id}
                           staggerIndex={index}
@@ -383,7 +464,7 @@ export function RetirementMapExplorer({
 
       <RetirementDestinationPanel
         scored={selectedScored}
-        monthlyIncome={monthlyIncomeCeiling}
+        monthlyIncome={explorationIncome}
         open={panelOpen && selectedScored != null}
         onClose={closePanel}
         compareSelected={
@@ -398,7 +479,7 @@ export function RetirementMapExplorer({
 
       {!compareOverlayOpen ? (
         <WtrCompareBar
-          count={compareIds.length}
+          cities={compareBarCities}
           onViewComparison={onViewComparison}
           onClearAll={onClearCompare}
         />

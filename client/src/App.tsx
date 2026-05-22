@@ -486,6 +486,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           'app-header-shell',
           hasGoalBar && 'app-header-shell--has-goal',
           phase === 'income' && welcomeDone && ssTimingConfigured && 'app-header-shell--ss-claim',
+          welcomeDone && isWhereToRetire && 'app-header-shell--where-to-retire',
           !welcomeDone && 'app-header-shell--onboarding',
         ]
           .filter(Boolean)
@@ -539,25 +540,27 @@ export default function App({ initialAuthModal = null }: AppProps) {
           hasPortfolioBalances={dashboardHasPortfolio}
         />
         ) : null}
-        <SubHeader
-          phase={phase}
-          onPhase={setPhase}
-          grossMon={c.grossMon}
-          totalFV={c.totalFV}
-          targetRetirementAge={inputs.targetRetirementAge}
-          ssIncluded={ui.ssIncluded}
-          onSsIncluded={(v) => setUi({ ssIncluded: v })}
-          ssClaimAge={normalizeClaimAge(inputs.ssAge)}
-          onSsClaimAgeChange={(age: SsClaimAge) => setInputs({ ssAge: age })}
-          ssTimingConfigured={welcomeDone && ssTimingConfigured}
-          onOpenSsConfig={() => {
-            setMobileNavOpen(false)
-            setAccordionOpen(false)
-            setConfigTab('social-security')
-            setDrawer('config')
-          }}
-          hasPortfolioBalances={dashboardHasPortfolio}
-        />
+        {!(welcomeDone && isWhereToRetire) ? (
+          <SubHeader
+            phase={phase}
+            onPhase={setPhase}
+            grossMon={c.grossMon}
+            totalFV={c.totalFV}
+            targetRetirementAge={inputs.targetRetirementAge}
+            ssIncluded={ui.ssIncluded}
+            onSsIncluded={(v) => setUi({ ssIncluded: v })}
+            ssClaimAge={normalizeClaimAge(inputs.ssAge)}
+            onSsClaimAgeChange={(age: SsClaimAge) => setInputs({ ssAge: age })}
+            ssTimingConfigured={welcomeDone && ssTimingConfigured}
+            onOpenSsConfig={() => {
+              setMobileNavOpen(false)
+              setAccordionOpen(false)
+              setConfigTab('social-security')
+              setDrawer('config')
+            }}
+            hasPortfolioBalances={dashboardHasPortfolio}
+          />
+        ) : null}
         </div>
         <div className="subheader-spacer" aria-hidden="true" />
       </div>

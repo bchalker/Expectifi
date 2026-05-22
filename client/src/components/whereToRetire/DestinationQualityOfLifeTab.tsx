@@ -1,11 +1,13 @@
 import { useMemo, type CSSProperties } from 'react'
 import {
   getQualityOfLifeData,
-  QOL_OVERALL_MAX,
+  QOL_NORMALIZED_MAX,
   QOL_TAB_SOURCE_FOOTER,
   QOL_UNAVAILABLE_MESSAGE,
+  QOL_WORLD_BANK_PROXY_NOTE,
   qolBarFillPercent,
   qolMetricBarBand,
+  qolNormalizedFromIndex,
   qolOverallScoreBand,
   type QoLMetricKey,
   type QualityOfLifeCountryData,
@@ -82,9 +84,10 @@ function QoLOverallCard({
   className?: string
   style?: CSSProperties
 }) {
+  const qolNormalized = qolNormalizedFromIndex(data.quality_of_life_index)
   const { band, label: bandLabel } = qolOverallScoreBand(data.quality_of_life_index)
-  const overallFill = Math.min(100, (data.quality_of_life_index / QOL_OVERALL_MAX) * 100)
-  const scoreValue = formatScore(data.quality_of_life_index)
+  const overallFill = qolNormalized
+  const scoreValue = formatScore(qolNormalized)
 
   return (
     <article
@@ -98,17 +101,20 @@ function QoLOverallCard({
       <div className="wtr-qol-overall__score-row">
         <p className="wtr-qol-overall__score tabular-nums">
           <span className="wtr-qol-overall__score-value">{scoreValue}</span>
-          <span className="wtr-qol-overall__score-denom"> / {QOL_OVERALL_MAX}</span>
+          <span className="wtr-qol-overall__score-denom"> / {QOL_NORMALIZED_MAX}</span>
         </p>
         <span className={`wtr-qol-overall__badge wtr-qol-overall__badge--${band}`}>{bandLabel}</span>
       </div>
       <QoLBar
         fillPct={overallFill}
-        valueNow={data.quality_of_life_index}
-        max={QOL_OVERALL_MAX}
-        label={`Overall quality of life: ${scoreValue} out of ${QOL_OVERALL_MAX}`}
+        valueNow={qolNormalized}
+        max={QOL_NORMALIZED_MAX}
+        label={`Overall quality of life: ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
         tone={band}
       />
+      {data.source === 'world_bank_proxy' ? (
+        <p className="wtr-qol-overall__proxy-note">{QOL_WORLD_BANK_PROXY_NOTE}</p>
+      ) : null}
     </article>
   )
 }

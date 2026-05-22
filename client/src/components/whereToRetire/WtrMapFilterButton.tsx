@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react'
 
 type Props = {
@@ -7,13 +8,16 @@ type Props = {
   onToggle: () => void
 }
 
-export function WtrMapFilterButton({ active, activeFilterCount, filtersOpen, onToggle }: Props) {
+export const WtrMapFilterButton = forwardRef<HTMLButtonElement, Props>(function WtrMapFilterButton(
+  { active, activeFilterCount, filtersOpen, onToggle },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type="button"
       className={[
         'where-to-retire__filter-btn',
-        'where-to-retire__filter-btn--mobile',
         filtersOpen && 'where-to-retire__filter-btn--active',
         active && 'where-to-retire__filter-btn--has-active',
       ]
@@ -36,4 +40,4 @@ export function WtrMapFilterButton({ active, activeFilterCount, filtersOpen, onT
       ) : null}
     </button>
   )
-}
+})

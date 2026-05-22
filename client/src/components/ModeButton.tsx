@@ -5,6 +5,7 @@ export type ModeButtonOption<T extends string> = {
   id: T
   label: string
   icon?: ReactNode
+  disabled?: boolean
 }
 
 type Props<T extends string> = {
@@ -22,8 +23,9 @@ export function ModeButtonGroup<T extends string>({ value, options, onChange, ar
         <button
           key={opt.id}
           type="button"
-          className={`mode-button${value === opt.id ? ' mode-button--active' : ''}`}
+          className={`mode-button${value === opt.id ? ' mode-button--active' : ''}${opt.disabled ? ' mode-button--disabled' : ''}`}
           aria-pressed={value === opt.id}
+          disabled={opt.disabled}
           onClick={() => onChange(opt.id)}
         >
           {opt.icon ? <span className="mode-button__icon">{opt.icon}</span> : null}

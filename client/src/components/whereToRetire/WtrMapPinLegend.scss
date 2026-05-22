@@ -1,0 +1,44 @@
+.wtr-map-pin-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--color-navy) 8%, transparent);
+  pointer-events: none;
+}
+
+.wtr-map-pin-legend--bar {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  gap: 0.45rem 0.65rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.wtr-map-pin-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.wtr-map-pin-legend__dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.wtr-map-pin-legend__label {
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  color: var(--text-muted);
+  white-space: nowrap;
+}

@@ -7,6 +7,7 @@ import {
 } from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
+import { Label, ListBox, Select } from "@heroui/react";
 import {
   IconBarbell,
   IconBolt,
@@ -20,12 +21,13 @@ import {
   IconSun,
   IconToolsKitchen2,
   IconUsers,
+  IconUsersGroup,
   IconX,
 } from "@tabler/icons-react";
+import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
 import { WtrCompareToggleButton } from "./WtrCompareToggleButton";
 import { useCityClimate } from "../../hooks/useCityClimate";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
-import { matchTier } from "../../lib/whereToRetire/cityMapScoring";
 import type { CityData } from "../../utils/costOfLiving";
 import {
   buildBudgetBreakdownDisplay,
@@ -52,16 +54,18 @@ import {
 } from "./ColCategoryCard";
 import { ColExtrasList, type ColExtraLineItem } from "./ColExtrasList";
 import { DestinationGettingThereTab } from "./DestinationGettingThereTab";
+import { DestinationExpatLifeTab } from "./DestinationExpatLifeTab";
 import { DestinationPeopleCultureTab } from "./DestinationPeopleCultureTab";
 import { DestinationQualityOfLifeTab } from "./DestinationQualityOfLifeTab";
 import { DestinationTaxVisaTab } from "./DestinationTaxVisaTab";
-import { FitGauge } from "./FitGauge";
+import { RetirementScoreHeader } from "./RetirementScoreHeader";
 import { WtrCityListPagination } from "./WtrCityListPagination";
 import "./ClimateCard.scss";
 import "./ColBudgetBreakdownBar.scss";
 import "./ColCategoryCard.scss";
 import "./ColExtrasList.scss";
 import "./DestinationGettingThereTab.scss";
+import "./DestinationExpatLifeTab.scss";
 import "./DestinationPeopleCultureTab.scss";
 import "./DestinationQualityOfLifeTab.scss";
 import "./RetirementDestinationPanel.scss";
@@ -91,7 +95,8 @@ type PanelTab =
   | "gettingThere"
   | "taxVisa"
   | "qol"
-  | "peopleCulture";
+  | "peopleCulture"
+  | "expatLife";
 
 function panelStaggerStyle(index: number): CSSProperties {
   return { "--wtr-panel-i": index } as CSSProperties;
@@ -146,7 +151,71 @@ const PANEL_TABS: {
     panelId: "wtr-dest-tabpanel-people-culture",
     icon: <IconUsers size={16} stroke={1.5} />,
   },
+  {
+    id: "expatLife",
+    label: "Expat Life",
+    tabId: "wtr-dest-tab-expat-life",
+    panelId: "wtr-dest-tabpanel-expat-life",
+    icon: <IconUsersGroup size={16} stroke={1.5} />,
+  },
 ];
+
+const PANEL_MOBILE_NAV_MQ = "(max-width: 680px)";
+
+function usePanelMobileNav(): boolean {
+  const [mobileNav, setMobileNav] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia(PANEL_MOBILE_NAV_MQ).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia(PANEL_MOBILE_NAV_MQ);
+    const onChange = () => setMobileNav(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  return mobileNav;
+}
+
+function DestinationPanelTabSelect({
+  activeTab,
+  onChange,
+}: {
+  activeTab: PanelTab;
+  onChange: (tab: PanelTab) => void;
+}) {
+  return (
+    <Select
+      className="wtr-dest-panel__tab-select"
+      variant="secondary"
+      aria-label="Destination section"
+      selectedKey={activeTab}
+      onSelectionChange={(keys) => {
+        const id = firstKeyFromSelectSelection(keys);
+        if (!id) return;
+        onChange(id as PanelTab);
+      }}
+    >
+      <Label className="wtr-dest-panel__tab-select-label">Section</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover className="wtr-dest-panel__tab-select-popover">
+        <ListBox>
+          {PANEL_TABS.map((tab) => (
+            <ListBox.Item key={tab.id} id={tab.id} textValue={tab.label}>
+              {tab.label}
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
+    </Select>
+  );
+}
 
 type ColCategoryPanelCard = ColCategoryCardProps & { id: string };
 
@@ -303,19 +372,29 @@ function DestinationPanelCityView({
   listPageNav,
 }: CityViewProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>("col");
+  const mobileNav = usePanelMobileNav();
+  const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab);
   const {
     climate,
     loading: climateLoading,
     failed: climateFailed,
   } = useCityClimate(scored.city);
 
-  const { city, affordabilityScore, colExplanation } = scored;
+  const {
+    city,
+    displayScore,
+    incomeFitScore,
+    qolNormalized,
+    warnings,
+    band,
+    bandColor,
+    bandLabel,
+  } = scored;
   const panelMonthlyBudget = calculateMonthlyBudget(city);
   const monthlySurplus = Math.max(
     0,
     Math.round(monthlyIncome - panelMonthlyBudget),
   );
-  const tier = matchTier(affordabilityScore);
   const flagEmoji = countryToFlagEmoji(city.country);
   const colBudgetCards = buildColBudgetCards(city);
   const colSupplementalItems = buildColSupplementalItems(city);
@@ -359,58 +438,71 @@ function DestinationPanelCityView({
               ) : null}
             </div>
             <div className="wtr-dest-panel__summary-copy">
-              <FitGauge
-                className="wtr-dest-panel__summary-gauge"
-                label="Retirement income fit score"
-                score={affordabilityScore}
-                tier={tier}
+              <RetirementScoreHeader
+                className="wtr-dest-panel__summary-score"
+                displayScore={displayScore}
+                incomeFitScore={incomeFitScore}
+                qolNormalized={qolNormalized}
+                warnings={warnings}
+                band={band}
+                bandColor={bandColor}
+                bandLabel={bandLabel}
               />
-              <p className="wtr-dest-panel__summary-note">
-                Single-person estimate based on rent outside city center, food,
-                transport, utilities, and internet.{" "}
-                <strong>{colExplanation}</strong>
-              </p>
             </div>
           </section>
         </header>
 
         <div className="wtr-dest-panel__scroll">
-          <div
-            className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
-            style={panelStaggerStyle(2)}
-            role="tablist"
-            aria-label="Destination details"
-            aria-orientation="vertical"
-          >
-            {PANEL_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={tab.tabId}
-                aria-selected={activeTab === tab.id}
-                aria-controls={tab.panelId}
-                className={`wtr-dest-panel__tab${activeTab === tab.id ? " wtr-dest-panel__tab--active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <span className="wtr-dest-panel__tab-inner">
-                  {/* <span className="wtr-dest-panel__tab-icon" aria-hidden>
-                    {tab.icon}
-                  </span> */}
-                  <span className="wtr-dest-panel__tab-label">{tab.label}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+          {mobileNav ? (
+            <div
+              className="wtr-dest-panel__tab-nav wtr-dest-panel__stagger-item"
+              style={panelStaggerStyle(2)}
+            >
+              <DestinationPanelTabSelect
+                activeTab={activeTab}
+                onChange={setActiveTab}
+              />
+            </div>
+          ) : (
+            <div
+              className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
+              style={panelStaggerStyle(2)}
+              role="tablist"
+              aria-label="Destination details"
+              aria-orientation="vertical"
+            >
+              {PANEL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={tab.tabId}
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={tab.panelId}
+                  className={`wtr-dest-panel__tab${activeTab === tab.id ? " wtr-dest-panel__tab--active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <span className="wtr-dest-panel__tab-inner">
+                    <span className="wtr-dest-panel__tab-label">
+                      {tab.label}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <SimpleBar className="wtr-dest-panel__tab-content" autoHide={false}>
             <div className="wtr-dest-panel__body">
               <div
                 key={`${city.id}-${activeTab}`}
-                id={PANEL_TABS.find((t) => t.id === activeTab)?.panelId}
-                role="tabpanel"
+                id={activeTabMeta?.panelId}
+                role={mobileNav ? "region" : "tabpanel"}
+                aria-label={
+                  mobileNav ? `${activeTabMeta?.label ?? "Section"} details` : undefined
+                }
                 aria-labelledby={
-                  PANEL_TABS.find((t) => t.id === activeTab)?.tabId
+                  mobileNav ? undefined : activeTabMeta?.tabId
                 }
                 className="wtr-dest-panel__tabpanel wtr-dest-panel__tabpanel--enter"
               >
@@ -477,8 +569,15 @@ function DestinationPanelCityView({
                     staggerClassName="wtr-dest-panel__stagger-item"
                     staggerStyle={panelStaggerStyle}
                   />
-                ) : (
+                ) : activeTab === "peopleCulture" ? (
                   <DestinationPeopleCultureTab
+                    country={city.country}
+                    staggerClassName="wtr-dest-panel__stagger-item"
+                    staggerStyle={panelStaggerStyle}
+                  />
+                ) : (
+                  <DestinationExpatLifeTab
+                    city={city.city}
                     country={city.country}
                     staggerClassName="wtr-dest-panel__stagger-item"
                     staggerStyle={panelStaggerStyle}

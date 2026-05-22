@@ -3,10 +3,15 @@ import {
   DEMOGRAPHICS_TAB_SOURCE_FOOTER,
   DEMOGRAPHICS_UNAVAILABLE_MESSAGE,
   getDemographicsData,
-  getEnglishProficiencyTone,
   getReligionBarSegments,
   getReligionLegendItems,
 } from '../../utils/demographics'
+import {
+  getEnglishProficiency,
+  getEnglishProficiencyBadgeLabel,
+  getEnglishProficiencyTone,
+  type EnglishProficiencyLevel,
+} from '../../utils/englishProficiency'
 import './DestinationPeopleCultureTab.scss'
 
 type Props = {
@@ -30,11 +35,12 @@ function staggerSectionProps(
   }
 }
 
-export function EnglishProficiencyBadge({ level }: { level: string }) {
+export function EnglishProficiencyBadge({ level }: { level: EnglishProficiencyLevel }) {
   const tone = getEnglishProficiencyTone(level)
+  const label = getEnglishProficiencyBadgeLabel(level)
   return (
     <span className={`wtr-people-culture__english-badge wtr-people-culture__english-badge--${tone}`}>
-      {level}
+      {label}
     </span>
   )
 }
@@ -84,8 +90,9 @@ function ReligionLegend({ breakdown }: { breakdown: Record<string, number> }) {
 
 export function DestinationPeopleCultureTab({ country, staggerClassName, staggerStyle }: Props) {
   const data = useMemo(() => getDemographicsData(country), [country])
+  const englishLevel = useMemo(() => getEnglishProficiency(country), [country])
 
-  if (!data) {
+  if (!data && !englishLevel) {
     return (
       <p {...staggerSectionProps(0, 'wtr-people-culture__empty', staggerClassName, staggerStyle)}>
         {DEMOGRAPHICS_UNAVAILABLE_MESSAGE}
@@ -93,83 +100,129 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
     )
   }
 
-  const { religion, demographics } = data
+  const religion = data?.religion
+  const demographics = data?.demographics
+  let sectionIndex = 0
 
   return (
     <div className="wtr-people-culture">
-      <section
-        className="wtr-people-culture__group"
-        aria-labelledby="wtr-people-culture-religion-heading"
-        {...staggerSectionProps(0, 'wtr-people-culture__group', staggerClassName, staggerStyle)}
-      >
-        <h3 id="wtr-people-culture-religion-heading" className="wtr-people-culture__section-title">
-          Religion
-        </h3>
-        <p className="wtr-people-culture__dominant">{religion.dominant}</p>
-        <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
-        <ReligionStackedBar breakdown={religion.breakdown} />
-        <ReligionLegend breakdown={religion.breakdown} />
-        <p className="wtr-people-culture__worship-note">
-          <em>Places of worship for expats:</em> {religion.expat_worship}
-        </p>
-      </section>
+      {religion ? (
+        <section
+          className="wtr-people-culture__group"
+          aria-labelledby="wtr-people-culture-religion-heading"
+          {...staggerSectionProps(
+            sectionIndex++,
+            'wtr-people-culture__group',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          <h3 id="wtr-people-culture-religion-heading" className="wtr-people-culture__section-title">
+            Religion
+          </h3>
+          <p className="wtr-people-culture__dominant">{religion.dominant}</p>
+          <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
+          <ReligionStackedBar breakdown={religion.breakdown} />
+          <ReligionLegend breakdown={religion.breakdown} />
+          <p className="wtr-people-culture__worship-note">
+            <em>Places of worship for expats:</em> {religion.expat_worship}
+          </p>
+        </section>
+      ) : null}
 
-      <section
-        className="wtr-people-culture__group"
-        aria-labelledby="wtr-people-culture-demo-heading"
-        {...staggerSectionProps(1, 'wtr-people-culture__group', staggerClassName, staggerStyle)}
-      >
-        <h3 id="wtr-people-culture-demo-heading" className="wtr-people-culture__section-title">
-          People &amp; language
-        </h3>
-        <dl className="wtr-people-culture__rows">
-          <div className="wtr-people-culture__row">
-            <dt>Population</dt>
-            <dd>{demographics.population}</dd>
-          </div>
-          <div className="wtr-people-culture__row">
-            <dt>Median age</dt>
-            <dd>
-              <span className="tabular-nums">{demographics.median_age}</span> years
-            </dd>
-          </div>
-          <div className="wtr-people-culture__row">
-            <dt>Urban population</dt>
-            <dd>
-              <span className="tabular-nums">{demographics.urban_pct}</span>%
-            </dd>
-          </div>
-          <div className="wtr-people-culture__row">
-            <dt>Official language</dt>
-            <dd>{demographics.official_language}</dd>
-          </div>
-          <div className="wtr-people-culture__row">
-            <dt>Common languages</dt>
-            <dd>{demographics.common_languages}</dd>
-          </div>
-          <div className="wtr-people-culture__row wtr-people-culture__row--badge">
-            <dt>English proficiency</dt>
-            <dd>
-              <EnglishProficiencyBadge level={demographics.english_proficiency} />
-            </dd>
-          </div>
-        </dl>
-      </section>
+      {demographics ? (
+        <section
+          className="wtr-people-culture__group"
+          aria-labelledby="wtr-people-culture-demo-heading"
+          {...staggerSectionProps(
+            sectionIndex++,
+            'wtr-people-culture__group',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          <h3 id="wtr-people-culture-demo-heading" className="wtr-people-culture__section-title">
+            People &amp; language
+          </h3>
+          <dl className="wtr-people-culture__rows">
+            <div className="wtr-people-culture__row">
+              <dt>Population</dt>
+              <dd>{demographics.population}</dd>
+            </div>
+            <div className="wtr-people-culture__row">
+              <dt>Median age</dt>
+              <dd>
+                <span className="tabular-nums">{demographics.median_age}</span> years
+              </dd>
+            </div>
+            <div className="wtr-people-culture__row">
+              <dt>Urban population</dt>
+              <dd>
+                <span className="tabular-nums">{demographics.urban_pct}</span>%
+              </dd>
+            </div>
+            <div className="wtr-people-culture__row">
+              <dt>Official language</dt>
+              <dd>{demographics.official_language}</dd>
+            </div>
+            <div className="wtr-people-culture__row">
+              <dt>Common languages</dt>
+              <dd>{demographics.common_languages}</dd>
+            </div>
+            {englishLevel ? (
+              <div className="wtr-people-culture__row wtr-people-culture__row--badge">
+                <dt>English proficiency</dt>
+                <dd>
+                  <EnglishProficiencyBadge level={englishLevel} />
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+      ) : englishLevel ? (
+        <section
+          className="wtr-people-culture__group"
+          aria-labelledby="wtr-people-culture-english-heading"
+          {...staggerSectionProps(
+            sectionIndex++,
+            'wtr-people-culture__group',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          <h3 id="wtr-people-culture-english-heading" className="wtr-people-culture__section-title">
+            English
+          </h3>
+          <EnglishProficiencyBadge level={englishLevel} />
+        </section>
+      ) : null}
 
-      <section
-        className="wtr-people-culture__group"
-        aria-labelledby="wtr-people-culture-expat-heading"
-        {...staggerSectionProps(2, 'wtr-people-culture__group', staggerClassName, staggerStyle)}
-      >
-        <h3 id="wtr-people-culture-expat-heading" className="wtr-people-culture__section-title">
-          Expat community
-        </h3>
-        <p className="wtr-people-culture__expat-copy">{demographics.expat_population}</p>
-      </section>
+      {demographics ? (
+        <section
+          className="wtr-people-culture__group"
+          aria-labelledby="wtr-people-culture-expat-heading"
+          {...staggerSectionProps(
+            sectionIndex++,
+            'wtr-people-culture__group',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          <h3 id="wtr-people-culture-expat-heading" className="wtr-people-culture__section-title">
+            Expat community
+          </h3>
+          <p className="wtr-people-culture__expat-copy">{demographics.expat_population}</p>
+        </section>
+      ) : null}
 
       <p
         className="wtr-dest-panel__data-source"
-        {...staggerSectionProps(3, 'wtr-dest-panel__data-source', staggerClassName, staggerStyle)}
+        {...staggerSectionProps(
+          sectionIndex,
+          'wtr-dest-panel__data-source',
+          staggerClassName,
+          staggerStyle,
+        )}
       >
         {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
       </p>

@@ -1,20 +1,24 @@
-import type { ReactNode } from 'react'
-import type { MatchTier } from '../../lib/whereToRetire/cityMapScoring'
+import type { CSSProperties, ReactNode } from 'react'
+import type { RetirementScoreBand } from '../../utils/retirementScore'
 import './FitGauge.scss'
 
 type Props = {
   label: string
   score: number
   explanation?: ReactNode
-  tier: MatchTier
+  band: RetirementScoreBand
+  bandColor: string
   className?: string
 }
 
-export function FitGauge({ label, score, explanation, tier, className }: Props) {
+export function FitGauge({ label, score, explanation, band, bandColor, className }: Props) {
   const fillPct = Math.max(0, Math.min(100, score))
 
   return (
-    <div className={['wtr-fit-gauge', className].filter(Boolean).join(' ')}>
+    <div
+      className={['wtr-fit-gauge', `wtr-fit-gauge--${band}`, className].filter(Boolean).join(' ')}
+      style={{ '--wtr-band-color': bandColor } as CSSProperties}
+    >
       <div className="wtr-fit-gauge__row">
         <span className="wtr-fit-gauge__label">{label}</span>
         <div
@@ -25,12 +29,9 @@ export function FitGauge({ label, score, explanation, tier, className }: Props) 
           aria-valuenow={fillPct}
           aria-label={`${label}: ${fillPct} out of 100`}
         >
-          <div
-            className={`wtr-fit-gauge__fill wtr-fit-gauge__fill--${tier}`}
-            style={{ width: `${fillPct}%` }}
-          />
+          <div className="wtr-fit-gauge__fill" style={{ width: `${fillPct}%` }} />
         </div>
-        <span className={`wtr-fit-gauge__score wtr-fit-gauge__score--${tier}`}>{score}</span>
+        <span className="wtr-fit-gauge__score">{fillPct}</span>
       </div>
       {explanation ? <div className="wtr-fit-gauge__explanation">{explanation}</div> : null}
     </div>

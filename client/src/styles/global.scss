@@ -22,6 +22,8 @@
   --color-text-success: #15803d;
   --color-text-danger: var(--color-danger);
   --color-background-info: #d8e6f4;
+  --color-text-info: #1a4a6e;
+  --color-border-info: #9eb8d4;
   --color-background-success: var(--color-teal-bg);
   --color-background-warning: var(--color-amber-bg);
   --color-background-secondary: var(--color-surface);
@@ -115,6 +117,12 @@
     var(--layout-app-max),
     calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
   );
+  /* Where to Retire: header inner, page column, map panel — change --wtr-content-max only */
+  --wtr-content-max: 1400px;
+  --wtr-content-boundary: min(
+    var(--wtr-content-max),
+    calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
+  );
   --layout-marketing-boundary: min(
     var(--layout-marketing-max),
     100vw
@@ -160,6 +168,13 @@
   max-width: 100%;
   margin-inline: auto;
   padding-inline: var(--layout-app-inner-pad);
+  box-sizing: border-box;
+}
+
+.layout-wtr-bound {
+  width: var(--wtr-content-boundary);
+  max-width: 100%;
+  margin-inline: auto;
   box-sizing: border-box;
 }
 

@@ -21,6 +21,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }
 
 .wtr-explorer__chrome-slot {
@@ -215,20 +216,24 @@
   overflow: hidden;
 }
 
-.wtr-explorer__filter-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  border: none;
-  padding: 0;
-  background: color-mix(in srgb, var(--color-navy) 25%, transparent);
-  cursor: pointer;
+.wtr-explorer__map-stage .wtr-leaflet-map {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
 }
 
-@media (min-width: 1024px) {
-  .wtr-explorer__filter-backdrop {
-    display: none;
-  }
+.wtr-explorer__list-sort-label {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  font-family: var(--heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
 }
 
 .wtr-explorer__list-head .wtr-map-filters__sort-select--list-head {

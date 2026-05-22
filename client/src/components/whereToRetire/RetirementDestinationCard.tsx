@@ -2,15 +2,27 @@ import type { CSSProperties, KeyboardEvent } from "react";
 import { IconAlertTriangle, IconPlane } from "@tabler/icons-react";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
 import {
+  resolveMapPinDisplay,
+  type BudgetFitBand,
+  type MapPinColorView,
+} from "../../lib/whereToRetire/mapPinDisplay";
+import {
   countryToFlagEmoji,
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
 import { formatEastCoastFlightHint } from "../../utils/gettingThere";
+import {
+  formatEstimatedAmericans,
+  getExpatDestinationInfo,
+  isDomesticRetirementDestination,
+} from "../../utils/expatInfo";
 import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
 import "./RetirementDestinationCard.scss";
 
 type Props = {
   scored: ScoredMapCity;
+  monthlyIncome: number;
+  pinColorView: MapPinColorView;
   rank: number;
   active: boolean;
   staggerIndex?: number;
@@ -19,14 +31,26 @@ type Props = {
 
 export function RetirementDestinationCard({
   scored,
+  monthlyIncome,
+  pinColorView,
   rank,
   active,
   staggerIndex,
   onSelect,
 }: Props) {
-  const { city, affordabilityScore, tier } = scored;
+  const { city } = scored;
+  const display = resolveMapPinDisplay(scored, pinColorView, monthlyIncome);
+  const { displayScore: badgeScore, bandClass, pinColor, bandLabel } = display;
   const showAdvisory = hasTravelAdvisory(city.country);
   const flightHint = formatEastCoastFlightHint(city.country);
+  const expatInfo =
+    pinColorView === "expat" ? getExpatDestinationInfo(city.country) : null;
+  const americansNote =
+    pinColorView === "expat" &&
+    expatInfo &&
+    !isDomesticRetirementDestination(city.country)
+      ? formatEstimatedAmericans(expatInfo.estimated_americans)
+      : null;
 
   const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -42,7 +66,7 @@ export function RetirementDestinationCard({
       className={[
         "wtr-dest-card",
         active && "wtr-dest-card--active",
-        `wtr-dest-card--${tier}`,
+        `wtr-dest-card--${bandClass}`,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -78,6 +102,9 @@ export function RetirementDestinationCard({
             </span>
             <span className="wtr-dest-card__country-name">{city.country}</span>
           </span>
+          {americansNote ? (
+            <span className="wtr-dest-card__expat-count">{americansNote}</span>
+          ) : null}
           {flightHint ? (
             <span className="wtr-dest-card__flight-hint">
               <IconPlane
@@ -89,11 +116,29 @@ export function RetirementDestinationCard({
               {flightHint}
             </span>
           ) : null}
-          <WtrAffordabilityScoreBar
-            score={affordabilityScore}
-            tier={tier}
-            className="wtr-dest-card__score"
-          />
+          {pinColorView === "expat" ? (
+            <span
+              className="wtr-dest-card__expat-badge"
+              style={
+                {
+                  "--wtr-expat-badge-color": pinColor,
+                } as CSSProperties
+              }
+            >
+              {bandLabel}
+            </span>
+          ) : (
+            <WtrAffordabilityScoreBar
+              score={badgeScore}
+              band={
+                pinColorView === "score"
+                  ? scored.band
+                  : (bandClass as BudgetFitBand)
+              }
+              bandColor={pinColor}
+              className="wtr-dest-card__score"
+            />
+          )}
         </span>
       </div>
     </div>

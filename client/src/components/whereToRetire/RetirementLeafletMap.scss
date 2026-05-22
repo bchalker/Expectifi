@@ -1,4 +1,5 @@
 .wtr-leaflet-map {
+  position: relative;
   width: 100%;
   height: 100%;
   flex: none;
@@ -6,6 +7,23 @@
   overflow: hidden;
   border: none;
   background: var(--surface2);
+}
+
+.wtr-leaflet-map__legend-overlay {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 450;
+  max-width: calc(100% - 1.25rem);
+  pointer-events: none;
+}
+
+.wtr-leaflet-map__legend-overlay .wtr-map-pin-legend {
+  flex-wrap: nowrap;
+  gap: 0.45rem 0.65rem;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .wtr-leaflet-map__canvas.leaflet-container {
@@ -52,21 +70,7 @@
   }
 }
 
-.wtr-leaflet-pin--strong {
-  background: var(--wtr-match-strong);
-}
-
-.wtr-leaflet-pin--moderate {
-  background: var(--wtr-match-moderate);
-}
-
-.wtr-leaflet-pin--stretch {
-  background: var(--wtr-match-stretch);
-}
-
-.wtr-leaflet-pin--poor {
-  background: var(--wtr-match-poor);
-}
+/* Pin fill color set inline from bandColor; class names scope hover/selection */
 
 .wtr-leaflet-pin--selected {
   transform: scale(1.12);
