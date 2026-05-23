@@ -42,8 +42,9 @@ Schema is created on boot (`ensureSchema` in `server/db.ts`).
 | `SMTP_USER`                                 | SMTP login / sender mailbox                                       |
 | `SMTP_PASS`                                 | SMTP password or app password                                     |
 | `SMTP_FROM`                                 | `Expectifi <noreply@expectifi.com>` (must be allowed by provider) |
+| `CONTACT_TO`                                | Inbox for form notifications (e.g. `you+expectifi@gmail.com`)       |
 
-Contact form posts to `/api/contact` and delivers to `support@expectifi.com`. Without SMTP vars the route returns 503.
+Contact form posts to `/api/contact`. Set `CONTACT_TO` to the inbox that should receive submissions (use a Gmail `+alias` if SMTP sends from the same account). Without all `SMTP_*` vars the route returns 503.
 
 Do **not** set `USE_STAGING_DB` in production.
 
@@ -77,7 +78,7 @@ https://YOUR-DOMAIN/api/auth/google/callback
 | 502 on start        | Logs: link Postgres; check `DATABASE_URL`                                                          |
 | Auth cookies fail   | `CLIENT_ORIGIN` must match browser URL exactly                                                     |
 | SSL / DB connection | App enables SSL for Railway URLs automatically                                                     |
-| Contact form error  | Deploy latest code (includes `/api/contact`); set `SMTP_*` vars; check deploy logs for `[contact]` |
+| Contact form error  | Set all `SMTP_*` vars; use port 587 + app password for Gmail/Workspace; check logs for `[contact] SMTP send failed` |
 
 ## Migrating from MySQL
 

@@ -208,7 +208,8 @@ export function ContactModal({ open, onClose }: Props) {
                 aria-hidden
               />
               <p className="auth-modal--contact__success-text">
-                Message sent. We&apos;ll be in touch soon.
+                Thank you for your message. I read every one personally (yes,
+                really) and will get back to you within one business day.
               </p>
               <div className="auth-modal__actions">
                 <Button

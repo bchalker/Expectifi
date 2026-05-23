@@ -1,6 +1,14 @@
 import nodemailer from 'nodemailer'
 
-const SUPPORT_EMAIL = 'support@expectifi.com'
+/** Public support address shown in the UI. Form notifications use CONTACT_TO when set. */
+export const PUBLIC_SUPPORT_EMAIL = 'support@expectifi.com'
+
+const DEFAULT_CONTACT_TO = PUBLIC_SUPPORT_EMAIL
+const SMTP_CONNECT_MS = 12_000
+
+export function contactDeliveryAddress(): string {
+  return process.env.CONTACT_TO?.trim() || DEFAULT_CONTACT_TO
+}
 
 export type ContactEmailInput = {
   name: string
@@ -49,15 +57,20 @@ function buildText(input: ContactEmailInput): string {
   ].join('\n')
 }
 
+function resolveFromAddress(smtpUser?: string): string {
+  return (
+    process.env.SMTP_FROM?.trim() ||
+    process.env.CONTACT_FROM?.trim() ||
+    (smtpUser ? `Expectifi <${smtpUser}>` : '')
+  )
+}
+
 export async function sendContactEmail(input: ContactEmailInput): Promise<void> {
   const host = process.env.SMTP_HOST?.trim()
   const portStr = process.env.SMTP_PORT?.trim()
   const user = process.env.SMTP_USER?.trim()
   const pass = process.env.SMTP_PASS?.trim()
-  const from =
-    process.env.SMTP_FROM?.trim() ||
-    process.env.CONTACT_FROM?.trim() ||
-    (user ? `Expectifi <${user}>` : '')
+  const from = resolveFromAddress(user)
 
   if (!host || !portStr || !user || !pass || !from) {
     throw new Error('smtp_not_configured')
@@ -75,13 +88,16 @@ export async function sendContactEmail(input: ContactEmailInput): Promise<void> 
     port,
     secure,
     auth: { user, pass },
+    connectionTimeout: SMTP_CONNECT_MS,
+    greetingTimeout: SMTP_CONNECT_MS,
+    socketTimeout: SMTP_CONNECT_MS,
     ...(secure ? {} : { requireTLS: process.env.SMTP_REQUIRE_TLS !== 'false' }),
   })
 
   try {
     await transporter.sendMail({
       from,
-      to: SUPPORT_EMAIL,
+      to: contactDeliveryAddress(),
       replyTo: input.email,
       subject: `[Expectifi] ${input.subject} from ${input.name}`,
       html: buildHtml(input),
@@ -99,10 +115,12 @@ export function logContactMailConfigAtStartup(): void {
   const port = process.env.SMTP_PORT?.trim()
   const user = process.env.SMTP_USER?.trim()
   const pass = process.env.SMTP_PASS?.trim()
-  const from = process.env.SMTP_FROM?.trim() || process.env.CONTACT_FROM?.trim()
+  const from = resolveFromAddress(user)
 
   if (host && port && user && pass && from) {
-    console.log(`[contact] SMTP configured (${host}:${port}) → ${SUPPORT_EMAIL}`)
+    console.log(
+      `[contact] SMTP configured (${host}:${port}) → ${contactDeliveryAddress()}`,
+    )
     return
   }
 
@@ -115,6 +133,6 @@ export function logContactMailConfigAtStartup(): void {
   ].filter(Boolean)
 
   console.warn(
-    `[contact] SMTP not configured (${missing.join(', ')}) — /api/contact will return 503`,
+    `[contact] SMTP not configured (${missing.join(', ')}); /api/contact will return 503`,
   )
 }

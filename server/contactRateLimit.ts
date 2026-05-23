@@ -1,7 +1,12 @@
 const WINDOW_MS = 60 * 60 * 1000
-const MAX_PER_WINDOW = 3
+const PROD_MAX_PER_WINDOW = 3
+const DEV_MAX_PER_WINDOW = 50
 
 const hitsByIp = new Map<string, number[]>()
+
+function maxPerWindow(): number {
+  return process.env.NODE_ENV === 'production' ? PROD_MAX_PER_WINDOW : DEV_MAX_PER_WINDOW
+}
 
 export function clientIpFromRequest(req: {
   ip?: string
@@ -21,7 +26,8 @@ export function clientIpFromRequest(req: {
 export function checkContactRateLimit(ip: string): boolean {
   const now = Date.now()
   const recent = (hitsByIp.get(ip) ?? []).filter((t) => now - t < WINDOW_MS)
-  if (recent.length >= MAX_PER_WINDOW) {
+  const limit = maxPerWindow()
+  if (recent.length >= limit) {
     hitsByIp.set(ip, recent)
     return false
   }
