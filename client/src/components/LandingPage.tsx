@@ -1,25 +1,30 @@
-import { IconCircleCheck } from '@tabler/icons-react'
+import {
+  IconChartLine,
+  IconCircleCheck,
+  IconWorld,
+} from '@tabler/icons-react'
 import { Header } from './Header'
+import { LandingFooter } from './LandingFooter'
 import { LandingHeroHeadline } from './LandingHeroHeadline'
-import { APP_PATHS } from '../lib/appPaths'
 import { landingNavigateOnboarding } from './landingNav'
 import './LandingPage.scss'
 
-const HOW_IT_WORKS_STEPS = [
+const FEATURE_CARDS = [
   {
-    n: 1,
-    title: 'Answer a few questions',
-    body: "No account needed. Just your age, income, and what you've saved. Takes about 60 seconds.",
+    id: 'portfolio',
+    icon: IconChartLine,
+    title: 'Your retirement portfolio, mapped out',
+    subheading: 'Add your accounts in 60 seconds. See what they\u2019re worth when you retire.',
+    body: `Enter your Roth, 401(k), Traditional IRA, brokerage, and HSA balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid (premium). Choose your expected annual return — or run scenarios by market sentiment or per-holding assumptions.
+
+The growth phase shows your projected balance at retirement. The income phase shows what you can draw each month, whether by dividends or withdrawal rate.`,
   },
   {
-    n: 2,
-    title: 'See your real numbers',
-    body: 'Your projected balance, monthly income, and retirement runway, calculated instantly from what you told us.',
-  },
-  {
-    n: 3,
-    title: 'Refine as you go',
-    body: 'Connect accounts, adjust assumptions, add a spouse. The more you put in, the sharper your picture gets.',
+    id: 'where-to-retire',
+    icon: IconWorld,
+    title: 'Find where your income goes furthest',
+    subheading: '638 cities. 70 countries. Ranked by your real surplus after taxes.',
+    body: `Most retirement calculators stop at your savings. Expectifi goes further — comparing cost of living, local tax rates on foreign pension income, visa requirements, healthcare, and quality of life so you can see which destinations actually work on your budget.`,
   },
 ] as const
 
@@ -33,21 +38,62 @@ const PRICING_INCLUDES = [
   'Saved scenarios you can revisit anytime',
   'Social Security timing and claiming ages',
   'Withdrawal strategy and tax-aware draw order',
-  'Where to retire? — compare regions (COL & tax)',
+  'Where to retire — 638 cities ranked by real after-tax surplus',
   'Plaid connection for auto-updates',
   'All future features as we ship them',
+] as const
+
+const PRICING_FREE_FEATURES = [
+  'Manual account entry',
+  'CSV import (Fidelity, Vanguard, Schwab)',
+  'Growth + income projections',
+  'Where to retire map',
+] as const
+
+const PRICING_PREMIUM_FEATURES = [
+  'Everything in free',
+  'Plaid auto-sync',
+  'Saved scenarios',
+  'Social Security timing',
+  'Withdrawal strategy',
+  'All future features',
+] as const
+
+const FAQ_ITEMS = [
+  {
+    q: 'Do I need an account?',
+    a: 'No — you can run the calculator and add balances locally before signing up.',
+  },
+  {
+    q: 'Is my financial data stored?',
+    a: 'Your numbers stay in your browser until you create an account and choose to save them.',
+  },
+  {
+    q: 'How do I add my accounts?',
+    a: 'You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account. Only account balances are stored — not individual holdings.',
+  },
+  {
+    q: "What's the difference between the growth and income phases?",
+    a: 'The growth phase shows how your portfolio compounds from today until your retirement date, based on the return assumptions you choose. The income phase shows what you can draw each month after retirement — based on your withdrawal rate or dividend income strategy.',
+  },
+  {
+    q: 'Does the retirement map account for taxes?',
+    a: "Yes. Each destination calculates your estimated net income after local tax rates on foreign pension income, then compares it against real cost-of-living data. The surplus figure shown is what you'd actually have left each month — not just raw COL.",
+  },
 ] as const
 
 type Props = {
   onSignIn: () => void
   onCreateAccount: () => void
   onGetStarted?: () => void
+  onContactClick: () => void
 }
 
 export function LandingPage({
   onSignIn,
   onCreateAccount,
   onGetStarted = landingNavigateOnboarding,
+  onContactClick,
 }: Props) {
   const scrollToSection = (id: 'how-it-works' | 'pricing' | 'faq') => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -62,16 +108,15 @@ export function LandingPage({
         onMarketingAnchor={scrollToSection}
       />
 
-
       <main>
         <section className="landing-hero" aria-labelledby="landing-hero-title">
           <div className="landing-page__wrap">
             <div className="landing-hero__inner">
-            <LandingHeroHeadline />
-            <button type="button" className="landing-btn landing-btn--primary landing-btn--lg" onClick={onGetStarted}>
-              Get started free
-            </button>
-            <p className="landing-hero__note">No credit card required · Takes about 2 minutes</p>
+              <LandingHeroHeadline />
+              <button type="button" className="landing-btn landing-btn--primary landing-btn--lg" onClick={onGetStarted}>
+                Get started free
+              </button>
+              <p className="landing-hero__note">No credit card required · Takes about 2 minutes</p>
             </div>
           </div>
         </section>
@@ -91,19 +136,24 @@ export function LandingPage({
           <div className="landing-page__wrap landing-steps__inner">
             <p className="landing-section__eyebrow">How it works</p>
             <h2 id="landing-steps-title" className="landing-section__title">
-              Three steps to retirement clarity
+              Two tools. One retirement picture.
             </h2>
-            <ol className="landing-steps__grid">
-              {HOW_IT_WORKS_STEPS.map((step) => (
-                <li key={step.n} className="landing-step-card">
-                  <span className="landing-step-card__num" aria-hidden>
-                    {step.n}
-                  </span>
-                  <h3 className="landing-step-card__title">{step.title}</h3>
-                  <p className="landing-step-card__body">{step.body}</p>
-                </li>
-              ))}
-            </ol>
+            <p className="landing-section__tagline">
+              Every nest egg looks different. Let&apos;s look at yours.
+            </p>
+            <div className="landing-feature-cards">
+              {FEATURE_CARDS.map((card) => {
+                const Icon = card.icon
+                return (
+                  <article key={card.id} className="landing-feature-card">
+                    <Icon className="landing-feature-card__icon" size={24} stroke={1.5} aria-hidden />
+                    <h3 className="landing-feature-card__title">{card.title}</h3>
+                    <p className="landing-feature-card__subheading">{card.subheading}</p>
+                    <p className="landing-feature-card__body">{card.body}</p>
+                  </article>
+                )
+              })}
+            </div>
           </div>
         </section>
 
@@ -123,6 +173,26 @@ export function LandingPage({
                   </li>
                 ))}
               </ul>
+              <div className="landing-pricing-card__compare" aria-label="Free vs premium comparison">
+                <div className="landing-pricing-card__compare-col">
+                  <p className="landing-pricing-card__compare-heading">Free</p>
+                  <ul className="landing-pricing-card__compare-list">
+                    {PRICING_FREE_FEATURES.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="landing-pricing-card__compare-col landing-pricing-card__compare-col--premium">
+                  <p className="landing-pricing-card__compare-heading">
+                    Premium <span className="landing-pricing-card__compare-price">($9/mo)</span>
+                  </p>
+                  <ul className="landing-pricing-card__compare-list">
+                    {PRICING_PREMIUM_FEATURES.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
               <button
                 type="button"
                 className="landing-btn landing-btn--primary landing-btn--lg landing-pricing-card__cta"
@@ -141,14 +211,12 @@ export function LandingPage({
               FAQ
             </h2>
             <dl className="landing-faq landing-anchor-section__prose">
-              <div>
-                <dt>Do I need an account?</dt>
-                <dd>No — you can run the calculator and add balances locally before signing up.</dd>
-              </div>
-              <div>
-                <dt>Is my financial data stored?</dt>
-                <dd>Your numbers stay in your browser until you create an account and choose to save them.</dd>
-              </div>
+              {FAQ_ITEMS.map((item) => (
+                <div key={item.q}>
+                  <dt>{item.q}</dt>
+                  <dd>{item.a}</dd>
+                </div>
+              ))}
             </dl>
           </div>
         </section>
@@ -166,17 +234,7 @@ export function LandingPage({
         </section>
       </main>
 
-      <footer className="landing-footer">
-        <div className="landing-page__wrap landing-footer__inner">
-          <span className="landing-footer__copy">© {new Date().getFullYear()} Expectifi</span>
-          <nav className="landing-footer__links" aria-label="Legal">
-            <a href={APP_PATHS.privacy}>Privacy</a>
-            <a href={APP_PATHS.home}>Terms</a>
-            <a href={APP_PATHS.home}>Contact</a>
-          </nav>
-        </div>
-      </footer>
+      <LandingFooter onContactClick={onContactClick} />
     </div>
   )
 }
-

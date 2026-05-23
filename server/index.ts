@@ -30,10 +30,14 @@ import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
 import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
+import { installContactRoutes } from './contactRoutes.js'
+import { logContactMailConfigAtStartup } from './contactMail.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+
+app.set('trust proxy', 1)
 
 installStripeWebhook(app)
 
@@ -42,6 +46,7 @@ app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)
 installPlaidRoutes(app, readSessionUser)
+installContactRoutes(app, readSessionUser)
 
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase()
@@ -831,6 +836,7 @@ async function main() {
   await ensureSchema()
   logStripeBillingConfigAtStartup()
   logPlaidConfigAtStartup()
+  logContactMailConfigAtStartup()
   installProductionClient(app)
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`API listening on port ${PORT}`)

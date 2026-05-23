@@ -37,6 +37,13 @@ Schema is created on boot (`ensureSchema` in `server/db.ts`).
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional |
 | `STRIPE_SECRET_KEY` | Optional |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | Enable **Available at build** for Docker build |
+| `SMTP_HOST` | Mail provider hostname (e.g. `smtp.gmail.com`) |
+| `SMTP_PORT` | Usually `587` (STARTTLS) or `465` (SSL) |
+| `SMTP_USER` | SMTP login / sender mailbox |
+| `SMTP_PASS` | SMTP password or app password |
+| `SMTP_FROM` | `Expectifi <noreply@expectifi.com>` (must be allowed by provider) |
+
+Contact form posts to `/api/contact` and delivers to `support@expectifi.com`. Without SMTP vars the route returns 503.
 
 Do **not** set `USE_STAGING_DB` in production.
 
@@ -70,6 +77,7 @@ https://YOUR-DOMAIN/api/auth/google/callback
 | 502 on start | Logs: link Postgres; check `DATABASE_URL` |
 | Auth cookies fail | `CLIENT_ORIGIN` must match browser URL exactly |
 | SSL / DB connection | App enables SSL for Railway URLs automatically |
+| Contact form error | Deploy latest code (includes `/api/contact`); set `SMTP_*` vars; check deploy logs for `[contact]` |
 
 ## Migrating from MySQL
 

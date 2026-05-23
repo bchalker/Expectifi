@@ -3,6 +3,7 @@ export const APP_PATHS = {
   onboarding: '/onboarding',
   login: '/login',
   privacy: '/privacy',
+  terms: '/terms',
   whereToRetire: '/where-to-retire',
 } as const
 

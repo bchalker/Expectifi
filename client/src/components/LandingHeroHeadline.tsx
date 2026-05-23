@@ -79,7 +79,9 @@ export function LandingHeroHeadline() {
         </span>
         <span className="landing-hero-headline__title-line">on your expected savings?</span>
       </h1>
-      <p className="landing-hero-headline__tagline">Every nest egg looks different. Let&apos;s look at yours.</p>
+      <p className="landing-hero-headline__tagline">
+        See exactly how long your money lasts and where it goes furthest.
+      </p>
     </div>
   )
 }

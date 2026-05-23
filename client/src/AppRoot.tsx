@@ -7,8 +7,10 @@ import { GuestWelcomeGate } from './components/GuestWelcomeGate'
 import { isOnboardingComplete, markForceOnboardingSession } from './lib/welcomeGate'
 import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
+import { ContactModal } from './components/ContactModal'
 import { LandingPage } from './components/LandingPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
 import { landingNavigateOnboarding } from './components/landingNav'
 import { trackPageView } from './lib/analytics'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
@@ -29,6 +31,7 @@ export default function AppRoot() {
   const { loading: authLoading, user, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi } = useAuth()
   const path = useAppPath()
   const [landingAuthModal, setLandingAuthModal] = useState<AuthModalMode | null>(null)
+  const [contactOpen, setContactOpen] = useState(false)
 
   const guestView = useMemo(() => resolveGuestView(path), [path])
 
@@ -93,8 +96,40 @@ export default function AppRoot() {
     }
   }, [authLoading, user, path])
 
-  if (path === APP_PATHS.privacy) {
-    return <PrivacyPolicy />
+  const openContact = useCallback(() => {
+    setContactOpen(true)
+  }, [])
+
+  const closeContact = useCallback(() => {
+    setContactOpen(false)
+  }, [])
+
+  if (path === APP_PATHS.privacy || path === APP_PATHS.terms) {
+    return (
+      <>
+        {path === APP_PATHS.privacy ? (
+          <PrivacyPolicy
+            onSignIn={openLandingSignIn}
+            onCreateAccount={openLandingRegister}
+            onContactClick={openContact}
+          />
+        ) : (
+          <TermsOfService
+            onSignIn={openLandingSignIn}
+            onCreateAccount={openLandingRegister}
+            onContactClick={openContact}
+          />
+        )}
+        {!user ? (
+          <AuthModal
+            open={landingAuthModal}
+            onClose={closeLandingAuthModal}
+            onSwitchMode={(mode) => setLandingAuthModal(mode)}
+          />
+        ) : null}
+        <ContactModal open={contactOpen} onClose={closeContact} />
+      </>
+    )
   }
 
   if (authLoading) {
@@ -114,12 +149,14 @@ export default function AppRoot() {
           onSignIn={openLandingSignIn}
           onCreateAccount={openLandingRegister}
           onGetStarted={landingNavigateOnboarding}
+          onContactClick={openContact}
         />
         <AuthModal
           open={landingAuthModal}
           onClose={closeLandingAuthModal}
           onSwitchMode={(mode) => setLandingAuthModal(mode)}
         />
+        <ContactModal open={contactOpen} onClose={closeContact} />
       </>
     )
   }
