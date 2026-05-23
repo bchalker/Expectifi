@@ -63,9 +63,9 @@ export default function PrivacyPolicy({
           <h2 className="legal-page__heading">Plaid</h2>
           <p className="legal-page__body">
             Plaid account connection is available on premium accounts only and
-            is not enabled by default. Free accounts do not have access to
-            Plaid integration. If you choose to connect a financial account
-            through Plaid, you are subject to Plaid&apos;s Privacy Policy at{" "}
+            is not enabled by default. Free accounts do not have access to Plaid
+            integration. If you choose to connect a financial account through
+            Plaid, you are subject to Plaid&apos;s Privacy Policy at{" "}
             <a
               className="legal-page__link"
               href={PLAID_PRIVACY_URL}
@@ -109,8 +109,8 @@ export default function PrivacyPolicy({
         <section className="legal-page__section">
           <h2 className="legal-page__heading">Changes to this policy</h2>
           <p className="legal-page__body">
-            We may update this policy as the application evolves. We will
-            notify users of material changes via email or an in-app notice.
+            We may update this policy as the application evolves. We will notify
+            users of material changes via email or an in-app notice.
           </p>
         </section>
       </article>

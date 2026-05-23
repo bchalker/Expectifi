@@ -4,10 +4,10 @@ One **web service** runs the Express API and serves the built React app from the
 
 ## Architecture
 
-| Railway resource | Purpose |
-|------------------|---------|
+| Railway resource            | Purpose                                           |
+| --------------------------- | ------------------------------------------------- |
 | **Web service** (this repo) | Docker build → `client/dist` + Node API on `PORT` |
-| **PostgreSQL** (plugin) | Users, scenarios; linked via `DATABASE_URL` |
+| **PostgreSQL** (plugin)     | Users, scenarios; linked via `DATABASE_URL`       |
 
 ## 1. Push code to GitHub
 
@@ -28,20 +28,20 @@ Schema is created on boot (`ensureSchema` in `server/db.ts`).
 
 ## 4. Web service variables
 
-| Variable | Value |
-|----------|--------|
-| `NODE_ENV` | `production` |
-| `JWT_SECRET` | Long random string (≥32 chars) |
-| `CLIENT_ORIGIN` | `https://your-app.up.railway.app` (no trailing slash) |
-| `API_PUBLIC_URL` | Same as `CLIENT_ORIGIN` |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional |
-| `STRIPE_SECRET_KEY` | Optional |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Enable **Available at build** for Docker build |
-| `SMTP_HOST` | Mail provider hostname (e.g. `smtp.gmail.com`) |
-| `SMTP_PORT` | Usually `587` (STARTTLS) or `465` (SSL) |
-| `SMTP_USER` | SMTP login / sender mailbox |
-| `SMTP_PASS` | SMTP password or app password |
-| `SMTP_FROM` | `Expectifi <noreply@expectifi.com>` (must be allowed by provider) |
+| Variable                                    | Value                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------- |
+| `NODE_ENV`                                  | `production`                                                      |
+| `JWT_SECRET`                                | Long random string (≥32 chars)                                    |
+| `CLIENT_ORIGIN`                             | `https://your-app.up.railway.app` (no trailing slash)             |
+| `API_PUBLIC_URL`                            | Same as `CLIENT_ORIGIN`                                           |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional                                                          |
+| `STRIPE_SECRET_KEY`                         | Optional                                                          |
+| `VITE_STRIPE_PUBLISHABLE_KEY`               | Enable **Available at build** for Docker build                    |
+| `SMTP_HOST`                                 | Mail provider hostname (e.g. `smtp.gmail.com`)                    |
+| `SMTP_PORT`                                 | Usually `587` (STARTTLS) or `465` (SSL)                           |
+| `SMTP_USER`                                 | SMTP login / sender mailbox                                       |
+| `SMTP_PASS`                                 | SMTP password or app password                                     |
+| `SMTP_FROM`                                 | `Expectifi <noreply@expectifi.com>` (must be allowed by provider) |
 
 Contact form posts to `/api/contact` and delivers to `support@expectifi.com`. Without SMTP vars the route returns 503.
 
@@ -71,13 +71,13 @@ https://YOUR-DOMAIN/api/auth/google/callback
 
 ## Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
-| Build fails | Build logs; `VITE_STRIPE_PUBLISHABLE_KEY` at build time if needed |
-| 502 on start | Logs: link Postgres; check `DATABASE_URL` |
-| Auth cookies fail | `CLIENT_ORIGIN` must match browser URL exactly |
-| SSL / DB connection | App enables SSL for Railway URLs automatically |
-| Contact form error | Deploy latest code (includes `/api/contact`); set `SMTP_*` vars; check deploy logs for `[contact]` |
+| Issue               | Fix                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Build fails         | Build logs; `VITE_STRIPE_PUBLISHABLE_KEY` at build time if needed                                  |
+| 502 on start        | Logs: link Postgres; check `DATABASE_URL`                                                          |
+| Auth cookies fail   | `CLIENT_ORIGIN` must match browser URL exactly                                                     |
+| SSL / DB connection | App enables SSL for Railway URLs automatically                                                     |
+| Contact form error  | Deploy latest code (includes `/api/contact`); set `SMTP_*` vars; check deploy logs for `[contact]` |
 
 ## Migrating from MySQL
 

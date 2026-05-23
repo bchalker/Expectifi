@@ -557,6 +557,31 @@
   color: var(--landing-green-muted);
 }
 
+.landing-footer__contact {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: inherit;
+  line-height: inherit;
+  color: var(--landing-text-muted-on-navy);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.landing-footer__contact:hover {
+  color: var(--landing-green-muted);
+}
+
+.landing-footer__contact:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(78, 203, 141, 0.45);
+  border-radius: 2px;
+}
+
 /* ── Responsive ── */
 @media (min-width: 680px) {
   .landing-trust__inner {
