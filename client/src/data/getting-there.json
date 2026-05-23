@@ -1416,6 +1416,35 @@
       "direct_from_ca": true,
       "direct_from_au": true
     },
+    "Oman": {
+      "main_airports": [
+        {
+          "code": "MCT",
+          "name": "Muscat International",
+          "city": "Muscat"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 16,
+        "west_coast": 20
+      },
+      "airlines": [
+        "Oman Air",
+        "Emirates",
+        "Qatar Airways",
+        "Turkish Airlines",
+        "Lufthansa",
+        "British Airways"
+      ],
+      "best_booking_tip": "No regular direct US flights. Connect via Dubai (DXB), Doha (DOH), or European hubs such as London and Frankfurt. Oman Air and Gulf carriers offer convenient one-stop routes.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 14,
+      "direct_from_uk": true,
+      "direct_from_ca": false,
+      "direct_from_au": false
+    },
     "United Arab Emirates": {
       "main_airports": [
         {

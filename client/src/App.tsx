@@ -166,10 +166,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
   )
 
   useEffect(() => {
-    if (consumeForceOnboardingSession()) {
-      welcomeBlockedRef.current = true
-      setShowWelcome(true)
-    }
+    if (!consumeForceOnboardingSession()) return
+    if (shouldSkipWelcome({ ...welcomeCtx, inputs: initialApp.inputs })) return
+    welcomeBlockedRef.current = true
+    setShowWelcome(true)
   }, [])
 
   useEffect(() => {

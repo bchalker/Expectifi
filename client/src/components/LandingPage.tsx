@@ -15,6 +15,9 @@ const FEATURE_CARDS = [
     icon: IconChartLine,
     title: 'Your retirement portfolio, mapped out',
     subheading: 'Add your accounts in 60 seconds. See what they\u2019re worth when you retire.',
+    imageSrc: '/landing/portfolio-calculator.png',
+    imageAlt:
+      'Expectifi withdrawal strategy showing monthly income, yield settings, and retirement account balances.',
     body: `Enter your Roth, 401(k), Traditional IRA, brokerage, and HSA balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid (premium). Choose your expected annual return — or run scenarios by market sentiment or per-holding assumptions.
 
 The growth phase shows your projected balance at retirement. The income phase shows what you can draw each month, whether by dividends or withdrawal rate.`,
@@ -24,6 +27,9 @@ The growth phase shows your projected balance at retirement. The income phase sh
     icon: IconWorld,
     title: 'Find where your income goes furthest',
     subheading: '638 cities. 70 countries. Ranked by your real surplus after taxes.',
+    imageSrc: '/landing/where-to-retire-map.png',
+    imageAlt:
+      'Where to retire map with city list sorted by expat community size, region filters, and an interactive world map.',
     body: `Most retirement calculators stop at your savings. Expectifi goes further — comparing cost of living, local tax rates on foreign pension income, visa requirements, healthcare, and quality of life so you can see which destinations actually work on your budget.`,
   },
 ] as const
@@ -149,6 +155,15 @@ export function LandingPage({
                     <Icon className="landing-feature-card__icon" size={24} stroke={1.5} aria-hidden />
                     <h3 className="landing-feature-card__title">{card.title}</h3>
                     <p className="landing-feature-card__subheading">{card.subheading}</p>
+                    <div className="landing-feature-card__media">
+                      <img
+                        className="landing-feature-card__image"
+                        src={card.imageSrc}
+                        alt={card.imageAlt}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
                     <p className="landing-feature-card__body">{card.body}</p>
                   </article>
                 )

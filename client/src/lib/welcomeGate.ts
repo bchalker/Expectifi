@@ -48,15 +48,24 @@ export function isOnboardingComplete(ctx: WelcomeSkipContext): boolean {
   return false
 }
 
-/** Show welcome overlay unless onboarding is fully complete or user dismissed this session. */
+/** Show welcome overlay unless onboarding is fully complete. */
 export function shouldShowWelcomeOverlay(ctx: WelcomeSkipContext): boolean {
-  if (peekForceOnboardingSession()) return true
-  return !isOnboardingComplete(ctx)
+  if (isOnboardingComplete(ctx)) return false
+  return true
 }
 
 export function markForceOnboardingSession(): void {
   try {
     sessionStorage.setItem(FORCE_ONBOARDING_SESSION_KEY, '1')
+    sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
+  } catch {
+    /* private mode */
+  }
+}
+
+export function clearForceOnboardingSession(): void {
+  try {
+    sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY)
     sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
   } catch {
     /* private mode */

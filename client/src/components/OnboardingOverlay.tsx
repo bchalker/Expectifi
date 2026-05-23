@@ -10,6 +10,7 @@ import {
   saveLocalUserPrefs,
   type UserPrefs,
 } from "../lib/userPrefs";
+import { clearForceOnboardingSession } from "../lib/welcomeGate";
 import { clampClaimAge, ssTripletFromMonthlyAt67 } from "../lib/socialSecurity";
 import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
 import { type SpouseClaimMode } from "./SpouseClaimModeSegment";
@@ -241,6 +242,7 @@ export function OnboardingOverlay({
       saveLocalUserPrefs(prefs);
     }
     markWelcomeCompletedLocal();
+    clearForceOnboardingSession();
     setBusy(false);
     onComplete();
     if (openConnect) onConnectAccounts?.();

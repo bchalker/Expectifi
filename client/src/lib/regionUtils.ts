@@ -1,7 +1,12 @@
 import type { DestinationRegion } from './whereToRetire/cityMapScoring'
 
 /** ISO-based geography buckets for retirement destination filtering. */
-export type IsoRegionBucket = 'europe' | 'latin-america' | 'southeast-asia' | 'other'
+export type IsoRegionBucket =
+  | 'europe'
+  | 'latin-america'
+  | 'southeast-asia'
+  | 'middle-east'
+  | 'other'
 
 const EUROPE = new Set([
   'PT', 'ES', 'IT', 'GR', 'FR', 'DE', 'NL', 'BE', 'IE', 'GB', 'AT', 'CH', 'LU', 'IS',
@@ -19,13 +24,16 @@ const SOUTHEAST_ASIA = new Set([
   'IN', 'LK', 'NP', 'BD',
 ])
 
+const MIDDLE_EAST = new Set(['AE', 'OM', 'BH', 'QA', 'KW', 'SA'])
+
 const EASTERN_EUROPE_ISO = new Set([
   'UA', 'MD', 'BY', 'RU', 'KZ', 'UZ', 'AZ', 'AM',
 ])
 
 const MIDDLE_EAST_AFRICA_ISO = new Set([
-  'MA', 'EG', 'JO', 'AE', 'OM', 'BH', 'QA', 'KW', 'IL', 'LB', 'SA', 'DZ', 'TN', 'ZA',
+  'MA', 'EG', 'JO', 'IL', 'LB', 'DZ', 'TN', 'ZA',
   'KE', 'NG', 'GH', 'ET', 'MU', 'CV', 'SN',
+  ...MIDDLE_EAST,
 ])
 
 export function getFlagEmoji(iso: string): string {
@@ -41,6 +49,7 @@ export function getRegion(iso: string): IsoRegionBucket {
   if (EUROPE.has(code)) return 'europe'
   if (LATIN_AMERICA.has(code)) return 'latin-america'
   if (SOUTHEAST_ASIA.has(code)) return 'southeast-asia'
+  if (MIDDLE_EAST.has(code)) return 'middle-east'
   return 'other'
 }
 
@@ -50,6 +59,7 @@ export function isoRegionToDestinationRegion(iso: string): DestinationRegion | n
   if (bucket === 'europe') return 'europe'
   if (bucket === 'latin-america') return 'latin-america'
   if (bucket === 'southeast-asia') return 'southeast-asia'
+  if (bucket === 'middle-east') return 'middle-east-africa'
   const code = iso.toUpperCase()
   if (EASTERN_EUROPE_ISO.has(code)) return 'eastern-europe'
   if (MIDDLE_EAST_AFRICA_ISO.has(code)) return 'middle-east-africa'

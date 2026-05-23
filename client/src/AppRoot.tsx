@@ -3,7 +3,6 @@ import { useAuth } from './context/AuthContext'
 import { useAppPath } from './hooks/useAppPath'
 import { APP_PATHS } from './lib/appPaths'
 import App from './App'
-import { GuestWelcomeGate } from './components/GuestWelcomeGate'
 import { isOnboardingComplete, markForceOnboardingSession } from './lib/welcomeGate'
 import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
@@ -140,8 +139,6 @@ export default function AppRoot() {
     return <App key={user.id} />
   }
 
-  const guestSkipWelcome = isOnboardingComplete({ inputs: getInitialCalculatorInputs() })
-
   if (guestView === 'landing') {
     return (
       <>
@@ -161,13 +158,5 @@ export default function AppRoot() {
     )
   }
 
-  if (guestSkipWelcome) {
-    return <App key="guest" initialAuthModal={initialAuthModal} />
-  }
-
-  return (
-    <GuestWelcomeGate>
-      <App key="guest" initialAuthModal={initialAuthModal} />
-    </GuestWelcomeGate>
-  )
+  return <App key="guest" initialAuthModal={initialAuthModal} />
 }

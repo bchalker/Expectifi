@@ -90,6 +90,11 @@ export function getEffectiveTaxRate(countryIso: string): number {
     NP: 0.1, // progressive — simplified
 
     // === MIDDLE EAST / AFRICA ===
+    OM: 0.0, // No personal income tax
+    QA: 0.0, // Qatar, no income tax
+    KW: 0.0, // Kuwait, no income tax
+    BH: 0.0, // Bahrain, no income tax
+    SA: 0.0, // Saudi Arabia, no income tax
     IL: 0.2, // progressive 10–50% — ~20% effective; US-Israel treaty
     JO: 0.1, // progressive 5–30% — simplified
     MA: 0.15, // progressive with pension exemptions available

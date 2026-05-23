@@ -81,6 +81,7 @@ function sortCitiesForPinView(
   monthlyIncome: number,
   filters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">,
   expatSortDescending = true,
+  budgetSortDescending = false,
 ): ScoredMapCity[] {
   if (pinColorView === "expat") {
     const expatDelta = expatSortDescending
@@ -96,10 +97,16 @@ function sortCitiesForPinView(
     );
   }
   if (pinColorView === "budget") {
+    const budgetDelta = budgetSortDescending
+      ? (a: ScoredMapCity, b: ScoredMapCity) =>
+          monthlyOutflowForMapCity(b, monthlyIncome, filters) -
+          monthlyOutflowForMapCity(a, monthlyIncome, filters)
+      : (a: ScoredMapCity, b: ScoredMapCity) =>
+          monthlyOutflowForMapCity(a, monthlyIncome, filters) -
+          monthlyOutflowForMapCity(b, monthlyIncome, filters);
+
     return [...cities].sort(
-      (a, b) =>
-        monthlyOutflowForMapCity(a, monthlyIncome, filters) -
-        monthlyOutflowForMapCity(b, monthlyIncome, filters),
+      (a, b) => budgetDelta(a, b) || b.retirementScore - a.retirementScore,
     );
   }
   return cities;
@@ -186,6 +193,7 @@ export function RetirementMapExplorer({
   const [listPanelOpen, setListPanelOpen] = useState(true);
   const [listPage, setListPage] = useState(0);
   const [expatSortDescending, setExpatSortDescending] = useState(true);
+  const [budgetSortDescending, setBudgetSortDescending] = useState(false);
   const baseFilteredCities = useMemo(
     () =>
       scoreAndFilterMapCities(
@@ -205,6 +213,7 @@ export function RetirementMapExplorer({
         explorationIncome,
         filters,
         expatSortDescending,
+        budgetSortDescending,
       ),
     [
       baseFilteredCities,
@@ -212,6 +221,7 @@ export function RetirementMapExplorer({
       explorationIncome,
       filters,
       expatSortDescending,
+      budgetSortDescending,
     ],
   );
 
@@ -543,9 +553,38 @@ export function RetirementMapExplorer({
                   )}
                 </button>
               ) : pinColorView === "budget" ? (
-                <p className="wtr-explorer__list-sort-label">
-                  Sorted by lowest monthly cost
-                </p>
+                <button
+                  type="button"
+                  className="wtr-explorer__list-sort-control"
+                  aria-label={
+                    budgetSortDescending
+                      ? "Sort by monthly cost, highest first. Click to sort lowest first."
+                      : "Sort by monthly cost, lowest first. Click to sort highest first."
+                  }
+                  onClick={() => {
+                    setBudgetSortDescending((prev) => !prev);
+                    setListPage(0);
+                  }}
+                >
+                  <span className="wtr-explorer__list-sort-label">
+                    Sort by monthly cost
+                  </span>
+                  {budgetSortDescending ? (
+                    <IconSortDescending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  ) : (
+                    <IconSortAscending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  )}
+                </button>
               ) : (
                 <WtrMapSortSelect
                   className="wtr-map-filters__sort-select--list-head"

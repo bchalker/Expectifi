@@ -720,6 +720,23 @@
         "common_languages": "Arabic official; English is the language of business and widely spoken; huge multilingual expat community"
       }
     },
+    "Oman": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {"Muslim": 86, "Christian": 6, "Hindu": 5, "Other": 3},
+        "christian_note": "Muslim majority country. Ibadi Islam is the dominant branch in Oman.",
+        "expat_worship": "Mosques throughout Muscat. Christian churches and Hindu temples serve expat communities, especially in Muscat."
+      },
+      "demographics": {
+        "population": "5.0M",
+        "median_age": 31,
+        "urban_pct": 87,
+        "english_proficiency": "Moderate",
+        "expat_population": "Small but growing, concentrated in Muscat",
+        "official_language": "Arabic",
+        "common_languages": "Arabic official; English widely spoken in Muscat business and expat areas; large South Asian expat workforce"
+      }
+    },
     "Malta": {
       "religion": {
         "dominant": "Christianity",

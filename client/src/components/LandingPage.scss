@@ -232,11 +232,27 @@
 }
 
 .landing-feature-card__subheading {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.85rem;
   font-size: var(--text-base);
   font-weight: 600;
   line-height: var(--leading-relaxed);
   color: var(--landing-text-on-light);
+}
+
+.landing-feature-card__media {
+  margin: 0 0 1rem;
+  border: 1px solid var(--border, #e2e8ed);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(28, 43, 58, 0.08);
+}
+
+.landing-feature-card__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
 }
 
 .landing-feature-card__body {

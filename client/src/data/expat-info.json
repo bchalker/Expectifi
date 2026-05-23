@@ -341,6 +341,18 @@
       "language_barrier": "None. English native.",
       "healthcare_expat": "Excellent public healthcare for residents. Private insurance for faster access. Very high standard."
     },
+    "Oman": {
+      "community_size": "Small but growing",
+      "estimated_americans": "3,000+",
+      "popular_areas": ["Muscat (Qurum, Al Mouj, Madinat Sultan Qaboos)", "Salalah"],
+      "expat_vibe": "Quiet Gulf alternative to Dubai. Muscat is clean, safe, and slower paced. Smaller expat scene but welcoming. English widely spoken in business and expat neighborhoods.",
+      "facebook_groups": ["Expats in Oman", "Muscat Expats", "Americans in Oman"],
+      "forums": ["r/oman", "expat.com/oman"],
+      "internations_chapter": true,
+      "cost_note": "Lower than Dubai or Abu Dhabi. Housing in Qurum and Al Mouj is the main expense. Muscat offers good value for a Gulf capital.",
+      "language_barrier": "Moderate. Arabic is official but English works in Muscat expat and business life. Outside Muscat, Arabic helps.",
+      "healthcare_expat": "Good private hospitals in Muscat. Private insurance essential. Medicare not accepted."
+    },
     "Canada": {
       "community_size": "Enormous",
       "estimated_americans": "1,000,000+",

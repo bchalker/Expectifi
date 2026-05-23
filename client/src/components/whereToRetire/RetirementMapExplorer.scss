@@ -88,15 +88,16 @@
 .wtr-explorer__list-head {
   flex-shrink: 0;
   display: flex;
-  align-items: stretch;
-  padding: 0 0.65rem 0 0.85rem;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.65rem 0.5rem 0.85rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .where-to-retire__main-panel .wtr-explorer__list-head {
-  padding: 0 var(--wtr-panel-inline-pad, 1.25rem) 0;
+  padding: 0.5rem var(--wtr-panel-inline-pad, 1.25rem);
 }
 
 .wtr-explorer__list-collapse {
@@ -230,8 +231,8 @@
   justify-content: space-between;
   gap: 0.5rem;
   min-width: 0;
-  min-height: 2.75rem;
-  padding: 0.5rem 0;
+  min-height: 0;
+  padding: 0;
   margin: 0;
   border: none;
   background: transparent;
@@ -286,8 +287,8 @@
 
 .wtr-explorer__list-head .wtr-map-filters__sort-select--list-head button[data-slot='select-trigger'] {
   width: 100%;
-  min-height: 2.75rem;
-  padding: 0.5rem 1.75rem 0.5rem 0;
+  min-height: 0;
+  padding: 0 1.75rem 0 0;
   border: none;
   border-radius: 0;
   background: var(--surface);
