@@ -1,10 +1,8 @@
 import { useMemo } from 'react'
 import { IconArrowBackUp } from '@tabler/icons-react'
 import { Tooltip } from '../Tooltip'
-import { AnimatedCount } from '../ui/AnimatedCount'
 import {
   clampExplorationIncome,
-  computeBudgetExplorationStats,
   defaultExplorationIncome,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
@@ -30,11 +28,6 @@ export function BudgetExplorationHero({
   onExplorationIncomeChange,
   section = 'slider',
 }: Props) {
-  const planStats = useMemo(
-    () => computeBudgetExplorationStats(planMonthlyIncome),
-    [planMonthlyIncome],
-  )
-
   const mapIncome = useMemo(
     () => resolveExplorationIncome(planMonthlyIncome, explorationIncome),
     [planMonthlyIncome, explorationIncome],
@@ -61,16 +54,6 @@ export function BudgetExplorationHero({
         Where can you retire on{' '}
         <span className="wtr-budget-hero__title-income">{fmtMon(planMonthlyIncome)}</span>?
       </h1>
-
-      <p className="wtr-budget-hero__subtitle">
-        <span className="wtr-budget-hero__subtitle-count">
-          <AnimatedCount
-            value={planStats.citiesInBudget}
-            className="wtr-budget-hero__subtitle-num"
-          />
-        </span>{' '}
-        cities at or below your expected income
-      </p>
     </>
   ) : null
 

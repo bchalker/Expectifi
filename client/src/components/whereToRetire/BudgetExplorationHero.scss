@@ -7,10 +7,6 @@
   margin-bottom: 1.25rem;
 }
 
-.wtr-budget-hero--intro .wtr-budget-hero__subtitle {
-  margin-bottom: 0;
-}
-
 .wtr-budget-hero--slider-only.wtr-budget-hero--embedded {
   margin-bottom: 0;
   padding: 0;
@@ -57,21 +53,6 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: inherit;
-}
-
-.wtr-budget-hero__subtitle {
-  margin: 0 0 1.25rem;
-  text-align: center;
-  font-size: var(--text-base);
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.wtr-budget-hero__subtitle-num {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
-  color: var(--text);
 }
 
 .wtr-budget-hero__slider-card {

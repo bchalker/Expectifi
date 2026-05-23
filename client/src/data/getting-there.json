@@ -6,534 +6,1781 @@
   },
   "countries": {
     "Portugal": {
-      "main_airports": [{"code": "LIS", "name": "Lisbon Humberto Delgado", "city": "Lisbon"}, {"code": "OPO", "name": "Francisco Sá Carneiro", "city": "Porto"}],
+      "main_airports": [
+        {
+          "code": "LIS",
+          "name": "Lisbon Humberto Delgado",
+          "city": "Lisbon"
+        },
+        {
+          "code": "OPO",
+          "name": "Francisco Sá Carneiro",
+          "city": "Porto"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Boston", "Newark", "Miami", "Washington DC"],
-      "flight_time_hours": {"east_coast": 7, "west_coast": 10},
-      "airlines": ["TAP Air Portugal", "United", "Delta", "American"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Boston",
+        "Newark",
+        "Miami",
+        "Washington DC"
+      ],
+      "flight_time_hours": {
+        "east_coast": 7,
+        "west_coast": 10
+      },
+      "airlines": [
+        "TAP Air Portugal",
+        "United",
+        "Delta",
+        "American"
+      ],
       "best_booking_tip": "TAP Air Portugal has most direct routes from US East Coast. Book 2-3 months ahead for best prices.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Spain": {
-      "main_airports": [{"code": "MAD", "name": "Adolfo Suárez Madrid-Barajas", "city": "Madrid"}, {"code": "BCN", "name": "Josep Tarradellas Barcelona-El Prat", "city": "Barcelona"}],
+      "main_airports": [
+        {
+          "code": "MAD",
+          "name": "Adolfo Suárez Madrid-Barajas",
+          "city": "Madrid"
+        },
+        {
+          "code": "BCN",
+          "name": "Josep Tarradellas Barcelona-El Prat",
+          "city": "Barcelona"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Miami", "Boston", "Chicago", "Los Angeles", "Washington DC"],
-      "flight_time_hours": {"east_coast": 8, "west_coast": 11},
-      "airlines": ["Iberia", "American", "United", "Delta", "Norse Atlantic"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Miami",
+        "Boston",
+        "Chicago",
+        "Los Angeles",
+        "Washington DC"
+      ],
+      "flight_time_hours": {
+        "east_coast": 8,
+        "west_coast": 11
+      },
+      "airlines": [
+        "Iberia",
+        "American",
+        "United",
+        "Delta",
+        "Norse Atlantic"
+      ],
       "best_booking_tip": "Many direct routes from multiple US cities. Iberia often has good transatlantic deals. Consider Malaga or Valencia via Madrid connection.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Italy": {
-      "main_airports": [{"code": "FCO", "name": "Leonardo da Vinci (Fiumicino)", "city": "Rome"}, {"code": "MXP", "name": "Malpensa", "city": "Milan"}, {"code": "VCE", "name": "Marco Polo", "city": "Venice"}],
+      "main_airports": [
+        {
+          "code": "FCO",
+          "name": "Leonardo da Vinci (Fiumicino)",
+          "city": "Rome"
+        },
+        {
+          "code": "MXP",
+          "name": "Malpensa",
+          "city": "Milan"
+        },
+        {
+          "code": "VCE",
+          "name": "Marco Polo",
+          "city": "Venice"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Miami", "Boston", "Chicago", "Los Angeles", "Philadelphia"],
-      "flight_time_hours": {"east_coast": 9, "west_coast": 12},
-      "airlines": ["ITA Airways", "Delta", "United", "American", "Nonstop via Rome"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Miami",
+        "Boston",
+        "Chicago",
+        "Los Angeles",
+        "Philadelphia"
+      ],
+      "flight_time_hours": {
+        "east_coast": 9,
+        "west_coast": 12
+      },
+      "airlines": [
+        "ITA Airways",
+        "Delta",
+        "United",
+        "American",
+        "Nonstop via Rome"
+      ],
       "best_booking_tip": "Rome (FCO) has most direct US connections. For southern Italy 7% tax regime towns, fly to Naples (NAP) via Rome.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Greece": {
-      "main_airports": [{"code": "ATH", "name": "Athens International Eleftherios Venizelos", "city": "Athens"}, {"code": "HER", "name": "Nikos Kazantzakis", "city": "Crete/Heraklion"}],
+      "main_airports": [
+        {
+          "code": "ATH",
+          "name": "Athens International Eleftherios Venizelos",
+          "city": "Athens"
+        },
+        {
+          "code": "HER",
+          "name": "Nikos Kazantzakis",
+          "city": "Crete/Heraklion"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Boston", "Philadelphia"],
-      "flight_time_hours": {"east_coast": 10, "west_coast": 13},
-      "airlines": ["Aegean Airlines", "Delta", "United", "American (via connection)"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Boston",
+        "Philadelphia"
+      ],
+      "flight_time_hours": {
+        "east_coast": 10,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Aegean Airlines",
+        "Delta",
+        "United",
+        "American (via connection)"
+      ],
       "best_booking_tip": "Delta has direct JFK-ATH. Otherwise connect via London, Frankfurt, or Amsterdam. Summer direct routes expand significantly.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "France": {
-      "main_airports": [{"code": "CDG", "name": "Charles de Gaulle", "city": "Paris"}, {"code": "NCE", "name": "Nice Côte d'Azur", "city": "Nice"}],
+      "main_airports": [
+        {
+          "code": "CDG",
+          "name": "Charles de Gaulle",
+          "city": "Paris"
+        },
+        {
+          "code": "NCE",
+          "name": "Nice Côte d'Azur",
+          "city": "Nice"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Miami", "Boston", "Chicago", "Los Angeles", "Atlanta", "Washington DC", "Seattle"],
-      "flight_time_hours": {"east_coast": 8, "west_coast": 11},
-      "airlines": ["Air France", "Delta", "United", "American", "Norse Atlantic"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Miami",
+        "Boston",
+        "Chicago",
+        "Los Angeles",
+        "Atlanta",
+        "Washington DC",
+        "Seattle"
+      ],
+      "flight_time_hours": {
+        "east_coast": 8,
+        "west_coast": 11
+      },
+      "airlines": [
+        "Air France",
+        "Delta",
+        "United",
+        "American",
+        "Norse Atlantic"
+      ],
       "best_booking_tip": "Paris CDG is one of the best-connected airports globally. More direct US routes than almost any other European city.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Croatia": {
-      "main_airports": [{"code": "DBV", "name": "Dubrovnik Airport", "city": "Dubrovnik"}, {"code": "ZAG", "name": "Zagreb Airport", "city": "Zagreb"}, {"code": "SPU", "name": "Split Airport", "city": "Split"}],
+      "main_airports": [
+        {
+          "code": "DBV",
+          "name": "Dubrovnik Airport",
+          "city": "Dubrovnik"
+        },
+        {
+          "code": "ZAG",
+          "name": "Zagreb Airport",
+          "city": "Zagreb"
+        },
+        {
+          "code": "SPU",
+          "name": "Split Airport",
+          "city": "Split"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["Croatia Airlines via connection", "Connect via London, Frankfurt, Vienna, or Amsterdam"],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Croatia Airlines via connection",
+        "Connect via London, Frankfurt, Vienna, or Amsterdam"
+      ],
       "best_booking_tip": "No direct flights from US. Best connections via London (LHR), Frankfurt (FRA), Vienna (VIE), or Amsterdam (AMS). Vienna and Frankfurt are quickest connections.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Hungary": {
-      "main_airports": [{"code": "BUD", "name": "Budapest Ferenc Liszt International", "city": "Budapest"}],
+      "main_airports": [
+        {
+          "code": "BUD",
+          "name": "Budapest Ferenc Liszt International",
+          "city": "Budapest"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 10, "west_coast": 13},
-      "airlines": ["Wizz Air", "Ryanair", "Connect via major European hubs"],
+      "flight_time_hours": {
+        "east_coast": 10,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Wizz Air",
+        "Ryanair",
+        "Connect via major European hubs"
+      ],
       "best_booking_tip": "Connect via London, Frankfurt, Vienna, or Amsterdam. Vienna (1hr away) is particularly easy and quick connection.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Czech Republic": {
-      "main_airports": [{"code": "PRG", "name": "Václav Havel Airport Prague", "city": "Prague"}],
+      "main_airports": [
+        {
+          "code": "PRG",
+          "name": "Václav Havel Airport Prague",
+          "city": "Prague"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 10, "west_coast": 13},
-      "airlines": ["Czech Airlines", "Connect via major European hubs"],
+      "flight_time_hours": {
+        "east_coast": 10,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Czech Airlines",
+        "Connect via major European hubs"
+      ],
       "best_booking_tip": "Connect via Frankfurt, Amsterdam, or London. Prague is centrally located so many European hub connections available.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Poland": {
-      "main_airports": [{"code": "WAW", "name": "Warsaw Chopin Airport", "city": "Warsaw"}, {"code": "KRK", "name": "Kraków John Paul II International", "city": "Kraków"}],
+      "main_airports": [
+        {
+          "code": "WAW",
+          "name": "Warsaw Chopin Airport",
+          "city": "Warsaw"
+        },
+        {
+          "code": "KRK",
+          "name": "Kraków John Paul II International",
+          "city": "Kraków"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Chicago (seasonal)", "Newark"],
-      "flight_time_hours": {"east_coast": 9, "west_coast": 13},
-      "airlines": ["LOT Polish Airlines", "United"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Chicago (seasonal)",
+        "Newark"
+      ],
+      "flight_time_hours": {
+        "east_coast": 9,
+        "west_coast": 13
+      },
+      "airlines": [
+        "LOT Polish Airlines",
+        "United"
+      ],
       "best_booking_tip": "LOT has direct Warsaw routes from New York and Chicago. Good value carrier.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Romania": {
-      "main_airports": [{"code": "OTP", "name": "Henri Coandă International", "city": "Bucharest"}],
+      "main_airports": [
+        {
+          "code": "OTP",
+          "name": "Henri Coandă International",
+          "city": "Bucharest"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["TAROM", "Connect via major European hubs"],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "TAROM",
+        "Connect via major European hubs"
+      ],
       "best_booking_tip": "Connect via Frankfurt, Amsterdam, London, or Vienna. Budget carriers Wizz Air and Ryanair serve Bucharest from European hubs.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Bulgaria": {
-      "main_airports": [{"code": "SOF", "name": "Sofia Airport", "city": "Sofia"}, {"code": "VAR", "name": "Varna Airport", "city": "Varna (Black Sea coast)"}],
+      "main_airports": [
+        {
+          "code": "SOF",
+          "name": "Sofia Airport",
+          "city": "Sofia"
+        },
+        {
+          "code": "VAR",
+          "name": "Varna Airport",
+          "city": "Varna (Black Sea coast)"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["Bulgaria Air", "Connect via major European hubs"],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Bulgaria Air",
+        "Connect via major European hubs"
+      ],
       "best_booking_tip": "Connect via Frankfurt, Amsterdam, or Vienna. Budget airline options via Wizz Air from European hubs.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Serbia": {
-      "main_airports": [{"code": "BEG", "name": "Belgrade Nikola Tesla Airport", "city": "Belgrade"}],
+      "main_airports": [
+        {
+          "code": "BEG",
+          "name": "Belgrade Nikola Tesla Airport",
+          "city": "Belgrade"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["Air Serbia", "Connect via major European hubs"],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Air Serbia",
+        "Connect via major European hubs"
+      ],
       "best_booking_tip": "Connect via Frankfurt, Amsterdam, or Vienna. Air Serbia has good European connections.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 30
+      "visa_free_days": 30,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Georgia": {
-      "main_airports": [{"code": "TBS", "name": "Tbilisi International Airport", "city": "Tbilisi"}, {"code": "BUS", "name": "Batumi International", "city": "Batumi"}],
+      "main_airports": [
+        {
+          "code": "TBS",
+          "name": "Tbilisi International",
+          "city": "Tbilisi"
+        },
+        {
+          "code": "BUS",
+          "name": "Batumi International",
+          "city": "Batumi"
+        }
+      ],
       "direct_from_us": false,
       "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 13, "west_coast": 16},
-      "airlines": ["Georgian Airways", "Turkish Airlines via Istanbul", "Wizz Air via hub"],
-      "best_booking_tip": "Best connection via Istanbul (IST) on Turkish Airlines — very convenient hub. Also via Frankfurt or Amsterdam. Turkish Airlines has frequent Tbilisi service.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 365
-    },
-    "Morocco": {
-      "main_airports": [{"code": "CMN", "name": "Mohammed V International", "city": "Casablanca"}, {"code": "RAK", "name": "Marrakech Menara", "city": "Marrakech"}, {"code": "AGA", "name": "Al Massira Airport", "city": "Agadir"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Washington DC (seasonal)"],
-      "flight_time_hours": {"east_coast": 7, "west_coast": 11},
-      "airlines": ["Royal Air Maroc", "Delta (seasonal)"],
-      "best_booking_tip": "Royal Air Maroc flies direct from JFK and IAD. Alternatively connect via Paris, Madrid, or Lisbon — all very short hops.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
-    },
-    "Mexico": {
-      "main_airports": [{"code": "MEX", "name": "Felipe Ángeles International / Benito Juárez", "city": "Mexico City"}, {"code": "CUN", "name": "Cancún International", "city": "Cancún"}, {"code": "GDL", "name": "Miguel Hidalgo y Costilla", "city": "Guadalajara"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["All major US cities — extensive direct routes"],
-      "flight_time_hours": {"east_coast": 3.5, "west_coast": 3},
-      "airlines": ["American", "United", "Delta", "Southwest", "Aeromexico", "Alaska"],
-      "best_booking_tip": "Most accessible international retirement destination from the US. Direct flights from nearly every major US city. Budget airlines also serve many routes.",
-      "nearest_major_us_hub": "Dallas/Houston/Phoenix",
-      "visa_free_days": 180
-    },
-    "Colombia": {
-      "main_airports": [{"code": "BOG", "name": "El Dorado International", "city": "Bogotá"}, {"code": "MDE", "name": "José María Córdova", "city": "Medellín"}, {"code": "CTG", "name": "Rafael Núñez", "city": "Cartagena"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Fort Lauderdale", "Atlanta", "Orlando", "Houston"],
-      "flight_time_hours": {"east_coast": 4, "west_coast": 7},
-      "airlines": ["Avianca", "American", "United", "Delta", "Spirit", "JetBlue"],
-      "best_booking_tip": "Miami is the major hub for Colombia. Direct to both Bogotá and Medellín from multiple US cities. Very affordable routes.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Panama": {
-      "main_airports": [{"code": "PTY", "name": "Tocumen International", "city": "Panama City"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Houston", "Los Angeles", "Orlando", "Fort Lauderdale"],
-      "flight_time_hours": {"east_coast": 3.5, "west_coast": 6},
-      "airlines": ["Copa Airlines", "American", "United", "Delta"],
-      "best_booking_tip": "Copa Airlines (Panama's national carrier) has excellent US connections and uses Panama as a hub for Latin America connections.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 180
-    },
-    "Costa Rica": {
-      "main_airports": [{"code": "SJO", "name": "Juan Santamaría International", "city": "San José"}, {"code": "LIR", "name": "Daniel Oduber Quirós", "city": "Liberia (Guanacaste)"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Houston", "Dallas", "Los Angeles", "Chicago", "Denver"],
-      "flight_time_hours": {"east_coast": 3.5, "west_coast": 6},
-      "airlines": ["American", "United", "Delta", "Southwest", "Spirit", "JetBlue", "Copa"],
-      "best_booking_tip": "Excellent direct connections from many US cities. One of the most accessible retirement destinations. Liberia airport convenient for Guanacaste beach areas.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Ecuador": {
-      "main_airports": [{"code": "UIO", "name": "Mariscal Sucre International", "city": "Quito"}, {"code": "GYE", "name": "José Joaquín de Olmedo", "city": "Guayaquil"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Houston", "Atlanta", "Fort Lauderdale"],
-      "flight_time_hours": {"east_coast": 5, "west_coast": 7},
-      "airlines": ["Avianca", "American", "United", "LATAM"],
-      "best_booking_tip": "Miami is main hub. Multiple direct routes available. Cuenca (expat favorite) requires short domestic connection from Quito or Guayaquil.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Dominican Republic": {
-      "main_airports": [{"code": "SDQ", "name": "Las Américas International", "city": "Santo Domingo"}, {"code": "PUJ", "name": "Punta Cana International", "city": "Punta Cana"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Boston", "Atlanta", "Philadelphia", "Charlotte", "Chicago", "Houston"],
-      "flight_time_hours": {"east_coast": 3.5, "west_coast": 6.5},
-      "airlines": ["American", "JetBlue", "United", "Delta", "Spirit"],
-      "best_booking_tip": "Punta Cana is one of the most connected Caribbean airports with direct routes from many US cities. Very affordable fares.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 30
-    },
-    "Uruguay": {
-      "main_airports": [{"code": "MVD", "name": "Carrasco International", "city": "Montevideo"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["LATAM via connection", "Copa via Panama City", "Aerolíneas Argentinas via Buenos Aires"],
-      "best_booking_tip": "Connect via Miami to Bogotá or Panama City then onward, or via Buenos Aires (just 1 hour from Montevideo by ferry or 45 min flight).",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Argentina": {
-      "main_airports": [{"code": "EZE", "name": "Ministro Pistarini (Ezeiza)", "city": "Buenos Aires"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Dallas", "Atlanta"],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["Aerolíneas Argentinas", "American", "United", "LATAM"],
-      "best_booking_tip": "Long flight but direct from several US cities. Miami to Buenos Aires is the main route. Book well in advance for best prices.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Brazil": {
-      "main_airports": [{"code": "GRU", "name": "São Paulo Guarulhos International", "city": "São Paulo"}, {"code": "GIG", "name": "Rio de Janeiro Galeão", "city": "Rio de Janeiro"}, {"code": "FLN", "name": "Florianópolis International", "city": "Florianópolis"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Houston", "Dallas", "Los Angeles"],
-      "flight_time_hours": {"east_coast": 9, "west_coast": 12},
-      "airlines": ["LATAM", "Azul", "American", "United", "Delta"],
-      "best_booking_tip": "Multiple direct routes from US. Miami and New York are main hubs. São Paulo is the main international gateway.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Peru": {
-      "main_airports": [{"code": "LIM", "name": "Jorge Chávez International", "city": "Lima"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Houston", "Fort Lauderdale", "Los Angeles"],
-      "flight_time_hours": {"east_coast": 7, "west_coast": 8},
-      "airlines": ["LATAM", "American", "United", "Delta", "Spirit"],
-      "best_booking_tip": "Lima is well-connected. Cusco requires domestic connection from Lima (1 hour). Good direct routes from multiple US cities.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Chile": {
-      "main_airports": [{"code": "SCL", "name": "Arturo Merino Benítez International", "city": "Santiago"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Dallas", "Los Angeles"],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 10},
-      "airlines": ["LATAM", "American", "Delta", "United", "JetBlue"],
-      "best_booking_tip": "Long flight from East Coast but reasonable from West Coast (10 hours from LA). Multiple direct routes available.",
-      "nearest_major_us_hub": "Miami",
-      "visa_free_days": 90
-    },
-    "Thailand": {
-      "main_airports": [{"code": "BKK", "name": "Suvarnabhumi International", "city": "Bangkok"}, {"code": "CNX", "name": "Chiang Mai International", "city": "Chiang Mai"}, {"code": "HKT", "name": "Phuket International", "city": "Phuket"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 18, "west_coast": 17},
-      "airlines": ["Thai Airways via connection", "Korean Air via Seoul", "ANA via Tokyo", "Cathay Pacific via Hong Kong", "Singapore Airlines via Singapore"],
-      "best_booking_tip": "Best connections via Tokyo, Seoul, Hong Kong, or Singapore. Seoul (Incheon) and Tokyo are particularly popular. Consider 1-2 day layover to break the journey.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 60
-    },
-    "Malaysia": {
-      "main_airports": [{"code": "KUL", "name": "Kuala Lumpur International (KLIA)", "city": "Kuala Lumpur"}, {"code": "PEN", "name": "Penang International", "city": "Penang"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 19, "west_coast": 18},
-      "airlines": ["Malaysia Airlines via connection", "AirAsia via hub", "Singapore Airlines via Singapore", "Cathay Pacific via Hong Kong"],
-      "best_booking_tip": "Connect via Singapore (very convenient — 40 min flight from Singapore to KL) or Tokyo, Seoul, Hong Kong. Singapore Airlines offers premium connections.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Vietnam": {
-      "main_airports": [{"code": "SGN", "name": "Tan Son Nhat International", "city": "Ho Chi Minh City"}, {"code": "HAN", "name": "Noi Bai International", "city": "Hanoi"}, {"code": "DAD", "name": "Da Nang International", "city": "Da Nang"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 20, "west_coast": 18},
-      "airlines": ["Vietnam Airlines via connection", "Korean Air via Seoul", "Cathay Pacific via Hong Kong", "Singapore Airlines via Singapore"],
-      "best_booking_tip": "Connect via Seoul (Incheon), Hong Kong, or Singapore. Da Nang — the popular expat city — has its own international airport with good Asian hub connections.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Philippines": {
-      "main_airports": [{"code": "MNL", "name": "Ninoy Aquino International", "city": "Manila"}, {"code": "CEB", "name": "Mactan-Cebu International", "city": "Cebu"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "Honolulu", "Guam"],
-      "flight_time_hours": {"east_coast": 20, "west_coast": 14},
-      "airlines": ["Philippine Airlines", "United", "Korean Air via Seoul", "Cathay Pacific via Hong Kong"],
-      "best_booking_tip": "Direct from US West Coast — much closer than other SE Asian destinations. Philippine Airlines and United fly LAX/SFO direct. Much shorter from West Coast.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 30
-    },
-    "Indonesia": {
-      "main_airports": [{"code": "DPS", "name": "Ngurah Rai International (Bali)", "city": "Bali/Denpasar"}, {"code": "CGK", "name": "Soekarno-Hatta International", "city": "Jakarta"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 22, "west_coast": 18},
-      "airlines": ["Garuda Indonesia via connection", "Singapore Airlines via Singapore", "Cathay Pacific via Hong Kong", "Korean Air via Seoul"],
-      "best_booking_tip": "Bali (DPS) is the main expat destination — best connected via Singapore (2.5 hrs), Tokyo, or Hong Kong. Singapore is the easiest layover city.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 30
-    },
-    "Japan": {
-      "main_airports": [{"code": "NRT", "name": "Narita International", "city": "Tokyo"}, {"code": "HND", "name": "Haneda International", "city": "Tokyo"}, {"code": "KIX", "name": "Kansai International", "city": "Osaka"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "New York (JFK)", "Chicago", "Seattle", "Dallas", "Houston", "Atlanta"],
-      "flight_time_hours": {"east_coast": 14, "west_coast": 11},
-      "airlines": ["ANA", "Japan Airlines", "United", "Delta", "American"],
-      "best_booking_tip": "Excellent direct connections from many US cities. West Coast (11 hrs from LA) much shorter than East Coast (14 hrs). ANA and JAL are premium carriers with great service.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "South Korea": {
-      "main_airports": [{"code": "ICN", "name": "Incheon International", "city": "Seoul"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "New York (JFK)", "Chicago", "Seattle", "Dallas", "Atlanta", "Honolulu"],
-      "flight_time_hours": {"east_coast": 14, "west_coast": 11},
-      "airlines": ["Korean Air", "Asiana Airlines", "United", "Delta", "American"],
-      "best_booking_tip": "Incheon is one of the world's best airports. Many direct US routes. Great shopping and layover facilities. Korean Air and Asiana are premium carriers.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Taiwan": {
-      "main_airports": [{"code": "TPE", "name": "Taiwan Taoyuan International", "city": "Taipei"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "New York (JFK)", "Seattle", "Honolulu"],
-      "flight_time_hours": {"east_coast": 15, "west_coast": 13},
-      "airlines": ["EVA Air", "China Airlines", "United", "Delta"],
-      "best_booking_tip": "EVA Air has excellent US connections and is consistently rated among best airlines. More West Coast routes than East Coast.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Singapore": {
-      "main_airports": [{"code": "SIN", "name": "Changi Airport", "city": "Singapore"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "New York (JFK)", "Seattle", "Houston"],
-      "flight_time_hours": {"east_coast": 19, "west_coast": 17},
-      "airlines": ["Singapore Airlines", "United", "Delta"],
-      "best_booking_tip": "Changi is consistently rated world's best airport. Singapore Airlines is world-class. Long flight but exceptional experience. Consider Singapore stopover program.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Hong Kong": {
-      "main_airports": [{"code": "HKG", "name": "Hong Kong International", "city": "Hong Kong"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "New York (JFK)", "Chicago", "Seattle", "Dallas"],
-      "flight_time_hours": {"east_coast": 16, "west_coast": 13},
-      "airlines": ["Cathay Pacific", "United", "American", "Delta"],
-      "best_booking_tip": "Cathay Pacific is premium carrier with great connections. HKG is excellent transit hub. Note changed political environment post-2020.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "India": {
-      "main_airports": [{"code": "DEL", "name": "Indira Gandhi International", "city": "New Delhi"}, {"code": "BOM", "name": "Chhatrapati Shivaji Maharaj", "city": "Mumbai"}, {"code": "COK", "name": "Cochin International", "city": "Kochi (Kerala)"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Chicago", "San Francisco", "Los Angeles", "Newark", "Washington DC", "Atlanta"],
-      "flight_time_hours": {"east_coast": 14, "west_coast": 16},
-      "airlines": ["Air India", "United", "Delta", "American", "Air India Express"],
-      "best_booking_tip": "Many direct routes especially from Northeast US with large Indian-American population. Air India expanded US routes significantly.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 60
-    },
-    "Cambodia": {
-      "main_airports": [{"code": "PNH", "name": "Phnom Penh International", "city": "Phnom Penh"}, {"code": "REP", "name": "Siem Reap–Angkor International", "city": "Siem Reap"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 20, "west_coast": 18},
-      "airlines": ["Connect via Bangkok", "Connect via Singapore", "Connect via Hong Kong"],
-      "best_booking_tip": "Connect via Bangkok (1.5 hrs), Singapore (2 hrs), or Hong Kong. Bangkok is the easiest and cheapest connection.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 30
-    },
-    "Sri Lanka": {
-      "main_airports": [{"code": "CMB", "name": "Bandaranaike International", "city": "Colombo"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 17, "west_coast": 19},
-      "airlines": ["SriLankan Airlines via connection", "Emirates via Dubai", "Qatar Airways via Doha", "Singapore Airlines via Singapore"],
-      "best_booking_tip": "Connect via Dubai (3 hrs from Colombo), Singapore, or Doha. Emirates and Qatar Airways offer good connections from US East Coast.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 30
-    },
-    "Nepal": {
-      "main_airports": [{"code": "KTM", "name": "Tribhuvan International", "city": "Kathmandu"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 16, "west_coast": 18},
-      "airlines": ["Nepal Airlines via connection", "Qatar Airways via Doha", "Turkish Airlines via Istanbul", "Emirates via Dubai"],
-      "best_booking_tip": "Connect via Doha, Dubai, or Istanbul. Qatar Airways via Doha is often most convenient. Kathmandu altitude can be challenging on arrival.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
-    },
-    "Georgia": {
-      "main_airports": [{"code": "TBS", "name": "Tbilisi International", "city": "Tbilisi"}, {"code": "BUS", "name": "Batumi International", "city": "Batumi"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 13, "west_coast": 16},
-      "airlines": ["Georgian Airways", "Turkish Airlines via Istanbul", "Wizz Air via hub", "LOT via Warsaw"],
+      "flight_time_hours": {
+        "east_coast": 13,
+        "west_coast": 16
+      },
+      "airlines": [
+        "Georgian Airways",
+        "Turkish Airlines via Istanbul",
+        "Wizz Air via hub",
+        "LOT via Warsaw"
+      ],
       "best_booking_tip": "Turkish Airlines via Istanbul is the best connection — Istanbul is a major hub with many US flights and Tbilisi is just 3 hours away.",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 365
-    },
-    "Turkey": {
-      "main_airports": [{"code": "IST", "name": "Istanbul Airport", "city": "Istanbul"}, {"code": "AYT", "name": "Antalya Airport", "city": "Antalya (coast)"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Miami", "Chicago", "Washington DC", "Houston", "Los Angeles", "Boston"],
-      "flight_time_hours": {"east_coast": 10, "west_coast": 13},
-      "airlines": ["Turkish Airlines", "United (seasonal)"],
-      "best_booking_tip": "Turkish Airlines is one of the world's best airlines and has extensive US connections. Istanbul Airport is a major global hub for onward connections.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 365,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
     },
     "Morocco": {
-      "main_airports": [{"code": "CMN", "name": "Mohammed V International", "city": "Casablanca"}, {"code": "RAK", "name": "Marrakech Menara", "city": "Marrakech"}],
+      "main_airports": [
+        {
+          "code": "CMN",
+          "name": "Mohammed V International",
+          "city": "Casablanca"
+        },
+        {
+          "code": "RAK",
+          "name": "Marrakech Menara",
+          "city": "Marrakech"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Washington DC (seasonal)"],
-      "flight_time_hours": {"east_coast": 7, "west_coast": 11},
-      "airlines": ["Royal Air Maroc", "Delta (seasonal)"],
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Washington DC (seasonal)"
+      ],
+      "flight_time_hours": {
+        "east_coast": 7,
+        "west_coast": 11
+      },
+      "airlines": [
+        "Royal Air Maroc",
+        "Delta (seasonal)"
+      ],
       "best_booking_tip": "Relatively short flight from East Coast. Also easy via Madrid (1.5 hrs), Lisbon (2 hrs), or Paris (3 hrs).",
       "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
-    "United Arab Emirates": {
-      "main_airports": [{"code": "DXB", "name": "Dubai International", "city": "Dubai"}, {"code": "AUH", "name": "Abu Dhabi International", "city": "Abu Dhabi"}],
+    "Mexico": {
+      "main_airports": [
+        {
+          "code": "MEX",
+          "name": "Felipe Ángeles International / Benito Juárez",
+          "city": "Mexico City"
+        },
+        {
+          "code": "CUN",
+          "name": "Cancún International",
+          "city": "Cancún"
+        },
+        {
+          "code": "GDL",
+          "name": "Miguel Hidalgo y Costilla",
+          "city": "Guadalajara"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Los Angeles", "San Francisco", "Chicago", "Houston", "Dallas", "Washington DC", "Boston", "Seattle"],
-      "flight_time_hours": {"east_coast": 13, "west_coast": 16},
-      "airlines": ["Emirates", "Etihad", "United", "Delta", "American"],
-      "best_booking_tip": "Emirates and Etihad are world-class premium carriers. Dubai (DXB) is one of the world's busiest airports. Many direct US routes.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
+      "direct_us_cities": [
+        "All major US cities — extensive direct routes"
+      ],
+      "flight_time_hours": {
+        "east_coast": 3.5,
+        "west_coast": 3
+      },
+      "airlines": [
+        "American",
+        "United",
+        "Delta",
+        "Southwest",
+        "Aeromexico",
+        "Alaska"
+      ],
+      "best_booking_tip": "Most accessible international retirement destination from the US. Direct flights from nearly every major US city. Budget airlines also serve many routes.",
+      "nearest_major_us_hub": "Dallas/Houston/Phoenix",
+      "visa_free_days": 180,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
-    "Malta": {
-      "main_airports": [{"code": "MLA", "name": "Malta International Airport", "city": "Valletta"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 10, "west_coast": 13},
-      "airlines": ["Air Malta via connection", "Connect via Rome, London, Frankfurt"],
-      "best_booking_tip": "Connect via Rome (1.5 hrs), London (3 hrs), or Frankfurt (3 hrs). Short hop from most European capitals.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
-    },
-    "Cyprus": {
-      "main_airports": [{"code": "LCA", "name": "Larnaca International", "city": "Larnaca"}, {"code": "PFO", "name": "Paphos International", "city": "Paphos"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 11, "west_coast": 14},
-      "airlines": ["Cyprus Airways", "Ryanair", "Connect via London, Frankfurt, Athens"],
-      "best_booking_tip": "Connect via London (4.5 hrs), Athens (1 hr), or Frankfurt (4 hrs). Easy connections from most European hubs.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
-    },
-    "New Zealand": {
-      "main_airports": [{"code": "AKL", "name": "Auckland Airport", "city": "Auckland"}, {"code": "CHC", "name": "Christchurch International", "city": "Christchurch"}],
+    "Colombia": {
+      "main_airports": [
+        {
+          "code": "BOG",
+          "name": "El Dorado International",
+          "city": "Bogotá"
+        },
+        {
+          "code": "MDE",
+          "name": "José María Córdova",
+          "city": "Medellín"
+        },
+        {
+          "code": "CTG",
+          "name": "Rafael Núñez",
+          "city": "Cartagena"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "Houston"],
-      "flight_time_hours": {"east_coast": 20, "west_coast": 12},
-      "airlines": ["Air New Zealand", "United", "Qantas via Sydney"],
-      "best_booking_tip": "Much closer from West Coast (12 hrs from LA). Air New Zealand is excellent carrier. Long flight from East Coast — consider Sydney stopover.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "Australia": {
-      "main_airports": [{"code": "SYD", "name": "Sydney Kingsford Smith", "city": "Sydney"}, {"code": "MEL", "name": "Melbourne Airport", "city": "Melbourne"}, {"code": "PER", "name": "Perth Airport", "city": "Perth"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["Los Angeles", "San Francisco", "Dallas", "Houston"],
-      "flight_time_hours": {"east_coast": 21, "west_coast": 15},
-      "airlines": ["Qantas", "United", "Delta", "American", "Hawaiian via Honolulu"],
-      "best_booking_tip": "Qantas has world's longest direct flight (Perth-New York, 19+ hrs) but most routes go via LA. Much shorter from West Coast. Perth is 2 hrs closer from LA.",
-      "nearest_major_us_hub": "Los Angeles",
-      "visa_free_days": 90
-    },
-    "United Kingdom": {
-      "main_airports": [{"code": "LHR", "name": "Heathrow", "city": "London"}, {"code": "LGW", "name": "Gatwick", "city": "London"}, {"code": "MAN", "name": "Manchester Airport", "city": "Manchester"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["All major US cities — most connected destination from US"],
-      "flight_time_hours": {"east_coast": 7, "west_coast": 10},
-      "airlines": ["British Airways", "Virgin Atlantic", "American", "United", "Delta", "Norse Atlantic"],
-      "best_booking_tip": "Most connected destination from US. Direct flights from virtually every major US city. Heathrow is a major global hub.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 180
-    },
-    "Canada": {
-      "main_airports": [{"code": "YYZ", "name": "Toronto Pearson International", "city": "Toronto"}, {"code": "YVR", "name": "Vancouver International", "city": "Vancouver"}, {"code": "YUL", "name": "Montréal-Trudeau International", "city": "Montreal"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["All major US cities — extensive cross-border routes"],
-      "flight_time_hours": {"east_coast": 1.5, "west_coast": 2.5},
-      "airlines": ["Air Canada", "WestJet", "American", "United", "Delta", "Porter"],
-      "best_booking_tip": "Essentially domestic-level connectivity. Drive or short flight from most US cities. No customs complications for most stays.",
-      "nearest_major_us_hub": "Various — closest US city",
-      "visa_free_days": 180
-    },
-    "Germany": {
-      "main_airports": [{"code": "FRA", "name": "Frankfurt Airport", "city": "Frankfurt"}, {"code": "MUC", "name": "Munich Airport", "city": "Munich"}, {"code": "BER", "name": "Berlin Brandenburg", "city": "Berlin"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["New York (JFK)", "Miami", "Chicago", "Los Angeles", "San Francisco", "Houston", "Atlanta", "Washington DC", "Seattle", "Boston"],
-      "flight_time_hours": {"east_coast": 9, "west_coast": 11},
-      "airlines": ["Lufthansa", "United", "American", "Delta", "Condor"],
-      "best_booking_tip": "Frankfurt is one of the world's busiest airports and a major hub. Many direct US routes. Lufthansa is premium carrier.",
-      "nearest_major_us_hub": "New York JFK",
-      "visa_free_days": 90
-    },
-    "South Africa": {
-      "main_airports": [{"code": "CPT", "name": "Cape Town International", "city": "Cape Town"}, {"code": "JNB", "name": "OR Tambo International", "city": "Johannesburg"}],
-      "direct_from_us": false,
-      "direct_us_cities": [],
-      "flight_time_hours": {"east_coast": 16, "west_coast": 19},
-      "airlines": ["South African Airways via connection", "Delta via Atlanta (seasonal)", "Emirates via Dubai", "Ethiopian via Addis"],
-      "best_booking_tip": "Delta has had seasonal direct Atlanta-Johannesburg. Otherwise connect via London (11 hrs from JHB), Dubai (8 hrs), or Amsterdam. Long flight but multiple good options.",
-      "nearest_major_us_hub": "Atlanta",
-      "visa_free_days": 90
-    },
-    "United States": {
-      "main_airports": [{"code": "Various", "name": "Your local airport", "city": "Varies"}],
-      "direct_from_us": true,
-      "direct_us_cities": ["You are already here"],
-      "flight_time_hours": {"east_coast": 0, "west_coast": 0},
-      "airlines": ["All US carriers"],
-      "best_booking_tip": "No travel required. Consider retiring in a no-income-tax state to maximize your retirement income.",
-      "nearest_major_us_hub": "Your local city",
-      "visa_free_days": 999
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Fort Lauderdale",
+        "Atlanta",
+        "Orlando",
+        "Houston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 4,
+        "west_coast": 7
+      },
+      "airlines": [
+        "Avianca",
+        "American",
+        "United",
+        "Delta",
+        "Spirit",
+        "JetBlue"
+      ],
+      "best_booking_tip": "Miami is the major hub for Colombia. Direct to both Bogotá and Medellín from multiple US cities. Very affordable routes.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     },
     "Panama": {
-      "main_airports": [{"code": "PTY", "name": "Tocumen International", "city": "Panama City"}],
+      "main_airports": [
+        {
+          "code": "PTY",
+          "name": "Tocumen International",
+          "city": "Panama City"
+        }
+      ],
       "direct_from_us": true,
-      "direct_us_cities": ["Miami", "New York (JFK)", "Atlanta", "Houston", "Los Angeles", "Orlando"],
-      "flight_time_hours": {"east_coast": 3.5, "west_coast": 6},
-      "airlines": ["Copa Airlines", "American", "United", "Delta"],
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Atlanta",
+        "Houston",
+        "Los Angeles",
+        "Orlando"
+      ],
+      "flight_time_hours": {
+        "east_coast": 3.5,
+        "west_coast": 6
+      },
+      "airlines": [
+        "Copa Airlines",
+        "American",
+        "United",
+        "Delta"
+      ],
       "best_booking_tip": "Copa Airlines hub makes Panama extremely well connected. One of the easiest international retirement destinations to reach from the US.",
       "nearest_major_us_hub": "Miami",
-      "visa_free_days": 180
+      "visa_free_days": 180,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Costa Rica": {
+      "main_airports": [
+        {
+          "code": "SJO",
+          "name": "Juan Santamaría International",
+          "city": "San José"
+        },
+        {
+          "code": "LIR",
+          "name": "Daniel Oduber Quirós",
+          "city": "Liberia (Guanacaste)"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Atlanta",
+        "Houston",
+        "Dallas",
+        "Los Angeles",
+        "Chicago",
+        "Denver"
+      ],
+      "flight_time_hours": {
+        "east_coast": 3.5,
+        "west_coast": 6
+      },
+      "airlines": [
+        "American",
+        "United",
+        "Delta",
+        "Southwest",
+        "Spirit",
+        "JetBlue",
+        "Copa"
+      ],
+      "best_booking_tip": "Excellent direct connections from many US cities. One of the most accessible retirement destinations. Liberia airport convenient for Guanacaste beach areas.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Ecuador": {
+      "main_airports": [
+        {
+          "code": "UIO",
+          "name": "Mariscal Sucre International",
+          "city": "Quito"
+        },
+        {
+          "code": "GYE",
+          "name": "José Joaquín de Olmedo",
+          "city": "Guayaquil"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Houston",
+        "Atlanta",
+        "Fort Lauderdale"
+      ],
+      "flight_time_hours": {
+        "east_coast": 5,
+        "west_coast": 7
+      },
+      "airlines": [
+        "Avianca",
+        "American",
+        "United",
+        "LATAM"
+      ],
+      "best_booking_tip": "Miami is main hub. Multiple direct routes available. Cuenca (expat favorite) requires short domestic connection from Quito or Guayaquil.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Dominican Republic": {
+      "main_airports": [
+        {
+          "code": "SDQ",
+          "name": "Las Américas International",
+          "city": "Santo Domingo"
+        },
+        {
+          "code": "PUJ",
+          "name": "Punta Cana International",
+          "city": "Punta Cana"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Boston",
+        "Atlanta",
+        "Philadelphia",
+        "Charlotte",
+        "Chicago",
+        "Houston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 3.5,
+        "west_coast": 6.5
+      },
+      "airlines": [
+        "American",
+        "JetBlue",
+        "United",
+        "Delta",
+        "Spirit"
+      ],
+      "best_booking_tip": "Punta Cana is one of the most connected Caribbean airports with direct routes from many US cities. Very affordable fares.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 30,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Uruguay": {
+      "main_airports": [
+        {
+          "code": "MVD",
+          "name": "Carrasco International",
+          "city": "Montevideo"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "LATAM via connection",
+        "Copa via Panama City",
+        "Aerolíneas Argentinas via Buenos Aires"
+      ],
+      "best_booking_tip": "Connect via Miami to Bogotá or Panama City then onward, or via Buenos Aires (just 1 hour from Montevideo by ferry or 45 min flight).",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": false
+    },
+    "Argentina": {
+      "main_airports": [
+        {
+          "code": "EZE",
+          "name": "Ministro Pistarini (Ezeiza)",
+          "city": "Buenos Aires"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Dallas",
+        "Atlanta"
+      ],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Aerolíneas Argentinas",
+        "American",
+        "United",
+        "LATAM"
+      ],
+      "best_booking_tip": "Long flight but direct from several US cities. Miami to Buenos Aires is the main route. Book well in advance for best prices.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Brazil": {
+      "main_airports": [
+        {
+          "code": "GRU",
+          "name": "São Paulo Guarulhos International",
+          "city": "São Paulo"
+        },
+        {
+          "code": "GIG",
+          "name": "Rio de Janeiro Galeão",
+          "city": "Rio de Janeiro"
+        },
+        {
+          "code": "FLN",
+          "name": "Florianópolis International",
+          "city": "Florianópolis"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Atlanta",
+        "Houston",
+        "Dallas",
+        "Los Angeles"
+      ],
+      "flight_time_hours": {
+        "east_coast": 9,
+        "west_coast": 12
+      },
+      "airlines": [
+        "LATAM",
+        "Azul",
+        "American",
+        "United",
+        "Delta"
+      ],
+      "best_booking_tip": "Multiple direct routes from US. Miami and New York are main hubs. São Paulo is the main international gateway.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Peru": {
+      "main_airports": [
+        {
+          "code": "LIM",
+          "name": "Jorge Chávez International",
+          "city": "Lima"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Atlanta",
+        "Houston",
+        "Fort Lauderdale",
+        "Los Angeles"
+      ],
+      "flight_time_hours": {
+        "east_coast": 7,
+        "west_coast": 8
+      },
+      "airlines": [
+        "LATAM",
+        "American",
+        "United",
+        "Delta",
+        "Spirit"
+      ],
+      "best_booking_tip": "Lima is well-connected. Cusco requires domestic connection from Lima (1 hour). Good direct routes from multiple US cities.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Chile": {
+      "main_airports": [
+        {
+          "code": "SCL",
+          "name": "Arturo Merino Benítez International",
+          "city": "Santiago"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Miami",
+        "New York (JFK)",
+        "Atlanta",
+        "Dallas",
+        "Los Angeles"
+      ],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 10
+      },
+      "airlines": [
+        "LATAM",
+        "American",
+        "Delta",
+        "United",
+        "JetBlue"
+      ],
+      "best_booking_tip": "Long flight from East Coast but reasonable from West Coast (10 hours from LA). Multiple direct routes available.",
+      "nearest_major_us_hub": "Miami",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Thailand": {
+      "main_airports": [
+        {
+          "code": "BKK",
+          "name": "Suvarnabhumi International",
+          "city": "Bangkok"
+        },
+        {
+          "code": "CNX",
+          "name": "Chiang Mai International",
+          "city": "Chiang Mai"
+        },
+        {
+          "code": "HKT",
+          "name": "Phuket International",
+          "city": "Phuket"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 18,
+        "west_coast": 17
+      },
+      "airlines": [
+        "Thai Airways via connection",
+        "Korean Air via Seoul",
+        "ANA via Tokyo",
+        "Cathay Pacific via Hong Kong",
+        "Singapore Airlines via Singapore"
+      ],
+      "best_booking_tip": "Best connections via Tokyo, Seoul, Hong Kong, or Singapore. Seoul (Incheon) and Tokyo are particularly popular. Consider 1-2 day layover to break the journey.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 60,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Malaysia": {
+      "main_airports": [
+        {
+          "code": "KUL",
+          "name": "Kuala Lumpur International (KLIA)",
+          "city": "Kuala Lumpur"
+        },
+        {
+          "code": "PEN",
+          "name": "Penang International",
+          "city": "Penang"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 19,
+        "west_coast": 18
+      },
+      "airlines": [
+        "Malaysia Airlines via connection",
+        "AirAsia via hub",
+        "Singapore Airlines via Singapore",
+        "Cathay Pacific via Hong Kong"
+      ],
+      "best_booking_tip": "Connect via Singapore (very convenient — 40 min flight from Singapore to KL) or Tokyo, Seoul, Hong Kong. Singapore Airlines offers premium connections.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Vietnam": {
+      "main_airports": [
+        {
+          "code": "SGN",
+          "name": "Tan Son Nhat International",
+          "city": "Ho Chi Minh City"
+        },
+        {
+          "code": "HAN",
+          "name": "Noi Bai International",
+          "city": "Hanoi"
+        },
+        {
+          "code": "DAD",
+          "name": "Da Nang International",
+          "city": "Da Nang"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 20,
+        "west_coast": 18
+      },
+      "airlines": [
+        "Vietnam Airlines via connection",
+        "Korean Air via Seoul",
+        "Cathay Pacific via Hong Kong",
+        "Singapore Airlines via Singapore"
+      ],
+      "best_booking_tip": "Connect via Seoul (Incheon), Hong Kong, or Singapore. Da Nang — the popular expat city — has its own international airport with good Asian hub connections.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Philippines": {
+      "main_airports": [
+        {
+          "code": "MNL",
+          "name": "Ninoy Aquino International",
+          "city": "Manila"
+        },
+        {
+          "code": "CEB",
+          "name": "Mactan-Cebu International",
+          "city": "Cebu"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "Honolulu",
+        "Guam"
+      ],
+      "flight_time_hours": {
+        "east_coast": 20,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Philippine Airlines",
+        "United",
+        "Korean Air via Seoul",
+        "Cathay Pacific via Hong Kong"
+      ],
+      "best_booking_tip": "Direct from US West Coast — much closer than other SE Asian destinations. Philippine Airlines and United fly LAX/SFO direct. Much shorter from West Coast.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 30,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Indonesia": {
+      "main_airports": [
+        {
+          "code": "DPS",
+          "name": "Ngurah Rai International (Bali)",
+          "city": "Bali/Denpasar"
+        },
+        {
+          "code": "CGK",
+          "name": "Soekarno-Hatta International",
+          "city": "Jakarta"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 22,
+        "west_coast": 18
+      },
+      "airlines": [
+        "Garuda Indonesia via connection",
+        "Singapore Airlines via Singapore",
+        "Cathay Pacific via Hong Kong",
+        "Korean Air via Seoul"
+      ],
+      "best_booking_tip": "Bali (DPS) is the main expat destination — best connected via Singapore (2.5 hrs), Tokyo, or Hong Kong. Singapore is the easiest layover city.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 30,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Japan": {
+      "main_airports": [
+        {
+          "code": "NRT",
+          "name": "Narita International",
+          "city": "Tokyo"
+        },
+        {
+          "code": "HND",
+          "name": "Haneda International",
+          "city": "Tokyo"
+        },
+        {
+          "code": "KIX",
+          "name": "Kansai International",
+          "city": "Osaka"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "New York (JFK)",
+        "Chicago",
+        "Seattle",
+        "Dallas",
+        "Houston",
+        "Atlanta"
+      ],
+      "flight_time_hours": {
+        "east_coast": 14,
+        "west_coast": 11
+      },
+      "airlines": [
+        "ANA",
+        "Japan Airlines",
+        "United",
+        "Delta",
+        "American"
+      ],
+      "best_booking_tip": "Excellent direct connections from many US cities. West Coast (11 hrs from LA) much shorter than East Coast (14 hrs). ANA and JAL are premium carriers with great service.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "South Korea": {
+      "main_airports": [
+        {
+          "code": "ICN",
+          "name": "Incheon International",
+          "city": "Seoul"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "New York (JFK)",
+        "Chicago",
+        "Seattle",
+        "Dallas",
+        "Atlanta",
+        "Honolulu"
+      ],
+      "flight_time_hours": {
+        "east_coast": 14,
+        "west_coast": 11
+      },
+      "airlines": [
+        "Korean Air",
+        "Asiana Airlines",
+        "United",
+        "Delta",
+        "American"
+      ],
+      "best_booking_tip": "Incheon is one of the world's best airports. Many direct US routes. Great shopping and layover facilities. Korean Air and Asiana are premium carriers.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Taiwan": {
+      "main_airports": [
+        {
+          "code": "TPE",
+          "name": "Taiwan Taoyuan International",
+          "city": "Taipei"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "New York (JFK)",
+        "Seattle",
+        "Honolulu"
+      ],
+      "flight_time_hours": {
+        "east_coast": 15,
+        "west_coast": 13
+      },
+      "airlines": [
+        "EVA Air",
+        "China Airlines",
+        "United",
+        "Delta"
+      ],
+      "best_booking_tip": "EVA Air has excellent US connections and is consistently rated among best airlines. More West Coast routes than East Coast.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Singapore": {
+      "main_airports": [
+        {
+          "code": "SIN",
+          "name": "Changi Airport",
+          "city": "Singapore"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "New York (JFK)",
+        "Seattle",
+        "Houston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 19,
+        "west_coast": 17
+      },
+      "airlines": [
+        "Singapore Airlines",
+        "United",
+        "Delta"
+      ],
+      "best_booking_tip": "Changi is consistently rated world's best airport. Singapore Airlines is world-class. Long flight but exceptional experience. Consider Singapore stopover program.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Hong Kong": {
+      "main_airports": [
+        {
+          "code": "HKG",
+          "name": "Hong Kong International",
+          "city": "Hong Kong"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "New York (JFK)",
+        "Chicago",
+        "Seattle",
+        "Dallas"
+      ],
+      "flight_time_hours": {
+        "east_coast": 16,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Cathay Pacific",
+        "United",
+        "American",
+        "Delta"
+      ],
+      "best_booking_tip": "Cathay Pacific is premium carrier with great connections. HKG is excellent transit hub. Note changed political environment post-2020.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "India": {
+      "main_airports": [
+        {
+          "code": "DEL",
+          "name": "Indira Gandhi International",
+          "city": "New Delhi"
+        },
+        {
+          "code": "BOM",
+          "name": "Chhatrapati Shivaji Maharaj",
+          "city": "Mumbai"
+        },
+        {
+          "code": "COK",
+          "name": "Cochin International",
+          "city": "Kochi (Kerala)"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Chicago",
+        "San Francisco",
+        "Los Angeles",
+        "Newark",
+        "Washington DC",
+        "Atlanta"
+      ],
+      "flight_time_hours": {
+        "east_coast": 14,
+        "west_coast": 16
+      },
+      "airlines": [
+        "Air India",
+        "United",
+        "Delta",
+        "American",
+        "Air India Express"
+      ],
+      "best_booking_tip": "Many direct routes especially from Northeast US with large Indian-American population. Air India expanded US routes significantly.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 60,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Cambodia": {
+      "main_airports": [
+        {
+          "code": "PNH",
+          "name": "Phnom Penh International",
+          "city": "Phnom Penh"
+        },
+        {
+          "code": "REP",
+          "name": "Siem Reap–Angkor International",
+          "city": "Siem Reap"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 20,
+        "west_coast": 18
+      },
+      "airlines": [
+        "Connect via Bangkok",
+        "Connect via Singapore",
+        "Connect via Hong Kong"
+      ],
+      "best_booking_tip": "Connect via Bangkok (1.5 hrs), Singapore (2 hrs), or Hong Kong. Bangkok is the easiest and cheapest connection.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 30,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Sri Lanka": {
+      "main_airports": [
+        {
+          "code": "CMB",
+          "name": "Bandaranaike International",
+          "city": "Colombo"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 17,
+        "west_coast": 19
+      },
+      "airlines": [
+        "SriLankan Airlines via connection",
+        "Emirates via Dubai",
+        "Qatar Airways via Doha",
+        "Singapore Airlines via Singapore"
+      ],
+      "best_booking_tip": "Connect via Dubai (3 hrs from Colombo), Singapore, or Doha. Emirates and Qatar Airways offer good connections from US East Coast.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 30,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": true
+    },
+    "Nepal": {
+      "main_airports": [
+        {
+          "code": "KTM",
+          "name": "Tribhuvan International",
+          "city": "Kathmandu"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 16,
+        "west_coast": 18
+      },
+      "airlines": [
+        "Nepal Airlines via connection",
+        "Qatar Airways via Doha",
+        "Turkish Airlines via Istanbul",
+        "Emirates via Dubai"
+      ],
+      "best_booking_tip": "Connect via Doha, Dubai, or Istanbul. Qatar Airways via Doha is often most convenient. Kathmandu altitude can be challenging on arrival.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": false
+    },
+    "Turkey": {
+      "main_airports": [
+        {
+          "code": "IST",
+          "name": "Istanbul Airport",
+          "city": "Istanbul"
+        },
+        {
+          "code": "AYT",
+          "name": "Antalya Airport",
+          "city": "Antalya (coast)"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Miami",
+        "Chicago",
+        "Washington DC",
+        "Houston",
+        "Los Angeles",
+        "Boston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 10,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Turkish Airlines",
+        "United (seasonal)"
+      ],
+      "best_booking_tip": "Turkish Airlines is one of the world's best airlines and has extensive US connections. Istanbul Airport is a major global hub for onward connections.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "United Arab Emirates": {
+      "main_airports": [
+        {
+          "code": "DXB",
+          "name": "Dubai International",
+          "city": "Dubai"
+        },
+        {
+          "code": "AUH",
+          "name": "Abu Dhabi International",
+          "city": "Abu Dhabi"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Los Angeles",
+        "San Francisco",
+        "Chicago",
+        "Houston",
+        "Dallas",
+        "Washington DC",
+        "Boston",
+        "Seattle"
+      ],
+      "flight_time_hours": {
+        "east_coast": 13,
+        "west_coast": 16
+      },
+      "airlines": [
+        "Emirates",
+        "Etihad",
+        "United",
+        "Delta",
+        "American"
+      ],
+      "best_booking_tip": "Emirates and Etihad are world-class premium carriers. Dubai (DXB) is one of the world's busiest airports. Many direct US routes.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Malta": {
+      "main_airports": [
+        {
+          "code": "MLA",
+          "name": "Malta International Airport",
+          "city": "Valletta"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 10,
+        "west_coast": 13
+      },
+      "airlines": [
+        "Air Malta via connection",
+        "Connect via Rome, London, Frankfurt"
+      ],
+      "best_booking_tip": "Connect via Rome (1.5 hrs), London (3 hrs), or Frankfurt (3 hrs). Short hop from most European capitals.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
+    },
+    "Cyprus": {
+      "main_airports": [
+        {
+          "code": "LCA",
+          "name": "Larnaca International",
+          "city": "Larnaca"
+        },
+        {
+          "code": "PFO",
+          "name": "Paphos International",
+          "city": "Paphos"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 11,
+        "west_coast": 14
+      },
+      "airlines": [
+        "Cyprus Airways",
+        "Ryanair",
+        "Connect via London, Frankfurt, Athens"
+      ],
+      "best_booking_tip": "Connect via London (4.5 hrs), Athens (1 hr), or Frankfurt (4 hrs). Easy connections from most European hubs.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": false
+    },
+    "New Zealand": {
+      "main_airports": [
+        {
+          "code": "AKL",
+          "name": "Auckland Airport",
+          "city": "Auckland"
+        },
+        {
+          "code": "CHC",
+          "name": "Christchurch International",
+          "city": "Christchurch"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "Houston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 20,
+        "west_coast": 12
+      },
+      "airlines": [
+        "Air New Zealand",
+        "United",
+        "Qantas via Sydney"
+      ],
+      "best_booking_tip": "Much closer from West Coast (12 hrs from LA). Air New Zealand is excellent carrier. Long flight from East Coast — consider Sydney stopover.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Australia": {
+      "main_airports": [
+        {
+          "code": "SYD",
+          "name": "Sydney Kingsford Smith",
+          "city": "Sydney"
+        },
+        {
+          "code": "MEL",
+          "name": "Melbourne Airport",
+          "city": "Melbourne"
+        },
+        {
+          "code": "PER",
+          "name": "Perth Airport",
+          "city": "Perth"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "Los Angeles",
+        "San Francisco",
+        "Dallas",
+        "Houston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 21,
+        "west_coast": 15
+      },
+      "airlines": [
+        "Qantas",
+        "United",
+        "Delta",
+        "American",
+        "Hawaiian via Honolulu"
+      ],
+      "best_booking_tip": "Qantas has world's longest direct flight (Perth-New York, 19+ hrs) but most routes go via LA. Much shorter from West Coast. Perth is 2 hrs closer from LA.",
+      "nearest_major_us_hub": "Los Angeles",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "United Kingdom": {
+      "main_airports": [
+        {
+          "code": "LHR",
+          "name": "Heathrow",
+          "city": "London"
+        },
+        {
+          "code": "LGW",
+          "name": "Gatwick",
+          "city": "London"
+        },
+        {
+          "code": "MAN",
+          "name": "Manchester Airport",
+          "city": "Manchester"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "All major US cities — most connected destination from US"
+      ],
+      "flight_time_hours": {
+        "east_coast": 7,
+        "west_coast": 10
+      },
+      "airlines": [
+        "British Airways",
+        "Virgin Atlantic",
+        "American",
+        "United",
+        "Delta",
+        "Norse Atlantic"
+      ],
+      "best_booking_tip": "Most connected destination from US. Direct flights from virtually every major US city. Heathrow is a major global hub.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 180,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Canada": {
+      "main_airports": [
+        {
+          "code": "YYZ",
+          "name": "Toronto Pearson International",
+          "city": "Toronto"
+        },
+        {
+          "code": "YVR",
+          "name": "Vancouver International",
+          "city": "Vancouver"
+        },
+        {
+          "code": "YUL",
+          "name": "Montréal-Trudeau International",
+          "city": "Montreal"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "All major US cities — extensive cross-border routes"
+      ],
+      "flight_time_hours": {
+        "east_coast": 1.5,
+        "west_coast": 2.5
+      },
+      "airlines": [
+        "Air Canada",
+        "WestJet",
+        "American",
+        "United",
+        "Delta",
+        "Porter"
+      ],
+      "best_booking_tip": "Essentially domestic-level connectivity. Drive or short flight from most US cities. No customs complications for most stays.",
+      "nearest_major_us_hub": "Various — closest US city",
+      "visa_free_days": 180,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "Germany": {
+      "main_airports": [
+        {
+          "code": "FRA",
+          "name": "Frankfurt Airport",
+          "city": "Frankfurt"
+        },
+        {
+          "code": "MUC",
+          "name": "Munich Airport",
+          "city": "Munich"
+        },
+        {
+          "code": "BER",
+          "name": "Berlin Brandenburg",
+          "city": "Berlin"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "New York (JFK)",
+        "Miami",
+        "Chicago",
+        "Los Angeles",
+        "San Francisco",
+        "Houston",
+        "Atlanta",
+        "Washington DC",
+        "Seattle",
+        "Boston"
+      ],
+      "flight_time_hours": {
+        "east_coast": 9,
+        "west_coast": 11
+      },
+      "airlines": [
+        "Lufthansa",
+        "United",
+        "American",
+        "Delta",
+        "Condor"
+      ],
+      "best_booking_tip": "Frankfurt is one of the world's busiest airports and a major hub. Many direct US routes. Lufthansa is premium carrier.",
+      "nearest_major_us_hub": "New York JFK",
+      "visa_free_days": 90,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
+    },
+    "South Africa": {
+      "main_airports": [
+        {
+          "code": "CPT",
+          "name": "Cape Town International",
+          "city": "Cape Town"
+        },
+        {
+          "code": "JNB",
+          "name": "OR Tambo International",
+          "city": "Johannesburg"
+        }
+      ],
+      "direct_from_us": false,
+      "direct_us_cities": [],
+      "flight_time_hours": {
+        "east_coast": 16,
+        "west_coast": 19
+      },
+      "airlines": [
+        "South African Airways via connection",
+        "Delta via Atlanta (seasonal)",
+        "Emirates via Dubai",
+        "Ethiopian via Addis"
+      ],
+      "best_booking_tip": "Delta has had seasonal direct Atlanta-Johannesburg. Otherwise connect via London (11 hrs from JHB), Dubai (8 hrs), or Amsterdam. Long flight but multiple good options.",
+      "nearest_major_us_hub": "Atlanta",
+      "visa_free_days": 90,
+      "direct_from_uk": false,
+      "direct_from_ca": false,
+      "direct_from_au": false
+    },
+    "United States": {
+      "main_airports": [
+        {
+          "code": "Various",
+          "name": "Your local airport",
+          "city": "Varies"
+        }
+      ],
+      "direct_from_us": true,
+      "direct_us_cities": [
+        "You are already here"
+      ],
+      "flight_time_hours": {
+        "east_coast": 0,
+        "west_coast": 0
+      },
+      "airlines": [
+        "All US carriers"
+      ],
+      "best_booking_tip": "No travel required. Consider retiring in a no-income-tax state to maximize your retirement income.",
+      "nearest_major_us_hub": "Your local city",
+      "visa_free_days": 999,
+      "direct_from_uk": true,
+      "direct_from_ca": true,
+      "direct_from_au": true
     }
   }
 }

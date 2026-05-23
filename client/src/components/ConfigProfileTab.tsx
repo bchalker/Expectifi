@@ -96,7 +96,7 @@ export function ConfigProfileTab({ onAccountCancelled, onOpenSignIn, onOpenRegis
         </div>
       </dl>
       <p className="footnote footnote--muted config-profile-tab__cancel-lead">
-        Cancel account ends your Stripe subscription immediately and permanently deletes your HeadwayPlanner account and
+        Cancel account ends your Stripe subscription immediately and permanently deletes your Expectifi account and
         saved scenarios.
       </p>
       {err ? (

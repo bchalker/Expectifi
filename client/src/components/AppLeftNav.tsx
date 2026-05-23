@@ -131,7 +131,7 @@ export function AppLeftNav({
       >
         <div className="app-left-nav__scroll">
           <div className="app-left-nav__brand">
-            <span className="app-left-nav__mark">HeadwayPlanner</span>
+            <span className="app-left-nav__mark">Expectifi</span>
           </div>
           <div
             className="app-left-nav__rule app-left-nav__rule--after-brand"

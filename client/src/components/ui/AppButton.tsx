@@ -10,7 +10,7 @@ export type AppButtonProps = Omit<ButtonProps, 'variant' | 'size'> & {
   className?: string
 }
 
-/** HeroUI Button with HeadwayPlanner design-system chrome (see AppButton.scss). */
+/** HeroUI Button with Expectifi design-system chrome (see AppButton.scss). */
 export function AppButton({
   variant = 'primary',
   size = 'md',

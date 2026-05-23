@@ -171,3 +171,13 @@ export const EXPAT_PIN_LEGEND: MapPinLegendItem[] = [
   { bandClass: 'moderate', color: '#f59e0b', label: 'Moderate' },
   { bandClass: 'small', color: '#94a3b8', label: 'Limited' },
 ]
+
+export const EXPAT_LEGEND_TIER_IDS = [
+  'enormous',
+  'very-large',
+  'large',
+  'moderate',
+  'small',
+] as const
+
+export type ExpatLegendTierId = (typeof EXPAT_LEGEND_TIER_IDS)[number]

@@ -64,7 +64,7 @@
 .where-to-retire__body > .where-to-retire__main-panel {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .where-to-retire__main-panel {
@@ -80,7 +80,7 @@
   background: var(--surface);
   box-shadow: 0 2px 10px rgb(28 43 58 / 0.06);
   box-sizing: border-box;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .where-to-retire__body > .where-to-retire__panel-back {
@@ -122,7 +122,8 @@
   gap: 0.65rem 1.15rem;
   flex-shrink: 0;
   padding: 1rem var(--wtr-panel-inline-pad, 1.25rem) 1rem;
-  border-bottom: 1px solid var(--border);
+  // border-bottom: 1px solid var(--border);
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   box-sizing: border-box;
   overflow: visible;
 }
@@ -160,6 +161,7 @@
   margin: -1rem calc(-1 * var(--wtr-panel-inline-pad, 1.25rem)) -1rem 0;
   padding: 0 0.65rem;
   border-left: 1px solid var(--border);
+  background: var(--surface);
   box-sizing: border-box;
 }
 
@@ -237,19 +239,36 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-height: var(--wtr-map-area-min-h, 36rem);
+  min-width: 0;
+  border-radius: 0 0 12px 12px;
   overflow: hidden;
 }
 
-/* Let list-panel collapse tab protrude past the panel edge */
-.where-to-retire__body--map .where-to-retire__view-panel,
-.where-to-retire__body--map .where-to-retire__main-panel-map,
-.where-to-retire__body--map .where-to-retire__main-panel-map .wtr-explorer {
+.where-to-retire__map-stage {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Discover / alternate layouts may need protruding chrome */
+.where-to-retire__body--map .where-to-retire__view-panel {
   overflow: visible;
 }
 
-.where-to-retire__main-panel-map .wtr-explorer {
+.where-to-retire__main-panel-map .wtr-explorer,
+.where-to-retire__map-stage .wtr-explorer {
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+}
+
+.where-to-retire__map-stage .where-to-retire__compare-overlay {
+  border-radius: 0;
 }
 
 .where-to-retire__view-panel {
@@ -315,7 +334,6 @@
 .where-to-retire__filter-btn--active,
 .where-to-retire__filter-btn--has-active {
   z-index: 1;
-  // border-color: color-mix(in srgb, var(--color-teal-dark) 20%, var(--border));
   background: #fff;
   color: var(--color-teal-dark);
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;

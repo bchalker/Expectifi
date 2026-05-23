@@ -1,4 +1,5 @@
 import gettingThereData from '../data/getting-there.json'
+import type { DirectFlightOrigin } from '../lib/whereToRetire/directFlightOrigins'
 import { getQualityOfLifeData } from './qualityOfLife'
 
 export type SafetyFilter = 'any' | 'reasonably-safe' | 'very-safe'
@@ -9,10 +10,13 @@ export type MaxFlightTimeFilter = 'any' | 'under-5' | 'under-10' | 'under-15'
 
 export type VisaFreeDaysFilter = 'any' | '30-plus' | '60-plus' | '90-plus' | '180-plus'
 
-export type MinRetirementScoreFilter = 'any' | 'good-55' | 'strong-70' | 'excellent-85'
+export type { DirectFlightOrigin } from '../lib/whereToRetire/directFlightOrigins'
 
 type GettingThereCountry = {
   direct_from_us: boolean
+  direct_from_uk: boolean
+  direct_from_ca: boolean
+  direct_from_au: boolean
   flight_time_hours: { east_coast: number; west_coast: number }
   visa_free_days: number
 }
@@ -68,12 +72,22 @@ export function passesMaxFlightTimeFilter(
 
 export function passesDirectFlightsFilter(
   country: string,
-  directFromUsOnly: boolean,
+  directOnly: boolean,
+  origin: DirectFlightOrigin = 'us',
 ): boolean {
-  if (!directFromUsOnly) return true
+  if (!directOnly) return true
   const entry = getGettingThereCountry(country)
   if (!entry) return false
-  return entry.direct_from_us === true
+  switch (origin) {
+    case 'uk':
+      return entry.direct_from_uk
+    case 'canada':
+      return entry.direct_from_ca
+    case 'australia':
+      return entry.direct_from_au
+    default:
+      return entry.direct_from_us
+  }
 }
 
 export function passesVisaFreeDaysFilter(
@@ -94,26 +108,10 @@ export function passesVisaFreeDaysFilter(
   return entry.visa_free_days >= minDays
 }
 
-export function minRetirementScoreThreshold(
-  filter: MinRetirementScoreFilter,
-): number | null {
-  switch (filter) {
-    case 'any':
-      return null
-    case 'good-55':
-      return 55
-    case 'strong-70':
-      return 70
-    case 'excellent-85':
-      return 85
-  }
-}
-
 export function passesMinRetirementScoreFilter(
   retirementScore: number,
-  filter: MinRetirementScoreFilter,
+  minScore: number,
 ): boolean {
-  const min = minRetirementScoreThreshold(filter)
-  if (min == null) return true
-  return retirementScore >= min
+  if (minScore <= 0) return true
+  return retirementScore >= minScore
 }

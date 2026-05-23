@@ -25,6 +25,15 @@ export function getStripeBackend(): Stripe | null {
   return stripe
 }
 
+/** `live` | `test` from STRIPE_SECRET_KEY prefix; null when unset. */
+export function getStripeKeyMode(): 'live' | 'test' | null {
+  const key = process.env.STRIPE_SECRET_KEY?.trim()
+  if (!key) return null
+  if (key.startsWith('sk_live_')) return 'live'
+  if (key.startsWith('sk_test_')) return 'test'
+  return null
+}
+
 /** Recurring price for signup (e.g. $9/mo). Create in Stripe Dashboard → Products → copy price_… id. */
 export function getStripeSubscriptionPriceId(): string | null {
   const id =

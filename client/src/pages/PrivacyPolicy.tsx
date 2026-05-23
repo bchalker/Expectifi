@@ -10,7 +10,7 @@ export default function PrivacyPolicy() {
       <header className="privacy-policy__topbar">
         <div className="privacy-policy__topbar-inner">
           <button type="button" className="privacy-policy__brand" onClick={() => navigateApp(APP_PATHS.home)}>
-            HeadwayPlanner
+            Expectifi
           </button>
         </div>
       </header>

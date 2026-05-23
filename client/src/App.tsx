@@ -322,7 +322,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   useEffect(() => {
     if (!welcomeDone || typeof sessionStorage === 'undefined') return
-    if (sessionStorage.getItem('headwayplanner_open_import') !== '1') return
+    const openImport =
+      sessionStorage.getItem('expectifi_open_import') === '1' ||
+      sessionStorage.getItem('headwayplanner_open_import') === '1'
+    if (!openImport) return
+    sessionStorage.removeItem('expectifi_open_import')
     sessionStorage.removeItem('headwayplanner_open_import')
     setOpenImportRequest((n) => n + 1)
   }, [welcomeDone])

@@ -5,8 +5,10 @@ import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import { clearLocalUserPrefsStorage } from './userPrefs'
 import { clearGuestWhereToRetireStorage } from './whereToRetire/storage'
 
-const GUEST_TAB_ID_KEY = 'headwayplanner_guest_tab_id'
-const GUEST_TABS_KEY = 'headwayplanner_guest_open_tabs'
+const GUEST_TAB_ID_KEY = 'expectifi_guest_tab_id'
+const GUEST_TABS_KEY = 'expectifi_guest_open_tabs'
+const LEGACY_GUEST_TAB_ID_KEY = 'headwayplanner_guest_tab_id'
+const LEGACY_GUEST_TABS_KEY = 'headwayplanner_guest_open_tabs'
 /** Tabs not heartbeated within this window are treated as closed (crash-safe). */
 const GUEST_TAB_STALE_MS = 45_000
 
@@ -17,7 +19,14 @@ type GuestTabRecord = {
 
 function readGuestTabs(): GuestTabRecord[] {
   try {
-    const raw = localStorage.getItem(GUEST_TABS_KEY)
+    let raw = localStorage.getItem(GUEST_TABS_KEY)
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_GUEST_TABS_KEY)
+      if (raw) {
+        localStorage.setItem(GUEST_TABS_KEY, raw)
+        localStorage.removeItem(LEGACY_GUEST_TABS_KEY)
+      }
+    }
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return []
@@ -75,6 +84,13 @@ export function initEphemeralGuestSession(): void {
   if (typeof window === 'undefined') return
 
   let tabId = sessionStorage.getItem(GUEST_TAB_ID_KEY)
+  if (!tabId) {
+    tabId = sessionStorage.getItem(LEGACY_GUEST_TAB_ID_KEY)
+    if (tabId) {
+      sessionStorage.setItem(GUEST_TAB_ID_KEY, tabId)
+      sessionStorage.removeItem(LEGACY_GUEST_TAB_ID_KEY)
+    }
+  }
   const isNewTab = !tabId
   if (!tabId) {
     tabId = crypto.randomUUID()

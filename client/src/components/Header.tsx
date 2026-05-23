@@ -69,14 +69,14 @@ function HeaderBrand({ onBrandClick }: { onBrandClick?: () => void }) {
   }
 
   const ariaLabel = user
-    ? 'HeadwayPlanner home — return to calculator'
+    ? 'Expectifi home — return to calculator'
     : path === APP_PATHS.home
-      ? 'HeadwayPlanner — scroll to top'
-      : 'HeadwayPlanner — return to landing page'
+      ? 'Expectifi — scroll to top'
+      : 'Expectifi — return to landing page'
 
   return (
     <button type="button" className="header__brand" onClick={handleClick} aria-label={ariaLabel}>
-      <span className="header__mark">HeadwayPlanner</span>
+      <span className="header__mark">Expectifi</span>
     </button>
   )
 }

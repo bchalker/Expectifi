@@ -8,7 +8,7 @@ import {
   subscriptionStatusFromStripe,
   syncUserFromStripeSubscription,
 } from './stripeBilling.js'
-import { getStripeBackend, getStripeSubscriptionPriceId } from './stripeBackend.js'
+import { getStripeBackend, getStripeKeyMode, getStripeSubscriptionPriceId } from './stripeBackend.js'
 
 async function handleSubscriptionEvent(sub: Stripe.Subscription): Promise<void> {
   const userId = await findUserIdForStripeSubscription(sub)
@@ -101,7 +101,9 @@ export function installStripeWebhook(app: Express): void {
 export function logStripeBillingConfigAtStartup(): void {
   const stripe = getStripeBackend()
   const priceId = getStripeSubscriptionPriceId()
+  const mode = getStripeKeyMode()
   if (!stripe) return
+  console.info(`[stripe] Billing enabled (${mode ?? 'unknown'} mode)`)
   if (!priceId) {
     console.warn(
       '[stripe] STRIPE_SECRET_KEY is set but STRIPE_SUBSCRIPTION_PRICE_ID is missing — signups will not create $9/mo subscriptions',

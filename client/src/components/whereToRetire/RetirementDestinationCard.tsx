@@ -20,6 +20,7 @@ import type { MapIncomeFitDisplay } from "../../lib/whereToRetire/mapIncomeFit";
 import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
 import { WtrIncomeFitBadges } from "./WtrIncomeFitBadges";
 import "./RetirementDestinationCard.scss";
+import "./WtrMapPinLegend.scss";
 
 type Props = {
   scored: ScoredMapCity;
@@ -89,9 +90,38 @@ export function RetirementDestinationCard({
     >
       <div className="wtr-dest-card__top">
         <div className="wtr-dest-card__rank-col">
-          <span className="wtr-dest-card__rank" aria-hidden>
-            {rank}
-          </span>
+          <div className="wtr-dest-card__rank-stack">
+            <span className="wtr-dest-card__rank" aria-hidden>
+              {rank}
+            </span>
+            {onToggleFavorite ? (
+              <button
+                type="button"
+                className={[
+                  "wtr-dest-card__favorite-btn",
+                  isFavorited && "wtr-dest-card__favorite-btn--active",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-label={
+                  isFavorited
+                    ? `Remove ${city.city} from favorites`
+                    : `Save ${city.city} to favorites`
+                }
+                aria-pressed={isFavorited}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite();
+                }}
+              >
+                {isFavorited ? (
+                  <IconHeartFilled size={16} stroke={1.5} aria-hidden />
+                ) : (
+                  <IconHeart size={16} stroke={1.5} aria-hidden />
+                )}
+              </button>
+            ) : null}
+          </div>
           <span className="wtr-dest-card__rank-sep" aria-hidden />
         </div>
         <span className="wtr-dest-card__body">
@@ -104,33 +134,6 @@ export function RetirementDestinationCard({
                   Travel advisory
                 </span>
               ) : null}
-              {onToggleFavorite ? (
-                <button
-                  type="button"
-                  className={[
-                    "wtr-dest-card__favorite-btn",
-                    isFavorited && "wtr-dest-card__favorite-btn--active",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  aria-label={
-                    isFavorited
-                      ? `Remove ${city.city} from favorites`
-                      : `Save ${city.city} to favorites`
-                  }
-                  aria-pressed={isFavorited}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite();
-                  }}
-                >
-                  {isFavorited ? (
-                    <IconHeartFilled size={16} stroke={1.5} aria-hidden />
-                  ) : (
-                    <IconHeart size={16} stroke={1.5} aria-hidden />
-                  )}
-                </button>
-              ) : null}
             </span>
           </span>
           <span className="wtr-dest-card__country">
@@ -139,9 +142,6 @@ export function RetirementDestinationCard({
             </span>
             <span className="wtr-dest-card__country-name">{city.country}</span>
           </span>
-          {americansNote ? (
-            <span className="wtr-dest-card__expat-count">{americansNote}</span>
-          ) : null}
           {flightHint ? (
             <span className="wtr-dest-card__flight-hint">
               <IconPlane
@@ -154,15 +154,18 @@ export function RetirementDestinationCard({
             </span>
           ) : null}
           {pinColorView === "expat" ? (
-            <span
-              className="wtr-dest-card__expat-badge"
-              style={
-                {
-                  "--wtr-expat-badge-color": pinColor,
-                } as CSSProperties
-              }
-            >
-              {bandLabel}
+            <span className="wtr-dest-card__expat-badge-row">
+              <span className="wtr-map-pin-legend__item">
+                <span
+                  className="wtr-map-pin-legend__dot"
+                  style={{ background: pinColor }}
+                  aria-hidden
+                />
+                <span className="wtr-map-pin-legend__label">{bandLabel}</span>
+              </span>
+              {americansNote ? (
+                <span className="wtr-dest-card__expat-count">{americansNote}</span>
+              ) : null}
             </span>
           ) : (
             <WtrAffordabilityScoreBar

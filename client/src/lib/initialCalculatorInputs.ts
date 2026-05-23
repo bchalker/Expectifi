@@ -75,7 +75,7 @@ function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {
   return { ...inputs, ...userPrefsToCalculatorPatch(prefs) }
 }
 
-/** Calculator inputs for welcome gate / first paint (session + headwayplanner_user_prefs). */
+/** Calculator inputs for welcome gate / first paint (session + expectifi_user_prefs). */
 export function getInitialCalculatorInputs(): CalculatorInputs {
   const persisted = loadPersistedCalculatorSession(defaultCalculatorInputs, defaultCalculatorUi)
   if (persisted) {

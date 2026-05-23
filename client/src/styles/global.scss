@@ -31,6 +31,26 @@
   --color-background-jewish: #e4ddf0;
   --color-background-other: #eceff2;
 
+  /* Header brand navy + 10-step tint scale (1 = darkest base, 10 = lightest) */
+  --header-brand-navy: #1a2332;
+  --brand-navy-1: var(--header-brand-navy);
+  --brand-navy-2: color-mix(in srgb, var(--header-brand-navy) 90%, white);
+  --brand-navy-3: color-mix(in srgb, var(--header-brand-navy) 80%, white);
+  --brand-navy-4: color-mix(in srgb, var(--header-brand-navy) 70%, white);
+  --brand-navy-5: color-mix(in srgb, var(--header-brand-navy) 60%, white);
+  --brand-navy-6: color-mix(in srgb, var(--header-brand-navy) 50%, white);
+  --brand-navy-7: color-mix(in srgb, var(--header-brand-navy) 40%, white);
+  --brand-navy-8: color-mix(in srgb, var(--header-brand-navy) 30%, white);
+  --brand-navy-9: color-mix(in srgb, var(--header-brand-navy) 20%, white);
+  --brand-navy-10: color-mix(in srgb, var(--header-brand-navy) 10%, white);
+  /* WTR map chrome — lightest → darker bands */
+  --wtr-content-bg: var(--brand-navy-10);
+  --wtr-filter-chrome-bg: var(--surface2);
+  --wtr-toolbar-bg: var(--brand-navy-8);
+  --wtr-chrome-border: var(--border);
+  --wtr-content-border: color-mix(in srgb, var(--header-brand-navy) 12%, var(--brand-navy-10));
+  --wtr-toolbar-border: color-mix(in srgb, var(--header-brand-navy) 16%, var(--brand-navy-8));
+
   /* Design system source tokens — edit via Design panel (localStorage) */
   --ds-font-body: var(--font-sans);
   --ds-font-mono: var(--font-mono);

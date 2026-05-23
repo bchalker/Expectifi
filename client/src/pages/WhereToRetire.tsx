@@ -97,14 +97,10 @@ export function WhereToRetire({ c }: Props) {
   }, [filtersOpen]);
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const onMqChange = () => {
-      if (mq.matches) setFiltersOpen(false);
-    };
-    onMqChange();
-    mq.addEventListener("change", onMqChange);
-    return () => mq.removeEventListener("change", onMqChange);
-  }, []);
+    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    const id = window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+    return () => window.clearTimeout(id);
+  }, [filtersOpen]);
 
   const toggleCompare = useCallback((cityId: string) => {
     setCompareIds((prev) => {
@@ -195,21 +191,8 @@ export function WhereToRetire({ c }: Props) {
               />
             </div>
           </div>
-          <RetirementMapFilters
-            open={filtersOpen}
-            onClose={() => setFiltersOpen(false)}
-            filters={mapFilters}
-            onChange={setMapFilters}
-            anchorRef={filterButtonRef}
-            monthlyIncome={mapExplorationIncome}
-            excludedCountries={storage.excludedCountries}
-            favoriteCities={storage.favoriteCities}
-            onAddExcludedCountry={storage.addExcludedCountry}
-            onRemoveExcludedCountry={storage.removeExcludedCountry}
-            onClearExcludedCountries={storage.clearExcludedCountries}
-            onRemoveFavorite={storage.removeFavoriteCity}
-          />
           <div className="where-to-retire__main-panel-map">
+            <div className="where-to-retire__map-stage">
             <RetirementMapExplorer
               explorationIncome={mapExplorationIncome}
               filters={mapFilters}
@@ -249,6 +232,20 @@ export function WhereToRetire({ c }: Props) {
                 />
               </div>
             ) : null}
+            </div>
+            <RetirementMapFilters
+              open={filtersOpen}
+              onClose={() => setFiltersOpen(false)}
+              filters={mapFilters}
+              onChange={setMapFilters}
+              monthlyIncome={mapExplorationIncome}
+              excludedCountries={storage.excludedCountries}
+              favoriteCities={storage.favoriteCities}
+              onAddExcludedCountry={storage.addExcludedCountry}
+              onRemoveExcludedCountry={storage.removeExcludedCountry}
+              onClearExcludedCountries={storage.clearExcludedCountries}
+              onRemoveFavorite={storage.removeFavoriteCity}
+            />
           </div>
         </div>
       </div>

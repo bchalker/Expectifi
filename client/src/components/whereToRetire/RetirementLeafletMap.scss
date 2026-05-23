@@ -18,6 +18,10 @@
   pointer-events: none;
 }
 
+.wtr-leaflet-map__legend-overlay .wtr-map-pin-legend--interactive {
+  pointer-events: auto;
+}
+
 .wtr-leaflet-map__legend-overlay .wtr-map-pin-legend {
   flex-wrap: nowrap;
   gap: 0.45rem 0.65rem;

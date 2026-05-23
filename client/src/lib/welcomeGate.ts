@@ -5,7 +5,8 @@ import { storedManualAccountsHaveBalances } from './manualAccountEntries'
 import type { UserPrefs } from './userPrefs'
 import { isWelcomeCompletedLocal } from './userPrefs'
 
-export const FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
+export const FORCE_ONBOARDING_SESSION_KEY = 'expectifi_force_onboarding'
+const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
 
 export type WelcomeSkipContext = {
   onboardingDone?: boolean
@@ -56,6 +57,7 @@ export function shouldShowWelcomeOverlay(ctx: WelcomeSkipContext): boolean {
 export function markForceOnboardingSession(): void {
   try {
     sessionStorage.setItem(FORCE_ONBOARDING_SESSION_KEY, '1')
+    sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
   } catch {
     /* private mode */
   }
@@ -63,7 +65,13 @@ export function markForceOnboardingSession(): void {
 
 export function peekForceOnboardingSession(): boolean {
   try {
-    return sessionStorage.getItem(FORCE_ONBOARDING_SESSION_KEY) === '1'
+    if (sessionStorage.getItem(FORCE_ONBOARDING_SESSION_KEY) === '1') return true
+    if (sessionStorage.getItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY) === '1') {
+      sessionStorage.setItem(FORCE_ONBOARDING_SESSION_KEY, '1')
+      sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
+      return true
+    }
+    return false
   } catch {
     return false
   }
@@ -71,9 +79,15 @@ export function peekForceOnboardingSession(): boolean {
 
 export function consumeForceOnboardingSession(): boolean {
   try {
-    if (sessionStorage.getItem(FORCE_ONBOARDING_SESSION_KEY) !== '1') return false
-    sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY)
-    return true
+    if (sessionStorage.getItem(FORCE_ONBOARDING_SESSION_KEY) === '1') {
+      sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY)
+      return true
+    }
+    if (sessionStorage.getItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY) === '1') {
+      sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
+      return true
+    }
+    return false
   } catch {
     return false
   }

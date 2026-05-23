@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import L from 'leaflet'
 import { MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
-import type { ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
+import type { MapFilters, ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
+import {
+  toggleExpatCommunityTier,
+  type ExpatLegendTierId,
+} from '../../lib/whereToRetire/cityMapScoring'
 import {
   resolveMapPinDisplay,
   type MapPinColorView,
@@ -22,6 +26,8 @@ type Props = {
   destinations: ScoredMapCity[]
   monthlyIncome: number
   pinColorView: MapPinColorView
+  filters: MapFilters
+  onFiltersChange: (filters: MapFilters) => void
   favoritedKeySet: ReadonlySet<string>
   selectedId: string | null
   /** When true, emphasize the selected pin and fly to that city; when false, fit all destinations. */
@@ -264,12 +270,26 @@ export function RetirementLeafletMap({
   destinations,
   monthlyIncome,
   pinColorView,
+  filters,
+  onFiltersChange,
   favoritedKeySet,
   selectedId,
   detailPanelOpen,
   fitKey,
   onSelect,
 }: Props) {
+  const handleToggleExpatTier = useCallback(
+    (tier: ExpatLegendTierId) => {
+      onFiltersChange({
+        ...filters,
+        expatCommunityTiers: toggleExpatCommunityTier(
+          filters.expatCommunityTiers,
+          tier,
+        ),
+      })
+    },
+    [filters, onFiltersChange],
+  )
   const focusId = detailFocusId(selectedId, detailPanelOpen)
 
   const pinDisplays = useMemo(
@@ -291,7 +311,14 @@ export function RetirementLeafletMap({
   return (
     <div className="wtr-leaflet-map">
       <div className="wtr-leaflet-map__legend-overlay">
-        <WtrMapPinLegend view={pinColorView} variant="overlay" />
+        <WtrMapPinLegend
+          view={pinColorView}
+          variant="overlay"
+          activeExpatTiers={filters.expatCommunityTiers}
+          onToggleExpatTier={
+            pinColorView === 'expat' ? handleToggleExpatTier : undefined
+          }
+        />
       </div>
       <MapContainer
         className="wtr-leaflet-map__canvas"

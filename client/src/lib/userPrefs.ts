@@ -3,9 +3,13 @@ import type { CalculatorInputs } from './computeResults'
 import { clampClaimAge, normalizeClaimAge, type SsClaimAge } from './socialSecurity'
 
 /** Guest welcome / plan profile (localStorage). */
-const LEGACY_USER_PREFS_STORAGE_KEY = 'eggspectifi_user_prefs'
-export const USER_PREFS_STORAGE_KEY = 'headwayplanner_user_prefs'
-export const WELCOME_COMPLETED_STORAGE_KEY = 'headwayplanner_welcome_completed'
+const LEGACY_USER_PREFS_STORAGE_KEYS = [
+  'headwayplanner_user_prefs',
+  'eggspectifi_user_prefs',
+] as const
+export const USER_PREFS_STORAGE_KEY = 'expectifi_user_prefs'
+export const WELCOME_COMPLETED_STORAGE_KEY = 'expectifi_welcome_completed'
+const LEGACY_WELCOME_COMPLETED_STORAGE_KEYS = ['headwayplanner_welcome_completed'] as const
 
 export type UserPrefs = {
   dob: string
@@ -95,7 +99,7 @@ export function calculatorInputsToUserPrefs(inputs: CalculatorInputs): UserPrefs
   return prefs && hasCompleteUserPrefs(prefs) ? prefs : null
 }
 
-/** Keep headwayplanner_user_prefs aligned with Configure planning fields. */
+/** Keep expectifi_user_prefs aligned with Configure planning fields. */
 export function syncPlanningPrefsFromInputs(inputs: CalculatorInputs): void {
   const prefs = calculatorInputsToPlanningPrefs(inputs)
   if (prefs) saveLocalUserPrefs(prefs)
@@ -139,10 +143,13 @@ export function loadLocalUserPrefs(): UserPrefs | null {
   try {
     let raw = localStorage.getItem(USER_PREFS_STORAGE_KEY)
     if (!raw) {
-      raw = localStorage.getItem(LEGACY_USER_PREFS_STORAGE_KEY)
-      if (raw) {
-        localStorage.setItem(USER_PREFS_STORAGE_KEY, raw)
-        localStorage.removeItem(LEGACY_USER_PREFS_STORAGE_KEY)
+      for (const legacyKey of LEGACY_USER_PREFS_STORAGE_KEYS) {
+        raw = localStorage.getItem(legacyKey)
+        if (raw) {
+          localStorage.setItem(USER_PREFS_STORAGE_KEY, raw)
+          localStorage.removeItem(legacyKey)
+          break
+        }
       }
     }
     if (!raw) return null
@@ -163,8 +170,13 @@ export function saveLocalUserPrefs(prefs: UserPrefs): void {
 export function clearLocalUserPrefsStorage(): void {
   try {
     localStorage.removeItem(USER_PREFS_STORAGE_KEY)
-    localStorage.removeItem(LEGACY_USER_PREFS_STORAGE_KEY)
+    for (const legacyKey of LEGACY_USER_PREFS_STORAGE_KEYS) {
+      localStorage.removeItem(legacyKey)
+    }
     localStorage.removeItem(WELCOME_COMPLETED_STORAGE_KEY)
+    for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
+      localStorage.removeItem(legacyKey)
+    }
   } catch {
     /* quota / private mode */
   }
@@ -173,6 +185,9 @@ export function clearLocalUserPrefsStorage(): void {
 export function markWelcomeCompletedLocal(): void {
   try {
     localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
+    for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
+      localStorage.removeItem(legacyKey)
+    }
   } catch {
     /* quota / private mode */
   }
@@ -180,7 +195,15 @@ export function markWelcomeCompletedLocal(): void {
 
 export function isWelcomeCompletedLocal(): boolean {
   try {
-    return localStorage.getItem(WELCOME_COMPLETED_STORAGE_KEY) === '1'
+    if (localStorage.getItem(WELCOME_COMPLETED_STORAGE_KEY) === '1') return true
+    for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
+      if (localStorage.getItem(legacyKey) === '1') {
+        localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
+        localStorage.removeItem(legacyKey)
+        return true
+      }
+    }
+    return false
   } catch {
     return false
   }

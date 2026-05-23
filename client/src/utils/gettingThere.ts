@@ -9,6 +9,9 @@ export type GettingThereAirport = {
 export type GettingThereCountryData = {
   main_airports: GettingThereAirport[]
   direct_from_us: boolean
+  direct_from_uk: boolean
+  direct_from_ca: boolean
+  direct_from_au: boolean
   direct_us_cities: string[]
   flight_time_hours: { east_coast: number; west_coast: number }
   airlines: string[]

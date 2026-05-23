@@ -7,7 +7,7 @@ import {
   createToken,
 } from './authToken.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
-import { getStripeBackend, getStripeSubscriptionPriceId } from './stripeBackend.js'
+import { getStripeBackend, getStripeKeyMode, getStripeSubscriptionPriceId } from './stripeBackend.js'
 import { isPlaidConfigured } from './plaidClient.js'
 
 const STATE_COOKIE = 'google_oauth_state'
@@ -130,6 +130,7 @@ export function installGoogleAuth(app: Express, port: number): void {
       ok: true,
       googleOAuth: Boolean(cfg),
       stripeConfigured: Boolean(stripe),
+      stripeMode: getStripeKeyMode(),
       subscriptionBillingEnabled: Boolean(stripe && getStripeSubscriptionPriceId()),
       plaidConfigured: isPlaidConfigured(),
     })

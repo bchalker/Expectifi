@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type RefObject,
-} from "react";
-import { createPortal } from "react-dom";
-import { useAnchoredPanelPosition } from "../../hooks/useAnchoredPanelPosition";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Button,
   CloseButton,
@@ -13,40 +6,52 @@ import {
   ListBox,
   Select,
 } from "@heroui/react";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
 import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
 import {
   ALL_DESTINATION_REGIONS,
   countActiveMapFilters,
   DEFAULT_HEALTH_INS_MONTHLY_USD,
   DEFAULT_MAP_FILTERS,
+  DIRECT_FLIGHT_ORIGIN_OPTIONS,
   hasNonDefaultMapFilters,
   resolveWhereToLook,
   type ClimateFilter,
+  type DirectFlightOrigin,
   type EnglishProficiencyFilter,
   type ForeignTaxFilter,
   type HealthcareFilter,
   type MapFilters,
   type MapSortBy,
   type MaxFlightTimeFilter,
-  type MinRetirementScoreFilter,
   type SafetyFilter,
   type VisaFreeDaysFilter,
 } from "../../lib/whereToRetire/cityMapScoring";
 import type { FavoriteCityEntry } from "../../lib/retirementStorage";
 import { WtrMapFiltersExcludeTab } from "./WtrMapFiltersExcludeTab";
 import { WtrMapFiltersFavoritesTab } from "./WtrMapFiltersFavoritesTab";
+import {
+  WtrFilterSegmentedRow,
+  WtrFilterToggleBox,
+} from "./WtrFilterFieldChrome";
+import { WtrMinRetirementScoreSlider } from "./WtrMinRetirementScoreSlider";
 import "./RetirementMapFilters.scss";
 
 type FilterPanelTab = "filters" | "exclude" | "favorites" | "display";
 
-const CLIMATE_OPTIONS: { id: ClimateFilter; label: string }[] = [
-  { id: "any", label: "Any climate" },
-  { id: "warm-year-round", label: "Warm year-round" },
-  { id: "mediterranean", label: "Mediterranean" },
-  { id: "tropical", label: "Tropical" },
-  { id: "four-seasons", label: "Four seasons" },
+const FOREIGN_TAX_SEGMENTS: { id: ForeignTaxFilter; label: string }[] = [
+  { id: "any", label: "Any" },
+  { id: "not-taxed-locally", label: "10%+" },
+  { id: "low-flat-rate", label: "20%" },
+  { id: "standard", label: "30%+" },
+];
+
+const SORT_OPTIONS: { id: MapSortBy; label: string }[] = [
+  { id: "affordability-fit", label: "Best retirement income fit score" },
+  { id: "lowest-budget", label: "Lowest monthly budget" },
+  { id: "highest-surplus", label: "Highest monthly surplus" },
+  { id: "quality-of-life", label: "Best quality of life" },
+  { id: "healthcare-access", label: "Best healthcare access" },
+  { id: "dollar-strength", label: "Strongest dollar" },
 ];
 
 const ENGLISH_PROFICIENCY_OPTIONS: {
@@ -59,57 +64,39 @@ const ENGLISH_PROFICIENCY_OPTIONS: {
   { id: "some-english", label: "Some English" },
 ];
 
-const FOREIGN_TAX_OPTIONS: { id: ForeignTaxFilter; label: string }[] = [
-  { id: "any", label: "Any tax treatment" },
-  { id: "not-taxed-locally", label: "Not taxed locally" },
-  { id: "low-flat-rate", label: "Low flat rate (under 15%)" },
-  { id: "standard", label: "Standard rates apply" },
+const CLIMATE_OPTIONS: { id: ClimateFilter; label: string }[] = [
+  { id: "any", label: "Any climate" },
+  { id: "warm-year-round", label: "Warm year-round" },
+  { id: "mediterranean", label: "Mediterranean" },
+  { id: "tropical", label: "Tropical" },
+  { id: "four-seasons", label: "Four seasons" },
 ];
 
-const SORT_OPTIONS: { id: MapSortBy; label: string }[] = [
-  { id: "affordability-fit", label: "Best retirement income fit score" },
-  { id: "lowest-budget", label: "Lowest monthly budget" },
-  { id: "highest-surplus", label: "Highest monthly surplus" },
-  { id: "quality-of-life", label: "Best quality of life" },
-  { id: "healthcare-access", label: "Best healthcare access" },
-  { id: "dollar-strength", label: "Strongest dollar" },
-];
-
-const SAFETY_OPTIONS: { id: SafetyFilter; label: string }[] = [
-  { id: "any", label: "Any safety level" },
-  { id: "reasonably-safe", label: "Reasonably safe (55+)" },
-  { id: "very-safe", label: "Very safe (75+)" },
-];
-
-const HEALTHCARE_OPTIONS: { id: HealthcareFilter; label: string }[] = [
-  { id: "any", label: "Any healthcare" },
-  { id: "good-care", label: "Good care available (60+)" },
-  { id: "excellent", label: "Excellent healthcare (75+)" },
-];
-
-const MAX_FLIGHT_TIME_OPTIONS: { id: MaxFlightTimeFilter; label: string }[] = [
-  { id: "any", label: "Any distance" },
-  { id: "under-5", label: "Under 5 hours" },
-  { id: "under-10", label: "Under 10 hours" },
-  { id: "under-15", label: "Under 15 hours" },
-];
-
-const VISA_FREE_DAYS_OPTIONS: { id: VisaFreeDaysFilter; label: string }[] = [
+const SAFETY_SEGMENTS: { id: SafetyFilter; label: string }[] = [
   { id: "any", label: "Any" },
-  { id: "30-plus", label: "30+ days" },
-  { id: "60-plus", label: "60+ days" },
-  { id: "90-plus", label: "90+ days" },
-  { id: "180-plus", label: "180+ days" },
+  { id: "reasonably-safe", label: "55+" },
+  { id: "very-safe", label: "75+" },
 ];
 
-const MIN_RETIREMENT_SCORE_OPTIONS: {
-  id: MinRetirementScoreFilter;
-  label: string;
-}[] = [
-  { id: "any", label: "Any score" },
-  { id: "good-55", label: "Good fit or better (55+)" },
-  { id: "strong-70", label: "Strong fit or better (70+)" },
-  { id: "excellent-85", label: "Excellent fit only (85+)" },
+const HEALTHCARE_SEGMENTS: { id: HealthcareFilter; label: string }[] = [
+  { id: "any", label: "Any" },
+  { id: "good-care", label: "60+" },
+  { id: "excellent", label: "75+" },
+];
+
+const MAX_FLIGHT_TIME_SEGMENTS: { id: MaxFlightTimeFilter; label: string }[] = [
+  { id: "any", label: "Any" },
+  { id: "under-5", label: "5hrs" },
+  { id: "under-10", label: "10hrs" },
+  { id: "under-15", label: "15hrs" },
+];
+
+const VISA_FREE_DAYS_SEGMENTS: { id: VisaFreeDaysFilter; label: string }[] = [
+  { id: "any", label: "Any" },
+  { id: "30-plus", label: "30+" },
+  { id: "60-plus", label: "60+" },
+  { id: "90-plus", label: "90+" },
+  { id: "180-plus", label: "180+" },
 ];
 
 type FilterChangeProps = {
@@ -117,42 +104,14 @@ type FilterChangeProps = {
   onChange: (filters: MapFilters) => void;
 };
 
-function onSwitchKeyDown(event: ReactKeyboardEvent, toggle: () => void) {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    toggle();
-  }
-}
-
-function FilterSwitchCard({
-  label,
-  subtitle,
-  pressed,
-  onToggle,
-}: {
-  label: string;
-  subtitle?: string;
-  pressed: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div
-      role="switch"
-      tabIndex={0}
-      aria-checked={pressed}
-      className={`wtr-map-filters__switch-card${pressed ? " wtr-map-filters__switch-card--on" : ""}`}
-      onClick={onToggle}
-      onKeyDown={(e) => onSwitchKeyDown(e, onToggle)}
-    >
-      <div className="wtr-map-filters__switch-card-copy">
-        <span className="wtr-map-filters__switch-card-label">{label}</span>
-        {subtitle ? (
-          <span className="wtr-map-filters__switch-card-sub">{subtitle}</span>
-        ) : null}
-      </div>
-      <span className="wtr-map-filters__native-switch" aria-hidden />
-    </div>
-  );
+function filterSelectFieldClass(chosen: boolean, extra?: string) {
+  return [
+    "wtr-map-filters__field",
+    extra,
+    chosen && "wtr-map-filters__field--chosen",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 type SortSelectProps = FilterChangeProps & {
@@ -200,27 +159,12 @@ export function WtrMapSortSelect({
   );
 }
 
-function englishProficiencyOptionLabel(filter: EnglishProficiencyFilter): string {
-  return (
-    ENGLISH_PROFICIENCY_OPTIONS.find((opt) => opt.id === filter)?.label ??
-    "Any English level"
-  );
-}
-
-function englishProficiencyTriggerLabel(filter: EnglishProficiencyFilter): string {
-  if (filter === "any") return "English";
-  return englishProficiencyOptionLabel(filter);
-}
-
 function EnglishProficiencySelect({ filters, onChange }: FilterChangeProps) {
-  const triggerLabel = englishProficiencyTriggerLabel(filters.englishProficiency);
-  const optionLabel = englishProficiencyOptionLabel(filters.englishProficiency);
-
   return (
     <Select
-      className="wtr-map-filters__field wtr-map-filters__english-select"
+      className={filterSelectFieldClass(filters.englishProficiency !== "any")}
       variant="secondary"
-      aria-label={`English, ${optionLabel}`}
+      aria-label="English proficiency"
       selectedKey={filters.englishProficiency}
       onSelectionChange={(keys) => {
         const id = firstKeyFromSelectSelection(keys);
@@ -231,21 +175,9 @@ function EnglishProficiencySelect({ filters, onChange }: FilterChangeProps) {
         });
       }}
     >
-      <Label className="wtr-map-filters__field-label">English</Label>
+      <Label className="wtr-map-filters__field-label">English proficiency</Label>
       <Select.Trigger>
-        <Select.Value>
-          <span
-            className={[
-              "wtr-map-filters__select-trigger-english",
-              filters.englishProficiency !== "any" &&
-                "wtr-map-filters__select-trigger-english--filtered",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {triggerLabel}
-          </span>
-        </Select.Value>
+        <Select.Value />
         <Select.Indicator />
       </Select.Trigger>
       <Select.Popover className="wtr-map-filters__select-popover">
@@ -261,71 +193,10 @@ function EnglishProficiencySelect({ filters, onChange }: FilterChangeProps) {
   );
 }
 
-function foreignTaxOptionLabel(filter: ForeignTaxFilter): string {
-  return (
-    FOREIGN_TAX_OPTIONS.find((opt) => opt.id === filter)?.label ??
-    "Any tax treatment"
-  );
-}
-
-function foreignTaxTriggerLabel(filter: ForeignTaxFilter): string {
-  if (filter === "any") return "Foreign tax";
-  return foreignTaxOptionLabel(filter);
-}
-
-function ForeignTaxSelect({ filters, onChange }: FilterChangeProps) {
-  const triggerLabel = foreignTaxTriggerLabel(filters.foreignTax);
-  const optionLabel = foreignTaxOptionLabel(filters.foreignTax);
-
-  return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__foreign-tax-select"
-      variant="secondary"
-      aria-label={`Foreign tax, ${optionLabel}`}
-      selectedKey={filters.foreignTax}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({
-          ...filters,
-          foreignTax: id as ForeignTaxFilter,
-        });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Foreign tax</Label>
-      <Select.Trigger>
-        <Select.Value>
-          <span
-            className={[
-              "wtr-map-filters__select-trigger-english",
-              filters.foreignTax !== "any" &&
-                "wtr-map-filters__select-trigger-english--filtered",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {triggerLabel}
-          </span>
-        </Select.Value>
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {FOREIGN_TAX_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
-  );
-}
-
 function ClimateSelect({ filters, onChange }: FilterChangeProps) {
   return (
     <Select
-      className="wtr-map-filters__field wtr-map-filters__climate-select"
+      className={filterSelectFieldClass(filters.climate !== "any")}
       variant="secondary"
       aria-label="Climate"
       selectedKey={filters.climate}
@@ -353,161 +224,39 @@ function ClimateSelect({ filters, onChange }: FilterChangeProps) {
   );
 }
 
-function SafetySelect({ filters, onChange }: FilterChangeProps) {
+function DirectFlightOriginEmbedded({ filters, onChange }: FilterChangeProps) {
   return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__safety-select"
-      variant="secondary"
-      aria-label="Safety"
-      selectedKey={filters.safety}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, safety: id as SafetyFilter });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Safety</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {SAFETY_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
-  );
-}
-
-function HealthcareSelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__healthcare-select"
-      variant="secondary"
-      aria-label="Healthcare"
-      selectedKey={filters.healthcare}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, healthcare: id as HealthcareFilter });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Healthcare</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {HEALTHCARE_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
-  );
-}
-
-function MaxFlightTimeSelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__flight-select"
-      variant="secondary"
-      aria-label="Max flight time"
-      selectedKey={filters.maxFlightTime}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, maxFlightTime: id as MaxFlightTimeFilter });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Max flight time</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {MAX_FLIGHT_TIME_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
-  );
-}
-
-function VisaFreeDaysSelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__visa-select"
-      variant="secondary"
-      aria-label="Visa-free stay"
-      selectedKey={filters.visaFreeDays}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, visaFreeDays: id as VisaFreeDaysFilter });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Visa-free stay</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {VISA_FREE_DAYS_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
-  );
-}
-
-function MinRetirementScoreSelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <Select
-      className="wtr-map-filters__field wtr-map-filters__min-score-select"
-      variant="secondary"
-      aria-label="Min retirement score"
-      selectedKey={filters.minRetirementScore}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({
-          ...filters,
-          minRetirementScore: id as MinRetirementScoreFilter,
-        });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Min retirement score</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {MIN_RETIREMENT_SCORE_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+    <>
+      <span className="wtr-map-filters__toggle-field-label">From</span>
+      <Select
+        className="wtr-map-filters__toggle-embedded-select"
+        variant="secondary"
+        aria-label="Direct flights from"
+        selectedKey={filters.directFlightOrigin}
+        onSelectionChange={(keys) => {
+          const id = firstKeyFromSelectSelection(keys);
+          if (!id) return;
+          onChange({
+            ...filters,
+            directFlightOrigin: id as DirectFlightOrigin,
+          });
+        }}
+      >
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover className="wtr-map-filters__select-popover">
+          <ListBox className="wtr-map-filters__select-list">
+            {DIRECT_FLIGHT_ORIGIN_OPTIONS.map((opt) => (
+              <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
+                {opt.label}
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </Select.Popover>
+      </Select>
+    </>
   );
 }
 
@@ -517,7 +266,30 @@ function parseHealthInsUsd(raw: string): number {
   return Math.round(n);
 }
 
-function IncomeFitFilterRow({ filters, onChange }: FilterChangeProps) {
+function FilterGroupCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
+  const titleId = `wtr-map-filter-group-${title.replace(/\s+/g, "-").toLowerCase()}`;
+  return (
+    <section className="wtr-map-filters__group-card" aria-labelledby={titleId}>
+      <h3 id={titleId} className="wtr-map-filters__group-title">
+        {title}
+      </h3>
+      {subtitle ? (
+        <p className="wtr-map-filters__group-subtitle">{subtitle}</p>
+      ) : null}
+      <div className="wtr-map-filters__group-stack">{children}</div>
+    </section>
+  );
+}
+
+function HealthInsuranceEstimateField({ filters, onChange }: FilterChangeProps) {
   const [healthDraft, setHealthDraft] = useState(() =>
     String(Math.round(filters.healthInsMonthlyUsd)),
   );
@@ -526,72 +298,57 @@ function IncomeFitFilterRow({ filters, onChange }: FilterChangeProps) {
     setHealthDraft(String(Math.round(filters.healthInsMonthlyUsd)));
   }, [filters.healthInsMonthlyUsd]);
 
+  const healthEmbedded = (
+    <label className="wtr-map-filters__health-amount-inline">
+      <span className="wtr-map-filters__toggle-field-label">Est.</span>
+      <span className="wtr-map-filters__health-amount-prefix" aria-hidden>
+        $
+      </span>
+      <input
+        type="text"
+        inputMode="decimal"
+        className="wtr-map-filters__health-amount-input"
+        aria-label="Monthly health insurance estimate"
+        value={healthDraft}
+        onChange={(e) => setHealthDraft(e.target.value)}
+        onBlur={() => {
+          const next = parseHealthInsUsd(healthDraft);
+          setHealthDraft(String(next));
+          onChange({ ...filters, healthInsMonthlyUsd: next });
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.currentTarget.blur();
+          }
+        }}
+      />
+      <span className="wtr-map-filters__health-amount-suffix">/mo</span>
+    </label>
+  );
+
   return (
-    <div className="wtr-map-filters__income-fit">
-      <p className="wtr-map-filters__section-label">Income fit</p>
-      <div className="wtr-map-filters__row wtr-map-filters__row--income-fit">
-        <div
-          className={`wtr-map-filters__switch-card wtr-map-filters__switch-card--health${
-            filters.includeHealthIns ? " wtr-map-filters__switch-card--on" : ""
-          }`}
-        >
-          <div
-            role="switch"
-            tabIndex={0}
-            aria-checked={filters.includeHealthIns}
-            className="wtr-map-filters__switch-card-main"
-            onClick={() =>
-              onChange({
-                ...filters,
-                includeHealthIns: !filters.includeHealthIns,
-              })
-            }
-            onKeyDown={(e) =>
-              onSwitchKeyDown(e, () =>
-                onChange({
-                  ...filters,
-                  includeHealthIns: !filters.includeHealthIns,
-                }),
-              )
-            }
-          >
-            <div className="wtr-map-filters__switch-card-copy">
-              <span className="wtr-map-filters__switch-card-label">
-                Include health insurance est.
-              </span>
-            </div>
-            <span className="wtr-map-filters__native-switch" aria-hidden />
-          </div>
-          {filters.includeHealthIns ? (
-            <label className="wtr-map-filters__health-amount">
-              <span className="wtr-map-filters__health-amount-prefix" aria-hidden>
-                $
-              </span>
-              <input
-                type="text"
-                inputMode="decimal"
-                className="wtr-map-filters__health-amount-input"
-                aria-label="Monthly health insurance estimate"
-                value={healthDraft}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setHealthDraft(e.target.value)}
-                onBlur={() => {
-                  const next = parseHealthInsUsd(healthDraft);
-                  setHealthDraft(String(next));
-                  onChange({ ...filters, healthInsMonthlyUsd: next });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.currentTarget.blur();
-                  }
-                }}
-              />
-              <span className="wtr-map-filters__health-amount-suffix">/mo</span>
-            </label>
-          ) : null}
-        </div>
-        <FilterSwitchCard
-          label="Visa-qualifying cities only"
+    <WtrFilterToggleBox
+      label="Include health insurance est."
+      pressed={filters.includeHealthIns}
+      onToggle={() =>
+        onChange({
+          ...filters,
+          includeHealthIns: !filters.includeHealthIns,
+        })
+      }
+      embedded={healthEmbedded}
+    />
+  );
+}
+
+function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
+  const showUsFilters = resolveWhereToLook(filters) === "us";
+
+  return (
+    <div className="wtr-map-filters__controls">
+      <FilterGroupCard title="Taxes and Visas">
+        <WtrFilterToggleBox
+          label="Visa qualifying"
           pressed={filters.visaQualifyingOnly}
           onToggle={() =>
             onChange({
@@ -600,18 +357,56 @@ function IncomeFitFilterRow({ filters, onChange }: FilterChangeProps) {
             })
           }
         />
-      </div>
-    </div>
-  );
-}
+        <WtrFilterSegmentedRow
+          label="Visa-free days"
+          ariaLabel="Visa-free days"
+          value={filters.visaFreeDays}
+          options={VISA_FREE_DAYS_SEGMENTS}
+          onChange={(visaFreeDays) => onChange({ ...filters, visaFreeDays })}
+        />
+        <WtrFilterSegmentedRow
+          label="Taxes under"
+          ariaLabel="Taxes under"
+          value={filters.foreignTax}
+          options={FOREIGN_TAX_SEGMENTS}
+          onChange={(foreignTax) => onChange({ ...filters, foreignTax })}
+        />
+      </FilterGroupCard>
 
-function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
-  return (
-    <div className="wtr-map-filters__controls">
-      <IncomeFitFilterRow filters={filters} onChange={onChange} />
-      <div className="wtr-map-filters__row wtr-map-filters__row--switches">
-        {resolveWhereToLook(filters) === "us" ? (
-          <FilterSwitchCard
+      <FilterGroupCard title="Transportation/Flights">
+        <WtrFilterToggleBox
+          label="Direct flights only"
+          pressed={filters.directFromUsOnly}
+          onToggle={() =>
+            onChange({
+              ...filters,
+              directFromUsOnly: !filters.directFromUsOnly,
+            })
+          }
+          embedded={
+            <DirectFlightOriginEmbedded filters={filters} onChange={onChange} />
+          }
+        />
+        <WtrFilterSegmentedRow
+          label="Distance"
+          ariaLabel="Flight distance"
+          value={filters.maxFlightTime}
+          options={MAX_FLIGHT_TIME_SEGMENTS}
+          onChange={(maxFlightTime) => onChange({ ...filters, maxFlightTime })}
+        />
+      </FilterGroupCard>
+
+      <FilterGroupCard title="Healthcare">
+        <HealthInsuranceEstimateField filters={filters} onChange={onChange} />
+        <WtrFilterSegmentedRow
+          label="Healthcare"
+          ariaLabel="Healthcare quality"
+          value={filters.healthcare}
+          options={HEALTHCARE_SEGMENTS}
+          onChange={(healthcare) => onChange({ ...filters, healthcare })}
+        />
+        {showUsFilters ? (
+          <WtrFilterToggleBox
             label="Medicare access"
             pressed={filters.medicareAccess}
             onToggle={() =>
@@ -619,58 +414,40 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
             }
           />
         ) : null}
-        <FilterSwitchCard
-          label="Retirement visa"
-          pressed={filters.retirementVisa}
+      </FilterGroupCard>
+
+      <FilterGroupCard title="Quality of Life">
+        <EnglishProficiencySelect filters={filters} onChange={onChange} />
+        <ClimateSelect filters={filters} onChange={onChange} />
+        <WtrFilterSegmentedRow
+          label="Safety"
+          ariaLabel="Safety"
+          value={filters.safety}
+          options={SAFETY_SEGMENTS}
+          onChange={(safety) => onChange({ ...filters, safety })}
+        />
+        <WtrFilterToggleBox
+          label="Good air only"
+          pressed={filters.goodAirOnly}
           onToggle={() =>
-            onChange({ ...filters, retirementVisa: !filters.retirementVisa })
+            onChange({ ...filters, goodAirOnly: !filters.goodAirOnly })
           }
         />
-        <FilterSwitchCard
-          label="Hide advisories"
+        <WtrMinRetirementScoreSlider
+          value={filters.minRetirementScore}
+          onChange={(minRetirementScore) =>
+            onChange({ ...filters, minRetirementScore })
+          }
+        />
+        <WtrFilterToggleBox
+          label="Hide unsafe cities"
+          subtitle="with travel advisories"
           pressed={filters.hideAdvisories}
           onToggle={() =>
             onChange({ ...filters, hideAdvisories: !filters.hideAdvisories })
           }
         />
-      </div>
-
-      <div className="wtr-map-filters__row wtr-map-filters__row--selects">
-        <EnglishProficiencySelect filters={filters} onChange={onChange} />
-        <ForeignTaxSelect filters={filters} onChange={onChange} />
-        <ClimateSelect filters={filters} onChange={onChange} />
-      </div>
-
-      <div className="wtr-map-filters__row wtr-map-filters__row--extended">
-        <SafetySelect filters={filters} onChange={onChange} />
-        <HealthcareSelect filters={filters} onChange={onChange} />
-        <div className="wtr-map-filters__toggle-field">
-          <span className="wtr-map-filters__field-label">Air quality</span>
-          <FilterSwitchCard
-            label="Good air only"
-            pressed={filters.goodAirOnly}
-            onToggle={() =>
-              onChange({ ...filters, goodAirOnly: !filters.goodAirOnly })
-            }
-          />
-        </div>
-        <MaxFlightTimeSelect filters={filters} onChange={onChange} />
-        <div className="wtr-map-filters__toggle-field">
-          <span className="wtr-map-filters__field-label">Direct flights</span>
-          <FilterSwitchCard
-            label="Direct from US only"
-            pressed={filters.directFromUsOnly}
-            onToggle={() =>
-              onChange({
-                ...filters,
-                directFromUsOnly: !filters.directFromUsOnly,
-              })
-            }
-          />
-        </div>
-        <VisaFreeDaysSelect filters={filters} onChange={onChange} />
-        <MinRetirementScoreSelect filters={filters} onChange={onChange} />
-      </div>
+      </FilterGroupCard>
     </div>
   );
 }
@@ -678,7 +455,6 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
 type PanelProps = FilterChangeProps & {
   open: boolean;
   onClose: () => void;
-  anchorRef: RefObject<HTMLElement | null>;
   monthlyIncome: number;
   excludedCountries: string[];
   favoriteCities: FavoriteCityEntry[];
@@ -700,7 +476,6 @@ export function RetirementMapFilters({
   onClose,
   filters,
   onChange,
-  anchorRef,
   monthlyIncome,
   excludedCountries,
   favoriteCities,
@@ -712,7 +487,6 @@ export function RetirementMapFilters({
   const [activeTab, setActiveTab] = useState<FilterPanelTab>("filters");
   const activeCount = countActiveMapFilters(filters);
   const showClear = hasNonDefaultMapFilters(filters);
-  const anchorStyle = useAnchoredPanelPosition({ open, anchorRef });
   const excludeTabActive = excludedCountries.length > 0;
 
   const clearFilters = () => {
@@ -722,15 +496,21 @@ export function RetirementMapFilters({
     });
   };
 
-  if (!open) return null;
-
-  return createPortal(
+  return (
     <aside
       id="wtr-map-filters-panel"
-      className="wtr-map-filters wtr-map-filters--panel wtr-map-filters--anchored wtr-map-filters--open"
-      style={anchorStyle}
+      className={[
+        "wtr-map-filters",
+        "wtr-map-filters--panel",
+        "wtr-map-filters--side",
+        open && "wtr-map-filters--open",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-label="Map filters"
+      aria-hidden={!open}
     >
+      <div className="wtr-map-filters__inner">
       <header className="wtr-map-filters__head">
         <div className="wtr-map-filters__head-copy">
           <h2 className="wtr-map-filters__head-title">Map options</h2>
@@ -775,24 +555,10 @@ export function RetirementMapFilters({
         ))}
       </div>
 
-      <SimpleBar className="wtr-map-filters__scroll" autoHide={false}>
+      <div className="wtr-map-filters__scroll">
         <div className="wtr-map-filters__body">
           {activeTab === "filters" ? (
-            <>
-              <FilterControlsStack filters={filters} onChange={onChange} />
-              {showClear ? (
-                <div className="wtr-map-filters__footer">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="wtr-map-filters__clear"
-                    onPress={clearFilters}
-                  >
-                    Clear filters
-                  </Button>
-                </div>
-              ) : null}
-            </>
+            <FilterControlsStack filters={filters} onChange={onChange} />
           ) : null}
 
           {activeTab === "exclude" ? (
@@ -819,8 +585,21 @@ export function RetirementMapFilters({
             </p>
           ) : null}
         </div>
-      </SimpleBar>
-    </aside>,
-    document.body,
+      </div>
+
+      {activeTab === "filters" && showClear ? (
+        <footer className="wtr-map-filters__footer">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="wtr-map-filters__clear"
+            onPress={clearFilters}
+          >
+            Clear filters
+          </Button>
+        </footer>
+      ) : null}
+      </div>
+    </aside>
   );
 }

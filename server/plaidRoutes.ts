@@ -269,7 +269,7 @@ export function installPlaidRoutes(
       const plaid = getPlaidClient()
       const { data } = await plaid.linkTokenCreate({
         user: { client_user_id: u.userId },
-        client_name: 'HeadwayPlanner',
+        client_name: 'Expectifi',
         products: [Products.Investments],
         country_codes: [CountryCode.Us],
         language: 'en',

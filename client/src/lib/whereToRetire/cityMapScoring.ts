@@ -29,19 +29,25 @@ import {
   passesVisaFreeDaysFilter,
   type HealthcareFilter,
   type MaxFlightTimeFilter,
-  type MinRetirementScoreFilter,
   type SafetyFilter,
   type VisaFreeDaysFilter,
+  type DirectFlightOrigin,
 } from '../../utils/mapDestinationFilters'
+import {
+  EXPAT_LEGEND_TIER_IDS,
+  type ExpatLegendTierId,
+} from './mapPinDisplay'
+import { expatCommunityPinTier } from '../../utils/expatInfo'
 
 export type { ForeignTaxFilter }
 export type {
+  DirectFlightOrigin,
   HealthcareFilter,
   MaxFlightTimeFilter,
-  MinRetirementScoreFilter,
   SafetyFilter,
   VisaFreeDaysFilter,
 } from '../../utils/mapDestinationFilters'
+export { DIRECT_FLIGHT_ORIGIN_OPTIONS } from './directFlightOrigins'
 import {
   calculateRetirementScore,
   retirementScoreBandFromScore,
@@ -120,14 +126,19 @@ export type MapFilters = {
   goodAirOnly: boolean
   maxFlightTime: MaxFlightTimeFilter
   directFromUsOnly: boolean
+  /** Departure country when `directFromUsOnly` is enabled. */
+  directFlightOrigin: DirectFlightOrigin
   visaFreeDays: VisaFreeDaysFilter
-  minRetirementScore: MinRetirementScoreFilter
+  /** Minimum retirement fit score (0 = any). */
+  minRetirementScore: number
   /** Include health insurance in income-fit cost (retirement catalog cities). */
   includeHealthIns: boolean
   /** Monthly health insurance estimate when `includeHealthIns` is true. */
   healthInsMonthlyUsd: number
   /** Only cities that meet visa income rules in the income-fit model. */
   visaQualifyingOnly: boolean
+  /** Active expat community size tiers (expat pin view legend filter). */
+  expatCommunityTiers: ExpatLegendTierId[]
 }
 
 export const DEFAULT_MAP_FILTERS: MapFilters = {
@@ -147,11 +158,49 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   goodAirOnly: false,
   maxFlightTime: 'any',
   directFromUsOnly: false,
+  directFlightOrigin: 'us',
   visaFreeDays: 'any',
-  minRetirementScore: 'any',
+  minRetirementScore: 0,
   includeHealthIns: true,
   healthInsMonthlyUsd: DEFAULT_HEALTH_INS_MONTHLY_USD,
   visaQualifyingOnly: false,
+  expatCommunityTiers: [...EXPAT_LEGEND_TIER_IDS],
+}
+
+export type { ExpatLegendTierId } from './mapPinDisplay'
+export { EXPAT_LEGEND_TIER_IDS } from './mapPinDisplay'
+
+export function isDefaultExpatCommunityTiers(
+  tiers: readonly ExpatLegendTierId[],
+): boolean {
+  return (
+    tiers.length === EXPAT_LEGEND_TIER_IDS.length &&
+    EXPAT_LEGEND_TIER_IDS.every((tier) => tiers.includes(tier))
+  )
+}
+
+export function toggleExpatCommunityTier(
+  tiers: ExpatLegendTierId[],
+  tier: ExpatLegendTierId,
+): ExpatLegendTierId[] {
+  if (tiers.includes(tier)) {
+    if (tiers.length <= 1) return [...EXPAT_LEGEND_TIER_IDS]
+    return tiers.filter((t) => t !== tier)
+  }
+  return [...tiers, tier].sort(
+    (a, b) =>
+      EXPAT_LEGEND_TIER_IDS.indexOf(a) - EXPAT_LEGEND_TIER_IDS.indexOf(b),
+  )
+}
+
+function passesExpatCommunityTierMapFilter(
+  country: string,
+  activeTiers: ExpatLegendTierId[],
+): boolean {
+  if (isDefaultExpatCommunityTiers(activeTiers)) return true
+  const tier = expatCommunityPinTier(country)
+  if (tier === 'domestic' || tier === 'none') return false
+  return activeTiers.includes(tier)
 }
 
 const US_COUNTRY = 'United States'
@@ -444,10 +493,11 @@ export function countActiveMapFilters(filters: MapFilters): number {
   if (filters.maxFlightTime !== 'any') count += 1
   if (filters.directFromUsOnly) count += 1
   if (filters.visaFreeDays !== 'any') count += 1
-  if (filters.minRetirementScore !== 'any') count += 1
+  if (filters.minRetirementScore > 0) count += 1
   if (!filters.includeHealthIns) count += 1
   if (filters.healthInsMonthlyUsd !== DEFAULT_HEALTH_INS_MONTHLY_USD) count += 1
   if (filters.visaQualifyingOnly) count += 1
+  if (!isDefaultExpatCommunityTiers(filters.expatCommunityTiers)) count += 1
   return count
 }
 
@@ -473,11 +523,13 @@ export function mapFiltersKey(filters: MapFilters): string {
     filters.goodAirOnly ? '1' : '0',
     filters.maxFlightTime,
     filters.directFromUsOnly ? '1' : '0',
+    filters.directFlightOrigin,
     filters.visaFreeDays,
-    filters.minRetirementScore,
+    String(filters.minRetirementScore),
     filters.includeHealthIns ? '1' : '0',
     String(filters.healthInsMonthlyUsd),
     filters.visaQualifyingOnly ? '1' : '0',
+    [...filters.expatCommunityTiers].sort().join(','),
   ].join('|')
 }
 
@@ -509,9 +561,21 @@ export function passesMapFilters(
   if (!passesHealthcareFilter(city.country, filters.healthcare)) return false
   if (!passesGoodAirFilter(city.country, filters.goodAirOnly)) return false
   if (!passesMaxFlightTimeFilter(city.country, filters.maxFlightTime)) return false
-  if (!passesDirectFlightsFilter(city.country, filters.directFromUsOnly)) return false
+  if (
+    !passesDirectFlightsFilter(
+      city.country,
+      filters.directFromUsOnly,
+      filters.directFlightOrigin,
+    )
+  ) {
+    return false
+  }
   if (!passesVisaFreeDaysFilter(city.country, filters.visaFreeDays)) return false
   if (!passesMinRetirementScoreFilter(scored.retirementScore, filters.minRetirementScore)) {
+    return false
+  }
+
+  if (!passesExpatCommunityTierMapFilter(city.country, filters.expatCommunityTiers)) {
     return false
   }
 
