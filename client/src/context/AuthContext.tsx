@@ -58,6 +58,7 @@ function normalizeAuthUser(u: AuthUser): AuthUser {
 export type GoogleCheckoutResolveResult =
   | { status: 'session_ready' }
   | { status: 'payment_required' }
+  | { status: 'checkout_expired' }
   | { status: 'idle' }
   | { status: 'error' }
 
@@ -89,12 +90,20 @@ type AuthCtx = {
   /** Call after redirect with `?google_checkout=1` to resume session or open payment. */
   resolveGoogleCheckoutFromUrl: () => Promise<GoogleCheckoutResolveResult>
   /** Finish Google signup after collecting a payment method (Stripe configured on server). */
-  completeGoogleCheckout: (paymentMethodId: string) => Promise<{ error?: string }>
+  completeGoogleCheckout: (
+    paymentMethodId?: string,
+    promoCode?: string,
+  ) => Promise<{ error?: string }>
   /** Set after redirect from Google when `?auth_error=` is present; cleared when consumed. */
   authCallbackMessage: string | null
   clearAuthCallbackMessage: () => void
   signIn: (email: string, password: string) => Promise<{ error?: string }>
-  signUp: (email: string, password: string, paymentMethodId?: string) => Promise<{ error?: string }>
+  signUp: (
+    email: string,
+    password: string,
+    paymentMethodId?: string,
+    promoCode?: string,
+  ) => Promise<{ error?: string }>
   /** Full-page navigation to `/api/auth/google` (cookie session on return). */
   signInWithGoogle: () => void
   signOut: () => Promise<void>
@@ -154,13 +163,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = (await res.json()) as CheckoutSessionJson
       if (!res.ok || !data.ok) {
         setGoogleCheckoutUi(null)
-        return res.status === 401 ? { status: 'idle' } : { status: 'error' }
+        if (res.status === 401) {
+          setAuthCallbackMessage(
+            'Google sign-in worked, but the billing step expired. Close this window and use Continue with Google again.',
+          )
+          return { status: 'checkout_expired' }
+        }
+        setAuthCallbackMessage('Could not resume Google account setup. Try again.')
+        return { status: 'error' }
       }
       if (data.status === 'session_ready') {
         setUser(normalizeAuthUser(data.user))
         setGoogleCheckoutUi(null)
         return { status: 'session_ready' }
       }
+      setUser(null)
       setGoogleCheckoutUi({
         email: data.email,
         displayName: data.displayName ?? null,
@@ -168,21 +185,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { status: 'payment_required' }
     } catch {
       setGoogleCheckoutUi(null)
+      setAuthCallbackMessage('Could not reach the server to finish Google sign-up. Try again.')
       return { status: 'error' }
     }
   }, [])
 
-  const completeGoogleCheckout = useCallback(async (paymentMethodId: string) => {
+  const completeGoogleCheckout = useCallback(async (paymentMethodId?: string, promoCode?: string) => {
     try {
+      const body: Record<string, string> = {}
+      if (paymentMethodId) body.paymentMethodId = paymentMethodId
+      if (promoCode?.trim()) body.promoCode = promoCode.trim()
       const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/google/complete-signup', {
         method: 'POST',
-        body: JSON.stringify({ paymentMethodId }),
+        body: JSON.stringify(body),
       })
       setUser(normalizeAuthUser(data.user))
       setGoogleCheckoutUi(null)
       return {}
     } catch (e) {
       if (e instanceof ApiRequestError) {
+        if (e.code === 'invalid_promo_code') {
+          return { error: 'That promo code is not valid or has expired.' }
+        }
         if (e.code === 'payment_failed') {
           return { error: 'Card could not be saved. Check the number or try another card.' }
         }
@@ -268,10 +292,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshSession])
 
-  const signUp = useCallback(async (email: string, password: string, paymentMethodId?: string) => {
+  const signUp = useCallback(async (
+    email: string,
+    password: string,
+    paymentMethodId?: string,
+    promoCode?: string,
+  ) => {
     try {
       const body: Record<string, string> = { email, password }
       if (paymentMethodId) body.paymentMethodId = paymentMethodId
+      if (promoCode?.trim()) body.promoCode = promoCode.trim()
       const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -283,6 +313,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (e.code === 'email_in_use') return { error: 'That email is already registered.' }
         if (e.code === 'password_too_short') return { error: 'Password must be at least 8 characters.' }
         if (e.code === 'invalid_email') return { error: 'Enter a valid email.' }
+        if (e.code === 'invalid_promo_code') {
+          return { error: 'That promo code is not valid or has expired.' }
+        }
         if (e.code === 'payment_method_required') {
           return { error: 'Add the Vite publishable key (VITE_STRIPE_PUBLISHABLE_KEY) and complete card details.' }
         }

@@ -120,8 +120,9 @@ function isBillableSubscriptionStatus(status: Stripe.Subscription.Status): boole
 export async function ensureStripeSubscription(
   stripe: Stripe,
   customerId: string,
-  paymentMethodId: string,
+  paymentMethodId: string | undefined,
   appUserId?: string,
+  promotionCodeId?: string,
 ): Promise<string> {
   const priceId = getStripeSubscriptionPriceId()
   if (!priceId) {
@@ -129,6 +130,10 @@ export async function ensureStripeSubscription(
       'subscription_price_not_configured',
       'Set STRIPE_SUBSCRIPTION_PRICE_ID in server/.env to a recurring price_… id',
     )
+  }
+
+  if (!paymentMethodId && !promotionCodeId) {
+    throw new StripeBillingError('payment_method_required')
   }
 
   await assertRecurringPrice(stripe, priceId)
@@ -146,9 +151,11 @@ export async function ensureStripeSubscription(
   )
 
   if (matching) {
-    await stripe.subscriptions.update(matching.id, {
-      default_payment_method: paymentMethodId,
-    })
+    if (paymentMethodId) {
+      await stripe.subscriptions.update(matching.id, {
+        default_payment_method: paymentMethodId,
+      })
+    }
     for (const s of existing.data) {
       if (s.id !== matching.id && isBillableSubscriptionStatus(s.status)) {
         await stripe.subscriptions.cancel(s.id)
@@ -166,13 +173,16 @@ export async function ensureStripeSubscription(
   const sub = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],
-    default_payment_method: paymentMethodId,
-    payment_behavior: 'error_if_incomplete',
+    ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
+    ...(promotionCodeId ? { discounts: [{ promotion_code: promotionCodeId }] } : {}),
+    payment_behavior: paymentMethodId ? 'error_if_incomplete' : 'allow_incomplete',
     collection_method: 'charge_automatically',
-    payment_settings: {
-      payment_method_types: ['card'],
-      save_default_payment_method: 'on_subscription',
-    },
+    payment_settings: paymentMethodId
+      ? {
+          payment_method_types: ['card'],
+          save_default_payment_method: 'on_subscription',
+        }
+      : undefined,
     metadata: appUserId ? { app_user_id: appUserId } : undefined,
     expand: ['latest_invoice'],
   })
@@ -232,15 +242,22 @@ export async function completeStripeBillingSetup(
   stripe: Stripe,
   email: string,
   appUserId: string,
-  paymentMethodId: string,
+  paymentMethodId?: string,
+  promotionCodeId?: string,
 ): Promise<{ customerId: string; subscriptionId: string }> {
+  if (!paymentMethodId && !promotionCodeId) {
+    throw new StripeBillingError('payment_method_required')
+  }
   const customer = await resolveStripeCustomerForEmail(stripe, email, appUserId)
-  await attachPaymentMethodToCustomer(stripe, customer.id, paymentMethodId)
+  if (paymentMethodId) {
+    await attachPaymentMethodToCustomer(stripe, customer.id, paymentMethodId)
+  }
   const subscriptionId = await ensureStripeSubscription(
     stripe,
     customer.id,
     paymentMethodId,
     appUserId,
+    promotionCodeId,
   )
   return { customerId: customer.id, subscriptionId }
 }

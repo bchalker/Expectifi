@@ -47,9 +47,17 @@ const AUTH_REGISTER_ELEMENTS_APPEARANCE: Appearance = {
   },
 }
 
-type SignUpFn = (email: string, password: string, paymentMethodId: string) => Promise<{ error?: string }>
+type SignUpFn = (
+  email: string,
+  password: string,
+  paymentMethodId?: string,
+  promoCode?: string,
+) => Promise<{ error?: string }>
 
-type CompleteGoogleFn = (paymentMethodId: string) => Promise<{ error?: string }>
+type CompleteGoogleFn = (
+  paymentMethodId?: string,
+  promoCode?: string,
+) => Promise<{ error?: string }>
 
 /** Exported for modal footer submit (`form` attribute must match `<Form id>`). */
 export const AUTH_STRIPE_REGISTER_FORM_ID = 'auth-stripe-register-payment-form'
@@ -58,6 +66,7 @@ type PaymentInnerProps = {
   clientSecret: string
   email: string
   password: string
+  promoCode?: string
   signUp?: SignUpFn
   completeGoogleCheckout?: CompleteGoogleFn
   setMsg: (v: string | null) => void
@@ -69,6 +78,7 @@ function RegisterStripePaymentInner({
   clientSecret,
   email,
   password,
+  promoCode,
   signUp,
   completeGoogleCheckout,
   setMsg,
@@ -127,14 +137,14 @@ function RegisterStripePaymentInner({
         return
       }
       if (completeGoogleCheckout) {
-        const { error: regErr } = await completeGoogleCheckout(paymentMethodId)
+        const { error: regErr } = await completeGoogleCheckout(paymentMethodId, promoCode)
         if (regErr) setMsg(regErr)
         else {
           setMsg('Account setup complete. You are signed in.')
           onRegistered?.()
         }
       } else if (signUp) {
-        const { error: regErr } = await signUp(email, password, paymentMethodId)
+        const { error: regErr } = await signUp(email, password, paymentMethodId, promoCode)
         if (regErr) setMsg(regErr)
         else {
           setMsg('Account created. You are signed in.')

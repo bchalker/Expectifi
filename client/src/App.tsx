@@ -209,6 +209,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
       )
       if (result.status === 'payment_required') {
         setAuthModal('google_checkout')
+      } else if (result.status === 'checkout_expired' || result.status === 'error') {
+        setAuthModal('signin')
       }
     })()
     return () => {

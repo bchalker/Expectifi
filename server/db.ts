@@ -82,8 +82,11 @@ export function getPool(): pg.Pool {
 
 async function addColumnIfMissing(sql: string): Promise<void> {
   const p = getPool()
+  const ifNotExistsSql = sql.includes('IF NOT EXISTS')
+    ? sql
+    : sql.replace('ADD COLUMN ', 'ADD COLUMN IF NOT EXISTS ')
   try {
-    await p.query(sql)
+    await p.query(ifNotExistsSql)
   } catch (e: unknown) {
     if (!isDuplicateColumn(e)) throw e
   }

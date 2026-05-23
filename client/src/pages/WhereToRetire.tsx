@@ -98,7 +98,10 @@ export function WhereToRetire({ c }: Props) {
 
   useEffect(() => {
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-    const id = window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+    const id = window.setTimeout(
+      () => window.dispatchEvent(new Event("resize")),
+      340,
+    );
     return () => window.clearTimeout(id);
   }, [filtersOpen]);
 
@@ -193,45 +196,45 @@ export function WhereToRetire({ c }: Props) {
           </div>
           <div className="where-to-retire__main-panel-map">
             <div className="where-to-retire__map-stage">
-            <RetirementMapExplorer
-              explorationIncome={mapExplorationIncome}
-              filters={mapFilters}
-              onFiltersChange={setMapFilters}
-              excludedCountries={storage.excludedCountries}
-              onAddExcludedCountry={storage.addExcludedCountry}
-              isFavoritedCity={storage.isFavoritedCity}
-              onToggleFavoriteCity={storage.toggleFavoriteCity}
-              favoriteCities={storage.favoriteCities}
-              filtersOpen={filtersOpen}
-              onFiltersOpenChange={setFiltersOpen}
-              compareIds={compareIds}
-              compareOverlayOpen={viewMode === "compare"}
-              explorerViewMode={viewMode === "compare" ? "compare" : "map"}
-              onExplorerViewModeChange={(mode) =>
-                setViewMode(mode === "compare" ? "compare" : "map")
-              }
-              onToggleCompare={toggleCompare}
-              onClearCompare={clearCompare}
-              onViewComparison={() => setViewMode("compare")}
-            />
-            {viewMode === "compare" ? (
-              <div
-                className="where-to-retire__compare-overlay"
-                role="dialog"
-                aria-modal="true"
-                aria-label="City comparison"
-              >
-                <WtrComparisonTableView
-                  monthlyIncome={mapExplorationIncome}
-                  compareIds={compareIds}
-                  baselineCity={baselineCity}
-                  onBaselineCityChange={setBaselineCity}
-                  onBackToMap={() => setViewMode("map")}
-                  onClearAll={clearCompare}
-                  onRemoveCompare={removeCompare}
-                />
-              </div>
-            ) : null}
+              <RetirementMapExplorer
+                explorationIncome={mapExplorationIncome}
+                filters={mapFilters}
+                onFiltersChange={setMapFilters}
+                excludedCountries={storage.excludedCountries}
+                onAddExcludedCountry={storage.addExcludedCountry}
+                isFavoritedCity={storage.isFavoritedCity}
+                onToggleFavoriteCity={storage.toggleFavoriteCity}
+                favoriteCities={storage.favoriteCities}
+                filtersOpen={filtersOpen}
+                onFiltersOpenChange={setFiltersOpen}
+                compareIds={compareIds}
+                compareOverlayOpen={viewMode === "compare"}
+                explorerViewMode={viewMode === "compare" ? "compare" : "map"}
+                onExplorerViewModeChange={(mode) =>
+                  setViewMode(mode === "compare" ? "compare" : "map")
+                }
+                onToggleCompare={toggleCompare}
+                onClearCompare={clearCompare}
+                onViewComparison={() => setViewMode("compare")}
+              />
+              {viewMode === "compare" ? (
+                <div
+                  className="where-to-retire__compare-overlay"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="City comparison"
+                >
+                  <WtrComparisonTableView
+                    monthlyIncome={mapExplorationIncome}
+                    compareIds={compareIds}
+                    baselineCity={baselineCity}
+                    onBaselineCityChange={setBaselineCity}
+                    onBackToMap={() => setViewMode("map")}
+                    onClearAll={clearCompare}
+                    onRemoveCompare={removeCompare}
+                  />
+                </div>
+              ) : null}
             </div>
             <RetirementMapFilters
               open={filtersOpen}
@@ -252,8 +255,8 @@ export function WhereToRetire({ c }: Props) {
 
       <footer className="where-to-retire__footer">
         <p className="where-to-retire__catalog-note">
-          {visibilityCounts.totalCities.toLocaleString()} cities in our worldwide
-          catalog.
+          {visibilityCounts.totalCities.toLocaleString()} cities in our
+          worldwide catalog.
         </p>
         <p className="where-to-retire__disclaimer" role="note">
           All figures are educational estimates only — not tax, legal,

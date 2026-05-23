@@ -654,6 +654,12 @@
   color: var(--accent);
 }
 
+.auth-modal__footer-link--promo {
+  align-self: center;
+  justify-content: center;
+  margin-top: 0.125rem;
+}
+
 .auth-modal__msg {
   margin: 0.5rem 0 0;
   font-family: var(--mono);
@@ -688,6 +694,50 @@
   gap: 0.75rem;
 }
 
+.auth-modal__promo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  min-width: 0;
+}
+
+.auth-modal__promo-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.auth-modal__promo-row .auth-modal__field--promo {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.auth-modal__promo-apply {
+  flex: 0 0 auto;
+  min-width: 4.75rem;
+  min-height: 2.75rem;
+  margin-bottom: 0;
+}
+
+.auth-modal__field--promo {
+  margin-top: 0.25rem;
+}
+
+.auth-modal__promo-hint {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--good);
+}
+
+.auth-modal__promo-submit {
+  margin-top: 0.125rem;
+}
+
 /* Register (Stripe): credentials slide → payment slide */
 .auth-modal__reg-slider {
   overflow: hidden;
@@ -705,7 +755,29 @@
 }
 
 .auth-modal__reg-slider--step-2 .auth-modal__reg-track {
-  transform: translate3d(-50%, 0, 0);
+  transform: none;
+  width: 100%;
+}
+
+.auth-modal__reg-slider:not(.auth-modal__reg-slider--step-2) .auth-modal__reg-slide:last-child {
+  display: none;
+}
+
+.auth-modal__reg-slider--step-2 .auth-modal__reg-slide:first-child {
+  display: none;
+}
+
+.auth-modal__reg-slider--step-2 .auth-modal__reg-slide {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.auth-modal__reg-payment-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .auth-modal__reg-slide {

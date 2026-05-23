@@ -23,6 +23,7 @@ import {
   isStripeBillingError,
   repairStripeSubscriptionForCustomer,
 } from './stripeBackend.js'
+import { normalizePromoCodeInput, resolveSignupPromotionCode } from './stripePromo.js'
 import type { SubscriptionStatus } from './stripeBilling.js'
 import { subscriptionStatusFromStripe } from './stripeBilling.js'
 import { installGoogleAuth } from './googleAuth.js'
@@ -180,6 +181,56 @@ app.post('/api/stripe/signup-setup-intent', async (_req, res) => {
   }
 })
 
+app.post('/api/stripe/validate-promo', async (req, res) => {
+  const raw =
+    typeof req.body?.promoCode === 'string' ? normalizePromoCodeInput(req.body.promoCode) : ''
+  if (!raw) {
+    res.status(400).json({ ok: false, error: 'promo_code_required' })
+    return
+  }
+  const stripe = getStripeBackend()
+  if (!stripe) {
+    res.status(503).json({ ok: false, error: 'stripe_not_configured' })
+    return
+  }
+  try {
+    const resolved = await resolveSignupPromotionCode(stripe, raw)
+    if (!resolved) {
+      res.status(400).json({ ok: false, error: 'invalid_promo_code' })
+      return
+    }
+    res.json({
+      ok: true,
+      code: resolved.code,
+      waivesPayment: resolved.waivesPayment,
+      message: resolved.waivesPayment
+        ? 'No card required — your subscription is free with this code.'
+        : 'Code applied at checkout — card still required.',
+    })
+  } catch {
+    res.status(502).json({ ok: false, error: 'promo_validation_failed' })
+  }
+})
+
+async function resolveSignupPromoFromRequest(
+  promoRaw: string,
+): Promise<
+  | { promotionCodeId: string; waivesPayment: boolean }
+  | null
+  | { error: string; status: number }
+> {
+  const code = normalizePromoCodeInput(promoRaw)
+  if (!code) return null
+  const stripe = getStripeBackend()
+  if (!stripe) return { error: 'stripe_not_configured', status: 503 }
+  const resolved = await resolveSignupPromotionCode(stripe, code)
+  if (!resolved) return { error: 'invalid_promo_code', status: 400 }
+  return {
+    promotionCodeId: resolved.promotionCodeId,
+    waivesPayment: resolved.waivesPayment,
+  }
+}
+
 app.get('/api/auth/google/checkout-session', async (req, res) => {
   const raw = req.cookies?.[GOOGLE_CHECKOUT_COOKIE]
   if (!raw || typeof raw !== 'string') {
@@ -211,7 +262,8 @@ app.get('/api/auth/google/checkout-session', async (req, res) => {
   }
   const emailNorm = normalizeEmail(row.email)
   const stripe = getStripeBackend()
-  const needsPayment = Boolean(stripe) && !row.stripe_customer_id
+  const needsPayment =
+    Boolean(stripe && getStripeSubscriptionPriceId()) && !row.stripe_customer_id
   if (!needsPayment) {
     res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
     const token = await createToken(row.id, emailNorm)
@@ -257,7 +309,13 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
   }
   const paymentMethodId =
     typeof req.body?.paymentMethodId === 'string' ? req.body.paymentMethodId.trim() : ''
-  if (!paymentMethodId) {
+  const promoRaw = typeof req.body?.promoCode === 'string' ? req.body.promoCode : ''
+  const promo = await resolveSignupPromoFromRequest(promoRaw)
+  if (promo && 'error' in promo) {
+    res.status(promo.status).json({ ok: false, error: promo.error })
+    return
+  }
+  if (!paymentMethodId && !(promo && promo.waivesPayment)) {
     res.status(400).json({ ok: false, error: 'payment_method_required' })
     return
   }
@@ -319,7 +377,8 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
       stripe,
       emailNorm,
       row.id,
-      paymentMethodId,
+      paymentMethodId || undefined,
+      promo?.promotionCodeId,
     )
     await dbQuery(
       'UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
@@ -359,6 +418,7 @@ app.post('/api/auth/register', async (req, res) => {
   const password = typeof req.body?.password === 'string' ? req.body.password : ''
   const paymentMethodIdRaw =
     typeof req.body?.paymentMethodId === 'string' ? req.body.paymentMethodId.trim() : ''
+  const promoRaw = typeof req.body?.promoCode === 'string' ? req.body.promoCode : ''
   const email = normalizeEmail(emailRaw)
   if (!email.includes('@') || email.length > 254) {
     res.status(400).json({ ok: false, error: 'invalid_email' })
@@ -370,7 +430,15 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   const stripe = getStripeBackend()
-  if (stripe && !paymentMethodIdRaw) {
+  let promo: Awaited<ReturnType<typeof resolveSignupPromoFromRequest>> = null
+  if (stripe && promoRaw.trim()) {
+    promo = await resolveSignupPromoFromRequest(promoRaw)
+    if (promo && 'error' in promo) {
+      res.status(promo.status).json({ ok: false, error: promo.error })
+      return
+    }
+  }
+  if (stripe && !paymentMethodIdRaw && !(promo && promo.waivesPayment)) {
     res.status(400).json({ ok: false, error: 'payment_method_required' })
     return
   }
@@ -408,7 +476,8 @@ app.post('/api/auth/register', async (req, res) => {
         stripe,
         email,
         id,
-        paymentMethodIdRaw,
+        paymentMethodIdRaw || undefined,
+        promo?.promotionCodeId,
       )
       await dbQuery(
         'UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ?, subscription_status = ? WHERE id = ?',
@@ -416,9 +485,15 @@ app.post('/api/auth/register', async (req, res) => {
       )
     } catch (e: unknown) {
       await dbQuery('DELETE FROM users WHERE id = ?', [id])
-      if (isStripeBillingError(e) && e.code === 'subscription_price_not_configured') {
-        res.status(503).json({ ok: false, error: e.code })
-        return
+      if (isStripeBillingError(e)) {
+        if (e.code === 'subscription_price_not_configured') {
+          res.status(503).json({ ok: false, error: e.code })
+          return
+        }
+        if (e.code === 'invalid_promo_code') {
+          res.status(400).json({ ok: false, error: e.code })
+          return
+        }
       }
       res.status(400).json({ ok: false, error: 'payment_failed' })
       return

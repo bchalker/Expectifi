@@ -131,5 +131,5 @@ fi
 echo ""
 echo "Done. GitHub has $(git rev-parse --short HEAD) — Railway should start a new deployment."
 echo "  • Railway → retirement_calc_app → Deployments (wait for Success)"
-echo "  • Hard-refresh https://eggspectifi.com (Cmd+Shift+R)"
-echo "  • Health: https://eggspectifi.com/api/health"
+echo "  • Hard-refresh https://expectifi.com (Cmd+Shift+R)"
+echo "  • Health: https://expectifi.com/api/health"

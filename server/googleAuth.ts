@@ -7,7 +7,17 @@ import {
   createToken,
 } from './authToken.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
-import { getStripeBackend, getStripeKeyMode, getStripeSubscriptionPriceId } from './stripeBackend.js'
+import {
+  getStripeBackend,
+  getStripeKeyMode,
+  getStripeSubscriptionPriceId,
+} from './stripeBackend.js'
+
+function googleSignupRequiresStripePayment(stripeCustomerId: string | null): boolean {
+  const stripe = getStripeBackend()
+  if (!stripe || !getStripeSubscriptionPriceId()) return false
+  return !stripeCustomerId
+}
 import { isPlaidConfigured } from './plaidClient.js'
 
 const STATE_COOKIE = 'google_oauth_state'
@@ -32,8 +42,8 @@ async function setSessionOrGoogleCheckoutCookie(
   email: string,
   stripeCustomerId: string | null,
 ): Promise<void> {
-  const stripe = getStripeBackend()
-  if (stripe && !stripeCustomerId) {
+  if (googleSignupRequiresStripePayment(stripeCustomerId)) {
+    res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
     const checkoutTok = await createGoogleCheckoutToken(userId, email)
     res.cookie(GOOGLE_CHECKOUT_COOKIE, checkoutTok, authCookieOpts(CHECKOUT_MAX_AGE_MS))
     res.redirect(302, `${clientOrigin}/?google_checkout=1`)

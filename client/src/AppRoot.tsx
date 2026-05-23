@@ -45,7 +45,7 @@ export default function AppRoot() {
   }, [authLoading, user])
 
   useEffect(() => {
-    if (authLoading || user) return
+    if (authLoading) return
     const params = new URLSearchParams(window.location.search)
     if (params.get('google_checkout') !== '1') return
     let cancelled = false
@@ -61,12 +61,14 @@ export default function AppRoot() {
       )
       if (result.status === 'payment_required') {
         setLandingAuthModal('google_checkout')
+      } else if (result.status === 'checkout_expired' || result.status === 'error') {
+        setLandingAuthModal('signin')
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [authLoading, user, resolveGoogleCheckoutFromUrl])
+  }, [authLoading, resolveGoogleCheckoutFromUrl])
 
   const openLandingSignIn = useCallback(() => {
     setLandingAuthModal('signin')
