@@ -52,7 +52,17 @@
 .wtr-budget-hero__title-income {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  color: inherit;
+  color: var(--color-amber-dark);
+}
+
+.wtr-budget-hero__title-income-amount {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-budget-hero__title-income-suffix {
+  font-size: 0.78em;
+  font-weight: 600;
 }
 
 .wtr-budget-hero__slider-card {

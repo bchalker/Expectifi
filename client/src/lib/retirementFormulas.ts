@@ -193,7 +193,7 @@ export function calcFitScore(
 
 export function taxBadgeLabel(rate: number): string {
   const pct = Math.round(rate * 100)
-  if (pct <= 10) return `${pct}% flat`
+  if (pct <= 10) return `${pct}% flat tax`
   return `${pct}% Taxes`
 }
 

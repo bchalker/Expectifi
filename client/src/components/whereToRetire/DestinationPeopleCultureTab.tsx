@@ -1,6 +1,5 @@
 import { useMemo, type CSSProperties } from 'react'
 import {
-  DEMOGRAPHICS_TAB_SOURCE_FOOTER,
   DEMOGRAPHICS_UNAVAILABLE_MESSAGE,
   getDemographicsData,
   getReligionBarSegments,
@@ -214,18 +213,6 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
           <p className="wtr-people-culture__expat-copy">{demographics.expat_population}</p>
         </section>
       ) : null}
-
-      <p
-        className="wtr-dest-panel__data-source"
-        {...staggerSectionProps(
-          sectionIndex,
-          'wtr-dest-panel__data-source',
-          staggerClassName,
-          staggerStyle,
-        )}
-      >
-        {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
-      </p>
     </div>
   )
 }

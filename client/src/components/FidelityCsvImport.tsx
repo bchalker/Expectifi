@@ -226,7 +226,7 @@ export function FidelityCsvImport({
       // Parent unmounts after close animation — resetting here flashes the custodian picker.
     } else {
       setModalOpen(false)
-      resetModalInner()
+      // Defer reset to openFlow() so the closing modal never flashes the custodian grid.
     }
   }
 

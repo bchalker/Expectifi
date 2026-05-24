@@ -416,6 +416,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const hasGoalBar =
     welcomeDone &&
+    !isWhereToRetire &&
     c.hasPortfolioBalances &&
     ((phase === 'growth' && inputs.growthGoal > 0) || (phase === 'income' && inputs.monthlyIncomeGoal > 0))
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)

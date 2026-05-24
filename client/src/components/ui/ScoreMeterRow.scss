@@ -24,7 +24,7 @@
 
 .score-meter-row__label {
   font-family: var(--body);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
   line-height: 1.25;
   color: var(--text);
@@ -52,7 +52,7 @@
 .score-meter-row__value {
   flex-shrink: 0;
   font-family: var(--body);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
   line-height: 1.25;
   text-align: right;

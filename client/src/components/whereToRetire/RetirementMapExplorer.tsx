@@ -31,7 +31,6 @@ import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
 import { useMapPinColorView } from "../../hooks/useMapPinColorView";
 import { RetirementLeafletMap } from "./RetirementLeafletMap";
 import { WtrMapPinColorChrome } from "./WtrMapPinColorChrome";
-import { WtrMapSortSelect } from "./RetirementMapFilters";
 import { WtrCityListPagination } from "./WtrCityListPagination";
 import "./RetirementMapExplorer.scss";
 import "./WtrMapPinColorChrome.scss";
@@ -82,7 +81,17 @@ function sortCitiesForPinView(
   filters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">,
   expatSortDescending = true,
   budgetSortDescending = false,
+  scoreSortDescending = true,
 ): ScoredMapCity[] {
+  if (pinColorView === "score") {
+    const scoreDelta = scoreSortDescending
+      ? (a: ScoredMapCity, b: ScoredMapCity) => b.retirementScore - a.retirementScore
+      : (a: ScoredMapCity, b: ScoredMapCity) => a.retirementScore - b.retirementScore;
+
+    return [...cities].sort(
+      (a, b) => scoreDelta(a, b) || b.retirementScore - a.retirementScore,
+    );
+  }
   if (pinColorView === "expat") {
     const expatDelta = expatSortDescending
       ? (a: ScoredMapCity, b: ScoredMapCity) =>
@@ -194,6 +203,7 @@ export function RetirementMapExplorer({
   const [listPage, setListPage] = useState(0);
   const [expatSortDescending, setExpatSortDescending] = useState(true);
   const [budgetSortDescending, setBudgetSortDescending] = useState(false);
+  const [scoreSortDescending, setScoreSortDescending] = useState(true);
   const baseFilteredCities = useMemo(
     () =>
       scoreAndFilterMapCities(
@@ -214,6 +224,7 @@ export function RetirementMapExplorer({
         filters,
         expatSortDescending,
         budgetSortDescending,
+        scoreSortDescending,
       ),
     [
       baseFilteredCities,
@@ -222,8 +233,28 @@ export function RetirementMapExplorer({
       filters,
       expatSortDescending,
       budgetSortDescending,
+      scoreSortDescending,
     ],
   );
+
+  /** Overall-fit list ranks stay fixed (best score = 1) when sort direction toggles. */
+  const scoreRankByCityId = useMemo(() => {
+    if (pinColorView !== "score") return null;
+    const ranked = sortCitiesForPinView(
+      baseFilteredCities,
+      "score",
+      explorationIncome,
+      filters,
+      true,
+      false,
+      true,
+    );
+    const map = new Map<string, number>();
+    ranked.forEach((item, index) => {
+      map.set(item.city.id, index + 1);
+    });
+    return map;
+  }, [baseFilteredCities, pinColorView, explorationIncome, filters]);
 
   /** Expat list ranks stay fixed (largest community = 1) when sort direction toggles. */
   const expatRankByCityId = useMemo(() => {
@@ -234,6 +265,23 @@ export function RetirementMapExplorer({
       explorationIncome,
       filters,
       true,
+    );
+    const map = new Map<string, number>();
+    ranked.forEach((item, index) => {
+      map.set(item.city.id, index + 1);
+    });
+    return map;
+  }, [baseFilteredCities, pinColorView, explorationIncome, filters]);
+
+  /** Budget list ranks stay fixed (lowest cost = 1) when sort direction toggles. */
+  const budgetRankByCityId = useMemo(() => {
+    if (pinColorView !== "budget") return null;
+    const ranked = sortCitiesForPinView(
+      baseFilteredCities,
+      "budget",
+      explorationIncome,
+      filters,
+      false,
     );
     const map = new Map<string, number>();
     ranked.forEach((item, index) => {
@@ -566,8 +614,15 @@ export function RetirementMapExplorer({
                     setListPage(0);
                   }}
                 >
-                  <span className="wtr-explorer__list-sort-label">
-                    Sort by monthly cost
+                  <span className="wtr-explorer__list-sort-text">
+                    <span className="wtr-explorer__list-sort-label">
+                      Sort by monthly cost
+                    </span>
+                    <span className="wtr-explorer__list-sort-sub">
+                      {budgetSortDescending
+                        ? "From highest to lowest"
+                        : "From lowest to highest"}
+                    </span>
                   </span>
                   {budgetSortDescending ? (
                     <IconSortDescending
@@ -586,11 +641,45 @@ export function RetirementMapExplorer({
                   )}
                 </button>
               ) : (
-                <WtrMapSortSelect
-                  className="wtr-map-filters__sort-select--list-head"
-                  filters={filters}
-                  onChange={onFiltersChange}
-                />
+                <button
+                  type="button"
+                  className="wtr-explorer__list-sort-control"
+                  aria-label={
+                    scoreSortDescending
+                      ? "Sort by overall fit, highest first. Click to sort lowest first."
+                      : "Sort by overall fit, lowest first. Click to sort highest first."
+                  }
+                  onClick={() => {
+                    setScoreSortDescending((prev) => !prev);
+                    setListPage(0);
+                  }}
+                >
+                  <span className="wtr-explorer__list-sort-text">
+                    <span className="wtr-explorer__list-sort-label">
+                      Sort by overall fit
+                    </span>
+                    <span className="wtr-explorer__list-sort-sub">
+                      {scoreSortDescending
+                        ? "From highest to lowest"
+                        : "From lowest to highest"}
+                    </span>
+                  </span>
+                  {scoreSortDescending ? (
+                    <IconSortDescending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  ) : (
+                    <IconSortAscending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  )}
+                </button>
               )}
             </header>
             {filteredCities.length === 0 ? (
@@ -617,6 +706,8 @@ export function RetirementMapExplorer({
                           pinColorView={pinColorView}
                           rank={
                             expatRankByCityId?.get(item.city.id) ??
+                            budgetRankByCityId?.get(item.city.id) ??
+                            scoreRankByCityId?.get(item.city.id) ??
                             safeListPage * LIST_PAGE_SIZE + index + 1
                           }
                           active={selectedId === item.city.id}
@@ -627,6 +718,7 @@ export function RetirementMapExplorer({
                             explorationIncome,
                             filters,
                           )}
+                          mapFilters={filters}
                           onSelect={() => openDestination(item.city.id)}
                           isFavorited={isFavoritedCity(
                             item.city.city,
@@ -688,6 +780,7 @@ export function RetirementMapExplorer({
       <RetirementDestinationPanel
         scored={selectedScored}
         monthlyIncome={explorationIncome}
+        mapFilters={filters}
         open={panelOpen && selectedScored != null}
         onClose={closePanel}
         compareSelected={

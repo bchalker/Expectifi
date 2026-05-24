@@ -285,6 +285,18 @@
   border-bottom: 1px solid var(--border);
 }
 
+.wtr-dest-panel__footer-source {
+  margin: 0;
+  padding: 0.65rem 1rem;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.wtr-dest-panel__footer-source:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
 .wtr-dest-panel__section-title {
   margin: 0 0 0.65rem;
   font-family: var(--heading);

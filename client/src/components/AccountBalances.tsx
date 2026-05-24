@@ -1476,10 +1476,6 @@ export function AccountBalances({
     </div>
   )
 
-  if (mergedDashboard && !c.hasPortfolioBalances) {
-    return <>{renderMergedDashboardOverlays()}</>
-  }
-
   const totalRetirementBar = !configureInputsOnly && (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData) ? (
     <div
       className={[

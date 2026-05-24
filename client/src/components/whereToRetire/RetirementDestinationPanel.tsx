@@ -28,18 +28,19 @@ import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
 import { WtrCompareToggleButton } from "./WtrCompareToggleButton";
 import { WtrExcludeCountryIcon } from "./WtrExcludeCountryIcon";
 import { useCityClimate } from "../../hooks/useCityClimate";
-import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
+import type { ScoredMapCity, MapFilters } from "../../lib/whereToRetire/cityMapScoring";
+import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
 import { calculateRetirementScore } from "../../utils/retirementScore";
 import type { CityData } from "../../utils/costOfLiving";
 import {
   buildBudgetBreakdownDisplay,
-  calculateMonthlyBudget,
   countryToFlagEmoji,
   formatUsd,
   formatUsdOrDash,
   getMonthlyBudgetComponents,
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
+import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from "../../utils/demographics";
 import { TravelAdvisoryNotice } from "./TravelAdvisoryNotice";
 import {
   formatGasolineDualPrice,
@@ -84,6 +85,7 @@ export type DestinationListPageNav = {
 type Props = {
   scored: ScoredMapCity | null;
   monthlyIncome: number;
+  mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   open: boolean;
   onClose: () => void;
   compareSelected: boolean;
@@ -365,6 +367,7 @@ function buildColSupplementalItems(city: CityData): ColExtraLineItem[] {
 type CityViewProps = {
   scored: ScoredMapCity;
   monthlyIncome: number;
+  mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   budgetBreakdown: NonNullable<ReturnType<typeof buildBudgetBreakdownDisplay>>;
   isCountryExcluded?: boolean;
   onExcludeCountry?: () => void;
@@ -375,6 +378,7 @@ type CityViewProps = {
 function DestinationPanelCityView({
   scored,
   monthlyIncome,
+  mapFilters,
   budgetBreakdown,
   isCountryExcluded = false,
   onExcludeCountry,
@@ -392,8 +396,8 @@ function DestinationPanelCityView({
   const { city } = scored;
 
   const panelMonthlyBudget = useMemo(
-    () => calculateMonthlyBudget(city),
-    [city],
+    () => monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters),
+    [scored, monthlyIncome, mapFilters],
   );
 
   const headerScore = useMemo(
@@ -407,10 +411,7 @@ function DestinationPanelCityView({
     [monthlyIncome, panelMonthlyBudget, city.country],
   );
 
-  const monthlySurplus = Math.max(
-    0,
-    Math.round(monthlyIncome - panelMonthlyBudget),
-  );
+  const monthlySurplus = Math.max(0, monthlyIncome - panelMonthlyBudget);
   const flagEmoji = countryToFlagEmoji(city.country);
   const colBudgetCards = buildColBudgetCards(city);
   const colSupplementalItems = buildColSupplementalItems(city);
@@ -456,7 +457,7 @@ function DestinationPanelCityView({
               <>
                 <hr className="wtr-dest-panel__summary-divider" />
                 <p className="wtr-dest-panel__summary-surplus tabular-nums">
-                  + {formatUsd(monthlySurplus)} surplus
+                  + {formatUsd(monthlySurplus)}
                 </p>
               </>
             ) : null}
@@ -617,6 +618,9 @@ function DestinationPanelCityView({
         {activeTab === "col" ? (
           <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
         ) : null}
+        {activeTab === "peopleCulture" ? (
+          <p className="wtr-dest-panel__footer-source">{DEMOGRAPHICS_TAB_SOURCE_FOOTER}</p>
+        ) : null}
         {listPageNav ? (
           <WtrCityListPagination
             className="wtr-list-pagination--dest-panel"
@@ -635,6 +639,7 @@ function DestinationPanelCityView({
 export function RetirementDestinationPanel({
   scored,
   monthlyIncome,
+  mapFilters,
   open,
   onClose,
   compareSelected,
@@ -706,6 +711,7 @@ export function RetirementDestinationPanel({
         key={scored.city.id}
         scored={scored}
         monthlyIncome={monthlyIncome}
+        mapFilters={mapFilters}
         budgetBreakdown={budgetBreakdown}
         isCountryExcluded={isCountryExcluded}
         onExcludeCountry={onExcludeCountry}

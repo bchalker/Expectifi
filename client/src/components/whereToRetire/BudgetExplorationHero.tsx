@@ -11,7 +11,7 @@ import {
   INCOME_EXPLORE_STEP,
   incomeSliderPct,
 } from '../../lib/whereToRetire/budgetExplorationStats'
-import { fmtMon } from '../../utils/format'
+import { fmt, fmtMon } from '../../utils/format'
 import './BudgetExplorationHero.scss'
 
 type Props = {
@@ -52,7 +52,13 @@ export function BudgetExplorationHero({
 
       <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
         Where can you retire on{' '}
-        <span className="wtr-budget-hero__title-income">{fmtMon(planMonthlyIncome)}</span>?
+        <span className="wtr-budget-hero__title-income">
+          <span className="wtr-budget-hero__title-income-amount tabular-nums">
+            {fmt(planMonthlyIncome)}
+          </span>
+          <span className="wtr-budget-hero__title-income-suffix">/mo</span>
+        </span>
+        ?
       </h1>
     </>
   ) : null

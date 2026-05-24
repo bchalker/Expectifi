@@ -8,6 +8,7 @@ import {
 } from "../../lib/whereToRetire/mapPinDisplay";
 import {
   countryToFlagEmoji,
+  formatUsd,
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
 import { formatEastCoastFlightHint } from "../../utils/gettingThere";
@@ -17,6 +18,8 @@ import {
   isDomesticRetirementDestination,
 } from "../../utils/expatInfo";
 import type { MapIncomeFitDisplay } from "../../lib/whereToRetire/mapIncomeFit";
+import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
+import type { MapFilters } from "../../lib/whereToRetire/cityMapScoring";
 import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
 import { WtrIncomeFitBadges } from "./WtrIncomeFitBadges";
 import "./RetirementDestinationCard.scss";
@@ -30,6 +33,7 @@ type Props = {
   active: boolean;
   staggerIndex?: number;
   incomeFit?: MapIncomeFitDisplay | null;
+  mapFilters?: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   onSelect: () => void;
   isFavorited?: boolean;
   onToggleFavorite?: () => void;
@@ -43,6 +47,7 @@ export function RetirementDestinationCard({
   active,
   staggerIndex,
   incomeFit = null,
+  mapFilters,
   onSelect,
   isFavorited = false,
   onToggleFavorite,
@@ -60,6 +65,13 @@ export function RetirementDestinationCard({
     !isDomesticRetirementDestination(city.country)
       ? formatEstimatedAmericans(expatInfo.estimated_americans)
       : null;
+
+  const monthlyCost =
+    pinColorView === "budget" && mapFilters
+      ? monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters)
+      : null;
+  const monthlySurplus =
+    monthlyCost != null ? Math.max(0, monthlyIncome - monthlyCost) : null;
 
   const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -125,22 +137,36 @@ export function RetirementDestinationCard({
           <span className="wtr-dest-card__rank-sep" aria-hidden />
         </div>
         <span className="wtr-dest-card__body">
-          <span className="wtr-dest-card__name-row">
-            <span className="wtr-dest-card__name">{city.city}</span>
-            <span className="wtr-dest-card__name-actions">
-              {showAdvisory ? (
-                <span className="wtr-dest-card__advisory-badge">
-                  <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
-                  Travel advisory
+          <span className="wtr-dest-card__head-row">
+            <span className="wtr-dest-card__identity">
+              <span className="wtr-dest-card__name-row">
+                <span className="wtr-dest-card__name">{city.city}</span>
+                {showAdvisory ? (
+                  <span className="wtr-dest-card__advisory-badge">
+                    <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
+                    Travel advisory
+                  </span>
+                ) : null}
+              </span>
+              <span className="wtr-dest-card__country">
+                <span className="wtr-dest-card__flag" aria-hidden>
+                  {countryToFlagEmoji(city.country)}
                 </span>
-              ) : null}
+                <span className="wtr-dest-card__country-name">{city.country}</span>
+              </span>
             </span>
-          </span>
-          <span className="wtr-dest-card__country">
-            <span className="wtr-dest-card__flag" aria-hidden>
-              {countryToFlagEmoji(city.country)}
-            </span>
-            <span className="wtr-dest-card__country-name">{city.country}</span>
+            {pinColorView === "budget" && monthlyCost != null ? (
+              <span className="wtr-dest-card__budget-stat">
+                <span className="wtr-dest-card__budget-amount tabular-nums">
+                  {formatUsd(monthlyCost)}
+                </span>
+                {monthlySurplus != null && monthlySurplus > 0 ? (
+                  <span className="wtr-dest-card__budget-surplus tabular-nums">
+                    + {formatUsd(monthlySurplus)}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
           </span>
           {flightHint ? (
             <span className="wtr-dest-card__flight-hint">
@@ -167,7 +193,7 @@ export function RetirementDestinationCard({
                 <span className="wtr-dest-card__expat-count">{americansNote}</span>
               ) : null}
             </span>
-          ) : (
+          ) : pinColorView === "budget" ? null : (
             <WtrAffordabilityScoreBar
               score={badgeScore}
               band={
@@ -176,7 +202,6 @@ export function RetirementDestinationCard({
                   : (bandClass as BudgetFitBand)
               }
               bandColor={pinColor}
-              valueSuffix={pinColorView === "budget" ? "%" : undefined}
               className="wtr-dest-card__score"
             />
           )}
