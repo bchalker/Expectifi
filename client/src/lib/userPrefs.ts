@@ -16,6 +16,7 @@ export type UserPrefs = {
   retirementAge: number
   monthlyGoal: number
   ssClaimingAge: number
+  residenceCountry?: string
 }
 
 export const RETIRE_AGE_MIN = 50
@@ -66,11 +67,14 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
   const monthlyGoal = typeof o.monthlyGoal === 'number' ? o.monthlyGoal : Number(o.monthlyGoal)
   const ssClaimingAge =
     typeof o.ssClaimingAge === 'number' ? o.ssClaimingAge : Number(o.ssClaimingAge)
+  const residenceCountry =
+    typeof o.residenceCountry === 'string' ? o.residenceCountry.trim() : ''
   const prefs: UserPrefs = {
     dob,
     retirementAge: Math.round(retirementAge),
     monthlyGoal: Math.round(monthlyGoal),
     ssClaimingAge: clampClaimAge(Math.round(ssClaimingAge)),
+    ...(residenceCountry ? { residenceCountry } : {}),
   }
   return hasPlanningProfilePrefs(prefs) ? prefs : null
 }
@@ -81,6 +85,7 @@ export function userPrefsToCalculatorPatch(p: UserPrefs): Partial<CalculatorInpu
     targetRetirementAge: Math.round(p.retirementAge),
     monthlyIncomeGoal: Math.max(0, Math.round(p.monthlyGoal)),
     ssAge: clampClaimAge(p.ssClaimingAge),
+    residenceCountry: p.residenceCountry ?? '',
   }
 }
 
@@ -90,6 +95,9 @@ export function calculatorInputsToPlanningPrefs(inputs: CalculatorInputs): UserP
     retirementAge: inputs.targetRetirementAge,
     monthlyGoal: inputs.monthlyIncomeGoal,
     ssClaimingAge: clampClaimAge(inputs.ssAge),
+    ...(inputs.residenceCountry?.trim()
+      ? { residenceCountry: inputs.residenceCountry.trim() }
+      : {}),
   }
   return hasPlanningProfilePrefs(prefs) ? prefs : null
 }

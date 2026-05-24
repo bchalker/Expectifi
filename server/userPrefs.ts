@@ -3,6 +3,7 @@ export type UserPrefs = {
   retirementAge: number
   monthlyGoal: number
   ssClaimingAge: number
+  residenceCountry?: string
 }
 
 const RETIRE_AGE_MIN = 50
@@ -51,5 +52,13 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
   const ss = normalizeSsClaimAge(ssClaimingAge)
   if (!Number.isFinite(age) || age < RETIRE_AGE_MIN || age > RETIRE_AGE_MAX) return null
   if (!Number.isFinite(goal) || goal <= 0) return null
-  return { dob, retirementAge: age, monthlyGoal: goal, ssClaimingAge: ss }
+  const residenceCountry =
+    typeof o.residenceCountry === 'string' ? o.residenceCountry.trim() : undefined
+  return {
+    dob,
+    retirementAge: age,
+    monthlyGoal: goal,
+    ssClaimingAge: ss,
+    ...(residenceCountry ? { residenceCountry } : {}),
+  }
 }

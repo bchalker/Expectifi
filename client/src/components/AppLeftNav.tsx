@@ -115,56 +115,59 @@ export function AppLeftNav({
 
   if (isDesktop) return null;
 
+  const hasPanelItems =
+    snapshotAvailable ||
+    APP_NAV_ROUTE_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext)) ||
+    APP_NAV_DRAWER_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext));
+  const showGuestProfile = Boolean(accountLabel || showRetireByInProfile);
+
   return (
     <>
-      {mobileOpen ? (
-        <div
-          className="app-left-nav__backdrop"
-          aria-hidden
-          onClick={closeMobile}
-        />
-      ) : null}
       <nav
         id="app-left-nav-panel"
-        className={`app-left-nav${mobileOpen ? " app-left-nav--mobile-open" : ""}`}
+        className={[
+          "app-left-nav",
+          mobileOpen ? "app-left-nav--mobile-open" : "",
+          !hasPanelItems ? "app-left-nav--auth-only" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         aria-label="Panels and tools"
       >
         <div className="app-left-nav__scroll">
-          <div className="app-left-nav__brand">
-            <span className="app-left-nav__mark">Expectifi</span>
-          </div>
-          <div
-            className="app-left-nav__rule app-left-nav__rule--after-brand"
-            aria-hidden
-          />
-          <button
-            id="app-left-nav-snapshot-btn"
-            type="button"
-            className={`app-left-nav__item${snapshotOpen && snapshotAvailable ? " app-left-nav__item--active" : ""}${!snapshotAvailable ? " app-left-nav__item--unavailable" : ""}`}
-            aria-expanded={snapshotOpen && snapshotAvailable}
-            aria-controls="strip-snapshot-panel"
-            aria-disabled={!snapshotAvailable}
-            title={snapshotUnavailableReason ?? undefined}
-            onClick={() => {
-              if (!snapshotAvailable) return;
-              toggleSnapshot();
-            }}
-          >
-            <span className="app-left-nav__item-label">Snapshot</span>
-          </button>
-          <div className="app-left-nav__rule" aria-hidden />
+          {snapshotAvailable ? (
+            <>
+              <button
+                id="app-left-nav-snapshot-btn"
+                type="button"
+                className={`app-left-nav__item${snapshotOpen && snapshotAvailable ? " app-left-nav__item--active" : ""}`}
+                aria-expanded={snapshotOpen && snapshotAvailable}
+                aria-controls="strip-snapshot-panel"
+                aria-disabled={!snapshotAvailable}
+                title={!snapshotAvailable ? (snapshotUnavailableReason ?? undefined) : undefined}
+                onClick={() => {
+                  if (!snapshotAvailable) return;
+                  toggleSnapshot();
+                }}
+              >
+                <span className="app-left-nav__item-label">Snapshot</span>
+              </button>
+              <div className="app-left-nav__rule" aria-hidden />
+            </>
+          ) : null}
           {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
             const available = navRequirementsMet(requires, navContext);
             const unavailableReason = navItemUnavailableReason(requires, navContext);
+            if (!available) return null;
             const isActive = path === routePath && available;
             return (
               <button
                 key={id}
                 type="button"
-                className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}${!available ? " app-left-nav__item--unavailable" : ""}`}
+                className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}`}
                 aria-current={isActive ? "page" : undefined}
                 aria-disabled={!available}
-                title={unavailableReason ?? undefined}
+                title={!available ? (unavailableReason ?? undefined) : undefined}
                 onClick={() => {
                   if (!available) return;
                   navigateApp(routePath);
@@ -178,13 +181,14 @@ export function AppLeftNav({
           {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
             const available = navRequirementsMet(requires, navContext);
             const unavailableReason = navItemUnavailableReason(requires, navContext);
+            if (!available) return null;
             return (
               <button
                 key={id}
                 type="button"
-                className={`app-left-nav__item${drawer === id && available ? " app-left-nav__item--active" : ""}${!available ? " app-left-nav__item--unavailable" : ""}`}
+                className={`app-left-nav__item${drawer === id && available ? " app-left-nav__item--active" : ""}`}
                 aria-disabled={!available}
-                title={unavailableReason ?? undefined}
+                title={!available ? (unavailableReason ?? undefined) : undefined}
                 onClick={() => {
                   if (!available) return;
                   openDrawer(id);
@@ -206,7 +210,7 @@ export function AppLeftNav({
               ]
                 .filter(Boolean)
                 .join(" ")}
-              aria-label="Open configure: planning, Social Security, and income presets"
+              aria-label="Open configure: planning and Social Security"
               aria-expanded={drawer === "config"}
               aria-controls="drawer"
               onClick={openConfig}
@@ -227,16 +231,18 @@ export function AppLeftNav({
             </button>
           ) : !loading ? (
             <>
-              <div className="app-left-nav__profile" aria-label="Profile">
-                {accountLabel ? (
-                  <span className="app-left-nav__profile-name">{accountLabel}</span>
-                ) : null}
-                {showRetireByInProfile ? (
-                  <span className="app-left-nav__profile-age" aria-label={`Retire by age ${targetRetirementAge}`}>
-                    Retire by {targetRetirementAge}
-                  </span>
-                ) : null}
-              </div>
+              {showGuestProfile ? (
+                <div className="app-left-nav__profile" aria-label="Profile">
+                  {accountLabel ? (
+                    <span className="app-left-nav__profile-name">{accountLabel}</span>
+                  ) : null}
+                  {showRetireByInProfile ? (
+                    <span className="app-left-nav__profile-age" aria-label={`Retire by age ${targetRetirementAge}`}>
+                      Retire by {targetRetirementAge}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="app-left-nav__auth" aria-label="Account">
                 {!apiReady ? (
                   <span
@@ -274,7 +280,7 @@ export function AppLeftNav({
                     ]
                       .filter(Boolean)
                       .join(" ")}
-                    aria-label="Configure: planning, Social Security, and income presets"
+                    aria-label="Configure: planning and Social Security"
                     aria-expanded={drawer === "config"}
                     aria-controls="drawer"
                     onClick={openConfig}

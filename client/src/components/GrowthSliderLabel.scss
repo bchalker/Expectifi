@@ -13,19 +13,21 @@
   text-align: center;
   width: 100%;
   gap: 3px;
-  margin-bottom: 6px;
+  margin-top: 14px;
+  margin-bottom: 8px;
 }
 
 .growth-slider-label__pct {
-  font-family: var(--heading);
+  font-family: var(--body);
   font-size: var(--text-md);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
 }
 
 .growth-slider-label__pct--hero {
+  font-family: var(--body);
   font-size: var(--text-xl);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }

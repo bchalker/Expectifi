@@ -1,11 +1,17 @@
 import { SS_62, SS_67, SS_70 } from 'shared'
 import { isValidIsoDateString } from './ageFromDob'
 import type { CalculatorInputs } from './computeResults'
+import { formatMoney } from './displayCurrency'
 
 export const SS_STANDARD_AGES = [62, 67, 70] as const
 export type SsClaimAge = (typeof SS_STANDARD_AGES)[number]
 export const SS_CLAIM_AGE_MIN = 62
 export const SS_CLAIM_AGE_MAX = 70
+
+export const SS_CLAIM_AGE_OPTIONS = Array.from(
+  { length: SS_CLAIM_AGE_MAX - SS_CLAIM_AGE_MIN + 1 },
+  (_, i) => SS_CLAIM_AGE_MIN + i,
+)
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const
 
@@ -59,6 +65,26 @@ export function benefitAtClaimAge(estimates: SsBenefitTriplet, claimAge: number)
   return Math.round(estimates.b67 + ((estimates.b70 - estimates.b67) * (age - 67)) / 3)
 }
 
+/** Monthly benefit at a claim age when the user's entered amount is their age-67 (FRA) estimate. */
+export function benefitAtClaimAgeFromMonthlyAt67(
+  monthlyAt67: number,
+  claimAge: number,
+): number {
+  if (monthlyAt67 <= 0) return 0
+  return benefitAtClaimAge(ssTripletFromMonthlyAt67(monthlyAt67), claimAge)
+}
+
+/** Convert a benefit entered at a specific claim age back to the age-67 anchor amount. */
+export function monthlyAt67FromBenefitAtClaimAge(
+  benefitAtClaim: number,
+  claimAge: number,
+): number {
+  if (benefitAtClaim <= 0) return 0
+  const refAtClaim = benefitAtClaimAgeFromMonthlyAt67(1000, claimAge)
+  if (refAtClaim <= 0) return Math.round(benefitAtClaim)
+  return Math.round((benefitAtClaim * 1000) / refAtClaim)
+}
+
 export function defaultUserEstimates(): SsBenefitTriplet {
   return { b62: SS_62, b67: SS_67, b70: SS_70 }
 }
@@ -105,7 +131,7 @@ export type SpouseBenefitResolution = {
 }
 
 export function resolveSpouseBenefit(inputs: CalculatorInputs, userEst: SsBenefitTriplet): SpouseBenefitResolution {
-  const claimAge = normalizeClaimAge(inputs.spouseClaimAge)
+  const claimAge = clampClaimAge(inputs.spouseClaimAge)
   const spousalEst = spousalBenefitTripletFromUser(userEst)
   const spousalAtClaim = benefitAtClaimAge(spousalEst, claimAge)
 
@@ -139,12 +165,12 @@ export function resolveSpouseBenefit(inputs: CalculatorInputs, userEst: SsBenefi
 }
 
 function fmtBenefit(n: number): string {
-  return `$${Math.round(n).toLocaleString('en-US')}/mo`
+  return `${formatMoney(n)}/mo`
 }
 
 export type HouseholdSsBreakdown = {
-  userClaimAge: SsClaimAge
-  spouseClaimAge: SsClaimAge
+  userClaimAge: number
+  spouseClaimAge: number
   userMonthly: number
   spouseMonthly: number
   totalMonthly: number
@@ -155,7 +181,7 @@ export type HouseholdSsBreakdown = {
 
 export function computeHouseholdSs(inputs: CalculatorInputs): HouseholdSsBreakdown {
   const userEst = resolveUserEstimates(inputs)
-  const userClaimAge = normalizeClaimAge(inputs.ssAge)
+  const userClaimAge = clampClaimAge(inputs.ssAge)
   const userMonthly = benefitAtClaimAge(userEst, userClaimAge)
 
   if (!inputs.married) {
@@ -171,7 +197,7 @@ export function computeHouseholdSs(inputs: CalculatorInputs): HouseholdSsBreakdo
     }
   }
 
-  const spouseClaimAge = normalizeClaimAge(inputs.spouseClaimAge)
+  const spouseClaimAge = clampClaimAge(inputs.spouseClaimAge)
   const spouseResolution = resolveSpouseBenefit(inputs, userEst)
   const spousalAtFraReadOnly = inputs.spouseHasOwnEarnings ? null : Math.round(userEst.b67 * 0.5)
 
@@ -191,7 +217,7 @@ export type SurvivorCallout = {
   householdBothMonthly: number
   householdIfUserDiesFirst: number
   survivorIfUserClaims70: number
-  userClaimAge: SsClaimAge
+  userClaimAge: number
 }
 
 export function buildSurvivorCallout(
@@ -236,8 +262,8 @@ export function normalizeSocialSecurityFields(
   if (spouseDob && !isValidIsoDateString(spouseDob)) spouseDob = ''
 
   return {
-    ssAge: normalizeClaimAge(typeof raw.ssAge === 'number' ? raw.ssAge : defaults.ssAge),
-    spouseClaimAge: normalizeClaimAge(
+    ssAge: clampClaimAge(typeof raw.ssAge === 'number' ? raw.ssAge : defaults.ssAge),
+    spouseClaimAge: clampClaimAge(
       typeof raw.spouseClaimAge === 'number' ? raw.spouseClaimAge : defaults.spouseClaimAge,
     ),
     ssBenefit62: Math.max(0, typeof raw.ssBenefit62 === 'number' ? raw.ssBenefit62 : defaults.ssBenefit62),

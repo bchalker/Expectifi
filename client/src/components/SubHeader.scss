@@ -26,8 +26,8 @@ html:not([data-no-portfolio-subheader]) .subheader {
 }
 
 .subheader.subheader--phase-income.subheader--ss-claim-slot {
-  height: auto;
-  min-height: 9.5rem;
+  height: var(--subheader-h);
+  min-height: var(--subheader-h);
 }
 
 .subheader.subheader--no-balances.subheader--phase-income.subheader--ss-claim-slot {
@@ -206,8 +206,10 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 .subheader-content .subheader-estimate .subheader-ss-block,
 .subheader-content .subheader-estimate .subheader-estimate__top,
 .subheader-content .subheader-estimate .subheader-estimate__bottom,
-.subheader-content .subheader-estimate .subheader-claim-age,
-.subheader-content .subheader-estimate .subheader-claim-age__btn,
+.subheader-content .subheader-estimate .subheader-claim-age-picker,
+.subheader-content .subheader-estimate .subheader-claim-age-picker__trigger-text,
+.subheader-content .subheader-estimate .subheader-claim-age-picker__chevron,
+.subheader-content .subheader-estimate .subheader-claim-age-picker__btn,
 .subheader-content .subheader-estimate .subheader-phase-segment,
 .subheader-content .subheader-estimate .subheader-phase-segment__tab {
   pointer-events: auto;
@@ -262,12 +264,29 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   padding-bottom: 0.5rem;
 }
 
-.subheader--ss-claim-slot .subheader-estimate__center {
-  padding-top: 3rem;
-  padding-bottom: 0.85rem;
+.subheader--ss-claim-slot .subheader-estimate {
+  justify-content: flex-start;
 }
 
-/* 62/67/70 — half over bottom wave */
+.subheader--ss-claim-slot .subheader-estimate__center {
+  flex: 0 0 auto;
+  padding-top: 3rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Claim age sits in document flow — tight under SS toggle (not pinned to wave bottom). */
+.subheader--ss-claim-slot .subheader-estimate__bottom {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  flex: 0 0 auto;
+  align-self: center;
+  margin-top: 0.125rem;
+  padding-bottom: 0.35rem;
+  transform: none;
+}
+
+/* 62/67/70 — half over bottom wave (growth / income without SS claim slot) */
 .subheader-estimate__bottom {
   position: absolute;
   bottom: 0;
@@ -314,6 +333,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   gap: 6px;
   width: 100%;
   min-width: 0;
+  margin-top: 12px;
 }
 
 @keyframes subheader-value-fade-slide {
@@ -392,56 +412,145 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   text-align: center;
 }
 
-.subheader-claim-age {
+.subheader-claim-age-picker {
   position: relative;
   z-index: 5;
   display: inline-flex;
-  align-items: stretch;
-  flex-wrap: nowrap;
-  padding: 2px;
-  border-radius: 9999px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: #fff;
-  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
   pointer-events: auto;
 }
 
-.subheader-claim-age__btn {
-  position: relative;
-  z-index: 1;
-  flex: 1 1 0;
-  min-width: 2.5rem;
-  min-height: 28px;
-  padding: 0 10px;
+.subheader-claim-age-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  box-sizing: border-box;
   margin: 0;
-  border: 0;
-  border-radius: 9999px;
-  font-family: var(--mono);
+  min-height: 1.75rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 0 0 1px rgb(0 0 0 / 0.06);
+  font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: rgba(0, 0, 0, 0.5);
-  background: transparent;
+  line-height: 1.2;
+  color: var(--nav-bg);
+  white-space: nowrap;
   cursor: pointer;
-  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   transition:
     background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.subheader-claim-age-picker__trigger-text {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.subheader-claim-age-picker__trigger-age {
+  font-weight: 700;
+}
+
+.subheader-claim-age-picker__chevron {
+  flex: 0 0 auto;
+  opacity: 0.55;
+}
+
+.subheader-claim-age-picker__trigger:hover {
+  background: #fff;
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.14),
+    0 0 0 1px rgb(0 0 0 / 0.08);
+}
+
+.subheader-claim-age-picker__trigger:active {
+  transform: scale(0.98);
+}
+
+.subheader-claim-age-picker__trigger:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.subheader-claim-age-picker__panel {
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 50%;
+  z-index: 10;
+  min-width: 9.5rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.subheader-claim-age-picker__group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(2rem, 1fr));
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.subheader-claim-age-picker__btn {
+  min-width: 0;
+  min-height: 2rem;
+  margin: 0;
+  padding: 0.4rem 0.35rem;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.25;
+  color: var(--text-muted);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
     color 0.15s ease;
 }
 
-.subheader-claim-age__btn:hover {
-  color: rgba(0, 0, 0, 0.72);
+.subheader-claim-age-picker__btn:nth-child(3n) {
+  border-right: none;
 }
 
-.subheader-claim-age__btn[aria-pressed='true'] {
+.subheader-claim-age-picker__btn:nth-last-child(-n + 3) {
+  border-bottom: none;
+}
+
+.subheader-claim-age-picker__btn:hover:not(.subheader-claim-age-picker__btn--on) {
+  background: var(--surface2, var(--surface));
+  color: var(--text);
+}
+
+.subheader-claim-age-picker__btn--on {
   background: var(--nav-bg);
   color: #fff;
 }
 
-.subheader-claim-age__btn:focus-visible {
-  outline: 2px solid var(--nav-bg);
-  outline-offset: 2px;
+.subheader-claim-age-picker__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  z-index: 1;
 }
 
 /* Tiny switch — custom track so it stays visible on navy + gold subheaders (HeroUI tokens blend on gold). */
@@ -569,11 +678,14 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 .subheader--phase-income .subheader-ss-add-btn {
   border-color: rgba(0, 0, 0, 0.22);
   background: rgba(255, 255, 255, 1);
+  background: rgba(0,0,0, .1);
   color: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
 }
 
 .subheader--phase-income .subheader-ss-add-btn:hover {
   background: rgba(255, 255, 255, 0.62);
+  background: rgba(0,0,0, .2);
   border-color: rgba(0, 0, 0, 0.32);
 }
 
@@ -588,9 +700,10 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   align-items: stretch;
   flex-wrap: nowrap;
   margin: 0;
-  height: 24px;
+  height: 23px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.22);
+  border: none;
   background: rgba(0, 0, 0, 0.32);
   padding: 2px;
   box-sizing: border-box;

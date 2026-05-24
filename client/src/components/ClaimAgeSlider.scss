@@ -48,6 +48,10 @@
   width: 100%;
 }
 
+.claim-age-slider__ticks--milestones {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .claim-age-slider__tick {
   font-family: var(--mono);
   font-size: 0.625rem;

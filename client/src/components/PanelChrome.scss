@@ -160,10 +160,24 @@
 
 .drawer-config-footer {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  width: 100%;
   min-width: 0;
 }
 
+.drawer-config-footer__confirm {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.drawer-config-footer__confirm[data-slot='button'] {
+  width: 100%;
+}
+
 .drawer-config-footer__signout {
+  flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }

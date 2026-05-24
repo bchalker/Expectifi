@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { HOME_EQUITY } from "shared";
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { fmt, fmtK, fmtMon } from "../utils/format";
 import { SidePanelShell } from "./SidePanelShell";
@@ -136,11 +137,11 @@ function StripSnapshotNarrative({
         </strong>
         . Home equity is shown as{" "}
         <strong className="strip-narrative__em strip-narrative__em--gold">
-          ~$250k
+          {fmtK(HOME_EQUITY)}
         </strong>
         ; if that were invested at your assumptions it could add roughly{" "}
         <strong className="strip-narrative__em strip-narrative__em--gold">
-          {fmtMon(c.equityMon)}/month
+          {fmtMon(c.equityMon)}
         </strong>
         .
       </p>

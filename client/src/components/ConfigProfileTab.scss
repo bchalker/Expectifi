@@ -109,6 +109,32 @@
   border-radius: 4px;
 }
 
+.config-profile-tab__reset-profile {
+  display: block;
+  width: 100%;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.config-profile-tab__reset-profile:hover {
+  color: var(--text);
+}
+
+.config-profile-tab__reset-profile:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .config-profile-tab__heading {
   margin: 0;
   font-family: var(--body);

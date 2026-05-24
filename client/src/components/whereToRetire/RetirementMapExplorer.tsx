@@ -66,6 +66,25 @@ type Props = {
 };
 
 const LIST_PAGE_SIZE = 25;
+const MOBILE_LIST_ONLY_MQ = "(max-width: 680px)";
+
+function useWtrMobileListOnly(): boolean {
+  const [mobileListOnly, setMobileListOnly] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia(MOBILE_LIST_ONLY_MQ).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia(MOBILE_LIST_ONLY_MQ);
+    const onChange = () => setMobileListOnly(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  return mobileListOnly;
+}
 
 function notifyMapResize() {
   requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
@@ -197,6 +216,7 @@ export function RetirementMapExplorer({
   }, [filters.whereToLook, pinColorView, onPinColorViewChange]);
 
   const chromeRef = useRef<HTMLDivElement>(null);
+  const mobileListOnly = useWtrMobileListOnly();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [listPanelOpen, setListPanelOpen] = useState(true);
@@ -496,6 +516,10 @@ export function RetirementMapExplorer({
     setListPanelOpen(true);
   }, []);
 
+  useEffect(() => {
+    if (mobileListOnly) setListPanelOpen(true);
+  }, [mobileListOnly]);
+
   const closeFiltersPanel = useCallback(() => {
     onFiltersOpenChange(false);
     notifyMapResize();
@@ -527,33 +551,36 @@ export function RetirementMapExplorer({
       <div
         className={[
           "wtr-explorer__map-row",
-          !listPanelOpen && "wtr-explorer__map-row--list-collapsed",
+          mobileListOnly && "wtr-explorer__map-row--list-only",
+          !mobileListOnly && !listPanelOpen && "wtr-explorer__map-row--list-collapsed",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <div className="wtr-explorer__map-stage">
-          <RetirementLeafletMap
-            destinations={filteredCities}
-            monthlyIncome={explorationIncome}
-            pinColorView={pinColorView}
-            filters={filters}
-            onFiltersChange={onFiltersChange}
-            favoritedKeySet={favoritedKeySet}
-            selectedId={selectedId}
-            detailPanelOpen={panelOpen && selectedScored != null}
-            fitKey={structuralFiltersKey}
-            onSelect={openDestination}
-          />
-        </div>
+        {!mobileListOnly ? (
+          <div className="wtr-explorer__map-stage">
+            <RetirementLeafletMap
+              destinations={filteredCities}
+              monthlyIncome={explorationIncome}
+              pinColorView={pinColorView}
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              favoritedKeySet={favoritedKeySet}
+              selectedId={selectedId}
+              detailPanelOpen={panelOpen && selectedScored != null}
+              fitKey={structuralFiltersKey}
+              onSelect={openDestination}
+            />
+          </div>
+        ) : null}
 
         <aside
           id="wtr-explorer-list-panel"
           className="wtr-explorer__list-panel"
           aria-label="City list"
-          aria-hidden={!listPanelOpen}
+          aria-hidden={!mobileListOnly && !listPanelOpen}
         >
-          {listPanelOpen ? (
+          {!mobileListOnly && listPanelOpen ? (
             <button
               type="button"
               className="wtr-explorer__list-collapse"
@@ -757,7 +784,7 @@ export function RetirementMapExplorer({
           </div>
         </aside>
 
-        {!listPanelOpen ? (
+        {!mobileListOnly && !listPanelOpen ? (
           <button
             type="button"
             className="wtr-explorer__list-reopen"

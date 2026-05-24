@@ -3,6 +3,8 @@ import { clearStoredFidelityImport } from './fidelityStorage'
 import { BALANCE_INPUT_MODE_KEY } from './retirementBalanceMode'
 import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import { clearLocalUserPrefsStorage } from './userPrefs'
+import { clearStoredManualAccounts } from './manualAccountEntries'
+import { clearUserProfileStorage } from './userProfileStorage'
 import { clearGuestWhereToRetireStorage } from './whereToRetire/storage'
 
 const GUEST_TAB_ID_KEY = 'expectifi_guest_tab_id'
@@ -55,18 +57,25 @@ function pruneStaleGuestTabs(tabs: GuestTabRecord[], now = Date.now()): GuestTab
   return tabs.filter((tab) => now - tab.ts < GUEST_TAB_STALE_MS)
 }
 
-/** Remove guest calculator + plan data from localStorage (not design tokens or API cache). */
+/** Remove guest financial session data; profile in expectifi_user_profile is kept. */
 export function clearEphemeralGuestStorage(): void {
   try {
     clearStoredAppState()
-    clearLocalUserPrefsStorage()
     clearStoredFidelityImport()
+    clearStoredManualAccounts()
     localStorage.removeItem(BALANCE_INPUT_MODE_KEY)
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearGuestWhereToRetireStorage()
   } catch {
     /* ignore */
   }
+}
+
+/** Full profile reset — clears saved onboarding profile and financial session data. */
+export function clearGuestProfileAndSession(): void {
+  clearUserProfileStorage()
+  clearLocalUserPrefsStorage()
+  clearEphemeralGuestStorage()
 }
 
 function touchGuestTab(tabId: string, now = Date.now()): GuestTabRecord[] {

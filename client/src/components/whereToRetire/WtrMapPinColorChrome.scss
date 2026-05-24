@@ -123,6 +123,11 @@
   color: var(--color-text-secondary);
 }
 
+.wtr-pin-color-chrome__view-select,
+.wtr-pin-color-chrome__where-select {
+  display: none;
+}
+
 @media (max-width: 680px) {
   .wtr-pin-color-chrome__toolbar {
     flex-direction: column;
@@ -140,5 +145,13 @@
     min-width: 0;
   }
 
+  .wtr-pin-color-chrome__view-group--buttons,
+  .wtr-pin-color-chrome__where-group--buttons {
+    display: none;
+  }
 
+  .wtr-pin-color-chrome__view-select,
+  .wtr-pin-color-chrome__where-select {
+    display: block;
+  }
 }

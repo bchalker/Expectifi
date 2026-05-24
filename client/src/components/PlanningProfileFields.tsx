@@ -40,6 +40,8 @@ type ConfigureProps = SharedProps & {
   onMonthlyContribution: (amount: number) => void
   monthlyIncomeGoal: number
   onMonthlyIncomeGoal: (amount: number) => void
+  currentResidence: string
+  onCurrentResidence: (country: string) => void
 }
 
 type WelcomeProps = SharedProps & {
@@ -76,6 +78,8 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
         <WelcomeProfileStepFields
           dateOfBirth={dateOfBirth}
           onDateOfBirth={onDateOfBirth}
+          currentResidence={props.currentResidence}
+          onCurrentResidence={props.onCurrentResidence}
           householdIncome={props.householdIncome}
           onHouseholdIncome={props.onHouseholdIncome}
           monthlyContribution={props.monthlyContribution}

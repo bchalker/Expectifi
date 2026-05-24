@@ -1,3 +1,4 @@
+import { fmtMon } from '../../utils/format'
 import { useMemo, useState } from 'react'
 import {
   calcFit,
@@ -215,5 +216,5 @@ export function RetirementFitCalculator({ grossMonthly, className }: Props) {
 }
 
 function formatIncome(n: number): string {
-  return `$${Math.round(n).toLocaleString('en-US')}/mo`
+  return fmtMon(n)
 }

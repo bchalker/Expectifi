@@ -512,44 +512,81 @@
 @media (max-width: 680px) {
   .wtr-explorer {
     --wtr-list-panel-w: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .wtr-explorer__chrome {
+    flex-shrink: 0;
+  }
+
+  .wtr-explorer__map-row,
+  .wtr-explorer__map-row--list-only {
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: auto;
+  }
+
+  .where-to-retire__main-panel .wtr-explorer__map-row {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .wtr-explorer__map-stage {
+    display: none;
   }
 
   .wtr-explorer__list-panel {
-    right: 0;
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
     bottom: auto;
+    flex: 1 1 auto;
     width: 100%;
-    max-height: 42%;
+    max-height: none;
+    min-height: 0;
+    height: auto;
+    transform: none;
+    pointer-events: auto;
+    box-shadow: none;
     border-right: none;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 4px 20px rgb(28 43 58 / 0.1);
-    transform: translateY(0);
+    border-bottom: none;
   }
 
   .wtr-explorer__map-row--list-collapsed .wtr-explorer__list-panel {
-    transform: translateY(-100%);
+    transform: none;
   }
 
   .wtr-explorer__list-panel-inner {
     width: 100%;
     min-width: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
   }
 
+  .wtr-explorer__list-body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .wtr-explorer__list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .wtr-explorer__list-collapse,
   .wtr-explorer__list-reopen {
-    top: 0.65rem;
-    left: 0.65rem;
-    flex-direction: row;
-    min-width: auto;
-    min-height: 44px;
-    padding: 0.45rem 0.65rem;
-    border-left: 1px solid var(--border);
-    border-radius: 999px;
-    transform: none;
+    display: none;
   }
 
-  .wtr-explorer__list-reopen-label {
-    writing-mode: horizontal-tb;
-    transform: none;
-    font-size: var(--text-sm);
+  .wtr-pin-color-chrome__description {
+    display: none;
   }
 }
 

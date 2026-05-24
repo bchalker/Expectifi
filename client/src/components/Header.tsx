@@ -118,7 +118,7 @@ function HeaderAuthTail({
           ]
             .filter(Boolean)
             .join(' ')}
-          aria-label="Open configure: planning, Social Security, and income presets"
+          aria-label="Open configure: planning and Social Security"
           aria-expanded={drawer === 'config'}
           aria-controls="drawer"
           onClick={onOpenConfig}
@@ -142,6 +142,25 @@ function HeaderAuthTail({
   if (!loading && (!user?.email || !isApp)) {
     return (
       <div className="header__tail">
+        {isApp && onOpenConfig && showSettings ? (
+          <button
+            type="button"
+            className={[
+              'header__settings',
+              drawer === 'config' ? 'header__settings--active' : '',
+              slideIn ? 'header__settings--slide-in' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            aria-label="My Plans: planning and Social Security"
+            aria-expanded={drawer === 'config'}
+            aria-controls="drawer"
+            onClick={onOpenConfig}
+          >
+            <span className="header__settings-label">My Plans</span>
+            <IconAdjustments size={18} stroke={1.65} aria-hidden />
+          </button>
+        ) : null}
         <div className="header__auth" aria-label="Account">
           {isApp && !apiReady ? (
             <span className="header__auth-offline" title="API not reachable">
@@ -155,24 +174,6 @@ function HeaderAuthTail({
             Create account
           </button>
         </div>
-        {isApp && onOpenConfig && showSettings ? (
-          <button
-            type="button"
-            className={[
-              'header__settings',
-              drawer === 'config' ? 'header__settings--active' : '',
-              slideIn ? 'header__settings--slide-in' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            aria-label="Configure: planning, Social Security, and income presets"
-            aria-expanded={drawer === 'config'}
-            aria-controls="drawer"
-            onClick={onOpenConfig}
-          >
-            <IconAdjustments size={18} stroke={1.65} aria-hidden />
-          </button>
-        ) : null}
       </div>
     )
   }
@@ -209,33 +210,36 @@ function HeaderAppNav({
 
   return (
     <nav className="header__nav header__nav--app" aria-label="Panels and tools">
-      <button
-        id="app-top-chrome-snapshot-btn"
-        type="button"
-        className={`header__link${snapshotOpen && snapshotAvailable ? ' header__link--active' : ''}${!snapshotAvailable ? ' header__link--unavailable' : ''}`}
-        aria-expanded={snapshotOpen && snapshotAvailable}
-        aria-controls="strip-snapshot-panel"
-        aria-disabled={!snapshotAvailable}
-        title={snapshotUnavailableReason ?? undefined}
-        onClick={() => {
-          if (!snapshotAvailable) return
-          onSnapshotToggle()
-        }}
-      >
-        Snapshot
-      </button>
+      {snapshotAvailable ? (
+        <button
+          id="app-top-chrome-snapshot-btn"
+          type="button"
+          className={`header__link${snapshotOpen && snapshotAvailable ? ' header__link--active' : ''}`}
+          aria-expanded={snapshotOpen && snapshotAvailable}
+          aria-controls="strip-snapshot-panel"
+          aria-disabled={!snapshotAvailable}
+          title={!snapshotAvailable ? (snapshotUnavailableReason ?? undefined) : undefined}
+          onClick={() => {
+            if (!snapshotAvailable) return
+            onSnapshotToggle()
+          }}
+        >
+          Snapshot
+        </button>
+      ) : null}
       {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
         const available = navRequirementsMet(requires, navContext)
         const unavailableReason = navItemUnavailableReason(requires, navContext)
+        if (!available) return null
         const isActive = path === routePath && available
         return (
           <button
             key={id}
             type="button"
-            className={`header__link${isActive ? ' header__link--active' : ''}${!available ? ' header__link--unavailable' : ''}`}
+            className={`header__link${isActive ? ' header__link--active' : ''}`}
             aria-current={isActive ? 'page' : undefined}
             aria-disabled={!available}
-            title={unavailableReason ?? undefined}
+            title={!available ? (unavailableReason ?? undefined) : undefined}
             onClick={() => {
               if (!available) return
               navigateApp(routePath)
@@ -248,13 +252,14 @@ function HeaderAppNav({
       {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
         const available = navRequirementsMet(requires, navContext)
         const unavailableReason = navItemUnavailableReason(requires, navContext)
+        if (!available) return null
         return (
           <button
             key={id}
             type="button"
-            className={`header__link${drawer === id && available ? ' header__link--active' : ''}${!available ? ' header__link--unavailable' : ''}`}
+            className={`header__link${drawer === id && available ? ' header__link--active' : ''}`}
             aria-disabled={!available}
-            title={unavailableReason ?? undefined}
+            title={!available ? (unavailableReason ?? undefined) : undefined}
             onClick={() => {
               if (!available) return
               onOpenDrawer(id)

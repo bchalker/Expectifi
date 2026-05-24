@@ -10,7 +10,7 @@
 
 /* Extra room when income subheader shows SS claim-age row */
 .app-header-shell--ss-claim {
-  --subheader-h: 9.5rem;
+  --subheader-h: max(var(--subheader-bubble-h), clamp(7.25rem, min(40vw, 36vh), 9.5rem));
 }
 
 html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
@@ -19,6 +19,8 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
 
 .app-header-shell--onboarding {
   --goal-bar-h: 0px;
+  --subheader-h: 0px;
+  --app-header-stack-h: var(--app-top-chrome-h);
 }
 
 /* Where to Retire: chrome only (no goal bar or subheader wave). */
@@ -55,4 +57,5 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   flex-direction: column;
   align-items: stretch;
   box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
 }

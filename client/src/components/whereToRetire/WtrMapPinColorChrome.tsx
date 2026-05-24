@@ -9,6 +9,7 @@ import {
   mapPinViewOptionsForWhereToLook,
 } from "../../lib/whereToRetire/mapPinColorCopy";
 import { WtrMapWhereToLookGroup } from "./WtrMapWhereToLookGroup";
+import { WtrToolbarSelect } from "./WtrToolbarSelect";
 import "./WtrMapPinColorChrome.scss";
 
 type Props = {
@@ -39,7 +40,7 @@ export function WtrMapPinColorChrome({
         <div className="wtr-pin-color-chrome__toolbar-block">
           <h2 className="wtr-pin-color-chrome__heading">{title}</h2>
           <div
-            className="wtr-pin-color-chrome__view-group"
+            className="wtr-pin-color-chrome__view-group wtr-pin-color-chrome__view-group--buttons"
             role="group"
             aria-label="Map view"
           >
@@ -61,6 +62,13 @@ export function WtrMapPinColorChrome({
               </button>
             ))}
           </div>
+          <WtrToolbarSelect
+            className="wtr-pin-color-chrome__view-select"
+            ariaLabel="Map view"
+            value={pinColorView}
+            options={pinViewOptions}
+            onChange={onPinColorViewChange}
+          />
         </div>
 
         <span className="wtr-pin-color-chrome__toolbar-separator" aria-hidden>

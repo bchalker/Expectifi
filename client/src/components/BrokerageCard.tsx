@@ -11,6 +11,7 @@ import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityBucketHoldingsSubrows } from './FidelityBucketHoldingsSubrows'
 import { FidelityCsvImport } from './FidelityCsvImport'
 import { fmt, fmtInput, parseNum } from '../utils/format'
+import { currencySymbol } from '../lib/displayCurrency'
 
 type Props = {
   brkBal: number
@@ -118,7 +119,7 @@ export function BrokerageCard({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <span className="edit-row-label">Taxable brokerage</span>
               <div className="num-input-wrap">
-                <span className="num-input-prefix">$</span>
+                <span className="num-input-prefix">{currencySymbol()}</span>
                 <input
                   type="text"
                   className="num-input"

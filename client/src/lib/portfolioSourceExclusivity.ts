@@ -1,8 +1,9 @@
 import type { BrokerageBalanceMode } from './brokerageBalanceMode'
+import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
 import type { CalculatorInputs } from './computeResults'
-import type { BalanceInputMode } from './retirementBalanceMode'
 import { loadStoredFidelityImport } from './fidelityStorage'
 import { storedManualAccountsHaveBalances } from './manualAccountEntries'
+import { loadBalanceInputMode, type BalanceInputMode } from './retirementBalanceMode'
 
 export const MANUAL_REMOVED_ON_CONNECT_MSG =
   'Your manual amounts will be removed when you import or connect accounts.'
@@ -43,4 +44,48 @@ export function hasManualPortfolioAmounts(
 export function hasImportedPortfolioData(): boolean {
   const imp = loadStoredFidelityImport()
   return Boolean(imp?.batches?.some((b) => b.rows.length > 0))
+}
+
+export type ImportedPortfolioBalances = Pick<
+  CalculatorInputs,
+  'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'
+>
+
+export type PortfolioBalanceFields = Pick<
+  CalculatorInputs,
+  'base401k' | 'baseSE401k' | 'baseTradIRA' | 'baseRoth' | 'baseHsa' | 'brkBal'
+>
+
+/** Replace manual portfolio buckets with import totals; clears Trad IRA (manual-only bucket). */
+export function portfolioBalancesFromImport(
+  balances: ImportedPortfolioBalances,
+): PortfolioBalanceFields {
+  return {
+    base401k: balances.base401k,
+    baseSE401k: balances.baseSE401k,
+    baseTradIRA: 0,
+    baseRoth: balances.baseRoth,
+    baseHsa: balances.baseHsa,
+    brkBal: balances.brkBal,
+  }
+}
+
+/** Overlay stored CSV/Plaid totals onto calculator inputs when fidelity mode is active. */
+export function applyFidelityBalanceOverrides(inputs: CalculatorInputs): CalculatorInputs {
+  const imp = loadStoredFidelityImport()
+  if (!imp?.balances) return inputs
+  const rabMode = loadBalanceInputMode()
+  const brkMode = loadBrokerageBalanceMode()
+  const d = { ...inputs }
+  if (rabMode === 'fidelity') {
+    d.base401k = imp.balances.base401k
+    d.baseSE401k = imp.balances.baseSE401k
+    d.baseRoth = imp.balances.baseRoth
+    d.baseHsa = imp.balances.baseHsa
+    d.baseTradIRA = 0
+  }
+  if (brkMode === 'fidelity' || rabMode === 'fidelity') {
+    d.brkBal = imp.balances.brkBal
+  }
+  return d
 }

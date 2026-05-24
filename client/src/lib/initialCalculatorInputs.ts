@@ -3,12 +3,11 @@ import {
   loadPersistedCalculatorSession,
   loadStoredAppState,
 } from './appStateStorage'
-import { loadStoredFidelityImport } from './fidelityStorage'
-import { loadBalanceInputMode } from './retirementBalanceMode'
-import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
+import { applyFidelityBalanceOverrides } from './portfolioSourceExclusivity'
 import { DEFAULT_INCOME_PRESETS, type CalculatorInputs, type CalculatorUi } from './computeResults'
 import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hasPlanningProfilePrefs, loadLocalUserPrefs, userPrefsToCalculatorPatch } from './userPrefs'
+import { loadUserProfile, profileToCalculatorPatch, stripFinancialFields } from './userProfileStorage'
 
 export const defaultCalculatorInputs: CalculatorInputs = {
   base401k: 0,
@@ -44,29 +43,13 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   monthlyIncomeGoal: 0,
   incomePresets: [...DEFAULT_INCOME_PRESETS],
   positionReturnModels: [],
+  residenceCountry: '',
 }
 
 export const defaultCalculatorUi: CalculatorUi = {
   incomeMode: true,
   ssIncluded: false,
-}
-
-function applyFidelityBalanceOverrides(inputs: CalculatorInputs): CalculatorInputs {
-  const imp = loadStoredFidelityImport()
-  if (!imp?.balances) return inputs
-  const rabMode = loadBalanceInputMode()
-  const brkMode = loadBrokerageBalanceMode()
-  const d = { ...inputs }
-  if (rabMode === 'fidelity') {
-    d.base401k = imp.balances.base401k
-    d.baseSE401k = imp.balances.baseSE401k
-    d.baseRoth = imp.balances.baseRoth
-    d.baseHsa = imp.balances.baseHsa
-  }
-  if (brkMode === 'fidelity' || rabMode === 'fidelity') {
-    d.brkBal = imp.balances.brkBal
-  }
-  return d
+  incomeSecurityTicker: null,
 }
 
 function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {
@@ -75,18 +58,28 @@ function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {
   return { ...inputs, ...userPrefsToCalculatorPatch(prefs) }
 }
 
+function mergeStoredProfile(inputs: CalculatorInputs): CalculatorInputs {
+  const profile = loadUserProfile()
+  if (!profile) return inputs
+  return { ...inputs, ...profileToCalculatorPatch(profile) }
+}
+
 /** Calculator inputs for welcome gate / first paint (session + expectifi_user_prefs). */
 export function getInitialCalculatorInputs(): CalculatorInputs {
-  const persisted = loadPersistedCalculatorSession(defaultCalculatorInputs, defaultCalculatorUi)
+  const persisted = loadPersistedCalculatorSession(defaultCalculatorInputs, defaultCalculatorUi, {
+    stripFinancial: true,
+  })
   if (persisted) {
-    return applyFidelityBalanceOverrides(persisted.inputs)
+    return mergeStoredProfile(applyFidelityBalanceOverrides(stripFinancialFields(persisted.inputs)))
   }
   const stored = loadStoredAppState()
   if (stored) {
     const hydrated = hydrateAppSnapshot(stored, defaultCalculatorInputs)
     if (hydrated) {
-      return mergeStoredWelcomePrefs(applyFidelityBalanceOverrides(hydrated.inputs))
+      return mergeStoredProfile(
+        mergeStoredWelcomePrefs(applyFidelityBalanceOverrides(stripFinancialFields(hydrated.inputs))),
+      )
     }
   }
-  return mergeStoredWelcomePrefs(applyFidelityBalanceOverrides({ ...defaultCalculatorInputs }))
+  return mergeStoredProfile(mergeStoredWelcomePrefs(applyFidelityBalanceOverrides({ ...defaultCalculatorInputs })))
 }

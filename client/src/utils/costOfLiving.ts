@@ -1,5 +1,6 @@
 import csvRaw from '../data/cost-of-living.csv?raw'
 import cityCoordinates from '../data/city-coordinates.json'
+import { formatMoney } from '../lib/displayCurrency'
 
 export type CityData = {
   city: string
@@ -321,7 +322,7 @@ export function calculateAffordabilityScore(city: CityData, monthlyIncome: numbe
 }
 
 export function formatUsd(n: number): string {
-  return `$${Math.round(n).toLocaleString('en-US')}`
+  return formatMoney(n)
 }
 
 export function formatUsdOrDash(n: number): string {

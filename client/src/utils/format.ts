@@ -1,12 +1,16 @@
+import {
+  formatMoney,
+  formatMoneyDigits,
+  formatMoneyK,
+  formatSignedMonthly,
+} from '../lib/displayCurrency'
+
 export function fmt(n: number): string {
-  if (!Number.isFinite(n)) return '$0'
-  return '$' + Math.round(n).toLocaleString('en-US')
+  return formatMoney(n)
 }
 
 export function fmtK(n: number): string {
-  if (!Number.isFinite(n)) return '$0'
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M'
-  return '$' + Math.round(n / 1000) + 'k'
+  return formatMoneyK(n)
 }
 
 export function fmtMon(n: number): string {
@@ -15,16 +19,11 @@ export function fmtMon(n: number): string {
 
 /** Monthly surplus/shortfall: `+$1,234/mo` or `- $1,234/mo`. */
 export function fmtSignedMonthly(surplus: number): string {
-  const n = Math.round(surplus)
-  const amount = '$' + Math.abs(n).toLocaleString('en-US')
-  if (n > 0) return `+${amount}/mo`
-  if (n < 0) return `- ${amount}/mo`
-  return `${amount}/mo`
+  return formatSignedMonthly(surplus)
 }
 
 export function fmtInput(n: number): string {
-  if (!Number.isFinite(n) || n === 0) return '0'
-  return Math.round(n).toLocaleString('en-US')
+  return formatMoneyDigits(n)
 }
 
 export function parseNum(raw: string): number {

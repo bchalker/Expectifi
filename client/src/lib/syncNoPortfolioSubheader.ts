@@ -2,9 +2,9 @@ import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hydrateAppSnapshot } from './appSnapshot'
 import { loadStoredAppState } from './appStateStorage'
 import { computeResults, type CalculatorInputs, type CalculatorUi } from './computeResults'
-import { loadStoredFidelityImport } from './fidelityStorage'
 import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
 import { loadBalanceInputMode } from './retirementBalanceMode'
+import { applyFidelityBalanceOverrides } from './portfolioSourceExclusivity'
 
 const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   base401k: 0,
@@ -40,11 +40,13 @@ const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   monthlyIncomeGoal: 0,
   incomePresets: [],
   positionReturnModels: [],
+  residenceCountry: '',
 }
 
 const BOOTSTRAP_DEFAULT_UI: CalculatorUi = {
   incomeMode: true,
   ssIncluded: false,
+  incomeSecurityTicker: null,
 }
 
 function bootstrapInputsFromStorage(): CalculatorInputs {
@@ -54,21 +56,7 @@ function bootstrapInputsFromStorage(): CalculatorInputs {
     const hydrated = hydrateAppSnapshot(stored, inputs)
     if (hydrated) inputs = hydrated.inputs
   }
-  const imp = loadStoredFidelityImport()
-  if (!imp?.balances) return inputs
-  const rabMode = loadBalanceInputMode()
-  const brkMode = loadBrokerageBalanceMode()
-  const d = { ...inputs }
-  if (rabMode === 'fidelity') {
-    d.base401k = imp.balances.base401k
-    d.baseSE401k = imp.balances.baseSE401k
-    d.baseRoth = imp.balances.baseRoth
-    d.baseHsa = imp.balances.baseHsa
-  }
-  if (brkMode === 'fidelity' || rabMode === 'fidelity') {
-    d.brkBal = imp.balances.brkBal
-  }
-  return d
+  return applyFidelityBalanceOverrides(inputs)
 }
 
 /** Match `computeResults().hasPortfolioBalances` from persisted local state (pre-React). */

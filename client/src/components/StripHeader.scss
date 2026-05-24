@@ -48,11 +48,27 @@
     var(--portfolio-strip-slider-delay) both;
 }
 
-.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-income-metric-stack {
+.portfolio-controls-reveal--in .yield-controls-row {
+  opacity: 0;
+  animation: portfolio-controls-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    calc(var(--portfolio-strip-slider-delay-income) + 0.09s) both;
+}
+
+.portfolio-controls-reveal--in .yield-controls__metric {
   animation-delay: 0s;
 }
 
-.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-equation-sliders-group {
+.portfolio-controls-reveal--in .yield-controls__slider {
+  animation-delay: var(--portfolio-strip-slider-delay-income);
+}
+
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-income-metric-stack,
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .yield-controls__metric {
+  animation-delay: 0s;
+}
+
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-equation-sliders-group,
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .yield-controls__slider {
   animation-delay: var(--portfolio-strip-slider-delay-income);
 }
 
@@ -67,7 +83,8 @@
 
   .portfolio-controls-reveal--in .strip-income-metric-stack,
   .portfolio-controls-reveal--in .growth-slider-label__headline-stack,
-  .portfolio-controls-reveal--in .strip-equation-sliders-group {
+  .portfolio-controls-reveal--in .strip-equation-sliders-group,
+  .portfolio-controls-reveal--in .yield-controls-row {
     animation: none;
     opacity: 1;
     transform: none;
@@ -373,9 +390,9 @@
 }
 
 .strip-income-metric-stack__pct {
-  font-family: var(--heading);
+  font-family: var(--body);
   font-size: var(--text-xl);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -426,9 +443,47 @@
   max-width: min(100%, 18rem);
 }
 
-.strip-income-nav-erosion-secondary__lead,
-.strip-income-nav-erosion-secondary__trail {
+.strip-income-nav-erosion-secondary__lead {
   color: inherit;
+}
+
+.strip-income-nav-erosion-value {
+  font-family: var(--body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.strip-income-nav-erosion-link {
+  display: inline;
+  margin: 0;
+  padding: 0 0 1px;
+  border: none;
+  border-bottom: 1px dashed var(--border-strong);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--body);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.strip-income-nav-erosion-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--text-muted);
+}
+
+.strip-income-nav-erosion-link:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
 }
 
 .strip-income-pct-pill {
@@ -495,7 +550,7 @@
   top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 220;
+  z-index: 360;
   width: min(22rem, calc(100vw - 2rem));
   padding: 10px 12px 12px;
   box-sizing: border-box;

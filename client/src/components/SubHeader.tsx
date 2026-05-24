@@ -1,6 +1,7 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IconChevronRight } from "@tabler/icons-react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
-import { SS_STANDARD_AGES, type SsClaimAge } from "../lib/socialSecurity";
+import { SS_CLAIM_AGE_OPTIONS, clampClaimAge } from "../lib/socialSecurity";
 import { fmt } from "../utils/format";
 import "./SubHeader.scss";
 
@@ -88,45 +89,95 @@ function PhaseSegmentTabs({
   );
 }
 
-const SUBHEADER_NAVY = "#1c2b3a";
 
-/** Claim age control for income subheader — plain buttons with explicit selected colors. */
+/** Claim age — trigger opens panel with 62 / 67 / 70 button group. */
 function SubheaderClaimAgePicker({
   value,
   onChange,
 }: {
-  value: SsClaimAge;
-  onChange: (age: SsClaimAge) => void;
+  value: number;
+  onChange: (age: number) => void;
 }) {
+  const claimAge = clampClaimAge(value);
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (rootRef.current?.contains(event.target as Node)) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
-    <div
-      className="subheader-claim-age"
-      role="group"
-      aria-label="Your Social Security claiming age"
-    >
-      {SS_STANDARD_AGES.map((age) => {
-        const selected = value === age;
-        return (
-          <button
-            key={age}
-            type="button"
-            className="subheader-claim-age__btn"
-            aria-pressed={selected}
-            style={
-              selected
-                ? { background: SUBHEADER_NAVY, color: "#fff" }
-                : { background: "transparent", color: "rgba(0, 0, 0, 0.5)" }
-            }
-            onPointerDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onChange(age);
-            }}
+    <div ref={rootRef} className="subheader-claim-age-picker">
+      <button
+        type="button"
+        className="subheader-claim-age-picker__trigger"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-controls="subheader-claim-age-panel"
+        aria-label={`Social Security claiming age ${claimAge}. Change claiming age.`}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span className="subheader-claim-age-picker__trigger-text">
+          At age{" "}
+          <span className="subheader-claim-age-picker__trigger-age">{claimAge}</span>
+        </span>
+        <IconChevronRight
+          className="subheader-claim-age-picker__chevron"
+          size={14}
+          stroke={1.5}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <div
+          id="subheader-claim-age-panel"
+          className="subheader-claim-age-picker__panel"
+          role="dialog"
+          aria-label="Your Social Security claiming age"
+        >
+          <div
+            className="subheader-claim-age-picker__group"
+            role="group"
+            aria-label="Select claiming age"
           >
-            {age}
-          </button>
-        );
-      })}
+            {SS_CLAIM_AGE_OPTIONS.map((age) => {
+              const selected = claimAge === age;
+              return (
+                <button
+                  key={age}
+                  type="button"
+                  className={[
+                    "subheader-claim-age-picker__btn",
+                    selected && "subheader-claim-age-picker__btn--on",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-pressed={selected}
+                  onClick={() => {
+                    onChange(age);
+                    setOpen(false);
+                  }}
+                >
+                  {age}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -139,8 +190,8 @@ type Props = {
   targetRetirementAge: number;
   ssIncluded: boolean;
   onSsIncluded: (v: boolean) => void;
-  ssClaimAge: SsClaimAge;
-  onSsClaimAgeChange: (age: SsClaimAge) => void;
+  ssClaimAge: number;
+  onSsClaimAgeChange: (age: number) => void;
   /** When false, show Add Social Security instead of the toggle. */
   ssTimingConfigured: boolean;
   onOpenSsConfig: () => void;

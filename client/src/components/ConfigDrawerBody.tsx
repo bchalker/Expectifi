@@ -1,47 +1,41 @@
 import { useEffect, useState } from 'react'
-import type { CalculatorInputs, CalculatorUi, ComputedSnapshot } from '../lib/computeResults'
+import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
-import { IncomePresetScenariosCard } from './IncomePresetScenariosCard'
 import { planningDisplayFromInputs } from '../lib/userPrefs'
 import { ConfigProfileTab } from './ConfigProfileTab'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 import './ConfigProfileTab.scss'
 
-export type ConfigDrawerTab = 'profile' | 'plan' | 'social-security' | 'presets'
+export type ConfigDrawerTab = 'profile' | 'plan' | 'social-security'
 
 const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'social-security', label: 'Social Security' },
-  { id: 'presets', label: 'Income Presets' },
 ]
 
 type Props = {
   c: ComputedSnapshot
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  ui: CalculatorUi
-  activePreset: string | null
-  setActivePreset: (id: string | null) => void
   initialTab?: ConfigDrawerTab
   onDrawerClose?: () => void
   onOpenSignIn?: () => void
   onOpenRegister?: () => void
+  onResetGuestProfile?: () => void
 }
 
 export function ConfigDrawerBody({
   c: _c,
   inputs,
   setInputs,
-  ui,
-  activePreset,
-  setActivePreset,
   initialTab = 'plan',
   onDrawerClose,
   onOpenSignIn,
   onOpenRegister,
+  onResetGuestProfile,
 }: Props) {
   const [tab, setTab] = useState<ConfigDrawerTab>(initialTab)
 
@@ -83,6 +77,7 @@ export function ConfigDrawerBody({
               onAccountCancelled={onDrawerClose}
               onOpenSignIn={onOpenSignIn}
               onOpenRegister={onOpenRegister}
+              onResetGuestProfile={onResetGuestProfile}
             />
           </section>
         </div>
@@ -104,6 +99,8 @@ export function ConfigDrawerBody({
               onTargetRetirementAge={(targetRetirementAge) =>
                 setInputs({ targetRetirementAge })
               }
+              currentResidence={inputs.residenceCountry ?? ''}
+              onCurrentResidence={(residenceCountry) => setInputs({ residenceCountry })}
               householdIncome={inputs.other}
               onHouseholdIncome={(other) => setInputs({ other })}
               monthlyContribution={planning.save > 0 ? Math.round(planning.save / 12) : 0}
@@ -124,26 +121,6 @@ export function ConfigDrawerBody({
         >
           <section className="config-drawer-section">
             <ConfigSocialSecurityTab inputs={inputs} setInputs={setInputs} />
-          </section>
-        </div>
-      ) : null}
-
-      {tab === 'presets' ? (
-        <div
-          className="config-drawer-tabpanel"
-          role="tabpanel"
-          id="config-panel-presets"
-          aria-labelledby="config-tab-presets"
-        >
-          <section className="config-drawer-section">
-            <IncomePresetScenariosCard
-              ui={ui}
-              inputs={inputs}
-              setInputs={setInputs}
-              activePreset={activePreset}
-              setActivePreset={setActivePreset}
-              alwaysShow
-            />
           </section>
         </div>
       ) : null}

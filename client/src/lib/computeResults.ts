@@ -123,6 +123,8 @@ export type CalculatorInputs = {
   incomePresets: IncomeYieldPreset[]
   /** Per-import-line return models (Fidelity dashboard sliders); merged with CSV at compute time. */
   positionReturnModels: PositionReturnModel[]
+  /** Welcome/settings residence — drives USD / GBP / EUR display. */
+  residenceCountry: string
 }
 
 export type { PositionReturnModel } from './positionReturnModel'
@@ -130,6 +132,8 @@ export type { PositionReturnModel } from './positionReturnModel'
 export type CalculatorUi = {
   incomeMode: boolean
   ssIncluded: boolean
+  /** Selected income security ticker; null = custom yield entry. */
+  incomeSecurityTicker: string | null
   /** Incremented from the strip to open the income preset editor on the Income page. */
   incomePresetEditorFocusSeq?: number
 }

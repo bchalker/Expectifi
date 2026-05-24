@@ -1,7 +1,16 @@
 /* Reuses .config-plan-* from ConfigDrawerBody.scss (imported in TSX). */
+html:has(.app-header-shell--onboarding) {
+  --goal-bar-h: 0px;
+  --subheader-h: 0px;
+  --app-header-stack-h: var(--app-top-chrome-h);
+}
+
 body.onboarding-overlay--open {
   overflow: hidden;
   touch-action: none;
+  --goal-bar-h: 0px;
+  --subheader-h: 0px;
+  --app-header-stack-h: var(--app-top-chrome-h);
 }
 
 .onboarding-overlay {
@@ -13,19 +22,17 @@ body.onboarding-overlay--open {
   --text-lg: 1.125rem;
   --onboarding-field-inset: 0.65rem;
   --onboarding-field-check: #15803d;
+  --onboarding-panel-max-w: 28rem;
 }
 
 /* Modal over dashboard — header stays above (202); covers full viewport below header. */
 .onboarding-overlay--in-app {
   position: fixed;
-  top: var(--app-header-stack-h);
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: var(--app-measured-header-h, var(--app-top-chrome-h)) 0 0 0;
   width: 100vw;
   max-width: 100vw;
   min-height: 0;
-  z-index: var(--z-onboarding);
+  z-index: var(--z-onboarding-in-app);
   padding: 0;
   box-sizing: border-box;
   pointer-events: none;
@@ -40,8 +47,9 @@ body.onboarding-overlay--open {
   z-index: 1;
   box-sizing: border-box;
   pointer-events: auto;
-  width: min(calc(100vw - 2rem), 36rem);
-  max-width: min(calc(100vw - 2rem), 36rem);
+  width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 28rem));
+  min-width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 28rem));
+  max-width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 28rem));
   transform: translate(-50%, -50%);
   height: min(calc(100dvh - var(--app-header-stack-h) - 2rem), 40rem);
   max-height: min(calc(100dvh - var(--app-header-stack-h) - 2rem), 40rem);
@@ -71,8 +79,79 @@ body.onboarding-overlay--open {
   }
 }
 
+@keyframes onboarding-panel-in-mobile {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.onboarding-overlay--exit .onboarding-overlay__panel {
+  animation: onboarding-panel-out 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes onboarding-panel-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+}
+
+@keyframes onboarding-panel-out-mobile {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+}
+
+/* Full-screen sheet on phones — fills viewport below top chrome only. */
+@media (max-width: 760px) {
+  .onboarding-overlay--in-app {
+    height: calc(100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)));
+  }
+
+  .onboarding-overlay__panel {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    transform: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: onboarding-panel-in-mobile 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .onboarding-overlay--exit .onboarding-overlay__panel {
+    animation: onboarding-panel-out-mobile 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+
+  .onboarding-overlay__footer {
+    padding-bottom: max(1.15rem, env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .onboarding-overlay--results .onboarding-overlay__panel {
-  max-width: min(100%, 32rem);
+  max-width: min(100%, var(--onboarding-panel-max-w));
   height: min(92dvh, 42rem);
   max-height: min(92dvh, 42rem);
 }
@@ -82,6 +161,15 @@ body.onboarding-overlay--open {
   padding: 1.25rem 1.25rem 0.85rem;
   border-bottom: 1px solid var(--border);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.onboarding-overlay__progress {
+  width: 100%;
+  max-width: 14rem;
 }
 
 .onboarding-overlay__title-stack {
@@ -138,7 +226,7 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__subtitle {
   font-family: var(--body);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-muted);
   margin: 0;
@@ -432,6 +520,13 @@ body.onboarding-overlay--open {
     transform: translate(-50%, -50%);
     box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
   }
+
+  @media (max-width: 760px) {
+    .onboarding-overlay__panel {
+      transform: none;
+      box-shadow: none;
+    }
+  }
 }
 
 .onboarding-overlay__results-hero {
@@ -563,6 +658,67 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.onboarding-overlay__footer-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+
+.onboarding-overlay__skip-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  overflow: hidden;
+  width: 100%;
+  justify-items: center;
+  transition:
+    grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease,
+    margin-top 0.35s ease;
+  margin-top: 0;
+}
+
+.onboarding-overlay__skip-wrap--visible {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 0.65rem;
+}
+
+.onboarding-overlay__skip-wrap > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.onboarding-overlay__skip-link {
+  margin: 0;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  text-align: center;
+  width: auto;
+  max-width: 100%;
+}
+
+.onboarding-overlay__skip-link:hover:not(:disabled),
+.onboarding-overlay__skip-link:focus-visible {
+  color: var(--text);
+}
+
+.onboarding-overlay__skip-link:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -849,4 +1005,47 @@ body.onboarding-overlay--open {
     gap: 1rem 1.15rem;
     align-items: start;
   }
+}
+
+.onboarding-overlay--region {
+  --onboarding-panel-max-w: 34rem;
+}
+
+.onboarding-overlay--accounts {
+  --onboarding-panel-max-w: 36rem;
+}
+
+.onboarding-overlay--region .onboarding-overlay__panel {
+  width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 34rem));
+  min-width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 34rem));
+}
+
+.onboarding-overlay--accounts .onboarding-overlay__panel {
+  width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 36rem));
+  min-width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 36rem));
+  max-width: min(calc(100vw - 2rem), var(--onboarding-panel-max-w, 36rem));
+}
+
+.onboarding-overlay--region .onboarding-overlay__header {
+  display: none;
+}
+
+.onboarding-overlay--region .onboarding-overlay__scroll {
+  min-height: 0;
+}
+
+.onboarding-overlay--region .onboarding-overlay__scroll .simplebar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.onboarding-overlay--region .onboarding-overlay__body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  padding-top: 1.35rem;
 }

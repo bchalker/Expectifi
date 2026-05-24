@@ -1,14 +1,18 @@
+import { useMemo } from 'react'
 import { IconPlus, IconX } from '@tabler/icons-react'
 import { ListBox, Select } from '@heroui/react'
 import { fmtInput, parseNum } from '../utils/format'
+import { currencySymbol } from '../lib/displayCurrency'
 import {
   canAddOnboardingAccountEntry,
   getAccountTypeMeta,
+  getNextOnboardingAccountType,
   getOnboardingAccountTypeOptionsForEntry,
   newManualAccountEntry,
   type ManualAccountEntry,
   type OnboardingAccountType,
 } from '../lib/manualAccountEntries'
+import { resolveOnboardingAccountLocale } from '../lib/onboardingAccountTypesByLocale'
 import { firstKeyFromSelectSelection } from '../lib/dateOfBirthSelect'
 import './OnboardingAccountsStep.scss'
 import './OnboardingFieldShell.scss'
@@ -20,7 +24,8 @@ type Props = {
 }
 
 export function OnboardingAccountsStep({ entries, onChange, validationError }: Props) {
-  const canAddAnother = canAddOnboardingAccountEntry(entries)
+  const accountLocale = useMemo(() => resolveOnboardingAccountLocale(), [])
+  const canAddAnother = canAddOnboardingAccountEntry(entries, accountLocale)
 
   function updateEntry(id: string, patch: Partial<ManualAccountEntry>) {
     onChange(entries.map((e) => (e.id === id ? { ...e, ...patch } : e)))
@@ -32,8 +37,9 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
   }
 
   function addEntry() {
-    if (!canAddOnboardingAccountEntry(entries)) return
-    onChange([...entries, newManualAccountEntry()])
+    if (!canAddOnboardingAccountEntry(entries, accountLocale)) return
+    const nextType = getNextOnboardingAccountType(entries, accountLocale)
+    onChange([...entries, newManualAccountEntry(nextType)])
   }
 
   return (
@@ -63,7 +69,7 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
           const typeSelected = entry.type != null
           const meta = entry.type != null ? getAccountTypeMeta(entry.type) : null
           const filled = entry.balance > 0
-          const typeOptions = getOnboardingAccountTypeOptionsForEntry(entries, entry.id)
+          const typeOptions = getOnboardingAccountTypeOptionsForEntry(entries, entry.id, accountLocale)
           return (
             <div key={entry.id} className="onboarding-accounts-step__row">
               <div className="onboarding-accounts-step__row-fields">
@@ -88,12 +94,7 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
                     <Select.Trigger>
                       <Select.Value>
                         {meta ? (
-                          <span className="onboarding-accounts-step__type-trigger-value">
-                            <span className="onboarding-accounts-step__type-trigger-label">{meta.label}</span>
-                            {meta.taxHelper ? (
-                              <span className="onboarding-accounts-step__type-trigger-helper">{meta.taxHelper}</span>
-                            ) : null}
-                          </span>
+                          <span className="onboarding-accounts-step__type-trigger-label">{meta.label}</span>
                         ) : null}
                       </Select.Value>
                       <Select.Indicator />
@@ -105,12 +106,7 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
                       <ListBox className="app-select-import-menu__list onboarding-accounts-step__type-list">
                         {typeOptions.map((opt) => (
                           <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-                            <span className="onboarding-accounts-step__type-option">
-                              <span className="onboarding-accounts-step__type-option-label">{opt.label}</span>
-                              {opt.taxHelper ? (
-                                <span className="onboarding-accounts-step__type-option-helper">{opt.taxHelper}</span>
-                              ) : null}
-                            </span>
+                            {opt.label}
                           </ListBox.Item>
                         ))}
                       </ListBox>
@@ -120,7 +116,7 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
 
                 <div className="onboarding-accounts-step__balance-field">
                   <div className="onboarding-accounts-step__balance-row">
-                    <span className="onboarding-accounts-step__balance-prefix">$</span>
+                    <span className="onboarding-accounts-step__balance-prefix">{currencySymbol()}</span>
                     <div
                       className={[
                         'onboarding-field-shell',

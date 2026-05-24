@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { IconCheck } from '@tabler/icons-react'
+import { currencySymbol } from '../../lib/displayCurrency'
 import { fmt, fmtInput, parseNum } from '../../utils/format'
 import './CurrencyAmountInput.scss'
 import '../OnboardingFieldShell.scss'
@@ -51,14 +52,15 @@ export function CurrencyAmountInput({
   const [focused, setFocused] = useState(false)
   const showPlaceholder = placeholder != null && value === 0
   const filled = showFillState && value > 0
+  const prefix = currencySymbol()
   const display = showPlaceholder
     ? ''
     : focused
       ? fmtInput(value)
-      : fmt(value).replace(/^\$/, '')
+      : fmtInput(value)
 
   if (readOnly) {
-    const readonlyValue = fmt(value).replace(/^\$/, '')
+    const readonlyValue = fmtInput(value)
     const readonlyBody = showFillState ? (
       <div
         className={[
@@ -92,7 +94,7 @@ export function CurrencyAmountInput({
         {externalPrefix || externalSuffix ? (
           <div className="currency-amount-input__value-group">
             <div className="currency-amount-input__amount-row currency-amount-input__amount-row--external-affixes">
-              <span className="currency-amount-input__prefix-outside">$</span>
+              <span className="currency-amount-input__prefix-outside">{prefix}</span>
               {readonlyBody}
               {externalSuffix ? (
                 <span className="currency-amount-input__suffix-outside">{externalSuffix}</span>
@@ -146,7 +148,7 @@ export function CurrencyAmountInput({
         .filter(Boolean)
         .join(' ')}
     >
-      {externalPrefix ? <span className="currency-amount-input__prefix-outside">$</span> : null}
+      {externalPrefix ? <span className="currency-amount-input__prefix-outside">{prefix}</span> : null}
       <div
         className={[
           showFillState ? 'onboarding-field-shell' : 'num-input-wrap',
@@ -156,7 +158,7 @@ export function CurrencyAmountInput({
           .filter(Boolean)
           .join(' ')}
       >
-        {!externalPrefix ? <span className="num-input-prefix">$</span> : null}
+        {!externalPrefix ? <span className="num-input-prefix">{prefix}</span> : null}
         <input
           id={id}
           type="text"

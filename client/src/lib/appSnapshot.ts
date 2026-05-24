@@ -1,6 +1,7 @@
 import { approxIsoDobFromAge, isValidIsoDateString } from './ageFromDob'
 import { normalizeIncomePresets, type CalculatorInputs, type CalculatorUi } from './computeResults'
 import { normalizeRetireRegions } from './calc/retireRegions'
+import { findIncomeSecurity } from './incomeSecurities'
 import { normalizeSocialSecurityFields } from './socialSecurity'
 
 export type AppSnapshotV1 = {
@@ -86,6 +87,14 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
     ui: {
       incomeMode: uiRest.incomeMode !== false,
       ssIncluded: uiRest.ssIncluded === true,
+      incomeSecurityTicker: (() => {
+        const raw =
+          typeof uiRest.incomeSecurityTicker === 'string' && uiRest.incomeSecurityTicker.trim()
+            ? uiRest.incomeSecurityTicker.trim()
+            : null
+        if (!raw) return null
+        return findIncomeSecurity(raw) ? raw : null
+      })(),
     },
     phase,
     activePreset,

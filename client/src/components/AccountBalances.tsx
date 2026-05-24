@@ -33,6 +33,7 @@ import {
   MANUAL_REMOVED_ON_CONNECT_MSG,
 } from '../lib/portfolioSourceExclusivity'
 import { fmt, fmtInput, parseNum } from '../utils/format'
+import { currencySymbol } from '../lib/displayCurrency'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
 import {
@@ -1125,7 +1126,7 @@ export function AccountBalances({
             <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(amount)}</span>
           ) : (
             <div className="num-input-wrap">
-              <span className="num-input-prefix">$</span>
+              <span className="num-input-prefix">{currencySymbol()}</span>
               <input
                 type="text"
                 className="num-input"

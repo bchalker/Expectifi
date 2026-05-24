@@ -1,5 +1,6 @@
 import { buildSnapshot, hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
 import type { CalculatorInputs, CalculatorUi } from './computeResults'
+import { stripFinancialFields } from './userProfileStorage'
 
 /** Dev / pre-DB persistence for calculator inputs, UI flags, phase, and presets. */
 export const APP_STATE_STORAGE_KEY = 'retirement-calculator/app-state-v1'
@@ -15,18 +16,30 @@ export function persistCalculatorSession(session: PersistedCalculatorSession): v
   saveStoredAppState(buildSnapshot(session.inputs, session.ui, session.phase, session.activePreset))
 }
 
+/** Guest sessions: persist planning fields only — balances are session-only. */
+export function persistGuestCalculatorSession(session: PersistedCalculatorSession): void {
+  persistCalculatorSession({
+    ...session,
+    inputs: stripFinancialFields(session.inputs),
+  })
+}
+
 /** Restore saved session (guest or signed-in) before applying live Fidelity CSV overrides. */
 export function loadPersistedCalculatorSession(
   defaultInputs: CalculatorInputs,
   defaultUi: CalculatorUi,
+  options?: { stripFinancial?: boolean },
 ): PersistedCalculatorSession | null {
   const stored = loadStoredAppState()
   if (!stored) return null
   const hydrated = hydrateAppSnapshot(stored, defaultInputs)
   if (!hydrated) return null
   const { incomePresetEditorFocusSeq: _ignored, ...uiRest } = hydrated.ui
+  const inputs = options?.stripFinancial
+    ? stripFinancialFields(hydrated.inputs)
+    : hydrated.inputs
   return {
-    inputs: hydrated.inputs,
+    inputs,
     ui: { ...defaultUi, ...uiRest },
     phase: hydrated.phase,
     activePreset: hydrated.activePreset,

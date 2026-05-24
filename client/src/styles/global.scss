@@ -119,6 +119,7 @@
   --subheader-h: max(var(--subheader-bubble-h), clamp(6.35rem, min(38vw, 34vh), 9.5rem));
   /* app-header-stack: nav + subheader; combined offset for drawers / mobile sheet */
   --app-top-chrome-h: clamp(2.875rem, 8.5vw, 3.375rem);
+  --app-measured-header-h: var(--app-top-chrome-h);
   --goal-bar-h: 0px;
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
   /* Mobile slide-over width */
@@ -162,7 +163,10 @@
   --z-subheader: 400;
   /* Full-screen auth overlay: above fixed header stack (202) and drawer shell (360) */
   --z-auth-modal: 500;
-  /* First-run welcome survey: above auth modal so it can appear immediately after sign-in */
+  /* In-app welcome: below header (202) and mobile nav (201). */
+  --z-onboarding-in-app: 199;
+  --z-mobile-nav: 201;
+  /* Full-screen auth / legacy onboarding layer */
   --z-onboarding: 520;
   /* Right / bottom inset for slide-over panels (drawer shell) */
   --drawer-panel-inset: 2rem;
@@ -202,6 +206,11 @@
 html[data-no-portfolio-subheader='true'] {
   --subheader-h: var(--subheader-bubble-h);
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
+}
+
+html[data-no-portfolio-subheader='true']:has(.app-header-shell--onboarding) {
+  --subheader-h: 0px;
+  --app-header-stack-h: var(--app-top-chrome-h);
 }
 
 body {

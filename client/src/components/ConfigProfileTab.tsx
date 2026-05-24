@@ -10,9 +10,15 @@ type Props = {
   onAccountCancelled?: () => void
   onOpenSignIn?: () => void
   onOpenRegister?: () => void
+  onResetGuestProfile?: () => void
 }
 
-export function ConfigProfileTab({ onAccountCancelled, onOpenSignIn, onOpenRegister }: Props) {
+export function ConfigProfileTab({
+  onAccountCancelled,
+  onOpenSignIn,
+  onOpenRegister,
+  onResetGuestProfile,
+}: Props) {
   const { user, cancelAccount, loading } = useAuth()
   const confirmState = useOverlayState()
   const [busy, setBusy] = useState(false)
@@ -49,16 +55,16 @@ export function ConfigProfileTab({ onAccountCancelled, onOpenSignIn, onOpenRegis
           <IconCloudUpload size={24} stroke={1.5} />
         </div>
         <h3 id="config-profile-guest-heading" className="config-profile-tab__empty-title">
-          Create an account to save your plan
+          Your profile is saved in this browser
         </h3>
         <p className="config-profile-tab__empty-lead">
-          Your progress stays on this device until you sign up. An account keeps everything backed up and ready when
-          you return.
+          Who you are, your goals, and Social Security settings persist here for free. Account balances are
+          session-only until you create an account.
         </p>
         <ul className="config-profile-tab__empty-list">
-          <li>Plan settings, Social Security, and income presets</li>
-          <li>Account balances and CSV imports</li>
-          <li>Custom return scenarios per holding</li>
+          <li>Country, date of birth, income, and savings rate</li>
+          <li>Social Security and retirement age goals</li>
+          <li>Account balances (create an account to save permanently)</li>
         </ul>
         <div className="config-profile-tab__empty-actions">
           <AppButton
@@ -73,6 +79,15 @@ export function ConfigProfileTab({ onAccountCancelled, onOpenSignIn, onOpenRegis
           <button type="button" className="config-profile-tab__empty-signin" onClick={onOpenSignIn}>
             Already have an account? Sign in
           </button>
+          {onResetGuestProfile ? (
+            <button
+              type="button"
+              className="config-profile-tab__reset-profile"
+              onClick={onResetGuestProfile}
+            >
+              Reset profile
+            </button>
+          ) : null}
         </div>
       </section>
     )

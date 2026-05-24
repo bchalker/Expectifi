@@ -1,17 +1,62 @@
 import type { WithdrawalDisplayBucket } from './withdrawalDisplayOrder'
+import type { OnboardingRegionId } from './onboardingRegions'
+import {
+  ACCOUNT_TYPE_AGGREGATE_BUCKET,
+  buildLocaleAccountTypeMetaMap,
+  getLocaleAccountTypeOptions,
+  resolveOnboardingAccountLocale,
+} from './onboardingAccountTypesByLocale'
 
 export const MANUAL_ACCOUNTS_STORAGE_KEY = 'retirement-calculator/manual-account-entries-v1'
 
 export type OnboardingAccountType =
+  // US
+  | 'brokerage'
+  | 'pretax_401k_ira'
   | 'roth_ira'
+  | 'hsa'
+  | 'pension'
+  // Legacy US (stored accounts)
   | 'trad_ira'
   | 'roth_401k'
   | 'trad_401k'
   | 'sep_ira'
-  | 'pension'
-  | 'brokerage'
-  | 'hsa'
   | 'other'
+  // UK
+  | 'uk_workplace_pension'
+  | 'uk_sipp'
+  | 'uk_isa'
+  | 'uk_lisa'
+  | 'uk_defined_benefit'
+  // DE
+  | 'de_gesetzliche_rente'
+  | 'de_bav'
+  | 'de_riester'
+  | 'de_ruerup'
+  | 'de_etf_depot'
+  // FR
+  | 'fr_retraite_base'
+  | 'fr_agirc_arrco'
+  | 'fr_per'
+  | 'fr_assurance_vie'
+  | 'fr_pea'
+  // ES
+  | 'es_pension_publica'
+  | 'es_plan_pensiones'
+  | 'es_pias'
+  | 'es_cuenta_valores'
+  | 'es_sialp'
+  // IT
+  | 'it_pensione_pubblica'
+  | 'it_fondo_pensione'
+  | 'it_pip'
+  | 'it_conto_titoli'
+  // EU / other
+  | 'int_occupational_pension'
+  | 'int_private_pension'
+  | 'int_state_pension'
+  | 'int_investment_account'
+  | 'int_savings_account'
 
 export type ManualAccountEntry = {
   id: string
@@ -36,6 +81,7 @@ export type ManualAccountTypeMeta = {
   withdrawalBucket: WithdrawalDisplayBucket
 }
 
+/** Legacy US-centric options — kept for backward-compatible stored account metadata. */
 export const ONBOARDING_ACCOUNT_TYPE_OPTIONS: ManualAccountTypeMeta[] = [
   {
     id: 'roth_ira',
@@ -120,10 +166,16 @@ export const ONBOARDING_ACCOUNT_TYPE_OPTIONS: ManualAccountTypeMeta[] = [
   },
 ]
 
-const META_BY_ID = Object.fromEntries(ONBOARDING_ACCOUNT_TYPE_OPTIONS.map((o) => [o.id, o])) as Record<
-  OnboardingAccountType,
-  ManualAccountTypeMeta
->
+const LOCALE_META_BY_ID = buildLocaleAccountTypeMetaMap()
+
+const LEGACY_META_BY_ID = Object.fromEntries(
+  ONBOARDING_ACCOUNT_TYPE_OPTIONS.map((o) => [o.id, o]),
+) as Record<OnboardingAccountType, ManualAccountTypeMeta>
+
+const META_BY_ID = {
+  ...LEGACY_META_BY_ID,
+  ...LOCALE_META_BY_ID,
+} as Record<OnboardingAccountType, ManualAccountTypeMeta>
 
 export function getAccountTypeMeta(type: OnboardingAccountType): ManualAccountTypeMeta {
   return META_BY_ID[type]
@@ -143,24 +195,36 @@ export function getUsedOnboardingAccountTypes(
 export function getOnboardingAccountTypeOptionsForEntry(
   entries: ManualAccountEntry[],
   entryId: string,
+  locale?: OnboardingRegionId | null,
 ): ManualAccountTypeMeta[] {
   const entry = entries.find((item) => item.id === entryId)
   const usedTypes = getUsedOnboardingAccountTypes(entries, entryId)
-  return ONBOARDING_ACCOUNT_TYPE_OPTIONS.filter(
-    (option) => option.id === entry?.type || !usedTypes.has(option.id),
-  )
+  const options = getLocaleAccountTypeOptions(locale ?? resolveOnboardingAccountLocale())
+  return options.filter((option) => option.id === entry?.type || !usedTypes.has(option.id))
 }
 
 export function getNextOnboardingAccountType(
   entries: ManualAccountEntry[],
+  locale?: OnboardingRegionId | null,
 ): OnboardingAccountType | null {
   const usedTypes = getUsedOnboardingAccountTypes(entries)
-  return ONBOARDING_ACCOUNT_TYPE_OPTIONS.find((option) => !usedTypes.has(option.id))?.id ?? null
+  const options = getLocaleAccountTypeOptions(locale ?? resolveOnboardingAccountLocale())
+  return options.find((option) => !usedTypes.has(option.id))?.id ?? null
 }
 
-export function canAddOnboardingAccountEntry(entries: ManualAccountEntry[]): boolean {
+export function canAddOnboardingAccountEntry(
+  entries: ManualAccountEntry[],
+  locale?: OnboardingRegionId | null,
+): boolean {
   if (entries.some((entry) => entry.type == null)) return false
-  return getNextOnboardingAccountType(entries) !== null
+  return getNextOnboardingAccountType(entries, locale) !== null
+}
+
+export function buildDefaultOnboardingAccountEntries(
+  locale?: OnboardingRegionId | null,
+): ManualAccountEntry[] {
+  const options = getLocaleAccountTypeOptions(locale ?? resolveOnboardingAccountLocale())
+  return options.slice(0, 3).map((option) => newManualAccountEntry(option.id))
 }
 
 export function newManualAccountEntry(type: OnboardingAccountType | null = null): ManualAccountEntry {
@@ -255,30 +319,9 @@ export function aggregateManualAccountsToBases(entries: ManualAccountEntry[]): {
   for (const entry of entries) {
     const amount = Math.max(0, Math.round(entry.balance))
     if (amount <= 0 || entry.type == null) continue
-    switch (entry.type) {
-      case 'trad_401k':
-        totals.base401k += amount
-        break
-      case 'sep_ira':
-        totals.baseSE401k += amount
-        break
-      case 'trad_ira':
-      case 'pension':
-      case 'other':
-        totals.baseTradIRA += amount
-        break
-      case 'roth_ira':
-      case 'roth_401k':
-        totals.baseRoth += amount
-        break
-      case 'hsa':
-        totals.baseHsa += amount
-        break
-      case 'brokerage':
-        totals.brkBal += amount
-        break
-      default:
-        break
+    const bucket = ACCOUNT_TYPE_AGGREGATE_BUCKET[entry.type]
+    if (bucket) {
+      totals[bucket] += amount
     }
   }
 

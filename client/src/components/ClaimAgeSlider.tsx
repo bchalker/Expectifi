@@ -12,16 +12,29 @@ const SLIDER_AGES = Array.from(
   (_, i) => SS_CLAIM_AGE_MIN + i,
 )
 
+/** Onboarding SS step: show only these tick labels; slider still selects every age 62–70. */
+export const SS_CLAIM_SLIDER_MILESTONES = [62, 64, 67, 70] as const
+
 type Props = {
   value: number
   onChange: (age: number) => void
   ariaLabel: string
   dateOfBirth?: string
   disabled?: boolean
+  /** Tick labels only; range input still spans min–max. */
+  milestoneAges?: readonly number[]
 }
 
-export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth, disabled = false }: Props) {
+export function ClaimAgeSlider({
+  value,
+  onChange,
+  ariaLabel,
+  dateOfBirth,
+  disabled = false,
+  milestoneAges,
+}: Props) {
   const age = clampClaimAge(value)
+  const tickAges = milestoneAges ?? SLIDER_AGES
   const valueLabel =
     dateOfBirth && isValidIsoDateString(dateOfBirth)
       ? formatSsAgeLabel(dateOfBirth, age)
@@ -49,13 +62,27 @@ export function ClaimAgeSlider({ value, onChange, ariaLabel, dateOfBirth, disabl
           aria-valuetext={valueLabel}
         />
       </div>
-      <div className="claim-age-slider__ticks" aria-hidden>
-        {SLIDER_AGES.map((tickAge) => (
+      <div
+        className={[
+          'claim-age-slider__ticks',
+          milestoneAges ? 'claim-age-slider__ticks--milestones' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-hidden
+      >
+        {tickAges.map((tickAge) => (
           <span
             key={tickAge}
-            className={`claim-age-slider__tick${age === tickAge ? ' claim-age-slider__tick--on' : ''}${
-              tickAge === 62 || tickAge === 67 || tickAge === 70 ? ' claim-age-slider__tick--milestone' : ''
-            }`}
+            className={[
+              'claim-age-slider__tick',
+              age === tickAge ? ' claim-age-slider__tick--on' : '',
+              milestoneAges || tickAge === 62 || tickAge === 67 || tickAge === 70
+                ? ' claim-age-slider__tick--milestone'
+                : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
             {tickAge}
           </span>

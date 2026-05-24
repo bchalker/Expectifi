@@ -1,0 +1,374 @@
+.income-security-selector {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.income-security-selector__trigger {
+  max-width: min(42vw, 11rem);
+}
+
+.income-security-selector__trigger.dd-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.income-security-selector__trigger.dd-trigger .income-security-selector__trigger-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.income-security-selector__trigger-label {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.income-security-selector__panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 50%;
+  z-index: 360;
+  display: flex;
+  flex-direction: column;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100vh - 8rem));
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 32px color-mix(in srgb, var(--text) 16%, transparent);
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.income-security-selector__filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+  flex-shrink: 0;
+}
+
+.income-security-selector__filter-dropdown {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.income-security-selector__filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.income-security-selector__filter-trigger:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--accent-light);
+}
+
+.income-security-selector__filter-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.income-security-selector__filter-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.income-security-selector__filter-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+  box-sizing: border-box;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.income-security-selector__filter-option {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.income-security-selector__filter-option:hover,
+.income-security-selector__filter-option[aria-selected='true'] {
+  background: var(--accent-light);
+  color: var(--accent-text);
+}
+
+.income-security-selector__filter-option[aria-selected='true'] {
+  font-weight: 600;
+}
+
+.income-security-selector__filter-option:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+
+.income-security-selector__filter-desc {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.income-security-selector__scroll {
+  flex-shrink: 0;
+  max-height: min(24rem, calc(100vh - 16rem));
+  border-top: 1px solid var(--border);
+  margin-top: 0.15rem;
+  padding-top: 0.35rem;
+}
+
+.income-security-selector__scroll.simplebar-scrollable-y .simplebar-track.simplebar-vertical {
+  opacity: 1;
+  visibility: visible;
+}
+
+.income-security-selector__scroll .simplebar-track.simplebar-vertical {
+  background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+  border-radius: 99px;
+}
+
+.income-security-selector__scroll .simplebar-wrapper,
+.income-security-selector__scroll .simplebar-mask,
+.income-security-selector__scroll .simplebar-content-wrapper {
+  min-height: 0;
+}
+
+.income-security-selector__scroll .simplebar-scrollbar::before {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-muted) 72%, transparent);
+}
+
+.income-security-selector__scroll .simplebar-scrollbar.simplebar-visible::before {
+  opacity: 1;
+}
+
+.income-security-selector__scroll .simplebar-content {
+  padding: 0 0.15rem 0.15rem;
+}
+
+.income-security-selector__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.income-security-selector__list > li {
+  min-width: 0;
+}
+
+.income-security-selector__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.65rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.income-security-selector__row:last-child {
+  border-bottom: none;
+}
+
+.income-security-selector__row:hover {
+  background: var(--accent-light);
+  border-color: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.income-security-selector__row--selected {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.income-security-selector__row--selected:hover {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.income-security-selector__row--custom {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.income-security-selector__row:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+
+.income-security-selector__ticker-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  min-width: 2.5rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  background: var(--accent);
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.2;
+  color: #fff;
+  letter-spacing: 0.02em;
+  transition: background 0.12s ease;
+}
+
+.income-security-selector__row:hover .income-security-selector__ticker-badge,
+.income-security-selector__row--selected .income-security-selector__ticker-badge {
+  background: var(--accent-text);
+  color: #fff;
+}
+
+.income-security-selector__row--selected:hover .income-security-selector__ticker-badge {
+  background: color-mix(in srgb, var(--accent-text) 88%, #000);
+  color: #fff;
+}
+
+.income-security-selector__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.income-security-selector__custom-label,
+.income-security-selector__row-name {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.income-security-selector__row-sub {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.income-security-selector__risk-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-top: 0.1rem;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+}
+
+.income-security-selector__risk-label {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.income-security-selector__risk-value {
+  font-weight: 600;
+}
+
+.income-security-selector__risk-value--green {
+  color: #16a34a;
+}
+
+.income-security-selector__risk-value--amber {
+  color: #d97706;
+}
+
+.income-security-selector__risk-value--orange {
+  color: #ea580c;
+}
+
+.income-security-selector__risk-value--red {
+  color: #dc2626;
+}
+
+.income-security-selector__yield-wrap {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding-left: 0.55rem;
+  border-left: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.income-security-selector__yield {
+  min-width: 2.25rem;
+  font-family: var(--body);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.1;
+  color: var(--text);
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .income-security-selector__panel {
+    left: 0;
+    transform: none;
+    width: min(22rem, calc(100vw - 1.5rem));
+  }
+}

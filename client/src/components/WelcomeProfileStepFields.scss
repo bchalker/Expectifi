@@ -6,10 +6,83 @@
   min-width: 0;
 }
 
+.welcome-profile-fields__section + .welcome-profile-fields__section,
 .welcome-profile-fields__section + .welcome-profile-fields__grid {
   border-top: 1px solid var(--border);
   padding-top: 1.1rem;
   margin-top: 1.1rem;
+}
+
+.welcome-profile-fields__section--residence {
+  padding-bottom: 0;
+}
+
+.welcome-profile-fields__residence-field {
+  gap: 0.45rem;
+}
+
+.welcome-profile-fields__residence-select {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.welcome-profile-fields__residence-select [data-slot='select'] {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.welcome-profile-fields__residence-select [data-slot='select-trigger'] {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--onboarding-field-inset, 0.65rem);
+  padding-right: calc(var(--onboarding-field-inset, 0.65rem) + 1.25rem);
+  line-height: 1.25;
+  background: var(--surface2);
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+.welcome-profile-fields__residence-select [data-slot='select-value'],
+.welcome-profile-fields__residence-select [data-slot='select-value'][data-placeholder='true'] {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  min-height: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.welcome-profile-fields__residence-select--filled [data-slot='select-trigger'] {
+  background: var(--surface);
+}
+
+.welcome-profile-fields__residence-select--filled [data-slot='select-trigger']:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.welcome-profile-fields__currency-note {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.welcome-profile-fields__callout {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
+.welcome-profile-fields__callout-text {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
 .welcome-profile-fields__section {

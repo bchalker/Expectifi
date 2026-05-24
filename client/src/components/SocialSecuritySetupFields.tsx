@@ -1,7 +1,12 @@
+import { useMemo } from 'react'
 import { ClaimAgeSlider } from './ClaimAgeSlider'
 import { DateOfBirthSelects } from './DateOfBirthSelects'
 import { SpouseClaimModeSegment, type SpouseClaimMode } from './SpouseClaimModeSegment'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
+import {
+  benefitAtClaimAgeFromMonthlyAt67,
+  monthlyAt67FromBenefitAtClaimAge,
+} from '../lib/socialSecurity'
 import './SocialSecuritySetupFields.scss'
 import './ClaimAgeSlider.scss'
 import './SpouseClaimModeSegment.scss'
@@ -40,6 +45,8 @@ type Props = {
   onSpouseBenefitMonthlyChange: (amount: number) => void
   hints?: SocialSecuritySetupHints
   showFillState?: boolean
+  /** When set, claim-age slider shows only these tick labels (range still 62–70). */
+  claimAgeMilestoneTicks?: readonly number[]
   className?: string
 }
 
@@ -63,12 +70,20 @@ export function SocialSecuritySetupFields({
   onSpouseBenefitMonthlyChange,
   hints: hintsProp,
   showFillState = false,
+  claimAgeMilestoneTicks,
   className,
 }: Props) {
   const hints = { ...DEFAULT_HINTS, ...hintsProp }
   const ssFieldsActive = includeSs
+  const ssBenefitInputValue = benefitAtClaimAgeFromMonthlyAt67(ssBenefitMonthly, ssAge)
+  const spouseBenefitAtClaimAge = useMemo(
+    () => benefitAtClaimAgeFromMonthlyAt67(spouseBenefitMonthly, spouseSsAge),
+    [spouseBenefitMonthly, spouseSsAge],
+  )
   const spouseBenefitDisplay =
-    spouseClaimMode === 'spousal' ? Math.round(ssBenefitMonthly * 0.5) : spouseBenefitMonthly
+    spouseClaimMode === 'spousal'
+      ? Math.round(benefitAtClaimAgeFromMonthlyAt67(ssBenefitMonthly, spouseSsAge) * 0.5)
+      : spouseBenefitAtClaimAge
 
   return (
     <div className={['ss-setup-fields', className].filter(Boolean).join(' ')}>
@@ -100,14 +115,17 @@ export function SocialSecuritySetupFields({
               ariaLabel="Your Social Security claiming age"
               dateOfBirth={dateOfBirth}
               disabled={!includeSs}
+              milestoneAges={claimAgeMilestoneTicks}
             />
             <p className="ss-setup-fields__hint">{hints.ssClaimAge}</p>
           </div>
           <CurrencyAmountInput
             id="ss-setup-user-benefit"
             label={`Expected benefit at ${ssAge}`}
-            value={ssBenefitMonthly}
-            onChange={onSsBenefitMonthlyChange}
+            value={ssBenefitInputValue}
+            onChange={(amount) =>
+              onSsBenefitMonthlyChange(monthlyAt67FromBenefitAtClaimAge(amount, ssAge))
+            }
             hint={hints.ssBenefit}
             disabled={!includeSs}
             externalPrefix
@@ -170,7 +188,11 @@ export function SocialSecuritySetupFields({
                   id="ss-setup-spouse-benefit"
                   label={`Expected benefit at ${spouseSsAge}`}
                   value={spouseBenefitDisplay}
-                  onChange={onSpouseBenefitMonthlyChange}
+                  onChange={(amount) =>
+                    onSpouseBenefitMonthlyChange(
+                      monthlyAt67FromBenefitAtClaimAge(amount, spouseSsAge),
+                    )
+                  }
                   readOnly={spouseClaimMode === 'spousal'}
                   disabled={!ssFieldsActive}
                   externalPrefix

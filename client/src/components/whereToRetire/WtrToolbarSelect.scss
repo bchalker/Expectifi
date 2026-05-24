@@ -1,0 +1,42 @@
+.wtr-toolbar-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.wtr-toolbar-select [data-slot='select'] {
+  width: 100%;
+  gap: 0;
+}
+
+.wtr-toolbar-select [data-slot='select-trigger'] {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.wtr-toolbar-select [data-slot='select-trigger']:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-strong));
+  background: var(--surface2);
+}
+
+.wtr-toolbar-select [data-slot='select-value'] {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wtr-toolbar-select__popover {
+  z-index: 70;
+}

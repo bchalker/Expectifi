@@ -2,12 +2,13 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
 import { Button } from '@heroui/react'
 import { useAuth } from '../context/AuthContext'
-import type { ComputedSnapshot, CalculatorInputs, CalculatorUi, DrawerName } from '../lib/computeResults'
+import type { ComputedSnapshot, CalculatorInputs, DrawerName } from '../lib/computeResults'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import { fmt, fmtK, fmtMon } from '../utils/format'
 import { ConfigDrawerBody, type ConfigDrawerTab } from './ConfigDrawerBody'
 import { SidePanelShell } from './SidePanelShell'
+import { AppButton } from './ui/AppButton'
 import './PanelChrome.scss'
 
 const TITLES: Record<DrawerName, string> = {
@@ -18,18 +19,12 @@ const TITLES: Record<DrawerName, string> = {
   config: 'Your Plans',
 }
 
-const CONFIG_DRAWER_SUBTITLE =
-  'We need a few details to project growth and monthly income from your balances.'
-
 type Props = {
   drawer: DrawerName | null
   onClose: () => void
   c: ComputedSnapshot
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  ui: CalculatorUi
-  activePreset: string | null
-  setActivePreset: (id: string | null) => void
   balanceMode: BalanceInputMode
   onBalanceModeChange: (m: BalanceInputMode) => void
   brokerageMode: BrokerageBalanceMode
@@ -41,6 +36,7 @@ type Props = {
   configInitialTab?: ConfigDrawerTab
   onOpenSignIn?: () => void
   onOpenRegister?: () => void
+  onResetGuestProfile?: () => void
 }
 
 export function DrawerPanel({
@@ -49,9 +45,6 @@ export function DrawerPanel({
   c,
   inputs,
   setInputs,
-  ui,
-  activePreset,
-  setActivePreset,
   balanceMode,
   onBalanceModeChange,
   brokerageMode,
@@ -63,6 +56,7 @@ export function DrawerPanel({
   configInitialTab,
   onOpenSignIn,
   onOpenRegister,
+  onResetGuestProfile,
 }: Props) {
   const open = drawer != null
   const lastDrawerRef = useRef<DrawerName | null>(null)
@@ -71,17 +65,22 @@ export function DrawerPanel({
   const { user, signOut } = useAuth()
 
   const configFooter =
-    panelDrawer === 'config' && user?.email ? (
+    panelDrawer === 'config' ? (
       <div className="drawer-config-footer">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="drawer-config-footer__signout"
-          onPress={() => void signOut()}
-        >
-          Sign out
-        </Button>
+        {user?.email ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="drawer-config-footer__signout"
+            onPress={() => void signOut()}
+          >
+            Sign out
+          </Button>
+        ) : null}
+        <AppButton type="button" size="md" variant="primary" className="drawer-config-footer__confirm" onPress={onClose}>
+          Confirm
+        </AppButton>
       </div>
     ) : undefined
 
@@ -106,7 +105,7 @@ export function DrawerPanel({
         id="drawer"
         titleId="drawer-panel-title"
         title={panelDrawer ? TITLES[panelDrawer] : 'Details'}
-        subtitle={panelDrawer === 'config' ? CONFIG_DRAWER_SUBTITLE : undefined}
+        subtitle={undefined}
         onClose={onClose}
         scrollKey={panelDrawer ?? ''}
         shellClassName={['drawer-shell--right', panelDrawer === 'config' ? 'drawer-shell--config' : '']
@@ -121,9 +120,6 @@ export function DrawerPanel({
             c={c}
             inputs={inputs}
             setInputs={setInputs}
-            ui={ui}
-            activePreset={activePreset}
-            setActivePreset={setActivePreset}
             balanceMode={balanceMode}
             onBalanceModeChange={onBalanceModeChange}
             brokerageMode={brokerageMode}
@@ -136,6 +132,7 @@ export function DrawerPanel({
             onClose={onClose}
             onOpenSignIn={onOpenSignIn}
             onOpenRegister={onOpenRegister}
+            onResetGuestProfile={onResetGuestProfile}
           />
         ) : null}
       </SidePanelShell>
@@ -148,9 +145,6 @@ function DrawerBody({
   c,
   inputs,
   setInputs,
-  ui,
-  activePreset,
-  setActivePreset,
   balanceMode: _balanceMode,
   onBalanceModeChange: _onBalanceModeChange,
   brokerageMode: _brokerageMode,
@@ -163,14 +157,12 @@ function DrawerBody({
   onClose,
   onOpenSignIn,
   onOpenRegister,
+  onResetGuestProfile,
 }: {
   id: DrawerName
   c: ComputedSnapshot
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  ui: CalculatorUi
-  activePreset: string | null
-  setActivePreset: (id: string | null) => void
   balanceMode: BalanceInputMode
   onBalanceModeChange: (m: BalanceInputMode) => void
   brokerageMode: BrokerageBalanceMode
@@ -183,6 +175,7 @@ function DrawerBody({
   onClose: () => void
   onOpenSignIn?: () => void
   onOpenRegister?: () => void
+  onResetGuestProfile?: () => void
 }) {
   switch (id) {
     case 'config':
@@ -191,13 +184,11 @@ function DrawerBody({
           c={c}
           inputs={inputs}
           setInputs={setInputs}
-          ui={ui}
-          activePreset={activePreset}
-          setActivePreset={setActivePreset}
           initialTab={configInitialTab}
           onDrawerClose={onClose}
           onOpenSignIn={onOpenSignIn}
           onOpenRegister={onOpenRegister}
+          onResetGuestProfile={onResetGuestProfile}
         />
       )
     case 'scenarios':
