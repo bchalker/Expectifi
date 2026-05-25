@@ -40,7 +40,9 @@ function isValidEmail(raw: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
-function firstNameFromDisplayName(displayName: string | null | undefined): string {
+function firstNameFromDisplayName(
+  displayName: string | null | undefined,
+): string {
   if (!displayName?.trim()) return "";
   return displayName.trim().split(/\s+/)[0] ?? "";
 }
@@ -52,7 +54,8 @@ function CreateAccountMarketing() {
     <div className="auth-modal__register-marketing">
       <p className="auth-modal__register-marketing__value-add">
         Premium saves your CSV uploads, <strong>Plaid</strong> bank sync in the
-        US and Canada, <strong>TrueLayer</strong> in Europe, and settings—kept in sync.
+        US and Canada, <strong>TrueLayer</strong> in Europe, and settings—kept
+        in sync.
       </p>
 
       {showStripeSetupHint ? (
@@ -99,7 +102,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   const [stripePaymentBusy, setStripePaymentBusy] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promoHint, setPromoHint] = useState<string | null>(null);
-  const [appliedPromo, setAppliedPromo] = useState<AppliedSignupPromo | null>(null);
+  const [appliedPromo, setAppliedPromo] = useState<AppliedSignupPromo | null>(
+    null,
+  );
   const prevOpenRef = useRef<AuthModalMode | null>(null);
 
   const resetFields = useCallback(() => {
@@ -647,7 +652,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                 readOnlyFirstName={googleFirstName}
                 billingFirstName={googleFirstName}
                 hideNameFields
-                promoCode={appliedPromo?.code ?? (promoCode.trim() || undefined)}
+                promoCode={
+                  appliedPromo?.code ?? (promoCode.trim() || undefined)
+                }
                 promotionCodeId={appliedPromo?.promotionCodeId}
                 completeGoogleCheckout={completeGoogleCheckout}
                 setMsg={setMsg}
@@ -714,7 +721,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                   onPress={() => signInWithGoogle()}
                 >
                   <span className="auth-modal__google-inner">
-                    <GoogleLogoMark className="auth-modal__google-logo" size={18} />
+                    <GoogleLogoMark
+                      className="auth-modal__google-logo"
+                      size={18}
+                    />
                     Continue with Google
                   </span>
                 </Button>
@@ -839,7 +849,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                         onPress={() => signInWithGoogle()}
                       >
                         <span className="auth-modal__google-inner">
-                          <GoogleLogoMark className="auth-modal__google-logo" size={18} />
+                          <GoogleLogoMark
+                            className="auth-modal__google-logo"
+                            size={18}
+                          />
                           Continue with Google
                         </span>
                       </Button>
@@ -891,7 +904,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                       password={password}
                       billingFirstName={firstName}
                       hideNameFields
-                      promoCode={appliedPromo?.code ?? (promoCode.trim() || undefined)}
+                      promoCode={
+                        appliedPromo?.code ?? (promoCode.trim() || undefined)
+                      }
                       promotionCodeId={appliedPromo?.promotionCodeId}
                       signUp={signUp}
                       setMsg={setMsg}
@@ -967,7 +982,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                   onPress={() => signInWithGoogle()}
                 >
                   <span className="auth-modal__google-inner">
-                    <GoogleLogoMark className="auth-modal__google-logo" size={18} />
+                    <GoogleLogoMark
+                      className="auth-modal__google-logo"
+                      size={18}
+                    />
                     Continue with Google
                   </span>
                 </Button>

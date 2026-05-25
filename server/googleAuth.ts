@@ -64,7 +64,9 @@ function googleConfig(port: number) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim()
   const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
   const apiPublic = process.env.API_PUBLIC_URL?.trim() || `http://localhost:${port}`
-  const redirectUri = `${apiPublic.replace(/\/$/, '')}/api/auth/google/callback`
+  const redirectUri =
+    process.env.GOOGLE_CALLBACK_URL?.trim() ||
+    `${apiPublic.replace(/\/$/, '')}/api/auth/google/callback`
   if (!clientId || !clientSecret) return null
   return { clientId, clientSecret, redirectUri, clientOrigin }
 }
