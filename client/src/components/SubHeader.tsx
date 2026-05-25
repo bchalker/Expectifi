@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
 import { SS_CLAIM_AGE_OPTIONS, clampClaimAge } from "../lib/socialSecurity";
@@ -89,7 +95,6 @@ function PhaseSegmentTabs({
   );
 }
 
-
 /** Claim age — trigger opens panel with 62 / 67 / 70 button group. */
 function SubheaderClaimAgePicker({
   value,
@@ -132,7 +137,9 @@ function SubheaderClaimAgePicker({
       >
         <span className="subheader-claim-age-picker__trigger-text">
           At age{" "}
-          <span className="subheader-claim-age-picker__trigger-age">{claimAge}</span>
+          <span className="subheader-claim-age-picker__trigger-age">
+            {claimAge}
+          </span>
         </span>
         <IconChevronRight
           className="subheader-claim-age-picker__chevron"

@@ -1,16 +1,11 @@
 import { isValidIsoDateString } from '../lib/ageFromDob'
 import {
-  clampClaimAge,
+  clampClaimAgeInRange,
   formatSsAgeLabel,
   SS_CLAIM_AGE_MAX,
   SS_CLAIM_AGE_MIN,
 } from '../lib/socialSecurity'
 import './ClaimAgeSlider.scss'
-
-const SLIDER_AGES = Array.from(
-  { length: SS_CLAIM_AGE_MAX - SS_CLAIM_AGE_MIN + 1 },
-  (_, i) => SS_CLAIM_AGE_MIN + i,
-)
 
 /** Onboarding SS step: show only these tick labels; slider still selects every age 62–70. */
 export const SS_CLAIM_SLIDER_MILESTONES = [62, 64, 67, 70] as const
@@ -21,6 +16,8 @@ type Props = {
   ariaLabel: string
   dateOfBirth?: string
   disabled?: boolean
+  claimAgeMin?: number
+  claimAgeMax?: number
   /** Tick labels only; range input still spans min–max. */
   milestoneAges?: readonly number[]
 }
@@ -31,10 +28,16 @@ export function ClaimAgeSlider({
   ariaLabel,
   dateOfBirth,
   disabled = false,
+  claimAgeMin = SS_CLAIM_AGE_MIN,
+  claimAgeMax = SS_CLAIM_AGE_MAX,
   milestoneAges,
 }: Props) {
-  const age = clampClaimAge(value)
-  const tickAges = milestoneAges ?? SLIDER_AGES
+  const min = claimAgeMin
+  const max = claimAgeMax
+  const age = clampClaimAgeInRange(value, min, max)
+  const tickAges =
+    milestoneAges ??
+    Array.from({ length: max - min + 1 }, (_, i) => min + i)
   const valueLabel =
     dateOfBirth && isValidIsoDateString(dateOfBirth)
       ? formatSsAgeLabel(dateOfBirth, age)
@@ -49,15 +52,15 @@ export function ClaimAgeSlider({
         <input
           type="range"
           className="claim-age-slider__input"
-          min={SS_CLAIM_AGE_MIN}
-          max={SS_CLAIM_AGE_MAX}
+          min={min}
+          max={max}
           step={1}
           value={age}
           disabled={disabled}
-          onChange={(e) => onChange(clampClaimAge(Number(e.target.value)))}
+          onChange={(e) => onChange(clampClaimAgeInRange(Number(e.target.value), min, max))}
           aria-label={ariaLabel}
-          aria-valuemin={SS_CLAIM_AGE_MIN}
-          aria-valuemax={SS_CLAIM_AGE_MAX}
+          aria-valuemin={min}
+          aria-valuemax={max}
           aria-valuenow={age}
           aria-valuetext={valueLabel}
         />

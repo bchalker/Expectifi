@@ -1,8 +1,9 @@
 import type { OnboardingRegionId } from './onboardingRegions'
+import { normalizeOnboardingRegionId } from './onboardingRegions'
 import { loadUserProfile } from './userProfileStorage'
 import type { ManualAccountTypeMeta, OnboardingAccountType } from './manualAccountEntries'
 
-export type AccountTypesLocaleKey = 'us' | 'uk' | 'de' | 'fr' | 'es' | 'it' | 'eu'
+export type AccountTypesLocaleKey = 'us' | 'ca' | 'uk' | 'de' | 'fr' | 'es' | 'it'
 
 type LocaleAccountDef = {
   id: OnboardingAccountType
@@ -23,6 +24,49 @@ function def(
 ): LocaleAccountDef {
   return { id, label, tone, withdrawalBucket, taxKind, taxDesc }
 }
+
+const CA_ACCOUNTS: LocaleAccountDef[] = [
+  def(
+    'pretax_401k_ira',
+    'RRSP',
+    'trad',
+    'pretax',
+    'Traditional',
+    'Pre-tax contributions, taxed on withdrawal',
+  ),
+  def(
+    'roth_ira',
+    'TFSA',
+    'roth',
+    'roth',
+    'Tax-free growth',
+    'After-tax contributions, tax-free withdrawals',
+  ),
+  def(
+    'ca_rrif',
+    'RRIF',
+    'trad',
+    'pretax',
+    'Traditional',
+    'Registered retirement income fund — withdrawals are taxable',
+  ),
+  def(
+    'brokerage',
+    'Non-registered account',
+    'taxable',
+    'brokerage',
+    'Taxable',
+    'After-tax, capital gains apply',
+  ),
+  def(
+    'pension',
+    'Workplace pension (DCPP/DBPP)',
+    'trad',
+    'pretax',
+    'Traditional',
+    'Employer defined contribution or defined benefit plan',
+  ),
+]
 
 const US_ACCOUNTS: LocaleAccountDef[] = [
   def('brokerage', 'Brokerage', 'taxable', 'brokerage', 'Taxable', 'After-tax, capital gains apply'),
@@ -85,7 +129,7 @@ const UK_ACCOUNTS: LocaleAccountDef[] = [
 const DE_ACCOUNTS: LocaleAccountDef[] = [
   def(
     'de_gesetzliche_rente',
-    'Gesetzliche Rente (statutory)',
+    'Gesetzliche Rente',
     'trad',
     'pretax',
     'State pension',
@@ -101,7 +145,7 @@ const DE_ACCOUNTS: LocaleAccountDef[] = [
   ),
   def('de_riester', 'Riester-Rente', 'trad', 'pretax', 'Traditional', 'Subsidized private retirement savings'),
   def('de_ruerup', 'Rürup-Rente', 'trad', 'pretax', 'Traditional', 'Basic pension for self-employed'),
-  def('de_etf_depot', 'ETF Depot (taxable)', 'taxable', 'brokerage', 'Taxable', 'Taxable investment account'),
+  def('de_etf_depot', 'ETF Depot', 'taxable', 'brokerage', 'Taxable', 'Taxable investment account'),
 ]
 
 const FR_ACCOUNTS: LocaleAccountDef[] = [
@@ -155,7 +199,8 @@ const IT_ACCOUNTS: LocaleAccountDef[] = [
   def('it_conto_titoli', 'Conto Titoli', 'taxable', 'brokerage', 'Taxable', 'Securities account'),
 ]
 
-const EU_ACCOUNTS: LocaleAccountDef[] = [
+/** Legacy EU / other stored account types — not offered in launch onboarding. */
+const LEGACY_INT_ACCOUNTS: LocaleAccountDef[] = [
   def('int_occupational_pension', 'Occupational pension', 'trad', 'pretax', 'Traditional', 'Employer pension plan'),
   def('int_private_pension', 'Private pension', 'trad', 'pretax', 'Traditional', 'Personal pension savings'),
   def('int_state_pension', 'State pension', 'trad', 'pretax', 'State pension', 'Government retirement benefit'),
@@ -165,25 +210,24 @@ const EU_ACCOUNTS: LocaleAccountDef[] = [
 
 export const LOCALE_ACCOUNT_TYPE_DEFS: Record<AccountTypesLocaleKey, LocaleAccountDef[]> = {
   us: US_ACCOUNTS,
+  ca: CA_ACCOUNTS,
   uk: UK_ACCOUNTS,
   de: DE_ACCOUNTS,
   fr: FR_ACCOUNTS,
   es: ES_ACCOUNTS,
   it: IT_ACCOUNTS,
-  eu: EU_ACCOUNTS,
 }
 
 export function toAccountTypesLocaleKey(
   locale: OnboardingRegionId | null | undefined,
 ): AccountTypesLocaleKey {
-  if (!locale || locale === 'other' || locale === 'other-europe') return 'eu'
-  if (locale in LOCALE_ACCOUNT_TYPE_DEFS) return locale as AccountTypesLocaleKey
+  if (locale && locale in LOCALE_ACCOUNT_TYPE_DEFS) return locale as AccountTypesLocaleKey
   return 'us'
 }
 
 export function resolveOnboardingAccountLocale(): OnboardingRegionId {
   const profile = loadUserProfile()
-  return profile?.locale ?? 'us'
+  return normalizeOnboardingRegionId(profile?.locale) ?? 'us'
 }
 
 function localeDefToMeta(definition: LocaleAccountDef): ManualAccountTypeMeta {
@@ -207,7 +251,7 @@ export function getLocaleAccountTypeOptions(
 
 export function buildLocaleAccountTypeMetaMap(): Record<OnboardingAccountType, ManualAccountTypeMeta> {
   const map = {} as Record<OnboardingAccountType, ManualAccountTypeMeta>
-  for (const defs of Object.values(LOCALE_ACCOUNT_TYPE_DEFS)) {
+  for (const defs of [...Object.values(LOCALE_ACCOUNT_TYPE_DEFS), LEGACY_INT_ACCOUNTS]) {
     for (const definition of defs) {
       map[definition.id] = localeDefToMeta(definition)
     }
@@ -268,7 +312,9 @@ export const ACCOUNT_TYPE_AGGREGATE_BUCKET: Partial<
   it_fondo_pensione: 'base401k',
   it_pip: 'baseTradIRA',
   it_conto_titoli: 'brkBal',
-  // EU / other
+  // Canada
+  ca_rrif: 'baseTradIRA',
+  // Legacy EU / other (stored accounts)
   int_occupational_pension: 'base401k',
   int_private_pension: 'baseTradIRA',
   int_state_pension: 'baseTradIRA',

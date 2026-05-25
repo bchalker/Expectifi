@@ -3,6 +3,7 @@ import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
 import { planningDisplayFromInputs } from '../lib/userPrefs'
+import { saveResidenceCountryToProfile } from '../lib/userProfileStorage'
 import { ConfigProfileTab } from './ConfigProfileTab'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
@@ -100,7 +101,10 @@ export function ConfigDrawerBody({
                 setInputs({ targetRetirementAge })
               }
               currentResidence={inputs.residenceCountry ?? ''}
-              onCurrentResidence={(residenceCountry) => setInputs({ residenceCountry })}
+              onCurrentResidence={(residenceCountry) => {
+                setInputs({ residenceCountry })
+                saveResidenceCountryToProfile(residenceCountry)
+              }}
               householdIncome={inputs.other}
               onHouseholdIncome={(other) => setInputs({ other })}
               monthlyContribution={planning.save > 0 ? Math.round(planning.save / 12) : 0}

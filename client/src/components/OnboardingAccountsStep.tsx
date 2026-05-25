@@ -1,30 +1,41 @@
 import { useMemo } from 'react'
-import { IconPlus, IconX } from '@tabler/icons-react'
+import { IconPlus, IconWallet, IconX } from '@tabler/icons-react'
+import { AppButton } from './ui/AppButton'
 import { ListBox, Select } from '@heroui/react'
 import { fmtInput, parseNum } from '../utils/format'
 import { currencySymbol } from '../lib/displayCurrency'
 import {
   canAddOnboardingAccountEntry,
   getAccountTypeMeta,
-  getNextOnboardingAccountType,
   getOnboardingAccountTypeOptionsForEntry,
   newManualAccountEntry,
   type ManualAccountEntry,
   type OnboardingAccountType,
 } from '../lib/manualAccountEntries'
+import type { OnboardingRegionId } from '../lib/onboardingRegions'
 import { resolveOnboardingAccountLocale } from '../lib/onboardingAccountTypesByLocale'
 import { firstKeyFromSelectSelection } from '../lib/dateOfBirthSelect'
 import './OnboardingAccountsStep.scss'
 import './OnboardingFieldShell.scss'
 
 type Props = {
+  /** Region from step 1 — drives account type labels in the dropdown. */
+  accountLocale?: OnboardingRegionId | null
   entries: ManualAccountEntry[]
   onChange: (entries: ManualAccountEntry[]) => void
   validationError?: string | null
 }
 
-export function OnboardingAccountsStep({ entries, onChange, validationError }: Props) {
-  const accountLocale = useMemo(() => resolveOnboardingAccountLocale(), [])
+export function OnboardingAccountsStep({
+  accountLocale: accountLocaleProp,
+  entries,
+  onChange,
+  validationError,
+}: Props) {
+  const accountLocale = useMemo(
+    () => accountLocaleProp ?? resolveOnboardingAccountLocale(),
+    [accountLocaleProp],
+  )
   const canAddAnother = canAddOnboardingAccountEntry(entries, accountLocale)
 
   function updateEntry(id: string, patch: Partial<ManualAccountEntry>) {
@@ -32,38 +43,63 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
   }
 
   function removeEntry(id: string) {
-    if (entries.length <= 1) return
     onChange(entries.filter((e) => e.id !== id))
   }
 
   function addEntry() {
     if (!canAddOnboardingAccountEntry(entries, accountLocale)) return
-    const nextType = getNextOnboardingAccountType(entries, accountLocale)
-    onChange([...entries, newManualAccountEntry(nextType)])
+    onChange([...entries, newManualAccountEntry(null)])
   }
+
+  const isEmpty = entries.length === 0
 
   return (
     <div className="onboarding-accounts-step">
-      <div className="onboarding-accounts-step__header-row">
-        <span className="onboarding-accounts-step__column-label" id="onboarding-acct-type-header">
-          Account type
-        </span>
-        <div className="onboarding-accounts-step__balance-header">
-          <span
-            className="onboarding-accounts-step__balance-prefix onboarding-accounts-step__balance-prefix--spacer"
-            aria-hidden
-          >
-            $
+      {!isEmpty ? (
+        <div className="onboarding-accounts-step__header-row">
+          <span className="onboarding-accounts-step__column-label" id="onboarding-acct-type-header">
+            Account type
           </span>
-          <span className="onboarding-accounts-step__column-label" id="onboarding-acct-balance-header">
-            Balance
+          <div className="onboarding-accounts-step__balance-header">
+            <span
+              className="onboarding-accounts-step__balance-prefix onboarding-accounts-step__balance-prefix--spacer"
+              aria-hidden
+            >
+              {currencySymbol()}
+            </span>
+            <span className="onboarding-accounts-step__column-label" id="onboarding-acct-balance-header">
+              Balance
+            </span>
+            {entries.length > 1 ? (
+              <span className="onboarding-accounts-step__remove-spacer" aria-hidden />
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {isEmpty ? (
+        <div className="onboarding-accounts-step__empty">
+          <span className="onboarding-accounts-step__empty-icon" aria-hidden>
+            <IconWallet size={24} stroke={1.5} />
           </span>
-          {entries.length > 1 ? (
-            <span className="onboarding-accounts-step__remove-spacer" aria-hidden />
+          <p className="onboarding-accounts-step__empty-title">No accounts added yet</p>
+          <p className="onboarding-accounts-step__empty-lead">
+            Add each account type and its balance. You can connect banks or import a CSV after setup.
+          </p>
+          {canAddAnother ? (
+            <AppButton
+              type="button"
+              size="sm"
+              variant="primary"
+              className="onboarding-accounts-step__empty-cta"
+              onPress={addEntry}
+            >
+              <IconPlus size={16} stroke={1.5} aria-hidden />
+              Add account
+            </AppButton>
           ) : null}
         </div>
-      </div>
-
+      ) : (
       <div className="onboarding-accounts-step__rows">
         {entries.map((entry) => {
           const typeSelected = entry.type != null
@@ -160,8 +196,9 @@ export function OnboardingAccountsStep({ entries, onChange, validationError }: P
           )
         })}
       </div>
+      )}
 
-      {canAddAnother ? (
+      {!isEmpty && canAddAnother ? (
         <button type="button" className="onboarding-accounts-step__add" onClick={addEntry}>
           <IconPlus size={14} stroke={1.5} aria-hidden />
           Add another account

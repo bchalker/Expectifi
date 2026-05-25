@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "seed:test-promo": "tsx scripts/seed-test-promo.ts",
+    "delete-user": "tsx scripts/delete-user-by-email.ts",
+    "test:truelayer-sync": "tsx scripts/test-truelayer-sync.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -16,6 +16,8 @@ export type OnboardingAccountType =
   | 'roth_ira'
   | 'hsa'
   | 'pension'
+  // Canada
+  | 'ca_rrif'
   // Legacy US (stored accounts)
   | 'trad_ira'
   | 'roth_401k'
@@ -220,6 +222,12 @@ export function canAddOnboardingAccountEntry(
   return getNextOnboardingAccountType(entries, locale) !== null
 }
 
+/** Welcome accounts step: no pre-filled types or balances. */
+export function emptyOnboardingAccountEntries(): ManualAccountEntry[] {
+  return []
+}
+
+/** @deprecated Use emptyOnboardingAccountEntries for welcome; kept for tests/tools. */
 export function buildDefaultOnboardingAccountEntries(
   locale?: OnboardingRegionId | null,
 ): ManualAccountEntry[] {

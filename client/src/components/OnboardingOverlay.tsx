@@ -9,24 +9,35 @@ import {
   saveLocalUserPrefs,
   type UserPrefs,
 } from "../lib/userPrefs";
-import { clearForceOnboardingSession } from "../lib/welcomeGate";
+import {
+  clearForceOnboardingSession,
+  consumeOnboardingFromSignup,
+  peekOnboardingFromSignup,
+} from "../lib/welcomeGate";
+import { useAuth } from "../context/AuthContext";
 import { clampClaimAge, ssTripletFromMonthlyAt67 } from "../lib/socialSecurity";
 import { syncDisplayCurrencyFromResidence } from "../lib/displayCurrency";
 import { isOnboardingResidenceCountry } from "../lib/onboardingResidenceCountries";
-import { regionCountryIsValid, findOnboardingRegion, type OnboardingRegionId } from "../lib/onboardingRegions";
+import {
+  regionCountryIsValid,
+  findOnboardingRegion,
+  normalizeOnboardingRegionId,
+  type OnboardingRegionId,
+} from "../lib/onboardingRegions";
 import {
   loadUserProfile,
   profileToFormDefaults,
   resolveOnboardingStartStep,
   saveProfileFromFormSlice,
   saveRegionToProfile,
+  saveResidenceCountryToProfile,
   type OnboardingFormProfileSlice,
 } from "../lib/userProfileStorage";
 import { OnboardingRegionStep } from "./OnboardingRegionStep";
 import { buildWelcomeSampleAccountEntries } from "../lib/welcomeSampleAccounts";
 import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
+import { pensionConfigForLocale } from "../lib/localePensionConfig";
 import { estimateSsMonthlyAt67FromAnnualIncome } from "../lib/onboardingSsCompare";
-import { SS_CLAIM_SLIDER_MILESTONES } from "./ClaimAgeSlider";
 import { OnboardingProgressSteps } from "./OnboardingProgressSteps";
 import { OnboardingSavingsComparisonBar } from "./OnboardingSavingsComparisonBar";
 import { type SpouseClaimMode } from "./SpouseClaimModeSegment";
@@ -42,7 +53,7 @@ import { fmt } from "../utils/format";
 import {
   aggregateManualAccountsToBases,
   loadStoredManualAccounts,
-  buildDefaultOnboardingAccountEntries,
+  emptyOnboardingAccountEntries,
   saveCompletedManualAccounts,
 } from "../lib/manualAccountEntries";
 import "./ConfigDrawerBody.scss";
@@ -60,17 +71,6 @@ import "./OnboardingRegionStep.scss";
 const BODY_CLASS = "onboarding-overlay--open";
 const RETIRE_AGE_MAX = 80;
 
-const WELCOME_SS_FIELD_HINTS = {
-  ssBenefit:
-    "Your estimated monthly benefit at your chosen claiming age. The average at 67 is around $1,800 — ssa.gov has a free estimator if you want your exact number.",
-  ssClaimAge:
-    "Claiming earlier means a smaller monthly check; waiting until 70 increases it. There is no single right answer — pick what fits your plan.",
-  includeSpouse:
-    "Include your spouse to factor in their Social Security alongside yours.",
-  spouseClaimModeTooltip:
-    "Social Security pays whichever is higher — your spouse's own earned benefit or 50% of yours. Choose spousal benefit if your spouse had lower lifetime earnings.",
-} as const;
-
 const ACCOUNTS_REQUIRED_MSG =
   "Enter at least one account type and balance to continue.";
 
@@ -87,7 +87,6 @@ type Props = {
   setUi?: (p: Partial<CalculatorUi>) => void;
   onComplete: () => void;
   /** Dismiss welcome without saving; dashboard stays empty. */
-  onCancel?: () => void;
   /** When set, prefs are written to the user profile on submit. */
   saveUserPrefs?: (prefs: UserPrefs) => Promise<{ error?: string }>;
   /** After welcome, open the account import flow on the dashboard. */
@@ -104,7 +103,7 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
   return {
     dob,
     currentResidence: profileDefaults.currentResidence || inputs.residenceCountry || "",
-    locale: profileDefaults.locale,
+    locale: normalizeOnboardingRegionId(profileDefaults.locale) ?? undefined,
     currency: profileDefaults.currency,
     householdIncome:
       profileDefaults.householdIncome ?? (inputs.other > 0 ? inputs.other : 0),
@@ -138,7 +137,7 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
     accountEntries:
       storedAccounts?.entries.length && storedAccounts.onboardingCompleted
         ? storedAccounts.entries
-        : buildDefaultOnboardingAccountEntries(profileDefaults.locale ?? storedProfile?.locale),
+        : emptyOnboardingAccountEntries(),
     accountsStepCompleted: storedAccounts?.onboardingCompleted ?? false,
     accountsStepSkipped: storedAccounts?.onboardingSkipped ?? false,
   };
@@ -198,13 +197,17 @@ export function OnboardingOverlay({
   setInputs,
   setUi,
   onComplete,
-  onCancel,
   saveUserPrefs,
   onConnectAccounts,
   onAccountsSaved,
 }: Props) {
+  const { user } = useAuth();
   const storedProfile = loadUserProfile();
-  const [step, setStep] = useState<WizardStep>(() => resolveOnboardingStartStep(storedProfile));
+  const [step, setStep] = useState<WizardStep>(() =>
+    resolveOnboardingStartStep(storedProfile, {
+      forceRegion: peekOnboardingFromSignup(),
+    }),
+  );
   const [form, setForm] = useState(() => initialFormFromInputs(inputs));
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -221,6 +224,13 @@ export function OnboardingOverlay({
   }, []);
 
   useEffect(() => {
+    if (!user || user.onboardingDone) return;
+    if (consumeOnboardingFromSignup()) {
+      setStep("region");
+    }
+  }, [user?.id, user?.onboardingDone]);
+
+  useEffect(() => {
     syncDisplayCurrencyFromResidence(form.currentResidence);
   }, [form.currentResidence]);
 
@@ -231,7 +241,7 @@ export function OnboardingOverlay({
       return;
     }
     if (ssBenefitUserEdited.current) return;
-    const est = estimateSsMonthlyAt67FromAnnualIncome(form.householdIncome);
+    const est = estimateSsMonthlyAt67FromAnnualIncome(form.householdIncome, form.locale);
     setForm((f) => {
       if (f.ssBenefitMonthly === est) return f;
       const next = { ...f, ssBenefitMonthly: est };
@@ -244,7 +254,7 @@ export function OnboardingOverlay({
       }
       return next;
     });
-  }, [step, form.householdIncome, form.includeSpouse, form.spouseClaimMode]);
+  }, [step, form.householdIncome, form.includeSpouse, form.spouseClaimMode, form.locale]);
 
   const dobOk = isValidIsoDateString(form.dob);
   const ageToday = dobOk ? ageFromIsoDateString(form.dob) : null;
@@ -286,11 +296,16 @@ export function OnboardingOverlay({
     if (!region) return;
     saveRegionToProfile(regionId);
     syncDisplayCurrencyFromResidence(region.country);
+    const pension = pensionConfigForLocale(region.locale);
     setForm((f) => ({
       ...f,
       currentResidence: region.country,
       locale: region.locale,
       currency: region.currency,
+      accountEntries: emptyOnboardingAccountEntries(),
+      ssAge: pension.defaultClaimAge,
+      spouseSsAge: pension.defaultClaimAge,
+      ssBenefitMonthly: pension.defaultBenefitMonthlyAt67,
     }));
     setStep("profile");
   }
@@ -366,6 +381,11 @@ export function OnboardingOverlay({
     if (openConnect) onConnectAccounts?.();
   }
 
+  function onProfileBack() {
+    setErr(null);
+    setStep("region");
+  }
+
   function onProfileContinue() {
     setErr(null);
     if (!dobOk || !ageOk) {
@@ -377,6 +397,7 @@ export function OnboardingOverlay({
       return;
     }
     saveProfileFromFormSlice(formProfileSlice(), "profile");
+    setForm((f) => ({ ...f, accountEntries: emptyOnboardingAccountEntries() }));
     setStep("accounts");
   }
 
@@ -465,12 +486,6 @@ export function OnboardingOverlay({
     void persistAndFinish(form);
   }
 
-  function handleCancel() {
-    if (busy) return;
-    setErr(null);
-    onCancel?.();
-  }
-
   const headerTitle =
     step === "region"
       ? null
@@ -479,7 +494,7 @@ export function OnboardingOverlay({
       : step === "accounts"
         ? "Let's see what you're working with"
         : step === "social-security"
-          ? "Social Security"
+          ? pensionConfigForLocale(form.locale).stepTitle
           : "Almost there.";
 
   const headerSubtitle =
@@ -490,7 +505,7 @@ export function OnboardingOverlay({
       : step === "accounts"
         ? null
         : step === "social-security"
-          ? "Help us estimate your benefits in retirement"
+          ? pensionConfigForLocale(form.locale).stepSubtitle
           : null;
 
   const progressStep: ProgressStep | null = step === "region" ? null : step;
@@ -570,8 +585,14 @@ export function OnboardingOverlay({
                   hideResidenceOnProfile
                     ? undefined
                     : (currentResidence) => {
+                        const saved = saveResidenceCountryToProfile(currentResidence);
                         syncDisplayCurrencyFromResidence(currentResidence);
-                        setForm((f) => ({ ...f, currentResidence }));
+                        setForm((f) => ({
+                          ...f,
+                          currentResidence,
+                          locale: saved.locale ?? f.locale,
+                          currency: saved.currency ?? f.currency,
+                        }));
                       }
                 }
                 ageToday={ageToday}
@@ -587,6 +608,7 @@ export function OnboardingOverlay({
               />
             ) : step === "accounts" ? (
               <OnboardingAccountsStep
+                accountLocale={form.locale}
                 entries={form.accountEntries}
                 onChange={(accountEntries) =>
                   setForm((f) => ({ ...f, accountEntries }))
@@ -632,9 +654,8 @@ export function OnboardingOverlay({
                   spouseSsBenefitUserEdited.current = true;
                   setForm((f) => ({ ...f, spouseSsBenefitMonthly }));
                 }}
-                hints={WELCOME_SS_FIELD_HINTS}
+                locale={form.locale}
                 showFillState
-                claimAgeMilestoneTicks={SS_CLAIM_SLIDER_MILESTONES}
               />
             ) : (
               <WelcomeGoalStepFields
@@ -667,9 +688,9 @@ export function OnboardingOverlay({
                 type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--muted"
                 disabled={busy}
-                onClick={handleCancel}
+                onClick={onProfileBack}
               >
-                Cancel
+                Back
               </button>
               <button
                 type="button"

@@ -54,7 +54,10 @@ export function AppLeftNav({
   welcomeDone = true,
 }: Props) {
   const snapshotAvailable = isSnapshotNavAvailable(navContext);
-  const snapshotUnavailableReason = navItemUnavailableReason(SNAPSHOT_NAV_REQUIRES, navContext);
+  const snapshotUnavailableReason = navItemUnavailableReason(
+    SNAPSHOT_NAV_REQUIRES,
+    navContext,
+  );
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone);
   const accountLabel = user
@@ -117,8 +120,12 @@ export function AppLeftNav({
 
   const hasPanelItems =
     snapshotAvailable ||
-    APP_NAV_ROUTE_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext)) ||
-    APP_NAV_DRAWER_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext));
+    APP_NAV_ROUTE_ITEMS.some(({ requires }) =>
+      navRequirementsMet(requires, navContext),
+    ) ||
+    APP_NAV_DRAWER_ITEMS.some(({ requires }) =>
+      navRequirementsMet(requires, navContext),
+    );
   const showGuestProfile = Boolean(accountLabel || showRetireByInProfile);
 
   return (
@@ -144,7 +151,11 @@ export function AppLeftNav({
                 aria-expanded={snapshotOpen && snapshotAvailable}
                 aria-controls="strip-snapshot-panel"
                 aria-disabled={!snapshotAvailable}
-                title={!snapshotAvailable ? (snapshotUnavailableReason ?? undefined) : undefined}
+                title={
+                  !snapshotAvailable
+                    ? (snapshotUnavailableReason ?? undefined)
+                    : undefined
+                }
                 onClick={() => {
                   if (!snapshotAvailable) return;
                   toggleSnapshot();
@@ -155,32 +166,42 @@ export function AppLeftNav({
               <div className="app-left-nav__rule" aria-hidden />
             </>
           ) : null}
-          {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
-            const available = navRequirementsMet(requires, navContext);
-            const unavailableReason = navItemUnavailableReason(requires, navContext);
-            if (!available) return null;
-            const isActive = path === routePath && available;
-            return (
-              <button
-                key={id}
-                type="button"
-                className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}`}
-                aria-current={isActive ? "page" : undefined}
-                aria-disabled={!available}
-                title={!available ? (unavailableReason ?? undefined) : undefined}
-                onClick={() => {
-                  if (!available) return;
-                  navigateApp(routePath);
-                  closeMobile();
-                }}
-              >
-                <span className="app-left-nav__item-label">{label}</span>
-              </button>
-            );
-          })}
+          {APP_NAV_ROUTE_ITEMS.map(
+            ({ id, path: routePath, label, requires }) => {
+              const available = navRequirementsMet(requires, navContext);
+              const unavailableReason = navItemUnavailableReason(
+                requires,
+                navContext,
+              );
+              if (!available) return null;
+              const isActive = path === routePath && available;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}`}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-disabled={!available}
+                  title={
+                    !available ? (unavailableReason ?? undefined) : undefined
+                  }
+                  onClick={() => {
+                    if (!available) return;
+                    navigateApp(routePath);
+                    closeMobile();
+                  }}
+                >
+                  <span className="app-left-nav__item-label">{label}</span>
+                </button>
+              );
+            },
+          )}
           {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
             const available = navRequirementsMet(requires, navContext);
-            const unavailableReason = navItemUnavailableReason(requires, navContext);
+            const unavailableReason = navItemUnavailableReason(
+              requires,
+              navContext,
+            );
             if (!available) return null;
             return (
               <button
@@ -188,7 +209,9 @@ export function AppLeftNav({
                 type="button"
                 className={`app-left-nav__item${drawer === id && available ? " app-left-nav__item--active" : ""}`}
                 aria-disabled={!available}
-                title={!available ? (unavailableReason ?? undefined) : undefined}
+                title={
+                  !available ? (unavailableReason ?? undefined) : undefined
+                }
                 onClick={() => {
                   if (!available) return;
                   openDrawer(id);
@@ -205,7 +228,9 @@ export function AppLeftNav({
               type="button"
               className={[
                 "app-left-nav__account-group",
-                drawer === "config" ? "app-left-nav__account-group--active" : "",
+                drawer === "config"
+                  ? "app-left-nav__account-group--active"
+                  : "",
                 slideIn ? "app-left-nav__account-group--slide-in" : "",
               ]
                 .filter(Boolean)
@@ -217,7 +242,9 @@ export function AppLeftNav({
             >
               <span className="app-left-nav__account-group__profile">
                 {accountLabel ? (
-                  <span className="app-left-nav__profile-name">{accountLabel}</span>
+                  <span className="app-left-nav__profile-name">
+                    {accountLabel}
+                  </span>
                 ) : null}
                 {showRetireByInProfile ? (
                   <span className="app-left-nav__profile-age" aria-hidden>
@@ -234,10 +261,15 @@ export function AppLeftNav({
               {showGuestProfile ? (
                 <div className="app-left-nav__profile" aria-label="Profile">
                   {accountLabel ? (
-                    <span className="app-left-nav__profile-name">{accountLabel}</span>
+                    <span className="app-left-nav__profile-name">
+                      {accountLabel}
+                    </span>
                   ) : null}
                   {showRetireByInProfile ? (
-                    <span className="app-left-nav__profile-age" aria-label={`Retire by age ${targetRetirementAge}`}>
+                    <span
+                      className="app-left-nav__profile-age"
+                      aria-label={`Retire by age ${targetRetirementAge}`}
+                    >
                       Retire by {targetRetirementAge}
                     </span>
                   ) : null}
@@ -275,7 +307,9 @@ export function AppLeftNav({
                     type="button"
                     className={[
                       "app-left-nav__settings-btn",
-                      drawer === "config" ? "app-left-nav__settings-btn--active" : "",
+                      drawer === "config"
+                        ? "app-left-nav__settings-btn--active"
+                        : "",
                       slideIn ? "app-left-nav__settings-btn--slide-in" : "",
                     ]
                       .filter(Boolean)

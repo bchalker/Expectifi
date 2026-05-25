@@ -7,6 +7,8 @@ import { isWelcomeCompletedLocal } from './userPrefs'
 
 export const FORCE_ONBOARDING_SESSION_KEY = 'expectifi_force_onboarding'
 const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
+/** Set after register / Google checkout so welcome starts at region, not a stale guest profile step. */
+export const ONBOARDING_FROM_SIGNUP_KEY = 'expectifi_onboarding_from_signup'
 
 export type WelcomeSkipContext = {
   onboardingDone?: boolean
@@ -60,6 +62,33 @@ export function markForceOnboardingSession(): void {
     sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
   } catch {
     /* private mode */
+  }
+}
+
+export function markOnboardingFromSignup(): void {
+  markForceOnboardingSession()
+  try {
+    sessionStorage.setItem(ONBOARDING_FROM_SIGNUP_KEY, '1')
+  } catch {
+    /* private mode */
+  }
+}
+
+export function peekOnboardingFromSignup(): boolean {
+  try {
+    return sessionStorage.getItem(ONBOARDING_FROM_SIGNUP_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function consumeOnboardingFromSignup(): boolean {
+  try {
+    const v = sessionStorage.getItem(ONBOARDING_FROM_SIGNUP_KEY) === '1'
+    if (v) sessionStorage.removeItem(ONBOARDING_FROM_SIGNUP_KEY)
+    return v
+  } catch {
+    return false
   }
 }
 

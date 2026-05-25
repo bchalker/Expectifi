@@ -50,9 +50,23 @@ type HeaderAppProps = HeaderAuthProps & {
 
 export type HeaderProps = HeaderMarketingProps | HeaderAppProps
 
-function HeaderBrand({ onBrandClick }: { onBrandClick?: () => void }) {
+function HeaderBrand({
+  onBrandClick,
+  onboardingMode = false,
+}: {
+  onBrandClick?: () => void
+  onboardingMode?: boolean
+}) {
   const { user } = useAuth()
   const path = useAppPath()
+
+  if (onboardingMode) {
+    return (
+      <div className="header__brand header__brand--onboarding" aria-label="Expectifi">
+        <span className="header__mark">Expectifi</span>
+      </div>
+    )
+  }
 
   const handleClick = () => {
     if (user) {
@@ -275,16 +289,29 @@ function HeaderAppNav({
 
 export function Header(props: HeaderProps) {
   const { variant, className = '', onSignIn, onCreateAccount } = props
-  const rootClass = ['header', `header--${variant}`, className].filter(Boolean).join(' ')
+  const onboardingChrome = variant === 'app' && props.welcomeDone === false
+  const rootClass = [
+    'header',
+    `header--${variant}`,
+    onboardingChrome && 'header--onboarding',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <header className={rootClass}>
       <div className="header__inner">
-        <HeaderBrand onBrandClick={variant === 'app' ? props.onBrandClick : undefined} />
+        <HeaderBrand
+          onBrandClick={variant === 'app' && !onboardingChrome ? props.onBrandClick : undefined}
+          onboardingMode={onboardingChrome}
+        />
 
-        {variant === 'marketing' ? (
+        {!onboardingChrome && variant === 'marketing' ? (
           <HeaderMarketingNav onMarketingAnchor={props.onMarketingAnchor} />
-        ) : (
+        ) : null}
+
+        {!onboardingChrome && variant === 'app' ? (
           <HeaderAppNav
             drawer={props.drawer}
             snapshotOpen={props.snapshotOpen}
@@ -292,9 +319,9 @@ export function Header(props: HeaderProps) {
             onOpenDrawer={props.onOpenDrawer}
             onSnapshotToggle={props.onSnapshotToggle}
           />
-        )}
+        ) : null}
 
-        {variant === 'app' ? (
+        {!onboardingChrome && variant === 'app' ? (
           <button
             type="button"
             className="header__menu-btn"
@@ -311,15 +338,17 @@ export function Header(props: HeaderProps) {
           </button>
         ) : null}
 
-        <HeaderAuthTail
-          variant={variant}
-          onSignIn={onSignIn}
-          onCreateAccount={onCreateAccount}
-          drawer={variant === 'app' ? props.drawer : undefined}
-          onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
-          targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
-          welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
-        />
+        {!onboardingChrome ? (
+          <HeaderAuthTail
+            variant={variant}
+            onSignIn={onSignIn}
+            onCreateAccount={onCreateAccount}
+            drawer={variant === 'app' ? props.drawer : undefined}
+            onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
+            targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
+            welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
+          />
+        ) : null}
       </div>
     </header>
   )

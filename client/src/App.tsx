@@ -63,6 +63,7 @@ import {
   loadUserProfile,
   mergeProfileWithDbPrefs,
   profileToCalculatorPatch,
+  saveResidenceCountryToProfile,
   stripFinancialFields,
 } from './lib/userProfileStorage'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
@@ -184,7 +185,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
   )
 
   useEffect(() => {
-    syncDisplayCurrencyFromResidence(inputs.residenceCountry ?? '')
+    const country = inputs.residenceCountry?.trim() ?? ''
+    if (!country) return
+    syncDisplayCurrencyFromResidence(country)
+    saveResidenceCountryToProfile(country)
   }, [inputs.residenceCountry])
 
   useEffect(() => {
@@ -604,6 +608,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       </div>
       {!welcomeDone ? (
         <OnboardingOverlay
+          key={user?.id ?? 'guest-onboarding'}
           headerStackHeight={headerStackHeight}
           inputs={inputs}
           setInputs={setInputs}
@@ -618,12 +623,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 setShowTransparencyNote(true)
               }
             }
-          }}
-          onCancel={() => {
-            const fresh = freshAppState()
-            setInputsState(fresh.inputs)
-            welcomeBlockedRef.current = false
-            setShowWelcome(false)
           }}
           onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
           onAccountsSaved={() => {

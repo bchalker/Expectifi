@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Form, Label, TextField } from '@heroui/react'
+import { Form, Input, Label, TextField } from '@heroui/react'
 import {
   CardCvcElement,
   CardExpiryElement,
@@ -33,6 +33,22 @@ const CARD_ELEMENT_OPTIONS = {
   },
 }
 
+const CARD_NUMBER_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  disableLink: true,
+  placeholder: '1234 1234 1234 1234',
+} as const
+
+const CARD_EXPIRY_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  placeholder: 'MM/YY',
+} as const
+
+const CARD_CVC_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  placeholder: 'CVC',
+} as const
+
 /** Stripe Elements appearance (align with app accent / surface). */
 const AUTH_REGISTER_ELEMENTS_APPEARANCE: Appearance = {
   theme: 'stripe',
@@ -52,11 +68,13 @@ type SignUpFn = (
   password: string,
   paymentMethodId?: string,
   promoCode?: string,
+  promotionCodeId?: string,
 ) => Promise<{ error?: string }>
 
 type CompleteGoogleFn = (
   paymentMethodId?: string,
   promoCode?: string,
+  promotionCodeId?: string,
 ) => Promise<{ error?: string }>
 
 /** Exported for modal footer submit (`form` attribute must match `<Form id>`). */
@@ -66,7 +84,13 @@ type PaymentInnerProps = {
   clientSecret: string
   email: string
   password: string
+  billingFirstName?: string
+  /** First name collected on step 1 — hide duplicate field on payment step. */
+  hideNameFields?: boolean
+  /** Google SSO: show first name read-only on payment step. */
+  readOnlyFirstName?: string
   promoCode?: string
+  promotionCodeId?: string
   signUp?: SignUpFn
   completeGoogleCheckout?: CompleteGoogleFn
   setMsg: (v: string | null) => void
@@ -78,7 +102,11 @@ function RegisterStripePaymentInner({
   clientSecret,
   email,
   password,
+  billingFirstName = '',
+  hideNameFields = false,
+  readOnlyFirstName = '',
   promoCode,
+  promotionCodeId,
   signUp,
   completeGoogleCheckout,
   setMsg,
@@ -87,6 +115,7 @@ function RegisterStripePaymentInner({
 }: PaymentInnerProps) {
   const stripe = useStripe()
   const elements = useElements()
+  const [firstName, setFirstName] = useState(billingFirstName)
   const [busy, setBusy] = useState(false)
   const onBusyChangeRef = useRef(onBusyChange)
   onBusyChangeRef.current = onBusyChange
@@ -94,6 +123,11 @@ function RegisterStripePaymentInner({
   useEffect(() => {
     onBusyChangeRef.current?.(busy)
   }, [busy])
+
+  useEffect(() => {
+    if (hideNameFields) return
+    setFirstName(billingFirstName)
+  }, [billingFirstName, hideNameFields])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -112,11 +146,15 @@ function RegisterStripePaymentInner({
       }
 
       /* Split CardNumber/Expiry/CVC elements require confirmCardSetup, not confirmSetup({ elements }) (Payment Element only). */
+      const billingName = hideNameFields
+        ? billingFirstName.trim()
+        : firstName.trim()
       const { error, setupIntent } = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
           card: cardNumberEl,
           billing_details: {
             email: email.trim(),
+            name: billingName || undefined,
             address: {
               country: BILLING_COUNTRY_US,
             },
@@ -137,14 +175,24 @@ function RegisterStripePaymentInner({
         return
       }
       if (completeGoogleCheckout) {
-        const { error: regErr } = await completeGoogleCheckout(paymentMethodId, promoCode)
+        const { error: regErr } = await completeGoogleCheckout(
+          paymentMethodId,
+          promotionCodeId ? undefined : promoCode,
+          promotionCodeId,
+        )
         if (regErr) setMsg(regErr)
         else {
           setMsg('Account setup complete. You are signed in.')
           onRegistered?.()
         }
       } else if (signUp) {
-        const { error: regErr } = await signUp(email, password, paymentMethodId, promoCode)
+        const { error: regErr } = await signUp(
+          email,
+          password,
+          paymentMethodId,
+          promotionCodeId ? undefined : promoCode,
+          promotionCodeId,
+        )
         if (regErr) setMsg(regErr)
         else {
           setMsg('Account created. You are signed in.')
@@ -165,28 +213,54 @@ function RegisterStripePaymentInner({
       className="auth-bar-stripe-form"
       onSubmit={(e) => void onSubmit(e)}
     >
-      <TextField
-        name="cardNumber"
-        className="auth-modal__field auth-bar-stripe-textfield"
-        fullWidth
-        variant="secondary"
-      >
-        <Label className="auth-modal__label">Card number</Label>
-        <div className="auth-bar-stripe-slot">
-          <CardNumberElement options={{ ...CARD_ELEMENT_OPTIONS, disableLink: true }} />
-        </div>
-      </TextField>
+      {readOnlyFirstName ? (
+        <TextField
+          name="firstName"
+          className="auth-modal__field auth-bar-stripe-textfield auth-modal__field--readonly"
+          fullWidth
+          variant="secondary"
+          value={readOnlyFirstName}
+          isReadOnly
+        >
+          <Label className="auth-modal__label">First name</Label>
+          <Input type="text" readOnly autoComplete="given-name" />
+        </TextField>
+      ) : hideNameFields ? null : (
+        <TextField
+          name="firstName"
+          className="auth-modal__field auth-bar-stripe-textfield"
+          fullWidth
+          variant="secondary"
+          value={firstName}
+          onChange={setFirstName}
+          isRequired
+        >
+          <Label className="auth-modal__label">First name</Label>
+          <Input type="text" autoComplete="given-name" />
+        </TextField>
+      )}
 
-      <div className="auth-modal__cred-row">
+      <div className="auth-bar-stripe-card-row">
+        <TextField
+          name="cardNumber"
+          className="auth-modal__field auth-bar-stripe-textfield"
+          fullWidth
+          variant="secondary"
+        >
+          <Label className="auth-modal__label">Card Number</Label>
+          <div className="auth-bar-stripe-slot">
+            <CardNumberElement options={CARD_NUMBER_OPTIONS} />
+          </div>
+        </TextField>
         <TextField
           name="cardExpiry"
           className="auth-modal__field auth-bar-stripe-textfield"
           fullWidth
           variant="secondary"
         >
-          <Label className="auth-modal__label">Expiration date</Label>
+          <Label className="auth-modal__label">Exp Date</Label>
           <div className="auth-bar-stripe-slot">
-            <CardExpiryElement options={CARD_ELEMENT_OPTIONS} />
+            <CardExpiryElement options={CARD_EXPIRY_OPTIONS} />
           </div>
         </TextField>
         <TextField
@@ -195,9 +269,9 @@ function RegisterStripePaymentInner({
           fullWidth
           variant="secondary"
         >
-          <Label className="auth-modal__label">Security code</Label>
+          <Label className="auth-modal__label">Security Code</Label>
           <div className="auth-bar-stripe-slot">
-            <CardCvcElement options={CARD_ELEMENT_OPTIONS} />
+            <CardCvcElement options={CARD_CVC_OPTIONS} />
           </div>
         </TextField>
       </div>

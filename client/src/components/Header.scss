@@ -17,6 +17,21 @@
   box-sizing: border-box;
 }
 
+/* Welcome onboarding: centered logo only (nav / account chrome hidden in Header.tsx). */
+.header--onboarding .header__inner {
+  justify-content: center;
+}
+
+.header--onboarding .header__brand--onboarding {
+  align-items: center;
+  text-align: center;
+  cursor: default;
+}
+
+.header--onboarding .header__mark {
+  font-size: clamp(1.125rem, 3vw, 1.35rem);
+}
+
 .header--marketing {
   position: sticky;
   top: 0;

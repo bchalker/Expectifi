@@ -7,6 +7,31 @@
   max-width: 28rem;
 }
 
+.auth-bar-stripe-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.auth-bar-stripe-card-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(4.5rem, 1fr) minmax(4.5rem, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+  min-width: 0;
+}
+
+@media (max-width: 479px) {
+  .auth-bar-stripe-card-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .auth-bar-stripe-card-row > [data-slot='textfield']:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Stripe Element mount: match `.auth-modal input[data-slot='input']` chrome (inside dialog only). */
 .auth-modal .auth-bar-stripe-slot {
   width: 100%;

@@ -111,8 +111,8 @@ export function ConfigProfileTab({
         </div>
       </dl>
       <p className="footnote footnote--muted config-profile-tab__cancel-lead">
-        Cancel account ends your Stripe subscription immediately and permanently deletes your Expectifi account and
-        saved scenarios.
+        Cancel account ends your Stripe subscription, disconnects linked banks, permanently deletes your Expectifi
+        account and all saved data on our servers, and clears plan data stored in this browser. This cannot be undone.
       </p>
       {err ? (
         <p className="config-profile-tab__error" role="alert">
@@ -154,8 +154,9 @@ export function ConfigProfileTab({
                   Cancel account?
                 </h4>
                 <p id="config-profile-cancel-desc" className="config-profile-tab__confirm-body">
-                  Your subscription will be cancelled in Stripe and your account ({user.email}) will be deleted. This
-                  cannot be undone.
+                  Your subscription will be cancelled, bank connections revoked, your account ({user.email}) and all
+                  associated data on our servers will be permanently deleted, and local plan data in this browser will
+                  be cleared. This cannot be undone.
                 </p>
                 {err ? (
                   <p className="config-profile-tab__confirm-error" role="alert">

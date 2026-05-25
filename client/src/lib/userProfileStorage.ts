@@ -1,11 +1,17 @@
 import { isValidIsoDateString } from './ageFromDob'
 import type { DisplayCurrencyCode } from './displayCurrency'
-import { setDisplayCurrencyCode } from './displayCurrency'
+import { residenceCountryToDisplayCurrency, setDisplayCurrencyCode } from './displayCurrency'
 import type { CalculatorInputs } from './computeResults'
+import { isOnboardingResidenceCountry } from './onboardingResidenceCountries'
 import type { OnboardingRegionId } from './onboardingRegions'
-import { findOnboardingRegion } from './onboardingRegions'
+import {
+  findOnboardingRegion,
+  normalizeOnboardingRegionId,
+  ONBOARDING_REGION_OPTIONS,
+} from './onboardingRegions'
 import type { UserPrefs } from './userPrefs'
-import { clampClaimAge } from './socialSecurity'
+import { pensionConfigForLocale } from './localePensionConfig'
+import { clampClaimAgeInRange } from './socialSecurity'
 
 export const USER_PROFILE_STORAGE_KEY = 'expectifi_user_profile'
 const LEGACY_USER_PROFILE_KEYS = ['hwp_user_profile'] as const
@@ -171,16 +177,39 @@ export function saveRegionToProfile(regionId: OnboardingRegionId): StoredUserPro
   })
 }
 
+/** Keep locale/currency aligned when residence changes in profile (config drawer). */
+function localeForResidenceCountry(country: string): OnboardingRegionId | undefined {
+  const trimmed = country.trim()
+  if (!trimmed) return undefined
+  const match = ONBOARDING_REGION_OPTIONS.find((r) => r.country === trimmed)
+  return match?.locale
+}
+
+export function saveResidenceCountryToProfile(country: string): StoredUserProfile {
+  const trimmed = country.trim()
+  const match = ONBOARDING_REGION_OPTIONS.find((r) => r.country === trimmed)
+  if (match) return saveRegionToProfile(match.id)
+  if (isOnboardingResidenceCountry(trimmed)) {
+    const currency = residenceCountryToDisplayCurrency(trimmed)
+    setDisplayCurrencyCode(currency)
+    return saveUserProfile({ country: trimmed, currency })
+  }
+  return saveUserProfile({ country: trimmed })
+}
+
 export function saveProfileFromFormSlice(
   form: OnboardingFormProfileSlice,
   step: 'profile' | 'social-security' | 'income-goal',
 ): StoredUserProfile {
   const dobPartsVal = dobParts(form.dob)
   const spouseParts = dobParts(form.spouseDob)
+  const residenceLocale = localeForResidenceCountry(form.currentResidence)
   const base: Partial<StoredUserProfile> = {
     country: form.currentResidence,
-    locale: form.locale,
-    currency: form.currency,
+    locale: residenceLocale ?? form.locale,
+    currency: residenceLocale
+      ? findOnboardingRegion(residenceLocale)?.currency ?? form.currency
+      : form.currency,
   }
 
   if (step === 'profile') {
@@ -195,17 +224,18 @@ export function saveProfileFromFormSlice(
   }
 
   if (step === 'social-security') {
+    const pension = pensionConfigForLocale(residenceLocale ?? form.locale)
     return saveUserProfile({
       ...base,
       include_social_security: form.includeSs,
-      ss_claim_age: clampClaimAge(form.ssAge),
+      ss_claim_age: clampClaimAgeInRange(form.ssAge, pension.claimAgeMin, pension.claimAgeMax),
       ss_benefit_estimate: Math.max(0, Math.round(form.ssBenefitMonthly)),
       include_spouse: form.includeSpouse,
       spouse_dob: form.includeSpouse ? form.spouseDob : '',
       spouse_birth_month: spouseParts.birth_month,
       spouse_birth_year: spouseParts.birth_year,
       spouse_claim_type: form.spouseClaimMode,
-      spouse_claim_age: clampClaimAge(form.spouseSsAge),
+      spouse_claim_age: clampClaimAgeInRange(form.spouseSsAge, pension.claimAgeMin, pension.claimAgeMax),
       spouse_benefit_estimate: Math.max(0, Math.round(form.spouseSsBenefitMonthly)),
     })
   }
@@ -220,20 +250,33 @@ export function saveProfileFromFormSlice(
 export function profileToFormDefaults(profile: StoredUserProfile | null): Partial<OnboardingFormProfileSlice> {
   if (!profile) return {}
   const spouseClaimMode = profile.spouse_claim_type === 'spousal' ? 'spousal' : 'own'
+  const locale = normalizeOnboardingRegionId(profile.locale) ?? undefined
   return {
     currentResidence: profile.country ?? '',
-    locale: profile.locale,
+    locale,
     currency: profile.currency,
     dob: profile.dob ?? '',
     householdIncome: profile.household_income ?? 0,
     monthlyContribution: profile.monthly_contribution ?? 0,
     includeSs: profile.include_social_security ?? false,
-    ssAge: profile.ss_claim_age ? clampClaimAge(profile.ss_claim_age) : 67,
+    ssAge: profile.ss_claim_age
+      ? clampClaimAgeInRange(
+          profile.ss_claim_age,
+          pensionConfigForLocale(locale).claimAgeMin,
+          pensionConfigForLocale(locale).claimAgeMax,
+        )
+      : pensionConfigForLocale(locale).defaultClaimAge,
     ssBenefitMonthly: profile.ss_benefit_estimate ?? 0,
     includeSpouse: profile.include_spouse ?? false,
     spouseClaimMode,
     spouseDob: profile.spouse_dob ?? '',
-    spouseSsAge: profile.spouse_claim_age ? clampClaimAge(profile.spouse_claim_age) : 67,
+    spouseSsAge: profile.spouse_claim_age
+      ? clampClaimAgeInRange(
+          profile.spouse_claim_age,
+          pensionConfigForLocale(locale).claimAgeMin,
+          pensionConfigForLocale(locale).claimAgeMax,
+        )
+      : pensionConfigForLocale(locale).defaultClaimAge,
     spouseSsBenefitMonthly: profile.spouse_benefit_estimate ?? 0,
     retireAge: profile.target_retirement_age ?? 0,
     monthlyGoal: profile.monthly_income_goal ?? 0,
@@ -249,10 +292,20 @@ export function profileToCalculatorPatch(profile: StoredUserProfile | null): Par
   if (profile.monthly_contribution != null) patch.save = Math.max(0, profile.monthly_contribution) * 12
   if (profile.target_retirement_age != null) patch.targetRetirementAge = profile.target_retirement_age
   if (profile.monthly_income_goal != null) patch.monthlyIncomeGoal = profile.monthly_income_goal
-  if (profile.ss_claim_age != null) patch.ssAge = clampClaimAge(profile.ss_claim_age)
+  const locale = normalizeOnboardingRegionId(profile.locale) ?? localeForResidenceCountry(profile.country ?? '') ?? 'us'
+  const pension = pensionConfigForLocale(locale)
+  if (profile.ss_claim_age != null) {
+    patch.ssAge = clampClaimAgeInRange(profile.ss_claim_age, pension.claimAgeMin, pension.claimAgeMax)
+  }
   if (profile.include_spouse != null) patch.married = profile.include_spouse
   if (profile.spouse_dob) patch.spouseDateOfBirth = profile.spouse_dob
-  if (profile.spouse_claim_age != null) patch.spouseClaimAge = clampClaimAge(profile.spouse_claim_age)
+  if (profile.spouse_claim_age != null) {
+    patch.spouseClaimAge = clampClaimAgeInRange(
+      profile.spouse_claim_age,
+      pension.claimAgeMin,
+      pension.claimAgeMax,
+    )
+  }
   if (profile.spouse_claim_type != null) {
     patch.spouseHasOwnEarnings = profile.spouse_claim_type === 'own'
   }
@@ -275,13 +328,31 @@ export function mergeProfileWithDbPrefs(
       }
     : {}
   const merged = { version: 1 as const, ...profile, ...fromDb }
+  const country = merged.country?.trim()
+  if (country) {
+    const locale = localeForResidenceCountry(country)
+    if (locale) {
+      merged.locale = locale
+      const region = findOnboardingRegion(locale)
+      if (region?.currency) {
+        merged.currency = region.currency
+        setDisplayCurrencyCode(region.currency)
+      } else {
+        const currency = residenceCountryToDisplayCurrency(country)
+        merged.currency = currency
+        setDisplayCurrencyCode(currency)
+      }
+    }
+  }
   saveUserProfile(merged)
   return merged
 }
 
 export function resolveOnboardingStartStep(
   profile: StoredUserProfile | null,
+  opts?: { forceRegion?: boolean },
 ): 'region' | 'profile' | 'accounts' {
+  if (opts?.forceRegion) return 'region'
   if (!hasStoredProfileStep0(profile)) return 'region'
   if (!hasStoredProfileStep1(profile)) return 'profile'
   return 'accounts'

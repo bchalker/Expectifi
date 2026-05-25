@@ -1,6 +1,6 @@
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconBrandGoogle } from "@tabler/icons-react";
+import { GoogleLogoMark } from "./ui/GoogleLogoMark";
 import {
   Button,
   CloseButton,
@@ -10,7 +10,12 @@ import {
   TextField,
 } from "@heroui/react";
 import { useAuth } from "../context/AuthContext";
-import { validateSignupPromoCode, promoValidationErrorMessage } from "../lib/api/stripePromo";
+import {
+  appliedPromoFromValidation,
+  validateSignupPromoCode,
+  promoValidationErrorMessage,
+  type AppliedSignupPromo,
+} from "../lib/api/stripePromo";
 import {
   getStripeBrowserPromise,
   stripePublishableKeyConfigured,
@@ -35,8 +40,10 @@ function isValidEmail(raw: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
-const REGISTER_VALUE_ADD_COPY =
-  "Premium members enjoy Plaid-connection sync saved data.";
+function firstNameFromDisplayName(displayName: string | null | undefined): string {
+  if (!displayName?.trim()) return "";
+  return displayName.trim().split(/\s+/)[0] ?? "";
+}
 
 function CreateAccountMarketing() {
   const showStripeSetupHint =
@@ -44,8 +51,10 @@ function CreateAccountMarketing() {
   return (
     <div className="auth-modal__register-marketing">
       <p className="auth-modal__register-marketing__value-add">
-        {REGISTER_VALUE_ADD_COPY}
+        Premium saves your CSV uploads, <strong>Plaid</strong> bank sync in the
+        US and Canada, <strong>TrueLayer</strong> in Europe, and settings—kept in sync.
       </p>
+
       {showStripeSetupHint ? (
         <p className="auth-modal__register-marketing__dev">
           Developer setup: add{" "}
@@ -75,6 +84,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     authCallbackMessage,
     clearAuthCallbackMessage,
   } = useAuth();
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -89,10 +99,11 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   const [stripePaymentBusy, setStripePaymentBusy] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promoHint, setPromoHint] = useState<string | null>(null);
-  const [showPromoField, setShowPromoField] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<AppliedSignupPromo | null>(null);
   const prevOpenRef = useRef<AuthModalMode | null>(null);
 
   const resetFields = useCallback(() => {
+    setFirstName("");
     setEmail("");
     setPassword("");
     setMsg(null);
@@ -105,7 +116,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setStripePaymentBusy(false);
     setPromoCode("");
     setPromoHint(null);
-    setShowPromoField(false);
+    setAppliedPromo(null);
   }, []);
 
   useEffect(() => {
@@ -205,6 +216,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setSignupStripeErr(null);
     setPromoHint(null);
     const em = email.trim();
+    if (!firstName.trim()) {
+      setMsg("Enter your first name.");
+      return;
+    }
     if (!isValidEmail(em)) {
       setMsg("Enter a valid email.");
       return;
@@ -212,35 +227,6 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     if (password.length < 8) {
       setMsg("Password must be at least 8 characters.");
       return;
-    }
-    const trimmedPromo = promoCode.trim();
-    if (trimmedPromo) {
-      setSignupStripeLoading(true);
-      try {
-        const promo = await validateSignupPromoCode(trimmedPromo);
-        if (!promo.ok) {
-          setMsg(promoValidationErrorMessage('error' in promo ? promo.error : undefined));
-          return;
-        }
-        setPromoHint(promo.message);
-        if (promo.waivesPayment) {
-          setBusy(true);
-          const { error } = await signUp(em, password, undefined, trimmedPromo);
-          setBusy(false);
-          if (error) {
-            setMsg(error);
-            return;
-          }
-          setMsg("Account created. You are signed in.");
-          setMsgOk(true);
-          return;
-        }
-      } catch {
-        setMsg("Could not validate promo code. Try again.");
-        return;
-      } finally {
-        setSignupStripeLoading(false);
-      }
     }
     setSignupStripeLoading(true);
     try {
@@ -270,7 +256,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     } finally {
       setSignupStripeLoading(false);
     }
-  }, [email, password, promoCode, signUp]);
+  }, [email, firstName, password]);
 
   const onRegisterStripeBack = useCallback(() => {
     setRegisterStripeStep(1);
@@ -279,60 +265,56 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setSignupStripeErr(null);
     setStripePaymentBusy(false);
     setPromoHint(null);
+    setAppliedPromo(null);
   }, []);
 
-  const onGoogleCheckoutWithPromo = useCallback(async () => {
+  const applySignupPromoCode = useCallback(async () => {
     setMsg(null);
-    setBusy(true);
+    setMsgOk(false);
     const trimmedPromo = promoCode.trim();
     if (!trimmedPromo) {
       setMsg("Enter a promo code.");
-      setBusy(false);
       return;
     }
+    setBusy(true);
     try {
       const promo = await validateSignupPromoCode(trimmedPromo);
       if (!promo.ok) {
-        setMsg(promoValidationErrorMessage('error' in promo ? promo.error : undefined));
+        setAppliedPromo(null);
+        setPromoHint(null);
+        setMsg(
+          promoValidationErrorMessage(
+            "error" in promo ? promo.error : undefined,
+            "hint" in promo ? promo.hint : undefined,
+          ),
+        );
         return;
       }
-      setPromoHint(promo.message);
-      if (!promo.waivesPayment) {
-        return;
-      }
-      const { error } = await completeGoogleCheckout(undefined, trimmedPromo);
-      if (error) setMsg(error);
-      else {
-        setMsg("Account setup complete. You are signed in.");
-        setMsgOk(true);
-      }
-    } catch {
-      setMsg("Could not complete signup. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  }, [promoCode, completeGoogleCheckout]);
+      const applied = appliedPromoFromValidation(promo);
+      setAppliedPromo(applied);
+      setPromoHint(applied.message);
 
-  const onRegisterPromoApply = useCallback(async () => {
-    setMsg(null);
-    setBusy(true);
-    const trimmedPromo = promoCode.trim();
-    if (!trimmedPromo) {
-      setMsg("Enter a promo code.");
-      setBusy(false);
-      return;
-    }
-    try {
-      const promo = await validateSignupPromoCode(trimmedPromo);
-      if (!promo.ok) {
-        setMsg(promoValidationErrorMessage('error' in promo ? promo.error : undefined));
+      if (!applied.waivesPayment) return;
+
+      if (open === "google_checkout") {
+        const { error } = await completeGoogleCheckout(
+          undefined,
+          undefined,
+          applied.promotionCodeId,
+        );
+        if (error) setMsg(error);
+        else {
+          setMsg("Account setup complete. You are signed in.");
+          setMsgOk(true);
+        }
         return;
       }
-      setPromoHint(promo.message);
-      if (!promo.waivesPayment) {
-        return;
-      }
+
       const em = email.trim();
+      if (!firstName.trim()) {
+        setMsg("Enter your first name before applying a free signup code.");
+        return;
+      }
       if (!isValidEmail(em)) {
         setMsg("Enter a valid email before applying a free signup code.");
         return;
@@ -341,7 +323,13 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         setMsg("Password must be at least 8 characters.");
         return;
       }
-      const { error } = await signUp(em, password, undefined, trimmedPromo);
+      const { error } = await signUp(
+        em,
+        password,
+        undefined,
+        undefined,
+        applied.promotionCodeId,
+      );
       if (error) setMsg(error);
       else {
         setMsg("Account created. You are signed in.");
@@ -352,7 +340,15 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     } finally {
       setBusy(false);
     }
-  }, [promoCode, email, password, signUp]);
+  }, [
+    promoCode,
+    open,
+    completeGoogleCheckout,
+    email,
+    firstName,
+    password,
+    signUp,
+  ]);
 
   async function onSignInSubmit(e: FormEvent) {
     e.preventDefault();
@@ -373,6 +369,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     e.preventDefault();
     setMsg(null);
     setMsgOk(false);
+    if (!firstName.trim()) {
+      setMsg("Enter your first name.");
+      return;
+    }
     setBusy(true);
     const { error } = await signUp(email, password);
     setBusy(false);
@@ -386,64 +386,133 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
 
   if (!open) return null;
 
-  const promoFooterLink = !showPromoField ? (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      className="auth-modal__footer-link auth-modal__footer-link--promo"
-      onPress={() => setShowPromoField(true)}
-    >
-      Have a promo code?
-    </Button>
-  ) : null;
-
-  const renderPromoBlock = (onApply: (() => void) | null) =>
-    showPromoField ? (
-      <div className="auth-modal__promo-block">
-        <div className="auth-modal__promo-row">
-          <TextField
-            className="auth-modal__field auth-modal__field--floating auth-modal__field--promo"
-            fullWidth
-            variant="secondary"
-            name="promoCode"
-            value={promoCode}
-            onChange={(v) => {
-              setPromoCode(v);
-              setPromoHint(null);
-            }}
+  const renderPromoBlock = (onApply: (() => void) | null) => (
+    <div className="auth-modal__promo-block">
+      <span
+        className="auth-modal__label auth-modal__promo-label"
+        id="auth-promo-label"
+      >
+        Promo Code
+      </span>
+      <div
+        className="auth-modal__promo-combo"
+        role="group"
+        aria-labelledby="auth-promo-label"
+      >
+        <TextField
+          className="auth-modal__field auth-modal__field--promo"
+          fullWidth
+          variant="secondary"
+          name="promoCode"
+          value={promoCode}
+          onChange={(v) => {
+            setPromoCode(v);
+            setPromoHint(null);
+            setAppliedPromo(null);
+          }}
+        >
+          <Input
+            type="text"
+            autoComplete="off"
+            autoCapitalize="characters"
+            placeholder="Promo"
+            aria-label="Promo Code"
+          />
+        </TextField>
+        {onApply ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            className="auth-modal__promo-apply"
+            isDisabled={busy || stripePaymentBusy || !promoCode.trim()}
+            onPress={() => void (onApply ? onApply() : applySignupPromoCode())}
           >
-            <Label className="auth-modal__label">Promo code</Label>
-            <Input
-              type="text"
-              autoComplete="off"
-              autoCapitalize="characters"
-              placeholder=" "
-            />
-          </TextField>
-          {onApply ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="auth-modal__outline auth-modal__promo-apply"
-              isDisabled={busy || stripePaymentBusy || !promoCode.trim()}
-              onPress={() => void onApply()}
-            >
-              Apply
-            </Button>
-          ) : null}
-        </div>
-        {promoHint ? (
-          <p className="auth-modal__promo-hint">{promoHint}</p>
+            Apply
+          </Button>
         ) : null}
       </div>
-    ) : null;
+      {promoHint ? (
+        <p
+          className={`auth-modal__promo-hint${appliedPromo ? " auth-modal__promo-hint--applied" : ""}`}
+          role="status"
+        >
+          {promoHint}
+        </p>
+      ) : null}
+    </div>
+  );
+
+  const renderRegisterFooter = () => (
+    <div className="auth-modal__register-footer">
+      <p className="auth-modal__register-footer-line">
+        Already have an account?{" "}
+        <button
+          type="button"
+          className="auth-modal__inline-link"
+          onClick={() => onSwitchMode("signin")}
+        >
+          Sign in
+        </button>
+      </p>
+      <p className="auth-modal__register-footer-line">
+        Just exploring?{" "}
+        <button
+          type="button"
+          className="auth-modal__inline-link"
+          onClick={onClose}
+        >
+          Continue without an account
+        </button>
+      </p>
+    </div>
+  );
+
+  const renderRegisterCredFields = () => (
+    <div className="auth-modal__cred-stack">
+      <TextField
+        className="auth-modal__field auth-modal__field--floating"
+        fullWidth
+        variant="secondary"
+        name="firstName"
+        value={firstName}
+        onChange={(v) => setFirstName(v)}
+        isRequired
+      >
+        <Label className="auth-modal__label">First name</Label>
+        <Input type="text" autoComplete="given-name" placeholder=" " />
+      </TextField>
+      <TextField
+        className="auth-modal__field auth-modal__field--floating"
+        fullWidth
+        variant="secondary"
+        name="email"
+        value={email}
+        onChange={(v) => setEmail(v)}
+        isRequired
+      >
+        <Label className="auth-modal__label">Email</Label>
+        <Input type="email" autoComplete="email" placeholder=" " />
+      </TextField>
+      <TextField
+        className="auth-modal__field auth-modal__field--floating"
+        fullWidth
+        variant="secondary"
+        name="password"
+        value={password}
+        onChange={(v) => setPassword(v)}
+        isRequired
+      >
+        <Label className="auth-modal__label">Password</Label>
+        <Input type="password" autoComplete="new-password" placeholder=" " />
+      </TextField>
+    </div>
+  );
 
   let title = "";
   let headerExtra: ReactNode = null;
   let headerSignupEmail: ReactNode = null;
-  let headerPlanPrice: ReactNode = null;
+  let showRegisterHeader = false;
   let body: ReactNode = null;
   let footer: ReactNode = null;
 
@@ -549,6 +618,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       );
     } else {
       const em = gc.email;
+      const googleFirstName = firstNameFromDisplayName(gc.displayName);
       const stripePromise = getStripeBrowserPromise();
       headerSignupEmail = (
         <p className="auth-modal__header-identity" title={em}>
@@ -556,8 +626,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
           <strong className="auth-modal__header-identity-email">{em}</strong>
         </p>
       );
-      const showPayment =
-        Boolean(stripePromise) && signupClientSecret !== null;
+      const showPayment = Boolean(stripePromise) && signupClientSecret !== null;
       body = (
         <>
           {signupStripeErr ? (
@@ -569,19 +638,26 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
             </p>
           ) : null}
           {showPayment && stripePromise ? (
-            <RegisterStripePaymentForm
-              stripePromise={stripePromise}
-              clientSecret={signupClientSecret}
-              email={em}
-              password=""
-              promoCode={promoCode.trim() || undefined}
-              completeGoogleCheckout={completeGoogleCheckout}
-              setMsg={setMsg}
-              onBusyChange={setStripePaymentBusy}
-              onRegistered={() => setMsgOk(true)}
-            />
+            <div className="auth-modal__reg-payment-step">
+              <RegisterStripePaymentForm
+                stripePromise={stripePromise}
+                clientSecret={signupClientSecret}
+                email={em}
+                password=""
+                readOnlyFirstName={googleFirstName}
+                billingFirstName={googleFirstName}
+                hideNameFields
+                promoCode={appliedPromo?.code ?? (promoCode.trim() || undefined)}
+                promotionCodeId={appliedPromo?.promotionCodeId}
+                completeGoogleCheckout={completeGoogleCheckout}
+                setMsg={setMsg}
+                onBusyChange={setStripePaymentBusy}
+                onRegistered={() => setMsgOk(true)}
+              />
+              <hr className="auth-modal__payment-divider" aria-hidden />
+              {renderPromoBlock(applySignupPromoCode)}
+            </div>
           ) : null}
-          {renderPromoBlock(onGoogleCheckoutWithPromo)}
           {msg ? (
             <p
               className={`auth-modal__msg${msgOk ? " auth-modal__msg--ok" : ""}`}
@@ -617,7 +693,6 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
               Start Premium — $9/month
             </Button>
           </div>
-          {promoFooterLink}
         </>
       );
     }
@@ -639,7 +714,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                   onPress={() => signInWithGoogle()}
                 >
                   <span className="auth-modal__google-inner">
-                    <IconBrandGoogle size={18} strokeWidth={1.5} aria-hidden />
+                    <GoogleLogoMark className="auth-modal__google-logo" size={18} />
                     Continue with Google
                   </span>
                 </Button>
@@ -719,16 +794,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       </Button>
     );
   } else if (stripePublishableKeyConfigured) {
-    title = "Create account";
+    title = "Save your retirement plan";
+    showRegisterHeader = true;
     headerExtra = null;
-    headerPlanPrice = (
-      <p
-        className="auth-modal__plan-price"
-        aria-label="Subscription price, 9 dollars per month"
-      >
-        $9/mo
-      </p>
-    );
     if (registerStripeStep === 2 && email.trim()) {
       const em = email.trim();
       headerSignupEmail = (
@@ -771,11 +839,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                         onPress={() => signInWithGoogle()}
                       >
                         <span className="auth-modal__google-inner">
-                          <IconBrandGoogle
-                            size={18}
-                            strokeWidth={1.5}
-                            aria-hidden
-                          />
+                          <GoogleLogoMark className="auth-modal__google-logo" size={18} />
                           Continue with Google
                         </span>
                       </Button>
@@ -793,41 +857,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                     void onRegisterStripeContinue();
                   }}
                 >
-                  <div className="auth-modal__cred-row">
-                    <TextField
-                      className="auth-modal__field auth-modal__field--floating"
-                      fullWidth
-                      variant="secondary"
-                      name="email"
-                      value={email}
-                      onChange={(v) => setEmail(v)}
-                      isRequired
-                    >
-                      <Label className="auth-modal__label">Email</Label>
-                      <Input
-                        type="email"
-                        autoComplete="email"
-                        placeholder=" "
-                      />
-                    </TextField>
-                    <TextField
-                      className="auth-modal__field auth-modal__field--floating"
-                      fullWidth
-                      variant="secondary"
-                      name="password"
-                      value={password}
-                      onChange={(v) => setPassword(v)}
-                      isRequired
-                    >
-                      <Label className="auth-modal__label">Password</Label>
-                      <Input
-                        type="password"
-                        autoComplete="new-password"
-                        placeholder=" "
-                      />
-                    </TextField>
-                  </div>
-                  {renderPromoBlock(onRegisterPromoApply)}
+                  {renderRegisterCredFields()}
                   <div className="auth-modal__actions">
                     <Button
                       type="submit"
@@ -839,9 +869,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                     >
                       {signupStripeLoading
                         ? "Preparing payment…"
-                        : promoCode.trim()
-                          ? "Continue"
-                          : "Continue to payment"}
+                        : "Continue to payment"}
                     </Button>
                   </div>
                 </Form>
@@ -855,23 +883,29 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
               </div>
               <div className="auth-modal__reg-slide">
                 {showPayment ? (
-                  <RegisterStripePaymentForm
-                    stripePromise={stripePromise}
-                    clientSecret={signupClientSecret}
-                    email={email}
-                    password={password}
-                    promoCode={promoCode.trim() || undefined}
-                    signUp={signUp}
-                    setMsg={setMsg}
-                    onBusyChange={setStripePaymentBusy}
-                    onRegistered={() => setMsgOk(true)}
-                  />
+                  <div className="auth-modal__reg-payment-step">
+                    <RegisterStripePaymentForm
+                      stripePromise={stripePromise}
+                      clientSecret={signupClientSecret}
+                      email={email}
+                      password={password}
+                      billingFirstName={firstName}
+                      hideNameFields
+                      promoCode={appliedPromo?.code ?? (promoCode.trim() || undefined)}
+                      promotionCodeId={appliedPromo?.promotionCodeId}
+                      signUp={signUp}
+                      setMsg={setMsg}
+                      onBusyChange={setStripePaymentBusy}
+                      onRegistered={() => setMsgOk(true)}
+                    />
+                    <hr className="auth-modal__payment-divider" aria-hidden />
+                    {renderPromoBlock(applySignupPromoCode)}
+                  </div>
                 ) : registerStripeStep === 2 ? (
                   <p className="auth-modal__subtitle auth-modal__subtitle--body-only">
                     Loading payment form…
                   </p>
                 ) : null}
-                {registerStripeStep === 2 ? renderPromoBlock(onRegisterPromoApply) : null}
                 {msg && registerStripeStep === 2 ? (
                   <p
                     className={`auth-modal__msg${msgOk ? " auth-modal__msg--ok" : ""}`}
@@ -910,29 +944,13 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
             </Button>
           </div>
         ) : null}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="auth-modal__footer-link"
-          onPress={() => onSwitchMode("signin")}
-        >
-          Already have an account? Sign in
-        </Button>
-        {promoFooterLink}
+        {renderRegisterFooter()}
       </>
     );
   } else {
-    title = "Create account";
+    title = "Save your retirement plan";
+    showRegisterHeader = true;
     headerExtra = null;
-    headerPlanPrice = (
-      <p
-        className="auth-modal__plan-price"
-        aria-label="Subscription price, 9 dollars per month"
-      >
-        $9/mo
-      </p>
-    );
     body = (
       <>
         <div className="auth-modal__form-entrance" key={open}>
@@ -949,7 +967,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                   onPress={() => signInWithGoogle()}
                 >
                   <span className="auth-modal__google-inner">
-                    <IconBrandGoogle size={18} strokeWidth={1.5} aria-hidden />
+                    <GoogleLogoMark className="auth-modal__google-logo" size={18} />
                     Continue with Google
                   </span>
                 </Button>
@@ -964,36 +982,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
             className="auth-modal__form"
             onSubmit={(e) => void onRegisterNoStripe(e)}
           >
-            <div className="auth-modal__cred-row">
-              <TextField
-                className="auth-modal__field auth-modal__field--floating"
-                fullWidth
-                variant="secondary"
-                name="email"
-                value={email}
-                onChange={(v) => setEmail(v)}
-                isRequired
-              >
-                <Label className="auth-modal__label">Email</Label>
-                <Input type="email" autoComplete="email" placeholder=" " />
-              </TextField>
-              <TextField
-                className="auth-modal__field auth-modal__field--floating"
-                fullWidth
-                variant="secondary"
-                name="password"
-                value={password}
-                onChange={(v) => setPassword(v)}
-                isRequired
-              >
-                <Label className="auth-modal__label">Password</Label>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder=" "
-                />
-              </TextField>
-            </div>
+            {renderRegisterCredFields()}
             <div className="auth-modal__actions">
               <Button
                 type="submit"
@@ -1017,17 +1006,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         ) : null}
       </>
     );
-    footer = (
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="auth-modal__footer-link"
-        onPress={() => onSwitchMode("signin")}
-      >
-        Already have an account? Sign in
-      </Button>
-    );
+    footer = renderRegisterFooter();
   }
 
   return (
@@ -1052,8 +1031,16 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
               <h2 id="auth-modal-title" className="auth-modal__title">
                 {title}
               </h2>
-              {headerPlanPrice}
             </div>
+            {showRegisterHeader ? (
+              <p className="auth-modal__register-tagline">
+                Everything synced, nothing lost.{" "}
+                <span className="auth-modal__register-tagline-price">
+                  $9/mo
+                </span>{" "}
+                — cancel anytime.
+              </p>
+            ) : null}
             {headerSignupEmail}
             {headerExtra}
           </div>

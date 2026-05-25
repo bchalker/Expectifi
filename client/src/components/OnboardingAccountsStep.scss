@@ -51,6 +51,57 @@
   color: var(--text);
 }
 
+.onboarding-accounts-step__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 10.5rem;
+  padding: 1.75rem 1.25rem;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1.5px dashed #b8bec8;
+  border-radius: 12px;
+  background: var(--surface2);
+}
+
+.onboarding-accounts-step__empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  color: var(--text-muted);
+}
+
+.onboarding-accounts-step__empty-title {
+  margin: 0.15rem 0 0;
+  font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.onboarding-accounts-step__empty-lead {
+  margin: 0;
+  max-width: 18rem;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.onboarding-accounts-step__empty-cta {
+  margin-top: 0.35rem;
+}
+
 .onboarding-accounts-step__rows {
   display: flex;
   flex-direction: column;

@@ -10,6 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
+    port: 5173,
+    strictPort: false,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

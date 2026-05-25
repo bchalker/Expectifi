@@ -222,6 +222,18 @@ export async function repairStripeSubscriptionForCustomer(
   return ensureStripeSubscription(stripe, customerId, pm.id)
 }
 
+/** Remove Stripe customer record after subscriptions are cancelled (account closure). */
+export async function deleteStripeCustomerRecord(
+  stripe: Stripe,
+  customerId: string,
+): Promise<void> {
+  try {
+    await stripe.customers.del(customerId)
+  } catch {
+    /* already deleted */
+  }
+}
+
 /** Cancel every non-terminal subscription for a Stripe customer (account closure). */
 export async function cancelAllStripeSubscriptionsForCustomer(
   stripe: Stripe,

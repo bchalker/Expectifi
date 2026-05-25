@@ -78,6 +78,8 @@ type PlaidConnectionsSectionProps = {
   onDisconnect: (itemId: string) => void | Promise<void>
   showConnectAnother?: boolean
   onConnectAnother?: () => void
+  usesTrueLayer?: boolean
+  connectAnotherLabel?: string
 }
 
 function PlaidConnectionsSection({
@@ -87,10 +89,16 @@ function PlaidConnectionsSection({
   onDisconnect,
   showConnectAnother = false,
   onConnectAnother,
+  usesTrueLayer = false,
+  connectAnotherLabel,
 }: PlaidConnectionsSectionProps) {
   if (!items.length) return null
+  const sectionLabel = usesTrueLayer ? 'Connected bank accounts' : 'Connected Plaid accounts'
+  const addLabel =
+    connectAnotherLabel ??
+    (usesTrueLayer ? 'Connect another bank' : 'Connect another account via Plaid')
   return (
-    <div className="account-balances-manage__plaid-section" aria-label="Connected Plaid accounts">
+    <div className="account-balances-manage__plaid-section" aria-label={sectionLabel}>
       <ul className="plaid-connection-panel__list">
         {items.map((item) => {
           const healthy = item.status === 'healthy'
@@ -153,7 +161,7 @@ function PlaidConnectionsSection({
           onClick={onConnectAnother}
         >
           <IconLink size={16} stroke={1.5} aria-hidden />
-          Connect another account via Plaid
+          {addLabel}
         </button>
       ) : null}
     </div>
@@ -279,20 +287,22 @@ export function AccountBalancesManageMenu({
     run()
   }, [close, ctx, onImportApplied, onRequestReplaceManual, showPlaidConnect])
 
+  const usesTrueLayer = ctx?.usesTrueLayer ?? false
+  const syncTitle = usesTrueLayer ? 'Bank synced' : 'Plaid synced'
   const syncTooltip = lastHealthySync ? (
     <>
-      <span className="account-balances-manage__tooltip-title">Plaid synced</span>
+      <span className="account-balances-manage__tooltip-title">{syncTitle}</span>
       <span className="account-balances-manage__tooltip-time">{formatPlaidSyncTime(lastHealthySync)}</span>
     </>
   ) : (
-    'Plaid synced'
+    syncTitle
   )
 
   return (
     <div className={['account-balances-manage', className].filter(Boolean).join(' ')}>
       {hasHealthyPlaid ? (
         <Tooltip content={syncTooltip} placement="bottom">
-          <span className="account-balances-manage__sync-dot" aria-label="Plaid synced" />
+          <span className="account-balances-manage__sync-dot" aria-label={syncTitle} />
         </Tooltip>
       ) : null}
       <button
@@ -329,6 +339,8 @@ export function AccountBalancesManageMenu({
                     onDisconnect={ctx.disconnectItem}
                     showConnectAnother={showPlaidConnect}
                     onConnectAnother={handlePlaidConnect}
+                    usesTrueLayer={ctx.usesTrueLayer}
+                    connectAnotherLabel={ctx.connectButtonLabel}
                   />
                   <div className="account-balances-manage__divider" role="separator" />
                 </>
@@ -357,7 +369,7 @@ export function AccountBalancesManageMenu({
                       onClick={handlePlaidConnect}
                     >
                       <IconLink size={16} stroke={1.5} aria-hidden />
-                      Connect with Plaid
+                      {ctx?.connectButtonLabel ?? 'Connect via Plaid'}
                     </button>
                   </li>
                 ) : !showPlaidConnect && !hasPaidSubscription ? (
@@ -366,15 +378,15 @@ export function AccountBalancesManageMenu({
                       className="account-balances-manage__item account-balances-manage__item--disabled"
                       aria-label={
                         user
-                          ? 'Connect with Plaid — Subscribe to Pro to connect'
-                          : 'Connect with Plaid — Pro subscribers only'
+                          ? `${ctx?.connectButtonLabel ?? 'Connect via Plaid'} — Subscribe to Pro to connect`
+                          : `${ctx?.connectButtonLabel ?? 'Connect via Plaid'} — Pro subscribers only`
                       }
                     >
                       <span className="account-balances-manage__pro-pill" aria-hidden>
                         PRO
                       </span>
                       <IconLink size={16} stroke={1.5} aria-hidden />
-                      Connect with Plaid
+                      {ctx?.connectButtonLabel ?? 'Connect via Plaid'}
                     </span>
                   </li>
                 ) : null}

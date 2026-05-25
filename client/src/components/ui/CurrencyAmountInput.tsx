@@ -30,6 +30,8 @@ type Props = {
   showFillState?: boolean
   /** Inline validation message shown beneath the input row. */
   error?: string
+  /** Optional benchmark badge beside the label (e.g. national average). */
+  averageBadge?: string | null
 }
 
 export function CurrencyAmountInput({
@@ -48,6 +50,7 @@ export function CurrencyAmountInput({
   placeholder,
   showFillState = false,
   error,
+  averageBadge,
 }: Props) {
   const [focused, setFocused] = useState(false)
   const showPlaceholder = placeholder != null && value === 0
@@ -190,11 +193,20 @@ export function CurrencyAmountInput({
     </div>
   )
 
-  return (
-    <div className={['currency-amount-input', className].filter(Boolean).join(' ')}>
+  const labelRow = (
+    <div className="currency-amount-input__label-row">
       <label className="currency-amount-input__label" htmlFor={id}>
         {label}
       </label>
+      {averageBadge ? (
+        <span className="currency-amount-input__average-badge">{averageBadge}</span>
+      ) : null}
+    </div>
+  )
+
+  return (
+    <div className={['currency-amount-input', className].filter(Boolean).join(' ')}>
+      {labelRow}
       {externalPrefix || externalSuffix ? (
         <div className="currency-amount-input__value-group">
           {amountRow}

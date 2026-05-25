@@ -28,9 +28,22 @@ import {
   type PlaidItemSummary,
 } from '../lib/api/plaid'
 import {
+  applyPlaidHoldingsSnapshot,
   applyPlaidHoldingsSnapshots,
   removePlaidItemFromLocalStorage,
 } from '../lib/plaidImportApply'
+import {
+  preferTrueLayerForCurrentUser,
+  resolveEffectiveResidenceCountry,
+  resolveOpenBankingLocale,
+  usesTrueLayerOpenBanking,
+} from '../lib/openBankingRegion'
+import {
+  disconnectTrueLayer,
+  fetchTrueLayerAccounts,
+  fetchTrueLayerStatus,
+  startTrueLayerAuth,
+} from '../lib/api/truelayer'
 import { markPortfolioBalancesFlush, triggerPortfolioWaveReveal } from '../lib/portfolioWaveReveal'
 import { AppButton } from './ui/AppButton'
 import { PlaidLinkButton } from './PlaidLinkButton'
@@ -45,6 +58,8 @@ type PlaidConnectionContextValue = {
   items: PlaidItemSummary[]
   initialLoaded: boolean
   configured: boolean | null
+  usesTrueLayer: boolean
+  connectButtonLabel: string
   panelOpen: boolean
   setPanelOpen: (open: boolean) => void
   togglePanel: () => void
@@ -198,17 +213,30 @@ export function PlaidDisconnectButton({ item, disabled = false, onConfirm }: Dis
 
 type ProviderProps = PlaidConnectionHandlers & {
   children: ReactNode
+  /** Live residence from calculator inputs — avoids stale profile locale after country change. */
+  residenceCountry?: string
 }
 
-export function PlaidConnectionProvider({ children, onApplyBalances, onImportApplied }: ProviderProps) {
+export function PlaidConnectionProvider({
+  children,
+  onApplyBalances,
+  onImportApplied,
+  residenceCountry,
+}: ProviderProps) {
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
+  const effectiveResidence = resolveEffectiveResidenceCountry(residenceCountry)
+  const usesTrueLayer = preferTrueLayerForCurrentUser(effectiveResidence)
+  const connectButtonLabel = usesTrueLayer ? 'Connect your bank' : 'Connect via Plaid'
   const userId = user?.id ?? null
   const [items, setItems] = useState<PlaidItemSummary[]>([])
   const [initialLoaded, setInitialLoaded] = useState(false)
   const [configured, setConfigured] = useState<boolean | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
   const [disconnectBusyId, setDisconnectBusyId] = useState<string | null>(null)
+  const [truelayerBusy, setTruelayerBusy] = useState(false)
+  const [truelayerErr, setTruelayerErr] = useState<string | null>(null)
+  const [truelayerInfo, setTruelayerInfo] = useState<string | null>(null)
   const reloadSeqRef = useRef(0)
   const onImportAppliedRef = useRef(onImportApplied)
   onImportAppliedRef.current = onImportApplied
@@ -222,17 +250,54 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
 
     const seq = ++reloadSeqRef.current
     try {
-      const [status, list] = await Promise.all([fetchPlaidStatus(), fetchPlaidItems()])
-      if (seq !== reloadSeqRef.current) return
-      setConfigured(status.configured)
-      setItems(list.items)
+      if (usesTrueLayer) {
+        const status = await fetchTrueLayerStatus()
+        if (seq !== reloadSeqRef.current) return
+        setConfigured(status.configured)
+        if (status.connected) {
+          const accountsRes = await fetchTrueLayerAccounts()
+          if (seq !== reloadSeqRef.current) return
+          if (accountsRes.snapshot) {
+            const balances = applyPlaidHoldingsSnapshot(accountsRes.snapshot)
+            markPortfolioBalancesFlush()
+            onApplyBalances(balances)
+            triggerPortfolioWaveReveal()
+          }
+          setItems([
+            {
+              id: accountsRes.connection?.id ?? 'truelayer',
+              institutionId: accountsRes.connection?.providerId ?? null,
+              institutionName:
+                accountsRes.connection?.institutionName ??
+                status.institutionName ??
+                'Connected bank',
+              logoUrl: null,
+              status: 'healthy',
+              errorCode: null,
+              lastSyncedAt:
+                accountsRes.connection?.lastSyncedAt ?? new Date().toISOString(),
+              createdAt:
+                accountsRes.connection?.createdAt ?? new Date().toISOString(),
+            },
+          ])
+        } else {
+          setItems([])
+        }
+      } else {
+        const [status, list] = await Promise.all([fetchPlaidStatus(), fetchPlaidItems()])
+        if (seq !== reloadSeqRef.current) return
+        setConfigured(status.configured)
+        setItems(list.items)
+      }
     } catch (e) {
       if (seq !== reloadSeqRef.current) return
       if (e instanceof ApiRequestError && (e.code === 'subscription_required' || e.status === 401)) {
         setItems([])
       } else {
         try {
-          const status = await fetchPlaidStatus()
+          const status = usesTrueLayer
+            ? await fetchTrueLayerStatus()
+            : await fetchPlaidStatus()
           if (seq !== reloadSeqRef.current) return
           setConfigured(status.configured)
         } catch {
@@ -243,31 +308,81 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
     } finally {
       if (seq === reloadSeqRef.current) setInitialLoaded(true)
     }
-  }, [hasPaidSubscription, userId])
-
-  useEffect(() => {
-    setInitialLoaded(false)
-    void reload()
-  }, [reload])
+  }, [hasPaidSubscription, onApplyBalances, userId, usesTrueLayer])
 
   const handleImportApplied = useCallback(() => {
     onImportAppliedRef.current?.()
     void reload()
   }, [reload])
 
-  const { startLink, busy: linkBusy, err: linkErr, info: linkInfo, clearInfo: clearLinkInfo } = usePlaidLinkFlow({
-    onApplyBalances,
-    onImportApplied: handleImportApplied,
-    onComplete: () => void reload(),
-    onAlreadyConnected: () => setPanelOpen(true),
-    enabled: hasPaidSubscription,
-  })
+  const { startLink, busy: plaidLinkBusy, err: plaidLinkErr, info: plaidLinkInfo, clearInfo: clearPlaidLinkInfo } =
+    usePlaidLinkFlow({
+      onApplyBalances,
+      onImportApplied: handleImportApplied,
+      onComplete: () => void reload(),
+      onAlreadyConnected: () => setPanelOpen(true),
+      enabled: hasPaidSubscription && !usesTrueLayer,
+    })
+
+  const linkBusy = plaidLinkBusy || truelayerBusy
+  const linkErr = usesTrueLayer ? truelayerErr : plaidLinkErr
+  const linkInfo = usesTrueLayer ? truelayerInfo : plaidLinkInfo
+  const clearLinkInfo = useCallback(() => {
+    clearPlaidLinkInfo()
+    setTruelayerErr(null)
+    setTruelayerInfo(null)
+  }, [clearPlaidLinkInfo])
+
+  useEffect(() => {
+    setInitialLoaded(false)
+    void reload()
+  }, [reload])
+
+  useEffect(() => {
+    if (!hasPaidSubscription || !usesTrueLayer) return
+    const params = new URLSearchParams(window.location.search)
+    const connected = params.get('truelayer') === 'connected'
+    const errCode = params.get('truelayer_error')
+    const errMsg = params.get('truelayer_message')
+    if (!connected && !errCode) return
+
+    if (errCode) {
+      setTruelayerErr(errMsg?.trim() || 'Bank connection could not be completed.')
+    } else if (connected) {
+      const pending = params.get('truelayer_fetch_pending') === '1'
+      setTruelayerInfo(
+        pending
+          ? 'Bank connected. Account balances will sync when you open Manage accounts.'
+          : 'Bank connected successfully.',
+      )
+      void reload()
+    }
+
+    params.delete('truelayer')
+    params.delete('truelayer_fetch_pending')
+    params.delete('truelayer_error')
+    params.delete('truelayer_message')
+    const q = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}${q ? `?${q}` : ''}${window.location.hash}`,
+    )
+  }, [hasPaidSubscription, reload, usesTrueLayer])
 
   const disconnectItem = useCallback(
     async (itemId: string) => {
       if (disconnectBusyId) return
       setDisconnectBusyId(itemId)
       try {
+        if (usesTrueLayer) {
+          await disconnectTrueLayer()
+          const balances = removePlaidItemFromLocalStorage(itemId)
+          if (balances) onApplyBalances(balances)
+          setPanelOpen(false)
+          await reload()
+          return
+        }
         await deletePlaidItem(itemId)
         removePlaidItemFromLocalStorage(itemId)
         const remaining = items.filter((i) => i.id !== itemId)
@@ -292,7 +407,39 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
         setDisconnectBusyId(null)
       }
     },
-    [disconnectBusyId, items, onApplyBalances, reload],
+    [disconnectBusyId, items, onApplyBalances, reload, usesTrueLayer],
+  )
+
+  const startAddAccount = useCallback(() => {
+    if (usesTrueLayer) {
+      startTrueLayerAuth(resolveOpenBankingLocale({ residenceCountry: effectiveResidence }))
+      return
+    }
+    void startLink(null)
+  }, [effectiveResidence, startLink, usesTrueLayer])
+
+  const reconnectItem = useCallback(
+    (itemId: string) => {
+      if (usesTrueLayer) {
+        setTruelayerBusy(true)
+        void fetchTrueLayerAccounts()
+          .then((res) => {
+            if (res.snapshot) {
+              const balances = applyPlaidHoldingsSnapshot(res.snapshot)
+              markPortfolioBalancesFlush()
+              onApplyBalances(balances)
+              triggerPortfolioWaveReveal()
+            }
+            if (res.warning) setTruelayerInfo(res.warning)
+            return reload()
+          })
+          .catch(() => setTruelayerErr('Could not refresh bank balances. Try again.'))
+          .finally(() => setTruelayerBusy(false))
+        return
+      }
+      void startLink(itemId)
+    },
+    [onApplyBalances, reload, startLink, usesTrueLayer],
   )
 
   const value = useMemo<PlaidConnectionContextValue>(
@@ -300,14 +447,16 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
       items,
       initialLoaded,
       configured,
+      usesTrueLayer,
+      connectButtonLabel,
       panelOpen,
       setPanelOpen,
       togglePanel: () => setPanelOpen((o) => !o),
       reload,
       hasConnections: items.length > 0,
       disconnectItem,
-      reconnectItem: (itemId: string) => void startLink(itemId),
-      startAddAccount: () => void startLink(null),
+      reconnectItem,
+      startAddAccount,
       linkBusy,
       linkErr,
       linkInfo,
@@ -315,6 +464,7 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
     }),
     [
       configured,
+      connectButtonLabel,
       disconnectItem,
       initialLoaded,
       items,
@@ -324,7 +474,8 @@ export function PlaidConnectionProvider({ children, onApplyBalances, onImportApp
       clearLinkInfo,
       panelOpen,
       reload,
-      startLink,
+      startAddAccount,
+      usesTrueLayer,
     ],
   )
 
@@ -345,7 +496,8 @@ export function usePlaidConnectionReload(): (() => Promise<void>) | null {
 export function PlaidConnectionChoiceButton({
   onApplyBalances,
   onImportApplied,
-}: PlaidConnectionHandlers) {
+  residenceCountry,
+}: PlaidConnectionHandlers & { residenceCountry?: string }) {
   const ctx = useContext(PlaidConnectionContext)
   const reload = usePlaidConnectionReload()
 
@@ -360,7 +512,7 @@ export function PlaidConnectionChoiceButton({
           onClick={() => ctx.startAddAccount()}
         >
           <IconLink size={18} stroke={1.5} aria-hidden />
-          {ctx.linkBusy ? 'Connecting…' : 'Connect via Plaid'}
+          {ctx.linkBusy ? 'Connecting…' : ctx.connectButtonLabel}
         </button>
         {ctx.linkInfo ? (
           <p className="plaid-link-btn__info" role="status">
@@ -379,6 +531,7 @@ export function PlaidConnectionChoiceButton({
   return (
     <PlaidLinkButton
       variant="choice"
+      residenceCountry={residenceCountry}
       onApplyBalances={onApplyBalances}
       onImportApplied={() => {
         onImportApplied?.()
@@ -389,11 +542,16 @@ export function PlaidConnectionChoiceButton({
 }
 
 /** Pro-gated disabled choice for guests / non-subscribers. */
-export function PlaidConnectionChoiceGated() {
+export function PlaidConnectionChoiceGated({ residenceCountry }: { residenceCountry?: string } = {}) {
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
   if (hasPaidSubscription) return null
   const proNote = user ? 'Subscribe to Pro to connect' : 'Pro subscribers only'
+  const connectLabel = usesTrueLayerOpenBanking(
+    resolveOpenBankingLocale({ residenceCountry: resolveEffectiveResidenceCountry(residenceCountry) }),
+  )
+    ? 'Connect your bank'
+    : 'Connect via Plaid'
   return (
     <div className="financials-entry-choice-wrap financials-entry-choice-wrap--pro-gated" role="listitem">
       <button
@@ -403,7 +561,7 @@ export function PlaidConnectionChoiceGated() {
         aria-disabled="true"
       >
         <IconLink size={18} stroke={1.5} aria-hidden />
-        Connect via Plaid
+        {connectLabel}
       </button>
       <p className="financials-entry-choice__pro-note">{proNote}</p>
     </div>

@@ -71,7 +71,7 @@ async function institutionLogoDataUrl(institutionId: string | null): Promise<str
     const plaid = getPlaidClient()
     const { data } = await plaid.institutionsGetById({
       institution_id: institutionId.trim(),
-      country_codes: [CountryCode.Us],
+      country_codes: [CountryCode.Us, CountryCode.Ca],
     })
     const logo = data.institution.logo
     return logo ? `data:image/png;base64,${logo}` : null
@@ -271,7 +271,7 @@ export function installPlaidRoutes(
         user: { client_user_id: u.userId },
         client_name: 'Expectifi',
         products: [Products.Investments],
-        country_codes: [CountryCode.Us],
+        country_codes: [CountryCode.Us, CountryCode.Ca],
         language: 'en',
         ...(accessTokenForUpdate ? { access_token: accessTokenForUpdate } : {}),
       })

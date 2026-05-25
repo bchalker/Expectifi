@@ -1,21 +1,16 @@
-import { isOnboardingResidenceCountry } from './onboardingResidenceCountries'
+import { findOnboardingRegion, ONBOARDING_REGION_OPTIONS } from './onboardingRegions'
 
-export type DisplayCurrencyCode = 'USD' | 'GBP' | 'EUR'
-
-const RESIDENCE_US = 'United States'
-const RESIDENCE_UK = 'United Kingdom'
+export type DisplayCurrencyCode = 'USD' | 'GBP' | 'EUR' | 'CAD'
 
 let activeDisplayCurrency: DisplayCurrencyCode = 'USD'
 
-/** Map welcome/settings residence to app display currency. */
+/** Map launch-country residence to app display currency. */
 export function residenceCountryToDisplayCurrency(country: string): DisplayCurrencyCode {
   const trimmed = country.trim()
   if (!trimmed) return 'USD'
-  if (trimmed === RESIDENCE_US) return 'USD'
-  if (trimmed === RESIDENCE_UK) return 'GBP'
-  if (trimmed === 'Other Europe' || trimmed === 'Other') return trimmed === 'Other' ? 'USD' : 'EUR'
-  if (isOnboardingResidenceCountry(trimmed)) return 'EUR'
-  return 'USD'
+  return findOnboardingRegion(
+    ONBOARDING_REGION_OPTIONS.find((r) => r.country === trimmed)?.id,
+  )?.currency ?? 'USD'
 }
 
 export function setDisplayCurrencyCode(code: DisplayCurrencyCode): void {
@@ -36,6 +31,8 @@ function localeForCurrency(code: DisplayCurrencyCode): string {
       return 'en-GB'
     case 'EUR':
       return 'en-IE'
+    case 'CAD':
+      return 'en-CA'
     default:
       return 'en-US'
   }
@@ -47,6 +44,8 @@ export function currencySymbol(code: DisplayCurrencyCode = getDisplayCurrencyCod
       return '£'
     case 'EUR':
       return '€'
+    case 'CAD':
+      return 'CA$'
     default:
       return '$'
   }

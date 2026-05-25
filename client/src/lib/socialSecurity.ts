@@ -16,7 +16,11 @@ export const SS_CLAIM_AGE_OPTIONS = Array.from(
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const
 
 export function clampClaimAge(age: number): number {
-  return Math.min(SS_CLAIM_AGE_MAX, Math.max(SS_CLAIM_AGE_MIN, Math.round(age)))
+  return clampClaimAgeInRange(age, SS_CLAIM_AGE_MIN, SS_CLAIM_AGE_MAX)
+}
+
+export function clampClaimAgeInRange(age: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(age)))
 }
 
 export function normalizeClaimAge(age: number): SsClaimAge {

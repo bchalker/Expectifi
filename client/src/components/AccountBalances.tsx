@@ -1573,6 +1573,7 @@ export function AccountBalances({
   if (onFidelityApplyBalances) {
     return (
       <PlaidConnectionProvider
+        residenceCountry={inputs?.residenceCountry}
         onApplyBalances={onFidelityApplyBalances}
         onImportApplied={onFidelityImportApplied}
       >

@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from 'react'
 import { ApiRequestError, apiFetchJson } from '../lib/api'
+import { clearAllLocalUserData } from '../lib/clearAllLocalUserData'
+import { markOnboardingFromSignup } from '../lib/welcomeGate'
 import type { UserPrefs } from '../lib/userPrefs'
 import { parseUserPrefs } from '../lib/userPrefs'
 
@@ -93,6 +95,7 @@ type AuthCtx = {
   completeGoogleCheckout: (
     paymentMethodId?: string,
     promoCode?: string,
+    promotionCodeId?: string,
   ) => Promise<{ error?: string }>
   /** Set after redirect from Google when `?auth_error=` is present; cleared when consumed. */
   authCallbackMessage: string | null
@@ -103,6 +106,7 @@ type AuthCtx = {
     password: string,
     paymentMethodId?: string,
     promoCode?: string,
+    promotionCodeId?: string,
   ) => Promise<{ error?: string }>
   /** Full-page navigation to `/api/auth/google` (cookie session on return). */
   signInWithGoogle: () => void
@@ -175,6 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.status === 'session_ready') {
         setUser(normalizeAuthUser(data.user))
         setGoogleCheckoutUi(null)
+        if (!data.user.onboardingDone) markOnboardingFromSignup()
         return { status: 'session_ready' }
       }
       setUser(null)
@@ -190,17 +195,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const completeGoogleCheckout = useCallback(async (paymentMethodId?: string, promoCode?: string) => {
+  const completeGoogleCheckout = useCallback(async (
+    paymentMethodId?: string,
+    promoCode?: string,
+    promotionCodeId?: string,
+  ) => {
     try {
       const body: Record<string, string> = {}
       if (paymentMethodId) body.paymentMethodId = paymentMethodId
-      if (promoCode?.trim()) body.promoCode = promoCode.trim()
+      if (promotionCodeId?.trim()) body.promotionCodeId = promotionCodeId.trim()
+      else if (promoCode?.trim()) body.promoCode = promoCode.trim()
       const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/google/complete-signup', {
         method: 'POST',
         body: JSON.stringify(body),
       })
       setUser(normalizeAuthUser(data.user))
       setGoogleCheckoutUi(null)
+      if (!data.user.onboardingDone) markOnboardingFromSignup()
       return {}
     } catch (e) {
       if (e instanceof ApiRequestError) {
@@ -297,16 +308,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     paymentMethodId?: string,
     promoCode?: string,
+    promotionCodeId?: string,
   ) => {
     try {
       const body: Record<string, string> = { email, password }
       if (paymentMethodId) body.paymentMethodId = paymentMethodId
-      if (promoCode?.trim()) body.promoCode = promoCode.trim()
+      if (promotionCodeId?.trim()) body.promotionCodeId = promotionCodeId.trim()
+      else if (promoCode?.trim()) body.promoCode = promoCode.trim()
       const data = await apiFetchJson<{ ok: true; user: AuthUser }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(body),
       })
       setUser(normalizeAuthUser(data.user))
+      if (!data.user.onboardingDone) markOnboardingFromSignup()
       return {}
     } catch (e) {
       if (e instanceof ApiRequestError) {
@@ -371,6 +385,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const cancelAccount = useCallback(async () => {
     try {
       await apiFetchJson<{ ok: true }>('/api/user/cancel-account', { method: 'POST' })
+      clearAllLocalUserData()
       setUser(null)
       setGoogleCheckoutUi(null)
       return {}

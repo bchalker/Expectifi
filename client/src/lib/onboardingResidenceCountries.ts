@@ -1,13 +1,9 @@
-import { whereToLookCountrySet } from './whereToRetire/whereToLookCountries'
+import { ONBOARDING_REGION_OPTIONS } from './onboardingRegions'
 
-const US = 'United States'
-const EUROPE = whereToLookCountrySet('europe')!
-
-/** US plus European countries for welcome “where do you live” select. */
-export const ONBOARDING_RESIDENCE_COUNTRIES: readonly string[] = [
-  US,
-  ...[...EUROPE].sort((a, b) => a.localeCompare(b)),
-]
+/** Launch countries for welcome/profile residence select. */
+export const ONBOARDING_RESIDENCE_COUNTRIES: readonly string[] = ONBOARDING_REGION_OPTIONS.map(
+  (r) => r.country,
+)
 
 export function isOnboardingResidenceCountry(value: string): boolean {
   return ONBOARDING_RESIDENCE_COUNTRIES.includes(value)

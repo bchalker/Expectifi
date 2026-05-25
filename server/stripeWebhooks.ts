@@ -102,8 +102,11 @@ export function logStripeBillingConfigAtStartup(): void {
   const stripe = getStripeBackend()
   const priceId = getStripeSubscriptionPriceId()
   const mode = getStripeKeyMode()
+  const keyPrefix = process.env.STRIPE_SECRET_KEY?.trim().slice(0, 8) ?? '(unset)'
   if (!stripe) return
-  console.info(`[stripe] Billing enabled (${mode ?? 'unknown'} mode)`)
+  console.info(
+    `[stripe] Billing enabled (${mode ?? 'unknown'} mode, key prefix ${keyPrefix})`,
+  )
   if (!priceId) {
     console.warn(
       '[stripe] STRIPE_SECRET_KEY is set but STRIPE_SUBSCRIPTION_PRICE_ID is missing — signups will not create $9/mo subscriptions',

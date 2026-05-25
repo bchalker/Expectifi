@@ -16,22 +16,30 @@ import { ensureSchema } from './db.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import {
   assertSubscriptionBillingConfigured,
-  cancelAllStripeSubscriptionsForCustomer,
   completeStripeBillingSetup,
   getStripeBackend,
+  getStripeKeyMode,
   getStripeSubscriptionPriceId,
   isStripeBillingError,
   repairStripeSubscriptionForCustomer,
 } from './stripeBackend.js'
-import { normalizePromoCodeInput, resolveSignupPromotionCode } from './stripePromo.js'
+import { AccountDeletionError, deleteUserAccountPermanently } from './deleteUserAccount.js'
+import {
+  normalizePromoCodeInput,
+  resolveSignupPromotionById,
+  resolveSignupPromotionCode,
+} from './stripePromo.js'
 import type { SubscriptionStatus } from './stripeBilling.js'
 import { subscriptionStatusFromStripe } from './stripeBilling.js'
 import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
 import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
+import { installTrueLayerRoutes } from './truelayerRoutes.js'
+import { logTrueLayerConfigAtStartup } from './truelayerConfig.js'
 import { installContactRoutes } from './contactRoutes.js'
 import { logContactMailConfigAtStartup } from './contactMail.js'
+import { installDevRoutes } from './devRoutes.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -46,7 +54,9 @@ app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)
 installPlaidRoutes(app, readSessionUser)
+installTrueLayerRoutes(app, readSessionUser)
 installContactRoutes(app, readSessionUser)
+installDevRoutes(app)
 
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase()
@@ -188,7 +198,11 @@ app.post('/api/stripe/signup-setup-intent', async (_req, res) => {
 
 app.post('/api/stripe/validate-promo', async (req, res) => {
   const raw =
-    typeof req.body?.promoCode === 'string' ? normalizePromoCodeInput(req.body.promoCode) : ''
+    typeof req.body?.promoCode === 'string'
+      ? normalizePromoCodeInput(req.body.promoCode)
+      : typeof req.body?.code === 'string'
+        ? normalizePromoCodeInput(req.body.code)
+        : ''
   if (!raw) {
     res.status(400).json({ ok: false, error: 'promo_code_required' })
     return
@@ -201,33 +215,62 @@ app.post('/api/stripe/validate-promo', async (req, res) => {
   try {
     const resolved = await resolveSignupPromotionCode(stripe, raw)
     if (!resolved) {
-      res.status(400).json({ ok: false, error: 'invalid_promo_code' })
+      const mode = getStripeKeyMode()
+      res.status(400).json({
+        ok: false,
+        error: 'invalid_promo_code',
+        stripeMode: mode,
+        hint:
+          mode === 'test'
+            ? 'No matching code in Stripe test mode. Create the promotion code in the Dashboard with Test mode on, or use sk_live_ keys for live codes.'
+            : mode === 'live'
+              ? 'No matching code in Stripe live mode. Create the promotion code in the Dashboard with Live mode on.'
+              : undefined,
+      })
       return
     }
+    const appliedMessage = `${resolved.discount} applied`
     res.json({
       ok: true,
+      valid: true,
       code: resolved.code,
+      promotionCodeId: resolved.promotionCodeId,
+      promotion_code_id: resolved.promotionCodeId,
       waivesPayment: resolved.waivesPayment,
+      discount: resolved.discount,
       message: resolved.waivesPayment
-        ? 'No card required — your subscription is free with this code.'
-        : 'Code applied at checkout — card still required.',
+        ? `${appliedMessage} — no card required.`
+        : `${appliedMessage} — card still required at checkout.`,
     })
-  } catch {
+  } catch (err) {
+    console.error('[stripe] validate-promo failed:', err)
     res.status(502).json({ ok: false, error: 'promo_validation_failed' })
   }
 })
 
 async function resolveSignupPromoFromRequest(
   promoRaw: string,
+  promotionCodeIdRaw?: string,
 ): Promise<
   | { promotionCodeId: string; waivesPayment: boolean }
   | null
   | { error: string; status: number }
 > {
-  const code = normalizePromoCodeInput(promoRaw)
-  if (!code) return null
   const stripe = getStripeBackend()
   if (!stripe) return { error: 'stripe_not_configured', status: 503 }
+
+  const id = typeof promotionCodeIdRaw === 'string' ? promotionCodeIdRaw.trim() : ''
+  if (id.startsWith('promo_')) {
+    const resolved = await resolveSignupPromotionById(stripe, id)
+    if (!resolved) return { error: 'invalid_promo_code', status: 400 }
+    return {
+      promotionCodeId: resolved.promotionCodeId,
+      waivesPayment: resolved.waivesPayment,
+    }
+  }
+
+  const code = normalizePromoCodeInput(promoRaw)
+  if (!code) return null
   const resolved = await resolveSignupPromotionCode(stripe, code)
   if (!resolved) return { error: 'invalid_promo_code', status: 400 }
   return {
@@ -315,7 +358,13 @@ app.post('/api/auth/google/complete-signup', async (req, res) => {
   const paymentMethodId =
     typeof req.body?.paymentMethodId === 'string' ? req.body.paymentMethodId.trim() : ''
   const promoRaw = typeof req.body?.promoCode === 'string' ? req.body.promoCode : ''
-  const promo = await resolveSignupPromoFromRequest(promoRaw)
+  const promotionCodeIdRaw =
+    typeof req.body?.promotionCodeId === 'string'
+      ? req.body.promotionCodeId
+      : typeof req.body?.promotion_code_id === 'string'
+        ? req.body.promotion_code_id
+        : ''
+  const promo = await resolveSignupPromoFromRequest(promoRaw, promotionCodeIdRaw)
   if (promo && 'error' in promo) {
     res.status(promo.status).json({ ok: false, error: promo.error })
     return
@@ -424,6 +473,12 @@ app.post('/api/auth/register', async (req, res) => {
   const paymentMethodIdRaw =
     typeof req.body?.paymentMethodId === 'string' ? req.body.paymentMethodId.trim() : ''
   const promoRaw = typeof req.body?.promoCode === 'string' ? req.body.promoCode : ''
+  const promotionCodeIdRaw =
+    typeof req.body?.promotionCodeId === 'string'
+      ? req.body.promotionCodeId
+      : typeof req.body?.promotion_code_id === 'string'
+        ? req.body.promotion_code_id
+        : ''
   const email = normalizeEmail(emailRaw)
   if (!email.includes('@') || email.length > 254) {
     res.status(400).json({ ok: false, error: 'invalid_email' })
@@ -436,8 +491,8 @@ app.post('/api/auth/register', async (req, res) => {
 
   const stripe = getStripeBackend()
   let promo: Awaited<ReturnType<typeof resolveSignupPromoFromRequest>> = null
-  if (stripe && promoRaw.trim()) {
-    promo = await resolveSignupPromoFromRequest(promoRaw)
+  if (stripe && (promoRaw.trim() || promotionCodeIdRaw.trim())) {
+    promo = await resolveSignupPromoFromRequest(promoRaw, promotionCodeIdRaw)
     if (promo && 'error' in promo) {
       res.status(promo.status).json({ ok: false, error: promo.error })
       return
@@ -661,25 +716,14 @@ app.post('/api/user/cancel-account', async (req, res) => {
     return
   }
 
-  const { rows } = await dbQuery<{ stripe_customer_id: string | null }>(
-    'SELECT stripe_customer_id FROM users WHERE id = ? LIMIT 1',
-    [u.userId],
-  )
-  const stripeCustomerId = rows[0]?.stripe_customer_id?.trim() || null
-
-  const stripe = getStripeBackend()
-  if (stripe && stripeCustomerId) {
-    try {
-      await cancelAllStripeSubscriptionsForCustomer(stripe, stripeCustomerId)
-    } catch {
-      res.status(502).json({ ok: false, error: 'stripe_cancel_failed' })
+  try {
+    await deleteUserAccountPermanently(u.userId)
+  } catch (e: unknown) {
+    if (e instanceof AccountDeletionError) {
+      const status = e.code === 'stripe_cancel_failed' ? 502 : 500
+      res.status(status).json({ ok: false, error: e.code })
       return
     }
-  }
-
-  try {
-    await dbQuery('DELETE FROM users WHERE id = ?', [u.userId])
-  } catch {
     res.status(500).json({ ok: false, error: 'delete_failed' })
     return
   }
@@ -836,6 +880,7 @@ async function main() {
   await ensureSchema()
   logStripeBillingConfigAtStartup()
   logPlaidConfigAtStartup()
+  logTrueLayerConfigAtStartup()
   logContactMailConfigAtStartup()
   installProductionClient(app)
   app.listen(PORT, '0.0.0.0', () => {
