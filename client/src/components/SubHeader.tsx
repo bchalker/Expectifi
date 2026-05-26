@@ -262,8 +262,8 @@ export function SubHeader({
                   y2="1"
                   gradientUnits="objectBoundingBox"
                 >
-                  <stop offset="0%" stopColor="#2e4559" />
-                  <stop offset="100%" stopColor="#1c2b3a" />
+                  <stop offset="0%" stopColor="#3d4f63" />
+                  <stop offset="100%" stopColor="#1a2332" />
                 </linearGradient>
                 <linearGradient
                   id="subheader-income-wave-fill"
@@ -273,8 +273,8 @@ export function SubHeader({
                   y2="1"
                   gradientUnits="objectBoundingBox"
                 >
-                  <stop offset="0%" stopColor="#E07830" />
-                  <stop offset="100%" stopColor="#C4610A" />
+                  <stop offset="0%" stopColor="#f9a03f" />
+                  <stop offset="100%" stopColor="#f9a03f" />
                 </linearGradient>
               </defs>
               <path

@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { isValidIsoDateString } from '../lib/ageFromDob'
+import type { OnboardingRegionId } from '../lib/onboardingRegions'
 import { clampTargetRetirementAge, retireAgeBoundsForDob } from '../lib/userPrefs'
 import { fmt } from '../utils/format'
 import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
@@ -40,8 +41,8 @@ type ConfigureProps = SharedProps & {
   onMonthlyContribution: (amount: number) => void
   monthlyIncomeGoal: number
   onMonthlyIncomeGoal: (amount: number) => void
-  currentResidence: string
-  onCurrentResidence: (country: string) => void
+  regionId: OnboardingRegionId | null | undefined
+  onRegionSelect: (regionId: OnboardingRegionId) => void
 }
 
 type WelcomeProps = SharedProps & {
@@ -76,10 +77,10 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
     return (
       <div className={rootClass}>
         <WelcomeProfileStepFields
+          regionId={props.regionId}
+          onRegionSelect={props.onRegionSelect}
           dateOfBirth={dateOfBirth}
           onDateOfBirth={onDateOfBirth}
-          currentResidence={props.currentResidence}
-          onCurrentResidence={props.onCurrentResidence}
           householdIncome={props.householdIncome}
           onHouseholdIncome={props.onHouseholdIncome}
           monthlyContribution={props.monthlyContribution}

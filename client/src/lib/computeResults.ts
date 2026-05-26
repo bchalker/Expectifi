@@ -1,4 +1,4 @@
-import { SCENARIOS, HOME_EQUITY, SP_SS_67, DEFAULT_HSA_RATIO, DEFAULT_ROTH_RATIO, DEFAULT_TRAD_RATIO } from 'shared'
+import { SCENARIOS, SP_SS_67, DEFAULT_HSA_RATIO, DEFAULT_ROTH_RATIO, DEFAULT_TRAD_RATIO } from 'shared'
 import {
   calcIncomePhase,
   calcPortfolioAtRetirement,
@@ -379,8 +379,6 @@ export function computeResults(
   )
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
-  const equityMon = (HOME_EQUITY * wdRate) / 12
-
   const incomeGoalProgressPct =
     monthlyIncomeGoal > 0 ? Math.min(150, Math.round((afterTaxMon / monthlyIncomeGoal) * 1000) / 10) : null
 
@@ -425,7 +423,7 @@ export function computeResults(
   const ssLabel =
     ssZone === 'free' ? '0% of SS taxable' : ssZone === 'partial' ? 'up to 50% taxable' : 'up to 85% taxable'
   const barPct = Math.min(100, Math.round((combinedInc / 34000) * 100))
-  const barColor = ssZone === 'free' ? '#0F6E56' : ssZone === 'partial' ? '#BA7517' : '#A32D2D'
+  const barColor = ssZone === 'free' ? '#16DB65' : ssZone === 'partial' ? '#F9A03F' : '#C03221'
 
   const grossAnnualUsd = annWd + totalSS * 12
   const usTax = calcTax(annWd, totalSS, retFV, brkFV, tradRatio, rothRatio, hsaRatio)
@@ -491,7 +489,6 @@ export function computeResults(
     taxDetail,
     annTax,
     afterTaxMon,
-    equityMon,
     incomePhase,
     scenarios,
     rothMon,

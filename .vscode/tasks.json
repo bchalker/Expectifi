@@ -19,6 +19,36 @@
       }
     },
     {
+      "label": "Restart: stop dev servers",
+      "type": "shell",
+      "command": "bash",
+      "args": ["${workspaceFolder}/scripts/restart-dev-servers.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "Restart: client + server",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Restart: stop dev servers",
+        "Start: client + server (on folder open)"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "showReuseMessage": false
+      }
+    },
+    {
       "label": "Dev: client (Vite)",
       "type": "shell",
       "command": "npm run dev -w client",

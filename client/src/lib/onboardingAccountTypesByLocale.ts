@@ -3,7 +3,7 @@ import { normalizeOnboardingRegionId } from './onboardingRegions'
 import { loadUserProfile } from './userProfileStorage'
 import type { ManualAccountTypeMeta, OnboardingAccountType } from './manualAccountEntries'
 
-export type AccountTypesLocaleKey = 'us' | 'ca' | 'uk' | 'de' | 'fr' | 'es' | 'it'
+export type AccountTypesLocaleKey = 'us' | 'ca'
 
 type LocaleAccountDef = {
   id: OnboardingAccountType
@@ -211,12 +211,16 @@ const LEGACY_INT_ACCOUNTS: LocaleAccountDef[] = [
 export const LOCALE_ACCOUNT_TYPE_DEFS: Record<AccountTypesLocaleKey, LocaleAccountDef[]> = {
   us: US_ACCOUNTS,
   ca: CA_ACCOUNTS,
-  uk: UK_ACCOUNTS,
-  de: DE_ACCOUNTS,
-  fr: FR_ACCOUNTS,
-  es: ES_ACCOUNTS,
-  it: IT_ACCOUNTS,
 }
+
+/** Stored manual accounts from prior EU launch — not offered in onboarding. */
+const LEGACY_EU_ACCOUNT_DEFS: LocaleAccountDef[] = [
+  ...UK_ACCOUNTS,
+  ...DE_ACCOUNTS,
+  ...FR_ACCOUNTS,
+  ...ES_ACCOUNTS,
+  ...IT_ACCOUNTS,
+]
 
 export function toAccountTypesLocaleKey(
   locale: OnboardingRegionId | null | undefined,
@@ -251,7 +255,11 @@ export function getLocaleAccountTypeOptions(
 
 export function buildLocaleAccountTypeMetaMap(): Record<OnboardingAccountType, ManualAccountTypeMeta> {
   const map = {} as Record<OnboardingAccountType, ManualAccountTypeMeta>
-  for (const defs of [...Object.values(LOCALE_ACCOUNT_TYPE_DEFS), LEGACY_INT_ACCOUNTS]) {
+  for (const defs of [
+    ...Object.values(LOCALE_ACCOUNT_TYPE_DEFS),
+    LEGACY_EU_ACCOUNT_DEFS,
+    LEGACY_INT_ACCOUNTS,
+  ]) {
     for (const definition of defs) {
       map[definition.id] = localeDefToMeta(definition)
     }

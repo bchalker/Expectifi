@@ -1,4 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import type { CalculatorInputs, CalculatorUi } from "../lib/computeResults";
@@ -17,9 +23,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { clampClaimAge, ssTripletFromMonthlyAt67 } from "../lib/socialSecurity";
 import { syncDisplayCurrencyFromResidence } from "../lib/displayCurrency";
-import { isOnboardingResidenceCountry } from "../lib/onboardingResidenceCountries";
 import {
-  regionCountryIsValid,
   findOnboardingRegion,
   normalizeOnboardingRegionId,
   type OnboardingRegionId,
@@ -30,10 +34,8 @@ import {
   resolveOnboardingStartStep,
   saveProfileFromFormSlice,
   saveRegionToProfile,
-  saveResidenceCountryToProfile,
   type OnboardingFormProfileSlice,
 } from "../lib/userProfileStorage";
-import { OnboardingRegionStep } from "./OnboardingRegionStep";
 import { buildWelcomeSampleAccountEntries } from "../lib/welcomeSampleAccounts";
 import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
 import { pensionConfigForLocale } from "../lib/localePensionConfig";
@@ -66,8 +68,6 @@ import "./OnboardingAccountsStep.scss";
 import "./OnboardingOverlay.scss";
 import "./OnboardingFieldShell.scss";
 import "./OnboardingProgressSteps.scss";
-import "./OnboardingRegionStep.scss";
-
 const BODY_CLASS = "onboarding-overlay--open";
 const RETIRE_AGE_MAX = 80;
 
@@ -76,8 +76,8 @@ const ACCOUNTS_REQUIRED_MSG =
 
 import "./OnboardingSavingsComparisonBar.scss";
 
-type WizardStep = "region" | "profile" | "accounts" | "social-security" | "income-goal";
-type ProgressStep = Exclude<WizardStep, "region">;
+type WizardStep = "profile" | "accounts" | "social-security" | "income-goal";
+type ProgressStep = WizardStep;
 
 type Props = {
   /** Live header stack height (px) — positions welcome sheet flush below chrome. */
@@ -102,7 +102,8 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
   const storedAccounts = loadStoredManualAccounts();
   return {
     dob,
-    currentResidence: profileDefaults.currentResidence || inputs.residenceCountry || "",
+    currentResidence:
+      profileDefaults.currentResidence || inputs.residenceCountry || "",
     locale: normalizeOnboardingRegionId(profileDefaults.locale) ?? undefined,
     currency: profileDefaults.currency,
     householdIncome:
@@ -119,18 +120,26 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
       (inputs.monthlyIncomeGoal > 0 ? inputs.monthlyIncomeGoal : 0),
     includeSs:
       profileDefaults.includeSs ??
-      (inputs.ssBenefit62 > 0 && inputs.ssBenefit67 > 0 && inputs.ssBenefit70 > 0),
-    ssAge: profileDefaults.ssAge ?? (inputs.ssAge ? clampClaimAge(inputs.ssAge) : 67),
+      (inputs.ssBenefit62 > 0 &&
+        inputs.ssBenefit67 > 0 &&
+        inputs.ssBenefit70 > 0),
+    ssAge:
+      profileDefaults.ssAge ??
+      (inputs.ssAge ? clampClaimAge(inputs.ssAge) : 67),
     ssBenefitMonthly:
-      profileDefaults.ssBenefitMonthly ?? (inputs.ssBenefit67 > 0 ? inputs.ssBenefit67 : 0),
+      profileDefaults.ssBenefitMonthly ??
+      (inputs.ssBenefit67 > 0 ? inputs.ssBenefit67 : 0),
     includeSpouse: profileDefaults.includeSpouse ?? false,
     spouseClaimMode:
       profileDefaults.spouseClaimMode ??
-      ((inputs.spouseHasOwnEarnings === false ? "spousal" : "own") as SpouseClaimMode),
+      ((inputs.spouseHasOwnEarnings === false
+        ? "spousal"
+        : "own") as SpouseClaimMode),
     spouseDob: profileDefaults.spouseDob || inputs.spouseDateOfBirth || "",
     spouseSsBenefitMonthly:
       profileDefaults.spouseSsBenefitMonthly ??
-      (inputs.spouseBenefit67 || Math.round(WELCOME_BENCHMARK.ssBenefitMonthlyAt67 * 0.5)),
+      (inputs.spouseBenefit67 ||
+        Math.round(WELCOME_BENCHMARK.ssBenefitMonthlyAt67 * 0.5)),
     spouseSsAge:
       profileDefaults.spouseSsAge ??
       (inputs.spouseClaimAge ? clampClaimAge(inputs.spouseClaimAge) : 67),
@@ -226,7 +235,7 @@ export function OnboardingOverlay({
   useEffect(() => {
     if (!user || user.onboardingDone) return;
     if (consumeOnboardingFromSignup()) {
-      setStep("region");
+      setStep("profile");
     }
   }, [user?.id, user?.onboardingDone]);
 
@@ -241,7 +250,10 @@ export function OnboardingOverlay({
       return;
     }
     if (ssBenefitUserEdited.current) return;
-    const est = estimateSsMonthlyAt67FromAnnualIncome(form.householdIncome, form.locale);
+    const est = estimateSsMonthlyAt67FromAnnualIncome(
+      form.householdIncome,
+      form.locale,
+    );
     setForm((f) => {
       if (f.ssBenefitMonthly === est) return f;
       const next = { ...f, ssBenefitMonthly: est };
@@ -254,7 +266,13 @@ export function OnboardingOverlay({
       }
       return next;
     });
-  }, [step, form.householdIncome, form.includeSpouse, form.spouseClaimMode, form.locale]);
+  }, [
+    step,
+    form.householdIncome,
+    form.includeSpouse,
+    form.spouseClaimMode,
+    form.locale,
+  ]);
 
   const dobOk = isValidIsoDateString(form.dob);
   const ageToday = dobOk ? ageFromIsoDateString(form.dob) : null;
@@ -264,11 +282,9 @@ export function OnboardingOverlay({
     Number.isFinite(form.retireAge) &&
     form.retireAge >= retireLo &&
     form.retireAge <= RETIRE_AGE_MAX;
-  const residenceOk =
-    regionCountryIsValid(form.currentResidence) || isOnboardingResidenceCountry(form.currentResidence);
-  const profileFieldsOk = dobOk && ageOk && residenceOk;
+  const regionOk = Boolean(normalizeOnboardingRegionId(form.locale));
+  const profileFieldsOk = dobOk && ageOk && regionOk;
   const profileValid = profileFieldsOk;
-  const hideResidenceOnProfile = Boolean(form.currentResidence?.trim());
 
   function formProfileSlice(): OnboardingFormProfileSlice {
     return {
@@ -291,7 +307,7 @@ export function OnboardingOverlay({
     };
   }
 
-  function onRegionSelect(regionId: OnboardingRegionId) {
+  function applyRegionSelection(regionId: OnboardingRegionId) {
     const region = findOnboardingRegion(regionId);
     if (!region) return;
     saveRegionToProfile(regionId);
@@ -307,7 +323,6 @@ export function OnboardingOverlay({
       spouseSsAge: pension.defaultClaimAge,
       ssBenefitMonthly: pension.defaultBenefitMonthlyAt67,
     }));
-    setStep("profile");
   }
   const accountsValid = hasValidManualAccountEntries(form.accountEntries);
   const spouseDobOk =
@@ -381,19 +396,14 @@ export function OnboardingOverlay({
     if (openConnect) onConnectAccounts?.();
   }
 
-  function onProfileBack() {
-    setErr(null);
-    setStep("region");
-  }
-
   function onProfileContinue() {
     setErr(null);
-    if (!dobOk || !ageOk) {
-      setErr("Enter a valid date of birth (you must be between 18 and 100).");
+    if (!regionOk) {
+      setErr("Select United States or Canada.");
       return;
     }
-    if (!residenceOk) {
-      setErr("Select where you currently live.");
+    if (!dobOk || !ageOk) {
+      setErr("Enter a valid date of birth (you must be between 18 and 100).");
       return;
     }
     saveProfileFromFormSlice(formProfileSlice(), "profile");
@@ -487,9 +497,7 @@ export function OnboardingOverlay({
   }
 
   const headerTitle =
-    step === "region"
-      ? null
-      : step === "profile"
+    step === "profile"
       ? "Let's start with you"
       : step === "accounts"
         ? "Let's see what you're working with"
@@ -498,17 +506,15 @@ export function OnboardingOverlay({
           : "Almost there.";
 
   const headerSubtitle =
-    step === "region"
-      ? null
-      : step === "profile"
-      ? "We'll use industry benchmarks to fill in smart defaults. Adjust anything that doesn't fit."
+    step === "profile"
+      ? "We'll use industry benchmarks to fill in smart defaults."
       : step === "accounts"
         ? null
         : step === "social-security"
           ? pensionConfigForLocale(form.locale).stepSubtitle
           : null;
 
-  const progressStep: ProgressStep | null = step === "region" ? null : step;
+  const progressStep: ProgressStep = step;
 
   const accountsTotal = form.accountEntries.reduce(
     (sum, entry) => sum + Math.max(0, Math.round(entry.balance)),
@@ -520,7 +526,7 @@ export function OnboardingOverlay({
       ? ({
           top: `${headerStackHeight}px`,
           height: `calc(100dvh - ${headerStackHeight}px)`,
-          bottom: 'auto',
+          bottom: "auto",
         } as CSSProperties)
       : undefined;
 
@@ -530,7 +536,6 @@ export function OnboardingOverlay({
         "onboarding-overlay",
         "onboarding-overlay--in-app",
         step === "income-goal" ? " onboarding-overlay--income-goal" : "",
-        step === "region" ? " onboarding-overlay--region" : "",
         step === "accounts" ? " onboarding-overlay--accounts" : "",
         exiting ? " onboarding-overlay--exit" : "",
       ]
@@ -539,62 +544,48 @@ export function OnboardingOverlay({
       style={stackTopStyle}
       role="dialog"
       aria-modal="true"
-      aria-labelledby={step === "region" ? "onboarding-region-title" : "onboarding-overlay-title"}
+      aria-labelledby="onboarding-overlay-title"
     >
       <div className="onboarding-overlay__panel">
-        {step !== "region" ? (
         <header className="onboarding-overlay__header">
-          {progressStep ? (
-            <OnboardingProgressSteps activeStep={progressStep} className="onboarding-overlay__progress" />
-          ) : null}
-          {headerTitle ? (
-          <div className="onboarding-overlay__title-stack">
-            <h2
-              id="onboarding-overlay-title"
-              className="onboarding-overlay__title"
-            >
-              {headerTitle}
-            </h2>
-            {headerSubtitle ? (
-              <p className="onboarding-overlay__subtitle">{headerSubtitle}</p>
+          <OnboardingProgressSteps
+            activeStep={progressStep}
+            className="onboarding-overlay__progress"
+          />
+            {headerTitle ? (
+              <div className="onboarding-overlay__title-stack">
+                <h2
+                  id="onboarding-overlay-title"
+                  className="onboarding-overlay__title"
+                >
+                  {headerTitle}
+                </h2>
+                {headerSubtitle ? (
+                  <p className="onboarding-overlay__subtitle">
+                    {headerSubtitle}
+                  </p>
+                ) : null}
+                {step === "accounts" ? (
+                  <p className="onboarding-overlay__accounts-import-note">
+                    Add each account type and balance. You can easily connect
+                    accounts (via csv import or auto-connection) after setup.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
-            {step === "accounts" ? (
-              <p className="onboarding-overlay__accounts-import-note">
-                Add each account type and balance. You can easily connect
-                accounts (via csv import or auto-connection) after setup.
-              </p>
-            ) : null}
-          </div>
-          ) : null}
         </header>
-        ) : null}
 
         <SimpleBar
           className="side-panel-shell__scroll onboarding-overlay__scroll"
           autoHide={false}
         >
           <div className="onboarding-overlay__body">
-            {step === "region" ? (
-              <OnboardingRegionStep onSelect={onRegionSelect} />
-            ) : step === "profile" ? (
+            {step === "profile" ? (
               <WelcomeProfileStepFields
+                regionId={form.locale}
+                onRegionSelect={applyRegionSelection}
                 dateOfBirth={form.dob}
                 onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
-                currentResidence={hideResidenceOnProfile ? undefined : form.currentResidence}
-                onCurrentResidence={
-                  hideResidenceOnProfile
-                    ? undefined
-                    : (currentResidence) => {
-                        const saved = saveResidenceCountryToProfile(currentResidence);
-                        syncDisplayCurrencyFromResidence(currentResidence);
-                        setForm((f) => ({
-                          ...f,
-                          currentResidence,
-                          locale: saved.locale ?? f.locale,
-                          currency: saved.currency ?? f.currency,
-                        }));
-                      }
-                }
                 ageToday={ageToday}
                 householdIncome={form.householdIncome}
                 onHouseholdIncome={(householdIncome) =>
@@ -675,122 +666,112 @@ export function OnboardingOverlay({
           </div>
         </SimpleBar>
 
-        {step !== "region" ? (
         <footer className="onboarding-overlay__footer">
-          {err ? (
-            <p className="onboarding-overlay__err" role="alert">
-              {err}
-            </p>
-          ) : null}
-          {step === "profile" ? (
-            <div className="onboarding-overlay__footer-actions">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                disabled={busy}
-                onClick={onProfileBack}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!profileFieldsOk || busy}
-                onClick={onProfileContinue}
-              >
-                Continue
-              </button>
-            </div>
-          ) : step === "accounts" ? (
-            <>
-              <div className="onboarding-overlay__accounts-total">
-                <span className="onboarding-overlay__accounts-total-label">
-                  Total across all accounts
-                </span>
-                <span className="onboarding-overlay__accounts-total-value">
-                  {fmt(accountsTotal)}
-                </span>
+            {err ? (
+              <p className="onboarding-overlay__err" role="alert">
+                {err}
+              </p>
+            ) : null}
+            {step === "profile" ? (
+              <div className="onboarding-overlay__footer-actions">
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={!profileFieldsOk || busy}
+                  onClick={onProfileContinue}
+                >
+                  Continue
+                </button>
               </div>
-              <OnboardingSavingsComparisonBar
-                totalSavings={accountsTotal}
-                age={ageToday}
-              />
-              <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
+            ) : step === "accounts" ? (
+              <>
+                <div className="onboarding-overlay__accounts-total">
+                  <span className="onboarding-overlay__accounts-total-label">
+                    Total across all accounts
+                  </span>
+                  <span className="onboarding-overlay__accounts-total-value">
+                    {fmt(accountsTotal)}
+                  </span>
+                </div>
+                <OnboardingSavingsComparisonBar
+                  totalSavings={accountsTotal}
+                  age={ageToday}
+                />
+                <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
+                  <button
+                    type="button"
+                    className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                    disabled={busy}
+                    onClick={onAccountsBack}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                    disabled={busy || !accountsValid}
+                    onClick={onAccountsContinue}
+                  >
+                    Continue
+                  </button>
+                </div>
+                <div className="onboarding-overlay__skip-wrap onboarding-overlay__skip-wrap--visible">
+                  <button
+                    type="button"
+                    className="onboarding-overlay__skip-link"
+                    disabled={busy || exiting || !profileFieldsOk}
+                    onClick={onProfileSkipWithSample}
+                  >
+                    Skip setup, show me the dashboard with sample data
+                  </button>
+                </div>
+              </>
+            ) : step === "social-security" ? (
+              <div className="onboarding-overlay__footer-actions">
                 <button
                   type="button"
                   className="onboarding-overlay__btn onboarding-overlay__btn--muted"
                   disabled={busy}
-                  onClick={onAccountsBack}
+                  onClick={() => {
+                    setErr(null);
+                    setStep("accounts");
+                  }}
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={busy}
-                  onClick={onAccountsContinue}
+                  disabled={!ssValid || busy}
+                  onClick={onSsContinue}
                 >
                   Continue
                 </button>
               </div>
-              <div className="onboarding-overlay__skip-wrap onboarding-overlay__skip-wrap--visible">
+            ) : (
+              <div className="onboarding-overlay__footer-actions">
                 <button
                   type="button"
-                  className="onboarding-overlay__skip-link"
-                  disabled={busy || exiting || !profileFieldsOk}
-                  onClick={onProfileSkipWithSample}
+                  className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                  disabled={busy}
+                  onClick={() => {
+                    setErr(null);
+                    setStep("social-security");
+                  }}
                 >
-                  Skip setup, show me the dashboard with sample data
+                  Back
+                </button>
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={!retireOk || busy}
+                  onClick={onFinishWelcome}
+                >
+                  {busy ? "Saving…" : "Continue to dashboard"}
                 </button>
               </div>
-            </>
-          ) : step === "social-security" ? (
-            <div className="onboarding-overlay__footer-actions">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                disabled={busy}
-                onClick={() => {
-                  setErr(null);
-                  setStep("accounts");
-                }}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!ssValid || busy}
-                onClick={onSsContinue}
-              >
-                Continue
-              </button>
-            </div>
-          ) : (
-            <div className="onboarding-overlay__footer-actions">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                disabled={busy}
-                onClick={() => {
-                  setErr(null);
-                  setStep("social-security");
-                }}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!retireOk || busy}
-                onClick={onFinishWelcome}
-              >
-                {busy ? "Saving…" : "Continue to dashboard"}
-              </button>
-            </div>
-          )}
+            )}
         </footer>
-        ) : null}
       </div>
     </div>
   );

@@ -48,7 +48,7 @@
 .dob-select-row [data-slot='select-trigger'][data-focus='true'],
 .dob-select-row [data-slot='select-trigger'][data-pressed='true'],
 .dob-select-row [data-slot='select-trigger'][data-open='true'] {
-  border-color: var(--border-strong);
+  border-color: var(--border-medium-dark);
   box-shadow: none;
   outline: none;
 }

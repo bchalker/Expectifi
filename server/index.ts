@@ -35,8 +35,6 @@ import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
 import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
-import { installTrueLayerRoutes } from './truelayerRoutes.js'
-import { logTrueLayerConfigAtStartup } from './truelayerConfig.js'
 import { installContactRoutes } from './contactRoutes.js'
 import { logContactMailConfigAtStartup } from './contactMail.js'
 import { installDevRoutes } from './devRoutes.js'
@@ -54,7 +52,6 @@ app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)
 installPlaidRoutes(app, readSessionUser)
-installTrueLayerRoutes(app, readSessionUser)
 installContactRoutes(app, readSessionUser)
 installDevRoutes(app)
 
@@ -880,7 +877,6 @@ async function main() {
   await ensureSchema()
   logStripeBillingConfigAtStartup()
   logPlaidConfigAtStartup()
-  logTrueLayerConfigAtStartup()
   logContactMailConfigAtStartup()
   installProductionClient(app)
   app.listen(PORT, '0.0.0.0', () => {

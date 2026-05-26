@@ -20,7 +20,7 @@ button[data-slot='select-trigger'] {
   box-sizing: border-box;
   margin: 0;
   padding: 6px 2rem 6px 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-medium-dark);
   border-radius: 6px;
   background: var(--surface2);
   font-family: var(--body);
@@ -40,7 +40,7 @@ button[data-slot='select-trigger'] {
 }
 
 button[data-slot='select-trigger']:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--text-muted) 45%, var(--border-strong));
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-medium-dark));
   background: var(--surface);
 }
 
@@ -223,7 +223,7 @@ button[data-slot='select-trigger'][data-disabled='true'] {
   min-height: 2.125rem;
   padding: 0.35rem 1.75rem 0.35rem 0.65rem;
   border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-medium-dark);
   background: var(--surface);
   color: var(--text);
   font-size: var(--text-sm);
@@ -233,7 +233,7 @@ button[data-slot='select-trigger'][data-disabled='true'] {
 
 .app-select--compact button[data-slot='select-trigger']:hover:not(:disabled),
 .app-select--compact button[data-slot='select-trigger'][data-pressed='true'] {
-  border-color: color-mix(in srgb, var(--text-muted) 40%, var(--border-strong));
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-medium-dark));
   background: var(--surface);
   box-shadow: none;
 }

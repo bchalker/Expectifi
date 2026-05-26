@@ -1,6 +1,7 @@
 import {
   IconChartLine,
   IconCircleCheck,
+  IconInfoCircle,
   IconWorld,
 } from '@tabler/icons-react'
 import { Header } from './Header'
@@ -18,9 +19,9 @@ const FEATURE_CARDS = [
     imageSrc: '/landing/portfolio-calculator.png',
     imageAlt:
       'Expectifi withdrawal strategy showing monthly income, yield settings, and retirement account balances.',
-    body: `Enter your Roth, 401(k), Traditional IRA, brokerage, and HSA balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid (premium). Choose your expected annual return — or run scenarios by market sentiment or per-holding assumptions.
+    body: `Built for United States and Canadian savers. Enter Roth, 401(k), RRSP, TFSA, brokerage, and other balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid (premium, US & Canada). Choose your expected annual return — or run scenarios by market sentiment or per-holding assumptions.
 
-The growth phase shows your projected balance at retirement. The income phase shows what you can draw each month, whether by dividends or withdrawal rate.`,
+The growth phase shows your projected balance at retirement. The income phase shows what you can draw each month, whether by dividends or withdrawal rate. Tax and withdrawal guidance follows US or Canadian rules based on your country.`,
   },
   {
     id: 'where-to-retire',
@@ -35,34 +36,27 @@ The growth phase shows your projected balance at retirement. The income phase sh
 ] as const
 
 const TRUST_ITEMS = [
+  'United States & Canada',
   'Your data stays private',
   'No account required to start',
   'Results in under 2 minutes',
 ] as const
 
-const PRICING_INCLUDES = [
-  'Saved scenarios you can revisit anytime',
-  'Social Security timing and claiming ages',
-  'Withdrawal strategy and tax-aware draw order',
-  'Where to retire — 638 cities ranked by real after-tax surplus',
-  'Plaid connection for auto-updates',
-  'All future features as we ship them',
-] as const
-
 const PRICING_FREE_FEATURES = [
   'Manual account entry',
   'CSV import (Fidelity, Vanguard, Schwab)',
-  'Growth + income projections',
-  'Where to retire map',
+  'Growth and income projections',
+  'Where to retire map ranked by real after-tax surplus',
+  'Social Security timing',
+  'Withdrawal strategy',
 ] as const
 
 const PRICING_PREMIUM_FEATURES = [
   'Everything in free',
-  'Plaid auto-sync',
-  'Saved scenarios',
-  'Social Security timing',
-  'Withdrawal strategy',
-  'All future features',
+  'Saved scenarios you can revisit anytime',
+  'Settings and balances saved across visits',
+  'Plaid bank sync (US & Canada)',
+  'All future features as we ship them',
 ] as const
 
 const FAQ_ITEMS = [
@@ -76,7 +70,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How do I add my accounts?',
-    a: 'You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account. Only account balances are stored — not individual holdings.',
+    a: 'You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account (United States and Canada). Only account balances are stored — not individual holdings.',
   },
   {
     q: "What's the difference between the growth and income phases?",
@@ -122,7 +116,9 @@ export function LandingPage({
               <button type="button" className="landing-btn landing-btn--primary landing-btn--lg" onClick={onGetStarted}>
                 Get started free
               </button>
-              <p className="landing-hero__note">No credit card required · Takes about 2 minutes</p>
+              <p className="landing-hero__note">
+                United States &amp; Canada · No credit card required · Takes about 2 minutes
+              </p>
             </div>
           </div>
         </section>
@@ -172,51 +168,74 @@ export function LandingPage({
           </div>
         </section>
 
-        <section id="pricing" className="landing-pricing" aria-labelledby="landing-pricing-price">
+        <section id="pricing" className="landing-pricing" aria-labelledby="landing-pricing-title">
           <div className="landing-page__wrap landing-pricing__inner">
-            <article className="landing-pricing-card">
-              <p className="landing-pricing-card__label">Pricing</p>
-              <h2 id="landing-pricing-price" className="landing-pricing-card__price">
-                <span className="landing-pricing-card__price-amount">$9</span>
-                <span className="landing-pricing-card__price-period">/ month</span>
+            <header className="landing-pricing__header">
+              <p className="landing-section__eyebrow">Pricing</p>
+              <h2 id="landing-pricing-title" className="landing-section__title landing-pricing__title">
+                100% free to use. No account required.
               </h2>
-              <ul className="landing-pricing-card__list">
-                {PRICING_INCLUDES.map((item) => (
-                  <li key={item} className="landing-pricing-card__list-item">
-                    <IconCircleCheck className="landing-pricing-card__check" size={18} stroke={2} aria-hidden />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="landing-pricing-card__compare" aria-label="Free vs premium comparison">
-                <div className="landing-pricing-card__compare-col">
-                  <p className="landing-pricing-card__compare-heading">Free</p>
-                  <ul className="landing-pricing-card__compare-list">
-                    {PRICING_FREE_FEATURES.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
+              <p className="landing-pricing__intro">
+                Explore your retirement plan without signing up. Upgrade only when you want to save your work and sync
+                your accounts.
+              </p>
+            </header>
+
+            <div className="landing-pricing__grid">
+              <article className="landing-pricing-plan landing-pricing-plan--free">
+                <h3 className="landing-pricing-plan__name">Free</h3>
+                <p className="landing-pricing-plan__price">
+                  <span className="landing-pricing-plan__price-amount">$0</span>
+                  <span className="landing-pricing-plan__price-period">forever</span>
+                </p>
+                <ul className="landing-pricing-plan__list">
+                  {PRICING_FREE_FEATURES.map((item) => (
+                    <li key={item} className="landing-pricing-plan__list-item">
+                      <IconCircleCheck className="landing-pricing-plan__check" size={18} stroke={2} aria-hidden />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="landing-pricing-plan__footnote">
+                  <IconInfoCircle className="landing-pricing-plan__footnote-icon" size={16} stroke={1.5} aria-hidden />
+                  <span>Your data lives in this browser session. Nothing is saved between visits.</span>
+                </p>
+              </article>
+
+              <article className="landing-pricing-plan landing-pricing-plan--premium">
+                <div className="landing-pricing-plan__head">
+                  <h3 className="landing-pricing-plan__name">Premium</h3>
+                  <span className="landing-pricing-plan__badge">Upgrade</span>
                 </div>
-                <div className="landing-pricing-card__compare-col landing-pricing-card__compare-col--premium">
-                  <p className="landing-pricing-card__compare-heading">
-                    Premium <span className="landing-pricing-card__compare-price">($9/mo)</span>
-                  </p>
-                  <ul className="landing-pricing-card__compare-list">
-                    {PRICING_PREMIUM_FEATURES.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+                <p className="landing-pricing-plan__price landing-pricing-plan__price--premium">
+                  <span className="landing-pricing-plan__price-amount">$9</span>
+                  <span className="landing-pricing-plan__price-period">/ month</span>
+                </p>
+                <ul className="landing-pricing-plan__list">
+                  {PRICING_PREMIUM_FEATURES.map((item) => (
+                    <li key={item} className="landing-pricing-plan__list-item">
+                      <IconCircleCheck className="landing-pricing-plan__check" size={18} stroke={2} aria-hidden />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="landing-pricing-plan__footnote">
+                  <IconInfoCircle className="landing-pricing-plan__footnote-icon" size={16} stroke={1.5} aria-hidden />
+                  <span>Cancel anytime. No questions asked.</span>
+                </p>
+              </article>
+            </div>
+
+            <div className="landing-pricing__cta-block">
               <button
                 type="button"
-                className="landing-btn landing-btn--primary landing-btn--lg landing-pricing-card__cta"
+                className="landing-btn landing-btn--primary landing-btn--lg landing-pricing__cta"
                 onClick={onGetStarted}
               >
-                Get started free
+                Start for free — no account needed
               </button>
-              <p className="landing-pricing-card__note">Free to explore — no account required to start</p>
-            </article>
+              <p className="landing-pricing__cta-note">No credit card. No signup. Just open and explore.</p>
+            </div>
           </div>
         </section>
 

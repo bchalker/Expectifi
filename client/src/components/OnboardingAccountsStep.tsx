@@ -84,7 +84,7 @@ export function OnboardingAccountsStep({
           </span>
           <p className="onboarding-accounts-step__empty-title">No accounts added yet</p>
           <p className="onboarding-accounts-step__empty-lead">
-            Add each account type and its balance. You can connect banks or import a CSV after setup.
+            Enter at least one account type and balance to continue.
           </p>
           {canAddAnother ? (
             <AppButton

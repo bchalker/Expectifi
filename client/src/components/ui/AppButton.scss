@@ -39,8 +39,8 @@ button.app-btn--sm[data-slot='button'] {
 
 button.app-btn--primary[data-slot='button'] {
   border: none;
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--color-primary);
+  color: var(--color-primary-on);
 }
 
 button.app-btn--primary[data-slot='button']:hover:not(:disabled) {
@@ -48,14 +48,15 @@ button.app-btn--primary[data-slot='button']:hover:not(:disabled) {
 }
 
 button.app-btn--secondary[data-slot='button'] {
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
+  border: 1px solid var(--btn-neutral-border);
+  background: var(--btn-neutral-bg);
+  color: var(--btn-neutral-color);
 }
 
 button.app-btn--secondary[data-slot='button']:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-strong));
+  background: var(--btn-neutral-bg-hover);
+  border-color: var(--btn-neutral-border);
+  color: var(--btn-neutral-color);
 }
 
 button.app-btn--ghost[data-slot='button'] {
@@ -65,7 +66,7 @@ button.app-btn--ghost[data-slot='button'] {
 }
 
 button.app-btn--ghost[data-slot='button']:hover:not(:disabled) {
-  background: var(--surface2);
+  background: var(--btn-neutral-bg-hover);
   border-color: var(--border);
   color: var(--text);
 }

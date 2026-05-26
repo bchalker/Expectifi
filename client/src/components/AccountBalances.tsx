@@ -19,11 +19,17 @@ import {
 } from '../lib/manualAccountEntries'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
+import { accountLabelForWithdrawalBucket, localeSupportsWithdrawalBucket } from '../config/taxConfig'
+import { useUserLocale } from '../context/UserLocaleContext'
 import {
   withdrawalBadgeAndHint,
   withdrawalBucketOrder,
   type WithdrawalDisplayBucket,
 } from '../lib/withdrawalDisplayOrder'
+import {
+  withdrawalExplainerBody,
+  withdrawalExplainerDisclaimer,
+} from '../lib/withdrawalStrategyContent'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { inputsHavePlanningProfileFields, planningDisplayFromInputs } from '../lib/userPrefs'
 import {
@@ -168,13 +174,9 @@ function WithdrawalLabeledBlock({
   )
 }
 
-const EXPLAINER_BODY =
-  'This order is designed to minimize your lifetime tax burden. Drawing from taxable accounts first preserves your tax-advantaged accounts longer. Strategic pre-tax withdrawals before age 73 let you fill lower tax brackets and convert to Roth while your income is lower. Roth accounts have no required withdrawals, so letting them grow tax-free as long as possible maximizes their value.'
-
 const REMOVE_ACCOUNTS_CONFIRM_BODY =
   'Remove all account balances from this card? Manual totals, imported positions, and custom return overrides for these accounts will be cleared.'
 
-const EXPLAINER_DISCLAIMER = 'This is a general strategy. Consult a financial advisor for personalized guidance.'
 
 export function AccountBalances({
   c,
@@ -203,6 +205,7 @@ export function AccountBalances({
   openImportRequest,
   onImportOpenHandled,
 }: Props) {
+  const { locale, taxConfig } = useUserLocale()
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly
   const fidelityScenarioEditingEnabled = Boolean(readOnly && inputs && setInputs && balanceMode === 'fidelity')
   const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false)
@@ -669,7 +672,9 @@ export function AccountBalances({
       if (c.bal.balHsa > 0) buckets.add('hsa')
       if ((brkBal ?? 0) > 0 || hasFidelityBrokerage) buckets.add('brokerage')
     }
-    return withdrawalBucketOrder(retirementAge, true).filter((b) => buckets.has(b))
+    return withdrawalBucketOrder(retirementAge, true, locale).filter(
+      (b) => buckets.has(b) && localeSupportsWithdrawalBucket(locale, b),
+    )
   }, [
     balanceMode,
     manualAccountEntries,
@@ -681,6 +686,7 @@ export function AccountBalances({
     brkBal,
     hasFidelityBrokerage,
     retirementAge,
+    locale,
   ])
 
   const showBalanceEntryActions = mergedDashboard ? canEditBalances : !readOnly && Boolean(onBalanceModeChange)
@@ -957,8 +963,8 @@ export function AccountBalances({
         </div>
         {withdrawalExplainerOpen ? (
           <div id="withdrawal-order-explainer" className="withdrawal-order-explainer" role="note">
-            <p>{EXPLAINER_BODY}</p>
-            <p className="withdrawal-order-explainer__disclaimer">{EXPLAINER_DISCLAIMER}</p>
+            <p>{withdrawalExplainerBody(locale, taxConfig)}</p>
+            <p className="withdrawal-order-explainer__disclaimer">{withdrawalExplainerDisclaimer(taxConfig)}</p>
           </div>
         ) : null}
       </>
@@ -966,7 +972,11 @@ export function AccountBalances({
   }
 
   function metaFor(bucket: WithdrawalDisplayBucket) {
-    return withdrawalBadgeAndHint(bucket, retirementAge, true, presentWithdrawalBuckets)
+    return withdrawalBadgeAndHint(bucket, retirementAge, true, presentWithdrawalBuckets, locale)
+  }
+
+  function fidelityBucketLabel(bucket: WithdrawalDisplayBucket, fallback: string): string {
+    return accountLabelForWithdrawalBucket(taxConfig, bucket) ?? fallback
   }
 
   function renderFidelityTaxDisclosure(
@@ -1014,17 +1024,29 @@ export function AccountBalances({
     const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
     const defs = (
       [
-        { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal },
-        { tax: 'roth' as const, label: 'Roth', total: c.bal.balRoth },
-        { tax: 'hsa' as const, label: 'HSA', total: c.bal.balHsa },
+        {
+          tax: 'pretax' as const,
+          label: fidelityBucketLabel('pretax', 'Pre-tax'),
+          total: pretaxTotal,
+        },
+        {
+          tax: 'roth' as const,
+          label: fidelityBucketLabel('roth', 'Tax-advantaged'),
+          total: c.bal.balRoth,
+        },
+        {
+          tax: 'hsa' as const,
+          label: fidelityBucketLabel('hsa', 'HSA'),
+          total: c.bal.balHsa,
+        },
       ] as const
-    ).filter((d) => d.total > 0)
+    ).filter((d) => d.total > 0 && localeSupportsWithdrawalBucket(locale, d.tax))
     const defByTax = Object.fromEntries(defs.map((d) => [d.tax, d])) as Partial<
       Record<'pretax' | 'roth' | 'hsa', (typeof defs)[0]>
     >
 
     if (withdrawalUi) {
-      const seq = withdrawalBucketOrder(retirementAge, false)
+      const seq = withdrawalBucketOrder(retirementAge, false, locale)
       return seq.flatMap((b) => {
         if (b === 'brokerage') return []
         const def = defByTax[b]
@@ -1234,11 +1256,23 @@ export function AccountBalances({
     if (!mergedDashboard) return null
 
     const withdrawalUi = Boolean(showWithdrawalGuidance)
-    const seq = withdrawalBucketOrder(retirementAge, true)
+    const seq = withdrawalBucketOrder(retirementAge, true, locale)
     const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
-    const pretaxDef = { tax: 'pretax' as const, label: 'Pre-tax', total: pretaxTotal }
-    const rothDef = { tax: 'roth' as const, label: 'Roth', total: c.bal.balRoth }
-    const hsaDef = { tax: 'hsa' as const, label: 'HSA', total: c.bal.balHsa }
+    const pretaxDef = {
+      tax: 'pretax' as const,
+      label: fidelityBucketLabel('pretax', 'Pre-tax'),
+      total: pretaxTotal,
+    }
+    const rothDef = {
+      tax: 'roth' as const,
+      label: fidelityBucketLabel('roth', 'Tax-advantaged'),
+      total: c.bal.balRoth,
+    }
+    const hsaDef = {
+      tax: 'hsa' as const,
+      label: fidelityBucketLabel('hsa', 'HSA'),
+      total: c.bal.balHsa,
+    }
 
     const nodes: ReactNode[] = []
 

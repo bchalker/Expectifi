@@ -4,13 +4,7 @@ import { AppButton } from './ui/AppButton'
 import { useAuth } from '../context/AuthContext'
 import { usePlan } from '../hooks/usePlan'
 import { fetchPlaidStatus } from '../lib/api/plaid'
-import { fetchTrueLayerStatus, startTrueLayerAuth } from '../lib/api/truelayer'
 import { usePlaidLinkFlow } from '../hooks/usePlaidLinkFlow'
-import {
-  preferTrueLayerForCurrentUser,
-  resolveEffectiveResidenceCountry,
-  resolveOpenBankingLocale,
-} from '../lib/openBankingRegion'
 import type { CalculatorInputs } from '../lib/computeResults'
 import './PlaidLinkButton.scss'
 
@@ -26,31 +20,29 @@ type Props = {
 export function PlaidLinkButton({
   className,
   variant = 'primary',
-  residenceCountry,
+  residenceCountry: _residenceCountry,
   onApplyBalances,
   onImportApplied,
   disabled = false,
 }: Props) {
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
-  const effectiveResidence = resolveEffectiveResidenceCountry(residenceCountry)
-  const usesTrueLayer = preferTrueLayerForCurrentUser(effectiveResidence)
   const [configured, setConfigured] = useState<boolean | null>(null)
   const handleImportApplied = useCallback(() => {
     onImportApplied?.()
   }, [onImportApplied])
 
-  const { startLink, busy: plaidBusy, err: plaidErr, info: plaidInfo } = usePlaidLinkFlow({
+  const { startLink, busy, err, info } = usePlaidLinkFlow({
     onApplyBalances,
     onImportApplied: handleImportApplied,
-    enabled: hasPaidSubscription && !usesTrueLayer,
+    enabled: hasPaidSubscription,
   })
 
   useEffect(() => {
     let cancelled = false
     void (async () => {
       try {
-        const status = usesTrueLayer ? await fetchTrueLayerStatus() : await fetchPlaidStatus()
+        const status = await fetchPlaidStatus()
         if (!cancelled) setConfigured(status.configured)
       } catch {
         if (!cancelled) setConfigured(false)
@@ -59,21 +51,10 @@ export function PlaidLinkButton({
     return () => {
       cancelled = true
     }
-  }, [usesTrueLayer])
+  }, [])
 
-  const busy = plaidBusy
-  const err = usesTrueLayer ? null : plaidErr
-  const info = usesTrueLayer ? null : plaidInfo
-  const connectLabel = usesTrueLayer ? 'Connect your bank' : 'Connect via Plaid'
-  const label = busy ? 'Connecting…' : variant === 'choice' ? connectLabel : usesTrueLayer ? 'Connect your bank' : 'Connect with Plaid'
-
-  const startConnect = useCallback(() => {
-    if (usesTrueLayer) {
-      startTrueLayerAuth(resolveOpenBankingLocale({ residenceCountry: effectiveResidence }))
-      return
-    }
-    void startLink(null)
-  }, [effectiveResidence, startLink, usesTrueLayer])
+  const label =
+    busy ? 'Connecting…' : variant === 'choice' ? 'Connect via Plaid' : 'Connect with Plaid'
 
   if (variant === 'choice' && !hasPaidSubscription) {
     const proNote = user ? 'Subscribe to Pro to connect' : 'Pro subscribers only'
@@ -86,7 +67,7 @@ export function PlaidLinkButton({
           aria-disabled="true"
         >
           <IconLink size={18} stroke={1.5} aria-hidden />
-          {connectLabel}
+          Connect via Plaid
         </button>
         <p className="financials-entry-choice__pro-note">{proNote}</p>
       </div>
@@ -115,7 +96,7 @@ export function PlaidLinkButton({
           size="sm"
           className={btnClass}
           isDisabled={disabled || busy || statusBlocksClick}
-          onPress={startConnect}
+          onPress={() => void startLink(null)}
         >
           <IconLink size={16} stroke={1.5} aria-hidden />
           {label}
@@ -126,7 +107,7 @@ export function PlaidLinkButton({
           role={variant === 'choice' ? 'listitem' : undefined}
           className={btnClass}
           disabled={disabled || busy || statusBlocksClick}
-          onClick={startConnect}
+          onClick={() => void startLink(null)}
         >
           <IconLink size={18} stroke={1.5} aria-hidden />
           {label}

@@ -1,6 +1,6 @@
 .score-meter-row {
   --score-meter-pct: 0%;
-  --score-meter-fill: var(--color-text-success);
+  --score-meter-fill: var(--green-progress);
   --score-meter-value: var(--score-meter-fill);
 
   display: flex;

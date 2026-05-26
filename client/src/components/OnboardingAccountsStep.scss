@@ -1,10 +1,12 @@
 .onboarding-accounts-step {
   --accounts-control-height: 40px;
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.65rem;
   width: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .onboarding-accounts-step__header-row,
@@ -59,13 +61,14 @@
   gap: 0.5rem;
   width: 100%;
   min-width: 0;
-  min-height: 10.5rem;
+  flex: 1 1 auto;
+  min-height: 8rem;
   padding: 1.75rem 1.25rem;
   box-sizing: border-box;
   text-align: center;
-  border: 1.5px dashed #b8bec8;
+  border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
   border-radius: 12px;
-  background: var(--surface2);
+  background: var(--surface1);
 }
 
 .onboarding-accounts-step__empty-icon {
@@ -75,7 +78,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  background: var(--surface);
   color: var(--text-muted);
 }
 
@@ -100,6 +103,18 @@
 
 .onboarding-accounts-step__empty-cta {
   margin-top: 0.35rem;
+}
+
+button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button'] {
+  border: none;
+  background: var(--blue2);
+  color: #fff;
+  filter: none;
+}
+
+button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:hover:not(:disabled) {
+  background: var(--blue1);
+  filter: none;
 }
 
 .onboarding-accounts-step__rows {
@@ -406,8 +421,10 @@
   justify-content: space-between;
   gap: 1rem;
   margin: 0;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  border-bottom: none;
+  border-radius: 8px;
+  background: var(--blue1);
   animation: onboarding-accounts-total-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -428,7 +445,7 @@
   font-size: var(--text-md);
   font-weight: 600;
   line-height: 1.35;
-  color: var(--text);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .onboarding-overlay__accounts-total-value {
@@ -437,7 +454,7 @@
   font-size: var(--text-xl);
   font-weight: 700;
   line-height: 1.2;
-  color: var(--text);
+  color: #fff;
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

@@ -5,23 +5,7 @@ import {
 } from './onboardingRegions'
 import { loadUserProfile } from './userProfileStorage'
 
-export type OpenBankingProvider = 'plaid' | 'truelayer'
-
-const PLAID_ONBOARDING_REGIONS = new Set<OnboardingRegionId>(['us', 'ca'])
-
-/** Plaid for US & Canada; TrueLayer for UK and EU launch countries. */
-export function usesPlaidOpenBanking(locale: OnboardingRegionId | null | undefined): boolean {
-  if (!locale) return true
-  return PLAID_ONBOARDING_REGIONS.has(locale)
-}
-
-export function usesTrueLayerOpenBanking(locale: OnboardingRegionId | null | undefined): boolean {
-  return !usesPlaidOpenBanking(locale)
-}
-
-export function getOpenBankingProvider(locale: OnboardingRegionId | null | undefined): OpenBankingProvider {
-  return usesTrueLayerOpenBanking(locale) ? 'truelayer' : 'plaid'
-}
+export type OpenBankingProvider = 'plaid'
 
 const COUNTRY_ALIAS_LOCALE: Record<string, OnboardingRegionId> = {
   usa: 'us',
@@ -29,6 +13,15 @@ const COUNTRY_ALIAS_LOCALE: Record<string, OnboardingRegionId> = {
   'u.s.a.': 'us',
   'united states of america': 'us',
   ca: 'ca',
+}
+
+/** Bank linking via Plaid (US & Canada). */
+export function usesPlaidOpenBanking(_locale?: OnboardingRegionId | null): boolean {
+  return true
+}
+
+export function getOpenBankingProvider(_locale?: OnboardingRegionId | null): OpenBankingProvider {
+  return 'plaid'
 }
 
 /** Map stored residence country → onboarding region id for open banking. */
@@ -64,8 +57,4 @@ export function resolveOpenBankingLocale(opts?: ResolveOpenBankingOptions): Onbo
   const fromProfile = normalizeOnboardingRegionId(profile?.locale)
   if (fromProfile) return fromProfile
   return 'us'
-}
-
-export function preferTrueLayerForCurrentUser(residenceCountry?: string): boolean {
-  return usesTrueLayerOpenBanking(resolveOpenBankingLocale({ residenceCountry }))
 }

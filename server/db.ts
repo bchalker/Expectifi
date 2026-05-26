@@ -146,39 +146,6 @@ export async function ensureSchema(): Promise<void> {
   await p.query(`CREATE INDEX IF NOT EXISTS plaid_items_user_id ON plaid_items (user_id)`)
 
   await p.query(`
-    CREATE TABLE IF NOT EXISTS truelayer_connections (
-      id TEXT NOT NULL PRIMARY KEY,
-      user_id TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-      access_token_enc TEXT NOT NULL,
-      refresh_token_enc TEXT,
-      token_expires_at TIMESTAMPTZ,
-      provider_id TEXT,
-      institution_name TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `)
-  await p.query(`CREATE INDEX IF NOT EXISTS truelayer_connections_user_id ON truelayer_connections (user_id)`)
-
-  await p.query(`
-    CREATE TABLE IF NOT EXISTS truelayer_accounts (
-      id TEXT NOT NULL,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      connection_id TEXT NOT NULL REFERENCES truelayer_connections(id) ON DELETE CASCADE,
-      display_name TEXT,
-      account_type TEXT,
-      currency TEXT,
-      current_balance NUMERIC,
-      available_balance NUMERIC,
-      provider_id TEXT,
-      raw_json JSONB,
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (user_id, id)
-    )
-  `)
-  await p.query(`CREATE INDEX IF NOT EXISTS truelayer_accounts_connection ON truelayer_accounts (connection_id)`)
-
-  await p.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT NOT NULL PRIMARY KEY,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

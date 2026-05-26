@@ -22,7 +22,11 @@ html:not([data-no-portfolio-subheader]) .subheader {
 }
 
 .subheader.subheader--phase-income .subheader-bubble__front-path {
-  fill: url(#subheader-income-wave-fill);
+  fill: var(--amber1);
+}
+
+.subheader.subheader--phase-income::before {
+  background: var(--amber1);
 }
 
 .subheader.subheader--phase-income.subheader--ss-claim-slot {
@@ -820,7 +824,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   font-size: var(--text-hero);
   font-weight: 600;
   line-height: 1.05;
-  color: var(--subheader-hero-fg);
+  color: var(--surface);
   min-height: 2.35rem;
   display: flex;
   flex-wrap: wrap;

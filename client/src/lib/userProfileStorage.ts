@@ -14,6 +14,9 @@ import { pensionConfigForLocale } from './localePensionConfig'
 import { clampClaimAgeInRange } from './socialSecurity'
 
 export const USER_PROFILE_STORAGE_KEY = 'expectifi_user_profile'
+
+/** Dispatched on `window` when profile is saved in this tab (see UserLocaleContext). */
+export const USER_PROFILE_UPDATED_EVENT = 'expectifi:user-profile-updated'
 const LEGACY_USER_PROFILE_KEYS = ['hwp_user_profile'] as const
 
 export type StoredUserProfile = {
@@ -139,6 +142,9 @@ export function saveUserProfile(patch: Partial<StoredUserProfile>): StoredUserPr
   const next: StoredUserProfile = { ...current, ...patch, version: 1 }
   try {
     localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(next))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(USER_PROFILE_UPDATED_EVENT))
+    }
   } catch {
     /* quota / private mode */
   }
@@ -350,11 +356,9 @@ export function mergeProfileWithDbPrefs(
 
 export function resolveOnboardingStartStep(
   profile: StoredUserProfile | null,
-  opts?: { forceRegion?: boolean },
-): 'region' | 'profile' | 'accounts' {
-  if (opts?.forceRegion) return 'region'
-  if (!hasStoredProfileStep0(profile)) return 'region'
-  if (!hasStoredProfileStep1(profile)) return 'profile'
+  _opts?: { forceRegion?: boolean },
+): 'profile' | 'accounts' {
+  if (!hasStoredProfileStep0(profile) || !hasStoredProfileStep1(profile)) return 'profile'
   return 'accounts'
 }
 

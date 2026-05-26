@@ -78,7 +78,6 @@ type PlaidConnectionsSectionProps = {
   onDisconnect: (itemId: string) => void | Promise<void>
   showConnectAnother?: boolean
   onConnectAnother?: () => void
-  usesTrueLayer?: boolean
   connectAnotherLabel?: string
 }
 
@@ -89,14 +88,11 @@ function PlaidConnectionsSection({
   onDisconnect,
   showConnectAnother = false,
   onConnectAnother,
-  usesTrueLayer = false,
   connectAnotherLabel,
 }: PlaidConnectionsSectionProps) {
   if (!items.length) return null
-  const sectionLabel = usesTrueLayer ? 'Connected bank accounts' : 'Connected Plaid accounts'
-  const addLabel =
-    connectAnotherLabel ??
-    (usesTrueLayer ? 'Connect another bank' : 'Connect another account via Plaid')
+  const sectionLabel = 'Connected Plaid accounts'
+  const addLabel = connectAnotherLabel ?? 'Connect another account via Plaid'
   return (
     <div className="account-balances-manage__plaid-section" aria-label={sectionLabel}>
       <ul className="plaid-connection-panel__list">
@@ -287,8 +283,7 @@ export function AccountBalancesManageMenu({
     run()
   }, [close, ctx, onImportApplied, onRequestReplaceManual, showPlaidConnect])
 
-  const usesTrueLayer = ctx?.usesTrueLayer ?? false
-  const syncTitle = usesTrueLayer ? 'Bank synced' : 'Plaid synced'
+  const syncTitle = 'Plaid synced'
   const syncTooltip = lastHealthySync ? (
     <>
       <span className="account-balances-manage__tooltip-title">{syncTitle}</span>
@@ -339,7 +334,6 @@ export function AccountBalancesManageMenu({
                     onDisconnect={ctx.disconnectItem}
                     showConnectAnother={showPlaidConnect}
                     onConnectAnother={handlePlaidConnect}
-                    usesTrueLayer={ctx.usesTrueLayer}
                     connectAnotherLabel={ctx.connectButtonLabel}
                   />
                   <div className="account-balances-manage__divider" role="separator" />

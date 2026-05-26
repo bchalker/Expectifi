@@ -6,7 +6,6 @@ import {
   deleteStripeCustomerRecord,
   getStripeBackend,
 } from './stripeBackend.js'
-import { deleteTrueLayerConnectionForUser } from './truelayerData.js'
 
 type PlaidItemRow = {
   id: string
@@ -68,8 +67,6 @@ export async function deleteUserAccountPermanently(userId: string): Promise<void
   if (!user) return
 
   await revokeAllPlaidItemsForUser(trimmedId)
-  await deleteTrueLayerConnectionForUser(trimmedId)
-  await dbQuery('DELETE FROM truelayer_accounts WHERE user_id = ?', [trimmedId])
   await dbQuery('DELETE FROM scenarios WHERE user_id = ?', [trimmedId])
 
   const stripeCustomerId = user.stripe_customer_id?.trim() || null

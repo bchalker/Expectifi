@@ -281,8 +281,13 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   border-left: 1px solid var(--border-strong);
 }
 
-/* ── TABS ── */
-.tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+/* ── TABS (legacy prototype; exclude HeroUI [data-slot="tabs"]) ── */
+.tabs:not([data-slot='tabs']) {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
 .tab-btn {
   font-family: var(--mono);
   font-size: var(--text-xs);
@@ -648,7 +653,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .strip-cards { flex-direction: column; }
   .strip-card { min-width: 0; }
-  .tabs { gap: 4px; }
+  .tabs:not([data-slot='tabs']) { gap: 4px; }
   .tab-btn { font-size: 10px; padding: 5px 10px; }
   .result-hero-val { font-size: 1.5rem !important; }
   .inc-preset { font-size: 9px; padding: 3px 8px; }

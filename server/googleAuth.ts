@@ -19,7 +19,6 @@ function googleSignupRequiresStripePayment(stripeCustomerId: string | null): boo
   return !stripeCustomerId
 }
 import { isPlaidConfigured } from './plaidClient.js'
-import { isTrueLayerConfigured } from './truelayerConfig.js'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE_MS = 10 * 60 * 1000
@@ -146,7 +145,6 @@ export function installGoogleAuth(app: Express, port: number): void {
       stripeMode: getStripeKeyMode(),
       subscriptionBillingEnabled: Boolean(stripe && getStripeSubscriptionPriceId()),
       plaidConfigured: isPlaidConfigured(),
-      truelayerConfigured: isTrueLayerConfigured(),
     })
   })
 

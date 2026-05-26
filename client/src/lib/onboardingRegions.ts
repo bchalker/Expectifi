@@ -1,17 +1,9 @@
 import type { DisplayCurrencyCode } from './displayCurrency'
 
-/** Launch regions — US/CA (Plaid), UK + EU-5 (TrueLayer). */
-export type OnboardingRegionId = 'us' | 'ca' | 'uk' | 'de' | 'fr' | 'es' | 'it'
+/** Launch regions — United States and Canada only (Plaid open banking). */
+export type OnboardingRegionId = 'us' | 'ca'
 
-export const LAUNCH_ONBOARDING_REGION_IDS: readonly OnboardingRegionId[] = [
-  'us',
-  'ca',
-  'uk',
-  'de',
-  'fr',
-  'es',
-  'it',
-] as const
+export const LAUNCH_ONBOARDING_REGION_IDS: readonly OnboardingRegionId[] = ['us', 'ca'] as const
 
 export type OnboardingRegionOption = {
   id: OnboardingRegionId
@@ -26,18 +18,18 @@ export type OnboardingRegionOption = {
 export const ONBOARDING_REGION_OPTIONS: readonly OnboardingRegionOption[] = [
   { id: 'us', label: 'United States', country: 'United States', locale: 'us', currency: 'USD', flag: '🇺🇸' },
   { id: 'ca', label: 'Canada', country: 'Canada', locale: 'ca', currency: 'CAD', flag: '🇨🇦' },
-  { id: 'uk', label: 'United Kingdom', country: 'United Kingdom', locale: 'uk', currency: 'GBP', flag: '🇬🇧' },
-  { id: 'de', label: 'Germany', country: 'Germany', locale: 'de', currency: 'EUR', flag: '🇩🇪' },
-  { id: 'fr', label: 'France', country: 'France', locale: 'fr', currency: 'EUR', flag: '🇫🇷' },
-  { id: 'es', label: 'Spain', country: 'Spain', locale: 'es', currency: 'EUR', flag: '🇪🇸' },
-  { id: 'it', label: 'Italy', country: 'Italy', locale: 'it', currency: 'EUR', flag: '🇮🇹' },
 ] as const
 
-/** Country picker grid order (US & CA first, then UK/EU). */
+/** Country picker grid (US & Canada). */
 export const ONBOARDING_COUNTRY_GRID: readonly OnboardingRegionOption[] = ONBOARDING_REGION_OPTIONS
 
 const LEGACY_LOCALE_MAP: Record<string, OnboardingRegionId> = {
-  'other-europe': 'uk',
+  'other-europe': 'ca',
+  uk: 'ca',
+  de: 'ca',
+  fr: 'ca',
+  es: 'ca',
+  it: 'ca',
   other: 'us',
 }
 
@@ -73,11 +65,6 @@ export function detectBrowserOnboardingRegion(): OnboardingRegionId | null {
     const lower = tag.toLowerCase()
     if (lower === 'en-us' || lower.endsWith('-us')) return 'us'
     if (lower === 'en-ca' || lower.endsWith('-ca')) return 'ca'
-    if (lower === 'en-gb' || lower.endsWith('-gb')) return 'uk'
-    if (lower.startsWith('de')) return 'de'
-    if (lower.startsWith('fr')) return 'fr'
-    if (lower.startsWith('es')) return 'es'
-    if (lower.startsWith('it')) return 'it'
   }
   return null
 }

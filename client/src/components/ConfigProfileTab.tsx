@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button, useOverlayState } from '@heroui/react'
+import { useOverlayState } from '@heroui/react'
 import { IconCloudUpload } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { AppButton } from './ui/AppButton'
@@ -93,45 +93,40 @@ export function ConfigProfileTab({
     )
   }
 
-  const displayLabel = user.displayName?.trim() || user.email
+  const displayName = user.displayName?.trim() || user.email
 
   return (
     <section className="config-profile-tab" aria-labelledby="config-profile-heading">
-      <h3 id="config-profile-heading" className="config-profile-tab__heading">
-        Profile
-      </h3>
-      <dl className="config-profile-tab__meta">
-        <div className="config-profile-tab__meta-row">
-          <dt className="config-profile-tab__meta-label">Name</dt>
-          <dd className="config-profile-tab__meta-value">{displayLabel}</dd>
-        </div>
-        <div className="config-profile-tab__meta-row">
-          <dt className="config-profile-tab__meta-label">Email</dt>
-          <dd className="config-profile-tab__meta-value">{user.email}</dd>
-        </div>
-      </dl>
-      <p className="footnote footnote--muted config-profile-tab__cancel-lead">
-        Cancel account ends your Stripe subscription, disconnects linked banks, permanently deletes your Expectifi
-        account and all saved data on our servers, and clears plan data stored in this browser. This cannot be undone.
-      </p>
-      {err ? (
-        <p className="config-profile-tab__error" role="alert">
-          {err}
+      <div className="config-profile-tab__identity">
+        <p id="config-profile-heading" className="config-profile-tab__name">
+          {displayName}
         </p>
-      ) : null}
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        className="config-profile-tab__cancel-btn"
-        isDisabled={busy}
-        onPress={() => {
-          setErr(null)
-          confirmState.open()
-        }}
-      >
-        Cancel account
-      </Button>
+        <p className="config-profile-tab__email">{user.email}</p>
+      </div>
+
+      <div className="config-profile-tab__cancel-card">
+        {err ? (
+          <p className="config-profile-tab__error" role="alert">
+            {err}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          className="config-profile-tab__cancel-btn"
+          disabled={busy}
+          onClick={() => {
+            setErr(null)
+            confirmState.open()
+          }}
+        >
+          Cancel my Account
+        </button>
+        <p className="config-profile-tab__cancel-note">
+          <strong>Note.</strong> Your privacy is the utmost concern. When you cancel your account, it ends your Stripe
+          subscription, disconnects linked banks, permanently deletes your Expectifi account and all saved data on our
+          servers, and clears plan data stored in this browser. This cannot be undone.
+        </p>
+      </div>
 
       {confirmState.isOpen && drawerShell
         ? createPortal(

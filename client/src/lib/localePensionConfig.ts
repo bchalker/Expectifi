@@ -69,51 +69,9 @@ const CA_CONFIG: LocalePensionConfig = {
   claimMilestoneTicks: [60, 65, 70],
 }
 
-const UK_CONFIG: LocalePensionConfig = {
-  ...US_CONFIG,
-  stepTitle: 'State Pension',
-  stepSubtitle: 'Help us estimate your State Pension in retirement',
-  includeToggleLabel: 'Include State Pension',
-  claimQuestionLabel: 'When do you plan to claim your State Pension?',
-  spouseClaimQuestionLabel: 'When will your spouse claim State Pension?',
-  spouseClaimModeQuestionLabel: 'How will your spouse claim State Pension?',
-  benefitHint:
-    'Your estimated monthly State Pension at your chosen age. Check your forecast at gov.uk/check-state-pension.',
-  claimAgeHint: 'State Pension age is rising; pick the age you plan to start receiving benefits.',
-  includeSpouseHint: 'Include your spouse to factor in their State Pension alongside yours.',
-  spouseClaimModeTooltip:
-    'Use your spouse’s own State Pension estimate, or a simplified amount based on your benefit.',
-  averageBadge: null,
-  defaultBenefitMonthlyAt67: 900,
-}
-
-const EU_GENERIC: Omit<LocalePensionConfig, 'stepTitle'> = {
-  stepSubtitle: 'Help us estimate your public pension in retirement',
-  includeToggleLabel: 'Include state pension',
-  claimQuestionLabel: 'When do you plan to start your state pension?',
-  spouseClaimQuestionLabel: 'When will your spouse start their state pension?',
-  spouseClaimModeQuestionLabel: 'How will your spouse claim their pension?',
-  benefitHint: 'Enter your expected monthly public pension at your chosen start age.',
-  claimAgeHint: 'Pick the age you plan to start receiving your state pension.',
-  includeSpouseHint: 'Include your spouse to factor in their pension alongside yours.',
-  spouseClaimModeTooltip:
-    'Use your spouse’s own pension estimate, or a simplified amount based on your benefit.',
-  averageBadge: null,
-  defaultBenefitMonthlyAt67: 1_200,
-  claimAgeMin: 62,
-  claimAgeMax: 70,
-  defaultClaimAge: 67,
-  claimMilestoneTicks: [62, 65, 67, 70],
-}
-
 const BY_LOCALE: Record<OnboardingRegionId, LocalePensionConfig> = {
   us: US_CONFIG,
   ca: CA_CONFIG,
-  uk: UK_CONFIG,
-  de: { ...EU_GENERIC, stepTitle: 'Gesetzliche Rente' },
-  fr: { ...EU_GENERIC, stepTitle: 'Retraite de base' },
-  es: { ...EU_GENERIC, stepTitle: 'Pensión pública' },
-  it: { ...EU_GENERIC, stepTitle: 'Pensione pubblica (INPS)' },
 }
 
 export function pensionConfigForLocale(

@@ -1,6 +1,15 @@
+import { Tabs } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { HOME_EQUITY } from "shared";
 import type { ComputedSnapshot } from "../lib/computeResults";
+import {
+  accountLabelForWithdrawalBucket,
+  formatMarginalRatesSummary,
+  localeSupportsWithdrawalBucket,
+  standardDeductionForFilingStatus,
+  taxFreeWithdrawalLabels,
+} from "../config/taxConfig";
+import { useUserLocale } from "../context/UserLocaleContext";
+import { pensionConfigForLocale } from "../lib/localePensionConfig";
 import { fmt, fmtK, fmtMon } from "../utils/format";
 import { SidePanelShell } from "./SidePanelShell";
 import "./PanelChrome.scss";
@@ -31,6 +40,8 @@ function StripSnapshotNarrative({
   targetRetirementAge: number;
   includeIncomeTaxSummary?: boolean;
 }) {
+  const { locale, taxConfig } = useUserLocale();
+  const pension = pensionConfigForLocale(locale);
   const td = c.taxDetail;
   const totalBal = c.retBal + brkBal;
   const navDriftPhrase = `${incGrowth >= 0 ? "+" : ""}${(incGrowth * 100).toFixed(1)}% net NAV drift per year`;
@@ -58,7 +69,7 @@ function StripSnapshotNarrative({
             , and{" "}
             <strong className="strip-narrative__em">{navDriftPhrase}</strong>
             {ssIncluded
-              ? ", with Social Security treated as reinvested for this yield path"
+              ? `, with ${pension.stepTitle} treated as reinvested for this yield path`
               : ""}
             .
           </>
@@ -77,7 +88,7 @@ function StripSnapshotNarrative({
             </strong>{" "}
             withdrawal rate on that balance
             {ssIncluded
-              ? " and Social Security modeled as spent rather than reinvested"
+              ? ` and ${pension.stepTitle} modeled as spent rather than reinvested`
               : ""}
             .
           </>
@@ -85,25 +96,24 @@ function StripSnapshotNarrative({
       </p>
       {ssIncluded ? (
         <p className="strip-narrative__p">
-          Social Security adds about{" "}
+          {taxConfig.pensionLabel} adds about{" "}
           <strong className="strip-narrative__em strip-narrative__em--accent">
             {fmtMon(c.ss)}
           </strong>{" "}
           for you (age{" "}
-          <strong className="strip-narrative__em">{c.ssAge}</strong>, 75% of
-          expected) and{" "}
+          <strong className="strip-narrative__em">{c.ssAge}</strong>
+          {locale === "us" ? ", 75% of expected" : ""}) and{" "}
           <strong className="strip-narrative__em strip-narrative__em--accent">
             {fmtMon(c.spouseSS)}
           </strong>{" "}
           for your spouse (age{" "}
-          <strong className="strip-narrative__em">{c.spouseAge}</strong>, 50% ×
-          75%).
+          <strong className="strip-narrative__em">{c.spouseAge}</strong>
+          {locale === "us" ? ", 50% × 75%" : ""}).
         </p>
       ) : null}
       {includeIncomeTaxSummary ? (
         <p className="strip-narrative__p">
-          Federal tax on ordinary income plus long-term capital gains is modeled
-          at about{" "}
+          Estimated tax on ordinary income and investment gains is about{" "}
           <strong className="strip-narrative__em strip-narrative__em--warn">
             {fmt(c.annTax)}/year
           </strong>{" "}
@@ -115,7 +125,7 @@ function StripSnapshotNarrative({
           <strong className="strip-narrative__em">{fmt(td.ordTax)}</strong>{" "}
           ordinary and{" "}
           <strong className="strip-narrative__em">{fmt(td.ltcgTax)}</strong>{" "}
-          LTCG.
+          {locale === "us" ? "LTCG" : "investment gains"}.
         </p>
       ) : null}
       <p className="strip-narrative__p">
@@ -131,17 +141,9 @@ function StripSnapshotNarrative({
           {fmtK(c.brkFV)}
         </strong>{" "}
         (<strong className="strip-narrative__em">{fmt(brkBal)}</strong>{" "}
-        starting, in withdrawal). Combined portfolio is about{" "}
+        starting, in withdrawal)        . Combined portfolio is about{" "}
         <strong className="strip-narrative__em strip-narrative__em--accent">
           {fmtK(c.totalFV)}
-        </strong>
-        . Home equity is shown as{" "}
-        <strong className="strip-narrative__em strip-narrative__em--gold">
-          {fmtK(HOME_EQUITY)}
-        </strong>
-        ; if that were invested at your assumptions it could add roughly{" "}
-        <strong className="strip-narrative__em strip-narrative__em--gold">
-          {fmtMon(c.equityMon)}
         </strong>
         .
       </p>
@@ -156,18 +158,64 @@ function StripTaxNarrative({
   td: C["taxDetail"];
   annTax: number;
 }) {
-  const ltcgLabel = td.ltcgTax > 0 ? "15%" : "0% (under threshold)";
-  const taxFreeAnnual = td.rothWd + td.hsaWd;
+  const { locale, taxConfig } = useUserLocale();
+  const pension = pensionConfigForLocale(locale);
+  const [filingStatus, setFilingStatus] = useState(taxConfig.defaultFilingStatus);
+
+  useEffect(() => {
+    setFilingStatus(taxConfig.defaultFilingStatus);
+  }, [taxConfig.defaultFilingStatus, locale]);
+
+  const pretaxLabel =
+    accountLabelForWithdrawalBucket(taxConfig, "pretax") ?? "Pre-tax retirement";
+  const taxFree = taxFreeWithdrawalLabels(taxConfig);
+  const stdDed = standardDeductionForFilingStatus(taxConfig, filingStatus);
+  const stdDedLabel = taxConfig.standardDeductionLabel ?? "Standard deduction";
+  const showRoth = localeSupportsWithdrawalBucket(locale, "roth") && td.rothWd > 0;
+  const showHsa = localeSupportsWithdrawalBucket(locale, "hsa") && td.hsaWd > 0;
+  const taxFreeAnnual =
+    (showRoth ? td.rothWd : 0) + (showHsa ? td.hsaWd : 0);
+
+  const ltcgLabel =
+    td.ltcgTax > 0
+      ? taxConfig.capitalGainsNote
+      : `No capital gains tax modeled (${taxConfig.capitalGainsNote})`;
 
   return (
     <div className="strip-narrative">
       <p className="strip-narrative__kicker">Tax breakdown</p>
+      {taxConfig.filingStatuses.length > 1 ? (
+        <div className="strip-narrative__filing" style={{ marginBottom: "0.75rem" }}>
+          <label
+            htmlFor="snapshot-filing-status"
+            className="strip-narrative__kicker"
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Filing status
+          </label>
+          <select
+            id="snapshot-filing-status"
+            className="strip-narrative__select"
+            value={filingStatus}
+            onChange={(e) => setFilingStatus(e.target.value)}
+            style={{ fontSize: "1rem", maxWidth: "100%" }}
+          >
+            {taxConfig.filingStatuses.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <p className="strip-narrative__p" style={{ marginBottom: "0.5rem" }}>
+          Filing: <strong className="strip-narrative__em">{filingStatus}</strong>
+        </p>
+      )}
       <p className="strip-narrative__p">
         Your{" "}
-        <strong className="strip-narrative__em">
-          ordinary income tax (MFJ)
-        </strong>{" "}
-        is modeled at{" "}
+        <strong className="strip-narrative__em">ordinary income tax</strong> (
+        {filingStatus}) is modeled at{" "}
         <strong className="strip-narrative__em strip-narrative__em--warn">
           {fmt(td.ordTax)}/year
         </strong>{" "}
@@ -175,24 +223,37 @@ function StripTaxNarrative({
         <strong className="strip-narrative__em strip-narrative__em--warn">
           {fmt(td.ordTax / 12)}/month
         </strong>
-        ), based on a traditional 401k withdrawal of{" "}
+        ), based on a {pretaxLabel.toLowerCase()} withdrawal of{" "}
         <strong className="strip-narrative__em">{fmt(td.tradWd)}/year</strong>{" "}
         and{" "}
         <strong className="strip-narrative__em">
           {fmt(td.ssTaxable)}/year
         </strong>{" "}
-        in Social Security treated as taxable (up to 85%). After the{" "}
-        <strong className="strip-narrative__em">MFJ standard deduction</strong>{" "}
-        of <strong className="strip-narrative__em">$29,200</strong>, taxable
-        ordinary income is about{" "}
-        <strong className="strip-narrative__em strip-narrative__em--warn">
-          {fmt(td.ordinaryIncome)}/year
-        </strong>
-        .
+        in {taxConfig.pensionLabel} treated as taxable ({taxConfig.pensionTaxNote.toLowerCase()}).
+        {stdDed != null ? (
+          <>
+            {" "}
+            After the <strong className="strip-narrative__em">{stdDedLabel}</strong> of{" "}
+            <strong className="strip-narrative__em">{fmt(stdDed)}</strong>, taxable ordinary
+            income is about{" "}
+            <strong className="strip-narrative__em strip-narrative__em--warn">
+              {fmt(td.ordinaryIncome)}/year
+            </strong>
+            .
+          </>
+        ) : (
+          <>
+            {" "}
+            Taxable ordinary income is about{" "}
+            <strong className="strip-narrative__em strip-narrative__em--warn">
+              {fmt(td.ordinaryIncome)}/year
+            </strong>
+            .
+          </>
+        )}
       </p>
       <p className="strip-narrative__p">
-        <strong className="strip-narrative__em">Long-term capital gains</strong>{" "}
-        tax is{" "}
+        <strong className="strip-narrative__em">Investment gains tax</strong> is{" "}
         <strong className="strip-narrative__em strip-narrative__em--gold">
           {fmt(td.ltcgTax)}/year
         </strong>{" "}
@@ -200,38 +261,52 @@ function StripTaxNarrative({
         <strong className="strip-narrative__em strip-narrative__em--gold">
           {fmt(td.ltcgTax / 12)}/month
         </strong>
-        ). Brokerage withdrawals are{" "}
-        <strong className="strip-narrative__em">{fmt(td.brkWd)}/year</strong>;
-        the model treats about{" "}
-        <strong className="strip-narrative__em">60%</strong> as taxable gain (
-        <strong className="strip-narrative__em">{fmt(td.brkGain)}/year</strong>
-        ), with rate{" "}
-        <strong className="strip-narrative__em strip-narrative__em--gold">
-          {ltcgLabel}
-        </strong>
-        .
+        ).{" "}
+        {accountLabelForWithdrawalBucket(taxConfig, "brokerage") ?? "Brokerage"} withdrawals are{" "}
+        <strong className="strip-narrative__em">{fmt(td.brkWd)}/year</strong>; the model treats
+        about <strong className="strip-narrative__em">60%</strong> as taxable gain (
+        <strong className="strip-narrative__em">{fmt(td.brkGain)}/year</strong>).{" "}
+        <strong className="strip-narrative__em">{ltcgLabel}</strong>
       </p>
+      {taxFreeAnnual > 0 ? (
+        <p className="strip-narrative__p">
+          <strong className="strip-narrative__em">Tax-free withdrawals</strong> (
+          {taxConfig.taxFreeNote}) total{" "}
+          <strong className="strip-narrative__em strip-narrative__em--accent">
+            {fmt(taxFreeAnnual)}/year
+          </strong>
+          {showRoth ? (
+            <>
+              {" "}
+              (<strong className="strip-narrative__em">{fmt(td.rothWd)}/year</strong>{" "}
+              {taxFree.primary})
+            </>
+          ) : null}
+          {showHsa ? (
+            <>
+              , <strong className="strip-narrative__em">{fmt(td.hsaWd)}/year</strong>{" "}
+              {taxFree.secondary ?? "HSA"}
+            </>
+          ) : null}
+          . {taxConfig.pensionLabel} excluded from taxation in this estimate:{" "}
+          <strong className="strip-narrative__em">{fmt(td.ssExclusion)}/year</strong>.
+        </p>
+      ) : null}
       <p className="strip-narrative__p">
-        <strong className="strip-narrative__em">Tax-free income</strong> from
-        Roth and HSA withdrawals totals{" "}
-        <strong className="strip-narrative__em strip-narrative__em--accent">
-          {fmt(taxFreeAnnual)}/year
-        </strong>{" "}
-        (<strong className="strip-narrative__em">{fmt(td.rothWd)}/year</strong>{" "}
-        Roth,{" "}
-        <strong className="strip-narrative__em">{fmt(td.hsaWd)}/year</strong>{" "}
-        HSA). Social Security excluded from taxation is{" "}
-        <strong className="strip-narrative__em">
-          {fmt(td.ssExclusion)}/year
-        </strong>
-        . Your effective rate is{" "}
+        Effective rate{" "}
         <strong className="strip-narrative__em">
           {(td.effectiveRate * 100).toFixed(1)}%
         </strong>
-        , with total tax of{" "}
-        <strong className="strip-narrative__em">{fmt(annTax)}/year</strong> on
-        gross income under <strong className="strip-narrative__em">MFJ</strong>{" "}
-        filing status.
+        ; total tax{" "}
+        <strong className="strip-narrative__em">{fmt(annTax)}/year</strong> on gross income.
+        Marginal rates (indicative):{" "}
+        <strong className="strip-narrative__em">
+          {formatMarginalRatesSummary(taxConfig)}
+        </strong>
+        . {pension.stepTitle} figures use your configured benefits.
+      </p>
+      <p className="strip-narrative__footnote" style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+        {taxConfig.taxDisclaimer}
       </p>
     </div>
   );
@@ -263,9 +338,7 @@ export function SnapshotPanel({
   targetRetirementAge,
 }: SnapshotPanelProps) {
   const td = c.taxDetail;
-  const [snapshotTab, setSnapshotTab] = useState<"overview" | "tax">(
-    "overview",
-  );
+  const [snapshotTab, setSnapshotTab] = useState<"overview" | "tax">("overview");
 
   useEffect(() => {
     if (!open) setSnapshotTab("overview");
@@ -281,8 +354,8 @@ export function SnapshotPanel({
   }, [open, onClose]);
 
   const portColLabel = incomeMode
-    ? "Portfolio yield (SS not reinvested)"
-    : "Portfolio withdrawal (SS not reinvested)";
+    ? "Portfolio yield (pension not reinvested)"
+    : "Portfolio withdrawal (pension not reinvested)";
 
   return (
     <>
@@ -303,41 +376,25 @@ export function SnapshotPanel({
         shellClassName="drawer-shell--right drawer-shell--snapshot"
         bodyClassName="snapshot-panel-body"
       >
-        <div
+        <Tabs
           className="strip-snapshot-tabs"
-          role="tablist"
-          aria-label="Snapshot"
+          selectedKey={snapshotTab}
+          onSelectionChange={(key) => setSnapshotTab(key === "tax" ? "tax" : "overview")}
         >
-            <button
-              type="button"
-              role="tab"
-              id="strip-tab-overview"
-              aria-selected={snapshotTab === "overview"}
-              aria-controls="strip-tabpanel-overview"
-              className={`tab-btn${snapshotTab === "overview" ? " active" : ""}`}
-              onClick={() => setSnapshotTab("overview")}
-            >
-              Overview
-            </button>
-            <button
-              type="button"
-              role="tab"
-              id="strip-tab-tax"
-              aria-selected={snapshotTab === "tax"}
-              aria-controls="strip-tabpanel-tax"
-              className={`tab-btn${snapshotTab === "tax" ? " active" : ""}`}
-              onClick={() => setSnapshotTab("tax")}
-            >
-              Tax Breakdown
-            </button>
-          </div>
-          <div
-            id="strip-tabpanel-overview"
-            role="tabpanel"
-            aria-labelledby="strip-tab-overview"
-            hidden={snapshotTab !== "overview"}
-            className="strip-snapshot-tabpanel"
-          >
+          <Tabs.ListContainer>
+            <Tabs.List aria-label="Snapshot">
+              <Tabs.Tab id="overview">
+                Overview
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="tax">
+                <Tabs.Separator />
+                Tax Breakdown
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
+          <Tabs.Panel id="overview" className="strip-snapshot-tabpanel">
             <StripSnapshotNarrative
               c={c}
               incomeMode={incomeMode}
@@ -350,16 +407,11 @@ export function SnapshotPanel({
               targetRetirementAge={targetRetirementAge}
               includeIncomeTaxSummary={false}
             />
-          </div>
-          <div
-            id="strip-tabpanel-tax"
-            role="tabpanel"
-            aria-labelledby="strip-tab-tax"
-            hidden={snapshotTab !== "tax"}
-            className="strip-snapshot-tabpanel"
-          >
+          </Tabs.Panel>
+          <Tabs.Panel id="tax" className="strip-snapshot-tabpanel">
             <StripTaxNarrative td={td} annTax={c.annTax} />
-          </div>
+          </Tabs.Panel>
+        </Tabs>
       </SidePanelShell>
     </>
   );

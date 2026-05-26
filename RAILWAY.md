@@ -70,28 +70,9 @@ https://YOUR-DOMAIN/api/auth/google/callback
 - `https://YOUR-DOMAIN/` — calculator UI
 - Register / login / scenarios
 
-### TrueLayer (UK / EU bank connect)
+### Plaid (US & Canada bank connect)
 
-| Variable | Value |
-| -------- | ----- |
-| `TRUELAYER_CLIENT_ID` | Sandbox `sandbox-…` from Console (Live toggle **off** for testing) |
-| `TRUELAYER_CLIENT_SECRET` | Matching secret |
-| `TRUELAYER_ENV` | `sandbox` for Mock Bank; omit or `live` for real banks |
-| `TRUELAYER_REDIRECT_URI` | Optional — defaults to `https://YOUR-DOMAIN/api/truelayer/callback` |
-
-In [TrueLayer Console](https://console.truelayer.com) → your app → **Redirect URIs**, add **exactly**:
-
-```text
-https://YOUR-DOMAIN/api/truelayer/callback
-```
-
-Local Vite dev (if UI is on port 5173):
-
-```text
-http://localhost:5173/api/truelayer/callback
-```
-
-A mismatch between this allowlist and `TRUELAYER_REDIRECT_URI` / server logs causes TrueLayer’s login page **Unexpected error** before redirect back to Expectifi.
+Set `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_ENV` on the web service. Bank linking via Plaid is available for United States and Canadian users on premium accounts.
 
 ## Troubleshooting
 

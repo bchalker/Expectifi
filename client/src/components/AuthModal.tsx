@@ -54,8 +54,7 @@ function CreateAccountMarketing() {
     <div className="auth-modal__register-marketing">
       <p className="auth-modal__register-marketing__value-add">
         Premium saves your CSV uploads, <strong>Plaid</strong> bank sync in the
-        US and Canada, <strong>TrueLayer</strong> in Europe, and settings—kept
-        in sync.
+        United States and Canada, and settings—kept in sync.
       </p>
 
       {showStripeSetupHint ? (

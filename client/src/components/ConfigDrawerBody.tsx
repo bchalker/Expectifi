@@ -3,7 +3,9 @@ import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
 import { planningDisplayFromInputs } from '../lib/userPrefs'
-import { saveResidenceCountryToProfile } from '../lib/userProfileStorage'
+import { findOnboardingRegion } from '../lib/onboardingRegions'
+import { useUserLocale } from '../context/UserLocaleContext'
+import { saveRegionToProfile } from '../lib/userProfileStorage'
 import { ConfigProfileTab } from './ConfigProfileTab'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
@@ -39,6 +41,7 @@ export function ConfigDrawerBody({
   onResetGuestProfile,
 }: Props) {
   const [tab, setTab] = useState<ConfigDrawerTab>(initialTab)
+  const { locale, refreshLocale } = useUserLocale()
 
   useEffect(() => {
     setTab(initialTab)
@@ -100,10 +103,13 @@ export function ConfigDrawerBody({
               onTargetRetirementAge={(targetRetirementAge) =>
                 setInputs({ targetRetirementAge })
               }
-              currentResidence={inputs.residenceCountry ?? ''}
-              onCurrentResidence={(residenceCountry) => {
-                setInputs({ residenceCountry })
-                saveResidenceCountryToProfile(residenceCountry)
+              regionId={locale}
+              onRegionSelect={(regionId) => {
+                const region = findOnboardingRegion(regionId)
+                if (!region) return
+                saveRegionToProfile(regionId)
+                setInputs({ residenceCountry: region.country })
+                refreshLocale()
               }}
               householdIncome={inputs.other}
               onHouseholdIncome={(other) => setInputs({ other })}

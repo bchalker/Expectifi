@@ -108,7 +108,16 @@ export function DateOfBirthSelects({
   function scrollYearListToDefault() {
     if (parts.year) return;
     requestAnimationFrame(() => {
-      defaultYearItemRef.current?.scrollIntoView({ block: "center" });
+      const item = defaultYearItemRef.current;
+      if (!item) return;
+      const scroller = item.closest('[data-slot="list-box"]') as HTMLElement | null;
+      if (!scroller) return;
+      const itemRect = item.getBoundingClientRect();
+      const scrollRect = scroller.getBoundingClientRect();
+      scroller.scrollTop +=
+        itemRect.top -
+        scrollRect.top -
+        (scrollRect.height - itemRect.height) / 2;
     });
   }
 

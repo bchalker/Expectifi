@@ -1,7 +1,6 @@
 import { LegalPageShell } from "../components/LegalPageShell";
 
 const PLAID_PRIVACY_URL = "https://plaid.com/legal/";
-const TRUELAYER_PRIVACY_URL = "https://truelayer.com/legal/";
 
 type Props = {
   onSignIn: () => void;
@@ -53,8 +52,8 @@ export default function PrivacyPolicy({
               savings balances, retirement goals, and Social Security estimates
             </li>
             <li>
-              Financial account data retrieved through Plaid (US users) or
-              TrueLayer (UK and European users), including investment holdings,
+              Financial account data retrieved through Plaid (United States and
+              Canada), including investment holdings,
               account balances, and related account information
             </li>
             <li>
@@ -95,12 +94,13 @@ export default function PrivacyPolicy({
         </section>
 
         <section className="legal-page__section">
-          <h2 className="legal-page__heading">Plaid (US users)</h2>
+          <h2 className="legal-page__heading">Plaid (United States &amp; Canada)</h2>
           <p className="legal-page__body">
-            Plaid account connection is available on premium accounts only and
-            is not enabled by default. Free accounts do not have access to Plaid
-            integration. If you choose to connect a financial account through
-            Plaid, you are subject to Plaid&apos;s Privacy Policy at{" "}
+            Plaid account connection is available on premium accounts in the
+            United States and Canada only and is not enabled by default. Free
+            accounts do not have access to Plaid integration. If you choose to
+            connect a financial account through Plaid, you are subject to
+            Plaid&apos;s Privacy Policy at{" "}
             <a
               className="legal-page__link"
               href={PLAID_PRIVACY_URL}
@@ -111,30 +111,6 @@ export default function PrivacyPolicy({
             </a>
             . We access only the data necessary to power your retirement
             projections.
-          </p>
-        </section>
-
-        <section className="legal-page__section">
-          <h2 className="legal-page__heading">
-            TrueLayer (UK and European users)
-          </h2>
-          <p className="legal-page__body">
-            TrueLayer account connection is available on premium accounts only
-            for users in the United Kingdom and Europe and is not enabled by
-            default. Free accounts do not have access to TrueLayer integration.
-            If you choose to connect a financial account through TrueLayer, you
-            are subject to TrueLayer&apos;s Privacy Policy at{" "}
-            <a
-              className="legal-page__link"
-              href={TRUELAYER_PRIVACY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              truelayer.com/legal
-            </a>
-            . We access only the data necessary to power your retirement
-            projections. TrueLayer is a licensed Account Information Service
-            Provider regulated under PSD2.
           </p>
         </section>
 

@@ -25,6 +25,14 @@
   min-width: 0;
 }
 
+.planning-profile-fields__dob-age-slot {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  min-height: 2.25rem;
+}
+
 .planning-profile-fields__dob .dob-select-row--no-day {
   grid-template-columns: minmax(0, 1.45fr) minmax(5.75rem, 1fr);
 }

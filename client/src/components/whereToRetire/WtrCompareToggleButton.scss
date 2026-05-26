@@ -111,7 +111,7 @@
 }
 
 .wtr-compare-corner--selected .wtr-compare-toggle {
-  color: #4ade80;
+  color: var(--green1);
 }
 
 .wtr-compare-corner:hover:not(.wtr-compare-corner--disabled) .wtr-compare-toggle:not(:disabled) {

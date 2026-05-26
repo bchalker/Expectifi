@@ -9,7 +9,7 @@ import {
 } from './fidelityStorage'
 
 /**
- * Plaid / TrueLayer sync replaces manual account entries (see App onFidelityApplyBalances)
+ * Plaid sync replaces manual account entries (see App onFidelityApplyBalances)
  * and must drop all CSV import batches — only linked-bank batches (plaidItemId) remain.
  */
 function stripCsvImportBatches(stored: StoredFidelityImportV2 | null): StoredFidelityImportV2 | null {
@@ -75,7 +75,7 @@ export function removePlaidItemFromLocalStorage(itemId: string) {
   return next?.balances ?? null
 }
 
-/** Merge Plaid / TrueLayer holdings into local import storage and return calculator balance totals. */
+/** Merge Plaid holdings into local import storage and return calculator balance totals. */
 export function applyPlaidHoldingsSnapshot(snapshot: PlaidHoldingsSnapshot) {
   const batch = snapshotToBatch(snapshot)
   const existing = loadStoredFidelityImport()

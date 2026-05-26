@@ -179,5 +179,10 @@
 
 .drawer-config-footer__signout {
   flex-shrink: 0;
+  min-width: 5.5rem;
   font-variant-numeric: tabular-nums;
+}
+
+.drawer-config-footer__signout[data-slot='button'] {
+  min-height: 2.75rem;
 }

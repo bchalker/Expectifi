@@ -1,10 +1,20 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
-import { Button } from '@heroui/react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useUserLocale } from '../context/UserLocaleContext'
+import {
+  accountLabelForWithdrawalBucket,
+  localeSupportsWithdrawalBucket,
+  taxFreeWithdrawalLabels,
+} from '../config/taxConfig'
 import type { ComputedSnapshot, CalculatorInputs, DrawerName } from '../lib/computeResults'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
+import { pensionConfigForLocale } from '../lib/localePensionConfig'
+import {
+  buildWithdrawalStrategySteps,
+  withdrawalExplainerDisclaimer,
+} from '../lib/withdrawalStrategyContent'
 import { fmt, fmtK, fmtMon } from '../utils/format'
 import { ConfigDrawerBody, type ConfigDrawerTab } from './ConfigDrawerBody'
 import { SidePanelShell } from './SidePanelShell'
@@ -68,15 +78,15 @@ export function DrawerPanel({
     panelDrawer === 'config' ? (
       <div className="drawer-config-footer">
         {user?.email ? (
-          <Button
+          <AppButton
             type="button"
             size="sm"
-            variant="outline"
+            variant="secondary"
             className="drawer-config-footer__signout"
             onPress={() => void signOut()}
           >
             Sign out
-          </Button>
+          </AppButton>
         ) : null}
         <AppButton type="button" size="md" variant="primary" className="drawer-config-footer__confirm" onPress={onClose}>
           Confirm
@@ -392,73 +402,103 @@ function SSTimingBody({
 }
 
 function TaxFreeBody({ c }: { c: ComputedSnapshot }) {
-  const badge = c.ssZone === 'free' ? 'badge-green' : c.ssZone === 'partial' ? 'badge-warn' : 'badge-danger'
+  const { locale, taxConfig } = useUserLocale()
+  const pension = pensionConfigForLocale(locale)
+  const taxFree = taxFreeWithdrawalLabels(taxConfig)
+  const showRoth = localeSupportsWithdrawalBucket(locale, 'roth')
+  const showHsa = localeSupportsWithdrawalBucket(locale, 'hsa')
+  const showPretax = localeSupportsWithdrawalBucket(locale, 'pretax')
+  const pretaxLabel = accountLabelForWithdrawalBucket(taxConfig, 'pretax') ?? 'Pre-tax retirement'
+  const usSsBadge = c.ssZone === 'free' ? 'badge-green' : c.ssZone === 'partial' ? 'badge-warn' : 'badge-danger'
+  const taxFreeMon = (showRoth ? c.rothMon : 0) + (showHsa ? c.hsaMon : 0)
+
   return (
     <>
-      <div className="section-title">Tax-free withdrawal strategy</div>
+      <div className="section-title">Tax-advantaged withdrawals</div>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-        Pull from Roth and HSA first. SS taxation depends on combined income. Traditional 401k last — it can push SS into taxable territory.
+        {taxConfig.withdrawalOrderNote} {taxConfig.taxFreeNote}
       </p>
       <div>
+        {showRoth && c.rothMon > 0 ? (
+          <StackItem
+            title={`${taxFree.primary} withdrawals`}
+            badge={<span className="badge badge-green">tax-advantaged</span>}
+            amount={fmtMon(c.rothMon)}
+            note={
+              taxConfig.accountTypes.find((a) => a.taxTreatment === 'roth' || a.taxTreatment === 'taxfree')
+                ?.withdrawalNote ?? taxConfig.taxFreeNote
+            }
+            accentAmount
+          />
+        ) : null}
+        {showHsa && c.hsaMon > 0 ? (
+          <StackItem
+            title={`${taxFree.secondary ?? 'HSA'} withdrawals`}
+            badge={<span className="badge badge-green">qualified expenses</span>}
+            amount={fmtMon(c.hsaMon)}
+            note="Use for qualified medical expenses where rules allow tax-free treatment."
+            accentAmount
+          />
+        ) : null}
         <StackItem
-          title="Roth IRA withdrawals"
-          badge={<span className="badge badge-green">always tax-free</span>}
-          amount={fmtMon(c.rothMon)}
-          note="4% on ~16% of projected retirement total. No income inclusion, no RMDs until 73, never affects SS taxation."
-        />
-        <StackItem
-          title="HSA withdrawals"
-          badge={<span className="badge badge-green">tax-free for medical</span>}
-          amount={fmtMon(c.hsaMon)}
-          note="4% on ~10% of projected retirement total. Tax-free for qualified medical expenses — Medicare premiums, dental, vision, LTC insurance."
-        />
-        <StackItem
-          title="Social Security"
-          badge={<span className={`badge ${badge}`}>{c.ssLabel}</span>}
-          amount={fmtMon(c.ss)}
-          note={
-            <>
-              Combined income test: ½ SS ({fmt(c.halfSS / 12)}/mo) + other income ({fmt(c.combinedInc - c.halfSS)}/yr) = {fmt(c.combinedInc)}/yr vs. $25k/$34k thresholds.
-            </>
+          title={taxConfig.pensionLabel}
+          badge={
+            locale === 'us' ? (
+              <span className={`badge ${usSsBadge}`}>{c.ssLabel}</span>
+            ) : (
+              <span className="badge badge-warn">taxable income</span>
+            )
           }
+          amount={fmtMon(c.ss)}
+          note={taxConfig.pensionTaxNote}
         >
-          <div className="prog-bar">
-            <div className="prog-fill" style={{ width: `${c.barPct}%`, background: c.barColor }} />
-          </div>
-          <div className="prog-labels">
-            <span>$0</span>
-            <span>$25k — 0% line</span>
-            <span>$34k — 50% line</span>
-          </div>
+          {locale === 'us' ? (
+            <>
+              <div className="prog-bar">
+                <div className="prog-fill" style={{ width: `${c.barPct}%`, background: c.barColor }} />
+              </div>
+              <div className="prog-labels">
+                <span>{fmt(0)}</span>
+                <span>{fmt(25_000)} — 0% line</span>
+                <span>{fmt(34_000)} — 50% line</span>
+              </div>
+            </>
+          ) : null}
         </StackItem>
-        <StackItem
-          title="Traditional 401k headroom"
-          badge={<span className="badge badge-warn">limited</span>}
-          amount={`${fmt(c.headroom0)}/yr`}
-          note="Amount you can withdraw from traditional accounts before pushing combined income past $25k and triggering SS taxation."
-        />
+        {showPretax && locale === 'us' ? (
+          <StackItem
+            title={`${pretaxLabel} headroom`}
+            badge={<span className="badge badge-warn">limited</span>}
+            amount={`${fmt(c.headroom0)}/yr`}
+            note={`Room before ${taxConfig.pensionLabel} provisional income thresholds are exceeded.`}
+          />
+        ) : null}
       </div>
       <hr className="divider" />
       <div className="grid-3">
+        {taxFreeMon > 0 ? (
+          <div className="card accent">
+            <div className="card-label">
+              {taxFree.secondary ? `${taxFree.primary} + ${taxFree.secondary}` : taxFree.primary} monthly (est.)
+            </div>
+            <div className="card-value">{fmtMon(taxFreeMon)}</div>
+            <div className="card-sub">tax-advantaged withdrawals at {c.targetRetirementAge}</div>
+          </div>
+        ) : null}
         <div className="card accent">
-          <div className="card-label">Roth + HSA monthly (4% wd, est.)</div>
-          <div className="card-value">{fmtMon(c.rothMon + c.hsaMon)}</div>
-          <div className="card-sub">~26% of ret. accts at {c.targetRetirementAge}</div>
-        </div>
-        <div className="card accent">
-          <div className="card-label">SS monthly</div>
+          <div className="card-label">{pension.stepTitle} monthly</div>
           <div className="card-value">{fmtMon(c.totalSS)}</div>
-          <div className="card-sub">{c.ssLabel}</div>
+          <div className="card-sub">{locale === 'us' ? c.ssLabel : taxConfig.pensionTaxNote}</div>
         </div>
-        <div className="card">
-          <div className="card-label">Trad. 401k headroom/yr</div>
-          <div className="card-value">{fmt(c.headroom0)}/yr</div>
-          <div className="card-sub">before SS taxation triggers</div>
-        </div>
+        {showPretax && locale === 'us' ? (
+          <div className="card">
+            <div className="card-label">{pretaxLabel} headroom/yr</div>
+            <div className="card-value">{fmt(c.headroom0)}/yr</div>
+            <div className="card-sub">before pension taxation increases</div>
+          </div>
+        ) : null}
       </div>
-      <div className="footnote">
-        Combined income = AGI + nontaxable interest + ½ SS. Standard deduction ($14,600 single / $29,200 married) reduces taxable income but not the SS combined income test. HSA withdrawals are tax-free only for qualified medical expenses — includes Medicare premiums, dental, vision, LTC insurance.
-      </div>
+      <div className="footnote">{taxConfig.taxDisclaimer}</div>
     </>
   )
 }
@@ -469,12 +509,14 @@ function StackItem({
   amount,
   note,
   children,
+  accentAmount = false,
 }: {
   title: string
   badge: ReactNode
   amount: string
   note: ReactNode
   children?: ReactNode
+  accentAmount?: boolean
 }) {
   return (
     <div className="stack-item">
@@ -483,7 +525,10 @@ function StackItem({
           {title}
           {badge}
         </span>
-        <span className="stack-item-amount" style={{ color: title.includes('Roth') || title.includes('HSA') ? 'var(--accent-text)' : undefined }}>
+        <span
+          className="stack-item-amount"
+          style={{ color: accentAmount ? 'var(--accent-text)' : undefined }}
+        >
           {amount}
         </span>
       </div>
@@ -494,19 +539,33 @@ function StackItem({
 }
 
 function StrategyBody({ c }: { c: ComputedSnapshot }) {
+  const { locale, taxConfig } = useUserLocale()
+  const [filingStatus, setFilingStatus] = useState(taxConfig.defaultFilingStatus)
+
+  useEffect(() => {
+    setFilingStatus(taxConfig.defaultFilingStatus)
+  }, [taxConfig.defaultFilingStatus, locale])
+
   if (!c.hasPortfolioBalances) {
     return (
       <>
         <div className="section-title">Optimal withdrawal strategy</div>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          Add account balances or import a positions CSV to see a withdrawal sequence based on your portfolio, tax buckets,
-          and sliders.
+          Add account balances or import positions to see a withdrawal sequence based on your portfolio, tax buckets, and
+          sliders.
         </p>
       </>
     )
   }
 
   const s = c.strategy
+  const pretaxLabel = accountLabelForWithdrawalBucket(taxConfig, 'pretax') ?? 'Pre-tax'
+  const rothLabel = accountLabelForWithdrawalBucket(taxConfig, 'roth') ?? 'Tax-advantaged'
+  const brokerageLabel = accountLabelForWithdrawalBucket(taxConfig, 'brokerage') ?? 'Taxable'
+  const showRoth = localeSupportsWithdrawalBucket(locale, 'roth')
+  const showHsa = localeSupportsWithdrawalBucket(locale, 'hsa')
+  const steps = buildWithdrawalStrategySteps(locale, taxConfig, c, filingStatus)
+
   const fmtStep = (n: number, title: string, tag: string, tagColor: string, body: string) => (
     <div key={n} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
       <div
@@ -549,16 +608,31 @@ function StrategyBody({ c }: { c: ComputedSnapshot }) {
     </div>
   )
 
-  const stdDed = 29200
-  const bracket12top = 89075
-  const room12 = Math.max(0, bracket12top - Math.max(0, s.tradWdAnn - stdDed))
-
   return (
     <>
       <div className="section-title">Optimal withdrawal strategy</div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-        The sequence you pull from your accounts matters almost as much as the amounts. This strategy minimizes lifetime taxes, preserves tax-free growth as long as possible, and keeps SS taxation low. Figures are based on your current balances and sliders above.
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.6 }}>
+        {taxConfig.withdrawalOrderNote} Figures use your current balances and sliders.
       </p>
+      {taxConfig.filingStatuses.length > 1 ? (
+        <div style={{ marginBottom: '1rem' }}>
+          <label htmlFor="strategy-filing-status" style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+            Filing status
+          </label>
+          <select
+            id="strategy-filing-status"
+            value={filingStatus}
+            onChange={(e) => setFilingStatus(e.target.value)}
+            style={{ fontSize: '1rem', maxWidth: '100%' }}
+          >
+            {taxConfig.filingStatuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       <div
         style={{
           background: 'var(--surface2)',
@@ -570,71 +644,27 @@ function StrategyBody({ c }: { c: ComputedSnapshot }) {
           gap: 10,
         }}
       >
-        <Cell k="Trad. 401k withdrawal/yr" v={fmt(s.tradWdAnn)} color="var(--warn)" />
-        <Cell k="Roth withdrawal/yr" v={fmt(s.rothWdAnn)} color="var(--accent-text)" />
-        <Cell k="HSA withdrawal/yr" v={fmt(s.hsaWdAnn)} color="var(--gold)" />
-        <Cell k="Brokerage withdrawal/yr" v={fmt(s.brkWdAnn)} />
-        <Cell
-          k="Roth conversion room"
-          v={s.rothConvRoom > 0 ? `${fmt(s.rothConvRoom)}/yr` : 'At bracket cap'}
-          color="var(--accent-text)"
-        />
+        <Cell k={`${pretaxLabel} withdrawal/yr`} v={fmt(s.tradWdAnn)} color="var(--warn)" />
+        {showRoth ? <Cell k={`${rothLabel} withdrawal/yr`} v={fmt(s.rothWdAnn)} color="var(--accent-text)" /> : null}
+        {showHsa ? (
+          <Cell
+            k={`${taxFreeWithdrawalLabels(taxConfig).secondary ?? 'HSA'} withdrawal/yr`}
+            v={fmt(s.hsaWdAnn)}
+            color="var(--gold)"
+          />
+        ) : null}
+        <Cell k={`${brokerageLabel} withdrawal/yr`} v={fmt(s.brkWdAnn)} />
+        {locale === 'us' && s.rothConvRoom > 0 ? (
+          <Cell
+            k="Roth conversion room"
+            v={s.rothConvRoom > 0 ? `${fmt(s.rothConvRoom)}/yr` : 'At bracket cap'}
+            color="var(--accent-text)"
+          />
+        ) : null}
         <Cell k="Effective tax rate" v={`${(s.taxDetail.effectiveRate * 100).toFixed(1)}%`} />
       </div>
-      {fmtStep(
-        1,
-        'Cover fixed expenses with SS + Brokerage',
-        'Year 1 priority',
-        '#0F6E56',
-        `Your combined SS (${fmtMon(s.totalSS)}) plus brokerage withdrawals (${fmtMon(s.brkWdAnn / 12)}) covers the base. Use brokerage first for discretionary spending — long-term capital gains are taxed at 15% (lower than ordinary income), and drawing from it first lets your retirement accounts continue compounding.`,
-      )}
-      {fmtStep(
-        2,
-        'Draw HSA for all medical expenses',
-        'Always first for medical',
-        '#EF9F27',
-        `Before paying any medical bill out of pocket — premiums, dental, vision, prescriptions, long-term care — use the HSA. At ${fmtMon(s.hsaWdAnn / 12)}/mo projected, this covers ongoing healthcare costs completely tax-free. Never use taxable income when HSA dollars are available for qualified expenses.`,
-      )}
-      {fmtStep(
-        3,
-        'Pull Roth IRA for large one-time needs',
-        'Tax-free flexibility',
-        '#0F6E56',
-        `Roth withdrawals (${fmtMon(s.rothWdAnn / 12)}/mo) are always tax-free and don't affect SS provisional income. Use Roth for big-ticket items — renovations, travel, car purchases — rather than taking a larger traditional withdrawal that pushes you into a higher bracket.`,
-      )}
-      {fmtStep(
-        4,
-        'Traditional 401k: stay inside the 12% bracket',
-        'Tax-managed',
-        '#BA7517',
-        `Your traditional withdrawals (${fmtMon(s.tradWdAnn / 12)}/mo) are ordinary income. Filing jointly, the 12% bracket tops out at ~$89,075 of taxable income. After your standard deduction of $29,200, you have ${fmt(room12)} of room before hitting the 22% bracket. Try not to exceed that with Roth conversions on top.`,
-      )}
-      {fmtStep(
-        5,
-        s.rothConvRoom > 500 ? `Convert up to ${fmt(s.rothConvRoom)}/yr from Traditional → Roth` : 'Roth conversion: limited room at current withdrawal rate',
-        `Years ${c.targetRetirementAge}–72`,
-        '#2B6CB0',
-        `The window between age ${c.targetRetirementAge} and your first RMD at 73 is the prime Roth conversion opportunity. You have ~${fmt(s.rothConvRoom)}/yr of 12% bracket headroom after accounting for current traditional withdrawals. Converting this amount each year moves money from taxable-at-withdrawal to permanently tax-free, reducing future RMDs. This is especially powerful since your traditional 401k ($${s.tradBalK}k) will force RMDs in 11 years.`,
-      )}
-      {fmtStep(
-        6,
-        'Delay spouse SS if possible — claim at your FRA (67)',
-        'SS optimization',
-        '#A32D2D',
-        `Spouse draws 50% of your benefit. Your FRA benefit is $3,888 — so spouse gets $1,944/mo at their FRA. If spouse claims at 62 it drops to $1,299. The breakeven for waiting vs. claiming early is roughly age 78. Since your combined income from portfolio + your SS is already strong, the spouse can afford to delay. Recommended: you claim at 62, spouse waits to 67. Combined: ${fmt(s.combinedSS67)}/mo.`,
-      )}
-      {fmtStep(
-        7,
-        'After 70: reassess traditional 401k drawdown',
-        'RMD planning',
-        '#BA7517',
-        `At 73, RMDs kick in on your traditional 401k. Based on your current balances growing at ${s.retRatePct}%, the traditional bucket (~${fmtK(s.tradFvK)}) will generate a required minimum you cannot avoid. Start drawing down traditional accounts more aggressively between ${c.targetRetirementAge}–72 — ideally to the point where RMDs stay within the 12% bracket. Roth conversions are the cleanest tool for this.`,
-      )}
-      <div className="footnote">
-        This strategy assumes you are married filing jointly. Bracket amounts adjust annually for inflation. The Roth conversion window (ages{' '}
-        {c.targetRetirementAge}
-        –72) is the most powerful planning opportunity — traditional 401k balances force RMDs at 73 that can push you into higher brackets. Filling lower brackets with conversions now avoids that. Consult a fee-only fiduciary advisor before executing. This is a planning framework, not tax advice.
-      </div>
+      {steps.map((step, i) => fmtStep(i + 1, step.title, step.tag, step.tagColor, step.body))}
+      <div className="footnote">{withdrawalExplainerDisclaimer(taxConfig)}</div>
     </>
   )
 }

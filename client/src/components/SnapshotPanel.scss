@@ -1,25 +1,25 @@
-.strip-snapshot-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* HeroUI Tabs — spacing above tab list; panel content below */
+.strip-snapshot-tabs[data-slot='tabs'] {
+  width: 100%;
+  margin-top: 1.25rem;
   margin-bottom: 1.35rem;
 }
-.strip-snapshot-tabs .tab-btn {
-  font-family: var(--body);
-  text-transform: none;
-  letter-spacing: var(--tracking-normal);
+
+.strip-snapshot-tabs[data-slot='tabs'] [data-slot='tabs-list-container'] {
+  margin-bottom: 0.25rem;
 }
+
 .strip-snapshot-tabpanel {
   outline: none;
+  padding-top: 0.15rem;
 }
-.strip-snapshot-tabpanel[hidden] {
-  display: none !important;
-}
+
 .strip-narrative {
   width: 100%;
   box-sizing: border-box;
   font-family: var(--body);
 }
+
 .strip-narrative__kicker {
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -29,6 +29,7 @@
   color: var(--text-faint);
   margin: 0 0 10px;
 }
+
 .strip-narrative__p {
   font-family: var(--body);
   font-size: var(--text-sm);
@@ -38,21 +39,26 @@
   margin: 0 0 0.7rem;
   max-width: 42ch;
 }
+
 .strip-narrative__p:last-of-type {
   margin-bottom: 0;
 }
+
 .strip-narrative__em {
   font-family: var(--body);
   font-weight: 600;
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
+
 .strip-narrative__em--accent {
   color: var(--accent-text);
 }
+
 .strip-narrative__em--warn {
   color: var(--warn);
 }
+
 .strip-narrative__em--gold {
   color: var(--gold);
 }

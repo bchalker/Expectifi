@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 import { useAuth } from './context/AuthContext'
+import { UserLocaleProvider } from './context/UserLocaleContext'
 import { AccountBalances } from './components/AccountBalances'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
@@ -522,6 +523,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   }, [])
 
   return (
+    <UserLocaleProvider residenceCountry={inputs.residenceCountry}>
     <>
       <div
         className={[
@@ -855,5 +857,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onSwitchMode={(mode) => setAuthModal(mode)}
       />
     </>
+    </UserLocaleProvider>
   )
 }

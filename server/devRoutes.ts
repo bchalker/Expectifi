@@ -8,7 +8,7 @@ function devRoutesAllowed(req: Request): boolean {
   return host === 'localhost' || host === '127.0.0.1'
 }
 
-/** Local-only: set session cookie and redirect (for TrueLayer OAuth testing). */
+/** Local-only: set session cookie and redirect (for OAuth testing). */
 export function installDevRoutes(app: Express): void {
   app.get('/api/dev/impersonate', async (req, res) => {
     if (!devRoutesAllowed(req)) {
