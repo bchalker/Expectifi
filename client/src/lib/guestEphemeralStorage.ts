@@ -1,6 +1,8 @@
 import { clearStoredAppState } from './appStateStorage'
 import { clearStoredFidelityImport } from './fidelityStorage'
-import { BALANCE_INPUT_MODE_KEY } from './retirementBalanceMode'
+import { getPlanWriteTier } from './planStorage/writeContext'
+import { loadMeta } from './planStorage/meta'
+import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import { clearLocalUserPrefsStorage } from './userPrefs'
 import { clearStoredManualAccounts } from './manualAccountEntries'
@@ -17,6 +19,11 @@ const GUEST_TAB_STALE_MS = 45_000
 type GuestTabRecord = {
   id: string
   ts: number
+}
+
+/** Tier 1: no localStorage — tab registry exists only to run teardown cleanup for browser_saved+. */
+export function shouldTrackEphemeralGuestTabs(): boolean {
+  return getPlanWriteTier() !== 'anonymous'
 }
 
 function readGuestTabs(): GuestTabRecord[] {
@@ -57,13 +64,16 @@ function pruneStaleGuestTabs(tabs: GuestTabRecord[], now = Date.now()): GuestTab
   return tabs.filter((tab) => now - tab.ts < GUEST_TAB_STALE_MS)
 }
 
-/** Remove guest financial session data; profile in expectifi_user_profile is kept. */
+/** Remove guest financial session data. Preserves expectifi plan keys for browser_saved tier. */
 export function clearEphemeralGuestStorage(): void {
+  const isBrowserSaved = loadMeta()?.tier === 'browser_saved'
   try {
-    clearStoredAppState()
-    clearStoredFidelityImport()
-    clearStoredManualAccounts()
-    localStorage.removeItem(BALANCE_INPUT_MODE_KEY)
+    if (!isBrowserSaved) {
+      clearStoredAppState()
+      clearStoredFidelityImport()
+      clearStoredManualAccounts()
+    }
+    clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearGuestWhereToRetireStorage()
   } catch {
@@ -91,6 +101,7 @@ function touchGuestTab(tabId: string, now = Date.now()): GuestTabRecord[] {
  */
 export function initEphemeralGuestSession(): void {
   if (typeof window === 'undefined') return
+  if (!shouldTrackEphemeralGuestTabs()) return
 
   let tabId = sessionStorage.getItem(GUEST_TAB_ID_KEY)
   if (!tabId) {
@@ -113,6 +124,7 @@ export function initEphemeralGuestSession(): void {
 
 export function heartbeatEphemeralGuestTab(): void {
   if (typeof window === 'undefined') return
+  if (!shouldTrackEphemeralGuestTabs()) return
   const tabId = sessionStorage.getItem(GUEST_TAB_ID_KEY)
   if (!tabId) return
   touchGuestTab(tabId)
@@ -121,6 +133,7 @@ export function heartbeatEphemeralGuestTab(): void {
 /** Call on tab close — clears guest local data when the last guest tab exits. */
 export function teardownEphemeralGuestTab(): void {
   if (typeof window === 'undefined') return
+  if (!shouldTrackEphemeralGuestTabs()) return
 
   const tabId = sessionStorage.getItem(GUEST_TAB_ID_KEY)
   if (!tabId) return

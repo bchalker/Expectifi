@@ -15,6 +15,8 @@ import {
   saveLocalUserPrefs,
   type UserPrefs,
 } from "../lib/userPrefs";
+import { canWritePlanLocalStorage, savePlanProfile } from "../lib/planStorage";
+import { setSessionOnboardingComplete } from "../lib/sessionFlags";
 import {
   clearForceOnboardingSession,
   consumeOnboardingFromSignup,
@@ -380,6 +382,10 @@ export function OnboardingOverlay({
       saveLocalUserPrefs(prefs);
     }
     saveProfileFromFormSlice(formProfileSlice(), "income-goal");
+    setSessionOnboardingComplete(true);
+    if (canWritePlanLocalStorage()) {
+      savePlanProfile({ onboardingComplete: true });
+    }
     markWelcomeCompletedLocal();
     clearForceOnboardingSession();
     setBusy(false);
@@ -552,27 +558,25 @@ export function OnboardingOverlay({
             activeStep={progressStep}
             className="onboarding-overlay__progress"
           />
-            {headerTitle ? (
-              <div className="onboarding-overlay__title-stack">
-                <h2
-                  id="onboarding-overlay-title"
-                  className="onboarding-overlay__title"
-                >
-                  {headerTitle}
-                </h2>
-                {headerSubtitle ? (
-                  <p className="onboarding-overlay__subtitle">
-                    {headerSubtitle}
-                  </p>
-                ) : null}
-                {step === "accounts" ? (
-                  <p className="onboarding-overlay__accounts-import-note">
-                    Add each account type and balance. You can easily connect
-                    accounts (via csv import or auto-connection) after setup.
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
+          {headerTitle ? (
+            <div className="onboarding-overlay__title-stack">
+              <h2
+                id="onboarding-overlay-title"
+                className="onboarding-overlay__title"
+              >
+                {headerTitle}
+              </h2>
+              {headerSubtitle ? (
+                <p className="onboarding-overlay__subtitle">{headerSubtitle}</p>
+              ) : null}
+              {step === "accounts" ? (
+                <p className="onboarding-overlay__accounts-import-note">
+                  Add each account type and balance. You can easily connect
+                  accounts (via csv import or auto-connection) after setup.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </header>
 
         <SimpleBar
@@ -667,110 +671,110 @@ export function OnboardingOverlay({
         </SimpleBar>
 
         <footer className="onboarding-overlay__footer">
-            {err ? (
-              <p className="onboarding-overlay__err" role="alert">
-                {err}
-              </p>
-            ) : null}
-            {step === "profile" ? (
-              <div className="onboarding-overlay__footer-actions">
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={!profileFieldsOk || busy}
-                  onClick={onProfileContinue}
-                >
-                  Continue
-                </button>
+          {err ? (
+            <p className="onboarding-overlay__err" role="alert">
+              {err}
+            </p>
+          ) : null}
+          {step === "profile" ? (
+            <div className="onboarding-overlay__footer-actions">
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                disabled={!profileFieldsOk || busy}
+                onClick={onProfileContinue}
+              >
+                Continue
+              </button>
+            </div>
+          ) : step === "accounts" ? (
+            <>
+              <div className="onboarding-overlay__accounts-total">
+                <span className="onboarding-overlay__accounts-total-label">
+                  Total across all accounts
+                </span>
+                <span className="onboarding-overlay__accounts-total-value">
+                  {fmt(accountsTotal)}
+                </span>
               </div>
-            ) : step === "accounts" ? (
-              <>
-                <div className="onboarding-overlay__accounts-total">
-                  <span className="onboarding-overlay__accounts-total-label">
-                    Total across all accounts
-                  </span>
-                  <span className="onboarding-overlay__accounts-total-value">
-                    {fmt(accountsTotal)}
-                  </span>
-                </div>
-                <OnboardingSavingsComparisonBar
-                  totalSavings={accountsTotal}
-                  age={ageToday}
-                />
-                <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
-                  <button
-                    type="button"
-                    className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                    disabled={busy}
-                    onClick={onAccountsBack}
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                    disabled={busy || !accountsValid}
-                    onClick={onAccountsContinue}
-                  >
-                    Continue
-                  </button>
-                </div>
-                <div className="onboarding-overlay__skip-wrap onboarding-overlay__skip-wrap--visible">
-                  <button
-                    type="button"
-                    className="onboarding-overlay__skip-link"
-                    disabled={busy || exiting || !profileFieldsOk}
-                    onClick={onProfileSkipWithSample}
-                  >
-                    Skip setup, show me the dashboard with sample data
-                  </button>
-                </div>
-              </>
-            ) : step === "social-security" ? (
-              <div className="onboarding-overlay__footer-actions">
+              <OnboardingSavingsComparisonBar
+                totalSavings={accountsTotal}
+                age={ageToday}
+              />
+              <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
                 <button
                   type="button"
                   className="onboarding-overlay__btn onboarding-overlay__btn--muted"
                   disabled={busy}
-                  onClick={() => {
-                    setErr(null);
-                    setStep("accounts");
-                  }}
+                  onClick={onAccountsBack}
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={!ssValid || busy}
-                  onClick={onSsContinue}
+                  disabled={busy || !accountsValid}
+                  onClick={onAccountsContinue}
                 >
                   Continue
                 </button>
               </div>
-            ) : (
-              <div className="onboarding-overlay__footer-actions">
+              <div className="onboarding-overlay__skip-wrap onboarding-overlay__skip-wrap--visible">
                 <button
                   type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                  disabled={busy}
-                  onClick={() => {
-                    setErr(null);
-                    setStep("social-security");
-                  }}
+                  className="onboarding-overlay__skip-link"
+                  disabled={busy || exiting || !profileFieldsOk}
+                  onClick={onProfileSkipWithSample}
                 >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={!retireOk || busy}
-                  onClick={onFinishWelcome}
-                >
-                  {busy ? "Saving…" : "Continue to dashboard"}
+                  Skip this setup and show me the dashboard with sample data.
                 </button>
               </div>
-            )}
+            </>
+          ) : step === "social-security" ? (
+            <div className="onboarding-overlay__footer-actions">
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                disabled={busy}
+                onClick={() => {
+                  setErr(null);
+                  setStep("accounts");
+                }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                disabled={!ssValid || busy}
+                onClick={onSsContinue}
+              >
+                Continue
+              </button>
+            </div>
+          ) : (
+            <div className="onboarding-overlay__footer-actions">
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
+                disabled={busy}
+                onClick={() => {
+                  setErr(null);
+                  setStep("social-security");
+                }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                disabled={!retireOk || busy}
+                onClick={onFinishWelcome}
+              >
+                {busy ? "Saving…" : "Continue to dashboard"}
+              </button>
+            </div>
+          )}
         </footer>
       </div>
     </div>

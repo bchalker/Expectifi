@@ -253,13 +253,10 @@ export function getLocaleAccountTypeOptions(
   return LOCALE_ACCOUNT_TYPE_DEFS[key].map(localeDefToMeta)
 }
 
+/** EU / int ids only — US and CA share ids with different labels; use getLocaleAccountTypeOptions(locale). */
 export function buildLocaleAccountTypeMetaMap(): Record<OnboardingAccountType, ManualAccountTypeMeta> {
   const map = {} as Record<OnboardingAccountType, ManualAccountTypeMeta>
-  for (const defs of [
-    ...Object.values(LOCALE_ACCOUNT_TYPE_DEFS),
-    LEGACY_EU_ACCOUNT_DEFS,
-    LEGACY_INT_ACCOUNTS,
-  ]) {
+  for (const defs of [LEGACY_EU_ACCOUNT_DEFS, LEGACY_INT_ACCOUNTS]) {
     for (const definition of defs) {
       map[definition.id] = localeDefToMeta(definition)
     }

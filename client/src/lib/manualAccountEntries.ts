@@ -6,6 +6,7 @@ import {
   getLocaleAccountTypeOptions,
   resolveOnboardingAccountLocale,
 } from './onboardingAccountTypesByLocale'
+import { canWritePlanLocalStorage, loadPlanAccounts, savePlanAccounts } from './planStorage'
 
 export const MANUAL_ACCOUNTS_STORAGE_KEY = 'retirement-calculator/manual-account-entries-v1'
 
@@ -179,8 +180,15 @@ const META_BY_ID = {
   ...LOCALE_META_BY_ID,
 } as Record<OnboardingAccountType, ManualAccountTypeMeta>
 
-export function getAccountTypeMeta(type: OnboardingAccountType): ManualAccountTypeMeta {
-  return META_BY_ID[type]
+export function getAccountTypeMeta(
+  type: OnboardingAccountType,
+  locale?: OnboardingRegionId | null,
+): ManualAccountTypeMeta {
+  const localized = getLocaleAccountTypeOptions(locale ?? resolveOnboardingAccountLocale()).find(
+    (option) => option.id === type,
+  )
+  if (localized) return localized
+  return META_BY_ID[type] ?? LEGACY_META_BY_ID[type]
 }
 
 export function getUsedOnboardingAccountTypes(
@@ -244,6 +252,11 @@ export function newManualAccountEntry(type: OnboardingAccountType | null = null)
 }
 
 export function loadStoredManualAccounts(): StoredManualAccounts | null {
+  const fromPlan = loadPlanAccounts()
+  if (fromPlan) return fromPlan
+
+  if (!canWritePlanLocalStorage()) return null
+
   try {
     const raw = localStorage.getItem(MANUAL_ACCOUNTS_STORAGE_KEY)
     if (!raw) return null
@@ -256,11 +269,8 @@ export function loadStoredManualAccounts(): StoredManualAccounts | null {
 }
 
 export function saveStoredManualAccounts(state: StoredManualAccounts): void {
-  try {
-    localStorage.setItem(MANUAL_ACCOUNTS_STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    /* ignore */
-  }
+  if (!canWritePlanLocalStorage()) return
+  savePlanAccounts(state)
 }
 
 export function clearStoredManualAccounts(): void {

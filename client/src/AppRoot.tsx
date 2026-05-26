@@ -3,8 +3,10 @@ import { useAuth } from './context/AuthContext'
 import { useAppPath } from './hooks/useAppPath'
 import { APP_PATHS } from './lib/appPaths'
 import App from './App'
-import { isOnboardingComplete, markForceOnboardingSession } from './lib/welcomeGate'
-import { getInitialCalculatorInputs } from './lib/initialCalculatorInputs'
+import { CalculatorShell } from './components/CalculatorShell'
+import { loadPlanProfile } from './lib/planStorage'
+import { isSessionOnboardingComplete } from './lib/sessionFlags'
+import { markForceOnboardingSession } from './lib/welcomeGate'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { ContactModal } from './components/ContactModal'
 import { LandingPage } from './components/LandingPage'
@@ -90,7 +92,8 @@ export default function AppRoot() {
   useEffect(() => {
     if (authLoading || user) return
     if (path !== APP_PATHS.onboarding) return
-    if (!isOnboardingComplete({ inputs: getInitialCalculatorInputs() })) {
+    const profileComplete = loadPlanProfile()?.onboardingComplete === true
+    if (!profileComplete && !isSessionOnboardingComplete()) {
       markForceOnboardingSession()
     }
   }, [authLoading, user, path])
@@ -136,7 +139,11 @@ export default function AppRoot() {
   }
 
   if (user) {
-    return <App key={user.id} />
+    return (
+      <CalculatorShell>
+        <App key={user.id} />
+      </CalculatorShell>
+    )
   }
 
   if (guestView === 'landing') {
@@ -158,5 +165,9 @@ export default function AppRoot() {
     )
   }
 
-  return <App key="guest" initialAuthModal={initialAuthModal} />
+  return (
+    <CalculatorShell>
+      <App key="guest" initialAuthModal={initialAuthModal} />
+    </CalculatorShell>
+  )
 }

@@ -28,7 +28,7 @@ export function savingsComparisonForAge(
   totalSavings: number,
   age: number,
 ): SavingsComparisonCopy {
-  if (!Number.isFinite(totalSavings) || totalSavings <= 0 || !Number.isFinite(age) || age < 18) {
+  if (!Number.isFinite(age) || age < 18) {
     return {
       headline: '',
       percentile: 0,
@@ -37,9 +37,19 @@ export function savingsComparisonForAge(
     }
   }
 
+  const savings = Number.isFinite(totalSavings) && totalSavings > 0 ? totalSavings : 0
+  if (savings <= 0) {
+    return {
+      headline: "You're building toward the national average — there's still time.",
+      percentile: 0,
+      visualPercent: 0,
+      showBar: true,
+    }
+  }
+
   const median = medianForAge(age)
-  if (totalSavings >= median * 2) {
-    const pct = Math.min(99, 90 + Math.round((totalSavings / (median * 2) - 1) * 5))
+  if (savings >= median * 2) {
+    const pct = Math.min(99, 90 + Math.round((savings / (median * 2) - 1) * 5))
     return {
       headline: `You're ahead of ${pct}% of Americans your age`,
       percentile: pct,
@@ -48,11 +58,11 @@ export function savingsComparisonForAge(
     }
   }
 
-  if (totalSavings >= median) {
+  if (savings >= median) {
     const span = median
     const pct = Math.min(
       89,
-      50 + Math.round(((totalSavings - median) / span) * 39),
+      50 + Math.round(((savings - median) / span) * 39),
     )
     return {
       headline: `You're ahead of ${pct}% of Americans your age`,
@@ -62,7 +72,7 @@ export function savingsComparisonForAge(
     }
   }
 
-  const ratio = totalSavings / median
+  const ratio = savings / median
   const pct = Math.max(5, Math.round(ratio * 48))
   return {
     headline: "You're building toward the national average — there's still time.",

@@ -1,5 +1,6 @@
 import { ageFromIsoDateString, isValidIsoDateString } from './ageFromDob'
 import type { CalculatorInputs } from './computeResults'
+import { canWritePlanLocalStorage, loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage'
 import { clampClaimAge, normalizeClaimAge, type SsClaimAge } from './socialSecurity'
 
 /** Guest welcome / plan profile (localStorage). */
@@ -154,8 +155,10 @@ export function loadLocalUserPrefs(): UserPrefs | null {
       for (const legacyKey of LEGACY_USER_PREFS_STORAGE_KEYS) {
         raw = localStorage.getItem(legacyKey)
         if (raw) {
-          localStorage.setItem(USER_PREFS_STORAGE_KEY, raw)
-          localStorage.removeItem(legacyKey)
+          if (!canWritePlanLocalStorage()) {
+            localStorage.setItem(USER_PREFS_STORAGE_KEY, raw)
+            localStorage.removeItem(legacyKey)
+          }
           break
         }
       }
@@ -168,6 +171,7 @@ export function loadLocalUserPrefs(): UserPrefs | null {
 }
 
 export function saveLocalUserPrefs(prefs: UserPrefs): void {
+  if (canWritePlanLocalStorage()) return
   try {
     localStorage.setItem(USER_PREFS_STORAGE_KEY, JSON.stringify(prefs))
   } catch {
@@ -191,6 +195,10 @@ export function clearLocalUserPrefsStorage(): void {
 }
 
 export function markWelcomeCompletedLocal(): void {
+  if (canWritePlanLocalStorage()) {
+    savePlanProfile({ ...loadPlanProfile(), version: 1, onboardingComplete: true })
+    return
+  }
   try {
     localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
     for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
@@ -202,11 +210,16 @@ export function markWelcomeCompletedLocal(): void {
 }
 
 export function isWelcomeCompletedLocal(): boolean {
+  if (canWritePlanLocalStorage() && profileHasOnboardingComplete(loadPlanProfile())) {
+    return true
+  }
   try {
     if (localStorage.getItem(WELCOME_COMPLETED_STORAGE_KEY) === '1') return true
     for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
       if (localStorage.getItem(legacyKey) === '1') {
-        localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
+        if (!canWritePlanLocalStorage()) {
+          localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
+        }
         localStorage.removeItem(legacyKey)
         return true
       }

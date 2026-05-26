@@ -663,7 +663,7 @@ export function AccountBalances({
     if (balanceMode === 'manual' && manualAccountEntries.length > 0) {
       for (const entry of manualAccountEntries) {
         if (entry.type == null || entry.balance <= 0) continue
-        buckets.add(getAccountTypeMeta(entry.type).withdrawalBucket)
+        buckets.add(getAccountTypeMeta(entry.type, locale).withdrawalBucket)
       }
     } else {
       const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
@@ -1064,7 +1064,7 @@ export function AccountBalances({
     borderBottom?: CSSProperties['borderBottom'],
   ) {
     if (entry.type == null) return null
-    const meta = getAccountTypeMeta(entry.type)
+    const meta = getAccountTypeMeta(entry.type, locale)
     const bucket = meta.withdrawalBucket
     const { order, hint } = withdrawalUi ? metaFor(bucket) : { order: null as number | null, hint: null as string | null }
     const labelNode = (
@@ -1284,7 +1284,8 @@ export function AccountBalances({
       if (manualAccountEntries.length > 0) {
         for (const step of seq) {
           const entriesForStep = manualAccountEntries.filter(
-            (entry) => entry.type != null && getAccountTypeMeta(entry.type).withdrawalBucket === step,
+            (entry) =>
+              entry.type != null && getAccountTypeMeta(entry.type, locale).withdrawalBucket === step,
           )
           if (step === 'brokerage') {
             for (const entry of entriesForStep) {

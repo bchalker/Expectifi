@@ -1,5 +1,6 @@
-import { buildSnapshot, hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
+import { hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
 import type { CalculatorInputs, CalculatorUi } from './computeResults'
+import { canWritePlanLocalStorage, getPlanWriteTier, loadPlanSession, persistPlanState } from './planStorage'
 import { stripFinancialFields } from './userProfileStorage'
 
 /** Dev / pre-DB persistence for calculator inputs, UI flags, phase, and presets. */
@@ -13,15 +14,20 @@ export type PersistedCalculatorSession = {
 }
 
 export function persistCalculatorSession(session: PersistedCalculatorSession): void {
-  saveStoredAppState(buildSnapshot(session.inputs, session.ui, session.phase, session.activePreset))
+  if (!canWritePlanLocalStorage()) return
+  persistPlanState(getPlanWriteTier(), {
+    inputs: session.inputs,
+    ui: session.ui,
+    phase: session.phase,
+    activePreset: session.activePreset,
+    profile: null,
+    accounts: null,
+  })
 }
 
-/** Guest sessions: persist planning fields only — balances are session-only. */
+/** @deprecated Guests use tier-gated persist; no financial strip for browser_saved. */
 export function persistGuestCalculatorSession(session: PersistedCalculatorSession): void {
-  persistCalculatorSession({
-    ...session,
-    inputs: stripFinancialFields(session.inputs),
-  })
+  persistCalculatorSession(session)
 }
 
 /** Restore saved session (guest or signed-in) before applying live Fidelity CSV overrides. */
@@ -30,6 +36,20 @@ export function loadPersistedCalculatorSession(
   defaultUi: CalculatorUi,
   options?: { stripFinancial?: boolean },
 ): PersistedCalculatorSession | null {
+  const planSession = loadPlanSession()
+  if (planSession && canWritePlanLocalStorage()) {
+    const hydrated = hydrateAppSnapshot(planSession, defaultInputs)
+    if (hydrated) {
+      const { incomePresetEditorFocusSeq: _ignored, ...uiRest } = hydrated.ui
+      return {
+        inputs: hydrated.inputs,
+        ui: { ...defaultUi, ...uiRest },
+        phase: hydrated.phase,
+        activePreset: hydrated.activePreset,
+      }
+    }
+  }
+
   const stored = loadStoredAppState()
   if (!stored) return null
   const hydrated = hydrateAppSnapshot(stored, defaultInputs)

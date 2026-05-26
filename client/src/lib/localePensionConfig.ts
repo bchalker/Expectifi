@@ -39,7 +39,7 @@ const US_CONFIG: LocalePensionConfig = {
   includeSpouseHint: 'Include your spouse to factor in their Social Security alongside yours.',
   spouseClaimModeTooltip:
     "Social Security pays whichever is higher — your spouse's own earned benefit or 50% of yours. Choose spousal benefit if your spouse had lower lifetime earnings.",
-  averageBadge: 'Avg SS: ~$1,800/mo',
+  averageBadge: null,
   defaultBenefitMonthlyAt67: 1_800,
   claimAgeMin: 62,
   claimAgeMax: 70,
@@ -61,7 +61,7 @@ const CA_CONFIG: LocalePensionConfig = {
   includeSpouseHint: 'Include your spouse to factor in their CPP alongside yours.',
   spouseClaimModeTooltip:
     'Use your spouse’s own CPP estimate, or a simplified spousal share based on your benefit.',
-  averageBadge: 'Avg CPP: ~$750/mo',
+  averageBadge: null,
   defaultBenefitMonthlyAt67: 750,
   claimAgeMin: 60,
   claimAgeMax: 70,

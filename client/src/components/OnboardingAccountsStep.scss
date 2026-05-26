@@ -422,9 +422,9 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   gap: 1rem;
   margin: 0;
   padding: 0.85rem 1rem;
-  border-bottom: none;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--blue1);
+  background: #fff;
   animation: onboarding-accounts-total-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -445,7 +445,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   font-size: var(--text-md);
   font-weight: 600;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--text-muted);
 }
 
 .onboarding-overlay__accounts-total-value {
@@ -454,7 +454,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   font-size: var(--text-xl);
   font-weight: 700;
   line-height: 1.2;
-  color: #fff;
+  color: var(--text);
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

@@ -12,6 +12,12 @@ import {
 import type { UserPrefs } from './userPrefs'
 import { pensionConfigForLocale } from './localePensionConfig'
 import { clampClaimAgeInRange } from './socialSecurity'
+import {
+  canWritePlanLocalStorage,
+  loadPlanProfile,
+  profileToStoredUserProfile,
+  savePlanProfile,
+} from './planStorage'
 
 export const USER_PROFILE_STORAGE_KEY = 'expectifi_user_profile'
 
@@ -44,6 +50,8 @@ export type StoredUserProfile = {
   retirement_destination?: string
   welcome_banner_dismissed?: boolean
   transparency_note_seen?: boolean
+  /** Persisted in expectifi/profile-v1 via planStorage (not in legacy JSON shape). */
+  onboardingComplete?: boolean
 }
 
 export type OnboardingFormProfileSlice = {
@@ -118,16 +126,15 @@ export function parseStoredUserProfile(raw: unknown): StoredUserProfile | null {
 }
 
 export function loadUserProfile(): StoredUserProfile | null {
+  const fromPlan = loadPlanProfile()
+  if (fromPlan) return profileToStoredUserProfile(fromPlan)
+
   try {
     let raw = localStorage.getItem(USER_PROFILE_STORAGE_KEY)
     if (!raw) {
       for (const legacy of LEGACY_USER_PROFILE_KEYS) {
         raw = localStorage.getItem(legacy)
-        if (raw) {
-          localStorage.setItem(USER_PROFILE_STORAGE_KEY, raw)
-          localStorage.removeItem(legacy)
-          break
-        }
+        if (raw) break
       }
     }
     if (!raw) return null
@@ -140,13 +147,16 @@ export function loadUserProfile(): StoredUserProfile | null {
 export function saveUserProfile(patch: Partial<StoredUserProfile>): StoredUserProfile {
   const current = loadUserProfile() ?? { version: 1 as const }
   const next: StoredUserProfile = { ...current, ...patch, version: 1 }
-  try {
-    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(next))
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent(USER_PROFILE_UPDATED_EVENT))
-    }
-  } catch {
-    /* quota / private mode */
+  if (!canWritePlanLocalStorage()) {
+    return next
+  }
+  savePlanProfile({
+    ...loadPlanProfile(),
+    ...patch,
+    version: 1,
+  })
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(USER_PROFILE_UPDATED_EVENT))
   }
   return next
 }

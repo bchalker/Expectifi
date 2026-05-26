@@ -1,7 +1,9 @@
 import { clearStoredAppState } from './appStateStorage'
 import { clearStoredFidelityImport } from './fidelityStorage'
 import { clearGuestProfileAndSession } from './guestEphemeralStorage'
-import { BALANCE_INPUT_MODE_KEY } from './retirementBalanceMode'
+import { ALL_EXPECTIFI_PLAN_KEYS } from './planStorage/keys'
+import { clearSessionOnboardingComplete } from './sessionFlags'
+import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import {
   FORCE_ONBOARDING_SESSION_KEY,
@@ -50,13 +52,17 @@ function clearApiCacheEntries(): void {
 export function clearAllLocalUserData(): void {
   clearGuestProfileAndSession()
   clearSessionOnboardingFlags()
+  clearSessionOnboardingComplete()
   clearApiCacheEntries()
   try {
+    for (const key of ALL_EXPECTIFI_PLAN_KEYS) {
+      localStorage.removeItem(key)
+    }
     localStorage.removeItem(EXCLUDED_COUNTRIES_KEY)
     localStorage.removeItem(FAVORITE_CITIES_KEY)
     localStorage.removeItem(MANUAL_PROJECTIONS_CALLOUT_DISMISSED_KEY)
     localStorage.removeItem(OPEN_ER_CACHE_PREFIX)
-    localStorage.removeItem(BALANCE_INPUT_MODE_KEY)
+    clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearStoredAppState()
     clearStoredFidelityImport()

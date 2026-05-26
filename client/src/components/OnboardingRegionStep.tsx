@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   detectBrowserOnboardingRegion,
   normalizeOnboardingRegionId,
@@ -31,6 +32,14 @@ export function OnboardingRegionStep({
 }: Props) {
   const detected = detectBrowserOnboardingRegion()
   const selected = normalizeOnboardingRegionId(selectedRegionId ?? undefined)
+  const onSelectRef = useRef(onSelect)
+  onSelectRef.current = onSelect
+
+  useEffect(() => {
+    if (selected) return
+    if (!detected) return
+    onSelectRef.current(detected)
+  }, [selected, detected])
 
   return (
     <div

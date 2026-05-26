@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import { ListBox, Select } from "@heroui/react";
 import { ageFromIsoDateString, isValidIsoDateString } from "../lib/ageFromDob";
 import {
@@ -17,29 +16,22 @@ import {
 } from "../lib/dateOfBirthSelect";
 import "./DateOfBirthSelects.scss";
 
-type DobAgeTodayProps = {
+type DobAgeHintProps = {
   iso: string;
   className?: string;
 };
 
-/** Prominent current age after a complete date of birth is selected. */
-export function DobAgeToday({ iso, className }: DobAgeTodayProps) {
+/** Helper copy under birth date — age emphasized in dark amber. */
+export function DobAgeHint({ iso, className }: DobAgeHintProps) {
   if (!iso || !isValidIsoDateString(iso)) return null;
   const age = ageFromIsoDateString(iso);
-  const rootClass = ["dob-age-today", "dob-age-today--enter", className]
-    .filter(Boolean)
-    .join(" ");
+  const rootClass = ["dob-age-hint", className].filter(Boolean).join(" ");
   return (
-    <div className={rootClass} aria-live="polite" aria-label={`Age ${age}`}>
-      <span className="dob-age-today__icon-wrap" aria-hidden>
-        <IconArrowNarrowRightDashed
-          size={18}
-          strokeWidth={1.5}
-          className="dob-age-today__icon"
-        />
-      </span>
-      <span className="dob-age-today__value">{age}</span>
-    </div>
+    <p className={rootClass} aria-live="polite">
+      We use your age (
+      <strong className="dob-age-hint__age">{age}</strong>
+      ) to estimate how many years your money needs to work for you.
+    </p>
   );
 }
 
@@ -110,7 +102,9 @@ export function DateOfBirthSelects({
     requestAnimationFrame(() => {
       const item = defaultYearItemRef.current;
       if (!item) return;
-      const scroller = item.closest('[data-slot="list-box"]') as HTMLElement | null;
+      const scroller = item.closest(
+        '[data-slot="list-box"]',
+      ) as HTMLElement | null;
       if (!scroller) return;
       const itemRect = item.getBoundingClientRect();
       const scrollRect = scroller.getBoundingClientRect();

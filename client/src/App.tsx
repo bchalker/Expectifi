@@ -12,11 +12,7 @@ import { StripHeader } from './components/StripHeader'
 import { GoalProgressBar } from './components/GoalProgressBar'
 import { SubHeader } from './components/SubHeader'
 import './components/AppHeaderStack.scss'
-import {
-  loadPersistedCalculatorSession,
-  persistCalculatorSession,
-  persistGuestCalculatorSession,
-} from './lib/appStateStorage'
+import { persistCalculatorSession } from './lib/appStateStorage'
 import {
   loadBrokerageBalanceMode,
   saveBrokerageBalanceMode,
@@ -44,10 +40,17 @@ import {
 } from './lib/portfolioSourceExclusivity'
 import { findIncomeSecurity, navDriftFromErosionRisk } from './lib/incomeSecurities'
 import { isSsConfigured, clampClaimAge } from './lib/socialSecurity'
-import { heartbeatEphemeralGuestTab, initEphemeralGuestSession, teardownEphemeralGuestTab, clearGuestProfileAndSession } from './lib/guestEphemeralStorage'
+import {
+  clearGuestProfileAndSession,
+  heartbeatEphemeralGuestTab,
+  initEphemeralGuestSession,
+  shouldTrackEphemeralGuestTabs,
+  teardownEphemeralGuestTab,
+} from './lib/guestEphemeralStorage'
 import { OnboardingOverlay } from './components/OnboardingOverlay'
-import { ProfileTransparencyNote } from './components/ProfileTransparencyNote'
 import { shouldSkipWelcome, shouldShowWelcomeOverlay, peekForceOnboardingSession, consumeForceOnboardingSession } from './lib/welcomeGate'
+import { useUserTier } from './hooks/useUserTier'
+import { clearSessionOnboardingComplete } from './lib/sessionFlags'
 import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
@@ -56,16 +59,13 @@ import { syncDisplayCurrencyFromResidence } from './lib/displayCurrency'
 import {
   calculatorInputsToUserPrefs,
   inputsHavePlanningProfileFields,
-  loadLocalUserPrefs,
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
 } from './lib/userPrefs'
 import {
   loadUserProfile,
   mergeProfileWithDbPrefs,
-  profileToCalculatorPatch,
   saveResidenceCountryToProfile,
-  stripFinancialFields,
 } from './lib/userProfileStorage'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
 import { useAppPath } from './hooks/useAppPath'
@@ -94,59 +94,19 @@ function freshAppState(): InitialAppState {
   }
 }
 
-function mergeStoredUserProfile(state: InitialAppState): InitialAppState {
-  const profile = loadUserProfile()
-  if (!profile) return state
-  return {
-    ...state,
-    inputs: { ...state.inputs, ...profileToCalculatorPatch(profile) },
-  }
-}
-
-function mergeStoredWelcomePrefs(state: InitialAppState): InitialAppState {
-  const prefs = loadLocalUserPrefs()
-  if (!prefs) return state
-  return {
-    ...state,
-    inputs: { ...state.inputs, ...userPrefsToCalculatorPatch(prefs) },
-  }
-}
-
-function resolveInitialAppState(isGuest = true): InitialAppState {
-  const persisted = loadPersistedCalculatorSession(defaultInputs, defaultUi, {
-    stripFinancial: isGuest,
-  })
-  let state: InitialAppState
-  if (persisted) {
-    state = {
-      inputs: applyFidelityBalanceOverrides(persisted.inputs),
-      ui: persisted.ui,
-      phase: persisted.phase,
-      activePreset: persisted.activePreset,
-    }
-  } else {
-    state = mergeStoredWelcomePrefs(freshAppState())
-  }
-  state = mergeStoredUserProfile(state)
-  if (isGuest) {
-    state = { ...state, inputs: stripFinancialFields(state.inputs) }
-  }
-  return state
-}
-
 type AppProps = {
   initialAuthModal?: AuthModalMode | null
 }
 
 export default function App({ initialAuthModal = null }: AppProps) {
-  const initialApp = useMemo(() => resolveInitialAppState(), [])
-  const [inputs, setInputsState] = useState<CalculatorInputs>(() => initialApp.inputs)
-  const [ui, setUiState] = useState<CalculatorUi>(() => initialApp.ui)
-  const [phase, setPhase] = useState<'growth' | 'income'>(() => initialApp.phase)
+  const { hydration, isHydrated } = useUserTier()
+  const [inputs, setInputsState] = useState<CalculatorInputs>(() => hydration.inputs)
+  const [ui, setUiState] = useState<CalculatorUi>(() => hydration.ui)
+  const [phase, setPhase] = useState<'growth' | 'income'>(() => hydration.phase)
   const [accordionOpen, setAccordionOpen] = useState(false)
   const [drawer, setDrawer] = useState<DrawerName | null>(null)
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>('profile')
-  const [activePreset, setActivePreset] = useState<string | null>(() => initialApp.activePreset)
+  const [activePreset, setActivePreset] = useState<string | null>(() => hydration.activePreset)
   const [fidelityImportRev, setFidelityImportRev] = useState(0)
   const [manualAccountsRev, setManualAccountsRev] = useState(0)
   const [balanceMode, setBalanceMode] = useState<BalanceInputMode>(() => loadBalanceInputMode())
@@ -163,27 +123,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const { loading: authLoading, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi, user, saveUserPrefs } =
     useAuth()
 
-  const [showTransparencyNote, setShowTransparencyNote] = useState(false)
 
   const path = useAppPath()
   const headerStackHeight = useAppHeaderStackHeight()
   const welcomeCtx = useMemo(
     () => ({
+      onboardingComplete: hydration.onboardingComplete,
       onboardingDone: user?.onboardingDone,
       planPrefs: user?.planPrefs ?? null,
-      inputs,
     }),
-    [user?.onboardingDone, user?.planPrefs, inputs],
+    [hydration.onboardingComplete, user?.onboardingDone, user?.planPrefs],
   )
   const welcomeBlockedRef = useRef(peekForceOnboardingSession())
 
-  const [showWelcome, setShowWelcome] = useState(() =>
-    shouldShowWelcomeOverlay({
-      onboardingDone: user?.onboardingDone,
-      planPrefs: user?.planPrefs ?? null,
-      inputs: initialApp.inputs,
-    }),
-  )
+  const [showWelcome, setShowWelcome] = useState(true)
 
   useEffect(() => {
     const country = inputs.residenceCountry?.trim() ?? ''
@@ -193,18 +146,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
   }, [inputs.residenceCountry])
 
   useEffect(() => {
+    if (!isHydrated) return
     if (!consumeForceOnboardingSession()) return
-    if (shouldSkipWelcome({ ...welcomeCtx, inputs: initialApp.inputs })) return
+    if (shouldSkipWelcome(welcomeCtx)) return
     welcomeBlockedRef.current = true
     setShowWelcome(true)
-  }, [])
+  }, [isHydrated, welcomeCtx])
 
   useEffect(() => {
+    if (!isHydrated) return
     if (path !== APP_PATHS.onboarding) return
     if (shouldSkipWelcome(welcomeCtx)) return
     welcomeBlockedRef.current = true
     setShowWelcome(true)
-  }, [path, welcomeCtx])
+  }, [isHydrated, path, welcomeCtx])
 
   const welcomeDone = !showWelcome
 
@@ -257,13 +212,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const onResetGuestProfile = useCallback(() => {
     clearGuestProfileAndSession()
+    clearSessionOnboardingComplete()
     welcomeBlockedRef.current = true
     const fresh = freshAppState()
     setInputsState(fresh.inputs)
     setUiState(fresh.ui)
     setPhase(fresh.phase)
     setActivePreset(fresh.activePreset)
-    setShowTransparencyNote(false)
     setShowWelcome(true)
   }, [])
 
@@ -299,28 +254,22 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setUiState((s) => ({ ...s, ...p }))
   }, [])
 
-  /** Rehydrate from localStorage when auth changes (guest ↔ signed-in) so CSV + plan fields survive checkout. */
   useEffect(() => {
-    if (authLoading) return
-    if (!user) initEphemeralGuestSession()
-    const restored = resolveInitialAppState(!user)
+    if (!isHydrated || authLoading) return
     if (user?.planPrefs) {
       mergeProfileWithDbPrefs(loadUserProfile(), user.planPrefs)
     }
-    setInputsState(restored.inputs)
-    setUiState(restored.ui)
-    setPhase(restored.phase)
-    setActivePreset(restored.activePreset)
     setBalanceMode(loadBalanceInputMode())
     setBrokerageMode(loadBrokerageBalanceMode())
     if (loadStoredFidelityImport()?.batches?.length) {
       setFidelityImportRev((n) => n + 1)
     }
-  }, [authLoading, user?.id])
+  }, [isHydrated, authLoading, user?.id, user?.planPrefs])
 
-  /** Ephemeral guest sessions: clear local plan data when the last guest tab closes. */
+  /** Ephemeral guest sessions: last-tab cleanup for browser_saved only (tier 1 skips all LS). */
   useEffect(() => {
-    if (authLoading || user) return
+    if (!isHydrated || authLoading || user) return
+    if (!shouldTrackEphemeralGuestTabs()) return
     initEphemeralGuestSession()
     heartbeatEphemeralGuestTab()
     const heartbeatId = window.setInterval(() => heartbeatEphemeralGuestTab(), 20_000)
@@ -330,31 +279,27 @@ export default function App({ initialAuthModal = null }: AppProps) {
       window.clearInterval(heartbeatId)
       window.removeEventListener('pagehide', onPageHide)
     }
-  }, [authLoading, user])
+  }, [isHydrated, authLoading, user])
 
-  /** Persist calculator session for guests and signed-in users (Fidelity CSV lives in its own storage key). */
+  /** Persist calculator session when tier allows local plan writes. */
   useEffect(() => {
-    if (authLoading) return
+    if (!isHydrated || authLoading) return
     const id = window.setTimeout(() => {
-      if (user) {
-        persistCalculatorSession({ inputs, ui, phase, activePreset })
-      } else {
-        persistGuestCalculatorSession({ inputs, ui, phase, activePreset })
-      }
+      persistCalculatorSession({ inputs, ui, phase, activePreset })
       syncPlanningPrefsFromInputs(inputs)
       const prefs = calculatorInputsToUserPrefs(inputs)
       if (user && prefs) void saveUserPrefs(prefs)
     }, 400)
     return () => window.clearTimeout(id)
-  }, [authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])
+  }, [isHydrated, authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])
 
-  /** After auth + session hydrate, auto-dismiss welcome only when truly complete. */
+  /** After tier hydration, auto-dismiss welcome when onboarding is complete. */
   useEffect(() => {
-    if (authLoading) return
+    if (!isHydrated || authLoading) return
     if (welcomeBlockedRef.current) return
     if (peekForceOnboardingSession()) return
     setShowWelcome(shouldShowWelcomeOverlay(welcomeCtx))
-  }, [authLoading, welcomeCtx])
+  }, [isHydrated, authLoading, welcomeCtx])
 
   useEffect(() => {
     if (!welcomeDone || typeof sessionStorage === 'undefined') return
@@ -619,12 +564,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onComplete={() => {
             welcomeBlockedRef.current = false
             setShowWelcome(false)
-            if (!user) {
-              const profile = loadUserProfile()
-              if (!profile?.transparency_note_seen) {
-                setShowTransparencyNote(true)
-              }
-            }
           }}
           onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
           onAccountsSaved={() => {
@@ -683,12 +622,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <WhereToRetire c={c} />
       ) : welcomeDone ? (
         <>
-      {showTransparencyNote && !user ? (
-        <ProfileTransparencyNote
-          onDismiss={() => setShowTransparencyNote(false)}
-          onCreateAccount={openAuthRegister}
-        />
-      ) : null}
       <StripHeader
         phase={phase}
         c={c}
