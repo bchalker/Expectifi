@@ -6,9 +6,12 @@
 export const SESSION_ONBOARDING_COMPLETE_KEY = 'expectifi/session/onboarding-complete'
 export const SESSION_ONBOARDING_ACCOUNTS_KEY = 'expectifi/session/onboarding-accounts'
 export const SESSION_SAVE_PLAN_DISMISSED_KEY = 'expectifi/session/save-plan-dismissed'
+export const SESSION_HAS_CSV_HOLDINGS_KEY = 'expectifi/session/has-csv-holdings'
 
 /** Fired when tier-1 onboarding finishes in this tab (save-plan dismiss resets). */
 export const ONBOARDING_SESSION_COMPLETE_EVENT = 'expectifi-onboarding-session-complete'
+/** Fired when session-only CSV holdings are saved/cleared. */
+export const CSV_SESSION_HOLDINGS_EVENT = 'expectifi-csv-session-holdings'
 
 export function isSessionOnboardingComplete(): boolean {
   if (typeof window === 'undefined') return false
@@ -48,6 +51,29 @@ export function isSessionSavePlanDismissed(): boolean {
     return sessionStorage.getItem(SESSION_SAVE_PLAN_DISMISSED_KEY) === '1'
   } catch {
     return false
+  }
+}
+
+export function hasSessionCsvHoldings(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return sessionStorage.getItem(SESSION_HAS_CSV_HOLDINGS_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function setSessionHasCsvHoldings(hasHoldings = true): void {
+  if (typeof window === 'undefined') return
+  try {
+    if (hasHoldings) {
+      sessionStorage.setItem(SESSION_HAS_CSV_HOLDINGS_KEY, '1')
+    } else {
+      sessionStorage.removeItem(SESSION_HAS_CSV_HOLDINGS_KEY)
+    }
+    window.dispatchEvent(new CustomEvent(CSV_SESSION_HOLDINGS_EVENT))
+  } catch {
+    /* private mode */
   }
 }
 

@@ -61,6 +61,8 @@ import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
 import { PlaidConnectionProvider } from './PlaidConnectionHeader'
 import { ScenariosBar } from './ScenariosBar'
+import { AppButton } from './ui/AppButton'
+import { useUserTier } from '../hooks/useUserTier'
 import './AccountBalancesTaxDisclosure.scss'
 import './AccountBalancesCustomScenario.scss'
 
@@ -149,6 +151,7 @@ type Props = {
   brkRate?: number
   brokerageMode?: BrokerageBalanceMode
   onOpenSignIn?: () => void
+  onOpenUpgradeCsv?: () => void
   /** Increment to open the CSV import panel once (e.g. after welcome connect). */
   openImportRequest?: number
   onImportOpenHandled?: () => void
@@ -202,9 +205,12 @@ export function AccountBalances({
   brkRate,
   brokerageMode,
   onOpenSignIn,
+  onOpenUpgradeCsv,
   openImportRequest,
   onImportOpenHandled,
 }: Props) {
+  const { isPro, hasSessionCsvHoldings } = useUserTier()
+  const showCsvSessionBanner = hasSessionCsvHoldings && !isPro
   const { locale, taxConfig } = useUserLocale()
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly
   const fidelityScenarioEditingEnabled = Boolean(readOnly && inputs && setInputs && balanceMode === 'fidelity')
@@ -1355,9 +1361,7 @@ export function AccountBalances({
 
   const cardStyle: CSSProperties = {
     background: 'var(--surface)',
-    border: '1px solid var(--border)',
     borderRadius: 10,
-    padding: '4px 14px',
     marginBottom: mergedDashboard ? 0 : configureInputsOnly && stackWithBrokerage ? '0.5rem' : '1rem',
   }
 
@@ -1529,6 +1533,28 @@ export function AccountBalances({
 
   const headerManageMenu = renderAccountBalancesManageMenu()
 
+  const csvSessionBanner = showCsvSessionBanner ? (
+    <div className="csv-session-banner" role="status">
+      <div className="csv-session-banner__text">
+        <p className="csv-session-banner__headline">
+          Your session is temporary — <strong>Pro</strong> keeps it safe.
+        </p>
+        <p className="csv-session-banner__subhead">
+          $9/mo. No contracts, no hassle. Cancel anytime.
+        </p>
+      </div>
+      <AppButton
+        type="button"
+        size="sm"
+        variant="primary"
+        className="csv-session-banner__cta"
+        onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
+      >
+        Upgrade to Pro
+      </AppButton>
+    </div>
+  ) : null
+
   const accountBalancesBody = (
     <>
       {mergedDashboard ? (
@@ -1551,6 +1577,7 @@ export function AccountBalances({
             </div>
             <div className="account-balances-header-row__actions">{headerManageMenu}</div>
           </div>
+          {csvSessionBanner}
           {showImportedHoldingsScenarioGuide ? (
             <ImportedHoldingsScenarioGuide holdings={aggregatedHoldingsForGuide} />
           ) : null}
@@ -1593,6 +1620,7 @@ export function AccountBalances({
             }`}
             style={cardStyle}
           >
+            {csvSessionBanner}
             {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
             {renderBalanceRows()}
             {renderReplaceSourceConfirmOverlay()}

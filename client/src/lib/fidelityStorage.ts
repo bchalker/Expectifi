@@ -1,6 +1,8 @@
 import type { FidelityPositionRow } from './fidelityCsv'
 import { isFidelityPendingActivityRow, normalizeFidelityImportSymbol, totalsFromPositionRows, totalsToCalculatorBases } from './fidelityCsv'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
+import { getPlanWriteTier } from './planStorage/writeContext'
+import { clearCsvSession, loadCsvSession, saveCsvSession } from './planStorage/csvSession'
 
 export const FIDELITY_IMPORT_STORAGE_KEY = 'retirement-calculator/fidelity-import-v1'
 
@@ -46,6 +48,11 @@ export type StoredFidelityImportV2 = {
 }
 
 export type StoredFidelityImport = StoredFidelityImportV2
+
+function shouldPersistCsvToLocalStorage(): boolean {
+  // Phase C: non-pro users are session-only; pro users keep existing behavior.
+  return getPlanWriteTier() === 'pro'
+}
 
 /** Stable hash of raw CSV text for duplicate detection (SHA-256, or djb2 fallback). */
 export async function hashCsvText(text: string): Promise<string> {
@@ -110,6 +117,9 @@ function migrateV1ToV2(o: StoredFidelityImportV1): StoredFidelityImportV2 {
 }
 
 export function loadStoredFidelityImport(): StoredFidelityImportV2 | null {
+  if (!shouldPersistCsvToLocalStorage()) {
+    return loadCsvSession()
+  }
   try {
     const raw = localStorage.getItem(FIDELITY_IMPORT_STORAGE_KEY)
     if (!raw) return null
@@ -122,7 +132,8 @@ export function loadStoredFidelityImport(): StoredFidelityImportV2 | null {
     if (o?.version === 1 && (o as StoredFidelityImportV1).balances && Array.isArray((o as StoredFidelityImportV1).positions)) {
       const v2 = migrateV1ToV2(o as StoredFidelityImportV1)
       try {
-        saveStoredFidelityImport(v2)
+        if (shouldPersistCsvToLocalStorage()) saveStoredFidelityImport(v2)
+        else saveCsvSession(v2)
       } catch {
         /* quota or private mode — still return migrated shape in memory */
       }
@@ -135,6 +146,10 @@ export function loadStoredFidelityImport(): StoredFidelityImportV2 | null {
 }
 
 export function clearStoredFidelityImport(): void {
+  if (!shouldPersistCsvToLocalStorage()) {
+    clearCsvSession()
+    return
+  }
   try {
     localStorage.removeItem(FIDELITY_IMPORT_STORAGE_KEY)
   } catch {
@@ -148,6 +163,10 @@ export function saveStoredFidelityImport(data: StoredFidelityImportV2) {
     savedAt: data.savedAt,
     batches: data.batches,
     balances: data.balances,
+  }
+  if (!shouldPersistCsvToLocalStorage()) {
+    saveCsvSession(payload)
+    return
   }
   localStorage.setItem(FIDELITY_IMPORT_STORAGE_KEY, JSON.stringify(payload))
 }

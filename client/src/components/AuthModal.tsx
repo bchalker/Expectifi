@@ -28,8 +28,15 @@ import "./AuthModal.scss";
 
 export type AuthModalMode = "signin" | "register" | "google_checkout";
 
+export type AuthModalSource = "csv";
+
+export type AuthModalOpen =
+  | AuthModalMode
+  | { mode: AuthModalMode; source?: AuthModalSource }
+  | null;
+
 type Props = {
-  open: AuthModalMode | null;
+  open: AuthModalOpen;
   onClose: () => void;
   onSwitchMode: (mode: AuthModalMode) => void;
 };
@@ -71,6 +78,11 @@ function CreateAccountMarketing() {
 }
 
 export function AuthModal({ open, onClose, onSwitchMode }: Props) {
+  const mode: AuthModalMode | null =
+    typeof open === "string" ? open : open?.mode ?? null;
+  const source: AuthModalSource | undefined =
+    open && typeof open === "object" ? open.source : undefined;
+
   const {
     apiReady,
     googleOAuth,
@@ -124,16 +136,16 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!open) {
+    if (!mode) {
       resetFields();
       return;
     }
     setMsg(null);
     setMsgOk(false);
-  }, [open, resetFields]);
+  }, [mode, resetFields]);
 
   useEffect(() => {
-    if (open !== "google_checkout" || !googleCheckoutUi?.email) return;
+    if (mode !== "google_checkout" || !googleCheckoutUi?.email) return;
     setSignupStripeErr(null);
     setSignupStripeLoading(true);
     setSignupClientSecret(null);
@@ -168,32 +180,32 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, googleCheckoutUi?.email]);
+  }, [mode, googleCheckoutUi?.email]);
 
   useEffect(() => {
-    if (!open || !authCallbackMessage) return;
+    if (!mode || !authCallbackMessage) return;
     setMsg(authCallbackMessage);
     setMsgOk(false);
     clearAuthCallbackMessage();
-  }, [open, authCallbackMessage, clearAuthCallbackMessage]);
+  }, [mode, authCallbackMessage, clearAuthCallbackMessage]);
 
   useEffect(() => {
-    if (user && open && open !== "google_checkout") {
+    if (user && mode && mode !== "google_checkout") {
       onClose();
       resetFields();
     }
-  }, [user, open, onClose, resetFields]);
+  }, [user, mode, onClose, resetFields]);
 
   useEffect(() => {
-    if (open !== "google_checkout" || googleCheckoutUi?.email) return;
+    if (mode !== "google_checkout" || googleCheckoutUi?.email) return;
     void resolveGoogleCheckoutFromUrl();
-  }, [open, googleCheckoutUi?.email, resolveGoogleCheckoutFromUrl]);
+  }, [mode, googleCheckoutUi?.email, resolveGoogleCheckoutFromUrl]);
 
   useEffect(() => {
     const prev = prevOpenRef.current;
-    prevOpenRef.current = open;
+    prevOpenRef.current = mode;
     if (
-      open === "register" &&
+      mode === "register" &&
       prev !== "register" &&
       stripePublishableKeyConfigured
     ) {
@@ -202,16 +214,16 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       setSignupStripeErr(null);
       setSignupStripeLoading(false);
     }
-  }, [open]);
+  }, [mode]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!mode) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [mode, onClose]);
 
   const stripePromise = getStripeBrowserPromise();
 
@@ -300,7 +312,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
 
       if (!applied.waivesPayment) return;
 
-      if (open === "google_checkout") {
+      if (mode === "google_checkout") {
         const { error } = await completeGoogleCheckout(
           undefined,
           undefined,
@@ -346,7 +358,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     }
   }, [
     promoCode,
-    open,
+    mode,
     completeGoogleCheckout,
     email,
     firstName,
@@ -388,7 +400,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setMsgOk(true);
   }
 
-  if (!open) return null;
+  if (!mode) return null;
 
   const renderPromoBlock = (onApply: (() => void) | null) => (
     <div className="auth-modal__promo-block">
@@ -522,9 +534,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
 
   if (!apiReady && !loading) {
     title =
-      open === "signin"
+      mode === "signin"
         ? "Sign in"
-        : open === "register"
+        : mode === "register"
           ? "Create account"
           : "Complete your account";
     body = (
@@ -550,9 +562,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     footer = null;
   } else if (loading) {
     title =
-      open === "signin"
+      mode === "signin"
         ? "Sign in"
-        : open === "register"
+        : mode === "register"
           ? "Create account"
           : "Complete your account";
     body = (
@@ -561,8 +573,11 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       </p>
     );
     footer = null;
-  } else if (open === "google_checkout") {
-    title = "Complete your account";
+  } else if (mode === "google_checkout") {
+    title =
+      source === "csv"
+        ? "Save your imported holdings permanently"
+        : "Complete your account";
     headerExtra = null;
     const gc = googleCheckoutUi;
     if (!gc?.email) {
@@ -702,12 +717,12 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         </>
       );
     }
-  } else if (open === "signin") {
+  } else if (mode === "signin") {
     title = "Sign in";
     headerExtra = null;
     body = (
       <>
-        <div className="auth-modal__form-entrance" key={open}>
+        <div className="auth-modal__form-entrance" key={mode}>
           {apiReady && googleOAuth ? (
             <>
               <div className="auth-modal__oauth-row">
@@ -803,7 +818,10 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       </Button>
     );
   } else if (stripePublishableKeyConfigured) {
-    title = "Save your retirement plan";
+    title =
+      source === "csv"
+        ? "Save your imported holdings permanently"
+        : "Save your retirement plan";
     showRegisterHeader = true;
     headerExtra = null;
     if (registerStripeStep === 2 && email.trim()) {
@@ -825,7 +843,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       <>
         <div
           className="auth-modal__form-entrance auth-modal__form-entrance--register-stripe"
-          key={open}
+          key={mode}
         >
           <div
             className={`auth-modal__reg-slider${registerStripeStep === 2 ? " auth-modal__reg-slider--step-2" : ""}`}
@@ -962,12 +980,15 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       </>
     );
   } else {
-    title = "Save your retirement plan";
+    title =
+      source === "csv"
+        ? "Save your imported holdings permanently"
+        : "Save your retirement plan";
     showRegisterHeader = true;
     headerExtra = null;
     body = (
       <>
-        <div className="auth-modal__form-entrance" key={open}>
+        <div className="auth-modal__form-entrance" key={mode}>
           <CreateAccountMarketing />
           {apiReady && googleOAuth ? (
             <>

@@ -1,7 +1,7 @@
 import { useContext } from 'react'
-import { UserTierContext } from '../context/UserTierContext'
+import { UserTierContext, type UserTierContextValue } from '../context/UserTierContext'
 
-export function useUserTier() {
+export function useUserTier(): UserTierContextValue {
   const ctx = useContext(UserTierContext)
   if (!ctx) {
     throw new Error('useUserTier must be used within UserTierProvider')

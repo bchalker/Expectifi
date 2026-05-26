@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { AuthModal, type AuthModalMode } from './components/AuthModal'
+import { AuthModal, type AuthModalOpen, type AuthModalMode } from './components/AuthModal'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 import { useAuth } from './context/AuthContext'
 import { UserLocaleProvider } from './context/UserLocaleContext'
@@ -99,7 +99,7 @@ function freshAppState(): InitialAppState {
 }
 
 type AppProps = {
-  initialAuthModal?: AuthModalMode | null
+  initialAuthModal?: AuthModalOpen
 }
 
 export default function App({ initialAuthModal = null }: AppProps) {
@@ -128,7 +128,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   } | null>(null)
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [authModal, setAuthModal] = useState<AuthModalMode | null>(initialAuthModal)
+  const [authModal, setAuthModal] = useState<AuthModalOpen>(initialAuthModal)
 
   const { loading: authLoading, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi, user, saveUserPrefs } =
     useAuth()
@@ -234,6 +234,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const openAuthRegister = useCallback(() => {
     setMobileNavOpen(false)
     setAuthModal('register')
+  }, [])
+
+  const openCsvUpgrade = useCallback(() => {
+    setMobileNavOpen(false)
+    setAuthModal({ mode: 'register', source: 'csv' })
   }, [])
 
   const onResetGuestProfile = useCallback(() => {
@@ -769,6 +774,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               brkRate={inputs.brkRate}
               brokerageMode={brokerageMode}
               onOpenSignIn={openAuthSignIn}
+              onOpenUpgradeCsv={openCsvUpgrade}
               openImportRequest={openImportRequest || undefined}
               onImportOpenHandled={() => setOpenImportRequest(0)}
             />
@@ -819,7 +825,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
       <AuthModal
         open={authModal}
         onClose={() => {
-          if (authModal === 'google_checkout') clearGoogleCheckoutUi()
+          const mode: AuthModalMode | null =
+            typeof authModal === 'string' ? authModal : authModal?.mode ?? null
+          if (mode === 'google_checkout') clearGoogleCheckoutUi()
           setAuthModal(null)
         }}
         onSwitchMode={(mode) => setAuthModal(mode)}

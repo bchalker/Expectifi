@@ -1091,6 +1091,8 @@
 
 .account-balances-card-inner-wrap {
   position: relative;
+  padding: 0;
+  border: none;
   /* Room for CSV import panel + in-card modal overlay */
   min-height: min(28rem, 78vh);
 }
@@ -1103,6 +1105,53 @@
 
 .account-balances-card-inner-wrap--scenario-slide-open {
   overflow: hidden;
+}
+
+.csv-session-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--border) 10%, var(--surface));
+}
+
+.csv-session-banner__text {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.csv-session-banner__headline {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.csv-session-banner__headline strong {
+  font-weight: 700;
+}
+
+.csv-session-banner__subhead {
+  margin: 0.2rem 0 0;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.csv-session-banner__cta.app-btn--primary[data-slot='button'] {
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  background: var(--color-primary);
+  color: var(--color-primary-on);
 }
 
 .account-balances-remove-overlay {

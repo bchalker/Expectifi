@@ -49,6 +49,7 @@ export {
 } from './hydrate'
 export { persistPlanState } from './persist'
 export { purgeUnconsentedPlanStorage } from './purgeUnconsented'
+export { clearCsvSession, loadCsvSession, saveCsvSession } from './csvSession'
 export {
   canWritePlanLocalStorage,
   getPlanWriteTier,

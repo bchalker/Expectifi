@@ -26,11 +26,14 @@ import {
 import {
   clearSessionOnboardingAccounts,
   clearSessionOnboardingComplete,
+  CSV_SESSION_HOLDINGS_EVENT,
+  hasSessionCsvHoldings,
   isSessionOnboardingComplete,
   isSessionSavePlanDismissed,
   ONBOARDING_SESSION_COMPLETE_EVENT,
   setSessionSavePlanDismissed,
 } from '../lib/sessionFlags'
+import { clearCsvSession } from '../lib/planStorage/csvSession'
 
 export type SavePlanPromptSignals = {
   dashboardVisible: boolean
@@ -44,6 +47,8 @@ export type UserTierContextValue = {
   canPersistPlanLocally: boolean
   canUsePlaid: boolean
   canPersistCsvHoldings: boolean
+  hasSessionCsvHoldings: boolean
+  clearCsvSession: () => void
   hydration: PlanHydration
   showSavePlanPrompt: boolean
   acceptBrowserSave: () => void
@@ -71,6 +76,7 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
   const [savePlanSignals, setSavePlanSignals] = useState<SavePlanPromptSignals>(defaultSavePlanSignals)
   const [savePlanSuppressed, setSavePlanSuppressed] = useState(false)
   const [savePlanPromptRev, setSavePlanPromptRev] = useState(0)
+  const [csvHoldingsRev, setCsvHoldingsRev] = useState(0)
   const browserSaveSnapshotRef = useRef<(() => PlanPersistSnapshot) | null>(null)
 
   useEffect(() => {
@@ -81,6 +87,14 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     window.addEventListener(ONBOARDING_SESSION_COMPLETE_EVENT, onOnboardingSessionComplete)
     return () => {
       window.removeEventListener(ONBOARDING_SESSION_COMPLETE_EVENT, onOnboardingSessionComplete)
+    }
+  }, [])
+
+  useEffect(() => {
+    const onCsvHoldingsChange = () => setCsvHoldingsRev((n) => n + 1)
+    window.addEventListener(CSV_SESSION_HOLDINGS_EVENT, onCsvHoldingsChange)
+    return () => {
+      window.removeEventListener(CSV_SESSION_HOLDINGS_EVENT, onCsvHoldingsChange)
     }
   }, [])
 
@@ -169,6 +183,15 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     savePlanSignals.projectedIncomeMonthly,
   ])
 
+  const sessionCsvHoldings = useMemo(() => {
+    void csvHoldingsRev
+    return hasSessionCsvHoldings()
+  }, [csvHoldingsRev])
+
+  const clearCsvSessionInContext = useCallback(() => {
+    clearCsvSession()
+  }, [])
+
   const value = useMemo((): UserTierContextValue => {
     const isPro = tier === 'pro'
     return {
@@ -178,6 +201,8 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
       canPersistPlanLocally: canPersistPlanToLocalStorage(tier),
       canUsePlaid: isPro,
       canPersistCsvHoldings: isPro,
+      hasSessionCsvHoldings: sessionCsvHoldings,
+      clearCsvSession: clearCsvSessionInContext,
       hydration,
       showSavePlanPrompt,
       acceptBrowserSave,
@@ -194,6 +219,8 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     dismissSavePlanPrompt,
     updateSavePlanPromptSignals,
     registerBrowserSaveSnapshot,
+    sessionCsvHoldings,
+    clearCsvSessionInContext,
   ])
 
   return (

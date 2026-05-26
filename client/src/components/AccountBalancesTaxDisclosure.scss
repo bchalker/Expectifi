@@ -12,6 +12,11 @@
   width: 100%;
 }
 
+/* Single divider per bucket — .edit-row also sets border-bottom on summaries */
+.tax-treatment-disclosure > summary.edit-row {
+  border-bottom: none;
+}
+
 .tax-treatment-disclosure > summary::-webkit-details-marker {
   display: none;
 }
