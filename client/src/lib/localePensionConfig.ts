@@ -29,7 +29,7 @@ const US_CONFIG: LocalePensionConfig = {
   stepTitle: 'Social Security',
   stepSubtitle: 'Help us estimate your benefits in retirement',
   includeToggleLabel: 'Include Social Security',
-  claimQuestionLabel: 'When do you plan to claim Social Security?',
+  claimQuestionLabel: 'When are you going to claim?',
   spouseClaimQuestionLabel: 'When will your spouse claim Social Security?',
   spouseClaimModeQuestionLabel: 'How will your spouse claim Social Security?',
   benefitHint:

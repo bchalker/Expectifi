@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { pensionConfigForResidenceCountry } from '../lib/localePensionConfig'
 import { openBankingLocaleFromCountry } from '../lib/openBankingRegion'
@@ -12,23 +12,31 @@ import type { SpouseClaimMode } from './SpouseClaimModeSegment'
 type Props = {
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
+  ssIncluded: boolean
+  onSsIncludedChange: (value: boolean) => void
+  benefitError?: string
 }
 
 function hasSsBenefits(inputs: CalculatorInputs): boolean {
   return inputs.ssBenefit62 > 0 || inputs.ssBenefit67 > 0 || inputs.ssBenefit70 > 0
 }
 
-export function ConfigSocialSecurityTab({ inputs, setInputs }: Props) {
+export function ConfigSocialSecurityTab({
+  inputs,
+  setInputs,
+  ssIncluded,
+  onSsIncludedChange,
+  benefitError,
+}: Props) {
   const locale = openBankingLocaleFromCountry(inputs.residenceCountry ?? '') ?? 'us'
   const pension = useMemo(
     () => pensionConfigForResidenceCountry(inputs.residenceCountry ?? ''),
     [inputs.residenceCountry],
   )
-  const [includeSs, setIncludeSs] = useState(() => hasSsBenefits(inputs))
 
   useEffect(() => {
-    if (hasSsBenefits(inputs)) setIncludeSs(true)
-  }, [inputs.ssBenefit62, inputs.ssBenefit67, inputs.ssBenefit70])
+    if (hasSsBenefits(inputs) && !ssIncluded) onSsIncludedChange(true)
+  }, [inputs.ssBenefit62, inputs.ssBenefit67, inputs.ssBenefit70, ssIncluded, onSsIncludedChange])
 
   const dob = inputs.dateOfBirth
   const ssAge = clampClaimAgeInRange(inputs.ssAge || pension.defaultClaimAge, pension.claimAgeMin, pension.claimAgeMax)
@@ -44,7 +52,7 @@ export function ConfigSocialSecurityTab({ inputs, setInputs }: Props) {
   const spouseBenefitMonthly = inputs.spouseBenefit67 > 0 ? inputs.spouseBenefit67 : 0
 
   const onIncludeSsChange = (value: boolean) => {
-    setIncludeSs(value)
+    onSsIncludedChange(value)
     if (!value) {
       setInputs({
         ssBenefit62: 0,
@@ -102,13 +110,11 @@ export function ConfigSocialSecurityTab({ inputs, setInputs }: Props) {
 
   return (
     <div className="config-ss-tab">
-      <p className="footnote footnote--muted config-drawer-lead">
-        {pension.stepSubtitle}
-      </p>
       <SocialSecuritySetupFields
         locale={locale}
-        includeSs={includeSs}
+        includeSs={ssIncluded}
         onIncludeSsChange={onIncludeSsChange}
+        userBenefitError={benefitError}
         ssAge={ssAge}
         onSsAgeChange={(age) => setInputs({ ssAge: age })}
         ssBenefitMonthly={ssBenefitMonthly}

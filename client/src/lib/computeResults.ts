@@ -380,11 +380,11 @@ export function computeResults(
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
   const incomeGoalProgressPct =
-    monthlyIncomeGoal > 0 ? Math.min(150, Math.round((afterTaxMon / monthlyIncomeGoal) * 1000) / 10) : null
+    monthlyIncomeGoal > 0 ? Math.min(100, Math.round((afterTaxMon / monthlyIncomeGoal) * 1000) / 10) : null
 
   const growthGoalProgressPct =
     growthGoal > 0 && hasPortfolioBalances
-      ? Math.min(150, Math.round((totalFV / growthGoal) * 1000) / 10)
+      ? Math.min(100, Math.round((totalFV / growthGoal) * 1000) / 10)
       : null
 
   const incomePhase = ui.incomeMode

@@ -14,6 +14,8 @@ import './OnboardingFieldShell.scss'
 type Props = {
   monthlyGoal: number
   onMonthlyGoalChange: (amount: number) => void
+  growthGoal: number
+  onGrowthGoalChange: (amount: number) => void
   retireAge: number
   onRetireAgeChange: (age: number) => void
   dateOfBirth?: string
@@ -25,6 +27,8 @@ type Props = {
 export function WelcomeGoalStepFields({
   monthlyGoal,
   onMonthlyGoalChange,
+  growthGoal,
+  onGrowthGoalChange,
   retireAge,
   onRetireAgeChange,
   dateOfBirth = '',
@@ -67,18 +71,35 @@ export function WelcomeGoalStepFields({
         .filter(Boolean)
         .join(' ')}
     >
-      <CurrencyAmountInput
-        id="welcome-planning-monthly-goal"
-        className="welcome-goal-fields__goal-input"
-        label="What would you like retirement to look like?"
-        value={monthlyGoal}
-        onChange={onMonthlyGoalChange}
-        placeholder={WELCOME_PLANNING_PLACEHOLDERS.monthlyIncomeGoal}
-        externalPrefix
-        externalSuffix="/mo"
-        hint={WELCOME_PLANNING_HINTS.monthlyIncomeGoal}
-        showFillState={showFillState}
-      />
+      <div className="welcome-goal-fields__goals-section">
+        <div className="welcome-goal-fields__goals-intro">
+          <h3 className="welcome-goal-fields__goals-heading">Goals at Retirement</h3>
+          <p className="welcome-goal-fields__goals-lead">{WELCOME_PLANNING_HINTS.goalsAtRetirement}</p>
+        </div>
+        <div className="welcome-goal-fields__goals-row">
+          <CurrencyAmountInput
+            id="welcome-planning-growth-goal"
+            className="welcome-goal-fields__goal-input"
+            label="Growth"
+            value={growthGoal}
+            onChange={onGrowthGoalChange}
+            placeholder={WELCOME_PLANNING_PLACEHOLDERS.growthGoal}
+            externalPrefix
+            showFillState={showFillState}
+          />
+          <CurrencyAmountInput
+            id="welcome-planning-monthly-goal"
+            className="welcome-goal-fields__goal-input"
+            label="Income"
+            value={monthlyGoal}
+            onChange={onMonthlyGoalChange}
+            placeholder={WELCOME_PLANNING_PLACEHOLDERS.monthlyIncomeGoal}
+            externalPrefix
+            externalSuffix="/mo"
+            showFillState={showFillState}
+          />
+        </div>
+      </div>
       <div className="config-plan-field welcome-goal-fields__retire-age">
         <label className="config-plan-label" htmlFor="welcome-planning-retire-age">
           ...and when would you like to retire?

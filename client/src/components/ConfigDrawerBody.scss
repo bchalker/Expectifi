@@ -22,9 +22,9 @@
   flex-wrap: nowrap;
   gap: 0;
   width: 100%;
-  margin: 0 0 1.25rem;
+  margin: 0;
   padding: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -76,6 +76,11 @@
   outline: none;
   box-shadow: inset 0 0 0 2px rgba(93, 202, 165, 0.35);
   border-radius: 4px 4px 0 0;
+}
+
+.side-panel-shell__below-header .config-drawer-tabs--classic {
+  margin: 0;
+  padding-bottom: 0.15rem;
 }
 
 .config-drawer-tabpanel {
@@ -157,6 +162,10 @@
   color: var(--text);
 }
 
+.config-drawer-body .currency-amount-input__label--error {
+  color: var(--danger, #b42318);
+}
+
 .config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input,
 .config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__goal-input {
   align-items: stretch;
@@ -173,6 +182,7 @@
   align-items: flex-start;
   margin-inline: 0;
   width: 100%;
+  max-width: 100%;
 }
 
 .config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__amount-row--external-affixes {
@@ -181,7 +191,8 @@
 }
 
 .config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input__hint,
-.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__hint {
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__hint,
+.config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__goals-lead {
   text-align: left;
 }
 

@@ -43,6 +43,8 @@ type ConfigureProps = SharedProps & {
   onHouseholdIncome: (amount: number) => void;
   monthlyContribution: number;
   onMonthlyContribution: (amount: number) => void;
+  growthGoal: number;
+  onGrowthGoal: (amount: number) => void;
   monthlyIncomeGoal: number;
   onMonthlyIncomeGoal: (amount: number) => void;
   regionId: OnboardingRegionId | null | undefined;
@@ -51,6 +53,8 @@ type ConfigureProps = SharedProps & {
 
 type WelcomeProps = SharedProps & {
   variant: "welcome";
+  growthGoal: number;
+  onGrowthGoal: (amount: number) => void;
   monthlyIncomeGoal: number;
   onMonthlyIncomeGoal: (amount: number) => void;
 };
@@ -109,9 +113,12 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
         <WelcomeGoalStepFields
           monthlyGoal={props.monthlyIncomeGoal}
           onMonthlyGoalChange={props.onMonthlyIncomeGoal}
+          growthGoal={props.growthGoal}
+          onGrowthGoalChange={props.onGrowthGoal}
           retireAge={targetRetirementAge}
           onRetireAgeChange={onTargetRetirementAge}
           dateOfBirth={dateOfBirth}
+          showFillState
         />
       </div>
     );
@@ -212,13 +219,23 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           </div>
         ) : null}
         {variant === "welcome" ? (
-          <CurrencyAmountInput
-            id="planning-profile-welcome-monthly-goal"
-            label="Monthly income goal in retirement"
-            value={props.monthlyIncomeGoal}
-            onChange={props.onMonthlyIncomeGoal}
-            showAnnualEquivalent
-          />
+          <div className="planning-profile-fields__welcome-goal-stack">
+            <CurrencyAmountInput
+              id="planning-profile-welcome-monthly-goal"
+              label="Monthly income goal in retirement"
+              value={props.monthlyIncomeGoal}
+              onChange={props.onMonthlyIncomeGoal}
+              showAnnualEquivalent
+              showFillState
+            />
+            <CurrencyAmountInput
+              id="planning-profile-welcome-growth-goal"
+              label="Growth goal at retirement"
+              value={props.growthGoal}
+              onChange={props.onGrowthGoal}
+              showFillState
+            />
+          </div>
         ) : null}
       </div>
     </div>

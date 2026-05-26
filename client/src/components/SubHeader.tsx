@@ -253,30 +253,6 @@ export function SubHeader({
               viewBox="0 0 1000 72"
               preserveAspectRatio="xMidYMax slice"
             >
-              <defs>
-                <linearGradient
-                  id="subheader-growth-wave-fill"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                  gradientUnits="objectBoundingBox"
-                >
-                  <stop offset="0%" stopColor="#3d4f63" />
-                  <stop offset="100%" stopColor="#1a2332" />
-                </linearGradient>
-                <linearGradient
-                  id="subheader-income-wave-fill"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                  gradientUnits="objectBoundingBox"
-                >
-                  <stop offset="0%" stopColor="#f9a03f" />
-                  <stop offset="100%" stopColor="#f9a03f" />
-                </linearGradient>
-              </defs>
               <path
                 className="subheader-bubble__front-path"
                 d={SUBHEADER_WAVE_FRONT_D}

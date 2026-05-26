@@ -11,18 +11,6 @@
   padding: 1.5rem 0.5rem 0.75rem;
 }
 
-.config-profile-tab__empty-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 0.85rem;
-  border-radius: 999px;
-  background: var(--accent-light);
-  color: var(--accent-text);
-}
-
 .config-profile-tab__empty-title {
   margin: 0 0 0.65rem;
   font-family: var(--heading);
@@ -85,28 +73,22 @@
   min-width: 11rem;
 }
 
-.config-profile-tab__empty-signin {
-  margin: 0;
-  padding: 0.35rem 0.5rem;
+/* Match header Create account CTA (header__auth-cta) */
+button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button'] {
   border: none;
-  background: transparent;
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--accent-text);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  min-height: 2rem;
+  padding: 0 0.85rem;
+  background: var(--header-income-orange, #c4610a);
+  color: #fff;
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  filter: none;
 }
 
-.config-profile-tab__empty-signin:hover {
-  color: var(--accent);
-}
-
-.config-profile-tab__empty-signin:focus-visible {
-  outline: 2px solid var(--accent-text);
-  outline-offset: 2px;
-  border-radius: 4px;
+button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--header-income-orange, #c4610a) 88%, #000);
+  color: #fff;
+  filter: none;
 }
 
 .config-profile-tab__reset-profile {

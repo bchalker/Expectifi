@@ -19,6 +19,8 @@ export type SidePanelShellProps = {
   onClose: () => void
   closeAriaLabel?: string
   children: ReactNode
+  /** Fixed row between header and scroll body (e.g. config drawer tabs). */
+  belowHeader?: ReactNode
   footer?: ReactNode
   /** Remounts scroll area when key changes (e.g. active drawer id). */
   scrollKey?: string | number
@@ -38,12 +40,14 @@ export function SidePanelShell({
   onClose,
   closeAriaLabel = 'Close panel',
   children,
+  belowHeader,
   footer,
   scrollKey,
   shellClassName = '',
   bodyClassName = 'drawer-shell-body',
 }: SidePanelShellProps) {
   const hasFooter = footer != null && footer !== false
+  const hasBelowHeader = belowHeader != null && belowHeader !== false
   const [latchedShellClass, setLatchedShellClass] = useState(shellClassName)
   const [latchedScrollKey, setLatchedScrollKey] = useState(scrollKey ?? '')
 
@@ -71,6 +75,7 @@ export function SidePanelShell({
         'drawer-shell',
         'side-panel-shell',
         hasFooter ? 'drawer-shell--with-footer' : '',
+        hasBelowHeader ? 'drawer-shell--with-below-header' : '',
         latchedShellClass,
         open ? 'drawer-shell--open' : '',
       ]
@@ -86,6 +91,9 @@ export function SidePanelShell({
         </div>
         <CloseButton aria-label={closeAriaLabel} onPress={onClose} />
       </header>
+      {hasBelowHeader ? (
+        <div className="side-panel-shell__below-header">{belowHeader}</div>
+      ) : null}
       <SimpleBar
         key={String(latchedScrollKey)}
         className="side-panel-shell__scroll"

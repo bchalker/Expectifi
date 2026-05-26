@@ -1,65 +1,97 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   /* ── Theme scales (locked palette) ───────────────────────────────────
-     blue / amber / red / green: 1 = base hex → 10 = lighten (mix white).
-     surface: 1 = gray base (#F9F9F9) → 10 = darken (mix black). */
+     Chromatic (blue, amber, red, green): *1 = base hex.
+       *d5…*d1 = 5 steps darker (mix black), *2…*6 = 5 steps lighter (mix white).
+       *7…*10 = legacy aliases (see below).
+     Surface: *1 = lightest base; *u1…*u5 lighter (mix white), *d1…*d5 darker (mix black). */
 
   --blue1: #1a2332;
+  --blue-d5: color-mix(in srgb, var(--blue1) 10%, black);
+  --blue-d4: color-mix(in srgb, var(--blue1) 30%, black);
+  --blue-d3: color-mix(in srgb, var(--blue1) 50%, black);
+  --blue-d2: color-mix(in srgb, var(--blue1) 70%, black);
+  --blue-d1: color-mix(in srgb, var(--blue1) 90%, black);
   --blue2: color-mix(in srgb, var(--blue1) 90%, white);
-  --blue3: color-mix(in srgb, var(--blue1) 80%, white);
-  --blue4: color-mix(in srgb, var(--blue1) 70%, white);
-  --blue5: color-mix(in srgb, var(--blue1) 60%, white);
-  --blue6: color-mix(in srgb, var(--blue1) 50%, white);
-  --blue7: color-mix(in srgb, var(--blue1) 40%, white);
-  --blue8: color-mix(in srgb, var(--blue1) 30%, white);
-  --blue9: color-mix(in srgb, var(--blue1) 20%, white);
-  --blue10: color-mix(in srgb, var(--blue1) 10%, white);
+  --blue3: color-mix(in srgb, var(--blue1) 70%, white);
+  --blue4: color-mix(in srgb, var(--blue1) 50%, white);
+  --blue5: color-mix(in srgb, var(--blue1) 30%, white);
+  --blue6: color-mix(in srgb, var(--blue1) 10%, white);
+  --blue7: var(--blue5);
+  --blue8: var(--blue5);
+  --blue9: var(--blue6);
+  --blue10: var(--blue6);
 
-  --amber1: #f9a03f;
+  --amber1: #ED7E07;
+  --amber-d5: color-mix(in srgb, var(--amber1) 10%, black);
+  --amber-d4: color-mix(in srgb, var(--amber1) 30%, black);
+  --amber-d3: color-mix(in srgb, var(--amber1) 50%, black);
+  --amber-d2: color-mix(in srgb, var(--amber1) 70%, black);
+  --amber-d1: color-mix(in srgb, var(--amber1) 90%, black);
   --amber2: color-mix(in srgb, var(--amber1) 90%, white);
-  --amber3: color-mix(in srgb, var(--amber1) 80%, white);
-  --amber4: color-mix(in srgb, var(--amber1) 70%, white);
-  --amber5: color-mix(in srgb, var(--amber1) 60%, white);
-  --amber6: color-mix(in srgb, var(--amber1) 50%, white);
-  --amber7: color-mix(in srgb, var(--amber1) 40%, white);
-  --amber8: color-mix(in srgb, var(--amber1) 30%, white);
-  --amber9: color-mix(in srgb, var(--amber1) 20%, white);
-  --amber10: color-mix(in srgb, var(--amber1) 10%, white);
+  --amber3: color-mix(in srgb, var(--amber1) 70%, white);
+  --amber4: color-mix(in srgb, var(--amber1) 50%, white);
+  --amber5: color-mix(in srgb, var(--amber1) 30%, white);
+  --amber6: color-mix(in srgb, var(--amber1) 10%, white);
+  --amber7: var(--amber5);
+  --amber8: var(--amber5);
+  --amber9: var(--amber6);
+  --amber10: var(--amber6);
 
   --red1: #c03221;
+  --red-d5: color-mix(in srgb, var(--red1) 10%, black);
+  --red-d4: color-mix(in srgb, var(--red1) 30%, black);
+  --red-d3: color-mix(in srgb, var(--red1) 50%, black);
+  --red-d2: color-mix(in srgb, var(--red1) 70%, black);
+  --red-d1: color-mix(in srgb, var(--red1) 90%, black);
   --red2: color-mix(in srgb, var(--red1) 90%, white);
-  --red3: color-mix(in srgb, var(--red1) 80%, white);
-  --red4: color-mix(in srgb, var(--red1) 70%, white);
-  --red5: color-mix(in srgb, var(--red1) 60%, white);
-  --red6: color-mix(in srgb, var(--red1) 50%, white);
-  --red7: color-mix(in srgb, var(--red1) 40%, white);
-  --red8: color-mix(in srgb, var(--red1) 30%, white);
-  --red9: color-mix(in srgb, var(--red1) 20%, white);
-  --red10: color-mix(in srgb, var(--red1) 10%, white);
+  --red3: color-mix(in srgb, var(--red1) 70%, white);
+  --red4: color-mix(in srgb, var(--red1) 50%, white);
+  --red5: color-mix(in srgb, var(--red1) 30%, white);
+  --red6: color-mix(in srgb, var(--red1) 10%, white);
+  --red7: var(--red5);
+  --red8: var(--red5);
+  --red9: var(--red6);
+  --red10: var(--red6);
 
   --green1: #0f9544;
+  --green-d5: color-mix(in srgb, var(--green1) 10%, black);
+  --green-d4: color-mix(in srgb, var(--green1) 30%, black);
+  --green-d3: color-mix(in srgb, var(--green1) 50%, black);
+  --green-d2: color-mix(in srgb, var(--green1) 70%, black);
+  --green-d1: color-mix(in srgb, var(--green1) 90%, black);
   --green2: color-mix(in srgb, var(--green1) 90%, white);
-  --green3: color-mix(in srgb, var(--green1) 80%, white);
-  --green4: color-mix(in srgb, var(--green1) 70%, white);
-  --green5: color-mix(in srgb, var(--green1) 60%, white);
-  --green6: color-mix(in srgb, var(--green1) 50%, white);
-  --green7: color-mix(in srgb, var(--green1) 40%, white);
-  --green8: color-mix(in srgb, var(--green1) 30%, white);
-  --green9: color-mix(in srgb, var(--green1) 20%, white);
-  --green10: color-mix(in srgb, var(--green1) 10%, white);
+  --green3: color-mix(in srgb, var(--green1) 70%, white);
+  --green4: color-mix(in srgb, var(--green1) 50%, white);
+  --green5: color-mix(in srgb, var(--green1) 30%, white);
+  --green6: color-mix(in srgb, var(--green1) 10%, white);
+  --green7: var(--green5);
+  --green8: var(--green5);
+  --green9: var(--green6);
+  --green10: var(--green6);
   /* Malachite — progress bars, meters, bright highlights on dark chrome */
   --green-progress: #16db65;
 
   --surface1: #f9f9f9;
-  --surface2: color-mix(in srgb, var(--surface1) 90%, black);
-  --surface3: color-mix(in srgb, var(--surface1) 80%, black);
-  --surface4: color-mix(in srgb, var(--surface1) 70%, black);
-  --surface5: color-mix(in srgb, var(--surface1) 60%, black);
-  --surface6: color-mix(in srgb, var(--surface1) 50%, black);
-  --surface7: color-mix(in srgb, var(--surface1) 40%, black);
-  --surface8: color-mix(in srgb, var(--surface1) 30%, black);
-  --surface9: color-mix(in srgb, var(--surface1) 20%, black);
-  --surface10: color-mix(in srgb, var(--surface1) 10%, black);
+  --surface-u5: color-mix(in srgb, var(--surface1) 10%, white);
+  --surface-u4: color-mix(in srgb, var(--surface1) 30%, white);
+  --surface-u3: color-mix(in srgb, var(--surface1) 50%, white);
+  --surface-u2: color-mix(in srgb, var(--surface1) 70%, white);
+  --surface-u1: color-mix(in srgb, var(--surface1) 90%, white);
+  --surface-d1: color-mix(in srgb, var(--surface1) 90%, black);
+  --surface-d2: color-mix(in srgb, var(--surface1) 70%, black);
+  --surface-d3: color-mix(in srgb, var(--surface1) 50%, black);
+  --surface-d4: color-mix(in srgb, var(--surface1) 30%, black);
+  --surface-d5: color-mix(in srgb, var(--surface1) 10%, black);
+  --surface2: var(--surface-d1);
+  --surface3: var(--surface-d2);
+  --surface4: var(--surface-d3);
+  --surface5: var(--surface-d4);
+  --surface6: var(--surface-d5);
+  --surface7: var(--surface-d5);
+  --surface8: var(--surface-d5);
+  --surface9: var(--surface-d5);
+  --surface10: var(--surface-d5);
 
   /* Medium-dark line — input borders, selects, section dividers (app-wide) */
   --border-medium-dark: var(--surface6);
@@ -83,27 +115,27 @@
   --color-teal-dark: color-mix(in srgb, var(--green1) 32%, var(--blue1));
   --color-teal-mid: var(--green1);
   --color-teal-light: var(--green4);
-  --color-teal-bg: var(--green9);
+  --color-teal-bg: var(--green6);
   --color-amber: var(--amber1);
   --color-amber-dark: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
-  --color-amber-bg: var(--amber9);
+  --color-amber-bg: var(--amber6);
   --color-surface: var(--surface1);
   --color-card: #ffffff;
   --color-border: var(--border-medium-dark);
   --color-text-primary: var(--blue1);
-  --color-text-muted: var(--blue6);
-  --color-text-hint: var(--blue7);
+  --color-text-muted: var(--blue4);
+  --color-text-hint: var(--blue5);
   --color-text-tertiary: var(--color-text-hint);
   --color-text-secondary: var(--color-text-muted);
   --color-border-tertiary: color-mix(in srgb, var(--color-border) 65%, transparent);
   --color-danger: var(--red1);
   --color-text-success: color-mix(in srgb, var(--green1) 40%, var(--blue1));
   --color-text-danger: var(--color-danger);
-  --color-background-info: var(--blue9);
+  --color-background-info: var(--blue6);
   --color-text-info: var(--blue3);
-  --color-border-info: var(--blue7);
-  --color-background-success: var(--green9);
-  --color-background-warning: var(--amber9);
+  --color-border-info: var(--blue5);
+  --color-background-success: var(--green6);
+  --color-background-warning: var(--amber6);
   --color-background-secondary: var(--surface2);
   --color-background-hindu: #f8dcc8;
   --color-background-jewish: #e4ddf0;
@@ -129,11 +161,11 @@
   /* Primary actions (submit, confirm) — green */
   --ds-color-accent: var(--green1);
   --ds-color-accent-text: color-mix(in srgb, var(--green1) 28%, var(--blue1));
-  --ds-color-accent-light: var(--green9);
+  --ds-color-accent-light: var(--green6);
   /* Secondary actions (outline, back, alt) — amber */
   --ds-color-secondary: var(--amber1);
   --ds-color-secondary-text: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
-  --ds-color-secondary-light: var(--amber9);
+  --ds-color-secondary-light: var(--amber6);
   --ds-color-secondary-border: color-mix(in srgb, var(--amber1) 42%, transparent);
   /* Drawer strip narrative highlight (amber) */
   --ds-color-strip-drawer: var(--ds-color-secondary);
@@ -174,9 +206,9 @@
   --btn-neutral-color: var(--text-muted);
   --warn: var(--color-amber-dark);
   --warn-light: var(--color-amber-bg);
-  --danger-light: var(--red9);
+  --danger-light: var(--red6);
   --gold: var(--amber1);
-  --gold-light: var(--amber9);
+  --gold-light: var(--amber6);
   --accent-green: var(--green-progress);
   --nav-accent: var(--green1);
   --nav-bg: var(--blue1);
@@ -189,6 +221,8 @@
   --subheader-hero-fg: var(--green3);
   --subheader-label-fg: rgba(255, 255, 255, 0.82);
   --subheader-phase-muted-fg: rgba(255, 255, 255, 0.78);
+  /* Income-phase front wave + band (matches goal progress bar) */
+  --subheader-income-wave: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
   --mono: var(--ds-font-mono); --sans: var(--font-sans); --serif: var(--font-serif);
   --body: var(--ds-font-body);
   --heading: var(--font-heading);

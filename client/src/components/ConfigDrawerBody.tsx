@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
@@ -19,56 +19,92 @@ const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'social-security', label: 'Social Security' },
 ]
 
-type Props = {
-  c: ComputedSnapshot
-  inputs: CalculatorInputs
-  setInputs: (p: Partial<CalculatorInputs>) => void
-  initialTab?: ConfigDrawerTab
-  onDrawerClose?: () => void
-  onOpenSignIn?: () => void
-  onOpenRegister?: () => void
-  onResetGuestProfile?: () => void
+type TabContextValue = {
+  tab: ConfigDrawerTab
+  setTab: (tab: ConfigDrawerTab) => void
 }
 
-export function ConfigDrawerBody({
-  c: _c,
-  inputs,
-  setInputs,
+const ConfigDrawerTabContext = createContext<TabContextValue | null>(null)
+
+function useConfigDrawerTab() {
+  const ctx = useContext(ConfigDrawerTabContext)
+  if (!ctx) {
+    throw new Error('Config drawer tabs must be used within ConfigDrawerTabProvider')
+  }
+  return ctx
+}
+
+export function ConfigDrawerTabProvider({
   initialTab = 'plan',
-  onDrawerClose,
-  onOpenSignIn,
-  onOpenRegister,
-  onResetGuestProfile,
-}: Props) {
+  children,
+}: {
+  initialTab?: ConfigDrawerTab
+  children: ReactNode
+}) {
   const [tab, setTab] = useState<ConfigDrawerTab>(initialTab)
-  const { locale, refreshLocale } = useUserLocale()
 
   useEffect(() => {
     setTab(initialTab)
   }, [initialTab])
 
+  return (
+    <ConfigDrawerTabContext.Provider value={{ tab, setTab }}>{children}</ConfigDrawerTabContext.Provider>
+  )
+}
+
+export function ConfigDrawerTabs() {
+  const { tab, setTab } = useConfigDrawerTab()
+
+  return (
+    <div className="config-drawer-tabs config-drawer-tabs--classic" role="tablist" aria-label="Configure sections">
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          id={`config-tab-${t.id}`}
+          type="button"
+          role="tab"
+          className={`tab-btn${tab === t.id ? ' active' : ''}`}
+          aria-selected={tab === t.id}
+          aria-controls={`config-panel-${t.id}`}
+          tabIndex={tab === t.id ? 0 : -1}
+          onClick={() => setTab(t.id)}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+type TabPanelsProps = {
+  c: ComputedSnapshot
+  inputs: CalculatorInputs
+  setInputs: (p: Partial<CalculatorInputs>) => void
+  ssIncluded: boolean
+  onSsIncludedChange: (value: boolean) => void
+  ssBenefitError?: string
+  onDrawerClose?: () => void
+  onOpenRegister?: () => void
+  onResetGuestProfile?: () => void
+}
+
+export function ConfigDrawerTabPanels({
+  c: _c,
+  inputs,
+  setInputs,
+  ssIncluded,
+  onSsIncludedChange,
+  ssBenefitError,
+  onDrawerClose,
+  onOpenRegister,
+  onResetGuestProfile,
+}: TabPanelsProps) {
+  const { tab } = useConfigDrawerTab()
+  const { locale, refreshLocale } = useUserLocale()
   const planning = planningDisplayFromInputs(inputs)
 
   return (
     <div className="config-drawer-body">
-      <div className="config-drawer-tabs config-drawer-tabs--classic" role="tablist" aria-label="Configure sections">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            id={`config-tab-${t.id}`}
-            type="button"
-            role="tab"
-            className={`tab-btn${tab === t.id ? ' active' : ''}`}
-            aria-selected={tab === t.id}
-            aria-controls={`config-panel-${t.id}`}
-            tabIndex={tab === t.id ? 0 : -1}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
       {tab === 'profile' ? (
         <div
           className="config-drawer-tabpanel"
@@ -79,7 +115,6 @@ export function ConfigDrawerBody({
           <section className="config-drawer-section">
             <ConfigProfileTab
               onAccountCancelled={onDrawerClose}
-              onOpenSignIn={onOpenSignIn}
               onOpenRegister={onOpenRegister}
               onResetGuestProfile={onResetGuestProfile}
             />
@@ -115,6 +150,8 @@ export function ConfigDrawerBody({
               onHouseholdIncome={(other) => setInputs({ other })}
               monthlyContribution={planning.save > 0 ? Math.round(planning.save / 12) : 0}
               onMonthlyContribution={(amount) => setInputs({ save: amount * 12 })}
+              growthGoal={planning.growthGoal}
+              onGrowthGoal={(growthGoal) => setInputs({ growthGoal })}
               monthlyIncomeGoal={planning.monthlyIncomeGoal}
               onMonthlyIncomeGoal={(monthlyIncomeGoal) => setInputs({ monthlyIncomeGoal })}
             />
@@ -130,7 +167,13 @@ export function ConfigDrawerBody({
           aria-labelledby="config-tab-social-security"
         >
           <section className="config-drawer-section">
-            <ConfigSocialSecurityTab inputs={inputs} setInputs={setInputs} />
+            <ConfigSocialSecurityTab
+              inputs={inputs}
+              setInputs={setInputs}
+              ssIncluded={ssIncluded}
+              onSsIncludedChange={onSsIncludedChange}
+              benefitError={ssBenefitError}
+            />
           </section>
         </div>
       ) : null}

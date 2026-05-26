@@ -60,6 +60,14 @@
   text-align: center;
 }
 
+.planning-profile-fields__welcome-goal-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: 100%;
+  min-width: 0;
+}
+
 .planning-profile-fields__goals {
   display: flex;
   flex-direction: column;

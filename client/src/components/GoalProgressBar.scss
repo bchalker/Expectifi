@@ -1,17 +1,20 @@
 .goal-progress-bar {
   flex-shrink: 0;
   box-sizing: border-box;
-  height: var(--goal-bar-h);
-  min-height: var(--goal-bar-h);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  min-height: var(--goal-bar-row-h, 2.5rem);
+  transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goal-progress-bar--phase-growth {
   background: var(--nav-bg);
-  // border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .goal-progress-bar--phase-income {
-  background: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
+  background: var(--amber-d1);
 }
 
 .goal-progress-bar__row {
@@ -84,12 +87,54 @@
 .goal-progress-bar__fill {
   height: 100%;
   border-radius: 9999px;
-  background: var(--green-progress);
-  transition: width 0.35s var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1));
+  background: var(--green3);
+  transform-origin: left center;
+  transition:
+    width 0.35s var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1)),
+    background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Post-commit: fade bar in, then grow fill (with subheader wave reveal). */
+html[data-portfolio-import-flush] .goal-progress-bar {
+  opacity: 0;
+}
+
+html[data-portfolio-import-flush] .goal-progress-bar__fill {
+  transform: scaleX(0);
+  transition: none;
+}
+
+html[data-portfolio-wave-reveal='true'] .goal-progress-bar {
+  animation: goal-progress-bar-reveal var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html[data-portfolio-wave-reveal='true'] .goal-progress-bar__fill {
+  animation: goal-progress-fill-reveal var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    0.1s both;
+}
+
+@keyframes goal-progress-bar-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes goal-progress-fill-reveal {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .goal-progress-bar__fill--met {
-  background: var(--gold);
+  background: var(--green-d3);
 }
 
 .goal-progress-bar__pct {
@@ -102,8 +147,20 @@
   text-align: right;
 }
 
+.goal-progress-bar__met {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
 .goal-progress-bar__pct--met {
-  color: var(--gold);
+  color: #fff;
+}
+
+.goal-progress-bar__met-icon {
+  flex-shrink: 0;
+  color: #fff;
 }
 
 @media (max-width: 520px) {
@@ -111,11 +168,24 @@
     flex-wrap: wrap;
     row-gap: 0.15rem;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .goal-progress-bar,
   .goal-progress-bar__fill {
     transition-duration: 0.01ms;
+  }
+
+  html[data-portfolio-import-flush] .goal-progress-bar {
+    opacity: 1;
+  }
+
+  html[data-portfolio-import-flush] .goal-progress-bar__fill {
+    transform: none;
+  }
+
+  html[data-portfolio-wave-reveal='true'] .goal-progress-bar,
+  html[data-portfolio-wave-reveal='true'] .goal-progress-bar__fill {
+    animation: none;
   }
 }

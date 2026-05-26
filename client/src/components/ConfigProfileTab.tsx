@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useOverlayState } from '@heroui/react'
-import { IconCloudUpload } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { AppButton } from './ui/AppButton'
 import './ConfigProfileTab.scss'
 
 type Props = {
   onAccountCancelled?: () => void
-  onOpenSignIn?: () => void
   onOpenRegister?: () => void
   onResetGuestProfile?: () => void
 }
 
 export function ConfigProfileTab({
   onAccountCancelled,
-  onOpenSignIn,
   onOpenRegister,
   onResetGuestProfile,
 }: Props) {
@@ -51,9 +48,6 @@ export function ConfigProfileTab({
 
     return (
       <section className="config-profile-tab config-profile-tab--guest" aria-labelledby="config-profile-guest-heading">
-        <div className="config-profile-tab__empty-icon-wrap" aria-hidden>
-          <IconCloudUpload size={24} stroke={1.5} />
-        </div>
         <h3 id="config-profile-guest-heading" className="config-profile-tab__empty-title">
           Your profile is saved in this browser
         </h3>
@@ -76,9 +70,6 @@ export function ConfigProfileTab({
           >
             Create account
           </AppButton>
-          <button type="button" className="config-profile-tab__empty-signin" onClick={onOpenSignIn}>
-            Already have an account? Sign in
-          </button>
           {onResetGuestProfile ? (
             <button
               type="button"

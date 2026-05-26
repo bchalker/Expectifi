@@ -5,7 +5,8 @@
 }
 
 .app-header-shell--has-goal {
-  --goal-bar-h: 2.5rem;
+  --goal-bar-row-h: 2.5rem;
+  --goal-bar-h: var(--goal-bar-row-h);
 }
 
 /* Extra room when income subheader shows SS claim-age row */
@@ -42,7 +43,7 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
 
 @media (max-width: 520px) {
   .app-header-shell--has-goal {
-    --goal-bar-h: 3.35rem;
+    --goal-bar-row-h: 3.35rem;
   }
 }
 

@@ -20,6 +20,10 @@
   color: var(--text-muted);
 }
 
+.currency-amount-input__label--error {
+  color: var(--danger, #b42318);
+}
+
 .currency-amount-input__average-badge {
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -144,6 +148,18 @@
   font-weight: 500;
   line-height: 1.45;
   color: var(--danger, #b42318);
+}
+
+.currency-amount-input__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .currency-amount-input__readonly-value {

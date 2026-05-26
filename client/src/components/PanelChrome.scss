@@ -44,6 +44,14 @@
   grid-template-rows: auto 1fr;
 }
 
+.drawer-shell.side-panel-shell.drawer-shell--with-below-header {
+  grid-template-rows: auto auto 1fr;
+}
+
+.drawer-shell.side-panel-shell.drawer-shell--with-below-header.drawer-shell--with-footer {
+  grid-template-rows: auto auto 1fr auto;
+}
+
 .drawer-shell.side-panel-shell.drawer-shell--with-footer {
   grid-template-rows: auto 1fr auto;
 }
@@ -117,6 +125,11 @@
   gap: 0.35rem;
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.drawer-shell--config .drawer-shell-header {
+  border-bottom: none;
+  padding-bottom: 0.75rem;
 }
 
 .drawer-shell--config .drawer-panel-title {

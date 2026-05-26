@@ -60,7 +60,6 @@ import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideE
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
 import { PlaidConnectionProvider } from './PlaidConnectionHeader'
-import { ScenariosBar } from './ScenariosBar'
 import { AppButton } from './ui/AppButton'
 import { useUserTier } from '../hooks/useUserTier'
 import './AccountBalancesTaxDisclosure.scss'
@@ -295,8 +294,6 @@ export function AccountBalances({
     fidelityScenarioEditingEnabled &&
     balanceMode === 'fidelity' &&
     aggregatedHoldingsForGuide.length > 0
-
-  const scenariosBar = mergedDashboard ? <ScenariosBar onOpenSignIn={onOpenSignIn} /> : null
 
   const [fidelityScenarioPanel, setFidelityScenarioPanel] = useState<{
     symbol: string
@@ -956,9 +953,6 @@ export function AccountBalances({
                   Why?
                 </button>
               </div>
-              {scenariosBar ? (
-                <div className="withdrawal-order-context__scenarios">{scenariosBar}</div>
-              ) : null}
             </div>
             <div className="withdrawal-order-context__arrow-row" aria-hidden>
               <span className="withdrawal-order-context__arrow-slot">

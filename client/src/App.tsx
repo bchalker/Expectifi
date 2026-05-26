@@ -166,7 +166,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
   useEffect(() => {
     if (!isHydrated) return
     if (path !== APP_PATHS.onboarding) return
-    if (shouldSkipWelcome(welcomeCtx)) return
+    if (shouldSkipWelcome(welcomeCtx)) {
+      welcomeBlockedRef.current = false
+      setShowWelcome(false)
+      return
+    }
     welcomeBlockedRef.current = true
     setShowWelcome(true)
   }, [isHydrated, path, welcomeCtx])
@@ -409,12 +413,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [inputs, ui, balanceMode, brokerageMode],
   )
 
-  const ssTimingConfigured = isSsConfigured(inputs)
+  const ssBenefitsConfigured = isSsConfigured(inputs)
+  /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
+  const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded
   const dashboardHasPortfolio = welcomeDone && c.hasPortfolioBalances
   const navContext: NavPanelContext = useMemo(
     () => ({
       hasPortfolioBalances: dashboardHasPortfolio,
-      ssConfigured: welcomeDone && ssTimingConfigured,
+      ssConfigured: welcomeDone && ssBenefitsConfigured,
     }),
     [dashboardHasPortfolio, welcomeDone, ssTimingConfigured],
   )
@@ -432,7 +438,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
     welcomeDone &&
     !isWhereToRetire &&
     c.hasPortfolioBalances &&
-    ((phase === 'growth' && inputs.growthGoal > 0) || (phase === 'income' && inputs.monthlyIncomeGoal > 0))
+    ((phase === 'growth' && inputs.growthGoal > 0) ||
+      (phase === 'income' && inputs.monthlyIncomeGoal > 0))
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] = useState(false)
   const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] = useState(false)
   const [openImportRequest, setOpenImportRequest] = useState(0)
@@ -817,7 +824,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
         onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
         configInitialTab={configTab}
-        onOpenSignIn={openAuthSignIn}
+        ssIncluded={ui.ssIncluded}
+        setUi={setUi}
         onOpenRegister={openAuthRegister}
         onResetGuestProfile={onResetGuestProfile}
       />

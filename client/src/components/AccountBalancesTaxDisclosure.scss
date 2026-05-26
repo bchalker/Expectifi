@@ -220,15 +220,6 @@
   width: 100%;
 }
 
-.withdrawal-order-context__scenarios {
-  flex-shrink: 0;
-  margin-left: auto;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  min-width: 0;
-}
-
 .withdrawal-order-context__title-why-row {
   display: flex;
   flex-direction: row;
@@ -264,9 +255,8 @@
   color: var(--text-faint);
 }
 
-/* Withdrawal header pills — shared typography (font-xs) and vertical centering */
-.withdrawal-why-pill,
-.scenarios-bar-sign-in-pill {
+/* Withdrawal header pill — font-xs typography */
+.withdrawal-why-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -287,9 +277,6 @@
     background 0.12s ease,
     color 0.12s ease,
     border-color 0.12s ease;
-}
-
-.withdrawal-why-pill {
   border: none;
   background: #e2e8f0;
   color: #475569;
@@ -301,23 +288,6 @@
 }
 
 .withdrawal-why-pill:focus-visible {
-  outline: 2px solid var(--accent-text);
-  outline-offset: 2px;
-}
-
-.scenarios-bar-sign-in-pill {
-  background: var(--surface);
-  border: 1px dashed var(--border-strong);
-  color: #475569;
-}
-
-.scenarios-bar-sign-in-pill:hover {
-  background: var(--surface2);
-  border-color: color-mix(in srgb, var(--text-muted) 55%, var(--border-strong));
-  color: #334155;
-}
-
-.scenarios-bar-sign-in-pill:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }

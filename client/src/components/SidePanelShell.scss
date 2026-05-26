@@ -11,6 +11,24 @@
   min-height: 0;
 }
 
+.side-panel-shell__below-header {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  background: var(--surface);
+}
+
+.drawer-shell--config .side-panel-shell__below-header {
+  padding: 0 1.75rem;
+  box-shadow: 0 6px 12px -8px rgba(28, 24, 18, 0.18);
+}
+
+.drawer-shell--config .side-panel-shell__footer {
+  border-top: none;
+  box-shadow: 0 -6px 12px -8px rgba(28, 24, 18, 0.18);
+}
+
 .side-panel-shell__footer {
   flex-shrink: 0;
   position: relative;

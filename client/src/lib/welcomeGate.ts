@@ -1,4 +1,9 @@
+import { loadPlanAccounts, planAccountsHaveBalances } from './planStorage/accounts'
+import { hasSavePlanBeenAccepted } from './planStorage/meta'
+import { loadPlanProfile, profileHasOnboardingComplete } from './planStorage/profile'
+import { isSessionOnboardingComplete } from './sessionFlags'
 import type { UserPrefs } from './userPrefs'
+import { isWelcomeCompletedLocal } from './userPrefs'
 
 export const FORCE_ONBOARDING_SESSION_KEY = 'expectifi_force_onboarding'
 const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
@@ -24,6 +29,15 @@ export function isOnboardingComplete(ctx: WelcomeSkipContext): boolean {
 export function shouldShowWelcomeOverlay(ctx: WelcomeSkipContext): boolean {
   if (isOnboardingComplete(ctx)) return false
   return true
+}
+
+/** Guest local/session signals that onboarding finished (marketing CTA should open dashboard). */
+export function guestHasCompletedOnboarding(): boolean {
+  if (profileHasOnboardingComplete(loadPlanProfile())) return true
+  if (isWelcomeCompletedLocal()) return true
+  if (isSessionOnboardingComplete()) return true
+  if (hasSavePlanBeenAccepted() && planAccountsHaveBalances(loadPlanAccounts())) return true
+  return false
 }
 
 export function markForceOnboardingSession(): void {

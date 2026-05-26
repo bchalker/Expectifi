@@ -28,8 +28,10 @@ type Props = {
   placeholder?: string
   /** Welcome/onboarding: grey when empty, white + checkmark when value > 0. */
   showFillState?: boolean
-  /** Inline validation message shown beneath the input row. */
+  /** Validation message; when set, marks the field invalid. */
   error?: string
+  /** `message` — error copy below the field; `label` — red label only (message stays for screen readers). */
+  errorVariant?: 'message' | 'label'
   /** Optional benchmark badge beside the label (e.g. national average). */
   averageBadge?: string | null
 }
@@ -50,9 +52,12 @@ export function CurrencyAmountInput({
   placeholder,
   showFillState = false,
   error,
+  errorVariant = 'message',
   averageBadge,
 }: Props) {
   const [focused, setFocused] = useState(false)
+  const invalid = Boolean(error)
+  const labelOnlyError = invalid && errorVariant === 'label'
   const showPlaceholder = placeholder != null && value === 0
   const filled = showFillState && value > 0
   const prefix = currencySymbol()
@@ -174,6 +179,7 @@ export function CurrencyAmountInput({
           value={display}
           placeholder={placeholder}
           disabled={disabled}
+          aria-invalid={invalid || undefined}
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false)
@@ -195,7 +201,15 @@ export function CurrencyAmountInput({
 
   const labelRow = (
     <div className="currency-amount-input__label-row">
-      <label className="currency-amount-input__label" htmlFor={id}>
+      <label
+        className={[
+          'currency-amount-input__label',
+          labelOnlyError ? 'currency-amount-input__label--error' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        htmlFor={id}
+      >
         {label}
       </label>
       {averageBadge ? (
@@ -205,7 +219,15 @@ export function CurrencyAmountInput({
   )
 
   return (
-    <div className={['currency-amount-input', className].filter(Boolean).join(' ')}>
+    <div
+      className={[
+        'currency-amount-input',
+        labelOnlyError ? 'currency-amount-input--label-error' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {labelRow}
       {externalPrefix || externalSuffix ? (
         <div className="currency-amount-input__value-group">
@@ -218,7 +240,16 @@ export function CurrencyAmountInput({
           {annualHint}
         </>
       )}
-      {error ? <p className="currency-amount-input__error" role="alert">{error}</p> : null}
+      {error && !labelOnlyError ? (
+        <p className="currency-amount-input__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {labelOnlyError ? (
+        <span className="currency-amount-input__sr-only" role="alert">
+          {error}
+        </span>
+      ) : null}
       {hint ? <p className="currency-amount-input__hint">{hint}</p> : null}
     </div>
   )

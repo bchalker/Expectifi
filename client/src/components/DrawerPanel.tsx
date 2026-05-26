@@ -7,7 +7,7 @@ import {
   localeSupportsWithdrawalBucket,
   taxFreeWithdrawalLabels,
 } from '../config/taxConfig'
-import type { ComputedSnapshot, CalculatorInputs, DrawerName } from '../lib/computeResults'
+import type { ComputedSnapshot, CalculatorInputs, CalculatorUi, DrawerName } from '../lib/computeResults'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import { pensionConfigForLocale } from '../lib/localePensionConfig'
@@ -16,7 +16,12 @@ import {
   withdrawalExplainerDisclaimer,
 } from '../lib/withdrawalStrategyContent'
 import { fmt, fmtK, fmtMon } from '../utils/format'
-import { ConfigDrawerBody, type ConfigDrawerTab } from './ConfigDrawerBody'
+import {
+  ConfigDrawerTabPanels,
+  ConfigDrawerTabProvider,
+  ConfigDrawerTabs,
+  type ConfigDrawerTab,
+} from './ConfigDrawerBody'
 import { SidePanelShell } from './SidePanelShell'
 import { AppButton } from './ui/AppButton'
 import './PanelChrome.scss'
@@ -44,7 +49,8 @@ type Props = {
   onFidelityImportAppliedRetirement: () => void
   onFidelityImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
-  onOpenSignIn?: () => void
+  ssIncluded: boolean
+  setUi: (p: Partial<CalculatorUi>) => void
   onOpenRegister?: () => void
   onResetGuestProfile?: () => void
 }
@@ -64,7 +70,8 @@ export function DrawerPanel({
   onFidelityImportAppliedRetirement,
   onFidelityImportAppliedBrokerage,
   configInitialTab,
-  onOpenSignIn,
+  ssIncluded,
+  setUi,
   onOpenRegister,
   onResetGuestProfile,
 }: Props) {
@@ -73,6 +80,29 @@ export function DrawerPanel({
   if (drawer) lastDrawerRef.current = drawer
   const panelDrawer = drawer ?? lastDrawerRef.current
   const { user, signOut } = useAuth()
+  const [ssBenefitError, setSsBenefitError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) setSsBenefitError(null)
+  }, [open])
+
+  useEffect(() => {
+    if (ssIncluded && inputs.ssBenefit67 > 0) setSsBenefitError(null)
+  }, [ssIncluded, inputs.ssBenefit67])
+
+  const onSsIncludedChange = (value: boolean) => {
+    setUi({ ssIncluded: value })
+    if (!value) setSsBenefitError(null)
+  }
+
+  const onConfigConfirm = () => {
+    if (ssIncluded && inputs.ssBenefit67 <= 0) {
+      setSsBenefitError('Enter your expected Social Security benefit.')
+      return
+    }
+    setSsBenefitError(null)
+    onClose()
+  }
 
   const configFooter =
     panelDrawer === 'config' ? (
@@ -88,7 +118,13 @@ export function DrawerPanel({
             Sign out
           </AppButton>
         ) : null}
-        <AppButton type="button" size="md" variant="primary" className="drawer-config-footer__confirm" onPress={onClose}>
+        <AppButton
+          type="button"
+          size="md"
+          variant="primary"
+          className="drawer-config-footer__confirm"
+          onPress={onConfigConfirm}
+        >
           Confirm
         </AppButton>
       </div>
@@ -103,28 +139,37 @@ export function DrawerPanel({
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
-  return (
-    <>
-      <div
-        className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
-        onClick={onClose}
-        aria-hidden={!open}
-      />
-      <SidePanelShell
-        open={open}
-        id="drawer"
-        titleId="drawer-panel-title"
-        title={panelDrawer ? TITLES[panelDrawer] : 'Details'}
-        subtitle={undefined}
-        onClose={onClose}
-        scrollKey={panelDrawer ?? ''}
-        shellClassName={['drawer-shell--right', panelDrawer === 'config' ? 'drawer-shell--config' : '']
-          .filter(Boolean)
-          .join(' ')}
-        bodyClassName="drawer-shell-body"
-        footer={configFooter}
-      >
-        {panelDrawer ? (
+  const isConfigDrawer = panelDrawer === 'config'
+  const shell = (
+    <SidePanelShell
+      open={open}
+      id="drawer"
+      titleId="drawer-panel-title"
+      title={panelDrawer ? TITLES[panelDrawer] : 'Details'}
+      subtitle={undefined}
+      onClose={onClose}
+      scrollKey={panelDrawer ?? ''}
+      shellClassName={['drawer-shell--right', isConfigDrawer ? 'drawer-shell--config' : '']
+        .filter(Boolean)
+        .join(' ')}
+      bodyClassName="drawer-shell-body"
+      belowHeader={isConfigDrawer ? <ConfigDrawerTabs /> : undefined}
+      footer={configFooter}
+    >
+      {panelDrawer ? (
+        isConfigDrawer ? (
+          <ConfigDrawerTabPanels
+            c={c}
+            inputs={inputs}
+            setInputs={setInputs}
+            ssIncluded={ssIncluded}
+            onSsIncludedChange={onSsIncludedChange}
+            ssBenefitError={ssBenefitError ?? undefined}
+            onDrawerClose={onConfigConfirm}
+            onOpenRegister={onOpenRegister}
+            onResetGuestProfile={onResetGuestProfile}
+          />
+        ) : (
           <DrawerBody
             id={panelDrawer}
             c={c}
@@ -138,14 +183,24 @@ export function DrawerPanel({
             onFidelityApplyBalances={onFidelityApplyBalances}
             onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
             onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
-            configInitialTab={configInitialTab}
-            onClose={onClose}
-            onOpenSignIn={onOpenSignIn}
-            onOpenRegister={onOpenRegister}
-            onResetGuestProfile={onResetGuestProfile}
           />
-        ) : null}
-      </SidePanelShell>
+        )
+      ) : null}
+    </SidePanelShell>
+  )
+
+  return (
+    <>
+      <div
+        className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
+        onClick={onClose}
+        aria-hidden={!open}
+      />
+      {isConfigDrawer ? (
+        <ConfigDrawerTabProvider initialTab={configInitialTab}>{shell}</ConfigDrawerTabProvider>
+      ) : (
+        shell
+      )}
     </>
   )
 }
@@ -163,11 +218,6 @@ function DrawerBody({
   onFidelityApplyBalances: _onFidelityApplyBalances,
   onFidelityImportAppliedRetirement: _onFidelityImportAppliedRetirement,
   onFidelityImportAppliedBrokerage: _onFidelityImportAppliedBrokerage,
-  configInitialTab,
-  onClose,
-  onOpenSignIn,
-  onOpenRegister,
-  onResetGuestProfile,
 }: {
   id: DrawerName
   c: ComputedSnapshot
@@ -181,26 +231,8 @@ function DrawerBody({
   onFidelityApplyBalances: (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
   onFidelityImportAppliedRetirement: () => void
   onFidelityImportAppliedBrokerage: () => void
-  configInitialTab?: ConfigDrawerTab
-  onClose: () => void
-  onOpenSignIn?: () => void
-  onOpenRegister?: () => void
-  onResetGuestProfile?: () => void
 }) {
   switch (id) {
-    case 'config':
-      return (
-        <ConfigDrawerBody
-          c={c}
-          inputs={inputs}
-          setInputs={setInputs}
-          initialTab={configInitialTab}
-          onDrawerClose={onClose}
-          onOpenSignIn={onOpenSignIn}
-          onOpenRegister={onOpenRegister}
-          onResetGuestProfile={onResetGuestProfile}
-        />
-      )
     case 'scenarios':
       return <ScenariosBody c={c} />
     case 'sstiming':

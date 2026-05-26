@@ -120,6 +120,8 @@ function initialFormFromInputs(inputs: CalculatorInputs) {
       profileDefaults.retireAge ||
       inputs.targetRetirementAge ||
       WELCOME_BENCHMARK.targetRetirementAge,
+    growthGoal:
+      inputs.growthGoal > 0 ? inputs.growthGoal : 0,
     monthlyGoal:
       profileDefaults.monthlyGoal ??
       (inputs.monthlyIncomeGoal > 0 ? inputs.monthlyIncomeGoal : 0),
@@ -188,6 +190,7 @@ function formToCalculatorPatch(
     targetRetirementAge: form.retireAge,
     ...accountBasesFromForm(form),
     save: form.monthlyContribution * 12,
+    growthGoal: form.growthGoal,
     monthlyIncomeGoal: form.monthlyGoal,
     other: form.householdIncome,
     ssAge: form.ssAge,
@@ -663,6 +666,10 @@ export function OnboardingOverlay({
                 monthlyGoal={form.monthlyGoal}
                 onMonthlyGoalChange={(monthlyGoal) =>
                   setForm((f) => ({ ...f, monthlyGoal }))
+                }
+                growthGoal={form.growthGoal}
+                onGrowthGoalChange={(growthGoal) =>
+                  setForm((f) => ({ ...f, growthGoal }))
                 }
                 retireAge={form.retireAge}
                 onRetireAgeChange={(retireAge) =>

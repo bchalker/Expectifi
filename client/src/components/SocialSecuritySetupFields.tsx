@@ -56,6 +56,8 @@ type Props = {
   onSpouseBenefitMonthlyChange: (amount: number) => void;
   hints?: SocialSecuritySetupHints;
   showFillState?: boolean;
+  /** Inline validation for the primary expected-benefit field. */
+  userBenefitError?: string;
   /** When set, claim-age slider shows only these tick labels (range still min–max). */
   claimAgeMilestoneTicks?: readonly number[];
   className?: string;
@@ -82,6 +84,7 @@ export function SocialSecuritySetupFields({
   onSpouseBenefitMonthlyChange,
   hints: hintsProp,
   showFillState = false,
+  userBenefitError,
   claimAgeMilestoneTicks,
   className,
 }: Props) {
@@ -174,6 +177,8 @@ export function SocialSecuritySetupFields({
             disabled={!includeSs}
             externalPrefix
             showFillState={showFillState}
+            error={userBenefitError}
+            errorVariant="label"
           />
         </div>
 
