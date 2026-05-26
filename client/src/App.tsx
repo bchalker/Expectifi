@@ -50,6 +50,8 @@ import {
 import { OnboardingOverlay } from './components/OnboardingOverlay'
 import { shouldSkipWelcome, shouldShowWelcomeOverlay, peekForceOnboardingSession, consumeForceOnboardingSession } from './lib/welcomeGate'
 import { useUserTier } from './hooks/useUserTier'
+import { SavePlanPromptBanner } from './components/SavePlanPromptBanner'
+import type { PlanPersistSnapshot } from './lib/planStorage'
 import { clearSessionOnboardingComplete } from './lib/sessionFlags'
 import {
   defaultCalculatorInputs,
@@ -62,9 +64,11 @@ import {
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
 } from './lib/userPrefs'
+import { manualAccountsForBrowserSave } from './lib/manualAccountEntries'
 import {
   loadUserProfile,
   mergeProfileWithDbPrefs,
+  profileSnapshotForBrowserSave,
   saveResidenceCountryToProfile,
 } from './lib/userProfileStorage'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
@@ -99,7 +103,13 @@ type AppProps = {
 }
 
 export default function App({ initialAuthModal = null }: AppProps) {
-  const { hydration, isHydrated } = useUserTier()
+  const {
+    hydration,
+    isHydrated,
+    tier,
+    updateSavePlanPromptSignals,
+    registerBrowserSaveSnapshot,
+  } = useUserTier()
   const [inputs, setInputsState] = useState<CalculatorInputs>(() => hydration.inputs)
   const [ui, setUiState] = useState<CalculatorUi>(() => hydration.ui)
   const [phase, setPhase] = useState<'growth' | 'income'>(() => hydration.phase)
@@ -164,6 +174,22 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const welcomeDone = !showWelcome
 
   const sessionRef = useRef({ inputs, ui, phase, activePreset })
+
+  const buildBrowserSaveSnapshot = useCallback((): PlanPersistSnapshot => {
+    const accounts = manualAccountsForBrowserSave()
+    return {
+      inputs,
+      ui,
+      phase,
+      activePreset,
+      profile: profileSnapshotForBrowserSave(inputs, ui),
+      accounts,
+    }
+  }, [inputs, ui, phase, activePreset])
+
+  useEffect(() => {
+    registerBrowserSaveSnapshot(buildBrowserSaveSnapshot)
+  }, [registerBrowserSaveSnapshot, buildBrowserSaveSnapshot])
   useEffect(() => {
     sessionRef.current = { inputs, ui, phase, activePreset }
   }, [inputs, ui, phase, activePreset])
@@ -279,7 +305,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       window.clearInterval(heartbeatId)
       window.removeEventListener('pagehide', onPageHide)
     }
-  }, [isHydrated, authLoading, user])
+  }, [isHydrated, authLoading, user, tier])
 
   /** Persist calculator session when tier allows local plan writes. */
   useEffect(() => {
@@ -293,13 +319,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
     return () => window.clearTimeout(id)
   }, [isHydrated, authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])
 
-  /** After tier hydration, auto-dismiss welcome when onboarding is complete. */
+  /** After tier hydration, sync welcome overlay to hydration (anonymous = session-only). */
   useEffect(() => {
     if (!isHydrated || authLoading) return
     if (welcomeBlockedRef.current) return
     if (peekForceOnboardingSession()) return
     setShowWelcome(shouldShowWelcomeOverlay(welcomeCtx))
-  }, [isHydrated, authLoading, welcomeCtx])
+  }, [isHydrated, authLoading, welcomeCtx, hydration.onboardingComplete])
 
   useEffect(() => {
     if (!welcomeDone || typeof sessionStorage === 'undefined') return
@@ -388,6 +414,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [dashboardHasPortfolio, welcomeDone, ssTimingConfigured],
   )
   const isWhereToRetire = path === APP_PATHS.whereToRetire
+
+  useEffect(() => {
+    const dashboardVisible = welcomeDone && !isWhereToRetire && !user
+    updateSavePlanPromptSignals({
+      dashboardVisible,
+      projectedIncomeMonthly: dashboardVisible ? c.grossMon : 0,
+    })
+  }, [welcomeDone, isWhereToRetire, user, c.grossMon, updateSavePlanPromptSignals])
 
   const hasGoalBar =
     welcomeDone &&
@@ -781,6 +815,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onOpenRegister={openAuthRegister}
         onResetGuestProfile={onResetGuestProfile}
       />
+      <SavePlanPromptBanner />
       <AuthModal
         open={authModal}
         onClose={() => {

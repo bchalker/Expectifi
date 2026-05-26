@@ -3,6 +3,7 @@ import type { PlanPersistSnapshot } from './types'
 import { savePlanAccounts } from './accounts'
 import { savePlanProfile } from './profile'
 import { savePlanSession } from './session'
+import { hasSavePlanBeenAccepted } from './meta'
 import { canPersistPlanToLocalStorage } from './resolveTier'
 import type { UserTier } from './types'
 
@@ -12,6 +13,7 @@ import type { UserTier } from './types'
  */
 export function persistPlanState(tier: UserTier, snapshot: PlanPersistSnapshot): void {
   if (!canPersistPlanToLocalStorage(tier)) return
+  if (tier === 'browser_saved' && !hasSavePlanBeenAccepted()) return
 
   if (snapshot.profile) {
     savePlanProfile(snapshot.profile)

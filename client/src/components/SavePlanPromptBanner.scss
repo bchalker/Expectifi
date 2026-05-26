@@ -1,0 +1,113 @@
+.save-plan-prompt {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  padding: 0 0 max(0.75rem, env(safe-area-inset-bottom));
+  pointer-events: none;
+  transform: translateY(calc(100% + 0.5rem));
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.36s ease;
+}
+
+.save-plan-prompt--visible {
+  pointer-events: auto;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.save-plan-prompt--exiting {
+  pointer-events: none;
+  transform: translateY(calc(100% + 0.5rem));
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-plan-prompt {
+    will-change: auto;
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+
+  .save-plan-prompt:not(.save-plan-prompt--visible) {
+    transform: none;
+  }
+
+  .save-plan-prompt--visible {
+    transform: none;
+  }
+
+  .save-plan-prompt--exiting {
+    transform: none;
+  }
+}
+
+.save-plan-prompt__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #fff;
+  border-radius: 0.75rem 0.75rem 0 0;
+  box-shadow:
+    0 -4px 24px rgb(15 23 42 / 0.08),
+    0 -1px 4px rgb(15 23 42 / 0.04);
+}
+
+.save-plan-prompt__message {
+  margin: 0;
+  flex: 1 1 12rem;
+  font-size: var(--text-base);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary, #0f172a);
+}
+
+.save-plan-prompt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.save-plan-prompt__save.app-btn--primary {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
+.save-plan-prompt__dismiss {
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.save-plan-prompt__dismiss:hover,
+.save-plan-prompt__dismiss:focus-visible {
+  color: var(--text-primary, #0f172a);
+  text-decoration: underline;
+}
+
+@media (min-width: 680px) {
+  .save-plan-prompt__inner {
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+}

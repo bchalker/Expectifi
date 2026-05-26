@@ -9,10 +9,11 @@ import {
   aggregateManualAccountsToBases,
   type StoredManualAccounts,
 } from '../manualAccountEntries'
-import { isSessionOnboardingComplete } from '../sessionFlags'
+import { isSessionOnboardingComplete, resetAnonymousEphemeralSessionOnBoot } from '../sessionFlags'
 import { profileToCalculatorPatch } from '../userProfileStorage'
 import { loadPlanAccounts, planAccountsHaveBalances } from './accounts'
-import { loadMeta } from './meta'
+import { hasSavePlanBeenAccepted, loadMeta } from './meta'
+import { purgeUnconsentedPlanStorage } from './purgeUnconsented'
 import { migrateLegacyPlanStorageIfNeeded } from './migrateLegacy'
 import { loadPlanProfile, profileHasOnboardingComplete } from './profile'
 import { hydratePlanSession, loadPlanSession } from './session'
@@ -30,8 +31,11 @@ function mergeManualAccountsIntoInputs(
   inputs: CalculatorInputs,
   accounts: StoredManualAccounts | null,
 ): CalculatorInputs {
-  if (!accounts?.onboardingCompleted) return inputs
+  if (!accounts?.onboardingCompleted || accounts.entries.length === 0) return inputs
   const bases = aggregateManualAccountsToBases(accounts.entries)
+  const retBal =
+    bases.base401k + bases.baseSE401k + bases.baseTradIRA + bases.baseRoth + bases.baseHsa
+  if (retBal + bases.brkBal <= 0) return inputs
   return {
     ...inputs,
     base401k: bases.base401k,
@@ -123,9 +127,13 @@ export function bootPlanHydration(
   auth: AuthTierInput,
   options?: Pick<HydratePlanOptions, 'defaultInputs' | 'defaultUi'>,
 ): PlanHydration {
+  purgeUnconsentedPlanStorage()
   loadMeta()
   migrateLegacyPlanStorageIfNeeded()
   const tier = resolveUserTier(auth)
+  if (tier === 'anonymous' && !hasSavePlanBeenAccepted()) {
+    resetAnonymousEphemeralSessionOnBoot()
+  }
   return hydratePlanStateForTier(tier, options)
 }
 

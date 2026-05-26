@@ -6,6 +6,7 @@ import {
   getLocaleAccountTypeOptions,
   resolveOnboardingAccountLocale,
 } from './onboardingAccountTypesByLocale'
+import { loadSessionOnboardingAccounts } from './sessionFlags'
 import { canWritePlanLocalStorage, loadPlanAccounts, savePlanAccounts } from './planStorage'
 
 export const MANUAL_ACCOUNTS_STORAGE_KEY = 'retirement-calculator/manual-account-entries-v1'
@@ -297,6 +298,53 @@ export function saveCompletedManualAccounts(entries: ManualAccountEntry[]): void
     onboardingCompleted: true,
     onboardingSkipped: false,
   })
+}
+
+function parseSessionOnboardingAccountEntries(): ManualAccountEntry[] | null {
+  const raw = loadSessionOnboardingAccounts()
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return null
+    return parsed.filter(
+      (entry): entry is ManualAccountEntry =>
+        !!entry &&
+        typeof entry === 'object' &&
+        typeof (entry as ManualAccountEntry).id === 'string' &&
+        ((entry as ManualAccountEntry).type == null ||
+          typeof (entry as ManualAccountEntry).type === 'string') &&
+        typeof (entry as ManualAccountEntry).balance === 'number',
+    )
+  } catch {
+    return null
+  }
+}
+
+/** Accounts blob for browser save — uses LS if present, else session onboarding entries. */
+export function manualAccountsForBrowserSave(): StoredManualAccounts {
+  const stored = loadStoredManualAccounts()
+  if (stored?.entries.length) {
+    return {
+      ...stored,
+      onboardingCompleted: true,
+      onboardingSkipped: false,
+    }
+  }
+  const sessionEntries = parseSessionOnboardingAccountEntries()
+  if (sessionEntries?.length) {
+    return {
+      version: 1,
+      entries: sessionEntries,
+      onboardingCompleted: true,
+      onboardingSkipped: false,
+    }
+  }
+  return {
+    version: 1,
+    entries: [],
+    onboardingCompleted: true,
+    onboardingSkipped: false,
+  }
 }
 
 export function manualAccountsOnboardingSkipped(): boolean {

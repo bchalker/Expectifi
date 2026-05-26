@@ -40,6 +40,41 @@ body.onboarding-overlay--open {
   isolation: isolate;
 }
 
+.onboarding-overlay--in-app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: auto;
+  background: rgb(15 23 42 / 0.42);
+  opacity: 0;
+  animation: onboarding-scrim-in 0.4s ease both;
+}
+
+.onboarding-overlay--exit.onboarding-overlay--in-app::before {
+  animation: onboarding-scrim-out 0.28s ease forwards;
+}
+
+@keyframes onboarding-scrim-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes onboarding-scrim-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 .onboarding-overlay__panel {
   position: absolute;
   top: 50%;
@@ -69,7 +104,7 @@ body.onboarding-overlay--open {
 @keyframes onboarding-panel-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.96);
+    transform: translate(-50%, calc(-50% + 1.25rem)) scale(0.98);
     box-shadow: rgba(17, 12, 46, 0) 0px 4px 12px 0px;
   }
 
@@ -83,7 +118,7 @@ body.onboarding-overlay--open {
 @keyframes onboarding-panel-in-mobile {
   from {
     opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(1.25rem);
   }
 
   to {
@@ -117,7 +152,7 @@ body.onboarding-overlay--open {
 
   to {
     opacity: 0;
-    transform: translateY(0.35rem);
+    transform: translateY(0.75rem);
   }
 }
 
@@ -528,6 +563,16 @@ body.onboarding-overlay--open {
 
   .onboarding-overlay__accounts-total {
     animation: none;
+  }
+
+  .onboarding-overlay--in-app::before {
+    animation: none;
+    opacity: 1;
+  }
+
+  .onboarding-overlay--exit.onboarding-overlay--in-app::before {
+    animation: none;
+    opacity: 0;
   }
 
   .onboarding-overlay__panel {

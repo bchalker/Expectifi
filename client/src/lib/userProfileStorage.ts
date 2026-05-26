@@ -1,7 +1,7 @@
 import { isValidIsoDateString } from './ageFromDob'
 import type { DisplayCurrencyCode } from './displayCurrency'
 import { residenceCountryToDisplayCurrency, setDisplayCurrencyCode } from './displayCurrency'
-import type { CalculatorInputs } from './computeResults'
+import type { CalculatorInputs, CalculatorUi } from './computeResults'
 import { isOnboardingResidenceCountry } from './onboardingResidenceCountries'
 import type { OnboardingRegionId } from './onboardingRegions'
 import {
@@ -191,6 +191,46 @@ export function saveRegionToProfile(regionId: OnboardingRegionId): StoredUserPro
     locale: region.locale,
     currency: region.currency,
   })
+}
+
+/** Profile blob written on "Save my plan" (tier 1 → browser_saved). */
+export function profileSnapshotForBrowserSave(
+  inputs: CalculatorInputs,
+  ui: CalculatorUi,
+): StoredUserProfile & { onboardingComplete: true } {
+  const country = inputs.residenceCountry?.trim() ?? ''
+  const locale =
+    normalizeOnboardingRegionId(localeForResidenceCountry(country)) ?? 'us'
+  const region = findOnboardingRegion(locale)
+  const pension = pensionConfigForLocale(locale)
+  const dob = inputs.dateOfBirth?.trim() ?? ''
+  const parts = isValidIsoDateString(dob) ? dobParts(dob) : {}
+  const spouseDob = inputs.spouseDateOfBirth?.trim() ?? ''
+  const spouseParts = isValidIsoDateString(spouseDob) ? dobParts(spouseDob) : {}
+
+  return {
+    version: 1,
+    country: country || region?.country,
+    locale,
+    currency: region?.currency,
+    dob: dob || undefined,
+    birth_month: parts.birth_month,
+    birth_year: parts.birth_year,
+    household_income: Math.max(0, Math.round(inputs.other)),
+    monthly_contribution: Math.max(0, Math.round(inputs.save / 12)),
+    target_retirement_age: inputs.targetRetirementAge,
+    monthly_income_goal: inputs.monthlyIncomeGoal,
+    include_social_security: ui.ssIncluded,
+    ss_claim_age: clampClaimAgeInRange(inputs.ssAge, pension.claimAgeMin, pension.claimAgeMax),
+    include_spouse: inputs.married,
+    spouse_dob: inputs.married ? spouseDob : undefined,
+    spouse_birth_month: spouseParts.birth_month,
+    spouse_birth_year: spouseParts.birth_year,
+    spouse_claim_age: inputs.married
+      ? clampClaimAgeInRange(inputs.spouseClaimAge, pension.claimAgeMin, pension.claimAgeMax)
+      : undefined,
+    onboardingComplete: true,
+  }
 }
 
 /** Keep locale/currency aligned when residence changes in profile (config drawer). */

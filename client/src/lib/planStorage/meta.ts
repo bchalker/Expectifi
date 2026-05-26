@@ -25,7 +25,16 @@ export function loadMeta(): ExpectifiMeta | null {
 }
 
 export function saveMeta(meta: ExpectifiMeta): void {
+  const accepted =
+    typeof meta.prompts?.savePlanAcceptedAt === 'string' &&
+    meta.prompts.savePlanAcceptedAt.length > 0
+  if (!accepted) return
   writeJsonToLocalStorage(EXPECTIFI_META_KEY, meta)
+}
+
+export function hasSavePlanBeenAccepted(): boolean {
+  const accepted = loadMeta()?.prompts.savePlanAcceptedAt
+  return typeof accepted === 'string' && accepted.length > 0
 }
 
 export function setPersistedGuestTier(tier: PersistedGuestTier): ExpectifiMeta {

@@ -17,6 +17,7 @@ import { savePlanAccounts } from './accounts'
 import { defaultMeta, loadMeta, saveMeta } from './meta'
 import { loadPlanProfile, savePlanProfile } from './profile'
 import { savePlanSession } from './session'
+import { runWithMigrationPlanWrites } from './writeContext'
 import type { StoredPlanProfile } from './types'
 import { readJsonFromLocalStorage, removeFromLocalStorage } from './storageUtils'
 
@@ -76,10 +77,7 @@ function hasLegacyDataToMigrate(): boolean {
   const legacyProfile = readLegacyProfile()
   const legacyAccounts = readLegacyAccounts()
   const legacySession = readLegacySession()
-  const hadWelcome = legacyWelcomeCompleted()
-  return (
-    legacyProfile != null || legacyAccounts != null || legacySession != null || hadWelcome
-  )
+  return legacyProfile != null || legacyAccounts != null || legacySession != null
 }
 
 /** True when any pre-Phase-A plan key remains in localStorage. */
@@ -119,24 +117,30 @@ export function migrateLegacyPlanStorageIfNeeded(): boolean {
   const legacySession = readLegacySession()
   const hadWelcome = legacyWelcomeCompleted()
 
-  const existingProfile = loadPlanProfile()
-  if (!existingProfile && legacyProfile) {
-    savePlanProfile(legacyProfile)
-  } else if (legacyProfile) {
-    savePlanProfile({
-      ...legacyProfile,
-      onboardingComplete:
-        legacyProfile.onboardingComplete === true || hadWelcome || existingProfile?.onboardingComplete,
-    })
-  } else if (hadWelcome) {
-    savePlanProfile({ version: 1, onboardingComplete: true })
-  }
+  return runWithMigrationPlanWrites(() => {
+    const meta = defaultMeta('browser_saved')
+    meta.prompts.savePlanAcceptedAt = new Date().toISOString()
+    saveMeta(meta)
 
-  if (legacyAccounts) savePlanAccounts(legacyAccounts)
-  if (legacySession) savePlanSession(legacySession)
+    const existingProfile = loadPlanProfile()
+    if (!existingProfile && legacyProfile) {
+      savePlanProfile(legacyProfile)
+    } else if (legacyProfile) {
+      savePlanProfile({
+        ...legacyProfile,
+        onboardingComplete:
+          legacyProfile.onboardingComplete === true ||
+          hadWelcome ||
+          existingProfile?.onboardingComplete,
+      })
+    } else if (hadWelcome) {
+      savePlanProfile({ version: 1, onboardingComplete: true })
+    }
 
-  saveMeta(defaultMeta('browser_saved'))
+    if (legacyAccounts) savePlanAccounts(legacyAccounts)
+    if (legacySession) savePlanSession(legacySession)
 
-  clearLegacyKeysAfterSuccessfulMigration()
-  return true
+    clearLegacyKeysAfterSuccessfulMigration()
+    return true
+  })
 }

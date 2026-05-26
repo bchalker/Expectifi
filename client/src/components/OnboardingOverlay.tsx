@@ -16,7 +16,10 @@ import {
   type UserPrefs,
 } from "../lib/userPrefs";
 import { canWritePlanLocalStorage, savePlanProfile } from "../lib/planStorage";
-import { setSessionOnboardingComplete } from "../lib/sessionFlags";
+import {
+  setSessionOnboardingAccounts,
+  setSessionOnboardingComplete,
+} from "../lib/sessionFlags";
 import {
   clearForceOnboardingSession,
   consumeOnboardingFromSignup,
@@ -382,6 +385,8 @@ export function OnboardingOverlay({
       saveLocalUserPrefs(prefs);
     }
     saveProfileFromFormSlice(formProfileSlice(), "income-goal");
+    const finishedEntries = normalizedManualAccountEntries(formState.accountEntries);
+    setSessionOnboardingAccounts(JSON.stringify(finishedEntries));
     setSessionOnboardingComplete(true);
     if (canWritePlanLocalStorage()) {
       savePlanProfile({ onboardingComplete: true });
@@ -457,6 +462,7 @@ export function OnboardingOverlay({
     }
     const entries = normalizedManualAccountEntries(form.accountEntries);
     saveCompletedManualAccounts(entries);
+    setSessionOnboardingAccounts(JSON.stringify(entries));
     setForm((f) => ({
       ...f,
       accountEntries: entries,

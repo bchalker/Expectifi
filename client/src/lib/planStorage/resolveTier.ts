@@ -1,4 +1,4 @@
-import { loadMeta } from './meta'
+import { hasSavePlanBeenAccepted, loadMeta } from './meta'
 import type { AuthTierInput, UserTier } from './types'
 
 export type { AuthTierInput, UserTier }
@@ -15,7 +15,7 @@ export function resolveUserTier(auth: AuthTierInput): UserTier {
     return 'authenticated_free'
   }
   const meta = loadMeta()
-  if (meta?.tier === 'browser_saved') return 'browser_saved'
+  if (meta?.tier === 'browser_saved' && hasSavePlanBeenAccepted()) return 'browser_saved'
   return 'anonymous'
 }
 

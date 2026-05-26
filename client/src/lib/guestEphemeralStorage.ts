@@ -1,7 +1,7 @@
 import { clearStoredAppState } from './appStateStorage'
 import { clearStoredFidelityImport } from './fidelityStorage'
 import { getPlanWriteTier } from './planStorage/writeContext'
-import { loadMeta } from './planStorage/meta'
+import { hasSavePlanBeenAccepted, loadMeta } from './planStorage/meta'
 import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import { clearLocalUserPrefsStorage } from './userPrefs'
@@ -66,7 +66,7 @@ function pruneStaleGuestTabs(tabs: GuestTabRecord[], now = Date.now()): GuestTab
 
 /** Remove guest financial session data. Preserves expectifi plan keys for browser_saved tier. */
 export function clearEphemeralGuestStorage(): void {
-  const isBrowserSaved = loadMeta()?.tier === 'browser_saved'
+  const isBrowserSaved = loadMeta()?.tier === 'browser_saved' && hasSavePlanBeenAccepted()
   try {
     if (!isBrowserSaved) {
       clearStoredAppState()

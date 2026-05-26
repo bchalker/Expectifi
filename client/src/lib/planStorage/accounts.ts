@@ -4,6 +4,7 @@ import {
 } from '../manualAccountEntries'
 import { EXPECTIFI_ACCOUNTS_KEY } from './keys'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'
+import { canWriteExpectifiPlanBlobs } from './writeContext'
 
 export function loadPlanAccounts(): StoredManualAccounts | null {
   const parsed = readJsonFromLocalStorage<StoredManualAccounts>(EXPECTIFI_ACCOUNTS_KEY)
@@ -12,6 +13,7 @@ export function loadPlanAccounts(): StoredManualAccounts | null {
 }
 
 export function savePlanAccounts(state: StoredManualAccounts): void {
+  if (!canWriteExpectifiPlanBlobs()) return
   writeJsonToLocalStorage(EXPECTIFI_ACCOUNTS_KEY, state)
 }
 

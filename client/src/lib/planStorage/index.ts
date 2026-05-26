@@ -19,7 +19,13 @@ export type {
   SubscriptionStatus,
   UserTier,
 } from './types'
-export { loadMeta, saveMeta, setPersistedGuestTier, defaultMeta } from './meta'
+export {
+  loadMeta,
+  saveMeta,
+  setPersistedGuestTier,
+  defaultMeta,
+  hasSavePlanBeenAccepted,
+} from './meta'
 export {
   loadPlanProfile,
   savePlanProfile,
@@ -42,6 +48,7 @@ export {
   type HydratePlanOptions,
 } from './hydrate'
 export { persistPlanState } from './persist'
+export { purgeUnconsentedPlanStorage } from './purgeUnconsented'
 export {
   canWritePlanLocalStorage,
   getPlanWriteTier,
