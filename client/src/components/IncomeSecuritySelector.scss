@@ -359,10 +359,57 @@
   text-align: right;
 }
 
-@media (max-width: 480px) {
-  .income-security-selector__panel {
+@media (max-width: 620px) {
+  .income-security-selector__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 399;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: color-mix(in srgb, var(--text) 32%, transparent);
+    cursor: default;
+  }
+
+  .income-security-selector__panel--mobile {
+    position: fixed;
+    inset: 0;
+    top: 0;
     left: 0;
+    z-index: 400;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    min-height: 100dvh;
+    height: 100dvh;
     transform: none;
-    width: min(22rem, calc(100vw - 1.5rem));
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .income-security-selector__panel--mobile .income-security-selector__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    margin-top: 0;
+  }
+
+  .income-security-selector__footer {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: stretch;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0));
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    box-sizing: border-box;
+  }
+
+  .income-security-selector__close-btn {
+    width: 100%;
+    min-height: 2.75rem;
   }
 }

@@ -856,6 +856,36 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   }
 }
 
+@media (max-width: 620px) {
+  .subheader,
+  .subheader.subheader--phase-income.subheader--ss-claim-slot,
+  .subheader.subheader--no-balances.subheader--phase-income.subheader--ss-claim-slot {
+    height: 120px;
+    min-height: 120px;
+  }
+
+  .subheader-waves {
+    height: 120px;
+  }
+
+  .subheader-estimate__center,
+  .subheader--ss-claim-slot .subheader-estimate__center {
+    padding-top: 2.4rem;
+  }
+
+  .subheader-estimate__value {
+    min-height: 0;
+  }
+
+  .subheader-estimate__meta {
+    margin-top: 4px;
+  }
+
+  .subheader-spacer {
+    height: calc(var(--app-header-stack-h) + 0rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .subheader {
     transition-duration: 0.01ms;

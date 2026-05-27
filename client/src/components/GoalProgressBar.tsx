@@ -30,7 +30,7 @@ export function GoalProgressBar({
 
   if (!showGrowth && !showIncome) return null
 
-  const label = showGrowth ? 'Growth goal' : 'Monthly income goal'
+  const label = showGrowth ? 'Growth goal' : 'Income goal'
   const target = showGrowth ? growthGoal : monthlyIncomeGoal
   const pct = showGrowth ? growthGoalProgressPct! : incomeGoalProgressPct!
   const formatValue = showGrowth ? fmt : fmtMon
