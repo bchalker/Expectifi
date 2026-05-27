@@ -45,6 +45,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   monthlyIncomeGoal: 0,
   incomePresets: [...DEFAULT_INCOME_PRESETS],
   positionReturnModels: [],
+  accountReturnScenarios: {},
   residenceCountry: '',
 }
 

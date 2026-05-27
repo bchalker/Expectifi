@@ -22,6 +22,12 @@ export function horizonClamp(y: number): number {
 export function inferScenarioUiChoice(m: PositionReturnModel, blended: number, horizon: number): ScenarioUiChoice {
   const h = horizonClamp(horizon)
   const rates = padYearlyReturns(m.yearlyReturns, h, m.flatRate)
+  if (m.returnOverride === true && m.returnMode === 'flat') {
+    const matchesBlended =
+      Math.abs(m.flatRate - blended) <= POSITION_FLAT_VS_BLENDED_EPS &&
+      rates.every((r) => Math.abs(r - blended) <= 1e-5)
+    if (matchesBlended) return 'custom'
+  }
   if (m.returnMode === 'peryear') return 'peryear'
   if (m.returnMode === 'scenario' && m.scenario) {
     if (ratesMatchScenario(m.scenario, rates, h)) {
@@ -76,6 +82,7 @@ function applyScenarioToModel(m: PositionReturnModel, scenario: PositionScenario
     scenario,
     yearlyReturns: yr,
     flatRate: annualizedReturnFromYearlyPath(yr),
+    returnOverride: true,
   }
 }
 
@@ -96,6 +103,7 @@ export function applyScenarioUiChoice(
         flatRate: blended,
         scenario: null,
         yearlyReturns: Array.from({ length: h }, () => blended),
+        returnOverride: false,
       }
     case 'bull':
       return applyScenarioToModel(m, 'bull', h)
@@ -111,6 +119,7 @@ export function applyScenarioUiChoice(
         flatRate: dec,
         scenario: null,
         yearlyReturns: Array.from({ length: h }, () => dec),
+        returnOverride: true,
       }
     }
     case 'peryear': {
@@ -122,6 +131,7 @@ export function applyScenarioUiChoice(
         scenario: null,
         yearlyReturns: padded,
         flatRate: annualizedReturnFromYearlyPath(padded),
+        returnOverride: true,
       }
     }
   }
@@ -135,6 +145,9 @@ export function mergePatchPositionModelsIntoInputs(
   const rest = (inputs.positionReturnModels ?? []).filter((p) => !ids.has(p.id))
   return [...rest, ...patched]
 }
+
+/** Outline trigger when a holding has no per-position scenario override. */
+export const HOLDING_SCENARIO_PLACEHOLDER_LABEL = 'Add a Scenario?'
 
 export function scenarioColumnShortLabel(
   choice: ScenarioUiChoice | typeof SCENARIO_MIXED,
@@ -155,6 +168,6 @@ export function scenarioColumnShortLabel(
         ? `Custom ${decimalToPct(customPctDecimal).toFixed(1)}%`
         : 'Custom %'
     case 'peryear':
-      return 'Per year'
+      return 'Per Year'
   }
 }

@@ -1,71 +1,29 @@
-import { IconCirclePlus } from '@tabler/icons-react'
-import type { ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
+import type { HoldingReturnRateSource } from '../lib/accountReturnScenario'
 import {
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import { fmt } from '../utils/format'
+import { PortfolioScenarioCell } from './PortfolioScenarioCell'
+import type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
+import { HoldingAggregateHint } from './ui/HoldingAggregateHint'
 import './HoldingsSymbolCard.scss'
-import './FidelityHoldingScenarioPopout.scss'
 
-export function holdingsScenarioTriggerChoiceClass(
-  choice: ScenarioUiChoice | typeof SCENARIO_MIXED,
-): string {
-  if (choice === 'default' || choice === SCENARIO_MIXED) return ''
-  if (choice === 'base') return 'holdings-scenario-trigger--normal'
-  return `holdings-scenario-trigger--${choice}`
-}
-
-type HoldingsScenarioTriggerProps = {
-  label: string
-  showAccent: boolean
-  common: ScenarioUiChoice | typeof SCENARIO_MIXED
-  rowActive: boolean
-  onOpen: () => void
-  className?: string
-}
-
-export function HoldingsScenarioTrigger({
-  label,
-  showAccent,
-  common,
-  rowActive,
-  onOpen,
-  className = '',
-}: HoldingsScenarioTriggerProps) {
-  return (
-    <button
-      type="button"
-      className={[
-        'holdings-scenario-trigger',
-        showAccent ? 'holdings-scenario-trigger--chosen' : '',
-        showAccent ? holdingsScenarioTriggerChoiceClass(common) : '',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      data-holdings-scenario-trigger
-      aria-expanded={rowActive}
-      aria-haspopup="dialog"
-      onClick={(e) => {
-        e.stopPropagation()
-        onOpen()
-      }}
-    >
-      <span className="holdings-scenario-trigger__label">{label}</span>
-      <span className="holdings-scenario-plus" aria-hidden>
-        <IconCirclePlus size={13} stroke={1.25} />
-      </span>
-    </button>
-  )
-}
+export type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
+export {
+  HoldingsScenarioTrigger,
+  holdingsScenarioTriggerChoiceClass,
+} from './HoldingsScenarioTrigger'
 
 export type HoldingsSymbolCardScenarioProps = {
   label: string
-  showAccent: boolean
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
+  variant: HoldingsScenarioTriggerVariant
+  inheritAccent?: ScenarioUiChoice | null
   rowActive: boolean
   onOpen: () => void
+  rateSource?: HoldingReturnRateSource
 }
 
 export type HoldingsSymbolCardProps = {
@@ -89,6 +47,8 @@ export function HoldingsSymbolCard({
   scenario = null,
   breakdown = null,
 }: HoldingsSymbolCardProps) {
+  const [breakdownOpen, setBreakdownOpen] = useState(false)
+  const breakdownPanelId = useId()
   const valueAmount = (
     <span className="holdings-symbol-card__value">{fmt(currentValue)}</span>
   )
@@ -98,36 +58,70 @@ export function HoldingsSymbolCard({
       className={[
         'holdings-symbol-card',
         scenarioActive ? 'holdings-symbol-card--scenario-active' : '',
+        breakdown ? 'holdings-symbol-card--has-breakdown' : '',
+        breakdown && breakdownOpen ? 'holdings-symbol-card--breakdown-open' : '',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="holdings-symbol-card__content">
-        <div className="holdings-symbol-card__left">
-          <div className="holdings-symbol-card__left-main">
-            <div className="holdings-symbol-card__symbol-row">
-              <span className="holdings-symbol-card__scenario-dot" aria-hidden />
-              <span className="holdings-symbol-card__symbol">{symbol}</span>
+      <div className="holdings-symbol-card__summary-row">
+        <div className="holdings-symbol-card__content">
+          <div className="holdings-symbol-card__left">
+            <div className="holdings-symbol-card__left-main">
+              <div className="holdings-symbol-card__symbol-row">
+                <span className="holdings-symbol-card__symbol">{symbol}</span>
+              </div>
+              {description}
             </div>
-            {description}
+          </div>
+          <div className="holdings-symbol-card__right">
+            <div className="holdings-symbol-card__field holdings-symbol-card__field--value">
+              <span className="holdings-symbol-card__field-label">Value:</span>
+              {valueAmount}
+            </div>
+            <div className="holdings-symbol-card__field holdings-symbol-card__field--basis">
+              <span className="holdings-symbol-card__field-label">Cost Basis:</span>
+              <span className="holdings-symbol-card__basis">
+                {costBasis != null ? fmt(costBasis) : '—'}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="holdings-symbol-card__right">
-          <div className="holdings-symbol-card__field holdings-symbol-card__field--value">
-            <span className="holdings-symbol-card__field-label">Value:</span>
-            {valueAmount}
+        {scenario || breakdown ? (
+          <div className="holdings-symbol-card__actions">
+            {scenario ? <HoldingsSymbolCardScenarioPanel scenario={scenario} /> : null}
+            {breakdown ? (
+              <button
+                type="button"
+                className="holdings-symbol-card__aggregate-toggle"
+                aria-expanded={breakdownOpen}
+                aria-controls={breakdownPanelId}
+                aria-label={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
+                onClick={() => setBreakdownOpen((open) => !open)}
+              >
+                <HoldingAggregateHint
+                  className="holdings-symbol-card__aggregate-hint"
+                  expanded={breakdownOpen}
+                />
+              </button>
+            ) : null}
           </div>
-          <div className="holdings-symbol-card__field holdings-symbol-card__field--basis">
-            <span className="holdings-symbol-card__field-label">Cost Basis:</span>
-            <span className="holdings-symbol-card__basis">
-              {costBasis != null ? fmt(costBasis) : '—'}
-            </span>
-          </div>
-        </div>
-        {breakdown ? <div className="holdings-symbol-card__breakdown">{breakdown}</div> : null}
+        ) : null}
       </div>
-      {scenario ? <HoldingsSymbolCardScenarioPanel scenario={scenario} /> : null}
+      {breakdown ? (
+        <div
+          id={breakdownPanelId}
+          className={[
+            'holdings-symbol-card__breakdown',
+            breakdownOpen ? 'holdings-symbol-card__breakdown--open' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <div className="holdings-symbol-card__breakdown-inner">{breakdown}</div>
+        </div>
+      ) : null}
     </article>
   )
 }
@@ -137,17 +131,21 @@ export function HoldingsSymbolCardScenarioPanel({
 }: {
   scenario: HoldingsSymbolCardScenarioProps
 }) {
+  const inheritAccent =
+    scenario.rateSource === 'account' ? (scenario.inheritAccent ?? null) : null
+
   return (
     <div className="holdings-symbol-card__scenario">
-      <div className="holdings-symbol-card__scenario-slot">
-        <HoldingsScenarioTrigger
-          label={scenario.label}
-          showAccent={scenario.showAccent}
-          common={scenario.common}
-          rowActive={scenario.rowActive}
-          onOpen={scenario.onOpen}
-        />
-      </div>
+      <PortfolioScenarioCell
+        layout="holding"
+        label={scenario.label}
+        common={scenario.common}
+        variant={scenario.variant}
+        inheritAccent={inheritAccent}
+        rateSource={scenario.rateSource}
+        rowActive={scenario.rowActive}
+        onOpen={scenario.onOpen}
+      />
     </div>
   )
 }

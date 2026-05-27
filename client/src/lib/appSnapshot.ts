@@ -81,6 +81,10 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
       dateOfBirth,
       incomePresets,
       positionReturnModels: Array.isArray(base.positionReturnModels) ? base.positionReturnModels : [],
+      accountReturnScenarios:
+        base.accountReturnScenarios && typeof base.accountReturnScenarios === 'object'
+          ? base.accountReturnScenarios
+          : {},
       retireRegions: normalizeRetireRegions(base.retireRegions, legacyItalyCost),
       ...normalizeSocialSecurityFields(base, defaultInputs),
     },

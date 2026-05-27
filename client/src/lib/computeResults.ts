@@ -15,6 +15,12 @@ import { positionsForBrokerage, positionsForRetirementBucket, type FidelityPosit
 import type { BrokerageBalanceMode } from './brokerageBalanceMode'
 import type { BalanceInputMode } from './retirementBalanceMode'
 import {
+  accountScenarioBucketForPositionId,
+  getAccountReturnScenario,
+  holdingReturnRateSource,
+  projectionModelForHolding,
+} from './accountReturnScenario'
+import {
   calendarRetirementYear,
   mergeBucketIntoAllModels,
   normalizePositionReturnModels,
@@ -39,6 +45,7 @@ export type DrawerName =
   | 'strategy'
   | 'config'
 
+import type { AccountReturnScenario, AccountScenarioBucketId } from './accountReturnScenario'
 import type { IncomeYieldPreset } from './incomePresets'
 
 export type { IncomeYieldPreset } from './incomePresets'
@@ -90,6 +97,8 @@ export type CalculatorInputs = {
   incomePresets: IncomeYieldPreset[]
   /** Per-import-line return models (Fidelity dashboard sliders); merged with CSV at compute time. */
   positionReturnModels: PositionReturnModel[]
+  /** Account-bucket return overrides (brokerage, pre-tax, Roth, HSA); below holding, above global sliders. */
+  accountReturnScenarios?: Partial<Record<AccountScenarioBucketId, AccountReturnScenario>>
   /** Welcome/settings residence — drives USD / GBP / EUR display. */
   residenceCountry: string
 }
@@ -274,10 +283,20 @@ export function computeResults(
       const prefix = `fid-${def.keyPrefix}-`
       const mergedBucket = working.filter((p) => p.id.startsWith(prefix))
       for (const m of mergedBucket) {
+        const accountBucket = accountScenarioBucketForPositionId(m.id)
+        const accountScenario = accountBucket ? getAccountReturnScenario(inputs, accountBucket) : undefined
         if (positionUsesCustomReturnMode(m, retRate)) customPositionReturnCount += 1
-        if (positionNeedsIndividualRetirementProjection(m, retRate)) {
+        if (
+          positionNeedsIndividualRetirementProjection(m, retRate) ||
+          holdingReturnRateSource(m, accountScenario, retRate) === 'account'
+        ) {
           individualCv += m.currentValue
-          individualFvSum += projectPositionAtRetirement(m, retirementCalendarYear, yearsToRetirement)
+          const projectionModel = projectionModelForHolding(m, accountScenario, retRate, yearsToRetirement)
+          individualFvSum += projectPositionAtRetirement(
+            projectionModel,
+            retirementCalendarYear,
+            yearsToRetirement,
+          )
         }
       }
     }
@@ -301,10 +320,19 @@ export function computeResults(
     mergedBrokeragePositionModels = mergedBrk
     let brkIndividualCv = 0
     let brkIndividualFv = 0
+    const brokerageAccountScenario = getAccountReturnScenario(inputs, 'brokerage')
     for (const m of mergedBrk) {
-      if (positionNeedsIndividualRetirementProjection(m, brkRate)) {
+      if (
+        positionNeedsIndividualRetirementProjection(m, brkRate) ||
+        holdingReturnRateSource(m, brokerageAccountScenario, brkRate) === 'account'
+      ) {
         brkIndividualCv += m.currentValue
-        brkIndividualFv += projectPositionAtRetirement(m, retirementCalendarYear, yearsToRetirement)
+        const projectionModel = projectionModelForHolding(m, brokerageAccountScenario, brkRate, yearsToRetirement)
+        brkIndividualFv += projectPositionAtRetirement(
+          projectionModel,
+          retirementCalendarYear,
+          yearsToRetirement,
+        )
       }
     }
     const brkLumpBal = Math.max(0, brkBal - brkIndividualCv)

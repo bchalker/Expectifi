@@ -20,7 +20,11 @@ import {
 } from '../lib/manualAccountEntries'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
-import { accountLabelForWithdrawalBucket, localeSupportsWithdrawalBucket } from '../config/taxConfig'
+import {
+  accountLabelForWithdrawalBucket,
+  accountTaxSubtextForWithdrawalBucket,
+  localeSupportsWithdrawalBucket,
+} from '../config/taxConfig'
 import { useUserLocale } from '../context/UserLocaleContext'
 import {
   withdrawalBadgeAndHint,
@@ -43,6 +47,18 @@ import {
 } from '../lib/portfolioSourceExclusivity'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { currencySymbol } from '../lib/displayCurrency'
+import {
+  accountScenarioIsActive,
+  blendedRateForAccountBucket,
+  getAccountReturnScenario,
+  inferAccountScenarioUiChoice,
+  type AccountScenarioBucketId,
+} from '../lib/accountReturnScenario'
+import {
+  HOLDING_SCENARIO_PLACEHOLDER_LABEL,
+  horizonClamp,
+  scenarioColumnShortLabel,
+} from '../lib/holdingScenarioApply'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
 import { FinancialsEntryCsvDropdown } from './FinancialsEntryCsvDropdown'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
@@ -55,7 +71,8 @@ import {
 import { positionUsesCustomReturnMode } from '../lib/positionReturnModel'
 import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
 import { FidelityAggregatedSymbolTable, type FidelityAggregatedScenarioBundle } from './FidelityAggregatedSymbolTable'
-import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
+import { FidelityAccountScenarioPanel } from './FidelityAccountScenarioPanel'
+import { FidelityBucketAccountRow, type FidelityBucketAccountScenarioProps } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
 import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
 import { AccountBalancesManageMenu } from './AccountBalancesManageMenu'
@@ -318,6 +335,8 @@ export function AccountBalances({
     contributingRows: FidelityPositionRow[]
   } | null>(null)
   const [fidelityScenarioClosing, setFidelityScenarioClosing] = useState(false)
+  const [accountScenarioPanel, setAccountScenarioPanel] = useState<AccountScenarioBucketId | null>(null)
+  const [accountScenarioClosing, setAccountScenarioClosing] = useState(false)
   const [balanceEditPanel, setBalanceEditPanel] = useState<'manual' | 'import' | null>(null)
   const [balanceEditClosing, setBalanceEditClosing] = useState(false)
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] = useState<PositionsCsvCustodian | null>(null)
@@ -389,6 +408,8 @@ export function AccountBalances({
     removeAccountsModalState.close()
     setFidelityScenarioPanel(null)
     setFidelityScenarioClosing(false)
+    setAccountScenarioPanel(null)
+    setAccountScenarioClosing(false)
     setBalanceEditPanel(null)
     setBalanceEditClosing(false)
     onRemoveRetirementAccounts?.()
@@ -417,9 +438,84 @@ export function AccountBalances({
   const onFidelityScenarioOpen = useCallback((payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => {
     setBalanceEditPanel(null)
     setBalanceEditClosing(false)
+    setAccountScenarioPanel(null)
+    setAccountScenarioClosing(false)
     setFidelityScenarioClosing(false)
     setFidelityScenarioPanel(payload)
   }, [])
+
+  const finalizeAccountScenarioClose = useCallback(() => {
+    setAccountScenarioPanel(null)
+    setAccountScenarioClosing(false)
+  }, [])
+
+  const requestAccountScenarioClose = useCallback(() => {
+    if (!accountScenarioPanel || accountScenarioClosing) return
+    setAccountScenarioClosing(true)
+  }, [accountScenarioPanel, accountScenarioClosing])
+
+  const onAccountScenarioSheetAnimationEnd = useCallback(
+    (e: AnimationEvent<HTMLElement>) => {
+      if (e.target !== e.currentTarget) return
+      if (e.animationName !== 'holding-scenario-slide-sheet-out') return
+      if (!accountScenarioClosing) return
+      finalizeAccountScenarioClose()
+    },
+    [accountScenarioClosing, finalizeAccountScenarioClose],
+  )
+
+  const onAccountScenarioOpen = useCallback((bucket: AccountScenarioBucketId) => {
+    setBalanceEditPanel(null)
+    setBalanceEditClosing(false)
+    setFidelityScenarioPanel(null)
+    setFidelityScenarioClosing(false)
+    setAccountScenarioClosing(false)
+    setAccountScenarioPanel(bucket)
+  }, [])
+
+  const accountScenarioPanelTitle = useCallback(
+    (bucket: AccountScenarioBucketId): string => {
+      switch (bucket) {
+        case 'brokerage':
+          return 'Brokerage'
+        case 'pretax':
+          return fidelityBucketLabel('pretax', 'Pre-tax 401(k) / IRA')
+        case 'roth':
+          return fidelityBucketLabel('roth', 'Roth IRA')
+        case 'hsa':
+          return fidelityBucketLabel('hsa', 'HSA')
+      }
+    },
+    [locale, taxConfig],
+  )
+
+  const buildAccountScenarioRowProps = useCallback(
+    (bucket: AccountScenarioBucketId): FidelityBucketAccountScenarioProps | null => {
+      if (!fidelityScenarioEditingEnabled || !inputs) return null
+      const blended = blendedRateForAccountBucket(bucket, inputs.retRate, inputs.brkRate)
+      const stored = getAccountReturnScenario(inputs, bucket)
+      const h = horizonClamp(c.yearsToRetirement)
+      const choice = stored ? inferAccountScenarioUiChoice(stored, blended, h) : 'default'
+      const customDec = choice === 'custom' && stored ? stored.flatRate : undefined
+      const active = accountScenarioIsActive(inputs, bucket)
+      return {
+        label: active
+          ? scenarioColumnShortLabel(choice, customDec)
+          : HOLDING_SCENARIO_PLACEHOLDER_LABEL,
+        common: choice,
+        variant: active ? 'badge' : 'outline',
+        rowActive: accountScenarioPanel === bucket,
+        onOpen: () => onAccountScenarioOpen(bucket),
+      }
+    },
+    [
+      accountScenarioPanel,
+      c.yearsToRetirement,
+      fidelityScenarioEditingEnabled,
+      inputs,
+      onAccountScenarioOpen,
+    ],
+  )
 
   const finalizeBalanceEditClose = useCallback(() => {
     setBalanceEditPanel(null)
@@ -510,6 +606,8 @@ export function AccountBalances({
     (panel: 'manual' | 'import') => {
       setFidelityScenarioPanel(null)
       setFidelityScenarioClosing(false)
+      setAccountScenarioPanel(null)
+      setAccountScenarioClosing(false)
       setBalanceEditClosing(false)
       setManualConfirmPhase(false)
       setManualConfirmProgress(0)
@@ -672,21 +770,24 @@ export function AccountBalances({
   )
 
   useEffect(() => {
-    if (!fidelityScenarioPanel && !balanceEditPanel && !removeAccountsModalState.isOpen) return
+    if (!fidelityScenarioPanel && !accountScenarioPanel && !balanceEditPanel && !removeAccountsModalState.isOpen) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       if (removeAccountsModalState.isOpen) removeAccountsModalState.close()
       else if (balanceEditPanel) requestBalanceEditClose()
+      else if (accountScenarioPanel) requestAccountScenarioClose()
       else if (fidelityScenarioPanel) requestFidelityScenarioClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [
     fidelityScenarioPanel,
+    accountScenarioPanel,
     balanceEditPanel,
     removeAccountsModalState.isOpen,
     removeAccountsModalState.close,
     requestFidelityScenarioClose,
+    requestAccountScenarioClose,
     requestBalanceEditClose,
   ])
 
@@ -1029,23 +1130,29 @@ export function AccountBalances({
     withdrawalUi: boolean,
   ) {
     const bucket: WithdrawalDisplayBucket = tax
+    const accountBucket: AccountScenarioBucketId = tax
+    const accountScenario = buildAccountScenarioRowProps(accountBucket)
+    const taxSubtext = accountTaxSubtextForWithdrawalBucket(taxConfig, accountBucket)
     const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
     const positions = positionsForTaxTreatment(fidelityRows, tax)
     const trend = computeBucketTrendDisplay(positions)
     const aggregated = aggregateFidelityPositionsBySymbol(positions)
     const combinedLines = positions.length > aggregated.length
 
-    const summaryInner = withdrawalUi ? (
-      <WithdrawalLabeledBlock badgeOrder={order} hint={null}>
-        <FidelityBucketAccountRow label={def.label} total={fmt(def.total)} trend={trend} />
-      </WithdrawalLabeledBlock>
-    ) : (
-      <FidelityBucketAccountRow label={def.label} total={fmt(def.total)} trend={trend} />
+    const summaryInner = (
+      <FidelityBucketAccountRow
+        badgeOrder={withdrawalUi ? order : null}
+        label={def.label}
+        subtext={taxSubtext}
+        total={fmt(def.total)}
+        trend={trend}
+        scenario={accountScenario}
+      />
     )
 
     return (
-      <details key={tax} className="tax-treatment-disclosure">
-        <summary className="edit-row edit-row--portfolio-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
+      <details key={tax} className="tax-treatment-disclosure portfolio-account-group">
+        <summary className="tax-treatment-disclosure__summary portfolio-bucket-account-summary">{summaryInner}</summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           {!positions.length ? (
             <p className="footnote tax-treatment-disclosure__empty">No positions mapped to this bucket in your import.</p>
@@ -1055,6 +1162,7 @@ export function AccountBalances({
               combinedLines={combinedLines}
               fidelityAllRows={fidelityRows}
               scenarioBundle={fidelityScenarioBundle}
+              accountScenarioBucket={accountBucket}
               activeScenarioSymbol={fidelityScenarioPanel?.symbol ?? null}
               onScenarioOpen={onFidelityScenarioOpen}
             />
@@ -1277,43 +1385,51 @@ export function AccountBalances({
 
     const brkMeta = withdrawalUi ? metaFor('brokerage') : { order: null as number | null }
     const brkTrend = computeBucketTrendDisplay(brokeragePositions)
+    const brokerageScenario = buildAccountScenarioRowProps('brokerage')
+    const brokerageSubtext = accountTaxSubtextForWithdrawalBucket(taxConfig, 'brokerage')
 
     if (!useFidelityBrokerageView) {
       return (
         <>
-          <div className="edit-row edit-row--no-divider">
-            {withdrawalUi ? (
-              <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
-                <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
-              </WithdrawalLabeledBlock>
-            ) : (
-              <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
-            )}
+          <div className="edit-row edit-row--no-divider portfolio-account-group portfolio-account-group--inline">
+            <FidelityBucketAccountRow
+              badgeOrder={withdrawalUi ? brkMeta.order : null}
+              label="Brokerage"
+              subtext={brokerageSubtext}
+              total={fmt(brkBal)}
+              trend={brkTrend}
+              showViewHoldings={false}
+              scenario={brokerageScenario}
+            />
           </div>
         </>
       )
     }
 
-    const summaryInner = withdrawalUi ? (
-      <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
-        <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} />
-      </WithdrawalLabeledBlock>
-    ) : (
-      <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} />
+    const summaryInner = (
+      <FidelityBucketAccountRow
+        badgeOrder={withdrawalUi ? brkMeta.order : null}
+        label="Brokerage"
+        subtext={brokerageSubtext}
+        total={fmt(brkBal)}
+        trend={brkTrend}
+        scenario={brokerageScenario}
+      />
     )
 
     const brkAggregated = aggregateFidelityPositionsBySymbol(brokeragePositions)
     const brkCombinedLines = brokeragePositions.length > brkAggregated.length
 
     return (
-      <details className="tax-treatment-disclosure">
-        <summary className="edit-row edit-row--portfolio-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
+      <details className="tax-treatment-disclosure portfolio-account-group">
+        <summary className="tax-treatment-disclosure__summary portfolio-bucket-account-summary">{summaryInner}</summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           <FidelityAggregatedSymbolTable
             rows={brkAggregated}
             combinedLines={brkCombinedLines}
             fidelityAllRows={fidelityRows}
             scenarioBundle={fidelityScenarioBundle}
+            accountScenarioBucket="brokerage"
             activeScenarioSymbol={fidelityScenarioPanel?.symbol ?? null}
             onScenarioOpen={onFidelityScenarioOpen}
           />
@@ -1485,6 +1601,8 @@ export function AccountBalances({
       balanceEditClosing ||
       fidelityScenarioPanel ||
       fidelityScenarioClosing ||
+      accountScenarioPanel ||
+      accountScenarioClosing ||
       removeAccountsModalState.isOpen,
   )
 
@@ -1508,6 +1626,28 @@ export function AccountBalances({
             retRate={fidelityScenarioBundle.retRate}
             brkRate={fidelityScenarioBundle.brkRate}
             onClose={requestFidelityScenarioClose}
+          />
+        </aside>
+      ) : null}
+      {accountScenarioPanel && fidelityScenarioBundle ? (
+        <aside
+          className={`holding-scenario-slide__sheet${accountScenarioClosing ? ' holding-scenario-slide__sheet--closing' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="account-scenario-panel-title"
+          onAnimationEnd={onAccountScenarioSheetAnimationEnd}
+        >
+          <FidelityAccountScenarioPanel
+            accountName={accountScenarioPanelTitle(accountScenarioPanel)}
+            bucket={accountScenarioPanel}
+            fidelityAllRows={fidelityRows}
+            inputs={fidelityScenarioBundle.inputs}
+            setInputs={fidelityScenarioBundle.setInputs}
+            yearsToRetirement={fidelityScenarioBundle.yearsToRetirement}
+            retirementCalendarYear={fidelityScenarioBundle.retirementCalendarYear}
+            retRate={fidelityScenarioBundle.retRate}
+            brkRate={fidelityScenarioBundle.brkRate}
+            onClose={requestAccountScenarioClose}
           />
         </aside>
       ) : null}
@@ -1695,9 +1835,8 @@ export function AccountBalances({
               <div className="account-balances-header-row__title-block">
                 <h2 className="account-balances-header-row__title">Retirement Account Balances</h2>
                 {hasCustomScenarioBadge ? (
-                  <p className="account-balances-header-row__subtitle">
-                    <span className="account-balances-header-row__subtitle-dot" aria-hidden />
-                    with custom scenarios
+                  <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+                    Some holdings use custom scenarios
                   </p>
                 ) : null}
                 {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}

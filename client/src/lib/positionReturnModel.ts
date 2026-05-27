@@ -18,6 +18,8 @@ export const POSITION_FLAT_VS_BLENDED_EPS = 5e-5
 
 /** True when the user chose a non-default return path (per-year, scenario, or flat ≠ blended). */
 export function positionUsesCustomReturnMode(pos: PositionReturnModel, blendedRate: number): boolean {
+  if (pos.returnOverride === true) return true
+  if (pos.returnOverride === false) return false
   if (pos.returnMode === 'peryear' || pos.returnMode === 'scenario') return true
   return Math.abs(pos.flatRate - blendedRate) > POSITION_FLAT_VS_BLENDED_EPS
 }
@@ -45,6 +47,8 @@ export type PositionReturnModel = {
   returnMode: PositionReturnMode
   flatRate: number
   scenario?: PositionScenarioId | null
+  /** User set a non-global return path; keeps overrides when flat rate equals blended. */
+  returnOverride?: boolean
 }
 
 /** Scenario presets as **percent** points (−5 = −5%). Base length 7; expanded for longer horizons. */
@@ -294,6 +298,7 @@ export function normalizePositionReturnModels(
       yearlyReturns = o.yearlyReturns.map((v) => (typeof v === 'number' && Number.isFinite(v) ? v : blendedFill))
     }
     yearlyReturns = padYearlyReturns(yearlyReturns, h, flatRate)
+    const returnOverride = typeof o.returnOverride === 'boolean' ? o.returnOverride : undefined
     out.push({
       id,
       ticker,
@@ -304,6 +309,7 @@ export function normalizePositionReturnModels(
       returnMode,
       flatRate,
       scenario,
+      returnOverride,
     })
   }
   return out

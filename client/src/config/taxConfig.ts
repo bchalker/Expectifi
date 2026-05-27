@@ -167,6 +167,44 @@ export function formatMarginalRatesSummary(config: TaxConfig): string {
 }
 
 /** Map internal portfolio buckets to locale account labels (first match by treatment). */
+/** Short tax line under account name on portfolio bucket rows (e.g. "Taxed as ordinary income"). */
+export function accountTaxSubtextForWithdrawalBucket(
+  config: TaxConfig,
+  bucket: WithdrawalDisplayBucket,
+): string | null {
+  const treatment: TaxTreatment | null =
+    bucket === 'brokerage'
+      ? 'taxable'
+      : bucket === 'pretax'
+        ? 'pretax'
+        : bucket === 'roth'
+          ? 'roth'
+          : bucket === 'hsa'
+            ? 'taxfree'
+            : null
+  if (!treatment) return null
+  if (bucket === 'hsa' && config.currencyCode !== 'USD') return null
+
+  const match =
+    bucket === 'roth'
+      ? config.accountTypes.find((a) => a.taxTreatment === 'roth') ??
+        config.accountTypes.find((a) => a.taxTreatment === 'taxfree')
+      : config.accountTypes.find((a) => a.taxTreatment === treatment)
+  if (treatment === 'taxable') {
+    return 'Taxed as capital gains'
+  }
+
+  const note = match?.withdrawalNote?.trim()
+  if (!note) return null
+
+  const dash = note.indexOf('—')
+  if (dash > 0) return note.slice(0, dash).trim()
+  const onWithdrawal = note.indexOf(' on withdrawal')
+  if (onWithdrawal > 0) return note.slice(0, onWithdrawal).trim()
+  if (note.length > 36) return `${note.slice(0, 33).trim()}…`
+  return note
+}
+
 export function accountLabelForWithdrawalBucket(
   config: TaxConfig,
   bucket: WithdrawalDisplayBucket,

@@ -1,0 +1,17 @@
+.holding-aggregate-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.holding-aggregate-hint--expanded {
+  color: var(--color-amber-dark);
+}
+
+.holding-aggregate-hint__icon {
+  flex-shrink: 0;
+  color: currentColor;
+}

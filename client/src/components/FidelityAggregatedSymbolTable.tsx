@@ -10,9 +10,18 @@ import {
 import { formatFidelityDescription } from '../lib/fidelityDisplay'
 import { truncateForHoldingsTable } from '../lib/fidelityHoldingDisplay'
 import {
+  accountScenarioBucketForPositionId,
+  getAccountReturnScenario,
+  holdingReturnRateSource,
+  inferAccountScenarioUiChoice,
+  type AccountScenarioBucketId,
+} from '../lib/accountReturnScenario'
+import {
   inferCommonScenarioChoiceForModels,
+  HOLDING_SCENARIO_PLACEHOLDER_LABEL,
   scenarioColumnShortLabel,
   SCENARIO_MIXED,
+  type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import {
   blendedRateForDashboardPositionId,
@@ -61,6 +70,8 @@ type Props = {
   fidelityAllRows: FidelityPositionRow[]
   /** Dashboard only: enables Scenario column + slide panel (parent hosts panel). */
   scenarioBundle?: FidelityAggregatedScenarioBundle | null
+  /** Tax bucket for account-level scenario inheritance in this table. */
+  accountScenarioBucket?: AccountScenarioBucketId
   /** Which ticker’s scenario sheet is open (symbol display key, matches row `symbol`). */
   activeScenarioSymbol?: string | null
   onScenarioOpen?: (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => void
@@ -77,6 +88,7 @@ function modelsForAggregateRow(
 type HoldingGroupProps = {
   row: AggregatedFidelitySymbolRow
   scenarioBundle?: FidelityAggregatedScenarioBundle | null
+  accountScenarioBucket?: AccountScenarioBucketId
   mergedModels: PositionReturnModel[]
   h: number
   activeScenarioSymbol?: string | null
@@ -87,6 +99,7 @@ type HoldingGroupProps = {
 function FidelityAggregatedHoldingGroup({
   row: r,
   scenarioBundle,
+  accountScenarioBucket,
   mergedModels,
   h,
   activeScenarioSymbol,
@@ -101,15 +114,45 @@ function FidelityAggregatedHoldingGroup({
   const fullDesc = formatFidelityDescription(r.description)
   const shortDesc = truncateForHoldingsTable(fullDesc)
   const showTip = fullDesc.length > shortDesc.length
-  const models = scenarioBundle ? modelsForAggregateRow(r, mergedModels) : []
-  const common =
-    scenarioBundle && models.length
-      ? inferCommonScenarioChoiceForModels(models, h, (m) =>
-          blendedRateForDashboardPositionId(m.id, scenarioBundle.retRate, scenarioBundle.brkRate),
-        )
-      : SCENARIO_MIXED
-  const customDec = models.length && common === 'custom' ? models[0]?.flatRate : undefined
-  const label = scenarioBundle ? scenarioColumnShortLabel(common, customDec) : '—'
+  const modelsAll = scenarioBundle ? modelsForAggregateRow(r, mergedModels) : []
+  const models =
+    accountScenarioBucket != null
+      ? modelsAll.filter((m) => accountScenarioBucketForPositionId(m.id) === accountScenarioBucket)
+      : modelsAll
+  const blendedForModel = (m: PositionReturnModel) =>
+    blendedRateForDashboardPositionId(m.id, scenarioBundle!.retRate, scenarioBundle!.brkRate)
+  const primaryModel = models[0]
+  const accountScenario =
+    scenarioBundle && accountScenarioBucket
+      ? getAccountReturnScenario(scenarioBundle.inputs, accountScenarioBucket)
+      : undefined
+  const primaryBlended = primaryModel ? blendedForModel(primaryModel) : scenarioBundle?.retRate ?? 0
+  const rateSource =
+    primaryModel && scenarioBundle
+      ? holdingReturnRateSource(primaryModel, accountScenario, primaryBlended)
+      : 'global'
+  const displayChoice: ScenarioUiChoice | typeof SCENARIO_MIXED = (() => {
+    if (!scenarioBundle || !models.length) return SCENARIO_MIXED
+    if (rateSource === 'custom') {
+      return inferCommonScenarioChoiceForModels(models, h, blendedForModel)
+    }
+    if (rateSource === 'account' && accountScenario) {
+      return inferAccountScenarioUiChoice(accountScenario, primaryBlended, h)
+    }
+    return 'default'
+  })()
+  const customDec =
+    displayChoice === 'custom' && rateSource === 'custom' && models[0]
+      ? models[0].flatRate
+      : displayChoice === 'custom' && rateSource === 'account' && accountScenario
+        ? accountScenario.flatRate
+        : undefined
+  const label =
+    scenarioBundle == null
+      ? '—'
+      : rateSource === 'custom'
+        ? scenarioColumnShortLabel(displayChoice, customDec)
+        : HOLDING_SCENARIO_PLACEHOLDER_LABEL
   const rowKey = r.symbol
   const rowActive =
     activeScenarioSymbol != null &&
@@ -129,13 +172,23 @@ function FidelityAggregatedHoldingGroup({
     </span>
   )
 
+  const accountInheritChoice =
+    accountScenario && accountScenarioBucket
+      ? inferAccountScenarioUiChoice(accountScenario, primaryBlended, h)
+      : null
+
   const scenarioProps = scenarioBundle
     ? {
         label,
-        showAccent: common !== 'default',
-        common,
+        common: displayChoice,
+        variant: (rateSource === 'custom' ? 'badge' : 'outline') as 'badge' | 'outline',
+        inheritAccent:
+          rateSource === 'account' && accountInheritChoice !== 'default'
+            ? accountInheritChoice
+            : null,
         rowActive,
         onOpen: openScenario,
+        rateSource,
       }
     : null
 
@@ -184,6 +237,7 @@ export function FidelityAggregatedSymbolTable({
   combinedLines,
   fidelityAllRows,
   scenarioBundle,
+  accountScenarioBucket,
   activeScenarioSymbol,
   onScenarioOpen,
 }: Props) {
@@ -217,39 +271,20 @@ export function FidelityAggregatedSymbolTable({
         .join(' ')}
     >
       <div className="holdings-symbol-list" role="table" aria-label="Holdings by symbol">
-        <div className="holdings-symbol-list__header-row" role="row">
-          <span className="holdings-symbol-list__col" role="columnheader">
-            Symbol
-          </span>
-          <span className="holdings-symbol-list__col holdings-symbol-list__col--upper" role="columnheader">
-            Description
-          </span>
-          <span
-            className="holdings-symbol-list__col holdings-symbol-list__col--value"
-            role="columnheader"
-          >
-            Value
-          </span>
-          <span
-            className="holdings-symbol-list__col holdings-symbol-list__col--basis holdings-symbol-list__col--upper"
-            role="columnheader"
-          >
-            Cost basis
-          </span>
-          {scenarioBundle ? (
-            <span
-              className="holdings-symbol-list__col holdings-symbol-list__col--scenario holdings-symbol-list__col--upper"
-              role="columnheader"
-            >
-              Scenario
+        {scenarioBundle ? (
+          <div className="holdings-symbol-list__subheader" role="row">
+            <span className="holdings-symbol-list__subheader-holdings">
+              <span className="holdings-symbol-list__subheader-count">{rows.length}</span> Holdings
             </span>
-          ) : null}
-        </div>
+            <span className="holdings-symbol-list__subheader-override">Want to override?</span>
+          </div>
+        ) : null}
         {rows.map((r) => (
           <FidelityAggregatedHoldingGroup
             key={r.symbol}
             row={r}
             scenarioBundle={scenarioBundle}
+            accountScenarioBucket={accountScenarioBucket}
             mergedModels={mergedModels}
             h={h}
             activeScenarioSymbol={activeScenarioSymbol}

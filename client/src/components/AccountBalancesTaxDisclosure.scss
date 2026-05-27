@@ -1,13 +1,32 @@
 .tax-treatment-disclosure {
-  // border-bottom: none;
-  border-bottom: 1px solid rgba(0,0,0, .1
-  );
-  // box-shadow: var(--shadow-account-divider);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }
 
-/* Only the last bucket row in the card stack — not disclosures wrapped in a layout div (e.g. brokerage). */
-.account-balances-card-inner-wrap > .tax-treatment-disclosure:last-of-type {
-  box-shadow: none;
+/* Account header + holdings list — single white card per bucket */
+.tax-treatment-disclosure.portfolio-account-group {
+  --portfolio-scenario-trigger-min: 8rem;
+  --portfolio-scenario-col-pad-x: 0.75rem;
+  --portfolio-account-chevron-pad-end: 0.85rem;
+  /* Single width: scenario col + chevron (16px icon, symmetric horizontal pad) */
+  --portfolio-account-actions-width: calc(
+    var(--portfolio-scenario-trigger-min) + 2 * var(--portfolio-scenario-col-pad-x) + 16px +
+      2 * var(--portfolio-account-chevron-pad-end)
+  );
+  margin-bottom: 0.75rem;
+  // border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 0px 0px 1px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group[open] {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.tax-treatment-disclosure.portfolio-account-group:last-child {
+  margin-bottom: 0;
 }
 
 .tax-treatment-disclosure > summary {
@@ -16,9 +35,36 @@
   width: 100%;
 }
 
-/* Single divider per bucket — shadow on disclosure, not on nested summary row */
+.tax-treatment-disclosure.portfolio-account-group > summary {
+  background: #fff;
+  box-shadow: none;
+}
+
 .tax-treatment-disclosure > summary.edit-row {
   box-shadow: none;
+}
+
+.tax-treatment-disclosure.portfolio-account-group > summary.portfolio-bucket-account-summary {
+  display: block;
+  padding: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group
+  > summary.portfolio-bucket-account-summary
+  .portfolio-bucket-account-row__order-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.75rem 0 0.75rem 0.85rem;
+  box-sizing: border-box;
+}
+
+.tax-treatment-disclosure.portfolio-account-group
+  > summary.portfolio-bucket-account-summary
+  .portfolio-bucket-account-row__main {
+  padding: 0.75rem 0.85rem;
+  box-sizing: border-box;
 }
 
 .tax-treatment-disclosure > summary::-webkit-details-marker {
@@ -34,6 +80,103 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .tax-treatment-disclosure__body--import-style {
+  padding: 0;
+  // border-top: 1px solid var(--border);
+  background: #fff;
+}
+
+.portfolio-account-group--inline {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-account-divider);
+  box-sizing: border-box;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list {
+  gap: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-group + .holdings-symbol-group .holdings-symbol-card {
+  border-top: 1px solid var(--border);
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader {
+  border-bottom: 1px solid var(--border);
+  padding: 0.55rem 0 0.65rem 0.85rem;
+}
+
+.tax-treatment-disclosure.portfolio-account-group[open]
+  > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary,
+.tax-treatment-disclosure.portfolio-account-group[open] .holdings-symbol-list__subheader {
+  background: #f9f9f9;
+  // background: var(--bg);
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {
+  padding: 0.75rem 0.85rem;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
+  padding: 0;
+  // border-left: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow: inset 8px 0 14px -8px color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+.tax-treatment-disclosure.portfolio-account-group .tax-treatment-disclosure__empty {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+}
+
+@media (min-width: 621px) {
+  .tax-treatment-disclosure.portfolio-account-group
+    .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
+    --holdings-scenario-col-w: var(--portfolio-account-actions-width);
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader {
+    padding: 0.65rem 0 0.75rem 0.85rem;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader-override {
+    flex: 0 0 var(--portfolio-account-actions-width);
+    width: var(--portfolio-account-actions-width);
+    min-width: var(--portfolio-account-actions-width);
+    max-width: var(--portfolio-account-actions-width);
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {
+    padding: 1rem 0.85rem;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
+    flex: 0 0 var(--portfolio-account-actions-width);
+    width: var(--portfolio-account-actions-width);
+    min-width: var(--portfolio-account-actions-width);
+    max-width: var(--portfolio-account-actions-width);
+    box-sizing: border-box;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    box-shadow: inset 8px 0 14px -8px color-mix(in srgb, var(--text) 16%, transparent);
+  }
+}
+
+@media (max-width: 620px) {
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
+    padding: 0.65rem 0 0.75rem;
+  }
 }
 
 .tax-treatment-disclosure__body--import-style .holdings-positions-table,
@@ -216,18 +359,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
+  min-width: 1.375rem;
+  height: 1.375rem;
   margin-top: 2px;
-  border-radius: 999px;
-  font-size: 11px;
+  padding: 0 0.25rem;
+  border-radius: 6px;
+  font-size: var(--text-xs);
   font-weight: 700;
   font-family: var(--mono);
-  background: var(--surface2);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: #2a4365;
+  color: #fff;
+  border: none;
   flex-shrink: 0;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .withdrawal-bucket-summary {
