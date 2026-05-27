@@ -34,6 +34,17 @@ function isStockOrEtfHolding(row: AggregatedFidelitySymbolRow): boolean {
   return true
 }
 
+/** Up to three largest holdings for the lead copy (“But X, Y, and Z behave…”). */
+export function pickScenarioGuideLeadTickers(rows: AggregatedFidelitySymbolRow[]): string[] {
+  const eligible = rows.filter((r) => r.currentValue > 0 && symbolKey(r.symbol))
+  if (eligible.length === 0) return []
+
+  return [...eligible]
+    .sort((a, b) => b.currentValue - a.currentValue)
+    .slice(0, 3)
+    .map((r) => r.symbol)
+}
+
 /** Up to three tickers for the dynamic examples line (largest, bond if any, then stock/ETF). */
 export function pickScenarioGuideExampleTickers(rows: AggregatedFidelitySymbolRow[]): string[] {
   const eligible = rows.filter((r) => r.currentValue > 0 && symbolKey(r.symbol))

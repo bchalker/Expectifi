@@ -64,6 +64,8 @@
 .account-balances-manage__menu {
   z-index: 1100;
   box-sizing: border-box;
+  width: max-content;
+  min-width: 11.5rem;
   max-height: min(70vh, 520px);
   overflow: auto;
   padding: 0.5rem;
@@ -193,6 +195,7 @@
   font-weight: 500;
   color: var(--text);
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }

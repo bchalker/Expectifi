@@ -1,7 +1,8 @@
 .imported-holdings-scenario-guide {
   margin: 0 0 0.85rem;
-  padding: 0.65rem 0.85rem;
+  // padding: 0.65rem 0.85rem;
   border-radius: 8px;
+  padding-bottom: 1rem;
   // background: var(--surface);
   // background: #f9f9f9;
   // border: 1px solid var(--border);
@@ -68,11 +69,11 @@
 
 .imported-holdings-scenario-guide__title {
   margin: 0 0 0.35rem;
-  font-family: var(--body);
+  font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.35;
-  color: var(--text);
+  color: var(--accent-text);
 }
 
 .imported-holdings-scenario-guide__lead {
@@ -154,7 +155,7 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   line-height: 1.3;
-  color: var(--text);
+  color: var(--accent-text);
   vertical-align: baseline;
   white-space: nowrap;
 }

@@ -29,25 +29,29 @@ import {
 } from './PlaidConnectionHeader'
 import './AccountBalancesManageMenu.scss'
 
-const MANAGE_MENU_MIN_WIDTH = 280
-const MANAGE_MENU_MAX_WIDTH = 360
+const MANAGE_MENU_MAX_WIDTH = 240
 
 function computeManageMenuStyle(anchor: DOMRect): CSSProperties {
   const gap = 6
-  const width = Math.min(MANAGE_MENU_MAX_WIDTH, Math.max(MANAGE_MENU_MIN_WIDTH, anchor.width + 120))
-  let left = anchor.right - width
-  left = Math.max(8, Math.min(left, window.innerWidth - width - 8))
+  const right = Math.max(8, window.innerWidth - anchor.right)
 
   const estimatedHeight = 420
   const spaceBelow = window.innerHeight - anchor.bottom - gap
   if (spaceBelow >= estimatedHeight) {
-    return { position: 'fixed', top: anchor.bottom + gap, left, width }
+    return {
+      position: 'fixed',
+      top: anchor.bottom + gap,
+      right,
+      width: 'max-content',
+      maxWidth: `min(92vw, ${MANAGE_MENU_MAX_WIDTH}px)`,
+    }
   }
   return {
     position: 'fixed',
     top: anchor.top - gap,
-    left,
-    width,
+    right,
+    width: 'max-content',
+    maxWidth: `min(92vw, ${MANAGE_MENU_MAX_WIDTH}px)`,
     transform: 'translateY(-100%)',
   }
 }

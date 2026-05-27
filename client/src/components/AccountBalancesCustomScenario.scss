@@ -7,6 +7,7 @@
   width: 100%;
   margin-bottom: 1rem;
   padding-bottom: 6px;
+  margin-top: 2rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1311,9 +1312,13 @@
 
 .csv-session-banner__cta.app-btn--primary[data-slot='button'] {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 2rem;
-  padding-inline: 1rem;
+  padding: 0 1rem;
   font-size: var(--text-xs);
+  line-height: 1;
   background: var(--color-primary);
   color: var(--color-primary-on);
 }
