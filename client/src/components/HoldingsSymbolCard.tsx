@@ -75,9 +75,6 @@ export type HoldingsSymbolCardProps = {
   description: ReactNode
   currentValue: number
   costBasis: number | null
-  enableValueHover?: boolean
-  onValueHoverEnter?: (rect: DOMRect) => void
-  onValueHoverLeave?: () => void
   scenario?: HoldingsSymbolCardScenarioProps | null
   breakdown?: ReactNode
 }
@@ -89,29 +86,11 @@ export function HoldingsSymbolCard({
   description,
   currentValue,
   costBasis,
-  enableValueHover = false,
-  onValueHoverEnter,
-  onValueHoverLeave,
   scenario = null,
   breakdown = null,
 }: HoldingsSymbolCardProps) {
   const valueAmount = (
-    <span
-      className={[
-        'holdings-symbol-card__value',
-        enableValueHover ? 'holdings-value-trigger' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onMouseEnter={
-        enableValueHover && onValueHoverEnter
-          ? (e) => onValueHoverEnter(e.currentTarget.getBoundingClientRect())
-          : undefined
-      }
-      onMouseLeave={enableValueHover ? onValueHoverLeave : undefined}
-    >
-      {fmt(currentValue)}
-    </span>
+    <span className="holdings-symbol-card__value">{fmt(currentValue)}</span>
   )
 
   return (

@@ -1,6 +1,8 @@
 .tax-treatment-disclosure {
-  border-bottom: none;
-  box-shadow: var(--shadow-account-divider);
+  // border-bottom: none;
+  border-bottom: 1px solid rgba(0,0,0, .1
+  );
+  // box-shadow: var(--shadow-account-divider);
 }
 
 /* Only the last bucket row in the card stack — not disclosures wrapped in a layout div (e.g. brokerage). */
@@ -155,107 +157,30 @@
   }
 }
 
-/* Recommended withdrawal order (dashboard read-only) */
-.withdrawal-order-context {
-  box-sizing: border-box;
-  width: 100%;
-  padding-top: 14px;
-  margin: 0 0 8px;
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--text-muted);
-  letter-spacing: var(--tracking-normal);
-  line-height: 1.35;
-}
-
-.withdrawal-order-context__stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 100%;
-}
-
-.withdrawal-order-context__header-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-}
-
-.withdrawal-order-context__title-why-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.withdrawal-order-context__text {
-  text-align: left;
-  min-width: 0;
-}
-
-.withdrawal-order-context__arrow-row {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  margin-top: 2px;
-}
-
-.withdrawal-order-context__arrow-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  min-width: 22px;
-  flex-shrink: 0;
-}
-
-.withdrawal-order-context__arrow {
-  color: var(--text-faint);
-}
-
-/* Withdrawal header pill — font-xs typography */
-.withdrawal-why-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+/* Withdrawal order helper (dashboard read-only) */
+.withdrawal-why-link {
+  display: inline;
   margin: 0;
-  padding: 0.3125rem 0.625rem;
-  min-height: 1.375rem;
-  border-radius: 999px;
-  box-sizing: border-box;
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background 0.12s ease,
-    color 0.12s ease,
-    border-color 0.12s ease;
+  padding: 0;
   border: none;
-  background: #e2e8f0;
-  color: #475569;
+  background: none;
+  font: inherit;
+  font-weight: inherit;
+  color: var(--warn);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.12s ease;
 }
 
-.withdrawal-why-pill:hover {
-  background: #cbd5e1;
-  color: #334155;
+.withdrawal-why-link:hover {
+  color: var(--amber-d3);
 }
 
-.withdrawal-why-pill:focus-visible {
+.withdrawal-why-link:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .withdrawal-order-explainer {

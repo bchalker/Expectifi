@@ -1,5 +1,5 @@
 import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import type { AggregatedFidelitySymbolRow, FidelityPositionRow } from '../lib/fidelityCsv'
 import {
@@ -22,7 +22,6 @@ import {
 } from '../lib/mergedDashboardPositionModels'
 import type { PositionReturnModel } from '../lib/positionReturnModel'
 import { fmt } from '../utils/format'
-import { FidelityValueHoverPortal } from './FidelityValueHoverPortal'
 import { HoldingsSymbolCard } from './HoldingsSymbolCard'
 import { Tooltip } from './Tooltip'
 import './FidelityAggregatedSymbolTable.scss'
@@ -58,18 +57,13 @@ type Props = {
   rows: AggregatedFidelitySymbolRow[]
   /** When true, same ticker appeared on more than one import line (e.g. multiple accounts). */
   combinedLines: boolean
-  /** Full merged import rows (for return model ids and value-hover source lines). */
+  /** Full merged import rows (for return model ids). */
   fidelityAllRows: FidelityPositionRow[]
   /** Dashboard only: enables Scenario column + slide panel (parent hosts panel). */
   scenarioBundle?: FidelityAggregatedScenarioBundle | null
   /** Which ticker’s scenario sheet is open (symbol display key, matches row `symbol`). */
   activeScenarioSymbol?: string | null
   onScenarioOpen?: (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => void
-}
-
-function placementForHover(rect: DOMRect): 'above' | 'below' {
-  const spaceBelow = window.innerHeight - rect.bottom
-  return spaceBelow >= 100 ? 'below' : 'above'
 }
 
 function modelsForAggregateRow(
@@ -82,27 +76,21 @@ function modelsForAggregateRow(
 
 type HoldingGroupProps = {
   row: AggregatedFidelitySymbolRow
-  mobileLayout: boolean
   scenarioBundle?: FidelityAggregatedScenarioBundle | null
   mergedModels: PositionReturnModel[]
   h: number
   activeScenarioSymbol?: string | null
   onScenarioOpen?: (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => void
-  onValueHoverEnter: (key: string, rect: DOMRect) => void
-  onValueHoverLeave: () => void
   showMergedTickerNote: boolean
 }
 
 function FidelityAggregatedHoldingGroup({
   row: r,
-  mobileLayout,
   scenarioBundle,
   mergedModels,
   h,
   activeScenarioSymbol,
   onScenarioOpen,
-  onValueHoverEnter,
-  onValueHoverLeave,
   showMergedTickerNote,
 }: HoldingGroupProps) {
   const hasBreakdown = aggregateRowHasAccountBreakdown(r)
@@ -183,9 +171,6 @@ function FidelityAggregatedHoldingGroup({
         description={descNode}
         currentValue={r.currentValue}
         costBasis={r.costBasis}
-        enableValueHover={!mobileLayout}
-        onValueHoverEnter={(rect) => onValueHoverEnter(rowKey, rect)}
-        onValueHoverLeave={onValueHoverLeave}
         scenario={scenarioProps}
         breakdown={breakdownBlock}
       />
@@ -215,32 +200,6 @@ export function FidelityAggregatedSymbolTable({
   }, [scenarioBundle, fidelityAllRows])
 
   const h = scenarioBundle ? Math.max(1, Math.min(50, Math.round(scenarioBundle.yearsToRetirement))) : 7
-
-  const [valueHover, setValueHover] = useState<{
-    key: string
-    rect: DOMRect
-    placement: 'above' | 'below'
-  } | null>(null)
-  const valueLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const valueHoverLock = useRef(false)
-
-  const clearValueLeaveTimer = () => {
-    if (valueLeaveTimer.current) {
-      clearTimeout(valueLeaveTimer.current)
-      valueLeaveTimer.current = null
-    }
-  }
-
-  const scheduleValueClose = useCallback(() => {
-    clearValueLeaveTimer()
-    valueLeaveTimer.current = setTimeout(() => {
-      if (!valueHoverLock.current) setValueHover(null)
-    }, 140)
-  }, [])
-
-  useEffect(() => () => clearValueLeaveTimer(), [])
-
-  const activeValueRow = valueHover ? rows.find((r) => r.symbol === valueHover.key) : null
 
   const showCombinedNote = combinedLines || rows.some((r) => aggregateRowHasAccountBreakdown(r))
 
@@ -290,38 +249,15 @@ export function FidelityAggregatedSymbolTable({
           <FidelityAggregatedHoldingGroup
             key={r.symbol}
             row={r}
-            mobileLayout={mobileLayout}
             scenarioBundle={scenarioBundle}
             mergedModels={mergedModels}
             h={h}
             activeScenarioSymbol={activeScenarioSymbol}
             onScenarioOpen={onScenarioOpen}
             showMergedTickerNote={showCombinedNote}
-            onValueHoverEnter={(key, rect) => {
-              clearValueLeaveTimer()
-              valueHoverLock.current = false
-              setValueHover({ key, rect, placement: placementForHover(rect) })
-            }}
-            onValueHoverLeave={scheduleValueClose}
           />
         ))}
       </div>
-      {!mobileLayout ? (
-        <FidelityValueHoverPortal
-          open={Boolean(valueHover && activeValueRow && valueHover.key === activeValueRow.symbol)}
-          rect={valueHover?.rect ?? null}
-          placement={valueHover?.placement ?? 'below'}
-          source={activeValueRow ?? rows[0]!}
-          onMouseEnterPopout={() => {
-            valueHoverLock.current = true
-            clearValueLeaveTimer()
-          }}
-          onMouseLeavePopout={() => {
-            valueHoverLock.current = false
-            scheduleValueClose()
-          }}
-        />
-      ) : null}
     </div>
   )
 }

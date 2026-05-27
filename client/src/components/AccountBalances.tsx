@@ -1,6 +1,6 @@
 import type { AnimationEvent, ChangeEvent, CSSProperties, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { IconArrowNarrowDownDashed, IconChevronDown, IconPencil } from '@tabler/icons-react'
+import { IconChevronDown, IconPencil } from '@tabler/icons-react'
 import { Button, useOverlayState } from '@heroui/react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import {
@@ -990,30 +990,21 @@ export function AccountBalances({
     if (!showWithdrawalGuidance) return null
     return (
       <>
-        <div className="withdrawal-order-context">
-          <div className="withdrawal-order-context__stack">
-            <div className="withdrawal-order-context__header-row">
-              <div className="withdrawal-order-context__title-why-row">
-                <span className="withdrawal-order-context__text">Recommended withdrawal order for age {retirementAge}</span>
-                <button
-                  type="button"
-                  className="withdrawal-why-pill"
-                  aria-expanded={withdrawalExplainerOpen}
-                  aria-controls="withdrawal-order-explainer"
-                  title="Why this order?"
-                  onClick={() => setWithdrawalExplainerOpen((o) => !o)}
-                >
-                  Why?
-                </button>
-              </div>
-            </div>
-            <div className="withdrawal-order-context__arrow-row" aria-hidden>
-              <span className="withdrawal-order-context__arrow-slot">
-                <IconArrowNarrowDownDashed size={18} stroke={1.5} className="withdrawal-order-context__arrow" />
-              </span>
-            </div>
-          </div>
-        </div>
+        <p className="account-balances-withdrawal-helper">
+          <span className="account-balances-withdrawal-helper__text">
+            Withdraw in this order to minimize taxes.
+          </span>{' '}
+          <button
+            type="button"
+            className="withdrawal-why-link"
+            aria-expanded={withdrawalExplainerOpen}
+            aria-controls="withdrawal-order-explainer"
+            title="Why this order?"
+            onClick={() => setWithdrawalExplainerOpen((o) => !o)}
+          >
+            Why?
+          </button>
+        </p>
         {withdrawalExplainerOpen ? (
           <div id="withdrawal-order-explainer" className="withdrawal-order-explainer" role="note">
             <p>{withdrawalExplainerBody(locale, taxConfig)}</p>
@@ -1688,7 +1679,7 @@ export function AccountBalances({
   const accountBalancesBody = (
     <>
       {mergedDashboard ? (
-        <div className="account-balances-stack">
+        <>
           {renderHiddenCsvFileInput()}
           <ManualProjectionsCallout
             hasPortfolioBalances={c.hasPortfolioBalances}
@@ -1709,26 +1700,29 @@ export function AccountBalances({
                     with custom scenarios
                   </p>
                 ) : null}
+                {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
               </div>
               <div className="account-balances-header-row__actions">{headerManageMenu}</div>
             </div>
           ) : null}
-          {csvSessionBanner}
-          <div
-            className={`account-balances-card-inner-wrap${
-              balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
-            }${!hasAnyAccountCardData ? ' account-balances-card-inner-wrap--empty-state' : ''}`}
-            style={hasAnyAccountCardData ? { ...cardStyle, marginBottom: '1.75rem' } : undefined}
-          >
-            {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
-            {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
-            {renderMergedDashboardOrderedContent()}
-            {totalRetirementBar}
+          <div className="account-balances-stack">
+            {csvSessionBanner}
+            <div
+              className={`account-balances-card-inner-wrap${
+                balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
+              }${!hasAnyAccountCardData ? ' account-balances-card-inner-wrap--empty-state' : ''}`}
+              style={hasAnyAccountCardData ? { ...cardStyle, marginBottom: '1.75rem' } : undefined}
+            >
+              {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
+              {renderMergedDashboardOrderedContent()}
+              {totalRetirementBar}
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         <>
           <div className="input-col-title">Retirement account balances</div>
+          {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
           {!readOnly && (hasRetirementAccountData || balanceMode === 'fidelity') ? (
             <div className="balance-input-toolbar">
               {showBalanceEntryActions ? renderAccountBalancesManageMenu() : null}
@@ -1746,19 +1740,20 @@ export function AccountBalances({
             </div>
           ) : null}
 
-          <div
-            className={`account-balances-card-inner-wrap account-balances-card-inner-wrap--standalone${
-              !hasRetirementAccountData ? ' account-balances-card-inner-wrap--empty-state' : ''
-            }${
-              removeAccountsModalState.isOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
-            }`}
-            style={cardStyle}
-          >
+          <div className="account-balances-stack">
             {csvSessionBanner}
-            {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
-            {renderBalanceRows()}
-            {renderReplaceSourceConfirmOverlay()}
-            {renderRemoveAccountsConfirmOverlay()}
+            <div
+              className={`account-balances-card-inner-wrap account-balances-card-inner-wrap--standalone${
+                !hasRetirementAccountData ? ' account-balances-card-inner-wrap--empty-state' : ''
+              }${
+                removeAccountsModalState.isOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
+              }`}
+              style={cardStyle}
+            >
+              {renderBalanceRows()}
+              {renderReplaceSourceConfirmOverlay()}
+              {renderRemoveAccountsConfirmOverlay()}
+            </div>
           </div>
           {totalRetirementBar}
         </>

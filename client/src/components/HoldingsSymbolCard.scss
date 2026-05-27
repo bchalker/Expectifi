@@ -7,10 +7,12 @@
   padding: 0;
   margin: 0;
   border: none;
-  border-radius: 0;
+  border-radius: 6px;
   background: #ffffff;
+  background: rgba(255,255,255, .75);
   box-shadow: var(--shadow-account-divider);
   box-sizing: border-box;
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -280,7 +282,7 @@
     .holdings-scenario-trigger--peryear
   ) {
   border: 1px solid var(--border);
-  background: var(--surface2);
+  background: var(--surface);
 }
 
 .holdings-symbol-card__scenario .holdings-scenario-trigger--bear,
@@ -363,12 +365,5 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 620px) {
-  .holdings-symbol-card__value.holdings-value-trigger {
-    text-decoration: none;
-    cursor: inherit;
   }
 }
