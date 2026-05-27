@@ -208,7 +208,7 @@ type Props = {
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
 const SUBHEADER_WAVE_BACK_D = "M0 0v100S0 4 500 4s500 96 500 96V0H0Z";
-/** Front divider (1000×72) — fill from CSS for income-phase gold transition */
+/** Front divider (1000×72) — fill from CSS (.subheader-bubble__front-path) */
 const SUBHEADER_WAVE_FRONT_D = "M0 0v3c350 0 350 69 500 69S650 3 1000 3V0H0Z";
 
 export function SubHeader({

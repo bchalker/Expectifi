@@ -384,12 +384,12 @@ export function SnapshotPanel({
           <Tabs.ListContainer>
             <Tabs.List aria-label="Snapshot">
               <Tabs.Tab id="overview">
-                Overview
+                <span className="strip-snapshot-tab__label">Overview</span>
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="tax">
                 <Tabs.Separator />
-                Tax Breakdown
+                <span className="strip-snapshot-tab__label">Tax Breakdown</span>
                 <Tabs.Indicator />
               </Tabs.Tab>
             </Tabs.List>

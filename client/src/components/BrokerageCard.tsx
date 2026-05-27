@@ -6,7 +6,6 @@ import { flattenBatches, latestBatchCustodian, loadStoredFidelityImport } from '
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
-import { useHoldingQuotes } from '../lib/holdingQuotes'
 import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityBucketHoldingsSubrows } from './FidelityBucketHoldingsSubrows'
 import { FidelityCsvImport } from './FidelityCsvImport'
@@ -51,8 +50,7 @@ export function BrokerageCard({
 
   const brokeragePositions = useMemo(() => positionsForBrokerage(fidelityRows), [fidelityRows])
   const hasFidelityBrokerage = brokeragePositions.length > 0
-  const brokerageQuoteMap = useHoldingQuotes(fidelityRows, readOnly && hasFidelityBrokerage)
-  const brokerageTrend = computeBucketTrendDisplay(brokeragePositions, brokerageQuoteMap)
+  const brokerageTrend = computeBucketTrendDisplay(brokeragePositions)
 
   const importCustodian = useMemo(() => {
     void fidelityImportRev
@@ -84,7 +82,7 @@ export function BrokerageCard({
     if (readOnly) {
       if (brokerageMode === 'manual') {
         return (
-          <div className="edit-row" style={{ borderBottom: 'none', flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <span className="edit-row-label">Taxable brokerage</span>
               <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(brkBal)}</span>
@@ -101,7 +99,7 @@ export function BrokerageCard({
         )
       }
       return (
-        <div className="edit-row edit-row--fidelity-bucket" style={{ borderBottom: 'none' }}>
+        <div className="edit-row edit-row--portfolio-bucket edit-row--no-divider">
           <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
           <FidelityBucketHoldingsSubrows
             positions={brokeragePositions}
@@ -115,7 +113,7 @@ export function BrokerageCard({
     if (configureInputsOnly) {
       if (brokerageMode === 'manual') {
         return (
-          <div className="edit-row" style={{ borderBottom: 'none', flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <span className="edit-row-label">Taxable brokerage</span>
               <div className="num-input-wrap">
@@ -143,7 +141,7 @@ export function BrokerageCard({
 
     if (brokerageMode === 'manual') {
       return (
-        <div className="edit-row" style={{ borderBottom: 'none', flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+        <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span className="edit-row-label">Taxable brokerage</span>
             <div className="num-input-wrap">
@@ -169,7 +167,7 @@ export function BrokerageCard({
       )
     }
     return (
-      <div className="edit-row edit-row--fidelity-bucket" style={{ borderBottom: 'none' }}>
+      <div className="edit-row edit-row--portfolio-bucket edit-row--no-divider">
         <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
         <FidelityBucketHoldingsSubrows
           positions={brokeragePositions}

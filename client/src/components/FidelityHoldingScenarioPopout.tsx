@@ -97,11 +97,11 @@ function FidelityYearPctField({
   )
 
   return (
-    <div className="fidelity-scenario-popout__year-input-wrap">
+    <div className="holding-scenario-popout__year-input-wrap">
       <input
         type="text"
         inputMode="decimal"
-        className="fidelity-scenario-popout__year-input"
+        className="holding-scenario-popout__year-input"
         aria-label={`Return percent for ${calendarYear}`}
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -113,7 +113,7 @@ function FidelityYearPctField({
           }
         }}
       />
-      <span className="fidelity-scenario-popout__year-suffix" aria-hidden>
+      <span className="holding-scenario-popout__year-suffix" aria-hidden>
         %
       </span>
     </div>
@@ -135,21 +135,21 @@ function OutlookMarketTabs({
   tiles: readonly OutlookTile[]
 }) {
   return (
-    <div className="fidelity-scenario-outlook-tabs" role="tablist" aria-label="Market outlook">
-      <div className="fidelity-scenario-outlook-tabs__list">
+    <div className="holding-scenario-outlook-tabs" role="tablist" aria-label="Market outlook">
+      <div className="holding-scenario-outlook-tabs__list">
         {tiles.map((t) => (
           <button
             key={t.choice}
             type="button"
             role="tab"
             aria-selected={value === t.choice}
-            className={`fidelity-scenario-outlook-tabs__tab fidelity-scenario-outlook-tabs__tab--${t.choice}${
-              value === t.choice ? ' fidelity-scenario-outlook-tabs__tab--selected' : ''
+            className={`holding-scenario-outlook-tabs__tab holding-scenario-outlook-tabs__tab--${t.choice}${
+              value === t.choice ? ' holding-scenario-outlook-tabs__tab--selected' : ''
             }`}
             onClick={() => onChange(t.choice)}
           >
-            <span className="fidelity-scenario-outlook-tabs__tab-label">{t.label}</span>
-            <span className="fidelity-scenario-outlook-tabs__tab-hint">{t.hint}</span>
+            <span className="holding-scenario-outlook-tabs__tab-label">{t.label}</span>
+            <span className="holding-scenario-outlook-tabs__tab-hint">{t.hint}</span>
           </button>
         ))}
       </div>
@@ -295,7 +295,7 @@ export function FidelityHoldingScenarioPanel({
 
   const onDefaultOverlayAnimationEnd = useCallback((e: AnimationEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget) return
-    if (e.animationName !== 'fidelity-scenario-overlay-out') return
+    if (e.animationName !== 'holding-scenario-overlay-out') return
     setDefaultOverlayExiting(false)
   }, [])
 
@@ -398,12 +398,12 @@ export function FidelityHoldingScenarioPanel({
 
   const yearGrid =
     primaryModel && activeIntent === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
-      <div className="fidelity-scenario-intent__year-grid">
+      <div className="holding-scenario-intent__year-grid">
         {modelingCalendarYears(calY, h).map((y, i) => {
           const rates = padYearlyReturns(primaryModel.yearlyReturns, h, primaryModel.flatRate)
           return (
-            <div key={y} className="fidelity-scenario-intent__year-item">
-              <span className="fidelity-scenario-popout__year-key">{y}</span>
+            <div key={y} className="holding-scenario-intent__year-item">
+              <span className="holding-scenario-popout__year-key">{y}</span>
               <FidelityYearPctField
                 calendarYear={y}
                 rateDecimal={rates[i] ?? 0}
@@ -438,48 +438,48 @@ export function FidelityHoldingScenarioPanel({
   )
 
   return (
-    <div className="fidelity-scenario-popout fidelity-scenario-popout--panel">
-      <header className="fidelity-scenario-popout__head">
-        <div className="fidelity-scenario-popout__head-stack">
-          <div className="fidelity-scenario-popout__head-row">
-            <h2 className="fidelity-scenario-popout__title" id="fidelity-scenario-panel-title">
+    <div className="holding-scenario-popout holding-scenario-popout--panel">
+      <header className="holding-scenario-popout__head">
+        <div className="holding-scenario-popout__head-stack">
+          <div className="holding-scenario-popout__head-row">
+            <h2 className="holding-scenario-popout__title" id="holding-scenario-panel-title">
               How would you like to set{' '}
-              <span className="fidelity-scenario-popout__title-ticker">{scenarioTickerLabel || 'this ticker'}</span>{' '}
+              <span className="holding-scenario-popout__title-ticker">{scenarioTickerLabel || 'this ticker'}</span>{' '}
               growth?
             </h2>
-            <button type="button" className="fidelity-scenario-popout__close" onClick={onClose} aria-label="Close">
+            <button type="button" className="holding-scenario-popout__close" onClick={onClose} aria-label="Close">
               <IconX size={14} stroke={1.5} aria-hidden />
             </button>
           </div>
         </div>
       </header>
-      <div className="fidelity-scenario-popout__body">
-        <SimpleBar className="fidelity-scenario-popout__scroll" autoHide={false}>
-          <div className="fidelity-scenario-popout__scroll-inner">
+      <div className="holding-scenario-popout__body">
+        <SimpleBar className="holding-scenario-popout__scroll" autoHide={false}>
+          <div className="holding-scenario-popout__scroll-inner">
             {showMoneyMarketNotice ? (
-              <p className="fidelity-scenario-popout__money-market-note" role="note">
+              <p className="holding-scenario-popout__money-market-note" role="note">
                 Money market funds are pretty stable but won't move the needle much on returns, so scenario modeling isn't really useful here — but you can have at it if you want!
               </p>
             ) : null}
-            <div className="fidelity-scenario-popout__intent-stack">
+            <div className="holding-scenario-popout__intent-stack">
               {showDefaultOverlay ? (
                 <div
-                  className={`fidelity-scenario-intent__default-mode-overlay${
-                    defaultOverlayExiting && !defaultResetOn ? ' fidelity-scenario-intent__default-mode-overlay--exiting' : ''
+                  className={`holding-scenario-intent__default-mode-overlay${
+                    defaultOverlayExiting && !defaultResetOn ? ' holding-scenario-intent__default-mode-overlay--exiting' : ''
                   }`}
                   role="status"
                   aria-live="polite"
                   onAnimationEnd={onDefaultOverlayAnimationEnd}
                 >
-                  <div className="fidelity-scenario-intent__default-mode-overlay-inner">
-                    <div className="fidelity-scenario-intent__default-mode-overlay-card">
+                  <div className="holding-scenario-intent__default-mode-overlay-inner">
+                    <div className="holding-scenario-intent__default-mode-overlay-card">
                       <div
                         role="switch"
                         tabIndex={0}
                         aria-checked={defaultResetOn}
-                        aria-labelledby="fidelity-scenario-default-switch-label"
-                        className={`fidelity-scenario-popout__default-switch-card fidelity-scenario-popout__default-switch-card--in-message${
-                          defaultResetOn ? '' : ' fidelity-scenario-popout__default-switch-card--off'
+                        aria-labelledby="holding-scenario-default-switch-label"
+                        className={`holding-scenario-popout__default-switch-card holding-scenario-popout__default-switch-card--in-message${
+                          defaultResetOn ? '' : ' holding-scenario-popout__default-switch-card--off'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation()
@@ -492,14 +492,14 @@ export function FidelityHoldingScenarioPanel({
                           }
                         }}
                       >
-                        <div className="fidelity-scenario-popout__switch-row fidelity-scenario-popout__switch-row--in-message">
-                          <span className="fidelity-scenario-intent__default-mode-overlay-switch-label" id="fidelity-scenario-default-switch-label">
+                        <div className="holding-scenario-popout__switch-row holding-scenario-popout__switch-row--in-message">
+                          <span className="holding-scenario-intent__default-mode-overlay-switch-label" id="holding-scenario-default-switch-label">
                             Using your global default rate of <strong>{globalPct}%</strong>
                           </span>
-                          <span className="fidelity-scenario-native-switch" aria-hidden />
+                          <span className="holding-scenario-native-switch" aria-hidden />
                         </div>
                       </div>
-                      <p className="fidelity-scenario-intent__default-mode-overlay-body">
+                      <p className="holding-scenario-intent__default-mode-overlay-body">
                         Turn off the switch to model bull, bear, custom, or per-year returns for this ticker.
                       </p>
                     </div>
@@ -507,11 +507,11 @@ export function FidelityHoldingScenarioPanel({
                 </div>
               ) : null}
               {nHoldings > 1 ? (
-                <p className="fidelity-scenario-popout__question-sub">
+                <p className="holding-scenario-popout__question-sub">
                   This will apply to the <strong>{nHoldings}</strong> holdings of this ticker across your accounts.
                 </p>
               ) : null}
-              <p className="fidelity-scenario-popout__intent-intro">
+              <p className="holding-scenario-popout__intent-intro">
                 Choose how you want to project growth for this holding. You can stick with the default rate, apply a market
                 outlook that adjusts based on broader conditions, punch in a specific rate you have in mind, or get granular
                 and set a different rate for each year. Pick whatever matches how you're thinking about this position.
@@ -521,7 +521,7 @@ export function FidelityHoldingScenarioPanel({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="fidelity-scenario-intent__keep-default-card"
+                  className="holding-scenario-intent__keep-default-card"
                   onPress={() => {
                     onDefaultResetSwitchChange(true)
                     onClose()
@@ -531,7 +531,7 @@ export function FidelityHoldingScenarioPanel({
                 </Button>
               ) : null}
               <Accordion
-                className={`fidelity-scenario-intent__accordion${defaultResetOn ? ' fidelity-scenario-intent__accordion--locked' : ''}`}
+                className={`holding-scenario-intent__accordion${defaultResetOn ? ' holding-scenario-intent__accordion--locked' : ''}`}
                 aria-label="Growth modeling approach"
                 hideSeparator
                 expandedKeys={openIntent && !defaultResetOn ? [openIntent] : []}
@@ -544,34 +544,34 @@ export function FidelityHoldingScenarioPanel({
                     <Accordion.Item
                       key={opt.id}
                       id={opt.id}
-                      className={`fidelity-scenario-intent__accordion-item fidelity-scenario-intent__accordion-item--${opt.id}${
-                        isActive ? ' fidelity-scenario-intent__accordion-item--active' : ''
+                      className={`holding-scenario-intent__accordion-item holding-scenario-intent__accordion-item--${opt.id}${
+                        isActive ? ' holding-scenario-intent__accordion-item--active' : ''
                       }`}
                     >
                       <Accordion.Heading>
-                        <Accordion.Trigger className="fidelity-scenario-intent__accordion-trigger">
-                          <span className="fidelity-scenario-intent__accordion-trigger-leading">
+                        <Accordion.Trigger className="holding-scenario-intent__accordion-trigger">
+                          <span className="holding-scenario-intent__accordion-trigger-leading">
                             <span
-                              className={`fidelity-scenario-intent__accordion-check${
-                                isActive ? ' fidelity-scenario-intent__accordion-check--visible' : ''
+                              className={`holding-scenario-intent__accordion-check${
+                                isActive ? ' holding-scenario-intent__accordion-check--visible' : ''
                               }`}
                               aria-hidden
                             >
                               <IconCheck size={16} stroke={2.5} />
                             </span>
-                            <span className="fidelity-scenario-intent__accordion-trigger-label">{opt.primary}</span>
+                            <span className="holding-scenario-intent__accordion-trigger-label">{opt.primary}</span>
                           </span>
                           {isCustom && !defaultResetOn ? (
                             <div
-                              className="fidelity-scenario-intent__custom-trigger-field"
+                              className="holding-scenario-intent__custom-trigger-field"
                               onClick={(e) => e.stopPropagation()}
                               onKeyDown={(e) => e.stopPropagation()}
                             >
-                              <div className="fidelity-scenario-intent__custom-input-wrap">
+                              <div className="holding-scenario-intent__custom-input-wrap">
                                 <input
                                   type="text"
                                   inputMode="decimal"
-                                  className="fidelity-scenario-intent__custom-input"
+                                  className="holding-scenario-intent__custom-input"
                                   aria-label="Custom annual return percent"
                                   value={draftPct}
                                   onChange={(e) => {
@@ -580,19 +580,19 @@ export function FidelityHoldingScenarioPanel({
                                     patchAll('custom', parsePct(s))
                                   }}
                                 />
-                                <span className="fidelity-scenario-intent__custom-suffix" aria-hidden>
+                                <span className="holding-scenario-intent__custom-suffix" aria-hidden>
                                   %
                                 </span>
                               </div>
                             </div>
                           ) : (
-                            <Accordion.Indicator className="fidelity-scenario-intent__accordion-indicator" />
+                            <Accordion.Indicator className="holding-scenario-intent__accordion-indicator" />
                           )}
                         </Accordion.Trigger>
                       </Accordion.Heading>
                       {isCustom ? null : (
                         <Accordion.Panel>
-                          <Accordion.Body className="fidelity-scenario-intent__accordion-body">
+                          <Accordion.Body className="holding-scenario-intent__accordion-body">
                             {opt.id === 'outlook' ? (
                               <OutlookMarketTabs
                                 value={outlookTabKey}
@@ -612,8 +612,8 @@ export function FidelityHoldingScenarioPanel({
           </div>
         </SimpleBar>
       </div>
-      <footer className="fidelity-scenario-popout__foot">
-        <Button type="button" size="sm" variant="primary" className="fidelity-scenario-popout__done" onPress={onClose}>
+      <footer className="holding-scenario-popout__foot">
+        <Button type="button" size="sm" variant="primary" className="holding-scenario-popout__done" onPress={onClose}>
           Done
         </Button>
       </footer>

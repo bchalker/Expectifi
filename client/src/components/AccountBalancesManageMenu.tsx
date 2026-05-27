@@ -18,7 +18,7 @@ import {
 } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { usePlan } from '../hooks/usePlan'
-import { isPositionsCsvCustodian, type PositionsCsvCustodian } from '../lib/positionsCsvImport'
+import { CSV_CUSTODIAN_OPTIONS, isPositionsCsvCustodian, type PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import type { PlaidItemSummary } from '../lib/api/plaid'
 import { AppButton } from './ui/AppButton'
 import { Tooltip } from './Tooltip'
@@ -28,13 +28,6 @@ import {
   formatPlaidSyncTime,
 } from './PlaidConnectionHeader'
 import './AccountBalancesManageMenu.scss'
-
-const CSV_CUSTODIANS: { id: PositionsCsvCustodian; label: string }[] = [
-  { id: 'fidelity', label: 'Fidelity' },
-  { id: 'schwab', label: 'Charles Schwab' },
-  { id: 'vanguard', label: 'Vanguard' },
-  { id: 'other', label: 'Other' },
-]
 
 const MANAGE_MENU_MIN_WIDTH = 280
 const MANAGE_MENU_MAX_WIDTH = 360
@@ -404,7 +397,7 @@ export function AccountBalancesManageMenu({
                   </button>
                   {csvExpanded ? (
                     <ul className="account-balances-manage__csv-list">
-                      {CSV_CUSTODIANS.map((o) => (
+                      {CSV_CUSTODIAN_OPTIONS.map((o) => (
                         <li key={o.id} role="none">
                           <button
                             type="button"

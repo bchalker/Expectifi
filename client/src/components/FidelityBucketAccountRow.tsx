@@ -15,13 +15,15 @@ type Props = {
 export function FidelityBucketAccountRow({ label, total, trend, showViewHoldings = true }: Props) {
   return (
     <>
-      <div className="fidelity-bucket-row__start">
+      <div className="portfolio-bucket-row__start">
         <span className="edit-row-label">{label}</span>
-        {showViewHoldings ? <ViewHoldingsHint /> : null}
       </div>
-      <div className="edit-row-right fidelity-bucket-row__end">
-        <div className="fidelity-bucket-row__values">
-          <span className="edit-row-val fidelity-bucket-total">{total}</span>
+      <div className="edit-row-right portfolio-bucket-row__end">
+        <div className="portfolio-bucket-row__values">
+          <div className="portfolio-bucket-row__amount-row">
+            <span className="edit-row-val portfolio-bucket-total">{total}</span>
+            {showViewHoldings ? <ViewHoldingsHint /> : null}
+          </div>
           <BucketTotalTrend trend={trend} />
         </div>
       </div>

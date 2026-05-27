@@ -1,23 +1,29 @@
 .app-privacy-trust {
-  flex-shrink: 0;
-  width: var(--layout-app-boundary);
-  max-width: 100%;
-  margin-top: auto;
-  margin-inline: auto;
-  padding: 1.25rem var(--layout-app-inner-pad) 1.5rem;
+  position: fixed;
+  z-index: var(--z-privacy-trust);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.875rem var(--layout-app-inner-pad)
+    calc(0.875rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+  background: var(--page-bg);
+  border-top: 1px solid var(--border);
 }
 
 .app-privacy-trust--divider {
-  border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
+  padding-top: 1rem;
 }
 
 .app-privacy-trust__text {
-  margin: 0;
-  width: 100%;
-  font-size: var(--text-sm);
-  line-height: 1.45;
+  margin: 0 auto;
+  width: var(--layout-app-boundary);
+  max-width: 100%;
+  font-size: var(--text-xs);
+  line-height: 1.15;
   text-align: center;
   color: var(--text-muted);
   box-sizing: border-box;

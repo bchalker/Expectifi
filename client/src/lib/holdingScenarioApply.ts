@@ -143,7 +143,7 @@ export function scenarioColumnShortLabel(
   if (choice === SCENARIO_MIXED) return 'Various'
   switch (choice) {
     case 'default':
-      return 'Default'
+      return 'Scenario'
     case 'bull':
       return 'Bull'
     case 'bear':

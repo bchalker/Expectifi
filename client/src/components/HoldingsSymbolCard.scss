@@ -1,0 +1,374 @@
+/* Shared holdings symbol row — default stacks scenario below at ≤620px; row layout above */
+.holdings-symbol-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: var(--shadow-account-divider);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 4px green inset bar — scales in/out from the left (no blur). */
+.holdings-symbol-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--green1, var(--success, #15803d));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s ease-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.holdings-symbol-card--scenario-active::before {
+  transform: scaleX(1);
+}
+
+.holdings-symbol-card--scenario-active {
+  background: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holdings-symbol-card::before {
+    transition: none;
+  }
+
+  .holdings-symbol-card--scenario-active::before {
+    transform: scaleX(1);
+  }
+
+  .holdings-symbol-card__scenario-dot {
+    transition: none;
+  }
+
+  .holdings-symbol-card--scenario-active .holdings-symbol-card__scenario-dot {
+    width: 5px;
+    margin-right: 5px;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .holdings-symbol-card__symbol {
+    transition: none;
+  }
+}
+
+.holdings-symbol-card__content {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem var(--layout-app-inner-pad, 10px);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.holdings-symbol-card__breakdown {
+  flex: 1 1 100%;
+  min-width: 0;
+  // margin-top: 0.2rem;
+  // padding-top: 0.2rem;
+  // border-top: 1px solid var(--border);
+}
+
+.holdings-symbol-card__breakdown-note {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  max-width: none;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--text-faint);
+}
+
+.holdings-symbol-card__breakdown-note + .holdings-breakdown-block {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.holdings-symbol-card__left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.holdings-symbol-card__scenario-dot {
+  flex-shrink: 0;
+  width: 0;
+  height: 5px;
+  margin-right: 0;
+  border-radius: 50%;
+  background: var(--green1, var(--success, #15803d));
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    width 0.25s ease-out,
+    margin-right 0.25s ease-out,
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out;
+}
+
+.holdings-symbol-card--scenario-active .holdings-symbol-card__scenario-dot {
+  width: 5px;
+  margin-right: 5px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.holdings-symbol-card__left-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.holdings-symbol-card__symbol-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.holdings-symbol-card__symbol {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-snug);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  transition: color 0.25s ease-out;
+}
+
+.holdings-symbol-card--scenario-active .holdings-symbol-card__symbol {
+  color: var(--green1, var(--success, #15803d));
+}
+
+.holdings-symbol-card__desc {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+.holdings-symbol-card__desc--trunc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.holdings-symbol-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.holdings-symbol-card__trailing {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.holdings-symbol-card__value {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-snug);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+
+.holdings-symbol-card__field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  text-align: right;
+}
+
+.holdings-symbol-card__field-label {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--text-muted);
+}
+
+.holdings-symbol-card__basis {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+
+.holdings-symbol-card__scenario {
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem var(--layout-app-inner-pad, 10px);
+  box-sizing: border-box;
+  box-shadow: 0 -4px 26px rgba(0, 0, 0, 0.07);
+}
+
+.holdings-symbol-card__scenario-slot {
+  width: 100%;
+  min-width: 0;
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger--chosen {
+  font-weight: 600;
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger--chosen .holdings-scenario-trigger__label {
+  font-weight: 600;
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger:not(
+    .holdings-scenario-trigger--bear,
+    .holdings-scenario-trigger--bull,
+    .holdings-scenario-trigger--normal,
+    .holdings-scenario-trigger--custom,
+    .holdings-scenario-trigger--peryear
+  ) {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.holdings-symbol-card__scenario .holdings-scenario-trigger--bear,
+.holdings-symbol-card__scenario .holdings-scenario-trigger--bull,
+.holdings-symbol-card__scenario .holdings-scenario-trigger--normal,
+.holdings-symbol-card__scenario .holdings-scenario-trigger--custom,
+.holdings-symbol-card__scenario .holdings-scenario-trigger--peryear {
+  border: none;
+}
+
+.holdings-symbol-table--no-scenario .holdings-symbol-card__scenario {
+  display: none;
+}
+
+/* ≥621px — scenario column to the right of left/right grouping */
+@media (min-width: 621px) {
+  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
+    --holdings-scenario-col-w: calc(19.5ch + 30px);
+  }
+
+  .holdings-symbol-card {
+    flex-direction: row;
+    align-items: center;
+    box-shadow: none;
+  }
+
+  .holdings-symbol-card__content {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 1rem;
+  }
+
+  .holdings-symbol-card__breakdown {
+    margin-top: 0.15rem;
+    padding-top: 0.2rem;
+  }
+
+  .holdings-symbol-card__desc--trunc {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+  }
+
+  .holdings-symbol-card__field {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .holdings-symbol-card__field--value .holdings-symbol-card__field-label {
+    flex-shrink: 0;
+  }
+
+  .holdings-symbol-card__scenario {
+    flex: 0 0 var(--holdings-scenario-col-w);
+    width: var(--holdings-scenario-col-w);
+    min-width: var(--holdings-scenario-col-w);
+    max-width: var(--holdings-scenario-col-w);
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    box-shadow: -4px 0 26px rgba(0, 0, 0, 0.07);
+  }
+
+  .holdings-symbol-card__scenario-slot {
+    display: flex;
+
+    align-items: flex-start;
+    height: 100%;
+    padding-top: 1rem;
+  }
+
+  .holdings-symbol-card__scenario-slot .holdings-scenario-trigger__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 620px) {
+  .holdings-symbol-card__value.holdings-value-trigger {
+    text-decoration: none;
+    cursor: inherit;
+  }
+}

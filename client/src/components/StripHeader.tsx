@@ -106,22 +106,20 @@ export function StripHeader({
                     retirementAge={targetRetirementAge}
                     onEditPosition={onOpenPositionReturnEditor}
                     onRemovePositionReturn={onRemovePositionReturn}
-                    slider={
-                      <div className="range-inline-row">
-                        <input
-                          type="range"
-                          min={3}
-                          max={55}
-                          step={0.5}
-                          value={retRate * 100}
-                          onChange={(e) => onRetRate(Number(e.target.value) / 100)}
-                        />
-                        <div className="range-inline-ticks">
-                          <span className="range-inline-tick">3%</span>
-                          <span className="range-inline-tick range-inline-tick--end">
-                            55%
-                          </span>
-                        </div>
+                    sliderTrack={
+                      <input
+                        type="range"
+                        min={3}
+                        max={55}
+                        step={0.5}
+                        value={retRate * 100}
+                        onChange={(e) => onRetRate(Number(e.target.value) / 100)}
+                      />
+                    }
+                    sliderTicks={
+                      <div className="range-inline-ticks">
+                        <span className="range-inline-tick">3%</span>
+                        <span className="range-inline-tick range-inline-tick--end">55%</span>
                       </div>
                     }
                   />

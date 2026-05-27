@@ -37,7 +37,7 @@ function BreakdownValueCell({ r }: { r: FidelityPositionRow }) {
   return (
     <>
       <span
-        className="fidelity-agg-value-trigger"
+        className="holdings-value-trigger"
         onMouseEnter={(e) => {
           clearT()
           lock.current = false
@@ -81,18 +81,18 @@ export function FidelityAccountPositionsTable({
   if (!sorted.length) return null
 
   return (
-    <div className="fidelity-acct-positions">
+    <div className="holdings-positions-table">
       <table>
         <thead>
           <tr>
             <th>Symbol</th>
-            <th className="fidelity-th-upper">Description</th>
+            <th className="holdings-th-upper">Description</th>
             <th style={{ textAlign: 'right' }}>Value</th>
-            <th className="fidelity-th-upper" style={{ textAlign: 'right' }}>
+            <th className="holdings-th-upper" style={{ textAlign: 'right' }}>
               Cost basis
             </th>
             {showScenarioColumn ? (
-              <th className="fidelity-th-upper fidelity-agg-scenario-th">Scenario</th>
+              <th className="holdings-th-upper holdings-scenario-th">Scenario</th>
             ) : null}
           </tr>
         </thead>
@@ -105,7 +105,7 @@ export function FidelityAccountPositionsTable({
             return (
               <tr key={rowKey}>
                 <td className="sym">{r.symbol}</td>
-                <td className="fidelity-desc-cell fidelity-desc-cell--trunc">
+                <td className="holdings-desc-cell holdings-desc-cell--trunc">
                   {showTip ? (
                     <Tooltip content={fullDesc} placement="top">
                       <span>{shortDesc}</span>
@@ -121,7 +121,7 @@ export function FidelityAccountPositionsTable({
                   {r.costBasis != null ? fmt(r.costBasis) : '—'}
                 </td>
                 {showScenarioColumn ? (
-                  <td className="val fidelity-agg-scenario-cell" style={{ color: 'var(--text-faint)' }}>
+                  <td className="val holdings-scenario-cell" style={{ color: 'var(--text-faint)' }}>
                     —
                   </td>
                 ) : null}
@@ -142,16 +142,16 @@ export function FidelityAccountBreakdown({ rows }: Props) {
   return (
     <>
       {accountGroups.map((g) => (
-        <details key={g.accountName} className="fidelity-acct-details">
+        <details key={g.accountName} className="imported-account-disclosure">
           <summary>
-            <div className="fidelity-acct-summary-main">
-              <span className="fidelity-acct-fido-name">{g.accountName}</span>
-              <span className={`fidelity-acct-mapped${g.bucket === 'unknown' ? ' unmapped' : ''}`}>
+            <div className="imported-account-summary-main">
+              <span className="imported-account-name">{g.accountName}</span>
+              <span className={`imported-account-bucket-label${g.bucket === 'unknown' ? ' unmapped' : ''}`}>
                 → {g.calculatorLabel}
                 {g.bucket === 'unknown' ? ' (not applied to totals)' : ''}
               </span>
             </div>
-            <span className="fidelity-acct-summary-total">{fmt(g.total)}</span>
+            <span className="imported-account-summary-total">{fmt(g.total)}</span>
           </summary>
           <FidelityAccountPositionsTable rows={g.rows} />
         </details>

@@ -1,4 +1,4 @@
-import { parseStoredUserProfile, type StoredUserProfile } from '../userProfileStorage'
+import { parseStoredUserProfile, type StoredUserProfile } from '../storedUserProfile'
 import { EXPECTIFI_PROFILE_KEY } from './keys'
 import type { StoredPlanProfile } from './types'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'

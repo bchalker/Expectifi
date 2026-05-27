@@ -35,7 +35,7 @@
   min-height: 0;
   margin-inline: auto;
   padding-top: 0;
-  padding-bottom: 1rem;
+  padding-bottom: calc(var(--app-privacy-trust-h) + 0.5rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 

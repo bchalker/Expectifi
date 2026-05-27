@@ -1,16 +1,37 @@
 .view-holdings-hint {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 500;
+  flex-shrink: 0;
   color: var(--text-muted);
-  line-height: 1.2;
+  transition: color 0.15s ease;
 }
 
 .view-holdings-hint__icon {
   flex-shrink: 0;
-  color: var(--text-faint);
-  transform: scaleX(-1);
+  color: currentColor;
+  transition: transform 0.2s ease;
+}
+
+/* Closed: medium gray, chevron up */
+details:not([open]) > summary .view-holdings-hint {
+  color: var(--text-muted);
+}
+
+details:not([open]) > summary .view-holdings-hint__icon {
+  transform: rotate(180deg);
+}
+
+/* Open: darker amber, chevron down */
+details[open] > summary .view-holdings-hint {
+  color: var(--color-amber-dark);
+}
+
+details[open] > summary .view-holdings-hint__icon {
+  transform: rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-holdings-hint__icon {
+    transition: none;
+  }
 }

@@ -70,9 +70,9 @@ export function clearEphemeralGuestStorage(): void {
   try {
     if (!isBrowserSaved) {
       clearStoredAppState()
-      clearStoredFidelityImport()
       clearStoredManualAccounts()
     }
+    clearStoredFidelityImport()
     clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearGuestWhereToRetireStorage()

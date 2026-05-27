@@ -4,10 +4,12 @@ import {
   loadStoredAppState,
 } from './appStateStorage'
 import { applyFidelityBalanceOverrides } from './portfolioSourceExclusivity'
-import { DEFAULT_INCOME_PRESETS, type CalculatorInputs, type CalculatorUi } from './computeResults'
+import type { CalculatorInputs, CalculatorUi } from './computeResults'
+import { DEFAULT_INCOME_PRESETS } from './incomePresets'
+import { stripFinancialFields } from './calculatorInputSanitize'
 import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hasPlanningProfilePrefs, loadLocalUserPrefs, userPrefsToCalculatorPatch } from './userPrefs'
-import { loadUserProfile, profileToCalculatorPatch, stripFinancialFields } from './userProfileStorage'
+import { loadUserProfile, profileToCalculatorPatch } from './userProfileStorage'
 
 export const defaultCalculatorInputs: CalculatorInputs = {
   base401k: 0,

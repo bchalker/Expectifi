@@ -7,6 +7,7 @@ import {
   resolveOnboardingAccountLocale,
 } from './onboardingAccountTypesByLocale'
 import { loadSessionOnboardingAccounts } from './sessionFlags'
+import { clearPlanAccounts } from './planStorage/accounts'
 import { canWritePlanLocalStorage, loadPlanAccounts, savePlanAccounts } from './planStorage'
 
 export const MANUAL_ACCOUNTS_STORAGE_KEY = 'retirement-calculator/manual-account-entries-v1'
@@ -275,6 +276,7 @@ export function saveStoredManualAccounts(state: StoredManualAccounts): void {
 }
 
 export function clearStoredManualAccounts(): void {
+  clearPlanAccounts()
   try {
     localStorage.removeItem(MANUAL_ACCOUNTS_STORAGE_KEY)
   } catch {
@@ -298,6 +300,44 @@ export function saveCompletedManualAccounts(entries: ManualAccountEntry[]): void
     onboardingCompleted: true,
     onboardingSkipped: false,
   })
+}
+
+/** Bucket totals from the dashboard manual-balance editor (matches `manualBalanceRows`). */
+export type ManualBucketBases = {
+  base401k: number
+  baseSE401k: number
+  baseTradIRA: number
+  baseRoth: number
+  baseHsa: number
+  brkBal: number
+}
+
+const DASHBOARD_BUCKET_ACCOUNT_TYPES: {
+  field: keyof ManualBucketBases
+  type: OnboardingAccountType
+}[] = [
+  { field: 'base401k', type: 'trad_401k' },
+  { field: 'baseSE401k', type: 'sep_ira' },
+  { field: 'baseTradIRA', type: 'trad_ira' },
+  { field: 'baseRoth', type: 'roth_ira' },
+  { field: 'baseHsa', type: 'hsa' },
+  { field: 'brkBal', type: 'brokerage' },
+]
+
+/** Build onboarding-style entries from dashboard bucket inputs (for localStorage restore). */
+export function manualEntriesFromBucketBases(bases: ManualBucketBases): ManualAccountEntry[] {
+  const entries: ManualAccountEntry[] = []
+  for (const { field, type } of DASHBOARD_BUCKET_ACCOUNT_TYPES) {
+    const balance = Math.max(0, Math.round(bases[field]))
+    if (balance <= 0) continue
+    entries.push({ ...newManualAccountEntry(type), balance })
+  }
+  return entries
+}
+
+/** Persist manual bucket totals to expectifi/accounts-v1 (browser_saved guests). */
+export function saveManualAccountsFromBucketBases(bases: ManualBucketBases): void {
+  saveCompletedManualAccounts(manualEntriesFromBucketBases(bases))
 }
 
 function parseSessionOnboardingAccountEntries(): ManualAccountEntry[] | null {

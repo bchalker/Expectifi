@@ -70,6 +70,7 @@
 [data-slot='tabs-tab'][data-selected='true'],
 [data-slot='tabs-tab'][aria-selected='true'] {
   color: var(--text);
+  font-weight: 600;
 }
 
 @media (hover: hover) {

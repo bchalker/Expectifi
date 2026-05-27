@@ -1,5 +1,5 @@
 import type { AppSnapshotV1 } from '../appSnapshot'
-import type { StoredUserProfile } from '../userProfileStorage'
+import type { StoredUserProfile } from '../storedUserProfile'
 import type { StoredManualAccounts } from '../manualAccountEntries'
 import type { CalculatorInputs, CalculatorUi } from '../computeResults'
 

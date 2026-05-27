@@ -44,19 +44,19 @@ export function FidelityValueHoverPortal({
   const chg = formatHoldingDailyChangeLine(source.dailyChangeDollar, source.dailyChangePercent)
   return createPortal(
     <div
-      className="fidelity-value-popout"
+      className="holdings-value-popout"
       style={style}
       role="tooltip"
       onMouseEnter={onMouseEnterPopout}
       onMouseLeave={onMouseLeavePopout}
     >
-      <div className="fidelity-value-popout__line">
+      <div className="holdings-value-popout__line">
         <strong>{formatHoldingShareCount(source.quantity)}</strong>
       </div>
-      <div className="fidelity-value-popout__line">
+      <div className="holdings-value-popout__line">
         Last: <strong>{formatHoldingLastPerShare(source.lastPrice)}</strong>
       </div>
-      {chg ? <div className="fidelity-value-popout__line">{chg}</div> : null}
+      {chg ? <div className="holdings-value-popout__line">{chg}</div> : null}
     </div>,
     document.body,
   )

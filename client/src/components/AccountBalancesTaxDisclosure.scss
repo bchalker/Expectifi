@@ -1,9 +1,11 @@
 .tax-treatment-disclosure {
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: var(--shadow-account-divider);
 }
 
-.tax-treatment-disclosure:last-child {
-  border-bottom: none;
+/* Only the last bucket row in the card stack — not disclosures wrapped in a layout div (e.g. brokerage). */
+.account-balances-card-inner-wrap > .tax-treatment-disclosure:last-of-type {
+  box-shadow: none;
 }
 
 .tax-treatment-disclosure > summary {
@@ -12,9 +14,9 @@
   width: 100%;
 }
 
-/* Single divider per bucket — .edit-row also sets border-bottom on summaries */
+/* Single divider per bucket — shadow on disclosure, not on nested summary row */
 .tax-treatment-disclosure > summary.edit-row {
-  border-bottom: none;
+  box-shadow: none;
 }
 
 .tax-treatment-disclosure > summary::-webkit-details-marker {
@@ -32,8 +34,8 @@
   box-sizing: border-box;
 }
 
-.tax-treatment-disclosure__body--import-style .fidelity-acct-positions,
-.tax-treatment-disclosure__body--import-style .fidelity-agg-symbol-table {
+.tax-treatment-disclosure__body--import-style .holdings-positions-table,
+.tax-treatment-disclosure__body--import-style .holdings-symbol-table {
   width: 100%;
   max-width: none;
 }
@@ -83,109 +85,73 @@
   padding: 0;
 }
 
-.fidelity-agg-symbol-table__note {
-  margin: 0 0 8px;
-  border: none;
-  padding: 0;
-}
-
-.fidelity-agg-symbol-cell {
+.holdings-symbol-cell {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.fidelity-agg-expand-btn {
+.holdings-breakdown-row {
+  padding: 0 0 2px;
+  border: none;
+  background: transparent;
+}
+
+.holdings-breakdown-row:last-child {
+  padding-bottom: 0;
+}
+
+.holdings-breakdown-row__inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  // padding: 0px 8px 0px 0px;
+  border-left: 3px solid var(--gold, var(--amber1));
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.holdings-breakdown-row__account-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.holdings-breakdown-row__source {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  margin: -4px 0;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: transform 0.15s ease, color 0.15s ease, background 0.15s ease;
+  color: var(--text-faint);
 }
 
-.fidelity-agg-expand-btn:hover {
-  color: var(--text);
-  background: var(--surface2, var(--surface));
-}
-
-.fidelity-agg-expand-btn--spacer {
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.fidelity-agg-holding-group--open .fidelity-agg-expand-btn {
-  transform: rotate(180deg);
-}
-
-.fidelity-agg-breakdown-row td {
-  padding: 0 8px 6px 36px;
-  border: none;
-  background: transparent;
-}
-
-.fidelity-agg-breakdown-row__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
-  gap: 12px 16px;
-  padding: 4px 8px 4px 12px;
-  border-left: 2px solid var(--border);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-}
-
-.fidelity-agg-breakdown-row__account {
+.holdings-breakdown-row__account {
   font-weight: 500;
   color: var(--text);
   word-break: break-word;
+  min-width: 0;
 }
 
-.fidelity-agg-breakdown-row__shares,
-.fidelity-agg-breakdown-row__value {
-  font-family: var(--heading);
+.holdings-breakdown-row__value {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   white-space: nowrap;
+  flex: 0 0 auto;
+  text-align: right;
 }
 
-.fidelity-agg-breakdown-row__value {
-  color: var(--text);
-  font-weight: 500;
-}
-
-.fidelity-agg-breakdown-row--total .fidelity-agg-breakdown-row__inner {
-  border-left-color: var(--text-muted);
-}
-
-.fidelity-agg-breakdown-row--total .fidelity-agg-breakdown-row__account,
-.fidelity-agg-breakdown-row--total .fidelity-agg-breakdown-row__value {
-  font-weight: 600;
+.holdings-breakdown-row__value {
+  min-width: 84px;
   color: var(--text);
 }
 
 @media (max-width: 680px) {
-  .fidelity-agg-breakdown-row__inner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-  }
-
-  .fidelity-agg-breakdown-row__shares {
-    grid-column: 1;
-  }
-
-  .fidelity-agg-breakdown-row__value {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: center;
+  .holdings-breakdown-row__value {
+    min-width: 74px;
   }
 }
 
@@ -355,7 +321,7 @@
 
 .withdrawal-bucket-summary__title-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   width: 100%;

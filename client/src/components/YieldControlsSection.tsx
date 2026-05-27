@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useClickOutside } from '../hooks/useClickOutside'
 import { IncomeModeDropdown } from './IncomeModeDropdown'
 import { IncomeSecuritySelector } from './IncomeSecuritySelector'
+import { RangeInlineWithValuePinRow } from './StripSliderValuePin'
 import './YieldControlsSection.scss'
 
 type Props = {
@@ -94,29 +95,29 @@ export function YieldControlsSection({
   return (
     <div className="yield-controls">
 
-      <div className="yield-controls__metric strip-income-metric-stack">
-        <span className="strip-income-metric-stack__pct strip-equation-main-val--accent strip-equation-main-val--tween">
-          {incYieldPctDisplay.toFixed(2)}%
-        </span>
-        <span className="strip-income-metric-stack__caption">Yield</span>
-      </div>
-
       <div className="yield-controls__slider strip-equation-sliders-group">
-        <div className="range-inline-row">
-          <input
-            type="range"
-            min={2}
-            max={20}
-            step={0.25}
-            value={incYield * 100}
-            onChange={(e) => onIncYield(Number(e.target.value) / 100)}
-            aria-label="Dividend yield percent"
-          />
-          <div className="range-inline-ticks">
-            <span className="range-inline-tick">2%</span>
-            <span className="range-inline-tick range-inline-tick--end">20%</span>
-          </div>
-        </div>
+        <RangeInlineWithValuePinRow
+          pinPct={`${incYieldPctDisplay.toFixed(2)}%`}
+          pinCaption="Yield"
+          pinPctClassName="strip-equation-main-val--accent strip-equation-main-val--tween"
+          track={
+            <input
+              type="range"
+              min={2}
+              max={20}
+              step={0.25}
+              value={incYield * 100}
+              onChange={(e) => onIncYield(Number(e.target.value) / 100)}
+              aria-label="Dividend yield percent"
+            />
+          }
+          ticks={
+            <div className="range-inline-ticks">
+              <span className="range-inline-tick">2%</span>
+              <span className="range-inline-tick range-inline-tick--end">20%</span>
+            </div>
+          }
+        />
       </div>
 
       <div className="yield-controls-row">

@@ -1,5 +1,5 @@
-import { IconChevronCompactDown, IconCirclePlus } from '@tabler/icons-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import type { AggregatedFidelitySymbolRow, FidelityPositionRow } from '../lib/fidelityCsv'
 import {
@@ -8,12 +8,11 @@ import {
   normalizeFidelityImportSymbol,
 } from '../lib/fidelityCsv'
 import { formatFidelityDescription } from '../lib/fidelityDisplay'
-import { formatHoldingShareCount, truncateForHoldingsTable } from '../lib/fidelityHoldingDisplay'
+import { truncateForHoldingsTable } from '../lib/fidelityHoldingDisplay'
 import {
   inferCommonScenarioChoiceForModels,
   scenarioColumnShortLabel,
   SCENARIO_MIXED,
-  type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import {
   blendedRateForDashboardPositionId,
@@ -24,8 +23,27 @@ import {
 import type { PositionReturnModel } from '../lib/positionReturnModel'
 import { fmt } from '../utils/format'
 import { FidelityValueHoverPortal } from './FidelityValueHoverPortal'
+import { HoldingsSymbolCard } from './HoldingsSymbolCard'
 import { Tooltip } from './Tooltip'
-import './FidelityHoldingScenarioPopout.scss'
+import './FidelityAggregatedSymbolTable.scss'
+
+/** Phone / narrow portrait tablet — stacked card layout below this width. */
+const HOLDINGS_MOBILE_MQ = '(max-width: 620px)'
+
+function useHoldingsMobileLayout(): boolean {
+  const [mobile, setMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(HOLDINGS_MOBILE_MQ).matches,
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mq = window.matchMedia(HOLDINGS_MOBILE_MQ)
+    const sync = () => setMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+  return mobile
+}
 
 export type FidelityAggregatedScenarioBundle = {
   inputs: CalculatorInputs
@@ -49,12 +67,6 @@ type Props = {
   onScenarioOpen?: (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => void
 }
 
-function scenarioTriggerChoiceClass(choice: ScenarioUiChoice | typeof SCENARIO_MIXED): string {
-  if (choice === 'default' || choice === SCENARIO_MIXED) return ''
-  if (choice === 'base') return 'fidelity-agg-scenario-trigger--normal'
-  return `fidelity-agg-scenario-trigger--${choice}`
-}
-
 function placementForHover(rect: DOMRect): 'above' | 'below' {
   const spaceBelow = window.innerHeight - rect.bottom
   return spaceBelow >= 100 ? 'below' : 'above'
@@ -70,8 +82,7 @@ function modelsForAggregateRow(
 
 type HoldingGroupProps = {
   row: AggregatedFidelitySymbolRow
-  expanded: boolean
-  onToggleExpand: () => void
+  mobileLayout: boolean
   scenarioBundle?: FidelityAggregatedScenarioBundle | null
   mergedModels: PositionReturnModel[]
   h: number
@@ -79,12 +90,12 @@ type HoldingGroupProps = {
   onScenarioOpen?: (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => void
   onValueHoverEnter: (key: string, rect: DOMRect) => void
   onValueHoverLeave: () => void
+  showMergedTickerNote: boolean
 }
 
 function FidelityAggregatedHoldingGroup({
   row: r,
-  expanded,
-  onToggleExpand,
+  mobileLayout,
   scenarioBundle,
   mergedModels,
   h,
@@ -92,14 +103,13 @@ function FidelityAggregatedHoldingGroup({
   onScenarioOpen,
   onValueHoverEnter,
   onValueHoverLeave,
+  showMergedTickerNote,
 }: HoldingGroupProps) {
   const hasBreakdown = aggregateRowHasAccountBreakdown(r)
   const breakdown = useMemo(
     () => (hasBreakdown ? breakdownAggregateByAccount(r) : []),
     [hasBreakdown, r],
   )
-  const colSpan = scenarioBundle ? 5 : 4
-
   const fullDesc = formatFidelityDescription(r.description)
   const shortDesc = truncateForHoldingsTable(fullDesc)
   const showTip = fullDesc.length > shortDesc.length
@@ -112,111 +122,74 @@ function FidelityAggregatedHoldingGroup({
       : SCENARIO_MIXED
   const customDec = models.length && common === 'custom' ? models[0]?.flatRate : undefined
   const label = scenarioBundle ? scenarioColumnShortLabel(common, customDec) : '—'
-  const showAccent = scenarioBundle && common !== 'default'
   const rowKey = r.symbol
   const rowActive =
     activeScenarioSymbol != null &&
     normalizeFidelityImportSymbol(activeScenarioSymbol).toUpperCase() ===
       normalizeFidelityImportSymbol(rowKey).toUpperCase()
 
-  return (
-    <tbody className={`fidelity-agg-holding-group${expanded ? ' fidelity-agg-holding-group--open' : ''}`}>
-      <tr className={rowActive ? 'fidelity-agg-symbol-row--scenario-active' : undefined}>
-        <td className="sym">
-          <div className="fidelity-agg-symbol-cell">
-            {hasBreakdown ? (
-              <button
-                type="button"
-                className="fidelity-agg-expand-btn"
-                aria-expanded={expanded}
-                aria-label={
-                  expanded
-                    ? `Collapse ${r.symbol} account breakdown`
-                    : `Expand ${r.symbol} account breakdown`
-                }
-                onClick={onToggleExpand}
-              >
-                <IconChevronCompactDown size={16} stroke={1.5} aria-hidden />
-              </button>
-            ) : (
-              <span className="fidelity-agg-expand-btn fidelity-agg-expand-btn--spacer" aria-hidden />
-            )}
-            <span>{r.symbol}</span>
-          </div>
-        </td>
-        <td className="fidelity-desc-cell fidelity-desc-cell--trunc">
-          {showTip ? (
-            <Tooltip content={fullDesc} placement="top">
-              <span>{shortDesc}</span>
-            </Tooltip>
-          ) : (
-            <span title={fullDesc}>{shortDesc}</span>
-          )}
-        </td>
-        <td className="val" style={{ textAlign: 'right' }}>
-          <span
-            className="fidelity-agg-value-trigger"
-            onMouseEnter={(e) => {
-              onValueHoverEnter(rowKey, e.currentTarget.getBoundingClientRect())
-            }}
-            onMouseLeave={onValueHoverLeave}
-          >
-            {fmt(r.currentValue)}
-          </span>
-        </td>
-        <td className="val" style={{ textAlign: 'right' }}>
-          {r.costBasis != null ? fmt(r.costBasis) : '—'}
-        </td>
-        {scenarioBundle ? (
-          <td className="fidelity-agg-scenario-cell val">
-            <button
-              type="button"
-              className={[
-                'fidelity-agg-scenario-trigger',
-                showAccent ? scenarioTriggerChoiceClass(common) : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              data-fidelity-scenario-trigger
-              aria-expanded={rowActive}
-              aria-haspopup="dialog"
-              onClick={() => onScenarioOpen?.({ symbol: r.symbol, contributingRows: r.contributingRows })}
-            >
-              <span>{label}</span>
-              <span className="fidelity-agg-scenario-plus" aria-hidden>
-                <IconCirclePlus size={13} stroke={1.5} />
-              </span>
-            </button>
-          </td>
+  const openScenario = () =>
+    onScenarioOpen?.({ symbol: r.symbol, contributingRows: r.contributingRows })
+
+  const descNode = showTip ? (
+    <Tooltip content={fullDesc} placement="top">
+      <span className="holdings-symbol-card__desc holdings-symbol-card__desc--trunc">{shortDesc}</span>
+    </Tooltip>
+  ) : (
+    <span className="holdings-symbol-card__desc holdings-symbol-card__desc--trunc" title={fullDesc}>
+      {shortDesc}
+    </span>
+  )
+
+  const scenarioProps = scenarioBundle
+    ? {
+        label,
+        showAccent: common !== 'default',
+        common,
+        rowActive,
+        onOpen: openScenario,
+      }
+    : null
+
+  const breakdownBlock =
+    hasBreakdown ? (
+      <Fragment>
+        {showMergedTickerNote ? (
+          <p className="holdings-symbol-card__breakdown-note">Same ticker in:</p>
         ) : null}
-      </tr>
-      {hasBreakdown && expanded
-        ? breakdown.map((line) => (
-            <tr key={`${rowKey}-${line.accountKey}`} className="fidelity-agg-breakdown-row">
-              <td colSpan={colSpan}>
-                <div className="fidelity-agg-breakdown-row__inner">
-                  <span className="fidelity-agg-breakdown-row__account">{line.accountLabel}</span>
-                  <span className="fidelity-agg-breakdown-row__shares">
-                    {formatHoldingShareCount(line.quantity)}
+        <div className="holdings-breakdown-block">
+          {breakdown.map((line) => (
+            <div key={`${rowKey}-${line.accountKey}`} className="holdings-breakdown-row">
+              <div className="holdings-breakdown-row__inner">
+                <div className="holdings-breakdown-row__account-cell">
+                  <span className="holdings-breakdown-row__source" aria-hidden>
+                    <IconArrowNarrowRightDashed size={12} stroke={1.15} />
                   </span>
-                  <span className="fidelity-agg-breakdown-row__value">{fmt(line.currentValue)}</span>
+                  <span className="holdings-breakdown-row__account">{line.accountLabel}</span>
                 </div>
-              </td>
-            </tr>
-          ))
-        : null}
-      {hasBreakdown && expanded && breakdown.length > 1 ? (
-        <tr className="fidelity-agg-breakdown-row fidelity-agg-breakdown-row--total">
-          <td colSpan={colSpan}>
-            <div className="fidelity-agg-breakdown-row__inner">
-              <span className="fidelity-agg-breakdown-row__account">Total</span>
-              <span className="fidelity-agg-breakdown-row__shares" aria-hidden />
-              <span className="fidelity-agg-breakdown-row__value">{fmt(r.currentValue)}</span>
+                <span className="holdings-breakdown-row__value">{fmt(line.currentValue)}</span>
+              </div>
             </div>
-          </td>
-        </tr>
-      ) : null}
-    </tbody>
+          ))}
+        </div>
+      </Fragment>
+    ) : null
+
+  return (
+    <div className="holdings-symbol-group">
+      <HoldingsSymbolCard
+        scenarioActive={rowActive}
+        symbol={r.symbol}
+        description={descNode}
+        currentValue={r.currentValue}
+        costBasis={r.costBasis}
+        enableValueHover={!mobileLayout}
+        onValueHoverEnter={(rect) => onValueHoverEnter(rowKey, rect)}
+        onValueHoverLeave={onValueHoverLeave}
+        scenario={scenarioProps}
+        breakdown={breakdownBlock}
+      />
+    </div>
   )
 }
 
@@ -229,7 +202,7 @@ export function FidelityAggregatedSymbolTable({
   activeScenarioSymbol,
   onScenarioOpen,
 }: Props) {
-  if (!rows.length) return null
+  const mobileLayout = useHoldingsMobileLayout()
 
   const mergedModels = useMemo(() => {
     if (!scenarioBundle) return [] as PositionReturnModel[]
@@ -242,17 +215,6 @@ export function FidelityAggregatedSymbolTable({
   }, [scenarioBundle, fidelityAllRows])
 
   const h = scenarioBundle ? Math.max(1, Math.min(50, Math.round(scenarioBundle.yearsToRetirement))) : 7
-
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set())
-
-  const toggleExpanded = useCallback((symbol: string) => {
-    setExpandedKeys((prev) => {
-      const next = new Set(prev)
-      if (next.has(symbol)) next.delete(symbol)
-      else next.add(symbol)
-      return next
-    })
-  }, [])
 
   const [valueHover, setValueHover] = useState<{
     key: string
@@ -282,38 +244,59 @@ export function FidelityAggregatedSymbolTable({
 
   const showCombinedNote = combinedLines || rows.some((r) => aggregateRowHasAccountBreakdown(r))
 
+  if (!rows.length) return null
+
   return (
-    <div className="fidelity-acct-positions fidelity-agg-symbol-table">
-      {showCombinedNote ? (
-        <p className="footnote fidelity-agg-symbol-table__note">
-          Same ticker across accounts is merged on one line — expand a row for the account breakdown.
-        </p>
-      ) : null}
-      <table>
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th className="fidelity-th-upper">Description</th>
-            <th style={{ textAlign: 'right' }}>Value</th>
-            <th className="fidelity-th-upper" style={{ textAlign: 'right' }}>
-              Cost basis
-            </th>
-            {scenarioBundle ? (
-              <th className="fidelity-th-upper fidelity-agg-scenario-th">Scenario</th>
-            ) : null}
-          </tr>
-        </thead>
+    <div
+      className={[
+        'holdings-positions-table',
+        'holdings-symbol-table',
+        mobileLayout && 'holdings-symbol-table--mobile-cards',
+        !scenarioBundle && 'holdings-symbol-table--no-scenario',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div className="holdings-symbol-list" role="table" aria-label="Holdings by symbol">
+        <div className="holdings-symbol-list__header-row" role="row">
+          <span className="holdings-symbol-list__col" role="columnheader">
+            Symbol
+          </span>
+          <span className="holdings-symbol-list__col holdings-symbol-list__col--upper" role="columnheader">
+            Description
+          </span>
+          <span
+            className="holdings-symbol-list__col holdings-symbol-list__col--value"
+            role="columnheader"
+          >
+            Value
+          </span>
+          <span
+            className="holdings-symbol-list__col holdings-symbol-list__col--basis holdings-symbol-list__col--upper"
+            role="columnheader"
+          >
+            Cost basis
+          </span>
+          {scenarioBundle ? (
+            <span
+              className="holdings-symbol-list__col holdings-symbol-list__col--scenario holdings-symbol-list__col--upper"
+              role="columnheader"
+            >
+              Scenario
+            </span>
+          ) : null}
+        </div>
         {rows.map((r) => (
           <FidelityAggregatedHoldingGroup
             key={r.symbol}
             row={r}
-            expanded={expandedKeys.has(r.symbol)}
-            onToggleExpand={() => toggleExpanded(r.symbol)}
+            mobileLayout={mobileLayout}
             scenarioBundle={scenarioBundle}
             mergedModels={mergedModels}
             h={h}
             activeScenarioSymbol={activeScenarioSymbol}
             onScenarioOpen={onScenarioOpen}
+            showMergedTickerNote={showCombinedNote}
             onValueHoverEnter={(key, rect) => {
               clearValueLeaveTimer()
               valueHoverLock.current = false
@@ -322,21 +305,23 @@ export function FidelityAggregatedSymbolTable({
             onValueHoverLeave={scheduleValueClose}
           />
         ))}
-      </table>
-      <FidelityValueHoverPortal
-        open={Boolean(valueHover && activeValueRow && valueHover.key === activeValueRow.symbol)}
-        rect={valueHover?.rect ?? null}
-        placement={valueHover?.placement ?? 'below'}
-        source={activeValueRow ?? rows[0]!}
-        onMouseEnterPopout={() => {
-          valueHoverLock.current = true
-          clearValueLeaveTimer()
-        }}
-        onMouseLeavePopout={() => {
-          valueHoverLock.current = false
-          scheduleValueClose()
-        }}
-      />
+      </div>
+      {!mobileLayout ? (
+        <FidelityValueHoverPortal
+          open={Boolean(valueHover && activeValueRow && valueHover.key === activeValueRow.symbol)}
+          rect={valueHover?.rect ?? null}
+          placement={valueHover?.placement ?? 'below'}
+          source={activeValueRow ?? rows[0]!}
+          onMouseEnterPopout={() => {
+            valueHoverLock.current = true
+            clearValueLeaveTimer()
+          }}
+          onMouseLeavePopout={() => {
+            valueHoverLock.current = false
+            scheduleValueClose()
+          }}
+        />
+      ) : null}
     </div>
   )
 }

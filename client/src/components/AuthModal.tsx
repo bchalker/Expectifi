@@ -79,7 +79,7 @@ function CreateAccountMarketing() {
 
 export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   const mode: AuthModalMode | null =
-    typeof open === "string" ? open : open?.mode ?? null;
+    typeof open === "string" ? open : (open?.mode ?? null);
   const source: AuthModalSource | undefined =
     open && typeof open === "object" ? open.source : undefined;
 
@@ -576,7 +576,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   } else if (mode === "google_checkout") {
     title =
       source === "csv"
-        ? "Save your imported holdings permanently"
+        ? "You've done the hard part — save it"
         : "Complete your account";
     headerExtra = null;
     const gc = googleCheckoutUi;
@@ -982,7 +982,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   } else {
     title =
       source === "csv"
-        ? "Save your imported holdings permanently"
+        ? "You've done the hard part — save it"
         : "Save your retirement plan";
     showRegisterHeader = true;
     headerExtra = null;

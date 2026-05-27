@@ -1,8 +1,13 @@
+import type { CalculatorInputs } from './computeResults'
 import type { FidelityPositionRow } from './fidelityCsv'
 import { isFidelityPendingActivityRow, normalizeFidelityImportSymbol, totalsFromPositionRows, totalsToCalculatorBases } from './fidelityCsv'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
+import { clearBalanceInputModeStorage } from './retirementBalanceMode'
+import { stripCsvDerivedFromCalculatorInputs } from './calculatorInputSanitize'
+import type { UserTier } from './planStorage/types'
 import { getPlanWriteTier } from './planStorage/writeContext'
 import { clearCsvSession, loadCsvSession, saveCsvSession } from './planStorage/csvSession'
+import { setSessionHasCsvHoldings } from './sessionFlags'
 
 export const FIDELITY_IMPORT_STORAGE_KEY = 'retirement-calculator/fidelity-import-v1'
 
@@ -50,8 +55,29 @@ export type StoredFidelityImportV2 = {
 export type StoredFidelityImport = StoredFidelityImportV2
 
 function shouldPersistCsvToLocalStorage(): boolean {
-  // Phase C: non-pro users are session-only; pro users keep existing behavior.
+  // CSV/Plaid holdings blobs: pro only. Guests with browser save keep profile + manual accounts in LS.
   return getPlanWriteTier() === 'pro'
+}
+
+/** Clear CSV holdings on each document load for non-pro (sessionStorage survives refresh). */
+export function clearNonProCsvHoldingsOnBoot(tier: UserTier = getPlanWriteTier()): void {
+  if (tier === 'pro') return
+  clearCsvSession()
+  try {
+    localStorage.removeItem(FIDELITY_IMPORT_STORAGE_KEY)
+  } catch {
+    /* private mode / quota */
+  }
+  clearBalanceInputModeStorage()
+}
+
+export function shouldStripCsvFromPersistedCalculatorSession(): boolean {
+  return !shouldPersistCsvToLocalStorage()
+}
+
+export function inputsForPersistedCalculatorSession(inputs: CalculatorInputs): CalculatorInputs {
+  if (!shouldStripCsvFromPersistedCalculatorSession()) return inputs
+  return stripCsvDerivedFromCalculatorInputs(inputs)
 }
 
 /** Stable hash of raw CSV text for duplicate detection (SHA-256, or djb2 fallback). */
@@ -169,6 +195,7 @@ export function saveStoredFidelityImport(data: StoredFidelityImportV2) {
     return
   }
   localStorage.setItem(FIDELITY_IMPORT_STORAGE_KEY, JSON.stringify(payload))
+  setSessionHasCsvHoldings((payload.batches?.length ?? 0) > 0)
 }
 
 /**

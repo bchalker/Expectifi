@@ -67,7 +67,7 @@
   width: var(--layout-app-boundary);
   max-width: 100%;
   margin-inline: auto;
-  padding: 2rem var(--layout-app-inner-pad) 4rem;
+  padding: 2rem var(--layout-app-inner-pad) 2rem;
   box-sizing: border-box;
 }
 .app-scroll-stack {
@@ -75,6 +75,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
+  padding-bottom: calc(var(--app-privacy-trust-h) + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 
@@ -98,7 +99,6 @@
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
 @media (max-width: 700px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-  .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
   .results-strip-inner { padding: 0 var(--layout-app-inner-pad); }
   .subheader { padding-left: var(--layout-app-inner-pad); padding-right: var(--layout-app-inner-pad); }
 }
@@ -169,15 +169,15 @@
 }
 input[type=range] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 4px;
-  background: var(--surface2); border-radius: 2px; outline: none; cursor: pointer; display: block; margin: 0; padding: 0;
+  background: var(--range-track-bg); border-radius: 2px; outline: none; cursor: pointer; display: block; margin: 0; padding: 0;
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%;
   background: var(--text); border: 2px solid var(--bg); box-shadow: 0 0 0 1px var(--border-strong); margin-top: -3.5px;
 }
-input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--surface2); }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--range-track-bg); }
 input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--text); border: 2px solid var(--bg); box-shadow: 0 0 0 1px var(--border-strong); }
-input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--surface2); }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--range-track-bg); }
 input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.28); }
 
 /* account balance rows */
@@ -625,6 +625,13 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
     font-size: var(--text-strip);
   }
 }
+
+@media (max-width: 760px) {
+  .main {
+    padding: 1.5rem 0 3rem;
+  }
+}
+
 @media (max-width: 680px) {
   .isr-label { width: 120px; }
   .isr-val {
@@ -675,8 +682,19 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   .num-input { width: 100% !important; }
   .inc-preset-add .num-input { width: auto !important; min-width: 48px; }
 }
-.edit-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 0; }
-.edit-row:last-child { border-bottom: none; }
+.edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  gap: 0;
+  border-bottom: none;
+  box-shadow: var(--shadow-account-divider);
+}
+.edit-row:last-child,
+.edit-row--no-divider {
+  box-shadow: none;
+}
 .edit-row-label {
   font-size: var(--text-sm);
   font-weight: 400;
@@ -888,14 +906,14 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 }
 
 /* Fidelity CSV import — modal uses absolute overlay inside .csv-import-modal-stack */
-.fidelity-import-busy-overlay {
+.csv-import-busy-overlay {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   box-sizing: border-box;
 }
-.fidelity-import-busy-card {
+.csv-import-busy-card {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -908,26 +926,26 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
-.fidelity-import-busy-ring {
+.csv-import-busy-ring {
   width: 36px;
   height: 36px;
   align-self: center;
   border-radius: 50%;
   border: 3px solid var(--surface2);
   border-top-color: var(--accent);
-  animation: fidelity-import-spin 0.75s linear infinite;
+  animation: csv-import-spin 0.75s linear infinite;
 }
-@keyframes fidelity-import-spin {
+@keyframes csv-import-spin {
   to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fidelity-import-busy-ring {
+  .csv-import-busy-ring {
     animation: none;
     border-color: color-mix(in srgb, var(--accent) 55%, var(--surface2));
   }
 }
-.fidelity-import-busy-headline {
+.csv-import-busy-headline {
   margin: 0;
   font-family: var(--body);
   font-size: var(--text-md);
@@ -936,7 +954,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   color: var(--text);
   text-align: center;
 }
-.fidelity-import-busy-details {
+.csv-import-busy-details {
   margin: 0;
   padding: 0 0 0 1.1rem;
   font-family: var(--body);
@@ -945,13 +963,13 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   color: var(--text-muted);
   text-align: left;
 }
-.fidelity-import-busy-details li {
+.csv-import-busy-details li {
   margin-bottom: 0.35rem;
 }
-.fidelity-import-busy-details li:last-child {
+.csv-import-busy-details li:last-child {
   margin-bottom: 0;
 }
-.fidelity-import-dropzone {
+.csv-import-dropzone {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -967,7 +985,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
-.fidelity-import-file-btn {
+.csv-import-file-btn {
   font-family: var(--body) !important;
   font-size: var(--text-sm) !important;
   min-height: 34px !important;
@@ -975,20 +993,20 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   padding: 0 12px !important;
   border-radius: 8px !important;
 }
-.fidelity-import-dropzone-active {
+.csv-import-dropzone-active {
   border-color: var(--accent);
   border-style: solid;
   background: var(--accent-light);
   box-shadow: 0 0 0 1px rgba(43, 95, 63, 0.2);
 }
-.fidelity-import-dropzone-hint {
+.csv-import-dropzone-hint {
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-muted);
   user-select: none;
 }
 
-.fidelity-import-root {
+.csv-import-root {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -997,7 +1015,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   max-width: 100%;
 }
 
-.fidelity-import-root--toolbar {
+.csv-import-root--toolbar {
   flex: 1 1 200px;
   width: auto;
   min-width: 0;
@@ -1007,7 +1025,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   align-items: center;
 }
 
-.fidelity-import-dropzone--toolbar {
+.csv-import-dropzone--toolbar {
   flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
@@ -1021,7 +1039,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   align-items: center;
 }
 
-.fidelity-import-dropzone--toolbar .fidelity-import-file-btn {
+.csv-import-dropzone--toolbar .csv-import-file-btn {
   min-height: 24px !important;
   height: auto !important;
   font-size: var(--text-sm) !important;
@@ -1029,7 +1047,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   border-radius: 4px !important;
 }
 
-.fidelity-import-dropzone--toolbar .fidelity-import-dropzone-hint {
+.csv-import-dropzone--toolbar .csv-import-dropzone-hint {
   font-size: var(--text-sm);
   white-space: nowrap;
 }
@@ -1046,13 +1064,13 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   margin-bottom: 0.75rem !important;
 }
 
-.fidelity-acct-details {
+.imported-account-disclosure {
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 8px;
   background: var(--surface);
 }
-.fidelity-acct-details > summary {
+.imported-account-disclosure > summary {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1064,8 +1082,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   font-size: 13px;
   color: var(--text);
 }
-.fidelity-acct-details > summary::-webkit-details-marker { display: none; }
-.fidelity-acct-summary-main {
+.imported-account-disclosure > summary::-webkit-details-marker { display: none; }
+.imported-account-summary-main {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1073,74 +1091,73 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   min-width: 0;
   flex: 1;
 }
-.fidelity-acct-fido-name {
+.imported-account-name {
   font-weight: 600;
   line-height: 1.25;
   word-break: break-word;
 }
-.fidelity-acct-mapped {
+.imported-account-bucket-label {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.04em;
   text-transform: none;
   color: var(--text-muted);
 }
-.fidelity-acct-mapped.unmapped { color: var(--warn); }
-.fidelity-acct-summary-total {
+.imported-account-bucket-label.unmapped { color: var(--warn); }
+.imported-account-summary-total {
   font-family: var(--heading);
   font-size: 13px;
   font-weight: 600;
   color: var(--accent-text);
   flex-shrink: 0;
 }
-.fidelity-acct-positions {
+.holdings-positions-table {
   font-size: 11px;
   color: var(--text-muted);
   padding: 12px 12px 10px;
+  padding: 0;
 
 }
-.fidelity-acct-positions table { width: 100%; border-collapse: collapse; }
-.fidelity-acct-positions th,
-.fidelity-acct-positions td {
+.holdings-positions-table table { width: 100%; border-collapse: collapse; }
+.holdings-positions-table th,
+.holdings-positions-table td {
   padding: 4px 6px 4px 0;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--border);
 }
-.fidelity-acct-positions th:first-child,
-.fidelity-acct-positions td:first-child {
+.holdings-positions-table th:first-child,
+.holdings-positions-table td:first-child {
   padding-left: 10px;
 }
-.fidelity-acct-positions th {
+.holdings-positions-table th {
   font-family: var(--mono);
   font-size: var(--text-xs);
   letter-spacing: 0.04em;
   text-transform: none;
   color: var(--text-faint);
-  border-bottom-color: var(--border-strong);
 }
-.fidelity-th-upper {
+.holdings-th-upper {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.fidelity-acct-positions .fidelity-desc-cell {
+.holdings-positions-table .holdings-desc-cell {
   font-family: var(--body);
   text-transform: none;
   color: var(--text-muted);
 }
-.fidelity-acct-positions .fidelity-desc-cell--trunc {
+.holdings-positions-table .holdings-desc-cell--trunc {
   max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
 }
-.fidelity-acct-positions tr:last-child td { border-bottom: none; }
-.fidelity-acct-positions .sym { font-family: var(--heading); color: var(--text); }
-.fidelity-acct-positions .val { font-family: var(--heading); color: var(--text); text-align: right; white-space: nowrap; }
+.holdings-positions-table .sym { font-family: var(--heading); color: var(--text); }
+.holdings-positions-table .val { font-family: var(--heading); color: var(--text); text-align: right; white-space: nowrap; }
 
-.fidelity-acct-positions th.fidelity-agg-scenario-th,
-.fidelity-acct-positions td.fidelity-agg-scenario-cell {
+.holdings-positions-table th.holdings-scenario-th,
+.holdings-positions-table td.holdings-scenario-cell {
   width: 9rem;
   min-width: 9rem;
   max-width: 11rem;
@@ -1149,8 +1166,9 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   text-align: right;
   vertical-align: middle;
   white-space: nowrap;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0%, rgba(0, 0, 0, 0.02) 8px, transparent 14px),
-    var(--surface, #fff);
+  background: rgba(0,0,0,0.04);
+  // background: linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0%, rgba(0, 0, 0, 0.02) 8px, transparent 14px),
+  //   var(--surface, #fff);
 }
 
 /* ── Typography utilities (Nunito) ── */
@@ -1240,23 +1258,23 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 }
 
 /* Account card: reveal after strip yield/return sliders (see portfolioWaveReveal.ts). */
-.portfolio-accounts-reveal--pending .rab-brokerage-stack {
+.portfolio-accounts-reveal--pending .account-balances-stack {
   opacity: 0;
   pointer-events: none;
 }
 
-.portfolio-accounts-reveal--in .rab-brokerage-stack {
+.portfolio-accounts-reveal--in .account-balances-stack {
   animation: portfolio-account-stack-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.portfolio-accounts-reveal--in .rab-brokerage-stack .account-balances-card-inner-wrap > * {
+.portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
   opacity: 0;
   animation: portfolio-account-row-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @for $i from 1 through 12 {
   .portfolio-accounts-reveal--in
-    .rab-brokerage-stack
+    .account-balances-stack
     .account-balances-card-inner-wrap
     > *:nth-child(#{$i}) {
     animation-delay: calc(var(--portfolio-row-stagger-base) + var(--portfolio-stagger-step) * #{$i - 1});
@@ -1286,17 +1304,17 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portfolio-accounts-reveal--pending .rab-brokerage-stack {
+  .portfolio-accounts-reveal--pending .account-balances-stack {
     opacity: 1;
     pointer-events: auto;
   }
 
-  .portfolio-accounts-reveal--in .rab-brokerage-stack {
+  .portfolio-accounts-reveal--in .account-balances-stack {
     animation: none;
     opacity: 1;
   }
 
-  .portfolio-accounts-reveal--in .rab-brokerage-stack .account-balances-card-inner-wrap > * {
+  .portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
     animation: none;
     opacity: 1;
     transform: none;

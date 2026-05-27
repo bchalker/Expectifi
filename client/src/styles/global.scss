@@ -72,6 +72,13 @@
   /* Malachite — progress bars, meters, bright highlights on dark chrome */
   --green-progress: #16db65;
 
+  /* App page canvas — body and chrome that sit on the page background */
+  --page-bg: #F5F3F0;
+  /* Fixed privacy trust bar — reserve on .app-scroll-stack (text may wrap on narrow screens) */
+  --app-privacy-trust-h: 4.75rem;
+  --z-privacy-trust: 45;
+  --range-track-bg: color-mix(in srgb, var(--page-bg) 62%, black);
+
   --surface1: #f9f9f9;
   --surface-u5: color-mix(in srgb, var(--surface1) 10%, white);
   --surface-u4: color-mix(in srgb, var(--surface1) 30%, white);
@@ -96,6 +103,7 @@
   /* Medium-dark line — input borders, selects, section dividers (app-wide) */
   --border-medium-dark: var(--surface6);
   --divider: var(--border-medium-dark);
+  --shadow-account-divider: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
 
   /* Legacy aliases (prefer blue1–blue10 in new code) */
   --header-brand-navy: var(--blue1);
@@ -175,7 +183,7 @@
   --ds-color-strip-drawer-text: var(--ds-color-secondary-text);
   --ds-color-danger: var(--red1);
 
-  --bg: var(--ds-color-bg);
+  --bg: var(--page-bg);
   --surface: var(--ds-color-surface);
   --surface2: var(--ds-color-surface2);
   --text: var(--ds-color-text);
@@ -355,6 +363,7 @@ body.app-left-nav--mobile-open-body {
 @media (max-width: 680px) {
   :root {
     --drawer-panel-inset: 1rem;
+    --app-privacy-trust-h: 5.5rem;
   }
 }
 

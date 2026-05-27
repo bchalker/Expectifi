@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { formatFidelityDescription } from '../lib/fidelityDisplay'
-import { groupPositionsByAccount, isFidelityPendingActivityRow, normalizeFidelityImportSymbol, type FidelityPositionRow } from '../lib/fidelityCsv'
+import { groupPositionsByAccount, type FidelityPositionRow } from '../lib/fidelityCsv'
 import {
   blendedBaselineFV,
   makeFidelityPositionReturnId,
@@ -15,7 +15,6 @@ import {
   projectPositionAtRetirement,
   type PositionReturnModel,
 } from '../lib/positionReturnModel'
-import { useHoldingQuotes } from '../lib/holdingQuotes'
 import { custodianLogoPublicUrl } from '../lib/custodianLogos'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { fmt } from '../utils/format'
@@ -97,8 +96,6 @@ export function FidelityBucketHoldingsSubrows({
   const [popover, setPopover] = useState<{ id: string; top: number } | null>(null)
   const popoverModel = popover ? mergedModels.find((m) => m.id === popover.id) : undefined
 
-  const quoteMap = useHoldingQuotes(positions, positions.length > 0)
-
   function patchPosition(next: PositionReturnModel) {
     if (!setInputs || !inputs) return
     const rest = (inputs.positionReturnModels ?? []).filter((p) => p.id !== next.id)
@@ -106,7 +103,7 @@ export function FidelityBucketHoldingsSubrows({
   }
 
   return (
-    <div className="fidelity-bucket-subrows">
+    <div className="portfolio-bucket-subrows">
       {popoverModel && popover ? (
         <PositionReturnPopover
           open
@@ -121,21 +118,23 @@ export function FidelityBucketHoldingsSubrows({
         />
       ) : null}
       {accountGroups.map((g) => (
-        <div key={`${keyPrefix}-${g.accountName}`} className="fidelity-import-ledger">
-          <details className="fidelity-holdings-disclosure">
-            <summary className="fidelity-holdings-summary">
-              <div className="fidelity-import-ledger__lead">
+        <div key={`${keyPrefix}-${g.accountName}`} className="import-ledger">
+          <details className="imported-holdings-disclosure">
+            <summary className="imported-holdings-summary">
+              <div className="import-ledger__lead">
                 {showFidelityAccountNames ? (
-                  <span className="fidelity-import-ledger-acct">{g.accountName}</span>
+                  <span className="import-ledger-account">{g.accountName}</span>
                 ) : null}
-                {showFidelityAccountNames ? <ViewHoldingsHint /> : null}
               </div>
-              <div className="fidelity-import-ledger__summary-end">
-                <div className="fidelity-import-ledger__values">
-                  <span className="fidelity-import-ledger__total">{fmt(g.total)}</span>
-                  <BucketTotalTrend trend={computeBucketTrendDisplay(g.rows, quoteMap)} />
+              <div className="import-ledger__summary-end">
+                <div className="import-ledger__values">
+                  <div className="import-ledger__amount-row">
+                    <span className="import-ledger__total">{fmt(g.total)}</span>
+                    {showFidelityAccountNames ? <ViewHoldingsHint /> : null}
+                  </div>
+                  <BucketTotalTrend trend={computeBucketTrendDisplay(g.rows)} />
                 </div>
-                {holdingsSummaryEnd ? <span className="fidelity-holdings-summary__end">{holdingsSummaryEnd}</span> : null}
+                {holdingsSummaryEnd ? <span className="imported-holdings-summary__end">{holdingsSummaryEnd}</span> : null}
               </div>
             </summary>
             <div className="retirement-import-holdings">
@@ -150,8 +149,6 @@ export function FidelityBucketHoldingsSubrows({
                   model != null ? blendedBaselineFV(model.currentValue, blendedRate, yearsToRetirement) : null
                 const delta = projected != null && blendedFv != null ? projected - blendedFv : null
                 const deltaMatchesBlended = delta != null && Math.abs(delta) < 1
-                const symKey = normalizeFidelityImportSymbol(r.symbol).toUpperCase()
-                const liveQuote = isFidelityPendingActivityRow(r) ? undefined : quoteMap.get(symKey)
                 return (
                   <div key={`${keyPrefix}-${g.accountName}-${r.symbol}-${rowIndex}`} className="holding-return-row">
                     <div className="holding-return-row__primary">
@@ -173,24 +170,6 @@ export function FidelityBucketHoldingsSubrows({
                       </div>
                       <div className="holding-return-row__values">
                         <div className="holding-card-value">{fmt(r.currentValue)}</div>
-                        {liveQuote ? (
-                          <div
-                            className={`holding-return-row__quote${
-                              liveQuote.changePct > 0
-                                ? ' holding-return-row__quote--up'
-                                : liveQuote.changePct < 0
-                                  ? ' holding-return-row__quote--down'
-                                  : ' holding-return-row__quote--flat'
-                            }`}
-                            title="Delayed quote via market data"
-                          >
-                            <span className="holding-return-row__quote-price">${liveQuote.price.toFixed(2)}</span>
-                            <span className="holding-return-row__quote-chg">
-                              {liveQuote.changePct >= 0 ? '+' : ''}
-                              {liveQuote.changePct.toFixed(2)}%
-                            </span>
-                          </div>
-                        ) : null}
                         {showReturnSliders && model && projected != null ? (
                           <div className="holding-return-row__projected">
                             {fmt(projected)} at {targetRetirementAge}

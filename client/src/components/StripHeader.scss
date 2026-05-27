@@ -33,12 +33,12 @@
   border: none;
 }
 
-.portfolio-controls-reveal--in .strip-income-metric-stack,
-.portfolio-controls-reveal--in .growth-slider-label__headline-stack {
+.portfolio-controls-reveal--in .strip-slider-value-pin,
+.portfolio-controls-reveal--in .range-inline-track-pin-cell {
   animation: portfolio-controls-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.portfolio-controls-reveal--in .strip-growth-rail .growth-slider-label__headline-stack {
+.portfolio-controls-reveal--in .strip-growth-rail .range-inline-track-pin-cell {
   animation-delay: 0s;
 }
 
@@ -54,16 +54,12 @@
     calc(var(--portfolio-strip-slider-delay-income) + 0.09s) both;
 }
 
-.portfolio-controls-reveal--in .yield-controls__metric {
-  animation-delay: 0s;
-}
 
 .portfolio-controls-reveal--in .yield-controls__slider {
   animation-delay: var(--portfolio-strip-slider-delay-income);
 }
 
-.portfolio-controls-reveal--in.strip-equation-row--phase-income .strip-income-metric-stack,
-.portfolio-controls-reveal--in.strip-equation-row--phase-income .yield-controls__metric {
+.portfolio-controls-reveal--in.strip-equation-row--phase-income .range-inline-track-pin-cell {
   animation-delay: 0s;
 }
 
@@ -81,8 +77,8 @@
     max-height: none;
   }
 
-  .portfolio-controls-reveal--in .strip-income-metric-stack,
-  .portfolio-controls-reveal--in .growth-slider-label__headline-stack,
+  .portfolio-controls-reveal--in .strip-slider-value-pin,
+  .portfolio-controls-reveal--in .range-inline-track-pin-cell,
   .portfolio-controls-reveal--in .strip-equation-sliders-group,
   .portfolio-controls-reveal--in .yield-controls-row {
     animation: none;

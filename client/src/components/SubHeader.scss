@@ -43,7 +43,6 @@ html:not([data-no-portfolio-subheader]) .subheader {
 
 .subheader-bubble__front-path {
   fill: var(--blue2);
-  transition: fill 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Fills the band above the wave art only — full subheader nav-bg hid waves (same fill as SVG paths). */
@@ -880,7 +879,6 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     transition-duration: 0.01ms;
   }
 
-  .subheader-bubble__front-path,
   .subheader::before {
     transition-duration: 0.01ms;
   }

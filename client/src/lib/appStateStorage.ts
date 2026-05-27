@@ -1,7 +1,8 @@
 import { hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
 import type { CalculatorInputs, CalculatorUi } from './computeResults'
+import { inputsForPersistedCalculatorSession } from './fidelityStorage'
 import { canWritePlanLocalStorage, getPlanWriteTier, loadPlanSession, persistPlanState } from './planStorage'
-import { stripFinancialFields } from './userProfileStorage'
+import { stripFinancialFields } from './calculatorInputSanitize'
 
 /** Dev / pre-DB persistence for calculator inputs, UI flags, phase, and presets. */
 export const APP_STATE_STORAGE_KEY = 'retirement-calculator/app-state-v1'
@@ -16,7 +17,7 @@ export type PersistedCalculatorSession = {
 export function persistCalculatorSession(session: PersistedCalculatorSession): void {
   if (!canWritePlanLocalStorage()) return
   persistPlanState(getPlanWriteTier(), {
-    inputs: session.inputs,
+    inputs: inputsForPersistedCalculatorSession(session.inputs),
     ui: session.ui,
     phase: session.phase,
     activePreset: session.activePreset,

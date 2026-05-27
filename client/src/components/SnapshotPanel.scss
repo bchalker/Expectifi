@@ -9,6 +9,27 @@
   margin-bottom: 0.25rem;
 }
 
+.strip-snapshot-tabs [data-slot='tabs-tab'] {
+  color: var(--text-muted);
+}
+
+.strip-snapshot-tabs [data-slot='tabs-tab'][data-selected='true'],
+.strip-snapshot-tabs [data-slot='tabs-tab'][aria-selected='true'] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.strip-snapshot-tab__label {
+  position: relative;
+  z-index: 1;
+  color: inherit;
+}
+
+.strip-snapshot-tabs [data-slot='tabs-indicator'] {
+  z-index: 0;
+  background: var(--surface);
+}
+
 .strip-snapshot-tabpanel {
   outline: none;
   padding-top: 0.15rem;

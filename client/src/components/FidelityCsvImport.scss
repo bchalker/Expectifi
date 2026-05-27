@@ -39,14 +39,14 @@
   background: var(--surface);
 }
 
-.fidelity-import-busy-overlay--panel {
+.csv-import-busy-overlay--panel {
   position: absolute;
   inset: 0;
   z-index: 10;
   background: rgba(255, 255, 255, 0.72);
 }
 
-.fidelity-import-busy-overlay--modal {
+.csv-import-busy-overlay--modal {
   position: absolute;
   inset: 0;
   z-index: 20;
@@ -181,6 +181,15 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
   line-height: 1.45;
+}
+
+.csv-import-modal__hint {
+  margin: 0.35rem 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .csv-import-custodian-grid {
@@ -472,7 +481,7 @@
   background: color-mix(in srgb, var(--warn-light) 85%, var(--surface));
 }
 
-.csv-import-review-list .fidelity-acct-details.csv-import-review-acct > summary {
+.csv-import-review-list .imported-account-disclosure.csv-import-review-acct > summary {
   display: grid;
   grid-template-columns: auto minmax(10.5rem, 12.75rem) minmax(0, 1fr);
   align-items: center;
@@ -489,7 +498,7 @@
   overflow: hidden;
 }
 
-.csv-import-review-list .csv-import-review-acct__name.fidelity-acct-fido-name {
+.csv-import-review-list .csv-import-review-acct__name.imported-account-name {
   max-width: 100%;
   font-family: var(--body);
   font-size: var(--text-sm);
@@ -523,7 +532,15 @@
   gap: 0.15rem;
 }
 
-.csv-import-review-acct .fidelity-acct-summary-total {
+.csv-import-review-acct__amount-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.csv-import-review-acct .imported-account-summary-total {
   flex: 0 0 auto;
   margin-left: 0;
 }
@@ -555,16 +572,33 @@
   }
 }
 
-@media (max-width: 519px) {
-  .csv-import-review-list .fidelity-acct-details.csv-import-review-acct > summary {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
+@media (max-width: 760px) {
+  .csv-import-review-list .imported-account-disclosure.csv-import-review-acct > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 0.5rem;
+    align-items: center;
+  }
+
+  .csv-import-review-acct__identity {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .csv-import-review-acct__bucket {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .csv-import-review-acct__summary-end {
+    grid-column: 2;
+    grid-row: 1;
     margin-left: 0;
     justify-self: end;
+    align-self: center;
   }
+
 }
 
 @keyframes csv-import-review-row-in {
@@ -593,4 +627,47 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0 0 8px;
+}
+
+/* Mobile: full-viewport import flow (modal + in-card panel shell) */
+@media (max-width: 760px) {
+  .csv-import-modal-overlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .csv-import-modal-stack,
+  .csv-import-modal-shell,
+  .csv-import-panel-host {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .csv-import-modal-shell {
+    border: none;
+    box-shadow: none;
+  }
+
+  .csv-import-busy-overlay--modal,
+  .csv-import-busy-overlay--panel {
+    border-radius: 0;
+  }
+
+  .csv-import-modal-header {
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  }
+
+  .csv-import-modal__lead {
+    font-size: var(--text-xs);
+    line-height: 1.15;
+  }
+
+  .csv-import-modal-footer__row {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  }
 }

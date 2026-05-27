@@ -1,6 +1,6 @@
 import { parseSnapshot } from '../appSnapshot'
 import { isWelcomeCompletedLocal } from '../userPrefs'
-import { parseStoredUserProfile } from '../userProfileStorage'
+import { parseStoredUserProfile } from '../storedUserProfile'
 import type { StoredManualAccounts } from '../manualAccountEntries'
 import {
   ALL_LEGACY_PLAN_STORAGE_KEYS,

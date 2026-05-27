@@ -79,38 +79,7 @@
 }
 
 .wtr-climate-card__chart {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 0.25rem;
-  align-items: end;
-  min-height: 5.5rem;
-}
-
-.wtr-climate-card__month {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.wtr-climate-card__bar-wrap {
-  position: relative;
   width: 100%;
-  height: 4.5rem;
-}
-
-.wtr-climate-card__bar {
-  position: absolute;
-  left: 15%;
-  right: 15%;
-  border-radius: 4px 4px 2px 2px;
-  background: color-mix(in srgb, var(--accent) 55%, var(--surface));
-}
-
-.wtr-climate-card__month-label {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
 }
 
 .wtr-climate-card__stats {

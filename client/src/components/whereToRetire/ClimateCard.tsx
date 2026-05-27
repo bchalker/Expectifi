@@ -2,6 +2,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react'
 import { IconSun } from '@tabler/icons-react'
 import type { CityClimate } from '../../lib/api/openMeteo'
 import { formatTemp } from '../../lib/api/openMeteo'
+import { ClimateMonthlyChart } from './ClimateMonthlyChart'
 import './ClimateCard.scss'
 
 type Props = {
@@ -10,11 +11,6 @@ type Props = {
   failed: boolean
   staggerClassName?: string
   staggerStyle?: (index: number) => CSSProperties
-}
-
-function monthBarHeight(value: number, min: number, max: number): number {
-  if (max <= min) return 50
-  return 12 + ((value - min) / (max - min)) * 88
 }
 
 function staggerSectionProps(
@@ -111,9 +107,6 @@ export function ClimateCard({
 
   if (!climate) return null
 
-  const tempMin = Math.min(...climate.monthly.map((m) => m.avgLowC))
-  const tempMax = Math.max(...climate.monthly.map((m) => m.avgHighC))
-
   return (
     <article className="wtr-climate-card" aria-label="Typical climate">
       <header {...staggerSectionProps(0, 'wtr-climate-card__head', staggerClassName, staggerStyle)}>
@@ -144,25 +137,8 @@ export function ClimateCard({
         </div>
       </header>
 
-      <div
-        aria-hidden
-        {...staggerSectionProps(1, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}
-      >
-        {climate.monthly.map((month) => {
-          const lowPct = monthBarHeight(month.avgLowC, tempMin, tempMax)
-          const highPct = monthBarHeight(month.avgHighC, tempMin, tempMax)
-          return (
-            <div key={month.month} className="wtr-climate-card__month">
-              <div className="wtr-climate-card__bar-wrap">
-                <div
-                  className="wtr-climate-card__bar"
-                  style={{ bottom: `${lowPct}%`, height: `${Math.max(4, highPct - lowPct)}%` }}
-                />
-              </div>
-              <span className="wtr-climate-card__month-label">{month.monthLabel}</span>
-            </div>
-          )
-        })}
+      <div {...staggerSectionProps(1, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}>
+        <ClimateMonthlyChart monthly={climate.monthly} />
       </div>
 
       <dl {...staggerSectionProps(2, 'wtr-climate-card__stats', staggerClassName, staggerStyle)}>

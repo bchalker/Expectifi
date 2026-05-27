@@ -191,11 +191,13 @@ export function DrawerPanel({
 
   return (
     <>
-      <div
-        className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
-        onClick={onClose}
-        aria-hidden={!open}
-      />
+      {!isConfigDrawer ? (
+        <div
+          className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
+          onClick={onClose}
+          aria-hidden={!open}
+        />
+      ) : null}
       {isConfigDrawer ? (
         <ConfigDrawerTabProvider initialTab={configInitialTab}>{shell}</ConfigDrawerTabProvider>
       ) : (

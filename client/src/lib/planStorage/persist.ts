@@ -1,4 +1,5 @@
 import { buildSnapshot } from '../appSnapshot'
+import { inputsForPersistedCalculatorSession } from '../fidelityStorage'
 import type { PlanPersistSnapshot } from './types'
 import { savePlanAccounts } from './accounts'
 import { savePlanProfile } from './profile'
@@ -22,6 +23,11 @@ export function persistPlanState(tier: UserTier, snapshot: PlanPersistSnapshot):
     savePlanAccounts(snapshot.accounts)
   }
   savePlanSession(
-    buildSnapshot(snapshot.inputs, snapshot.ui, snapshot.phase, snapshot.activePreset),
+    buildSnapshot(
+      inputsForPersistedCalculatorSession(snapshot.inputs),
+      snapshot.ui,
+      snapshot.phase,
+      snapshot.activePreset,
+    ),
   )
 }

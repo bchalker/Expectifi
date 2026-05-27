@@ -131,17 +131,23 @@
   box-sizing: border-box;
 }
 
-/* Tall card: center the empty-state block vertically (min-height is on .account-balances-card-inner-wrap) */
+/* Empty portfolio: dashed drop zone (matches onboarding accounts empty) */
 .account-balances-card-inner-wrap--empty-state {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
+  min-height: min(16rem, 48vh);
+  padding: 1.75rem 1.25rem;
+  box-sizing: border-box;
+  border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 12px;
 }
 
 .account-balances-card-inner-wrap--empty-state > .account-balances-empty {
   flex: 0 0 auto;
   align-self: stretch;
+  padding: 0;
 }
 
 .account-balances-empty__lead {
@@ -173,17 +179,19 @@
 
 .account-balances-empty__actions--financials-entry {
   width: 100%;
-  max-width: 22rem;
+  max-width: none;
   margin-top: 0;
-  justify-content: stretch;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.rab-brokerage-stack {
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 1.75rem;
-  background: var(--surface);
+.account-balances-stack {
+  // border: 1px solid var(--border-strong);
+  // border-radius: 12px;
+  // padding: 16px;
+  // // margin-bottom: 1.75rem;
+  // background: var(--surface);
   box-sizing: border-box;
 }
 
@@ -356,6 +364,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.65rem;
   width: 100%;
 }
@@ -368,6 +377,32 @@
   width: 100%;
   max-width: 20rem;
   margin-inline: auto;
+}
+
+.account-balances-financials-entry__choices--primary {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+  max-width: none;
+}
+
+.account-balances-financials-entry__choices--primary .financials-entry-choice {
+  width: auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.account-balances-financials-entry__choices--secondary {
+  width: auto;
+  max-width: none;
+  margin-inline: auto;
+}
+
+.account-balances-financials-entry__choices--secondary .financials-entry-choice-wrap {
+  align-items: center;
 }
 
 .financials-entry-choice-wrap {
@@ -446,15 +481,99 @@
   font-feature-settings: 'tnum';
 }
 
+.financials-entry-csv-dropdown {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.financials-entry-csv-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--surface);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.financials-entry-csv-dropdown__trigger:hover:not(:disabled),
+.financials-entry-csv-dropdown__trigger:focus-visible:not(:disabled),
+.financials-entry-csv-dropdown__trigger--open {
+  background: color-mix(in srgb, var(--accent) 88%, black);
+}
+
+.financials-entry-csv-dropdown__chevron {
+  transition: transform 0.15s ease;
+}
+
+.financials-entry-csv-dropdown__chevron--open {
+  transform: rotate(180deg);
+}
+
+.financials-entry-csv-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  min-width: 11.5rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent);
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.financials-entry-csv-dropdown__item {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.financials-entry-csv-dropdown__item:hover,
+.financials-entry-csv-dropdown__item:focus-visible {
+  background: var(--surface2);
+  color: var(--accent-text);
+}
+
 .account-balances-edit-sheet {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-/* App.tsx section divider sits below the financials shell — hide during in-card import / manual */
+/* App.tsx section divider sits below the financials shell — hide during empty / in-card import / manual */
+.main:has(.account-balances-card-inner-wrap--empty-state) > hr.divider,
 .main:has(.account-balances-import-sheet) > hr.divider,
-.main:has(.account-balances-manual-sheet) > hr.divider {
+.main:has(.account-balances-manual-sheet) > hr.divider,
+.main:has(.account-balances-total-retirement--merged) > hr.divider {
   display: none;
 }
 
@@ -976,8 +1095,8 @@
   height: 100%;
 }
 
-.account-balances-edit-sheet--import .fidelity-acct-details,
-.account-balances-edit-sheet--import .fidelity-acct-positions {
+.account-balances-edit-sheet--import .imported-account-disclosure,
+.account-balances-edit-sheet--import .holdings-positions-table {
   width: 100%;
   max-width: none;
   box-sizing: border-box;
@@ -1012,6 +1131,15 @@
   flex: 0 1 auto;
   align-items: center;
   max-width: 100%;
+}
+
+.account-balances-edit-sheet__hint {
+  margin: 0.35rem 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .account-balances-edit-sheet__subtitle {
@@ -1093,11 +1221,10 @@
   position: relative;
   padding: 0;
   border: none;
-  /* Room for CSV import panel + in-card modal overlay */
-  min-height: min(28rem, 78vh);
 }
 
 @media (min-width: 680px) {
+  /* Room for CSV import panel + in-card modal overlay */
   .account-balances-card-inner-wrap {
     min-height: min(32rem, 72vh);
   }
@@ -1107,6 +1234,15 @@
   overflow: hidden;
 }
 
+.csv-session-banner-wrap {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: inset 0 0 12px 1px color-mix(in srgb, var(--border) 55%, transparent);
+}
+
 .csv-session-banner {
   display: flex;
   flex-wrap: wrap;
@@ -1114,11 +1250,11 @@
   justify-content: space-between;
   gap: 0.75rem 1rem;
   width: 100%;
-  padding: 0.85rem 1rem;
-  margin-bottom: 1rem;
+  padding: 12px;
+  box-sizing: border-box;
   border: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--border) 10%, var(--surface));
+  background: #fff;
 }
 
 .csv-session-banner__text {
@@ -1238,7 +1374,7 @@
   filter: brightness(1.05);
 }
 
-.fidelity-scenario-slide__sheet {
+.holding-scenario-slide__sheet {
   position: absolute;
   top: 0;
   right: 0;
@@ -1252,14 +1388,14 @@
   border-left: 1px solid var(--border);
   /* Closed / pre-open: no shadow; keyframes + forwards bring in the depth. */
   box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
-  animation: fidelity-scenario-slide-sheet-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: holding-scenario-slide-sheet-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.fidelity-scenario-slide__sheet.fidelity-scenario-slide__sheet--closing {
-  animation: fidelity-scenario-slide-sheet-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+.holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
+  animation: holding-scenario-slide-sheet-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-@keyframes fidelity-scenario-slide-sheet-in {
+@keyframes holding-scenario-slide-sheet-in {
   from {
     transform: translateX(100%);
     box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
@@ -1270,7 +1406,7 @@
   }
 }
 
-@keyframes fidelity-scenario-slide-sheet-out {
+@keyframes holding-scenario-slide-sheet-out {
   from {
     transform: translateX(0);
     box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
@@ -1282,20 +1418,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fidelity-scenario-slide__sheet {
+  .holding-scenario-slide__sheet {
     animation: none;
     transform: translateX(0);
     box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
   }
 
-  .fidelity-scenario-slide__sheet.fidelity-scenario-slide__sheet--closing {
+  .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
     animation: none;
     transform: translateX(100%);
     box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
   }
 }
 
-.fidelity-scenario-slide__sheet .fidelity-scenario-popout.fidelity-scenario-popout--panel {
+.holding-scenario-slide__sheet .holding-scenario-popout.holding-scenario-popout--panel {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -1304,18 +1440,18 @@
   background: var(--surface);
 }
 
-.fidelity-scenario-slide__sheet .fidelity-scenario-popout__head {
+.holding-scenario-slide__sheet .holding-scenario-popout__head {
   flex-shrink: 0;
 }
 
-.fidelity-scenario-slide__sheet .fidelity-scenario-popout__body {
+.holding-scenario-slide__sheet .holding-scenario-popout__body {
   flex: 1;
   min-height: 0;
   max-height: none;
   overflow: hidden;
 }
 
-.fidelity-scenario-slide__sheet .fidelity-scenario-popout__foot {
+.holding-scenario-slide__sheet .holding-scenario-popout__foot {
   flex-shrink: 0;
 }
 
@@ -1465,4 +1601,104 @@
   font-size: 1rem;
   padding: 0.25rem 0.35rem;
   min-height: 2.25rem;
+}
+
+/* Mobile: full-screen import CSV + related dashboard overlays (scenario panel) */
+@media (max-width: 760px) {
+  .account-balances-dashboard-overlays {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .account-balances-dashboard-overlays .account-balances-import-sheet {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    min-height: 100dvh;
+    padding: 0;
+    background: var(--surface);
+  }
+
+  .account-balances-import-sheet {
+    padding: 0;
+  }
+
+  .account-balances-edit-sheet--import .csv-import-panel-host {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    min-height: 100dvh;
+    margin: 0;
+    align-self: stretch;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .account-balances-edit-sheet--import .csv-import-panel-shell {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .account-balances-dashboard-overlays .holding-scenario-slide__sheet {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    border-left: none;
+    box-shadow: none;
+    animation: holding-scenario-sheet-mobile-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .account-balances-dashboard-overlays
+    .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
+    animation: holding-scenario-sheet-mobile-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+  }
+}
+
+@keyframes holding-scenario-sheet-mobile-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes holding-scenario-sheet-mobile-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-balances-dashboard-overlays .holding-scenario-slide__sheet {
+    animation: none;
+    transform: none;
+  }
+
+  .account-balances-dashboard-overlays
+    .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
 }

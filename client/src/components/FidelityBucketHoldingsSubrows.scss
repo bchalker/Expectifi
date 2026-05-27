@@ -1,5 +1,5 @@
 /* Fidelity CSV bucket: subrows + per-account ledger + holdings list */
-.edit-row--fidelity-bucket .fidelity-bucket-subrows {
+.edit-row--portfolio-bucket .portfolio-bucket-subrows {
   flex: 1 1 100%;
   width: 100%;
   margin-top: 0;
@@ -7,14 +7,14 @@
   border-top: none;
 }
 
-.fidelity-import-ledger {
+.import-ledger {
   margin-bottom: 6px;
   padding-left: 2px;
 }
-.fidelity-import-ledger:last-child {
+.import-ledger:last-child {
   margin-bottom: 0;
 }
-.fidelity-import-ledger__lead {
+.import-ledger__lead {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -23,7 +23,7 @@
   min-width: 0;
 }
 
-.fidelity-import-ledger-acct {
+.import-ledger-account {
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -33,7 +33,7 @@
   margin: 0;
 }
 
-.fidelity-import-ledger__summary-end {
+.import-ledger__summary-end {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -42,14 +42,22 @@
   margin-left: auto;
 }
 
-.fidelity-import-ledger__values {
+.import-ledger__values {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.15rem;
 }
 
-.fidelity-import-ledger__total {
+.import-ledger__amount-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.import-ledger__total {
   font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 500;
@@ -59,10 +67,10 @@
   line-height: 1.25;
 }
 
-.fidelity-holdings-disclosure {
+.imported-holdings-disclosure {
   margin: 0;
 }
-.fidelity-holdings-disclosure > summary {
+.imported-holdings-disclosure > summary {
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -74,15 +82,15 @@
   padding: 0;
   user-select: none;
 }
-.fidelity-holdings-disclosure > summary::-webkit-details-marker {
+.imported-holdings-disclosure > summary::-webkit-details-marker {
   display: none;
 }
-.fidelity-holdings-summary__text {
+.imported-holdings-summary__text {
   display: inline-flex;
   align-items: center;
   min-width: 0;
 }
-.fidelity-holdings-summary__end {
+.imported-holdings-summary__end {
   flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
@@ -91,7 +99,7 @@
   gap: 6px;
   max-width: 100%;
 }
-.fidelity-holdings-disclosure[open] > summary {
+.imported-holdings-disclosure[open] > summary {
   margin-bottom: 2px;
 }
 
@@ -112,12 +120,13 @@
   border: none;
   border-radius: 0;
   background: transparent;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: var(--shadow-account-divider);
   box-sizing: border-box;
 }
 
 .holding-return-row:last-child {
-  border-bottom: none;
+  box-shadow: none;
 }
 
 .holding-return-row__primary {
@@ -287,4 +296,44 @@
   font-weight: 400;
   line-height: 1.3;
   color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .retirement-import-holdings {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+
+  .holding-return-row {
+    padding-inline: 1rem;
+  }
+
+  .holding-return-row__primary {
+    flex-wrap: nowrap;
+  }
+
+  .holding-return-row__left {
+    flex: 1 1 auto;
+  }
+
+  .holding-return-row__values {
+    flex-shrink: 0;
+  }
+
+  .holding-return-row__edit {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .holding-return-row__secondary {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    box-shadow: var(--shadow-account-divider);
+  }
+
+  .holding-card-basis {
+    margin-left: auto;
+    text-align: right;
+  }
 }

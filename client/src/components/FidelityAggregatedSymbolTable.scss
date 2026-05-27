@@ -1,0 +1,89 @@
+/* Aggregated holdings list (card styles in HoldingsSymbolCard.scss) */
+.holdings-symbol-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+  gap: 1px;
+  --holdings-stagger-base: 0.04s;
+  --holdings-stagger-step: 0.045s;
+}
+
+.holdings-symbol-list__header-row {
+  display: none;
+}
+
+.holdings-symbol-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Stagger in when bucket disclosure opens (details collapsed → open). */
+.tax-treatment-disclosure[open] .holdings-symbol-list > .holdings-symbol-group {
+  opacity: 0;
+  animation: holdings-symbol-group-stagger-in var(--portfolio-reveal-duration, 0.5s)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes holdings-symbol-group-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@for $i from 1 through 48 {
+  .tax-treatment-disclosure[open] .holdings-symbol-list > .holdings-symbol-group:nth-child(#{$i + 1}) {
+    animation-delay: calc(var(--holdings-stagger-base) + var(--holdings-stagger-step) * #{$i - 1});
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tax-treatment-disclosure[open] .holdings-symbol-list > .holdings-symbol-group {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.holdings-symbol-group:last-child .holdings-symbol-card:last-of-type {
+  box-shadow: none;
+}
+
+.holdings-breakdown-block {
+  // padding: 0 0 0.35rem var(--layout-app-inner-pad);
+  box-sizing: border-box;
+}
+
+.holdings-breakdown-block .holdings-breakdown-row__inner {
+  margin-inline: 0 var(--layout-app-inner-pad);
+}
+
+@media (min-width: 621px) {
+  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
+    width: 100%;
+  }
+
+  .holdings-breakdown-block {
+    // padding: 0 0 0.5rem calc(var(--layout-app-inner-pad, 10px) + 1.5rem);
+  }
+
+  .holdings-breakdown-block .holdings-breakdown-row__inner {
+    margin-inline: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .account-balances-total-retirement__value,
+  .tax-treatment-disclosure__summary .portfolio-bucket-total {
+    text-decoration: none;
+    cursor: inherit;
+  }
+}

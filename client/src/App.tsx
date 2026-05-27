@@ -25,7 +25,7 @@ import {
   type DrawerName,
 } from './lib/computeResults'
 import { clearStoredManualAccounts } from './lib/manualAccountEntries'
-import { loadStoredFidelityImport } from './lib/fidelityStorage'
+import { inputsForPersistedCalculatorSession, loadStoredFidelityImport } from './lib/fidelityStorage'
 import {
   clearAllAccountBalancesFromCard,
   clearAllFidelityImportFromCard,
@@ -370,7 +370,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           ...portfolioBalancesFromImport(b),
         }
         persistCalculatorSession({
-          inputs: applyFidelityBalanceOverrides(next),
+          inputs: inputsForPersistedCalculatorSession(applyFidelityBalanceOverrides(next)),
           ui: sessionRef.current.ui,
           phase: 'growth',
           activePreset: sessionRef.current.activePreset,
@@ -784,6 +784,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               onOpenUpgradeCsv={openCsvUpgrade}
               openImportRequest={openImportRequest || undefined}
               onImportOpenHandled={() => setOpenImportRequest(0)}
+              onManualAccountsCommitted={() => setManualAccountsRev((n) => n + 1)}
             />
           </div>
 
@@ -794,8 +795,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
         </>
       ) : null}
         </div>
-        <AppPrivacyTrust dividerAbove={isWhereToRetire} />
       </div>
+      <AppPrivacyTrust dividerAbove={isWhereToRetire} />
 
       <SnapshotPanel
         open={accordionOpen}

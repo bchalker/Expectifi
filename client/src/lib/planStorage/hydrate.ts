@@ -3,7 +3,9 @@ import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
 } from '../initialCalculatorInputs'
+import { clearNonProCsvHoldingsOnBoot } from '../fidelityStorage'
 import { applyFidelityBalanceOverrides } from '../portfolioSourceExclusivity'
+import { stripCsvDerivedFromCalculatorInputs } from '../calculatorInputSanitize'
 import type { CalculatorInputs, CalculatorUi } from '../computeResults'
 import {
   aggregateManualAccountsToBases,
@@ -97,6 +99,9 @@ function hydratePlanStateForTier(
       ui = { ...defaultUi, ...session.ui }
       phase = session.phase
       activePreset = session.activePreset
+      if (tier !== 'pro') {
+        inputs = stripCsvDerivedFromCalculatorInputs(inputs)
+      }
     }
     if (profile) {
       inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
@@ -134,6 +139,7 @@ export function bootPlanHydration(
   if (tier === 'anonymous' && !hasSavePlanBeenAccepted()) {
     resetAnonymousEphemeralSessionOnBoot()
   }
+  clearNonProCsvHoldingsOnBoot(tier)
   return hydratePlanStateForTier(tier, options)
 }
 

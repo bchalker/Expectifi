@@ -1,6 +1,6 @@
 import type { AnimationEvent, ChangeEvent, CSSProperties, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { IconArrowNarrowDownDashed } from '@tabler/icons-react'
+import { IconArrowNarrowDownDashed, IconChevronDown, IconPencil } from '@tabler/icons-react'
 import { Button, useOverlayState } from '@heroui/react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import {
@@ -15,6 +15,7 @@ import { flattenBatches, loadStoredFidelityImport } from '../lib/fidelityStorage
 import {
   getAccountTypeMeta,
   loadStoredManualAccounts,
+  saveManualAccountsFromBucketBases,
   type ManualAccountEntry,
 } from '../lib/manualAccountEntries'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
@@ -32,6 +33,8 @@ import {
 } from '../lib/withdrawalStrategyContent'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { inputsHavePlanningProfileFields, planningDisplayFromInputs } from '../lib/userPrefs'
+import { loadPlanProfile, profileHasOnboardingComplete } from '../lib/planStorage/profile'
+import { loadUserProfile, profileToCalculatorPatch } from '../lib/userProfileStorage'
 import {
   hasImportedPortfolioData,
   hasManualPortfolioAmounts,
@@ -41,6 +44,7 @@ import {
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { currencySymbol } from '../lib/displayCurrency'
 import { computeMergedDashboardPositionModels, blendedRateForDashboardPositionId } from '../lib/mergedDashboardPositionModels'
+import { FinancialsEntryCsvDropdown } from './FinancialsEntryCsvDropdown'
 import { ManualBalancesPlanStep, type ManualPlanDraft } from './ManualBalancesPlanStep'
 import {
   MANUAL_PLAN_POST_FADE_PAUSE_MS,
@@ -50,7 +54,6 @@ import {
 } from '../lib/portfolioWaveReveal'
 import { positionUsesCustomReturnMode } from '../lib/positionReturnModel'
 import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
-import { useHoldingQuotes } from '../lib/holdingQuotes'
 import { FidelityAggregatedSymbolTable, type FidelityAggregatedScenarioBundle } from './FidelityAggregatedSymbolTable'
 import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
@@ -60,6 +63,7 @@ import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideE
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
 import { PlaidConnectionProvider } from './PlaidConnectionHeader'
+import { PlaidLinkButton } from './PlaidLinkButton'
 import { AppButton } from './ui/AppButton'
 import { useUserTier } from '../hooks/useUserTier'
 import './AccountBalancesTaxDisclosure.scss'
@@ -92,6 +96,22 @@ function ManualBalanceRowLabel({ label, taxKind, taxDesc, tone }: Pick<ManualBal
 /** Pre-tax display total — must match `retBal` (includes Traditional IRA). */
 function retirementPretaxDisplayTotal(bal: ComputedSnapshot['bal']): number {
   return bal.bal401k + bal.balSE401k + bal.balTradIRA
+}
+
+/** Onboarding / saved profile already captured DOB, retirement age, and contributions. */
+function shouldSkipManualBalancesPlanStep(inputs: CalculatorInputs | undefined): boolean {
+  if (profileHasOnboardingComplete(loadPlanProfile())) return true
+  return Boolean(inputs && inputsHavePlanningProfileFields(inputs))
+}
+
+function manualPlanDraftForCommit(inputs: CalculatorInputs): ManualPlanDraft {
+  const merged = { ...inputs, ...profileToCalculatorPatch(loadUserProfile()) }
+  const display = planningDisplayFromInputs(merged)
+  return {
+    dateOfBirth: display.dateOfBirth,
+    targetRetirementAge: display.targetRetirementAge,
+    save: display.save,
+  }
 }
 
 type ManualBalancesDraft = {
@@ -154,6 +174,8 @@ type Props = {
   /** Increment to open the CSV import panel once (e.g. after welcome connect). */
   openImportRequest?: number
   onImportOpenHandled?: () => void
+  /** After manual balances are committed to expectifi/accounts-v1. */
+  onManualAccountsCommitted?: () => void
 }
 
 function WithdrawalLabeledBlock({
@@ -207,6 +229,7 @@ export function AccountBalances({
   onOpenUpgradeCsv,
   openImportRequest,
   onImportOpenHandled,
+  onManualAccountsCommitted,
 }: Props) {
   const { isPro, hasSessionCsvHoldings } = useUserTier()
   const showCsvSessionBanner = hasSessionCsvHoldings && !isPro
@@ -222,6 +245,17 @@ export function AccountBalances({
     if (!imp?.batches?.length) return [] as FidelityPositionRow[]
     return flattenBatches(imp.batches)
   }, [fidelityImportRev])
+
+  const aggregatedHoldingsForGuide = useMemo(
+    () => aggregatedHoldingsForScenarioGuide(fidelityRows),
+    [fidelityRows],
+  )
+
+  const showImportedHoldingsScenarioGuide =
+    mergedDashboard &&
+    fidelityScenarioEditingEnabled &&
+    balanceMode === 'fidelity' &&
+    aggregatedHoldingsForGuide.length > 0
 
   const manualAccountEntries = useMemo(() => {
     void manualAccountsRev
@@ -241,11 +275,6 @@ export function AccountBalances({
         return b !== 'unknown' && b !== 'brokerage'
       }),
     [fidelityRows],
-  )
-
-  const holdingQuoteMap = useHoldingQuotes(
-    fidelityRows,
-    mergedDashboard && balanceMode === 'fidelity' && (hasAnyFidelityRetirement || hasFidelityBrokerage),
   )
 
   const hasManualRetirementBalances =
@@ -283,17 +312,6 @@ export function AccountBalances({
       positionUsesCustomReturnMode(m, blendedRateForDashboardPositionId(m.id, inputs.retRate, inputs.brkRate)),
     )
   }, [mergedPositionModels, inputs])
-
-  const aggregatedHoldingsForGuide = useMemo(
-    () => aggregatedHoldingsForScenarioGuide(fidelityRows),
-    [fidelityRows],
-  )
-
-  const showImportedHoldingsScenarioGuide =
-    mergedDashboard &&
-    fidelityScenarioEditingEnabled &&
-    balanceMode === 'fidelity' &&
-    aggregatedHoldingsForGuide.length > 0
 
   const [fidelityScenarioPanel, setFidelityScenarioPanel] = useState<{
     symbol: string
@@ -389,7 +407,7 @@ export function AccountBalances({
   const onFidelityScenarioSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return
-      if (e.animationName !== 'fidelity-scenario-slide-sheet-out') return
+      if (e.animationName !== 'holding-scenario-slide-sheet-out') return
       if (!fidelityScenarioClosing) return
       finalizeFidelityScenarioClose()
     },
@@ -417,12 +435,20 @@ export function AccountBalances({
   const commitPendingManualPortfolio = useCallback(() => {
     const pending = pendingManualCommitRef.current
     if (!pending || !onBases) return
+    saveManualAccountsFromBucketBases(pending.balances)
+    onManualAccountsCommitted?.()
     onClearImportedForManual?.()
     onManualPortfolioPlanApplied?.(pending.plan)
     onBases(pending.balances)
     onBalanceModeChange?.('manual')
     pendingManualCommitRef.current = null
-  }, [onBases, onBalanceModeChange, onClearImportedForManual, onManualPortfolioPlanApplied])
+  }, [
+    onBases,
+    onBalanceModeChange,
+    onClearImportedForManual,
+    onManualAccountsCommitted,
+    onManualPortfolioPlanApplied,
+  ])
 
   const requestBalanceEditClose = useCallback(() => {
     if (balanceEditPanel === 'manual' && manualConfirmPhase === 'plan') {
@@ -469,7 +495,7 @@ export function AccountBalances({
         return
       }
       if (
-        e.animationName !== 'fidelity-scenario-slide-sheet-out' &&
+        e.animationName !== 'holding-scenario-slide-sheet-out' &&
         e.animationName !== 'account-balances-import-sheet-out'
       ) {
         return
@@ -519,6 +545,29 @@ export function AccountBalances({
     onImportOpenHandled?.()
   }, [openImportRequest, mergedDashboard, onFidelityApplyBalances, onImportOpenHandled])
 
+  const queueManualCommitAfterBalances = useCallback(
+    (plan: ManualPlanDraft) => {
+      if (!manualDraft || balanceEditClosing) return
+      // Keep progress UI until the sheet finishes closing — avoids flashing manual rows.
+      pendingManualCommitRef.current = { balances: manualDraft, plan }
+      manualConfirmPendingRef.current = true
+      const prefersReducedMotion =
+        typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (prefersReducedMotion) {
+        commitPendingManualPortfolio()
+        markPortfolioBalancesFlush({ afterManualPlanModal: true })
+        manualConfirmPendingRef.current = false
+        finalizeBalanceEditClose()
+        schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS)
+        return
+      }
+      setManualConfirmPhase('progress')
+      setManualConfirmProgress(100)
+      setBalanceEditClosing(true)
+    },
+    [manualDraft, balanceEditClosing, commitPendingManualPortfolio, finalizeBalanceEditClose],
+  )
+
   const runManualConfirmSequence = useCallback(async () => {
     if (!manualDraft || manualConfirmRunRef.current) return
     manualConfirmRunRef.current = true
@@ -535,33 +584,20 @@ export function AccountBalances({
     setManualConfirmProgress(100)
 
     await new Promise((r) => window.setTimeout(r, 280))
+    if (inputs && shouldSkipManualBalancesPlanStep(inputs)) {
+      queueManualCommitAfterBalances(manualPlanDraftForCommit(inputs))
+      manualConfirmRunRef.current = false
+      return
+    }
     setManualConfirmPhase('plan')
     manualConfirmRunRef.current = false
-  }, [manualDraft])
+  }, [manualDraft, inputs, queueManualCommitAfterBalances])
 
   const completeManualPlanStep = useCallback(
     (plan: ManualPlanDraft) => {
-      if (!manualDraft || balanceEditClosing) return
-      pendingManualCommitRef.current = { balances: manualDraft, plan }
-      manualConfirmPendingRef.current = true
-      const prefersReducedMotion =
-        typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (prefersReducedMotion) {
-        commitPendingManualPortfolio()
-        markPortfolioBalancesFlush({ afterManualPlanModal: true })
-        manualConfirmPendingRef.current = false
-        finalizeBalanceEditClose()
-        schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS)
-        return
-      }
-      setBalanceEditClosing(true)
+      queueManualCommitAfterBalances(plan)
     },
-    [
-      manualDraft,
-      balanceEditClosing,
-      commitPendingManualPortfolio,
-      finalizeBalanceEditClose,
-    ],
+    [queueManualCommitAfterBalances],
   )
 
   const confirmManualBalances = useCallback(() => {
@@ -569,11 +605,22 @@ export function AccountBalances({
     const prefersReducedMotion =
       typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) {
+      if (inputs && shouldSkipManualBalancesPlanStep(inputs)) {
+        queueManualCommitAfterBalances(manualPlanDraftForCommit(inputs))
+        return
+      }
       setManualConfirmPhase('plan')
       return
     }
     void runManualConfirmSequence()
-  }, [manualDraft, manualConfirmBusy, balanceEditClosing, runManualConfirmSequence])
+  }, [
+    manualDraft,
+    manualConfirmBusy,
+    balanceEditClosing,
+    inputs,
+    queueManualCommitAfterBalances,
+    runManualConfirmSequence,
+  ])
 
   const toggleBalanceEditPanel = useCallback(
     (panel: 'manual' | 'import') => {
@@ -899,19 +946,25 @@ export function AccountBalances({
   }
 
 
+  function renderHiddenCsvFileInput() {
+    if (!mergedDashboard || !canEditBalances) return null
+    return (
+      <input
+        ref={financialsCsvFileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={onFinancialsCsvFileChange}
+      />
+    )
+  }
+
   function renderAccountBalancesManageMenu() {
     if (!showBalanceEntryActions) return null
     return (
       <>
-        <input
-          ref={financialsCsvFileInputRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden
-          onChange={onFinancialsCsvFileChange}
-        />
         <AccountBalancesManageMenu
           canClearAccounts={Boolean(hasAnyAccountCardData && onRemoveRetirementAccounts)}
           manualReplaceNotice={null}
@@ -987,7 +1040,7 @@ export function AccountBalances({
     const bucket: WithdrawalDisplayBucket = tax
     const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
     const positions = positionsForTaxTreatment(fidelityRows, tax)
-    const trend = computeBucketTrendDisplay(positions, holdingQuoteMap)
+    const trend = computeBucketTrendDisplay(positions)
     const aggregated = aggregateFidelityPositionsBySymbol(positions)
     const combinedLines = positions.length > aggregated.length
 
@@ -1001,7 +1054,7 @@ export function AccountBalances({
 
     return (
       <details key={tax} className="tax-treatment-disclosure">
-        <summary className="edit-row edit-row--fidelity-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
+        <summary className="edit-row edit-row--portfolio-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           {!positions.length ? (
             <p className="footnote tax-treatment-disclosure__empty">No positions mapped to this bucket in your import.</p>
@@ -1061,7 +1114,7 @@ export function AccountBalances({
   function renderManualAccountEntryRow(
     entry: ManualAccountEntry,
     withdrawalUi: boolean,
-    borderBottom?: CSSProperties['borderBottom'],
+    omitDivider?: boolean,
   ) {
     if (entry.type == null) return null
     const meta = getAccountTypeMeta(entry.type, locale)
@@ -1076,7 +1129,16 @@ export function AccountBalances({
       />
     )
     return (
-      <div key={entry.id} className="edit-row edit-row--manual-balance" style={{ borderBottom }}>
+      <div
+        key={entry.id}
+        className={[
+          'edit-row',
+          'edit-row--manual-balance',
+          omitDivider ? 'edit-row--no-divider' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {withdrawalUi ? (
           <WithdrawalLabeledBlock badgeOrder={order} hint={hint}>
             {labelNode}
@@ -1104,13 +1166,22 @@ export function AccountBalances({
     row: ManualBalanceRow,
     withdrawalUi: boolean,
     bucket: WithdrawalDisplayBucket,
-    borderBottom?: CSSProperties['borderBottom'],
+    omitDivider?: boolean,
   ) {
     const { key, label, taxKind, taxDesc, tone } = row
     const { order, hint } = withdrawalUi ? metaFor(bucket) : { order: null as number | null, hint: null as string | null }
     const labelNode = <ManualBalanceRowLabel label={label} taxKind={taxKind} taxDesc={taxDesc} tone={tone} />
     return (
-      <div key={key} className="edit-row edit-row--manual-balance" style={{ borderBottom }}>
+      <div
+        key={key}
+        className={[
+          'edit-row',
+          'edit-row--manual-balance',
+          omitDivider ? 'edit-row--no-divider' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {withdrawalUi ? (
           <WithdrawalLabeledBlock badgeOrder={order} hint={hint}>
             {labelNode}
@@ -1136,12 +1207,20 @@ export function AccountBalances({
     opts: { readOnly?: boolean; useDraft?: boolean; omitLastBorder?: boolean },
   ) {
     const { key, label, taxKind, taxDesc, tone } = row
-    const borderStyle =
-      opts.omitLastBorder && idx === manualBalanceRows.length - 1 ? ({ borderBottom: 'none' } as const) : undefined
+    const omitDivider = opts.omitLastBorder && idx === manualBalanceRows.length - 1
     const amount = opts.useDraft ? displayManualDraft(key) : display(key)
 
     return (
-      <div key={key} className="edit-row edit-row--manual-balance" style={borderStyle}>
+      <div
+        key={key}
+        className={[
+          'edit-row',
+          'edit-row--manual-balance',
+          omitDivider ? 'edit-row--no-divider' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <ManualBalanceRowLabel label={label} taxKind={taxKind} taxDesc={taxDesc} tone={tone} />
         <div className="edit-row-right">
           {opts.readOnly ? (
@@ -1206,12 +1285,12 @@ export function AccountBalances({
     }
 
     const brkMeta = withdrawalUi ? metaFor('brokerage') : { order: null as number | null }
-    const brkTrend = computeBucketTrendDisplay(brokeragePositions, holdingQuoteMap)
+    const brkTrend = computeBucketTrendDisplay(brokeragePositions)
 
     if (!useFidelityBrokerageView) {
       return (
         <>
-          <div className="edit-row" style={{ borderBottom: 'none' }}>
+          <div className="edit-row edit-row--no-divider">
             {withdrawalUi ? (
               <WithdrawalLabeledBlock badgeOrder={brkMeta.order} hint={null}>
                 <FidelityBucketAccountRow label="Brokerage" total={fmt(brkBal)} trend={brkTrend} showViewHoldings={false} />
@@ -1237,7 +1316,7 @@ export function AccountBalances({
 
     return (
       <details className="tax-treatment-disclosure">
-        <summary className="edit-row edit-row--fidelity-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
+        <summary className="edit-row edit-row--portfolio-bucket tax-treatment-disclosure__summary">{summaryInner}</summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           <FidelityAggregatedSymbolTable
             rows={brkAggregated}
@@ -1249,6 +1328,58 @@ export function AccountBalances({
           />
         </div>
       </details>
+    )
+  }
+
+  function renderFinancialsEntry() {
+    if (!canEditBalances) return null
+    return (
+      <div
+        className="account-balances-empty account-balances-financials-entry account-balances-financials-entry--reveal"
+        role="region"
+        aria-labelledby="account-balances-financials-entry-title"
+      >
+        <p className="account-balances-financials-entry__intro">Let&apos;s add your account balances</p>
+        <div className="account-balances-financials-entry__divider" aria-hidden>
+          <IconChevronDown size={18} stroke={1.5} className="account-balances-financials-entry__divider-chevron" />
+        </div>
+        <h3 className="account-balances-financials-entry__title" id="account-balances-financials-entry-title">
+          How would you like to enter them?
+        </h3>
+        <div className="account-balances-financials-entry__actions account-balances-empty__actions account-balances-empty__actions--financials-entry">
+          <div
+            className="account-balances-financials-entry__choices account-balances-financials-entry__choices--primary"
+            role="list"
+          >
+            <button
+              type="button"
+              role="listitem"
+              className="financials-entry-choice"
+              onClick={() => guardReplaceImport(() => toggleBalanceEditPanel('manual'))}
+            >
+              <IconPencil size={18} stroke={1.5} aria-hidden />
+              Enter manually
+            </button>
+            <FinancialsEntryCsvDropdown
+              onPickCustodian={onPickCsvCustodian}
+              onRequestReplaceManual={guardReplaceManual}
+            />
+          </div>
+          {onFidelityApplyBalances ? (
+            <div
+              className="account-balances-financials-entry__choices account-balances-financials-entry__choices--secondary"
+              role="list"
+            >
+              <PlaidLinkButton
+                variant="choice"
+                residenceCountry={inputs?.residenceCountry}
+                onApplyBalances={onFidelityApplyBalances}
+                onImportApplied={onFidelityImportApplied}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
     )
   }
 
@@ -1289,7 +1420,7 @@ export function AccountBalances({
           )
           if (step === 'brokerage') {
             for (const entry of entriesForStep) {
-              nodes.push(<div key={entry.id}>{renderManualAccountEntryRow(entry, withdrawalUi, 'none')}</div>)
+              nodes.push(<div key={entry.id}>{renderManualAccountEntryRow(entry, withdrawalUi, true)}</div>)
             }
             continue
           }
@@ -1323,7 +1454,7 @@ export function AccountBalances({
         }
         if (step === 'hsa') {
           const hsaRow = visibleManualRetirementRows().find((r) => r.key === 'hsa')
-          if (hsaRow) nodes.push(renderManualAccountRow(hsaRow, withdrawalUi, 'hsa', 'none'))
+          if (hsaRow) nodes.push(renderManualAccountRow(hsaRow, withdrawalUi, 'hsa', true))
         }
       }
       return <>{nodes}</>
@@ -1354,7 +1485,6 @@ export function AccountBalances({
   }
 
   const cardStyle: CSSProperties = {
-    background: 'var(--surface)',
     borderRadius: 10,
     marginBottom: mergedDashboard ? 0 : configureInputsOnly && stackWithBrokerage ? '0.5rem' : '1rem',
   }
@@ -1371,10 +1501,10 @@ export function AccountBalances({
     <div className="account-balances-dashboard-overlays">
       {fidelityScenarioPanel && fidelityScenarioBundle ? (
         <aside
-          className={`fidelity-scenario-slide__sheet${fidelityScenarioClosing ? ' fidelity-scenario-slide__sheet--closing' : ''}`}
+          className={`holding-scenario-slide__sheet${fidelityScenarioClosing ? ' holding-scenario-slide__sheet--closing' : ''}`}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="fidelity-scenario-panel-title"
+          aria-labelledby="holding-scenario-panel-title"
           onAnimationEnd={onFidelityScenarioSheetAnimationEnd}
         >
           <FidelityHoldingScenarioPanel
@@ -1411,6 +1541,10 @@ export function AccountBalances({
                 {manualConfirmPhase === 'plan' ? (
                   <p className="account-balances-edit-sheet__subtitle">
                     We need a few details to project growth and monthly income from your balances.
+                  </p>
+                ) : manualConfirmPhase === false ? (
+                  <p className="account-balances-edit-sheet__hint">
+                    Ballpark amounts are fine — you can refine them later.
                   </p>
                 ) : null}
               </div>
@@ -1528,60 +1662,66 @@ export function AccountBalances({
   const headerManageMenu = renderAccountBalancesManageMenu()
 
   const csvSessionBanner = showCsvSessionBanner ? (
-    <div className="csv-session-banner" role="status">
-      <div className="csv-session-banner__text">
-        <p className="csv-session-banner__headline">
-          Your session is temporary — <strong>Pro</strong> keeps it safe.
-        </p>
-        <p className="csv-session-banner__subhead">
-          $9/mo. No contracts, no hassle. Cancel anytime.
-        </p>
+    <div className="csv-session-banner-wrap">
+      <div className="csv-session-banner" role="status">
+        <div className="csv-session-banner__text">
+          <p className="csv-session-banner__headline">
+            Your session is temporary — <strong>Pro</strong> keeps it safe.
+          </p>
+          <p className="csv-session-banner__subhead">
+            $9/mo. No contracts, no hassle. Cancel anytime.
+          </p>
+        </div>
+        <AppButton
+          type="button"
+          size="sm"
+          variant="primary"
+          className="csv-session-banner__cta"
+          onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
+        >
+          Upgrade to Pro
+        </AppButton>
       </div>
-      <AppButton
-        type="button"
-        size="sm"
-        variant="primary"
-        className="csv-session-banner__cta"
-        onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
-      >
-        Upgrade to Pro
-      </AppButton>
     </div>
   ) : null
 
   const accountBalancesBody = (
     <>
       {mergedDashboard ? (
-        <div className="rab-brokerage-stack">
+        <div className="account-balances-stack">
+          {renderHiddenCsvFileInput()}
           <ManualProjectionsCallout
             hasPortfolioBalances={c.hasPortfolioBalances}
             fidelityImportRev={fidelityImportRev}
             onConnectAccounts={() => setOpenManageRequest((n) => n + 1)}
             onImportCsv={() => setOpenManageRequest((n) => n + 1)}
           />
-          <div className="account-balances-header-row">
-            <div className="account-balances-header-row__title-block">
-              <h2 className="account-balances-header-row__title">Retirement Account Balances</h2>
-              {hasCustomScenarioBadge ? (
-                <p className="account-balances-header-row__subtitle">
-                  <span className="account-balances-header-row__subtitle-dot" aria-hidden />
-                  with custom scenarios
-                </p>
-              ) : null}
-            </div>
-            <div className="account-balances-header-row__actions">{headerManageMenu}</div>
-          </div>
-          {csvSessionBanner}
           {showImportedHoldingsScenarioGuide ? (
             <ImportedHoldingsScenarioGuide holdings={aggregatedHoldingsForGuide} />
           ) : null}
+          {hasAnyAccountCardData ? (
+            <div className="account-balances-header-row">
+              <div className="account-balances-header-row__title-block">
+                <h2 className="account-balances-header-row__title">Retirement Account Balances</h2>
+                {hasCustomScenarioBadge ? (
+                  <p className="account-balances-header-row__subtitle">
+                    <span className="account-balances-header-row__subtitle-dot" aria-hidden />
+                    with custom scenarios
+                  </p>
+                ) : null}
+              </div>
+              <div className="account-balances-header-row__actions">{headerManageMenu}</div>
+            </div>
+          ) : null}
+          {csvSessionBanner}
           <div
             className={`account-balances-card-inner-wrap${
               balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
-            }`}
-            style={{ ...cardStyle, marginBottom: '1.75rem' }}
+            }${!hasAnyAccountCardData ? ' account-balances-card-inner-wrap--empty-state' : ''}`}
+            style={hasAnyAccountCardData ? { ...cardStyle, marginBottom: '1.75rem' } : undefined}
           >
             {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
+            {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
             {renderMergedDashboardOrderedContent()}
             {totalRetirementBar}
           </div>

@@ -17,6 +17,15 @@ export function savePlanAccounts(state: StoredManualAccounts): void {
   writeJsonToLocalStorage(EXPECTIFI_ACCOUNTS_KEY, state)
 }
 
+/** Remove saved manual account entries (e.g. when CSV/Plaid replaces manual). */
+export function clearPlanAccounts(): void {
+  try {
+    localStorage.removeItem(EXPECTIFI_ACCOUNTS_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
 export function planAccountsHaveBalances(accounts: StoredManualAccounts | null): boolean {
   if (!accounts?.onboardingCompleted) return false
   const bases = aggregateManualAccountsToBases(accounts.entries)

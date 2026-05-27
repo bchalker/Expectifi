@@ -12,6 +12,13 @@ export type PositionsCsvCustodian = 'fidelity' | 'schwab' | 'vanguard' | 'other'
 
 const POSITIONS_CSV_CUSTODIANS: PositionsCsvCustodian[] = ['fidelity', 'schwab', 'vanguard', 'other']
 
+export const CSV_CUSTODIAN_OPTIONS: { id: PositionsCsvCustodian; label: string }[] = [
+  { id: 'fidelity', label: 'Fidelity' },
+  { id: 'schwab', label: 'Charles Schwab' },
+  { id: 'vanguard', label: 'Vanguard' },
+  { id: 'other', label: 'Other' },
+]
+
 export function isPositionsCsvCustodian(id: string): id is PositionsCsvCustodian {
   return (POSITIONS_CSV_CUSTODIANS as string[]).includes(id)
 }

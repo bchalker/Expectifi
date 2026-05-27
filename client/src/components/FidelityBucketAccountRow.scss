@@ -1,17 +1,17 @@
-/* Fidelity CSV bucket: title + total row inside .edit-row.edit-row--fidelity-bucket */
-.edit-row--fidelity-bucket {
+/* Fidelity CSV bucket: title + total row inside .edit-row.edit-row--portfolio-bucket */
+.edit-row--portfolio-bucket {
   flex-wrap: wrap;
   align-items: flex-start;
   align-content: flex-start;
   gap: 0;
 }
 
-.edit-row--fidelity-bucket .edit-row-label {
+.edit-row--portfolio-bucket .edit-row-label {
   font-weight: 700;
   color: var(--text);
 }
 
-.fidelity-bucket-row__start {
+.portfolio-bucket-row__start {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -20,22 +20,26 @@
   flex: 1;
 }
 
-.fidelity-bucket-row__start .view-holdings-hint {
-  margin-top: 0.05rem;
-}
-
-.fidelity-bucket-row__end {
+.portfolio-bucket-row__end {
   align-items: flex-start;
 }
 
-.fidelity-bucket-row__values {
+.portfolio-bucket-row__values {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.2rem;
 }
 
-.fidelity-bucket-row__values .bucket-total-trend {
+.portfolio-bucket-row__amount-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.portfolio-bucket-row__values .bucket-total-trend {
   width: 100%;
   min-height: 0;
   margin-top: 0.05rem;
@@ -43,7 +47,7 @@
   justify-content: flex-end;
 }
 
-.fidelity-bucket-total {
+.portfolio-bucket-total {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--text);

@@ -6,7 +6,6 @@
   justify-content: center;
   width: 100%;
   min-height: var(--goal-bar-row-h, 2.5rem);
-  transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .goal-progress-bar--phase-growth {
@@ -89,9 +88,7 @@
   border-radius: 9999px;
   background: var(--green3);
   transform-origin: left center;
-  transition:
-    width 0.35s var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1)),
-    background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.35s var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* Post-commit: fade bar in, then grow fill (with subheader wave reveal). */
@@ -163,6 +160,16 @@ html[data-portfolio-wave-reveal='true'] .goal-progress-bar__fill {
   color: #fff;
 }
 
+/* Match app header chrome inset (Header.scss max-width: 760px) */
+@media (max-width: 760px) {
+  .goal-progress-bar__row {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    padding-inline: 1rem;
+  }
+}
+
 @media (max-width: 520px) {
   .goal-progress-bar__copy {
     flex-wrap: wrap;
@@ -171,7 +178,6 @@ html[data-portfolio-wave-reveal='true'] .goal-progress-bar__fill {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .goal-progress-bar,
   .goal-progress-bar__fill {
     transition-duration: 0.01ms;
   }
