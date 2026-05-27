@@ -1,7 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import type { Selection } from 'react-aria-components'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import { IconChevronDown } from '@tabler/icons-react'
+import { Tag, TagGroup } from '@heroui/react'
 import { useClickOutside } from '../hooks/useClickOutside'
 import {
   filterIncomeSecurities,
@@ -14,6 +16,7 @@ import {
   securityRowSubtext,
   type IncomeSecurityFilterId,
 } from '../lib/incomeSecurities'
+import { Tooltip } from './Tooltip'
 import './IncomeSecuritySelector.scss'
 
 type Props = {
@@ -23,56 +26,42 @@ type Props = {
   triggerClassName?: string
 }
 
-function CategoryFilterDropdown({
+function CategoryFilterTags({
   filterId,
   onFilterId,
 }: {
   filterId: IncomeSecurityFilterId
   onFilterId: (id: IncomeSecurityFilterId) => void
 }) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-  const close = useCallback(() => setOpen(false), [])
-  useClickOutside(rootRef, close, open)
-
-  const active = INCOME_SECURITY_FILTERS.find((f) => f.id === filterId) ?? INCOME_SECURITY_FILTERS[0]
-  const description = INCOME_SECURITY_FILTER_DESCRIPTIONS[filterId]
+  const handleSelectionChange = (keys: Selection) => {
+    if (keys === 'all') return
+    const next = keys.values().next().value
+    if (next != null) onFilterId(String(next) as IncomeSecurityFilterId)
+  }
 
   return (
     <div className="income-security-selector__filter">
-      <div ref={rootRef} className="income-security-selector__filter-dropdown">
-        <button
-          type="button"
-          className="income-security-selector__filter-trigger"
-          aria-expanded={open}
-          aria-haspopup="listbox"
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          {active.label}
-          <IconChevronDown className="income-security-selector__filter-chevron" size={14} stroke={1.5} aria-hidden />
-        </button>
-        {open ? (
-          <ul className="income-security-selector__filter-menu" role="listbox" aria-label="Filter by category">
-            {INCOME_SECURITY_FILTERS.map((filter) => (
-              <li key={filter.id}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={filterId === filter.id}
-                  className="income-security-selector__filter-option"
-                  onClick={() => {
-                    onFilterId(filter.id)
-                    setOpen(false)
-                  }}
-                >
-                  {filter.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
-      <p className="income-security-selector__filter-desc">{description}</p>
+      <TagGroup
+        className="income-security-selector__tag-group"
+        selectionMode="single"
+        selectedKeys={new Set([filterId])}
+        onSelectionChange={handleSelectionChange}
+        size="sm"
+        variant="surface"
+      >
+        <TagGroup.List className="income-security-selector__tag-list">
+          {INCOME_SECURITY_FILTERS.map((filter) => (
+            <Tag key={filter.id} id={filter.id} className="income-security-selector__tag">
+              <Tooltip
+                content={INCOME_SECURITY_FILTER_DESCRIPTIONS[filter.id]}
+                placement="top"
+              >
+                <span className="income-security-selector__tag-label">{filter.label}</span>
+              </Tooltip>
+            </Tag>
+          ))}
+        </TagGroup.List>
+      </TagGroup>
     </div>
   )
 }
@@ -136,7 +125,7 @@ export function IncomeSecuritySelector({
           aria-label="Select income security"
           onClick={(e) => e.stopPropagation()}
         >
-          <CategoryFilterDropdown filterId={filterId} onFilterId={setFilterId} />
+          <CategoryFilterTags filterId={filterId} onFilterId={setFilterId} />
           <SimpleBar
             className="income-security-selector__scroll"
             autoHide={false}

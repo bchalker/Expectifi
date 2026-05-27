@@ -16,6 +16,14 @@
   background: var(--amber-d1);
 }
 
+.goal-progress-bar--phase-income .goal-progress-bar__fill {
+  background: var(--green-d1);
+}
+
+.goal-progress-bar--phase-income .goal-progress-bar__fill--met {
+  background: var(--green-d3);
+}
+
 .goal-progress-bar__row {
   display: flex;
   flex-direction: row;

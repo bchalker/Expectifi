@@ -1,5 +1,6 @@
 import { Tooltip as HeroTooltip } from '@heroui/react'
 import type { ReactNode } from 'react'
+import './Tooltip.scss'
 
 type Placement = 'top' | 'bottom' | 'left' | 'right'
 
@@ -9,6 +10,7 @@ type Props = {
   content: ReactNode
   placement?: Placement
   contentClassName?: string
+  triggerClassName?: string
   /** Point at trigger with HeroUI overlay arrow. */
   showArrow?: boolean
 }
@@ -21,16 +23,16 @@ export function Tooltip({
   content,
   placement = 'top',
   contentClassName,
+  triggerClassName,
   showArrow = false,
 }: Props) {
-  const contentClass = ['max-w-[260px] text-xs leading-snug', contentClassName]
-    .filter(Boolean)
-    .join(' ')
+  const contentClass = ['app-tooltip__content', contentClassName].filter(Boolean).join(' ')
+  const triggerClass = ['app-tooltip__trigger', triggerClassName].filter(Boolean).join(' ')
 
   return (
     <HeroTooltip.Root delay={250} closeDelay={80}>
-      <HeroTooltip.Trigger className="inline-flex shrink-0 items-center">
-        <span tabIndex={0} className="inline-flex max-w-full min-w-0 cursor-default outline-none">
+      <HeroTooltip.Trigger className={triggerClass}>
+        <span tabIndex={0} className="app-tooltip__trigger-inner">
           {children}
         </span>
       </HeroTooltip.Trigger>
