@@ -12,21 +12,42 @@
     var(--portfolio-scenario-trigger-min) + 2 * var(--portfolio-scenario-col-pad-x) + 16px +
       2 * var(--portfolio-account-chevron-pad-end)
   );
-  margin-bottom: 0.75rem;
+  margin: 0;
+  border-bottom: none;
   // border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 0px 0px 1px;
   overflow: hidden;
   padding: 0;
+  transition:
+    margin-top 0.28s ease,
+    margin-bottom 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.portfolio-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tax-treatment-disclosure.portfolio-account-group[open] {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
-.tax-treatment-disclosure.portfolio-account-group:last-child {
-  margin-bottom: 0;
+@media (prefers-reduced-motion: reduce) {
+  .tax-treatment-disclosure.portfolio-account-group {
+    transition: none;
+  }
+}
+
+.portfolio-account-list + .account-balances-total-retirement--merged {
+  margin-top: 1.75rem;
 }
 
 .tax-treatment-disclosure > summary {
@@ -131,7 +152,7 @@
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
   padding: 0;
   // border-left: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-  box-shadow: inset 8px 0 14px -8px color-mix(in srgb, var(--text) 16%, transparent);
+  box-shadow: none;
 }
 
 .tax-treatment-disclosure.portfolio-account-group .tax-treatment-disclosure__empty {
@@ -169,7 +190,7 @@
     padding: 0;
     display: flex;
     align-items: stretch;
-    box-shadow: inset 8px 0 14px -8px color-mix(in srgb, var(--text) 16%, transparent);
+    box-shadow: none;
   }
 }
 

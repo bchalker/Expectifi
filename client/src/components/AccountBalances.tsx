@@ -1391,7 +1391,7 @@ export function AccountBalances({
     if (!useFidelityBrokerageView) {
       return (
         <>
-          <div className="edit-row edit-row--no-divider portfolio-account-group portfolio-account-group--inline">
+          <div key="brokerage" className="edit-row edit-row--no-divider portfolio-account-group portfolio-account-group--inline">
             <FidelityBucketAccountRow
               badgeOrder={withdrawalUi ? brkMeta.order : null}
               label="Brokerage"
@@ -1421,7 +1421,7 @@ export function AccountBalances({
     const brkCombinedLines = brokeragePositions.length > brkAggregated.length
 
     return (
-      <details className="tax-treatment-disclosure portfolio-account-group">
+      <details key="brokerage" className="tax-treatment-disclosure portfolio-account-group">
         <summary className="tax-treatment-disclosure__summary portfolio-bucket-account-summary">{summaryInner}</summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           <FidelityAggregatedSymbolTable
@@ -1536,13 +1536,13 @@ export function AccountBalances({
             nodes.push(renderManualAccountEntryRow(entry, withdrawalUi, undefined))
           }
         }
-        return <>{nodes}</>
+        return <div className="portfolio-account-list">{nodes}</div>
       }
 
       for (const step of seq) {
         if (step === 'brokerage') {
           if (!hasBrokerageAccountData) continue
-          nodes.push(<div key="brk">{renderMergedBrokerageBlock(withdrawalUi)}</div>)
+          nodes.push(renderMergedBrokerageBlock(withdrawalUi))
           continue
         }
         if (!hasRetirementAccountData) continue
@@ -1564,14 +1564,14 @@ export function AccountBalances({
           if (hsaRow) nodes.push(renderManualAccountRow(hsaRow, withdrawalUi, 'hsa', true))
         }
       }
-      return <>{nodes}</>
+      return <div className="portfolio-account-list">{nodes}</div>
     }
 
 
     for (const step of seq) {
       if (step === 'brokerage') {
         if (!hasBrokerageAccountData) continue
-        nodes.push(<div key="brk">{renderMergedBrokerageBlock(withdrawalUi)}</div>)
+        nodes.push(renderMergedBrokerageBlock(withdrawalUi))
         continue
       }
       if (!hasRetirementAccountData) continue
@@ -1588,7 +1588,7 @@ export function AccountBalances({
       }
     }
 
-    return <>{nodes}</>
+    return <div className="portfolio-account-list">{nodes}</div>
   }
 
   const cardStyle: CSSProperties = {

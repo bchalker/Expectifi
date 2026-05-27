@@ -1267,12 +1267,17 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   animation: portfolio-account-stack-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.portfolio-accounts-reveal--in .account-balances-stack .portfolio-account-list > *,
 .portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
   opacity: 0;
   animation: portfolio-account-row-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @for $i from 1 through 12 {
+  .portfolio-accounts-reveal--in
+    .account-balances-stack
+    .portfolio-account-list
+    > *:nth-child(#{$i}),
   .portfolio-accounts-reveal--in
     .account-balances-stack
     .account-balances-card-inner-wrap
@@ -1314,6 +1319,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
     opacity: 1;
   }
 
+  .portfolio-accounts-reveal--in .account-balances-stack .portfolio-account-list > *,
   .portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
     animation: none;
     opacity: 1;
