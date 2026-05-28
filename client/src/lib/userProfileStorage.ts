@@ -13,7 +13,8 @@ import type { UserPrefs } from './userPrefs'
 import { pensionConfigForLocale } from './localePensionConfig'
 import { clampClaimAgeInRange } from './socialSecurity'
 import { canWritePlanLocalStorage } from './planStorage/writeContext'
-import { loadPlanProfile, savePlanProfile } from './planStorage/profile'
+import { loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage/profile'
+import type { StoredPlanProfile } from './planStorage/types'
 import { parseStoredUserProfile, type StoredUserProfile } from './storedUserProfile'
 
 export type { StoredUserProfile } from './storedUserProfile'
@@ -121,14 +122,22 @@ export function saveRegionToProfile(regionId: OnboardingRegionId): StoredUserPro
   })
 }
 
-/** Profile blob written on "Save my plan" (tier 1 → browser_saved). */
-export function profileSnapshotForBrowserSave(
+/** True when the user has a saved planning profile (browser save or onboarding). */
+export function hasPersistedPlanningProfile(): boolean {
+  if (profileHasOnboardingComplete(loadPlanProfile())) return true
+  return hasStoredProfileStep1(loadUserProfile())
+}
+
+/** Planning + SS fields from live calculator state (configure drawer, debounced persist). */
+export function profilePatchFromCalculatorInputs(
   inputs: CalculatorInputs,
   ui: CalculatorUi,
-): StoredUserProfile & { onboardingComplete: true } {
+): Partial<StoredUserProfile> {
   const country = inputs.residenceCountry?.trim() ?? ''
   const locale =
-    normalizeOnboardingRegionId(localeForResidenceCountry(country)) ?? 'us'
+    normalizeOnboardingRegionId(localeForResidenceCountry(country)) ??
+    normalizeOnboardingRegionId(loadUserProfile()?.locale) ??
+    'us'
   const region = findOnboardingRegion(locale)
   const pension = pensionConfigForLocale(locale)
   const dob = inputs.dateOfBirth?.trim() ?? ''
@@ -137,7 +146,6 @@ export function profileSnapshotForBrowserSave(
   const spouseParts = isValidIsoDateString(spouseDob) ? dobParts(spouseDob) : {}
 
   return {
-    version: 1,
     country: country || region?.country,
     locale,
     currency: region?.currency,
@@ -150,13 +158,57 @@ export function profileSnapshotForBrowserSave(
     monthly_income_goal: inputs.monthlyIncomeGoal,
     include_social_security: ui.ssIncluded,
     ss_claim_age: clampClaimAgeInRange(inputs.ssAge, pension.claimAgeMin, pension.claimAgeMax),
+    ss_benefit_estimate: Math.max(0, Math.round(inputs.ssBenefit67)),
     include_spouse: inputs.married,
-    spouse_dob: inputs.married ? spouseDob : undefined,
-    spouse_birth_month: spouseParts.birth_month,
-    spouse_birth_year: spouseParts.birth_year,
+    spouse_dob: inputs.married ? spouseDob || undefined : undefined,
+    spouse_birth_month: inputs.married ? spouseParts.birth_month : undefined,
+    spouse_birth_year: inputs.married ? spouseParts.birth_year : undefined,
+    spouse_claim_type: inputs.married
+      ? inputs.spouseHasOwnEarnings === false
+        ? 'spousal'
+        : 'own'
+      : undefined,
     spouse_claim_age: inputs.married
       ? clampClaimAgeInRange(inputs.spouseClaimAge, pension.claimAgeMin, pension.claimAgeMax)
       : undefined,
+    spouse_benefit_estimate: inputs.married
+      ? Math.max(0, Math.round(inputs.spouseBenefit67))
+      : undefined,
+  }
+}
+
+/** Merge calculator patch into expectifi/profile-v1 when a profile already exists. */
+export function syncUserProfileFromCalculatorInputs(
+  inputs: CalculatorInputs,
+  ui: CalculatorUi,
+): void {
+  if (!hasPersistedPlanningProfile() || !canWritePlanLocalStorage()) return
+  saveUserProfile(profilePatchFromCalculatorInputs(inputs, ui))
+}
+
+export function planProfilePatchFromCalculatorInputs(
+  inputs: CalculatorInputs,
+  ui: CalculatorUi,
+): StoredPlanProfile | null {
+  if (!hasPersistedPlanningProfile()) return null
+  const existing = loadPlanProfile()
+  const patch = profilePatchFromCalculatorInputs(inputs, ui)
+  return {
+    ...(existing ?? { version: 1 as const }),
+    ...patch,
+    version: 1,
+    ...(existing?.onboardingComplete ? { onboardingComplete: true as const } : {}),
+  }
+}
+
+/** Profile blob written on "Save my plan" (tier 1 → browser_saved). */
+export function profileSnapshotForBrowserSave(
+  inputs: CalculatorInputs,
+  ui: CalculatorUi,
+): StoredUserProfile & { onboardingComplete: true } {
+  return {
+    ...profilePatchFromCalculatorInputs(inputs, ui),
+    version: 1,
     onboardingComplete: true,
   }
 }

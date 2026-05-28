@@ -59,7 +59,7 @@ import {
 } from './lib/initialCalculatorInputs'
 import { syncDisplayCurrencyFromResidence } from './lib/displayCurrency'
 import {
-  calculatorInputsToUserPrefs,
+  calculatorInputsToPlanningPrefs,
   inputsHavePlanningProfileFields,
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
@@ -70,6 +70,7 @@ import {
   mergeProfileWithDbPrefs,
   profileSnapshotForBrowserSave,
   saveResidenceCountryToProfile,
+  syncUserProfileFromCalculatorInputs,
 } from './lib/userProfileStorage'
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
 import { useAppPath } from './hooks/useAppPath'
@@ -322,8 +323,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
     const id = window.setTimeout(() => {
       persistCalculatorSession({ inputs, ui, phase, activePreset })
       syncPlanningPrefsFromInputs(inputs)
-      const prefs = calculatorInputsToUserPrefs(inputs)
-      if (user && prefs) void saveUserPrefs(prefs)
+      syncUserProfileFromCalculatorInputs(inputs, ui)
+      const planningPrefs = calculatorInputsToPlanningPrefs(inputs)
+      if (user && planningPrefs) {
+        const monthlyGoal =
+          Math.max(0, Math.round(inputs.monthlyIncomeGoal)) || user.planPrefs?.monthlyGoal || 0
+        if (monthlyGoal > 0) {
+          void saveUserPrefs({ ...planningPrefs, monthlyGoal })
+        }
+      }
     }, 400)
     return () => window.clearTimeout(id)
   }, [isHydrated, authLoading, inputs, ui, phase, activePreset, user, saveUserPrefs])

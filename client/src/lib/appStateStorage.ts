@@ -3,6 +3,7 @@ import type { CalculatorInputs, CalculatorUi } from './computeResults'
 import { inputsForPersistedCalculatorSession } from './fidelityStorage'
 import { canWritePlanLocalStorage, getPlanWriteTier, loadPlanSession, persistPlanState } from './planStorage'
 import { stripFinancialFields } from './calculatorInputSanitize'
+import { planProfilePatchFromCalculatorInputs } from './userProfileStorage'
 
 /** Dev / pre-DB persistence for calculator inputs, UI flags, phase, and presets. */
 export const APP_STATE_STORAGE_KEY = 'retirement-calculator/app-state-v1'
@@ -21,7 +22,7 @@ export function persistCalculatorSession(session: PersistedCalculatorSession): v
     ui: session.ui,
     phase: session.phase,
     activePreset: session.activePreset,
-    profile: null,
+    profile: planProfilePatchFromCalculatorInputs(session.inputs, session.ui),
     accounts: null,
   })
 }
