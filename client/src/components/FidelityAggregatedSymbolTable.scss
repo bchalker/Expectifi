@@ -52,18 +52,7 @@
 }
 
 /* Column corner — faint 1px diagonal in top 15px at holdings / scenario split */
-.holdings-symbol-list__subheader-override::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: calc(15px * 1.414);
-  height: 1px;
-  pointer-events: none;
-  background: color-mix(in srgb, var(--text) 14%, transparent);
-  transform: rotate(45deg);
-  transform-origin: 0 0;
-}
+
 
 .holdings-symbol-group {
   display: flex;
