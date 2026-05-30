@@ -65,13 +65,17 @@
   box-shadow: none;
 }
 
-.tax-treatment-disclosure.portfolio-account-group > summary.portfolio-bucket-account-summary {
+.tax-treatment-disclosure.portfolio-account-group > summary.portfolio-bucket-account-summary,
+.tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
+  > .portfolio-bucket-account-summary {
   display: block;
   padding: 0;
 }
 
 .tax-treatment-disclosure.portfolio-account-group
   > summary.portfolio-bucket-account-summary
+  .portfolio-bucket-account-row__order-badge-wrap,
+.tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
   .portfolio-bucket-account-row__order-badge-wrap {
   display: flex;
   align-items: center;
@@ -83,6 +87,8 @@
 
 .tax-treatment-disclosure.portfolio-account-group
   > summary.portfolio-bucket-account-summary
+  .portfolio-bucket-account-row__main,
+.tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
   .portfolio-bucket-account-row__main {
   padding: 0.75rem 0.85rem;
   box-sizing: border-box;

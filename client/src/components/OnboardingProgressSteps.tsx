@@ -14,7 +14,6 @@ export function OnboardingProgressSteps({ activeStep, className }: Props) {
 
   return (
     <div className={['onboarding-progress', className].filter(Boolean).join(' ')}>
-      <p className="onboarding-progress__eyebrow">Setting up your plan</p>
       <div
         className="onboarding-progress__track"
         role="progressbar"

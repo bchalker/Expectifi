@@ -106,6 +106,13 @@
   box-shadow: none;
 }
 
+.portfolio-bucket-account-row__actions--no-chevron {
+  flex: 0 0 calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
+  width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
+  min-width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
+  max-width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
+}
+
 .portfolio-bucket-account-row__chevron.view-holdings-hint {
   align-self: center;
   flex: 0 0 auto;

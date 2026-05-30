@@ -37,6 +37,8 @@ export function FidelityBucketAccountRow({
   badgeOrder = null,
   scenario = null,
 }: Props) {
+  const showActions = Boolean(scenario) || showViewHoldings
+
   return (
     <div className="portfolio-bucket-account-row">
       {badgeOrder != null ? (
@@ -52,12 +54,21 @@ export function FidelityBucketAccountRow({
         </div>
         <span className="portfolio-bucket-account-row__total">{total}</span>
       </div>
-      <div className="portfolio-bucket-account-row__actions">
-        {scenario ? (
-          <PortfolioScenarioCell layout="account" {...scenario} />
-        ) : null}
-        {showViewHoldings ? <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" /> : null}
-      </div>
+      {showActions ? (
+        <div
+          className={[
+            'portfolio-bucket-account-row__actions',
+            scenario && !showViewHoldings ? 'portfolio-bucket-account-row__actions--no-chevron' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {scenario ? (
+            <PortfolioScenarioCell layout="account" {...scenario} />
+          ) : null}
+          {showViewHoldings ? <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" /> : null}
+        </div>
+      ) : null}
     </div>
   )
 }

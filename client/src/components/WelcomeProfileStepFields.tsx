@@ -21,8 +21,6 @@ type Props = {
   onHouseholdIncome: (amount: number) => void;
   monthlyContribution: number;
   onMonthlyContribution: (amount: number) => void;
-  /** Whole years; when set, shows accumulation callout above footer. */
-  ageToday?: number | null;
   showFillState?: boolean;
   className?: string;
 };
@@ -36,7 +34,6 @@ export function WelcomeProfileStepFields({
   onHouseholdIncome,
   monthlyContribution,
   onMonthlyContribution,
-  ageToday,
   showFillState = false,
   className,
 }: Props) {
@@ -59,8 +56,7 @@ export function WelcomeProfileStepFields({
             onSelect={onRegionSelect}
           />
           <p className="welcome-profile-fields__hint">
-            Expectifi is built for savers in the United States and Canada. Your
-            country sets tax rules, pension labels, and bank linking via Plaid.
+            Expectifi is built for savers in the United States and Canada.
           </p>
         </div>
       </div>
@@ -94,7 +90,6 @@ export function WelcomeProfileStepFields({
           value={householdIncome}
           onChange={onHouseholdIncome}
           placeholder={WELCOME_PLANNING_PLACEHOLDERS.householdIncome}
-          hint={WELCOME_PLANNING_HINTS.householdIncome}
           externalPrefix
           showFillState={showFillState}
         />
@@ -105,20 +100,10 @@ export function WelcomeProfileStepFields({
           onChange={onMonthlyContribution}
           placeholder={WELCOME_PLANNING_PLACEHOLDERS.monthlyContribution}
           showAnnualEquivalent
-          hint={WELCOME_PLANNING_HINTS.monthlyContribution}
           externalPrefix
           showFillState={showFillState}
         />
       </div>
-
-      {ageToday != null ? (
-        <aside className="welcome-profile-fields__callout" aria-live="polite">
-          <p className="welcome-profile-fields__callout-text">
-            At {ageToday}, you&apos;re in the prime accumulation window. Most
-            financial planners target 10x your salary saved by retirement age.
-          </p>
-        </aside>
-      ) : null}
     </div>
   );
 }

@@ -51,12 +51,12 @@ import { type SpouseClaimMode } from "./SpouseClaimModeSegment";
 import { SocialSecuritySetupFields } from "./SocialSecuritySetupFields";
 import { WelcomeGoalStepFields } from "./WelcomeGoalStepFields";
 import { WelcomeProfileStepFields } from "./WelcomeProfileStepFields";
+import { welcomeAccumulationFooterCopy } from "../lib/welcomePlanningFieldCopy";
 import {
   hasValidManualAccountEntries,
   normalizedManualAccountEntries,
   OnboardingAccountsStep,
 } from "./OnboardingAccountsStep";
-import { fmt } from "../utils/format";
 import {
   aggregateManualAccountsToBases,
   loadStoredManualAccounts,
@@ -599,7 +599,6 @@ export function OnboardingOverlay({
                 onRegionSelect={applyRegionSelection}
                 dateOfBirth={form.dob}
                 onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
-                ageToday={ageToday}
                 householdIncome={form.householdIncome}
                 onHouseholdIncome={(householdIncome) =>
                   setForm((f) => ({ ...f, householdIncome }))
@@ -690,26 +689,25 @@ export function OnboardingOverlay({
             </p>
           ) : null}
           {step === "profile" ? (
-            <div className="onboarding-overlay__footer-actions">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!profileFieldsOk || busy}
-                onClick={onProfileContinue}
-              >
-                Continue
-              </button>
+            <div className="onboarding-overlay__footer-profile">
+              {ageToday != null ? (
+                <p className="onboarding-overlay__profile-callout" aria-live="polite">
+                  {welcomeAccumulationFooterCopy(ageToday)}
+                </p>
+              ) : null}
+              <div className="onboarding-overlay__footer-actions">
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={!profileFieldsOk || busy}
+                  onClick={onProfileContinue}
+                >
+                  Continue
+                </button>
+              </div>
             </div>
           ) : step === "accounts" ? (
             <>
-              <div className="onboarding-overlay__accounts-total">
-                <span className="onboarding-overlay__accounts-total-label">
-                  Total across all accounts
-                </span>
-                <span className="onboarding-overlay__accounts-total-value">
-                  {fmt(accountsTotal)}
-                </span>
-              </div>
               <OnboardingSavingsComparisonBar
                 totalSavings={accountsTotal}
                 age={ageToday}
@@ -739,7 +737,7 @@ export function OnboardingOverlay({
                   disabled={busy || exiting || !profileFieldsOk}
                   onClick={onProfileSkipWithSample}
                 >
-                  Skip this setup and show me the dashboard with sample data.
+                  Skip this show the dashboard with sample data.
                 </button>
               </div>
             </>

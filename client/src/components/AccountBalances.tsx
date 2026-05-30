@@ -195,26 +195,6 @@ type Props = {
   onManualAccountsCommitted?: () => void
 }
 
-function WithdrawalLabeledBlock({
-  badgeOrder,
-  hint,
-  children,
-}: {
-  badgeOrder: number | null
-  hint: string | null
-  children: ReactNode
-}) {
-  return (
-    <div className="withdrawal-bucket-summary">
-      {badgeOrder != null ? <span className="withdrawal-order-badge">{badgeOrder}</span> : null}
-      <div className="withdrawal-bucket-summary__body">
-        <div className="withdrawal-bucket-summary__title-row">{children}</div>
-        {hint ? <div className="withdrawal-order-hint">{hint}</div> : null}
-      </div>
-    </div>
-  )
-}
-
 const REMOVE_ACCOUNTS_CONFIRM_BODY =
   'Remove all account balances from this card? Manual totals, imported positions, and custom return overrides for these accounts will be cleared.'
 
@@ -1124,6 +1104,39 @@ export function AccountBalances({
     return accountLabelForWithdrawalBucket(taxConfig, bucket) ?? fallback
   }
 
+  function renderManualPortfolioAccountCard(
+    key: string,
+    opts: {
+      label: string
+      bucket: AccountScenarioBucketId
+      total: number
+      withdrawalUi: boolean
+    },
+  ) {
+    const { label, bucket, total, withdrawalUi } = opts
+    const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
+    const subtext = accountTaxSubtextForWithdrawalBucket(taxConfig, bucket)
+    const scenario = buildAccountScenarioRowProps(bucket)
+
+    return (
+      <div
+        key={key}
+        className="tax-treatment-disclosure portfolio-account-group portfolio-account-group--static"
+      >
+        <div className="portfolio-bucket-account-summary">
+          <FidelityBucketAccountRow
+            badgeOrder={withdrawalUi ? order : null}
+            label={label}
+            subtext={subtext}
+            total={fmt(total)}
+            showViewHoldings={false}
+            scenario={scenario}
+          />
+        </div>
+      </div>
+    )
+  }
+
   function renderFidelityTaxDisclosure(
     tax: 'pretax' | 'roth' | 'hsa',
     def: { label: string; total: number },
@@ -1208,96 +1221,6 @@ export function AccountBalances({
     }
 
     return defs.map((d) => renderFidelityTaxDisclosure(d.tax, d, false))
-  }
-
-  function renderManualAccountEntryRow(
-    entry: ManualAccountEntry,
-    withdrawalUi: boolean,
-    omitDivider?: boolean,
-  ) {
-    if (entry.type == null) return null
-    const meta = getAccountTypeMeta(entry.type, locale)
-    const bucket = meta.withdrawalBucket
-    const { order, hint } = withdrawalUi ? metaFor(bucket) : { order: null as number | null, hint: null as string | null }
-    const labelNode = (
-      <ManualBalanceRowLabel
-        label={meta.label}
-        taxKind={meta.taxKind}
-        taxDesc={meta.taxDesc}
-        tone={meta.tone}
-      />
-    )
-    return (
-      <div
-        key={entry.id}
-        className={[
-          'edit-row',
-          'edit-row--manual-balance',
-          omitDivider ? 'edit-row--no-divider' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {withdrawalUi ? (
-          <WithdrawalLabeledBlock badgeOrder={order} hint={hint}>
-            {labelNode}
-            <div className="edit-row-right">
-              <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>
-                {fmt(entry.balance)}
-              </span>
-            </div>
-          </WithdrawalLabeledBlock>
-        ) : (
-          <>
-            {labelNode}
-            <div className="edit-row-right">
-              <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>
-                {fmt(entry.balance)}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  function renderManualAccountRow(
-    row: ManualBalanceRow,
-    withdrawalUi: boolean,
-    bucket: WithdrawalDisplayBucket,
-    omitDivider?: boolean,
-  ) {
-    const { key, label, taxKind, taxDesc, tone } = row
-    const { order, hint } = withdrawalUi ? metaFor(bucket) : { order: null as number | null, hint: null as string | null }
-    const labelNode = <ManualBalanceRowLabel label={label} taxKind={taxKind} taxDesc={taxDesc} tone={tone} />
-    return (
-      <div
-        key={key}
-        className={[
-          'edit-row',
-          'edit-row--manual-balance',
-          omitDivider ? 'edit-row--no-divider' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {withdrawalUi ? (
-          <WithdrawalLabeledBlock badgeOrder={order} hint={hint}>
-            {labelNode}
-            <div className="edit-row-right">
-              <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(display(key))}</span>
-            </div>
-          </WithdrawalLabeledBlock>
-        ) : (
-          <>
-            {labelNode}
-            <div className="edit-row-right">
-              <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(display(key))}</span>
-            </div>
-          </>
-        )}
-      </div>
-    )
   }
 
   function renderManualBalanceEditRow(
@@ -1389,21 +1312,12 @@ export function AccountBalances({
     const brokerageSubtext = accountTaxSubtextForWithdrawalBucket(taxConfig, 'brokerage')
 
     if (!useFidelityBrokerageView) {
-      return (
-        <>
-          <div key="brokerage" className="edit-row edit-row--no-divider portfolio-account-group portfolio-account-group--inline">
-            <FidelityBucketAccountRow
-              badgeOrder={withdrawalUi ? brkMeta.order : null}
-              label="Brokerage"
-              subtext={brokerageSubtext}
-              total={fmt(brkBal)}
-              trend={brkTrend}
-              showViewHoldings={false}
-              scenario={brokerageScenario}
-            />
-          </div>
-        </>
-      )
+      return renderManualPortfolioAccountCard('brokerage', {
+        label: 'Brokerage',
+        bucket: 'brokerage',
+        total: brkBal,
+        withdrawalUi,
+      })
     }
 
     const summaryInner = (
@@ -1527,13 +1441,29 @@ export function AccountBalances({
           )
           if (step === 'brokerage') {
             for (const entry of entriesForStep) {
-              nodes.push(<div key={entry.id}>{renderManualAccountEntryRow(entry, withdrawalUi, true)}</div>)
+              const meta = getAccountTypeMeta(entry.type!, locale)
+              nodes.push(
+                renderManualPortfolioAccountCard(entry.id, {
+                  label: meta.label,
+                  bucket: meta.withdrawalBucket,
+                  total: entry.balance,
+                  withdrawalUi,
+                }),
+              )
             }
             continue
           }
           if (!hasRetirementAccountData && entriesForStep.length === 0) continue
           for (const entry of entriesForStep) {
-            nodes.push(renderManualAccountEntryRow(entry, withdrawalUi, undefined))
+            const meta = getAccountTypeMeta(entry.type!, locale)
+            nodes.push(
+              renderManualPortfolioAccountCard(entry.id, {
+                label: meta.label,
+                bucket: meta.withdrawalBucket,
+                total: entry.balance,
+                withdrawalUi,
+              }),
+            )
           }
         }
         return <div className="portfolio-account-list">{nodes}</div>
@@ -1550,18 +1480,43 @@ export function AccountBalances({
           for (const row of visibleManualRetirementRows().filter(
             (r) => r.key === 'ret401k' || r.key === 'se401k' || r.key === 'tradIra',
           )) {
-            nodes.push(renderManualAccountRow(row, withdrawalUi, 'pretax', undefined))
+            nodes.push(
+              renderManualPortfolioAccountCard(row.key, {
+                label: row.label,
+                bucket: 'pretax',
+                total: display(row.key),
+                withdrawalUi,
+              }),
+            )
           }
           continue
         }
         if (step === 'roth') {
           const rothRow = visibleManualRetirementRows().find((r) => r.key === 'roth')
-          if (rothRow) nodes.push(renderManualAccountRow(rothRow, withdrawalUi, 'roth', undefined))
+          if (rothRow) {
+            nodes.push(
+              renderManualPortfolioAccountCard(rothRow.key, {
+                label: rothRow.label,
+                bucket: 'roth',
+                total: display(rothRow.key),
+                withdrawalUi,
+              }),
+            )
+          }
           continue
         }
         if (step === 'hsa') {
           const hsaRow = visibleManualRetirementRows().find((r) => r.key === 'hsa')
-          if (hsaRow) nodes.push(renderManualAccountRow(hsaRow, withdrawalUi, 'hsa', true))
+          if (hsaRow) {
+            nodes.push(
+              renderManualPortfolioAccountCard(hsaRow.key, {
+                label: hsaRow.label,
+                bucket: 'hsa',
+                total: display(hsaRow.key),
+                withdrawalUi,
+              }),
+            )
+          }
         }
       }
       return <div className="portfolio-account-list">{nodes}</div>

@@ -57,8 +57,7 @@ export function OnboardingRegionStep({
             Where are you based?
           </h2>
           <p className="onboarding-region-step__intro">
-            Expectifi is built for savers in the United States and Canada. Your country sets tax
-            rules, pension labels, and bank linking via Plaid.
+            Expectifi is built for savers in the United States and Canada.
           </p>
         </>
       ) : null}
