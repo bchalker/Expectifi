@@ -4,7 +4,6 @@ import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 import { useAuth } from './context/AuthContext'
 import { UserLocaleProvider } from './context/UserLocaleContext'
 import { AccountBalances } from './components/AccountBalances'
-import { LifeEventsPanel } from './components/LifeEventsPanel'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
 import { Header } from './components/Header'
@@ -25,7 +24,6 @@ import {
   type CalculatorUi,
   type DrawerName,
 } from './lib/computeResults'
-import { buildLifeEventsProjectionData } from './lib/calc/lifeEvents'
 import { clearStoredManualAccounts } from './lib/manualAccountEntries'
 import { inputsForPersistedCalculatorSession, loadStoredFidelityImport } from './lib/fidelityStorage'
 import {
@@ -423,16 +421,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [inputs, ui, balanceMode, brokerageMode],
   )
 
-  const lifeEventsProjectionData = useMemo(
-    () =>
-      buildLifeEventsProjectionData(c, {
-        retRate: inputs.retRate,
-        brkRate: inputs.brkRate,
-        save: inputs.save,
-      }),
-    [c, inputs.retRate, inputs.brkRate, inputs.save],
-  )
-
   const ssBenefitsConfigured = isSsConfigured(inputs)
   /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
   const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded
@@ -807,14 +795,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
               onManualAccountsCommitted={() => setManualAccountsRev((n) => n + 1)}
             />
           </div>
-
-          {c.hasPortfolioBalances ? (
-            <LifeEventsPanel
-              projectionData={lifeEventsProjectionData}
-              retirementYear={c.retirementCalendarYear}
-              monthlyPortfolioIncome={c.monPort}
-            />
-          ) : null}
 
         </div>
 
