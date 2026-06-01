@@ -329,39 +329,40 @@ export function GrowthSliderLabel({
           track={sliderTrack}
           ticks={sliderTicks}
         />
-        <p className="growth-slider-label__suffix-line">
-          {!hasCustom ? (
-            "Default rate for all holdings"
-          ) : (
-            <>
-              <span className="growth-slider-label__suffix">
-                {allCustom
-                  ? "Default rate for non-position balances"
-                  : "Default rate for all, except"}
+        {!hasCustom ? (
+          <>
+            <p className="growth-slider-label__suffix-line">Default rate for all holdings</p>
+            <p className="growth-slider-label__suffix-note">
+              Applied to all holdings set to Global in their scenario.
+            </p>
+          </>
+        ) : (
+          <p className="growth-slider-label__suffix-line">
+            <span className="growth-slider-label__suffix">
+              {allCustom
+                ? "Default rate for non-position balances"
+                : "Default rate for all, except"}
+            </span>
+            {!allCustom ? (
+              <span className="growth-slider-label__tickers">
+                {customPositionsForSuffix.map((p, i) => (
+                  <span key={p.id}>
+                    {i > 0 ? ", " : " "}
+                    <button
+                      type="button"
+                      data-growth-slider-ticker
+                      className="growth-slider-label__ticker"
+                      onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
+                      onMouseLeave={scheduleClose}
+                    >
+                      {p.ticker || "—"}
+                    </button>
+                  </span>
+                ))}
               </span>
-              {!allCustom ? (
-                <span className="growth-slider-label__tickers">
-                  {customPositionsForSuffix.map((p, i) => (
-                    <span key={p.id}>
-                      {i > 0 ? ", " : " "}
-                      <button
-                        type="button"
-                        data-growth-slider-ticker
-                        className="growth-slider-label__ticker"
-                        onMouseEnter={(e) =>
-                          openForTicker(p.id, e.currentTarget)
-                        }
-                        onMouseLeave={scheduleClose}
-                      >
-                        {p.ticker || "—"}
-                      </button>
-                    </span>
-                  ))}
-                </span>
-              ) : null}
-            </>
-          )}
-        </p>
+            ) : null}
+          </p>
+        )}
       </div>
 
       {hasCustom && hovered && anchor

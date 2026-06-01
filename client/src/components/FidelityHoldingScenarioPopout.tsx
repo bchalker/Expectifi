@@ -1,4 +1,3 @@
-import { Button } from '@heroui/react'
 import { IconX } from '@tabler/icons-react'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
@@ -33,6 +32,7 @@ import {
   type PositionReturnModel,
 } from '../lib/positionReturnModel'
 import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
+import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
 import './FidelityHoldingScenarioPopout.scss'
 
 function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boolean {
@@ -72,8 +72,7 @@ function clampPct(n: number): number {
 function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
   if (choice === 'peryear') return 'peryear'
   if (choice === 'custom') return 'custom'
-  if (isOutlookScenarioChoice(choice)) return 'outlook'
-  return 'default'
+  return 'outlook'
 }
 
 /** Plain percent text field; syncs when `rateDecimal` changes from outside. */
@@ -181,7 +180,7 @@ export function FidelityHoldingScenarioPanel({
 
   const [draftPct, setDraftPct] = useState(String(decimalToPct(retRate)))
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
-  const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('default')
+  const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('outlook')
 
   useEffect(() => {
     setUiChoice(resolvedChoice)
@@ -222,11 +221,15 @@ export function FidelityHoldingScenarioPanel({
     patchAll('custom', parsePct(seedStr))
   }, [h, patchAll, retRate, brkRate, targets])
 
-  const useGlobalRate = useCallback(() => {
-    setActiveTab('default')
+  const clearToGlobalRate = useCallback(() => {
     setUiChoice('default')
     patchAll('default', 0)
   }, [patchAll])
+
+  const onNoScenario = useCallback(() => {
+    clearToGlobalRate()
+    onClose()
+  }, [clearToGlobalRate, onClose])
 
   const onSelectOutlookTile = useCallback(
     (choice: OutlookScenarioChoice) => {
@@ -240,9 +243,7 @@ export function FidelityHoldingScenarioPanel({
     (tab: ScenarioIntentTabId) => {
       setActiveTab(tab)
       if (tab === 'outlook') {
-        if (isOutlookScenarioChoice(uiChoice)) return
-        setUiChoice('base')
-        patchAll('base', 0)
+        return
       } else if (tab === 'custom') {
         setUiChoice('custom')
         applyCustomWithSeed()
@@ -271,12 +272,16 @@ export function FidelityHoldingScenarioPanel({
     ? blendedRateForDashboardPositionId(targets[0].id, retRate, brkRate)
     : retRate
   const globalPct = (globalBlended * 100).toFixed(1)
-  const globalUsingActive = commonChoice === 'default'
   const nHoldings = importLineCountForSymbol
+
+  const outlookPreviewValue = useMemo(
+    () => targets.reduce((sum, m) => sum + (m.currentValue > 0 ? m.currentValue : 0), 0),
+    [targets],
+  )
 
   const outlookTiles = OUTLOOK_SCENARIO_TILES
 
-  const outlookTabKey = isOutlookScenarioChoice(uiChoice) ? uiChoice : 'base'
+  const outlookSelection = isOutlookScenarioChoice(uiChoice) ? uiChoice : null
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
@@ -335,12 +340,12 @@ export function FidelityHoldingScenarioPanel({
                 variant="holding"
                 activeTab={activeTab}
                 onTabChange={onTabChange}
-                globalPct={globalPct}
-                globalUsingActive={globalUsingActive}
-                onUseGlobalRate={useGlobalRate}
-                outlookValue={outlookTabKey}
+                outlookValue={outlookSelection}
                 onOutlookChange={onSelectOutlookTile}
                 outlookTiles={outlookTiles}
+                globalBlended={globalBlended}
+                outlookHorizon={h}
+                outlookPreviewCurrentValue={outlookPreviewValue}
                 draftPct={draftPct}
                 onDraftPctChange={(s) => {
                   setDraftPct(s)
@@ -357,11 +362,7 @@ export function FidelityHoldingScenarioPanel({
           </div>
         </SimpleBar>
       </div>
-      <footer className="holding-scenario-popout__foot">
-        <Button type="button" size="sm" variant="primary" className="holding-scenario-popout__done" onPress={onClose}>
-          Done
-        </Button>
-      </footer>
+      <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
     </div>
   )
 }

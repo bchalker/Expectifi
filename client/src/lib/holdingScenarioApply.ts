@@ -1,10 +1,13 @@
 import type { CalculatorInputs } from './computeResults'
+import { fmtK } from '../utils/format'
 import {
   annualizedReturnFromYearlyPath,
   decimalToPct,
+  defaultPositionReturns,
   padYearlyReturns,
   POSITION_FLAT_VS_BLENDED_EPS,
   pctToDecimal,
+  projectPositionAtRetirement,
   ratesMatchScenario,
   scenarioRatesDecimal,
   type PositionReturnModel,
@@ -23,17 +26,144 @@ export type ScenarioUiChoice =
 
 export type OutlookScenarioChoice = 'very_bear' | 'bear' | 'base' | 'bull' | 'very_bull'
 
-export const OUTLOOK_SCENARIO_TILES: readonly {
+export type OutlookScenarioTile = {
   choice: OutlookScenarioChoice
   label: string
   hint: string
-}[] = [
-  { choice: 'very_bear', label: 'Very Bearish', hint: 'Strong negative' },
-  { choice: 'bear', label: 'Bearish', hint: 'Leans negative' },
-  { choice: 'base', label: 'Normal', hint: 'Neutral' },
-  { choice: 'bull', label: 'Bullish', hint: 'Leans positive' },
-  { choice: 'very_bull', label: 'Very Bullish', hint: 'Strong positive' },
+  description: string
+  modifierLabel: string
+}
+
+/** Flat modifier vs global slider rate — used for tile effective-rate display. */
+export const OUTLOOK_SCENARIO_MODIFIER_PCT: Record<OutlookScenarioChoice, number> = {
+  very_bear: -4,
+  bear: -2,
+  base: 0,
+  bull: 2,
+  very_bull: 4,
+}
+
+export const OUTLOOK_SCENARIO_TILES: readonly OutlookScenarioTile[] = [
+  {
+    choice: 'very_bear',
+    label: 'Very Bearish',
+    hint: 'Strong negative',
+    description: 'Sustained downturn with slow recovery',
+    modifierLabel: '−4%',
+  },
+  {
+    choice: 'bear',
+    label: 'Bearish',
+    hint: 'Leans negative',
+    description: 'Prolonged weakness, gradual drag',
+    modifierLabel: '−2%',
+  },
+  {
+    choice: 'base',
+    label: 'Normal',
+    hint: 'Neutral',
+    description: 'Neutral — no adjustment applied',
+    modifierLabel: '0%',
+  },
+  {
+    choice: 'bull',
+    label: 'Bullish',
+    hint: 'Leans positive',
+    description: 'Steady above-average growth',
+    modifierLabel: '+2%',
+  },
+  {
+    choice: 'very_bull',
+    label: 'Very Bullish',
+    hint: 'Strong positive',
+    description: 'Strong sustained growth throughout',
+    modifierLabel: '+4%',
+  },
 ]
+
+export function formatOutlookRatePct(rateDecimal: number): string {
+  return `${decimalToPct(rateDecimal).toFixed(1)}%`
+}
+
+export function formatSignedRatePct(pct: number): string {
+  const rounded = Math.round(pct * 10) / 10
+  const sign = rounded < 0 ? '−' : ''
+  return `${sign}${Math.abs(rounded).toFixed(1)}%`
+}
+
+/**
+ * Yearly return span for a scenario preset (matches compute — not global ± modifier).
+ * e.g. Very Bearish `−12.0% … +2.0%` when early years are negative.
+ */
+export function formatOutlookScenarioRateRange(choice: OutlookScenarioChoice, horizon: number): string {
+  const h = horizonClamp(horizon)
+  const pcts = scenarioRatesDecimal(choice, h).map((d) => decimalToPct(d))
+  const min = Math.min(...pcts)
+  const max = Math.max(...pcts)
+  if (Math.abs(max - min) < 0.05) return formatSignedRatePct(min)
+  return `${formatSignedRatePct(min)} … ${formatSignedRatePct(max)}`
+}
+
+/** Global slider rate after flat outlook modifier (display-only shorthand; not used in compute). */
+export function outlookRateAfterModifier(globalBlended: number, choice: OutlookScenarioChoice): number {
+  return globalBlended + pctToDecimal(OUTLOOK_SCENARIO_MODIFIER_PCT[choice])
+}
+
+/** Retirement FV delta vs holding flat at global rate, using scenario preset paths. */
+export function outlookRetirementDelta(
+  currentValue: number,
+  globalBlended: number,
+  choice: OutlookScenarioChoice,
+  horizon: number,
+): number {
+  if (!(currentValue > 0)) return 0
+  const h = horizonClamp(horizon)
+  const stub = defaultPositionReturns(
+    '__outlook_preview__',
+    { ticker: '', label: '', currentValue, accountId: '' },
+    globalBlended,
+    h,
+    0,
+  )
+  const globalModel = applyScenarioUiChoice(stub, 'default', globalBlended, h, 0)
+  const scenarioModel = applyScenarioUiChoice(stub, choice, globalBlended, h, 0)
+  const baseline = projectPositionAtRetirement(globalModel, 0, h)
+  const projected = projectPositionAtRetirement(scenarioModel, 0, h)
+  return projected - baseline
+}
+
+export function formatOutlookProjectionDelta(delta: number): string {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 500) return '~±0'
+  const sign = delta > 0 ? '+' : '−'
+  return `~${sign}${fmtK(Math.abs(delta))}`
+}
+
+export function outlookProjectionDeltaTone(
+  choice: OutlookScenarioChoice,
+  delta: number,
+): 'positive' | 'negative' | 'neutral' {
+  if (choice === 'base') return 'neutral'
+  if (delta > 500) return 'positive'
+  if (delta < -500) return 'negative'
+  return 'neutral'
+}
+
+export function outlookCalloutAmountLabel(delta: number): string {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 500) return '~±0'
+  return `~${fmtK(Math.abs(delta))}`
+}
+
+export function outlookCalloutDirectionWord(
+  choice: OutlookScenarioChoice,
+  delta: number,
+): 'more' | 'less' | 'same' {
+  if (choice === 'base' || Math.abs(delta) < 500) return 'same'
+  return delta > 0 ? 'more' : 'less'
+}
+
+export function getOutlookScenarioTileLabel(choice: OutlookScenarioChoice): string {
+  return OUTLOOK_SCENARIO_TILES.find((t) => t.choice === choice)?.label ?? choice
+}
 
 export function isOutlookScenarioChoice(choice: ScenarioUiChoice): choice is OutlookScenarioChoice {
   return (

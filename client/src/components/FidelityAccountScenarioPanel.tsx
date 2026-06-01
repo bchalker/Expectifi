@@ -1,4 +1,3 @@
-import { Button } from '@heroui/react'
 import { IconAlertSquareRounded, IconX } from '@tabler/icons-react'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
@@ -38,6 +37,7 @@ import {
 } from '../lib/positionReturnModel'
 import { FidelityYearPctField, parseScenarioPct } from './FidelityHoldingScenarioPopout'
 import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
+import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
 import { AppButton } from './ui/AppButton'
 import './FidelityHoldingScenarioPopout.scss'
 
@@ -57,8 +57,7 @@ function clampPct(n: number): number {
 function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
   if (choice === 'peryear') return 'peryear'
   if (choice === 'custom') return 'custom'
-  if (isOutlookScenarioChoice(choice)) return 'outlook'
-  return 'default'
+  return 'outlook'
 }
 
 function accountScenarioToPositionModel(scenario: AccountReturnScenario): PositionReturnModel {
@@ -117,7 +116,7 @@ export function FidelityAccountScenarioPanel({
 
   const [draftPct, setDraftPct] = useState(() => String(decimalToPct(blended)))
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
-  const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('default')
+  const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('outlook')
 
   useEffect(() => {
     setUiChoice(resolvedChoice)
@@ -210,12 +209,16 @@ export function FidelityAccountScenarioPanel({
     setOverrideConflict(null)
   }, [blended, bucket, h, inputs, overrideConflict, setInputs, stored])
 
-  const resetToGlobal = useCallback(() => {
+  const clearToGlobalRate = useCallback(() => {
     setInputs({ accountReturnScenarios: patchAccountReturnScenario(inputs, bucket, null) })
-    setActiveTab('default')
     setUiChoice('default')
     setOverrideConflict(null)
   }, [bucket, inputs, setInputs])
+
+  const onNoScenario = useCallback(() => {
+    clearToGlobalRate()
+    onClose()
+  }, [clearToGlobalRate, onClose])
 
   const primaryModel = useMemo(
     () => (stored ? accountScenarioToPositionModel(stored) : targets[0]),
@@ -243,9 +246,7 @@ export function FidelityAccountScenarioPanel({
     (tab: ScenarioIntentTabId) => {
       setActiveTab(tab)
       if (tab === 'outlook') {
-        if (isOutlookScenarioChoice(uiChoice)) return
-        setUiChoice('base')
-        tryPatchAccount('base', 0)
+        return
       } else if (tab === 'custom') {
         setUiChoice('custom')
         applyCustomWithSeed()
@@ -267,9 +268,14 @@ export function FidelityAccountScenarioPanel({
 
   const globalPct = (blended * 100).toFixed(1)
 
+  const outlookPreviewValue = useMemo(
+    () => targets.reduce((sum, m) => sum + (m.currentValue > 0 ? m.currentValue : 0), 0),
+    [targets],
+  )
+
   const outlookTiles = OUTLOOK_SCENARIO_TILES
 
-  const outlookTabKey = isOutlookScenarioChoice(uiChoice) ? uiChoice : 'base'
+  const outlookSelection = isOutlookScenarioChoice(uiChoice) ? uiChoice : null
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
@@ -293,8 +299,6 @@ export function FidelityAccountScenarioPanel({
         })}
       </div>
     ) : null
-
-  const globalUsingActive = !stored
 
   return (
     <div className="holding-scenario-popout holding-scenario-popout--panel">
@@ -359,12 +363,12 @@ export function FidelityAccountScenarioPanel({
                 variant="account"
                 activeTab={activeTab}
                 onTabChange={onTabChange}
-                globalPct={globalPct}
-                globalUsingActive={globalUsingActive}
-                onUseGlobalRate={resetToGlobal}
-                outlookValue={outlookTabKey}
+                outlookValue={outlookSelection}
                 onOutlookChange={onSelectOutlookTile}
                 outlookTiles={outlookTiles}
+                globalBlended={blended}
+                outlookHorizon={h}
+                outlookPreviewCurrentValue={outlookPreviewValue}
                 draftPct={draftPct}
                 onDraftPctChange={(s) => {
                   setDraftPct(s)
@@ -381,11 +385,7 @@ export function FidelityAccountScenarioPanel({
           </div>
         </SimpleBar>
       </div>
-      <footer className="holding-scenario-popout__foot holding-scenario-popout__foot--account">
-        <Button type="button" size="sm" variant="primary" className="holding-scenario-popout__done" onPress={onClose}>
-          Done
-        </Button>
-      </footer>
+      <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
     </div>
   )
 }
