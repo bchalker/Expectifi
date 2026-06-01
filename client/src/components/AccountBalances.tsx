@@ -38,7 +38,6 @@ import {
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { inputsHavePlanningProfileFields, planningDisplayFromInputs } from '../lib/userPrefs'
 import { loadPlanProfile, profileHasOnboardingComplete } from '../lib/planStorage/profile'
-import { loadUserProfile, profileToCalculatorPatch } from '../lib/userProfileStorage'
 import {
   hasImportedPortfolioData,
   hasManualPortfolioAmounts,
@@ -55,7 +54,7 @@ import {
   type AccountScenarioBucketId,
 } from '../lib/accountReturnScenario'
 import {
-  HOLDING_SCENARIO_PLACEHOLDER_LABEL,
+  ACCOUNT_SCENARIO_PLACEHOLDER_LABEL,
   horizonClamp,
   scenarioColumnShortLabel,
 } from '../lib/holdingScenarioApply'
@@ -75,7 +74,10 @@ import { FidelityAccountScenarioPanel } from './FidelityAccountScenarioPanel'
 import { FidelityBucketAccountRow, type FidelityBucketAccountScenarioProps } from './FidelityBucketAccountRow'
 import { FidelityCsvImport } from './FidelityCsvImport'
 import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
+import { MarketScenarioSelector } from './MarketScenarioSelector'
+import { MarketScenarioContextRow } from './MarketScenarioContextRow'
 import { AccountBalancesManageMenu } from './AccountBalancesManageMenu'
+import { marketScenarioIsBase, normalizeMarketScenarioId } from '../lib/marketScenario'
 import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideExamples'
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
@@ -122,8 +124,7 @@ function shouldSkipManualBalancesPlanStep(inputs: CalculatorInputs | undefined):
 }
 
 function manualPlanDraftForCommit(inputs: CalculatorInputs): ManualPlanDraft {
-  const merged = { ...inputs, ...profileToCalculatorPatch(loadUserProfile()) }
-  const display = planningDisplayFromInputs(merged)
+  const display = planningDisplayFromInputs(inputs)
   return {
     dateOfBirth: display.dateOfBirth,
     targetRetirementAge: display.targetRetirementAge,
@@ -235,6 +236,10 @@ export function AccountBalances({
   const fidelityScenarioEditingEnabled = Boolean(readOnly && inputs && setInputs && balanceMode === 'fidelity')
   const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false)
   const retirementAge = inputs?.targetRetirementAge ?? c.targetRetirementAge
+  const marketScenarioId = normalizeMarketScenarioId(inputs?.marketScenario)
+  const showMarketScenarioContext = Boolean(
+    inputs && !marketScenarioIsBase(marketScenarioId) && c.hasPortfolioBalances,
+  )
 
   const fidelityRows = useMemo(() => {
     void fidelityImportRev
@@ -309,6 +314,14 @@ export function AccountBalances({
       positionUsesCustomReturnMode(m, blendedRateForDashboardPositionId(m.id, inputs.retRate, inputs.brkRate)),
     )
   }, [mergedPositionModels, inputs])
+
+  const hasMarketScenarioOverrides = useMemo(() => {
+    if (!inputs) return false
+    if (hasCustomScenarioBadge) return true
+    return (['brokerage', 'pretax', 'roth', 'hsa'] as const satisfies readonly AccountScenarioBucketId[]).some(
+      (bucket) => accountScenarioIsActive(inputs, bucket),
+    )
+  }, [hasCustomScenarioBadge, inputs])
 
   const [fidelityScenarioPanel, setFidelityScenarioPanel] = useState<{
     symbol: string
@@ -405,6 +418,9 @@ export function AccountBalances({
     setFidelityScenarioClosing(true)
   }, [fidelityScenarioPanel, fidelityScenarioClosing])
 
+  const fidelityActiveScenarioSymbol =
+    fidelityScenarioPanel && !fidelityScenarioClosing ? fidelityScenarioPanel.symbol : null
+
   const onFidelityScenarioSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return
@@ -481,15 +497,16 @@ export function AccountBalances({
       return {
         label: active
           ? scenarioColumnShortLabel(choice, customDec)
-          : HOLDING_SCENARIO_PLACEHOLDER_LABEL,
+          : ACCOUNT_SCENARIO_PLACEHOLDER_LABEL,
         common: choice,
         variant: active ? 'badge' : 'outline',
-        rowActive: accountScenarioPanel === bucket,
+        rowActive: accountScenarioPanel === bucket && !accountScenarioClosing,
         onOpen: () => onAccountScenarioOpen(bucket),
       }
     },
     [
       accountScenarioPanel,
+      accountScenarioClosing,
       c.yearsToRetirement,
       fidelityScenarioEditingEnabled,
       inputs,
@@ -1176,7 +1193,7 @@ export function AccountBalances({
               fidelityAllRows={fidelityRows}
               scenarioBundle={fidelityScenarioBundle}
               accountScenarioBucket={accountBucket}
-              activeScenarioSymbol={fidelityScenarioPanel?.symbol ?? null}
+              activeScenarioSymbol={fidelityActiveScenarioSymbol}
               onScenarioOpen={onFidelityScenarioOpen}
             />
           )}
@@ -1344,7 +1361,7 @@ export function AccountBalances({
             fidelityAllRows={fidelityRows}
             scenarioBundle={fidelityScenarioBundle}
             accountScenarioBucket="brokerage"
-            activeScenarioSymbol={fidelityScenarioPanel?.symbol ?? null}
+            activeScenarioSymbol={fidelityActiveScenarioSymbol}
             onScenarioOpen={onFidelityScenarioOpen}
           />
         </div>
@@ -1763,9 +1780,15 @@ export function AccountBalances({
           size="sm"
           variant="primary"
           className="csv-session-banner__cta"
+          aria-label="Upgrade to Pro"
           onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
         >
-          Upgrade to Pro
+          <span className="csv-session-banner__cta-label csv-session-banner__cta-label--long">
+            Upgrade to Pro
+          </span>
+          <span className="csv-session-banner__cta-label csv-session-banner__cta-label--short">
+            Upgrade
+          </span>
         </AppButton>
       </div>
     </div>
@@ -1796,9 +1819,39 @@ export function AccountBalances({
                 ) : null}
                 {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
               </div>
-              <div className="account-balances-header-row__actions">{headerManageMenu}</div>
+              <div className="account-balances-header-row__actions">
+                {inputs && setInputs ? (
+                  <MarketScenarioSelector
+                    value={normalizeMarketScenarioId(inputs.marketScenario)}
+                    onChange={(marketScenario) => setInputs({ marketScenario })}
+                  />
+                ) : null}
+                {headerManageMenu}
+              </div>
             </div>
           ) : null}
+          <div
+            className={[
+              'market-scenario-context-row-wrap',
+              showMarketScenarioContext && 'market-scenario-context-row-wrap--open',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <div className="market-scenario-context-row-wrap__inner">
+              {showMarketScenarioContext && inputs && setInputs ? (
+                <MarketScenarioContextRow
+                  scenarioId={marketScenarioId}
+                  c={c}
+                  inputs={inputs}
+                  balanceModes={{ retirement: balanceMode, brokerage: brokerageMode ?? 'manual' }}
+                  retRate={inputs.retRate}
+                  brkRate={brkRate ?? inputs.brkRate}
+                  hasScenarioOverrides={hasMarketScenarioOverrides}
+                />
+              ) : null}
+            </div>
+          </div>
           <div className="account-balances-stack">
             {csvSessionBanner}
             <div

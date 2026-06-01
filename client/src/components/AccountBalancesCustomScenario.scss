@@ -71,7 +71,7 @@
 .account-balances-header-row__actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
   gap: 0.5rem;
   flex-shrink: 0;
@@ -1313,6 +1313,37 @@
   line-height: 1;
   background: var(--color-primary);
   color: var(--color-primary-on);
+}
+
+.csv-session-banner__cta-label--short {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .csv-session-banner {
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .csv-session-banner__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .csv-session-banner__cta.app-btn--primary[data-slot='button'] {
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .csv-session-banner__cta-label--long {
+    display: none;
+  }
+
+  .csv-session-banner__cta-label--short {
+    display: inline;
+  }
 }
 
 .account-balances-remove-overlay {

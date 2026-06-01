@@ -348,22 +348,31 @@ export function profileToCalculatorPatch(profile: StoredUserProfile | null): Par
   return patch
 }
 
-/** Prefer DB prefs on load; mirror into localStorage cache. */
+/** Prefer DB prefs on load; mirror into localStorage cache. Local profile fills gaps only. */
 export function mergeProfileWithDbPrefs(
   profile: StoredUserProfile | null,
   dbPrefs: UserPrefs | null | undefined,
 ): StoredUserProfile | null {
   if (!dbPrefs && !profile) return null
-  const fromDb: Partial<StoredUserProfile> = dbPrefs
-    ? {
-        dob: dbPrefs.dob,
-        target_retirement_age: dbPrefs.retirementAge,
-        monthly_income_goal: dbPrefs.monthlyGoal,
-        ss_claim_age: dbPrefs.ssClaimingAge,
-        country: dbPrefs.residenceCountry,
-      }
-    : {}
-  const merged = { version: 1 as const, ...profile, ...fromDb }
+  const merged: StoredUserProfile = { version: 1 as const, ...(profile ?? {}) }
+  if (dbPrefs) {
+    if (!merged.dob?.trim() && dbPrefs.dob?.trim()) merged.dob = dbPrefs.dob
+    if (
+      !(merged.target_retirement_age != null && merged.target_retirement_age > 0) &&
+      dbPrefs.retirementAge > 0
+    ) {
+      merged.target_retirement_age = dbPrefs.retirementAge
+    }
+    if (merged.monthly_income_goal == null && dbPrefs.monthlyGoal != null) {
+      merged.monthly_income_goal = dbPrefs.monthlyGoal
+    }
+    if (merged.ss_claim_age == null && dbPrefs.ssClaimingAge != null) {
+      merged.ss_claim_age = dbPrefs.ssClaimingAge
+    }
+    if (!merged.country?.trim() && dbPrefs.residenceCountry?.trim()) {
+      merged.country = dbPrefs.residenceCountry
+    }
+  }
   const country = merged.country?.trim()
   if (country) {
     const locale = localeForResidenceCountry(country)

@@ -1,621 +1,512 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Filler,
-  type ChartOptions,
-} from 'chart.js'
-import { Line } from 'react-chartjs-2'
-import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import {
-  buildImpactSentence,
-  classifyEvent,
-  eventBadgeText,
-  eventPhaseLabel,
-  newEventId,
-  presetLifeEvent,
-  projectPortfolioTimeline,
-  retirementDateShiftMonths,
-  totalEventOutflows,
-  type LifeEvent,
-  type LifeEventPresetId,
-  type LifeEventType,
+  blendedGrowthRate,
   type LifeEventsProjectionData,
-} from '../lib/calc/lifeEvents'
-import { deriveDisplayLabel } from '../lib/lifeEventDisplayLabels'
-import { fmt, fmtK } from '../utils/format'
-import { AppButton } from './ui/AppButton'
-import { SidePanelShell } from './SidePanelShell'
-import './LifeEventsPanel.scss'
+} from "../lib/calc/lifeEvents";
+import GrowthEventCard from "./life-events/GrowthEventCard";
+import { growthEventConfigs } from "./life-events/eventConfigs";
+import {
+  calcEventImpactFutureValue,
+  formatCurrency,
+} from "./life-events/utils";
+import type { LifeEventConfig, LifeEventState } from "./life-events/types";
+import "./LifeEventsPanel.scss";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
+export type LifeEventActiveImpact = {
+  portfolioDelta: number;
+  monthlyIncomeDelta: number;
+};
 
-type Props = {
-  projectionData: LifeEventsProjectionData
-  retirementYear: number
-  monthlyPortfolioIncome: number
-  className?: string
+export interface LifeEventsPanelProps {
+  projectionData: LifeEventsProjectionData;
+  retirementYear: number;
+  monthlyPortfolioIncome: number;
+  activePhase: "growth" | "income";
+  withdrawalRate: number;
+  hsaBalance: number;
+  onEventActiveChange?: (
+    eventId: string,
+    isActive: boolean,
+    impact: LifeEventActiveImpact,
+  ) => void;
+  className?: string;
 }
 
-type BuilderDraft = Omit<LifeEvent, 'id'>
+let nextEventInstanceId = 1;
 
-function LifeEventsEmptyIcon() {
-  return (
-    <svg className="life-events-empty__icon" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3 9h18" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8 3v4M16 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="12" cy="14" r="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 16v2M9 18h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
+function createEventInstanceId(): string {
+  nextEventInstanceId += 1;
+  return `life-event-${nextEventInstanceId}`;
 }
 
-function formatSliderAmount(n: number, recurring: boolean): string {
-  const rounded = Math.round(n)
-  if (recurring) return `$${rounded.toLocaleString('en-US')}`
-  if (rounded >= 1000) return `$${rounded.toLocaleString('en-US')}`
-  return `$${rounded.toLocaleString('en-US')}`
+const EVENT_PICKER_GROUPS: { label: string; configIds: string[] }[] = [
+  {
+    label: "One-time expenses",
+    configIds: ["buy-car-cash", "home-renovation", "medical-expense"],
+  },
+  {
+    label: "Pay off debt",
+    configIds: ["pay-off-mortgage"],
+  },
+  {
+    label: "Ongoing commitments",
+    configIds: ["tuition-support", "charitable-giving", "church-tithe"],
+  },
+];
+
+function buildInitialEventState(
+  config: LifeEventConfig,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventState {
+  return {
+    id: createEventInstanceId(),
+    configId: config.id,
+    amount: config.defaultAmount,
+    year: config.defaultYear(currentYear, retirementYear),
+    duration: config.defaultDuration,
+    isActive: false,
+    isExpanded: false,
+  };
 }
 
-function LifeEventSliderRow({
-  label,
-  min,
-  max,
-  step,
-  value,
-  display,
-  onChange,
-}: {
-  label: string
-  min: number
-  max: number
-  step: number
-  value: number
-  display: string
-  onChange: (v: number) => void
-}) {
-  return (
-    <div className="life-events-slider-row">
-      <span className="life-events-slider-row__label">{label}</span>
-      <div className="life-events-slider-row__track-wrap">
-        <input
-          type="range"
-          className="life-events-slider-row__input"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          aria-label={label}
-          aria-valuetext={display}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
-      </div>
-      <span className="life-events-slider-row__value">{display}</span>
-    </div>
-  )
+function duplicateLabel(
+  config: LifeEventConfig,
+  eventStates: LifeEventState[],
+): string | undefined {
+  const sameTypeCount = eventStates.filter((s) => s.configId === config.id).length;
+  if (sameTypeCount === 0) return undefined;
+  return `${config.displayLabel} (${sameTypeCount + 1})`;
 }
 
-function LifeEventsChart({
-  projectionData,
-  events,
-}: {
-  projectionData: LifeEventsProjectionData
-  events: LifeEvent[]
-}) {
-  const baseline = useMemo(
-    () => projectPortfolioTimeline(projectionData, []),
-    [projectionData],
-  )
-  const withEvents = useMemo(
-    () => projectPortfolioTimeline(projectionData, events),
-    [projectionData, events],
-  )
-
-  const chartData = useMemo(
-    () => ({
-      labels: baseline.years.map(String),
-      datasets: [
-        {
-          label: 'Baseline',
-          data: baseline.portfolioValues.map((v) => v / 1000),
-          borderColor: '#7F77DD',
-          borderDash: [5, 4],
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 0,
-          tension: 0.25,
-          fill: false,
-        },
-        {
-          label: 'With events',
-          data: withEvents.portfolioValues.map((v) => v / 1000),
-          borderColor: '#378ADD',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: '#378ADD',
-          pointBorderColor: '#378ADD',
-          pointHoverRadius: 4,
-          tension: 0.25,
-          fill: false,
-        },
-      ],
-    }),
-    [baseline, withEvents],
-  )
-
-  const chartOptions: ChartOptions<'line'> = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              const val = (ctx.parsed.y ?? 0) * 1000
-              return `${ctx.dataset.label}: ${fmtK(val)}`
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            font: { size: 11, family: 'Nunito, system-ui, sans-serif' },
-            color: 'var(--text-faint)',
-            maxRotation: 0,
-          },
-          border: { display: false },
-        },
-        y: {
-          grid: { color: 'color-mix(in srgb, var(--border) 60%, transparent)' },
-          ticks: {
-            font: { size: 11, family: 'Nunito, system-ui, sans-serif' },
-            color: 'var(--text-faint)',
-            callback: (v) => `$${v}k`,
-          },
-          border: { display: false },
-        },
-      },
-    }),
-    [],
-  )
-
-  return (
-    <>
-      <div className="life-events-chart-wrap">
-        <div className="life-events-chart-canvas">
-          <Line data={chartData} options={chartOptions} />
-        </div>
-      </div>
-      <div className="life-events-chart-legend" aria-hidden>
-        <span className="life-events-chart-legend__item">
-          <span className="life-events-chart-legend__swatch life-events-chart-legend__swatch--baseline" />
-          baseline
-        </span>
-        <span className="life-events-chart-legend__item">
-          <span className="life-events-chart-legend__dot" style={{ background: '#378ADD' }} />
-          with events
-        </span>
-        <span className="life-events-chart-legend__item">
-          <span className="life-events-chart-legend__swatch life-events-chart-legend__swatch--outflows" />
-          outflows
-        </span>
-        <span className="life-events-chart-legend__item">
-          <span className="life-events-chart-legend__swatch life-events-chart-legend__swatch--inflows" />
-          inflows
-        </span>
-      </div>
-    </>
-  )
+function lifeEventCountWord(count: number): string {
+  const words = [
+    "Zero",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+  ];
+  return words[count] ?? String(count);
 }
 
-function LifeEventCard({
-  event,
-  expanded,
-  projectionData,
-  retirementYear,
-  monthlyPortfolioIncome,
-  onToggle,
-  onPatch,
-}: {
-  event: LifeEvent
-  expanded: boolean
-  projectionData: LifeEventsProjectionData
-  retirementYear: number
-  monthlyPortfolioIncome: number
-  onToggle: () => void
-  onPatch: (patch: Partial<LifeEvent>) => void
-}) {
-  const isRecurring = event.type === 'recurring-out' || event.type === 'recurring-in'
-  const impact = buildImpactSentence(event, retirementYear, monthlyPortfolioIncome)
-  const phase = classifyEvent(event, retirementYear)
-  const badgeBg = `color-mix(in srgb, ${event.color} 10%, white)`
-  const amountMax = isRecurring ? 5000 : 200000
-  const amountStep = isRecurring ? 50 : 1000
-  const yearMin = projectionData.currentYear
-  const yearMax = projectionData.retirementYear
-
-  return (
-    <div className="life-events-event">
-      <button type="button" className="life-events-event__head" onClick={onToggle} aria-expanded={expanded}>
-        <span className="life-events-event__dot" style={{ background: event.color }} aria-hidden />
-        <span className="life-events-event__name-block">
-          <span className="life-events-event__prefix">Expect if I...</span>
-          <span className="life-events-event__name">{event.displayLabel}</span>
-        </span>
-        <span className="life-events-event__badges">
-          <span
-            className="life-events-event__badge"
-            style={{ color: event.color, background: badgeBg }}
-          >
-            {eventBadgeText(event)}
-          </span>
-          <span className={`life-events-event__phase life-events-event__phase--${phase}`}>
-            {phase === 'both' ? (
-              <>
-                <span className="life-events-event__phase-half life-events-event__phase-half--growth">growth</span>
-                <span className="life-events-event__phase-half life-events-event__phase-half--income">+ income</span>
-              </>
-            ) : (
-              eventPhaseLabel(phase)
-            )}
-          </span>
-        </span>
-        <span className="life-events-event__chevron" aria-hidden>
-          {expanded ? <IconChevronDown size={16} strokeWidth={1.5} /> : <IconChevronRight size={16} strokeWidth={1.5} />}
-        </span>
-      </button>
-      {expanded ? (
-        <div className="life-events-event__drawer">
-          <LifeEventSliderRow
-            label={isRecurring ? 'Monthly amount' : 'Amount'}
-            min={isRecurring ? 100 : 5000}
-            max={amountMax}
-            step={amountStep}
-            value={event.amount}
-            display={formatSliderAmount(event.amount, isRecurring)}
-            onChange={(amount) => onPatch({ amount })}
-          />
-          <LifeEventSliderRow
-            label="Year"
-            min={yearMin}
-            max={yearMax}
-            step={1}
-            value={event.year}
-            display={String(event.year)}
-            onChange={(year) => onPatch({ year })}
-          />
-          {isRecurring ? (
-            <LifeEventSliderRow
-              label="Duration (years)"
-              min={1}
-              max={20}
-              step={1}
-              value={event.duration ?? 1}
-              display={`${event.duration ?? 1} yr`}
-              onChange={(duration) => onPatch({ duration })}
-            />
-          ) : null}
-          <div className="life-events-impact">
-            {impact.split('\n').map((line, i) => (
-              <p key={i} className="life-events-impact__line">
-                {line}
-              </p>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  )
+function lifeEventCountTitle(count: number): { word: string; noun: string } {
+  return {
+    word: lifeEventCountWord(count),
+    noun: count === 1 ? "Life Event" : "Life Events",
+  };
 }
 
-function EventBuilderDrawer({
-  open,
-  draft,
-  projectionData,
-  onDraftChange,
-  onSave,
-  onClose,
-}: {
-  open: boolean
-  draft: BuilderDraft | null
-  projectionData: LifeEventsProjectionData
-  onDraftChange: (next: BuilderDraft) => void
-  onSave: () => void
-  onClose: () => void
-}) {
-  if (!draft) return null
-  const isRecurring = draft.type === 'recurring-out' || draft.type === 'recurring-in'
-
-  return (
-    <SidePanelShell
-      open={open}
-      titleId="life-events-builder-title"
-      title="Add life event"
-      subtitle="Model a one-time or recurring cash flow"
-      onClose={onClose}
-      shellClassName="drawer-shell--right"
-    >
-      <div className="life-events-builder-fields">
-        <div className="life-events-builder-field">
-          <label htmlFor="life-event-label">Event name</label>
-          <input
-            id="life-event-label"
-            type="text"
-            value={draft.label}
-            onChange={(e) => onDraftChange({ ...draft, label: e.target.value })}
-          />
-        </div>
-        <div className="life-events-builder-field">
-          <label htmlFor="life-event-type">Type</label>
-          <select
-            id="life-event-type"
-            value={draft.type}
-            onChange={(e) => {
-              const type = e.target.value as LifeEventType
-              const color =
-                type === 'lump-sum-out'
-                  ? '#E24B4A'
-                  : type === 'recurring-out'
-                    ? '#1D9E75'
-                    : '#639922'
-              onDraftChange({
-                ...draft,
-                type,
-                color,
-                duration: type === 'recurring-out' || type === 'recurring-in' ? (draft.duration ?? 5) : undefined,
-              })
-            }}
-          >
-            <option value="lump-sum-out">One-time expense</option>
-            <option value="recurring-out">Recurring expense</option>
-            <option value="lump-sum-in">One-time inflow</option>
-            <option value="recurring-in">Recurring income</option>
-          </select>
-        </div>
-        <LifeEventSliderRow
-          label={isRecurring ? 'Monthly amount' : 'Amount'}
-          min={isRecurring ? 100 : 5000}
-          max={isRecurring ? 5000 : 200000}
-          step={isRecurring ? 50 : 1000}
-          value={draft.amount}
-          display={formatSliderAmount(draft.amount, isRecurring)}
-          onChange={(amount) => onDraftChange({ ...draft, amount })}
-        />
-        <LifeEventSliderRow
-          label="Year"
-          min={projectionData.currentYear}
-          max={projectionData.retirementYear}
-          step={1}
-          value={draft.year}
-          display={String(draft.year)}
-          onChange={(year) => onDraftChange({ ...draft, year })}
-        />
-        {isRecurring ? (
-          <LifeEventSliderRow
-            label="Duration (years)"
-            min={1}
-            max={20}
-            step={1}
-            value={draft.duration ?? 1}
-            display={`${draft.duration ?? 1} yr`}
-            onChange={(duration) => onDraftChange({ ...draft, duration })}
-          />
-        ) : null}
-        <div className="life-events-builder-actions">
-          <AppButton type="button" variant="primary" onPress={onSave}>
-            Save event
-          </AppButton>
-          <AppButton type="button" variant="secondary" onPress={onClose}>
-            Cancel
-          </AppButton>
-        </div>
-      </div>
-    </SidePanelShell>
-  )
+function calcTotalActiveImpact(
+  eventStates: LifeEventState[],
+  retirementYear: number,
+  growthRate: number,
+  configs: LifeEventConfig[],
+  hsaBalance: number,
+): number {
+  return eventStates
+    .filter((s) => s.isActive)
+    .reduce((sum, s) => {
+      const config = configs.find((c) => c.id === s.configId);
+      if (!config) return sum;
+      const fv = calcEventImpactFutureValue(
+        config,
+        s.amount,
+        s.year,
+        retirementYear,
+        growthRate,
+        hsaBalance,
+        s.duration,
+      );
+      const isOutflow = config.type.includes("out");
+      return sum + (isOutflow ? fv : -fv);
+    }, 0);
 }
 
-function retirementMonthLabel(retirementYear: number): string {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  return `${months[0]} ${retirementYear}`
+function calcOtherActiveImpact(
+  excludeId: string,
+  eventStates: LifeEventState[],
+  retirementYear: number,
+  growthRate: number,
+  configs: LifeEventConfig[],
+  hsaBalance: number,
+): number {
+  return eventStates
+    .filter((s) => s.isActive && s.configId !== excludeId)
+    .reduce((sum, s) => {
+      const config = configs.find((c) => c.id === s.configId);
+      if (!config) return sum;
+      const fv = calcEventImpactFutureValue(
+        config,
+        s.amount,
+        s.year,
+        retirementYear,
+        growthRate,
+        hsaBalance,
+        s.duration,
+      );
+      const isOutflow = config.type.includes("out");
+      return sum + (isOutflow ? fv : -fv);
+    }, 0);
 }
 
 export function LifeEventsPanel({
   projectionData,
   retirementYear,
-  monthlyPortfolioIncome,
-  className = '',
-}: Props) {
-  const [events, setEvents] = useState<LifeEvent[]>([])
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [builderOpen, setBuilderOpen] = useState(false)
-  const [builderDraft, setBuilderDraft] = useState<BuilderDraft | null>(null)
+  monthlyPortfolioIncome: _monthlyPortfolioIncome,
+  activePhase,
+  withdrawalRate: _withdrawalRate,
+  hsaBalance,
+  onEventActiveChange = () => {},
+  className = "",
+}: LifeEventsPanelProps) {
+  const currentYear = projectionData.currentYear;
+  const basePortfolio = projectionData.retBal + projectionData.brkBal;
+  const retirementPortfolio = projectionData.baselineTotalAtRetirement;
+  const growthRate = blendedGrowthRate(projectionData);
 
-  const baselineAtRetirement = projectionData.baselineTotalAtRetirement
-  const withEventsProjection = useMemo(
-    () => projectPortfolioTimeline(projectionData, events),
-    [projectionData, events],
-  )
-  const withEventsAtRetirement = withEventsProjection.totalAtRetirement
-  const netImpact = withEventsAtRetirement - baselineAtRetirement
-  const outflowsTotal = useMemo(() => totalEventOutflows(events), [events])
-  const shiftMonths = useMemo(
-    () => retirementDateShiftMonths(projectionData, events),
-    [projectionData, events],
-  )
+  const [eventStates, setEventStates] = useState<LifeEventState[]>(() => {
+    const carConfig = growthEventConfigs.find((c) => c.id === "buy-car-cash");
+    const mortgageConfig = growthEventConfigs.find(
+      (c) => c.id === "pay-off-mortgage",
+    );
+    const renovationConfig = growthEventConfigs.find(
+      (c) => c.id === "home-renovation",
+    );
+    const medicalConfig = growthEventConfigs.find(
+      (c) => c.id === "medical-expense",
+    );
+    const tuitionConfig = growthEventConfigs.find(
+      (c) => c.id === "tuition-support",
+    );
+    const charitableConfig = growthEventConfigs.find(
+      (c) => c.id === "charitable-giving",
+    );
+    const churchTitheConfig = growthEventConfigs.find(
+      (c) => c.id === "church-tithe",
+    );
 
-  const openBuilder = useCallback(
-    (preset: LifeEventPresetId) => {
-      const base = presetLifeEvent(preset, projectionData)
-      setBuilderDraft(base)
-      setBuilderOpen(true)
+    return [
+      {
+        id: createEventInstanceId(),
+        configId: "buy-car-cash",
+        amount: carConfig?.defaultAmount ?? 35000,
+        year:
+          carConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "pay-off-mortgage",
+        amount: mortgageConfig?.defaultAmount ?? 85000,
+        year:
+          mortgageConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 2,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "home-renovation",
+        amount: renovationConfig?.defaultAmount ?? 45000,
+        year:
+          renovationConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "medical-expense",
+        amount: medicalConfig?.defaultAmount ?? 25000,
+        year:
+          medicalConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "tuition-support",
+        amount: tuitionConfig?.defaultAmount ?? 600,
+        year:
+          tuitionConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 2,
+        duration: tuitionConfig?.defaultDuration ?? 4,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "charitable-giving",
+        amount: charitableConfig?.defaultAmount ?? 400,
+        year:
+          charitableConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear,
+        duration: charitableConfig?.defaultDuration ?? 20,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "church-tithe",
+        amount: churchTitheConfig?.defaultAmount ?? 500,
+        year:
+          churchTitheConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear,
+        duration: churchTitheConfig?.defaultDuration ?? 25,
+        isActive: false,
+        isExpanded: false,
+      },
+    ];
+  });
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!pickerOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setPickerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [pickerOpen]);
+
+  const pickerGroups = useMemo(
+    () =>
+      EVENT_PICKER_GROUPS.map((group) => ({
+        label: group.label,
+        configs: group.configIds
+          .map((id) => growthEventConfigs.find((c) => c.id === id))
+          .filter((c): c is LifeEventConfig => c != null),
+      })).filter((group) => group.configs.length > 0),
+    [],
+  );
+
+  const updateEventState = useCallback(
+    (id: string, updates: Partial<LifeEventState>) => {
+      setEventStates((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+      );
     },
-    [projectionData],
-  )
+    [],
+  );
 
-  const saveBuilder = useCallback(() => {
-    if (!builderDraft) return
-    const id = newEventId()
-    const displayLabel = deriveDisplayLabel(builderDraft.label)
-    const next: LifeEvent = { ...builderDraft, id, displayLabel }
-    setEvents((prev) => [...prev, next])
-    setExpandedId(id)
-    setBuilderOpen(false)
-    setBuilderDraft(null)
-  }, [builderDraft])
+  const totalActiveImpact = useMemo(
+    () =>
+      calcTotalActiveImpact(
+        eventStates,
+        retirementYear,
+        growthRate,
+        growthEventConfigs,
+        hsaBalance,
+      ),
+    [eventStates, retirementYear, growthRate, hsaBalance],
+  );
 
-  const patchEvent = useCallback((id: string, patch: Partial<LifeEvent>) => {
-    setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)))
-  }, [])
+  const activeEventCount = useMemo(
+    () => eventStates.filter((s) => s.isActive).length,
+    [eventStates],
+  );
 
-  const panelClass = ['life-events-panel', className].filter(Boolean).join(' ')
+  const activeEventTitle = useMemo(
+    () => (activeEventCount > 0 ? lifeEventCountTitle(activeEventCount) : null),
+    [activeEventCount],
+  );
 
-  if (events.length === 0) {
-    return (
-      <section className={panelClass} aria-labelledby="life-events-heading">
-        <header className="life-events-panel__header">
-          <h2 id="life-events-heading" className="life-events-panel__title">
-            Life events
-          </h2>
-          <p className="life-events-panel__subhead">Model how major expenses affect your retirement date</p>
-        </header>
-        <div className="life-events-empty">
-          <LifeEventsEmptyIcon />
-          <h3 className="life-events-empty__heading">What if you paid off your mortgage in 2028?</h3>
-          <p className="life-events-empty__subtext">
-            Add a life event to see how it shifts your retirement projection. One-time pulls, recurring expenses, and
-            future inflows all modeled in real time.
-          </p>
-          <AppButton type="button" variant="primary" onPress={() => openBuilder('custom')}>
-            Add your first event
-          </AppButton>
-        </div>
-        <EventBuilderDrawer
-          open={builderOpen}
-          draft={builderDraft}
-          projectionData={projectionData}
-          onDraftChange={setBuilderDraft}
-          onSave={saveBuilder}
-          onClose={() => {
-            setBuilderOpen(false)
-            setBuilderDraft(null)
-          }}
-        />
-      </section>
-    )
-  }
+  const handleActiveChange = useCallback(
+    (id: string, isActive: boolean, futureValue: number) => {
+      onEventActiveChange(id, isActive, {
+        portfolioDelta: isActive ? -futureValue : 0,
+        monthlyIncomeDelta: 0,
+      });
+    },
+    [onEventActiveChange],
+  );
+
+  const handleAddEvent = useCallback(
+    (config: LifeEventConfig) => {
+      setEventStates((prev) => [
+        ...prev,
+        {
+          ...buildInitialEventState(config, currentYear, retirementYear),
+          label: duplicateLabel(config, prev),
+          isExpanded: true,
+        },
+      ]);
+      setPickerOpen(false);
+    },
+    [currentYear, retirementYear],
+  );
+
+  const panelClassName = ["life-events-panel", className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <section className={panelClass} aria-labelledby="life-events-heading">
-      <header className="life-events-panel__header">
-        <div className="life-events-panel__title-row">
-          <div>
-            <h2 id="life-events-heading" className="life-events-panel__title">
-              Life events
-            </h2>
-            <p className="life-events-panel__subhead">
-              Retire {retirementMonthLabel(retirementYear)} · life events active
-            </p>
-          </div>
-          <span className="life-events-panel__count-badge">{events.length} events</span>
+    <section className={panelClassName} aria-labelledby="life-events-heading">
+      <header className="life-events-panel__header account-balances-header-row">
+        <div className="account-balances-header-row__title-block">
+          {activePhase === "growth" ? (
+            <>
+              <h2
+                id="life-events-heading"
+                className="account-balances-header-row__title"
+              >
+                {activeEventTitle ? (
+                  <>
+                    {activeEventTitle.word}{" "}
+                    <span className="life-events-panel__active-count">
+                      ({activeEventCount})
+                    </span>{" "}
+                    {activeEventTitle.noun}
+                  </>
+                ) : (
+                  "Life events"
+                )}
+              </h2>
+              <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+                Moments that pull from your compounding portfolio before
+                retirement
+              </p>
+            </>
+          ) : (
+            <>
+              <h2
+                id="life-events-heading"
+                className="account-balances-header-row__title"
+              >
+                Life events — income phase
+              </h2>
+              <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+                Moments that affect your monthly draw and portfolio runway after
+                retirement
+              </p>
+            </>
+          )}
         </div>
-      </header>
-
-      <div className="life-events-panel__card">
-        <div className="life-events-metrics">
-          <div className="life-events-metric">
-            <div className="life-events-metric__label">Baseline portfolio</div>
-            <div className="life-events-metric__value">{fmtK(baselineAtRetirement)}</div>
-          </div>
-          <div className="life-events-metric">
-            <div className="life-events-metric__label">With all events</div>
-            <div className="life-events-metric__value life-events-metric__value--amber">
-              {fmtK(withEventsAtRetirement)}
-            </div>
-          </div>
-          <div className="life-events-metric">
-            <div className="life-events-metric__label">Net impact</div>
-            <div
+        {activePhase === "growth" ? (
+          <div className="life-events-panel__impact">
+            <span
               className={[
-                'life-events-metric__value',
-                netImpact < 0 ? 'life-events-metric__value--negative' : '',
+                "life-events-panel__impact-value",
+                activeEventCount === 0 && "life-events-panel__impact-value--none",
               ]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
             >
-              {netImpact >= 0 ? '+' : ''}
-              {fmtK(netImpact)}
+              {activeEventCount === 0
+                ? "NO"
+                : totalActiveImpact > 0
+                  ? `-${formatCurrency(totalActiveImpact)}`
+                  : formatCurrency(0)}
+            </span>
+            <span className="life-events-panel__impact-label">Impact</span>
+          </div>
+        ) : null}
+      </header>
+
+      {activePhase === "income" ? (
+        <div className="life-events-panel__income-empty">
+          <p className="life-events-panel__income-empty-text">
+            No income phase events yet.
+          </p>
+          <p className="life-events-panel__income-empty-subtext">
+            Switch to growth phase to model expenses before retirement.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="life-events-panel__cards">
+            {eventStates.map((state) => {
+              const config = growthEventConfigs.find(
+                (c) => c.id === state.configId,
+              );
+              if (!config) return null;
+              return (
+                <GrowthEventCard
+                  key={state.id}
+                  config={config}
+                  state={state}
+                  basePortfolio={basePortfolio}
+                  retirementYear={retirementYear}
+                  retirementPortfolio={retirementPortfolio}
+                  currentYear={currentYear}
+                  growthRate={growthRate}
+                  otherActiveImpact={calcOtherActiveImpact(
+                    state.configId,
+                    eventStates,
+                    retirementYear,
+                    growthRate,
+                    growthEventConfigs,
+                    hsaBalance,
+                  )}
+                  hsaBalance={hsaBalance}
+                  onStateChange={updateEventState}
+                  onActiveChange={handleActiveChange}
+                />
+              );
+            })}
+          </div>
+
+          {pickerGroups.length > 0 ? (
+            <div className="life-events-panel__add" ref={pickerRef}>
+              <button
+                type="button"
+                className="life-events-panel__add-btn"
+                aria-expanded={pickerOpen}
+                aria-haspopup="listbox"
+                onClick={() => setPickerOpen((open) => !open)}
+              >
+                <IconPlus size={16} stroke={1.5} aria-hidden />
+                Add a life event
+              </button>
+              {pickerOpen ? (
+                <div className="life-events-panel__add-menu" role="listbox">
+                  {pickerGroups.map((group) => (
+                    <div key={group.label} className="life-events-panel__add-group">
+                      <p className="life-events-panel__add-group-label">{group.label}</p>
+                      <ul className="life-events-panel__add-group-list">
+                        {group.configs.map((config) => (
+                          <li key={config.id} role="none">
+                            <button
+                              type="button"
+                              className="life-events-panel__add-item"
+                              role="option"
+                              onClick={() => handleAddEvent(config)}
+                            >
+                              <span
+                                className="life-events-panel__add-item-dot"
+                                style={{ backgroundColor: config.color }}
+                                aria-hidden
+                              />
+                              {config.canonicalLabel}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
-          </div>
-        </div>
-
-        <LifeEventsChart projectionData={projectionData} events={events} />
-
-        <div className="life-events-list">
-          <h3 className="life-events-list__heading">Life events</h3>
-          {events.map((event) => (
-            <LifeEventCard
-              key={event.id}
-              event={event}
-              expanded={expandedId === event.id}
-              projectionData={projectionData}
-              retirementYear={retirementYear}
-              monthlyPortfolioIncome={monthlyPortfolioIncome}
-              onToggle={() => setExpandedId((id) => (id === event.id ? null : event.id))}
-              onPatch={(patch) => patchEvent(event.id, patch)}
-            />
-          ))}
-        </div>
-
-        <div className="life-events-chips">
-          <button type="button" className="life-events-chip" onClick={() => openBuilder('rental-income')}>
-            + rental income
-          </button>
-          <button type="button" className="life-events-chip" onClick={() => openBuilder('home-renovation')}>
-            + home renovation
-          </button>
-          <button type="button" className="life-events-chip" onClick={() => openBuilder('pension-inheritance')}>
-            + pension / inheritance ↗
-          </button>
-          <button type="button" className="life-events-chip" onClick={() => openBuilder('custom')}>
-            + more events ↗
-          </button>
-        </div>
-
-        <div className="life-events-summary">
-          <div className="life-events-summary__card">
-            <div className="life-events-summary__label">Total outflows (all events)</div>
-            <div className="life-events-summary__value">-{fmt(outflowsTotal)}</div>
-          </div>
-          <div className="life-events-summary__card">
-            <div className="life-events-summary__label">Retirement date shift</div>
-            <div className="life-events-summary__value">
-              {shiftMonths > 0 ? `+${shiftMonths} months later` : 'No change'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <EventBuilderDrawer
-        open={builderOpen}
-        draft={builderDraft}
-        projectionData={projectionData}
-        onDraftChange={setBuilderDraft}
-        onSave={saveBuilder}
-        onClose={() => {
-          setBuilderOpen(false)
-          setBuilderDraft(null)
-        }}
-      />
+          ) : null}
+        </>
+      )}
     </section>
-  )
+  );
 }

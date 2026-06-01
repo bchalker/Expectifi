@@ -1,0 +1,36 @@
+.impact-rating-badge {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.impact-rating-badge__bars {
+  display: inline-flex;
+  align-items: flex-end;
+}
+
+.impact-rating-badge__bar {
+  width: 3px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 2px;
+  vertical-align: bottom;
+}
+
+.impact-rating-badge__bar:last-child {
+  margin-right: 0;
+}
+
+.impact-rating-badge__label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+
+@media (max-width: 480px) {
+  .impact-rating-badge__label {
+    display: none;
+  }
+}

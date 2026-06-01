@@ -22,6 +22,7 @@ import {
   ConfigDrawerTabs,
   type ConfigDrawerTab,
 } from './ConfigDrawerBody'
+import type { LifePlans } from '../lib/planStorage/life'
 import { SidePanelShell } from './SidePanelShell'
 import { AppButton } from './ui/AppButton'
 import './PanelChrome.scss'
@@ -53,6 +54,9 @@ type Props = {
   setUi: (p: Partial<CalculatorUi>) => void
   onOpenRegister?: () => void
   onResetGuestProfile?: () => void
+  lifePlans: LifePlans
+  onLifePlansChange: (next: LifePlans) => void
+  currentYear: number
 }
 
 export function DrawerPanel({
@@ -74,6 +78,9 @@ export function DrawerPanel({
   setUi,
   onOpenRegister,
   onResetGuestProfile,
+  lifePlans,
+  onLifePlansChange,
+  currentYear,
 }: Props) {
   const open = drawer != null
   const lastDrawerRef = useRef<DrawerName | null>(null)
@@ -168,6 +175,9 @@ export function DrawerPanel({
             onDrawerClose={onConfigConfirm}
             onOpenRegister={onOpenRegister}
             onResetGuestProfile={onResetGuestProfile}
+            lifePlans={lifePlans}
+            onLifePlansChange={onLifePlansChange}
+            currentYear={currentYear}
           />
         ) : (
           <DrawerBody

@@ -22,7 +22,10 @@ import {
 } from '../lib/holdingsScenarioConflict'
 import {
   horizonClamp,
+  isOutlookScenarioChoice,
   mergePatchPositionModelsIntoInputs,
+  OUTLOOK_SCENARIO_TILES,
+  type OutlookScenarioChoice,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import { blendedRateForDashboardPositionId, computeMergedDashboardPositionModels } from '../lib/mergedDashboardPositionModels'
@@ -54,7 +57,7 @@ function clampPct(n: number): number {
 function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
   if (choice === 'peryear') return 'peryear'
   if (choice === 'custom') return 'custom'
-  if (choice === 'bull' || choice === 'bear' || choice === 'base') return 'outlook'
+  if (isOutlookScenarioChoice(choice)) return 'outlook'
   return 'default'
 }
 
@@ -110,14 +113,18 @@ export function FidelityAccountScenarioPanel({
 
   const targets = useMemo(() => mergedModelsForAccountBucket(bucket, merged), [bucket, merged])
 
+  const resolvedChoice = stored ? inferAccountScenarioUiChoice(stored, blended, h) : 'default'
+
   const [draftPct, setDraftPct] = useState(() => String(decimalToPct(blended)))
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
   const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('default')
 
   useEffect(() => {
-    const resolved = stored ? inferAccountScenarioUiChoice(stored, blended, h) : 'default'
-    setUiChoice(resolved)
-    setActiveTab(intentFromScenarioChoice(resolved))
+    setUiChoice(resolvedChoice)
+    setActiveTab(intentFromScenarioChoice(resolvedChoice))
+  }, [resolvedChoice])
+
+  useEffect(() => {
     if (stored) {
       const ch = inferAccountScenarioUiChoice(stored, blended, h)
       setDraftPct(String(decimalToPct(ch === 'custom' ? stored.flatRate : blended)))
@@ -225,7 +232,7 @@ export function FidelityAccountScenarioPanel({
   }, [blended, h, stored, tryPatchAccount])
 
   const onSelectOutlookTile = useCallback(
-    (choice: 'bull' | 'bear' | 'base') => {
+    (choice: OutlookScenarioChoice) => {
       setUiChoice(choice)
       tryPatchAccount(choice, 0)
     },
@@ -236,7 +243,7 @@ export function FidelityAccountScenarioPanel({
     (tab: ScenarioIntentTabId) => {
       setActiveTab(tab)
       if (tab === 'outlook') {
-        if (uiChoice === 'bull' || uiChoice === 'bear' || uiChoice === 'base') return
+        if (isOutlookScenarioChoice(uiChoice)) return
         setUiChoice('base')
         tryPatchAccount('base', 0)
       } else if (tab === 'custom') {
@@ -260,17 +267,9 @@ export function FidelityAccountScenarioPanel({
 
   const globalPct = (blended * 100).toFixed(1)
 
-  const outlookTiles = useMemo(
-    () => [
-      { choice: 'bear' as const, label: 'Bear', hint: 'Leans negative' },
-      { choice: 'base' as const, label: 'Normal', hint: 'Neutral' },
-      { choice: 'bull' as const, label: 'Bull', hint: 'Leans positive' },
-    ],
-    [],
-  )
+  const outlookTiles = OUTLOOK_SCENARIO_TILES
 
-  const outlookTabKey =
-    uiChoice === 'bull' || uiChoice === 'bear' || uiChoice === 'base' ? uiChoice : 'base'
+  const outlookTabKey = isOutlookScenarioChoice(uiChoice) ? uiChoice : 'base'
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (

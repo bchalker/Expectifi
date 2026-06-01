@@ -7,11 +7,18 @@
   transition: color 0.15s ease;
 }
 
+.holding-aggregate-hint__icon {
+  flex-shrink: 0;
+  color: currentColor;
+  transition: color 0.15s ease;
+}
+
 .holding-aggregate-hint--expanded {
   color: var(--color-amber-dark);
 }
 
-.holding-aggregate-hint__icon {
-  flex-shrink: 0;
-  color: currentColor;
+@media (prefers-reduced-motion: reduce) {
+  .holding-aggregate-hint {
+    transition: none;
+  }
 }

@@ -1,5 +1,7 @@
 import type { HoldingReturnRateSource } from '../lib/accountReturnScenario'
 import {
+  ACCOUNT_SCENARIO_SUBLABEL,
+  HOLDING_ROW_SCENARIO_SUBLABEL,
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
@@ -23,57 +25,14 @@ export type PortfolioScenarioCellProps = {
   className?: string
 }
 
-function portfolioScenarioCellAccentClass(choice: ScenarioUiChoice | 'outline'): string {
-  if (choice === 'outline') return 'portfolio-scenario-cell--accent-outline'
-  if (choice === 'base') return 'portfolio-scenario-cell--accent-normal'
-  return `portfolio-scenario-cell--accent-${choice}`
-}
-
-function portfolioScenarioCellStateClass(
-  layout: 'account' | 'holding',
-  variant: HoldingsScenarioTriggerVariant,
-  common: ScenarioUiChoice | typeof SCENARIO_MIXED,
-  inheritAccent: ScenarioUiChoice | null | undefined,
-  rateSource: HoldingReturnRateSource | undefined,
-): string {
-  if (layout === 'holding') {
-    if (variant === 'badge' || rateSource === 'custom') {
-      return ''
-    }
-    if (
-      rateSource === 'account' &&
-      inheritAccent &&
-      inheritAccent !== 'default'
-    ) {
-      return portfolioScenarioCellAccentClass(inheritAccent)
-    }
-    return ''
-  }
-
-  if (variant === 'badge' && common !== 'default' && common !== SCENARIO_MIXED) {
-    return portfolioScenarioCellAccentClass(common)
-  }
-  if (variant === 'outline') {
-    if (inheritAccent && inheritAccent !== 'default') {
-      return portfolioScenarioCellAccentClass(inheritAccent)
-    }
-    if (layout === 'account' && common === 'default') {
-      return ''
-    }
-    return portfolioScenarioCellAccentClass('outline')
-  }
-  return ''
-}
-
 /**
- * Shared scenario column for portfolio account rows and holding rows —
- * same trigger, width, and per-scenario left accent as the account header.
+ * Shared scenario column for portfolio account rows and holding rows.
  */
 export function PortfolioScenarioCell({
   label,
   common,
   variant,
-  inheritAccent = null,
+  inheritAccent: _inheritAccent = null,
   rateSource,
   rowActive,
   onOpen,
@@ -83,23 +42,15 @@ export function PortfolioScenarioCell({
   const inheritsAccountScenario =
     layout === 'holding' && rateSource === 'account' && variant === 'outline'
   const holdingScenarioActive = layout === 'holding' && variant === 'badge'
-  const stateClass = portfolioScenarioCellStateClass(
-    layout,
-    variant,
-    common,
-    inheritAccent,
-    rateSource,
-  )
 
   return (
     <div
       className={[
         'portfolio-scenario-cell',
         `portfolio-scenario-cell--${layout}`,
-        layout === 'account' && variant === 'badge' && 'portfolio-scenario-cell--account-active',
+        layout === 'account' && rowActive && 'portfolio-scenario-cell--account-active',
         inheritsAccountScenario && 'portfolio-scenario-cell--inherits-account',
         holdingScenarioActive && 'portfolio-scenario-cell--holding-active',
-        stateClass,
         className,
       ]
         .filter(Boolean)
@@ -112,6 +63,9 @@ export function PortfolioScenarioCell({
         inheritAccent={null}
         rowActive={rowActive}
         onOpen={onOpen}
+        sublabel={
+          layout === 'holding' ? HOLDING_ROW_SCENARIO_SUBLABEL : ACCOUNT_SCENARIO_SUBLABEL
+        }
         className="portfolio-scenario-cell__trigger"
       />
     </div>

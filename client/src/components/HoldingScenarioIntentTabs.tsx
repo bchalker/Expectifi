@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
 import { AppButton } from './ui/AppButton'
+import type { OutlookScenarioChoice } from '../lib/holdingScenarioApply'
 import './HoldingScenarioIntentTabs.scss'
 
-type OutlookChoice = 'bull' | 'bear' | 'base'
-
-type OutlookTile = { choice: OutlookChoice; label: string; hint: string }
+type OutlookTile = { choice: OutlookScenarioChoice; label: string; hint: string }
 
 /** Bear / Normal / Bull segmented control (no HeroUI Tabs.Indicator). */
 export function OutlookMarketTabs({
@@ -12,8 +11,8 @@ export function OutlookMarketTabs({
   onChange,
   tiles,
 }: {
-  value: OutlookChoice
-  onChange: (choice: OutlookChoice) => void
+  value: OutlookScenarioChoice
+  onChange: (choice: OutlookScenarioChoice) => void
   tiles: readonly OutlookTile[]
 }) {
   return (
@@ -47,9 +46,9 @@ export type HoldingScenarioIntentTabsProps = {
   globalPct: string
   onUseGlobalRate: () => void
   globalUsingActive?: boolean
-  outlookValue: OutlookChoice
-  onOutlookChange: (choice: OutlookChoice) => void
-  outlookTiles: readonly { choice: OutlookChoice; label: string; hint: string }[]
+  outlookValue: OutlookScenarioChoice
+  onOutlookChange: (choice: OutlookScenarioChoice) => void
+  outlookTiles: readonly { choice: OutlookScenarioChoice; label: string; hint: string }[]
   draftPct: string
   onDraftPctChange: (value: string) => void
   onDraftPctBlur: () => void

@@ -11,7 +11,39 @@ import {
   type PositionScenarioId,
 } from './positionReturnModel'
 
-export type ScenarioUiChoice = 'default' | 'bull' | 'base' | 'bear' | 'custom' | 'peryear'
+export type ScenarioUiChoice =
+  | 'default'
+  | 'very_bear'
+  | 'bear'
+  | 'base'
+  | 'bull'
+  | 'very_bull'
+  | 'custom'
+  | 'peryear'
+
+export type OutlookScenarioChoice = 'very_bear' | 'bear' | 'base' | 'bull' | 'very_bull'
+
+export const OUTLOOK_SCENARIO_TILES: readonly {
+  choice: OutlookScenarioChoice
+  label: string
+  hint: string
+}[] = [
+  { choice: 'very_bear', label: 'Very Bearish', hint: 'Strong negative' },
+  { choice: 'bear', label: 'Bearish', hint: 'Leans negative' },
+  { choice: 'base', label: 'Normal', hint: 'Neutral' },
+  { choice: 'bull', label: 'Bullish', hint: 'Leans positive' },
+  { choice: 'very_bull', label: 'Very Bullish', hint: 'Strong positive' },
+]
+
+export function isOutlookScenarioChoice(choice: ScenarioUiChoice): choice is OutlookScenarioChoice {
+  return (
+    choice === 'very_bear' ||
+    choice === 'bear' ||
+    choice === 'base' ||
+    choice === 'bull' ||
+    choice === 'very_bull'
+  )
+}
 
 export const SCENARIO_MIXED = '_mixed' as const
 
@@ -31,7 +63,9 @@ export function inferScenarioUiChoice(m: PositionReturnModel, blended: number, h
   if (m.returnMode === 'peryear') return 'peryear'
   if (m.returnMode === 'scenario' && m.scenario) {
     if (ratesMatchScenario(m.scenario, rates, h)) {
+      if (m.scenario === 'very_bull') return 'very_bull'
       if (m.scenario === 'bull') return 'bull'
+      if (m.scenario === 'very_bear') return 'very_bear'
       if (m.scenario === 'bear') return 'bear'
       return 'base'
     }
@@ -105,10 +139,14 @@ export function applyScenarioUiChoice(
         yearlyReturns: Array.from({ length: h }, () => blended),
         returnOverride: false,
       }
+    case 'very_bull':
+      return applyScenarioToModel(m, 'very_bull', h)
     case 'bull':
       return applyScenarioToModel(m, 'bull', h)
     case 'base':
       return applyScenarioToModel(m, 'base', h)
+    case 'very_bear':
+      return applyScenarioToModel(m, 'very_bear', h)
     case 'bear':
       return applyScenarioToModel(m, 'bear', h)
     case 'custom': {
@@ -147,7 +185,16 @@ export function mergePatchPositionModelsIntoInputs(
 }
 
 /** Outline trigger when a holding has no per-position scenario override. */
-export const HOLDING_SCENARIO_PLACEHOLDER_LABEL = 'Add a Scenario?'
+export const HOLDING_SCENARIO_PLACEHOLDER_LABEL = 'Holding Scenario'
+
+/** Outline trigger when an account has no return scenario. */
+export const ACCOUNT_SCENARIO_PLACEHOLDER_LABEL = 'Account Scenario'
+
+/** Badge sublabel on account summary rows. */
+export const ACCOUNT_SCENARIO_SUBLABEL = 'Account Scenario'
+
+/** Badge sublabel on per-holding scenario controls. */
+export const HOLDING_ROW_SCENARIO_SUBLABEL = 'This holding'
 
 export function scenarioColumnShortLabel(
   choice: ScenarioUiChoice | typeof SCENARIO_MIXED,
@@ -157,16 +204,23 @@ export function scenarioColumnShortLabel(
   switch (choice) {
     case 'default':
       return 'Scenario'
+    case 'very_bull':
+      return 'Very Bullish'
     case 'bull':
-      return 'Bull'
+      return 'Bullish'
+    case 'very_bear':
+      return 'Very Bearish'
     case 'bear':
-      return 'Bear'
+      return 'Bearish'
     case 'base':
       return 'Normal'
     case 'custom':
-      return customPctDecimal != null && Number.isFinite(customPctDecimal)
-        ? `Custom ${decimalToPct(customPctDecimal).toFixed(1)}%`
-        : 'Custom %'
+      if (customPctDecimal != null && Number.isFinite(customPctDecimal)) {
+        const pct = decimalToPct(customPctDecimal)
+        const pctStr = Number.isInteger(pct) ? String(pct) : pct.toFixed(1)
+        return `Custom ${pctStr}%`
+      }
+      return 'Custom %'
     case 'peryear':
       return 'Per Year'
   }

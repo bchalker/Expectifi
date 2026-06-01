@@ -15,42 +15,6 @@
   display: none;
 }
 
-.holdings-symbol-list__subheader {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.55rem var(--layout-app-inner-pad, 10px) 0.65rem;
-  border-bottom: 1px solid var(--border);
-  box-sizing: border-box;
-}
-
-.holdings-symbol-list__subheader-holdings {
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--text-faint);
-}
-
-.holdings-symbol-list__subheader-count {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
-  font-weight: 900;
-}
-
-.holdings-symbol-list__subheader-override {
-  position: relative;
-  flex-shrink: 0;
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 400;
-  line-height: 1.2;
-  color: var(--text-faint);
-  text-align: center;
-}
-
 /* Column corner — faint 1px diagonal in top 15px at holdings / scenario split */
 
 
@@ -79,7 +43,7 @@
 }
 
 @for $i from 1 through 48 {
-  .tax-treatment-disclosure[open] .holdings-symbol-list > .holdings-symbol-group:nth-child(#{$i + 1}) {
+  .tax-treatment-disclosure[open] .holdings-symbol-list > .holdings-symbol-group:nth-child(#{$i}) {
     animation-delay: calc(var(--holdings-stagger-base) + var(--holdings-stagger-step) * #{$i - 1});
   }
 }
@@ -105,28 +69,9 @@
   margin-inline: 0;
 }
 
-@media (min-width: 621px) {
-  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
-    width: 100%;
-    --holdings-scenario-col-w: calc(19.5ch + 30px);
-  }
-
-  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) .holdings-symbol-list__subheader {
-    padding: 0.65rem 1rem 0.75rem;
-  }
-
-  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) .holdings-symbol-list__subheader-override {
-    flex: 0 0 var(--holdings-scenario-col-w);
-    max-width: var(--holdings-scenario-col-w);
-  }
-
-  .holdings-breakdown-block {
-    // padding: 0 0 0.5rem calc(var(--layout-app-inner-pad, 10px) + 1.5rem);
-  }
-
-  .holdings-breakdown-block .holdings-breakdown-row__inner {
-    margin-inline: 0;
-  }
+.holdings-symbol-table {
+  width: 100%;
+  --holdings-scenario-col-w: calc(19.5ch + 30px);
 }
 
 @media (max-width: 620px) {

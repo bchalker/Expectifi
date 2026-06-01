@@ -130,6 +130,19 @@ export function AppLeftNav({
 
   return (
     <>
+      <button
+        type="button"
+        className={[
+          "app-left-nav__backdrop",
+          mobileOpen ? "app-left-nav__backdrop--open" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-hidden={!mobileOpen}
+        tabIndex={mobileOpen ? 0 : -1}
+        aria-label="Close menu"
+        onClick={closeMobile}
+      />
       <nav
         id="app-left-nav-panel"
         className={[
@@ -284,45 +297,45 @@ export function AppLeftNav({
                     Offline
                   </span>
                 ) : null}
-                <div className="app-left-nav__auth-row">
-                  <button
-                    type="button"
-                    className="app-left-nav__auth-link"
-                    onClick={onOpenSignIn}
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    type="button"
-                    className="app-left-nav__auth-cta"
-                    onClick={onOpenRegister}
-                  >
-                    Create account
-                  </button>
+                <div className="app-left-nav__auth-toolbar">
+                  <div className="app-left-nav__auth-row">
+                    <button
+                      type="button"
+                      className="app-left-nav__auth-link"
+                      onClick={onOpenSignIn}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      className="app-left-nav__auth-cta"
+                      onClick={onOpenRegister}
+                    >
+                      Create account
+                    </button>
+                  </div>
+                  {showSettings ? (
+                    <button
+                      type="button"
+                      className={[
+                        "app-left-nav__settings-btn",
+                        drawer === "config"
+                          ? "app-left-nav__settings-btn--active"
+                          : "",
+                        slideIn ? "app-left-nav__settings-btn--slide-in" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      aria-label="Configure: planning and Social Security"
+                      aria-expanded={drawer === "config"}
+                      aria-controls="drawer"
+                      onClick={openConfig}
+                    >
+                      <IconAdjustments size={18} stroke={1.65} aria-hidden />
+                    </button>
+                  ) : null}
                 </div>
               </div>
-              {showSettings ? (
-                <div className="app-left-nav__footer-actions">
-                  <button
-                    type="button"
-                    className={[
-                      "app-left-nav__settings-btn",
-                      drawer === "config"
-                        ? "app-left-nav__settings-btn--active"
-                        : "",
-                      slideIn ? "app-left-nav__settings-btn--slide-in" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    aria-label="Configure: planning and Social Security"
-                    aria-expanded={drawer === "config"}
-                    aria-controls="drawer"
-                    onClick={openConfig}
-                  >
-                    <IconAdjustments size={18} stroke={1.65} aria-hidden />
-                  </button>
-                </div>
-              ) : null}
             </>
           ) : null}
         </div>

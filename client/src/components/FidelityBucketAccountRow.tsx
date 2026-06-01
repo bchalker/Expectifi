@@ -27,7 +27,7 @@ type Props = {
   scenario?: FidelityBucketAccountScenarioProps | null
 }
 
-/** Portfolio account summary row: badge, name + tax subtext, total, scenario, expand chevron. */
+/** Portfolio account summary row: order count, name + tax subtext, total, scenario, chevron. */
 export function FidelityBucketAccountRow({
   label,
   subtext = null,
@@ -37,38 +37,43 @@ export function FidelityBucketAccountRow({
   badgeOrder = null,
   scenario = null,
 }: Props) {
-  const showActions = Boolean(scenario) || showViewHoldings
+  const showScenario = Boolean(scenario)
 
   return (
     <div className="portfolio-bucket-account-row">
-      {badgeOrder != null ? (
-        <span className="portfolio-bucket-account-row__order-badge-wrap">
-          <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
-        </span>
-      ) : null}
-      <div className="portfolio-bucket-account-row__main">
-        <div className="portfolio-bucket-account-row__identity">
-          <span className="portfolio-bucket-account-row__name">{label}</span>
-          {subtext ? <span className="portfolio-bucket-account-row__subtext">{subtext}</span> : null}
-          <BucketTotalTrend trend={trend} className="portfolio-bucket-account-row__trend" />
+      <div className="portfolio-bucket-account-row__summary-row">
+        <div className="portfolio-bucket-account-row__content">
+          <div className="portfolio-bucket-account-row__main">
+            {badgeOrder != null ? (
+              <span className="portfolio-bucket-account-row__order-badge-wrap">
+                <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
+              </span>
+            ) : null}
+            <div className="portfolio-bucket-account-row__identity">
+              <span className="portfolio-bucket-account-row__name">{label}</span>
+              {subtext ? (
+                <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
+              ) : null}
+              <BucketTotalTrend trend={trend} className="portfolio-bucket-account-row__trend" />
+            </div>
+          </div>
+          <div className="portfolio-bucket-account-row__values">
+            <span className="portfolio-bucket-account-row__total">{total}</span>
+          </div>
         </div>
-        <span className="portfolio-bucket-account-row__total">{total}</span>
+        {showScenario || showViewHoldings ? (
+          <div className="portfolio-bucket-account-row__actions">
+            {showScenario ? (
+              <div className="portfolio-bucket-account-row__scenario">
+                <PortfolioScenarioCell layout="account" {...scenario!} />
+              </div>
+            ) : null}
+            {showViewHoldings ? (
+              <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" />
+            ) : null}
+          </div>
+        ) : null}
       </div>
-      {showActions ? (
-        <div
-          className={[
-            'portfolio-bucket-account-row__actions',
-            scenario && !showViewHoldings ? 'portfolio-bucket-account-row__actions--no-chevron' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {scenario ? (
-            <PortfolioScenarioCell layout="account" {...scenario} />
-          ) : null}
-          {showViewHoldings ? <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" /> : null}
-        </div>
-      ) : null}
     </div>
   )
 }

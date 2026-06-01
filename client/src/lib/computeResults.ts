@@ -47,6 +47,14 @@ export type DrawerName =
 
 import type { AccountReturnScenario, AccountScenarioBucketId } from './accountReturnScenario'
 import type { IncomeYieldPreset } from './incomePresets'
+import type { MarketScenarioId } from './marketScenario'
+import {
+  fvAnnuityWithYearlyRates,
+  fvWithYearlyRates,
+  marketScenarioIsBase,
+  normalizeMarketScenarioId,
+  resolveGlobalMarketScenarioRates,
+} from './marketScenario'
 
 export type { IncomeYieldPreset } from './incomePresets'
 export { DEFAULT_INCOME_PRESETS, normalizeIncomePresets } from './incomePresets'
@@ -97,8 +105,10 @@ export type CalculatorInputs = {
   incomePresets: IncomeYieldPreset[]
   /** Per-import-line return models (Fidelity dashboard sliders); merged with CSV at compute time. */
   positionReturnModels: PositionReturnModel[]
-  /** Account-bucket return overrides (brokerage, pre-tax, Roth, HSA); below holding, above global sliders. */
+  /** Account-bucket return overrides (brokerage, pre-tax, Roth, HSA); below holding, above global market scenario. */
   accountReturnScenarios?: Partial<Record<AccountScenarioBucketId, AccountReturnScenario>>
+  /** Macro market scenario applied to all buckets/holdings unless overridden. */
+  marketScenario?: MarketScenarioId
   /** Welcome/settings residence — drives USD / GBP / EUR display. */
   residenceCountry: string
 }
@@ -242,6 +252,14 @@ export function computeResults(
   const rothRatio = retBal > 0 ? rothBal / retBal : DEFAULT_ROTH_RATIO
   const hsaRatio = retBal > 0 ? hsaBal / retBal : DEFAULT_HSA_RATIO
 
+  const marketScenario = normalizeMarketScenarioId(inputs.marketScenario)
+  const useMarketScenario = !marketScenarioIsBase(marketScenario)
+
+  const retirementBuckets = ['trad401k', 'se401k', 'roth', 'hsa'] as const
+  const hasFidelityRetirementModeling = retirementBuckets.some((b) => positionsForRetirementBucket(fidelityRows, b).length > 0)
+  const brokerageRows = positionsForBrokerage(fidelityRows)
+  const hasFidelityBrokerageModeling = brokerageRows.length > 0
+
   const legacyGrowth = calcPortfolioAtRetirement({
     retBal,
     save,
@@ -250,18 +268,29 @@ export function computeResults(
     brkRate,
     years: yearsToRetirement,
   })
-  const { savingsFV, brkFV: legacyBrkFV } = legacyGrowth
-  let brkFV = legacyBrkFV
+  let savingsFV = legacyGrowth.savingsFV
+  if (useMarketScenario) {
+    const retGlobalRates = resolveGlobalMarketScenarioRates(marketScenario, retRate, yearsToRetirement)
+    savingsFV = fvAnnuityWithYearlyRates(save, retGlobalRates)
+  }
+  let brkFV = legacyGrowth.brkFV
   const growthRetFvLegacy = legacyGrowth.retFV
   let retFV = growthRetFvLegacy
+  if (useMarketScenario && !(retirementInputMode === 'fidelity' && hasFidelityRetirementModeling)) {
+    const retGlobalRates = resolveGlobalMarketScenarioRates(marketScenario, retRate, yearsToRetirement)
+    retFV = fvWithYearlyRates(retBal, retGlobalRates) + savingsFV
+  } else if (useMarketScenario) {
+    retFV = growthRetFvLegacy - legacyGrowth.savingsFV + savingsFV
+  }
+  if (useMarketScenario && !(brokerageInputMode === 'fidelity' && hasFidelityBrokerageModeling)) {
+    const brkGlobalRates = resolveGlobalMarketScenarioRates(marketScenario, brkRate, yearsToRetirement)
+    brkFV = fvWithYearlyRates(brkBal, brkGlobalRates)
+  }
   let growthRetFvCompareDelta = 0
   let customPositionReturnCount = 0
   let retirementGrowthSliderShowsFallback = false
   let mergedRetirementPositionModels: PositionReturnModel[] = []
   let mergedBrokeragePositionModels: PositionReturnModel[] = []
-
-  const retirementBuckets = ['trad401k', 'se401k', 'roth', 'hsa'] as const
-  const hasFidelityRetirementModeling = retirementBuckets.some((b) => positionsForRetirementBucket(fidelityRows, b).length > 0)
 
   const retirementCalendarYear = calendarRetirementYear(currentAge, targetRetirementAge)
 
@@ -291,7 +320,13 @@ export function computeResults(
           holdingReturnRateSource(m, accountScenario, retRate) === 'account'
         ) {
           individualCv += m.currentValue
-          const projectionModel = projectionModelForHolding(m, accountScenario, retRate, yearsToRetirement)
+          const projectionModel = projectionModelForHolding(
+            m,
+            accountScenario,
+            retRate,
+            yearsToRetirement,
+            marketScenario,
+          )
           individualFvSum += projectPositionAtRetirement(
             projectionModel,
             retirementCalendarYear,
@@ -303,12 +338,17 @@ export function computeResults(
 
     retirementGrowthSliderShowsFallback = customPositionReturnCount > 0
     const lumpPrincipal = Math.max(0, retBal - individualCv)
-    retFV = individualFvSum + fv(lumpPrincipal, retRate, yearsToRetirement) + savingsFV
+    const lumpFv = useMarketScenario
+      ? fvWithYearlyRates(
+          lumpPrincipal,
+          resolveGlobalMarketScenarioRates(marketScenario, retRate, yearsToRetirement),
+        )
+      : fv(lumpPrincipal, retRate, yearsToRetirement)
+    retFV = individualFvSum + lumpFv + savingsFV
     growthRetFvCompareDelta = retFV - growthRetFvLegacy
   }
 
-  const brokerageRows = positionsForBrokerage(fidelityRows)
-  if (brokerageInputMode === 'fidelity' && brokerageRows.length > 0) {
+  if (brokerageInputMode === 'fidelity' && hasFidelityBrokerageModeling) {
     let workingBrk = normalizePositionReturnModels(
       inputs.positionReturnModels ?? [],
       yearsToRetirement,
@@ -327,7 +367,13 @@ export function computeResults(
         holdingReturnRateSource(m, brokerageAccountScenario, brkRate) === 'account'
       ) {
         brkIndividualCv += m.currentValue
-        const projectionModel = projectionModelForHolding(m, brokerageAccountScenario, brkRate, yearsToRetirement)
+        const projectionModel = projectionModelForHolding(
+          m,
+          brokerageAccountScenario,
+          brkRate,
+          yearsToRetirement,
+          marketScenario,
+        )
         brkIndividualFv += projectPositionAtRetirement(
           projectionModel,
           retirementCalendarYear,
@@ -336,7 +382,13 @@ export function computeResults(
       }
     }
     const brkLumpBal = Math.max(0, brkBal - brkIndividualCv)
-    brkFV = brkIndividualFv + fv(brkLumpBal, brkRate, yearsToRetirement)
+    const brkLumpFv = useMarketScenario
+      ? fvWithYearlyRates(
+          brkLumpBal,
+          resolveGlobalMarketScenarioRates(marketScenario, brkRate, yearsToRetirement),
+        )
+      : fv(brkLumpBal, brkRate, yearsToRetirement)
+    brkFV = brkIndividualFv + brkLumpFv
   }
 
   let totalFV = retFV + brkFV
@@ -617,3 +669,121 @@ function computeStrategyBlock({
 }
 
 export type ComputedSnapshot = ReturnType<typeof computeResults>
+
+export function applyPortfolioDeltaAtRetirement(
+  snapshot: ComputedSnapshot,
+  params: {
+    portfolioDelta: number
+    incomeMode: boolean
+    incYield: number
+    incGrowth: number
+    wdRate: number
+    wdInflation: number
+    monthlyIncomeGoal: number
+    targetRetirementAge: number
+    ssIncluded: boolean
+    retireRegions: RetireRegionPick[]
+  },
+): ComputedSnapshot {
+  const {
+    portfolioDelta,
+    incomeMode,
+    incYield,
+    incGrowth,
+    wdRate,
+    wdInflation,
+    monthlyIncomeGoal,
+    targetRetirementAge,
+    ssIncluded,
+    retireRegions,
+  } = params
+
+  if (portfolioDelta === 0 || !snapshot.hasPortfolioBalances) return snapshot
+
+  const adjustedTotalFV = Math.max(0, snapshot.totalFV + portfolioDelta)
+  const scale = snapshot.totalFV > 0 ? adjustedTotalFV / snapshot.totalFV : 0
+  const adjustedRetFV = snapshot.retFV * scale
+  const adjustedBrkFV = snapshot.brkFV * scale
+
+  const annWd = incomeMode
+    ? adjustedTotalFV * incYield
+    : adjustedTotalFV * wdRate * (1 + wdInflation)
+  const monPort = annWd / 12
+  const totalSS = snapshot.totalSS
+  const grossMon = monPort + totalSS
+
+  const portSum = adjustedRetFV + adjustedBrkFV
+  const retWdAnn = portSum > 0 ? annWd * (adjustedRetFV / portSum) : 0
+  const brkWdAnn = portSum > 0 ? annWd * (adjustedBrkFV / portSum) : 0
+  const taxDetail = calcTaxDetailed(
+    retWdAnn * snapshot.tradRatio,
+    retWdAnn * snapshot.rothRatio,
+    retWdAnn * snapshot.hsaRatio,
+    brkWdAnn,
+    totalSS,
+  )
+  const annTax = taxDetail.totalTax
+  const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
+  const incomeGoalProgressPct =
+    monthlyIncomeGoal > 0
+      ? Math.min(100, Math.round((afterTaxMon / monthlyIncomeGoal) * 1000) / 10)
+      : null
+
+  const growthGoalProgressPct =
+    snapshot.growthGoal > 0
+      ? Math.min(100, Math.round((adjustedTotalFV / snapshot.growthGoal) * 1000) / 10)
+      : snapshot.growthGoalProgressPct
+
+  const incomePhase = incomeMode
+    ? calcIncomePhase({
+        totalFV: adjustedTotalFV,
+        incYield,
+        incGrowth,
+        wdRate,
+        wdInflation,
+        totalSSMonthly: totalSS,
+        ssIncluded,
+        retirementStartAge: targetRetirementAge,
+      })
+    : snapshot.incomePhase
+
+  const grossAnnualUsd = annWd + totalSS * 12
+  const usTax = calcTax(
+    annWd,
+    totalSS,
+    adjustedRetFV,
+    adjustedBrkFV,
+    snapshot.tradRatio,
+    snapshot.rothRatio,
+    snapshot.hsaRatio,
+  )
+  const retireRegionComparisons = computeAllRetireRegionComparisons(
+    retireRegions,
+    grossAnnualUsd,
+    usTax,
+  )
+  const primaryRegion = retireRegionComparisons[0]
+
+  return {
+    ...snapshot,
+    retFV: adjustedRetFV,
+    brkFV: adjustedBrkFV,
+    totalFV: adjustedTotalFV,
+    annWd,
+    monPort,
+    grossMon,
+    taxDetail,
+    annTax,
+    afterTaxMon,
+    incomeGoalProgressPct,
+    growthGoalProgressPct,
+    incomePhase,
+    survivorCallout: buildSurvivorCallout(monPort, snapshot.ssBreakdown),
+    usTax,
+    retireRegionComparisons,
+    itAnn: grossAnnualUsd,
+    itTax: primaryRegion ? primaryRegion.localTaxMonthlyUsd * 12 : 0,
+    itAfter: primaryRegion?.afterTaxMonthlyUsd ?? 0,
+    itSurplus: primaryRegion?.surplusMonthlyUsd ?? 0,
+  }
+}
