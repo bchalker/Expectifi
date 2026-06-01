@@ -7,10 +7,8 @@ import type { DrawerName } from '../lib/computeResults'
 import {
   APP_NAV_DRAWER_ITEMS,
   APP_NAV_ROUTE_ITEMS,
-  isSnapshotNavAvailable,
   navItemUnavailableReason,
   navRequirementsMet,
-  SNAPSHOT_NAV_REQUIRES,
   type NavPanelContext,
 } from '../lib/appNavDrawers'
 import './Header.scss'
@@ -38,11 +36,9 @@ type HeaderAppProps = HeaderAuthProps & {
   onBrandClick?: () => void
   targetRetirementAge: number
   drawer: DrawerName | null
-  snapshotOpen: boolean
   mobileNavOpen: boolean
   onMobileNavToggle: () => void
   onOpenDrawer: (name: DrawerName) => void
-  onSnapshotToggle: () => void
   onOpenConfig: () => void
   welcomeDone?: boolean
   navContext: NavPanelContext
@@ -123,8 +119,7 @@ function HeaderAuthTail({
   if (!loading && user?.email && isApp && onOpenConfig && showSettings) {
     return (
       <div className="header__tail">
-        <button
-          type="button"
+        <div
           className={[
             'header__account-group',
             drawer === 'config' ? 'header__account-group--active' : '',
@@ -132,10 +127,6 @@ function HeaderAuthTail({
           ]
             .filter(Boolean)
             .join(' ')}
-          aria-label="Open configure: planning and Social Security"
-          aria-expanded={drawer === 'config'}
-          aria-controls="drawer"
-          onClick={onOpenConfig}
         >
           <span className="header__account-group__profile">
             {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
@@ -145,10 +136,24 @@ function HeaderAuthTail({
               </span>
             ) : null}
           </span>
-          <span className="header__account-group__icons" aria-hidden>
-            <IconAdjustments size={18} stroke={1.65} />
-          </span>
-        </button>
+          <button
+            type="button"
+            className={[
+              'header__settings',
+              'header__settings--signed-in',
+              drawer === 'config' ? 'header__settings--active' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            aria-label="My Plans: planning and Social Security"
+            aria-expanded={drawer === 'config'}
+            aria-controls="drawer"
+            onClick={onOpenConfig}
+          >
+            <span className="header__settings-label">My Plans</span>
+            <IconAdjustments size={18} stroke={1.65} aria-hidden />
+          </button>
+        </div>
       </div>
     )
   }
@@ -213,34 +218,13 @@ function HeaderMarketingNav({
 
 function HeaderAppNav({
   drawer,
-  snapshotOpen,
   navContext,
   onOpenDrawer,
-  onSnapshotToggle,
-}: Pick<HeaderAppProps, 'drawer' | 'snapshotOpen' | 'navContext' | 'onOpenDrawer' | 'onSnapshotToggle'>) {
+}: Pick<HeaderAppProps, 'drawer' | 'navContext' | 'onOpenDrawer'>) {
   const path = useAppPath()
-  const snapshotAvailable = isSnapshotNavAvailable(navContext)
-  const snapshotUnavailableReason = navItemUnavailableReason(SNAPSHOT_NAV_REQUIRES, navContext)
 
   return (
     <nav className="header__nav header__nav--app" aria-label="Panels and tools">
-      {snapshotAvailable ? (
-        <button
-          id="app-top-chrome-snapshot-btn"
-          type="button"
-          className={`header__link${snapshotOpen && snapshotAvailable ? ' header__link--active' : ''}`}
-          aria-expanded={snapshotOpen && snapshotAvailable}
-          aria-controls="strip-snapshot-panel"
-          aria-disabled={!snapshotAvailable}
-          title={!snapshotAvailable ? (snapshotUnavailableReason ?? undefined) : undefined}
-          onClick={() => {
-            if (!snapshotAvailable) return
-            onSnapshotToggle()
-          }}
-        >
-          Snapshot
-        </button>
-      ) : null}
       {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
         const available = navRequirementsMet(requires, navContext)
         const unavailableReason = navItemUnavailableReason(requires, navContext)
@@ -314,10 +298,8 @@ export function Header(props: HeaderProps) {
         {!onboardingChrome && variant === 'app' ? (
           <HeaderAppNav
             drawer={props.drawer}
-            snapshotOpen={props.snapshotOpen}
             navContext={props.navContext}
             onOpenDrawer={props.onOpenDrawer}
-            onSnapshotToggle={props.onSnapshotToggle}
           />
         ) : null}
 

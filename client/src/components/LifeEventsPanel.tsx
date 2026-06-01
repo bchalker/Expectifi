@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { useCallback, useMemo, useState } from "react";
 import {
   blendedGrowthRate,
   type LifeEventsProjectionData,
@@ -38,46 +37,6 @@ let nextEventInstanceId = 1;
 function createEventInstanceId(): string {
   nextEventInstanceId += 1;
   return `life-event-${nextEventInstanceId}`;
-}
-
-const EVENT_PICKER_GROUPS: { label: string; configIds: string[] }[] = [
-  {
-    label: "One-time expenses",
-    configIds: ["buy-car-cash", "home-renovation", "medical-expense"],
-  },
-  {
-    label: "Pay off debt",
-    configIds: ["pay-off-mortgage"],
-  },
-  {
-    label: "Ongoing commitments",
-    configIds: ["tuition-support", "charitable-giving", "church-tithe"],
-  },
-];
-
-function buildInitialEventState(
-  config: LifeEventConfig,
-  currentYear: number,
-  retirementYear: number,
-): LifeEventState {
-  return {
-    id: createEventInstanceId(),
-    configId: config.id,
-    amount: config.defaultAmount,
-    year: config.defaultYear(currentYear, retirementYear),
-    duration: config.defaultDuration,
-    isActive: false,
-    isExpanded: false,
-  };
-}
-
-function duplicateLabel(
-  config: LifeEventConfig,
-  eventStates: LifeEventState[],
-): string | undefined {
-  const sameTypeCount = eventStates.filter((s) => s.configId === config.id).length;
-  if (sameTypeCount === 0) return undefined;
-  return `${config.displayLabel} (${sameTypeCount + 1})`;
 }
 
 function lifeEventCountWord(count: number): string {
@@ -270,33 +229,6 @@ export function LifeEventsPanel({
     ];
   });
 
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!pickerOpen) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!pickerRef.current?.contains(event.target as Node)) {
-        setPickerOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [pickerOpen]);
-
-  const pickerGroups = useMemo(
-    () =>
-      EVENT_PICKER_GROUPS.map((group) => ({
-        label: group.label,
-        configs: group.configIds
-          .map((id) => growthEventConfigs.find((c) => c.id === id))
-          .filter((c): c is LifeEventConfig => c != null),
-      })).filter((group) => group.configs.length > 0),
-    [],
-  );
-
   const updateEventState = useCallback(
     (id: string, updates: Partial<LifeEventState>) => {
       setEventStates((prev) =>
@@ -336,21 +268,6 @@ export function LifeEventsPanel({
       });
     },
     [onEventActiveChange],
-  );
-
-  const handleAddEvent = useCallback(
-    (config: LifeEventConfig) => {
-      setEventStates((prev) => [
-        ...prev,
-        {
-          ...buildInitialEventState(config, currentYear, retirementYear),
-          label: duplicateLabel(config, prev),
-          isExpanded: true,
-        },
-      ]);
-      setPickerOpen(false);
-    },
-    [currentYear, retirementYear],
   );
 
   const panelClassName = ["life-events-panel", className]
@@ -453,49 +370,7 @@ export function LifeEventsPanel({
               );
             })}
           </div>
-
-          {pickerGroups.length > 0 ? (
-            <div className="life-events-panel__add" ref={pickerRef}>
-              <button
-                type="button"
-                className="life-events-panel__add-btn"
-                aria-expanded={pickerOpen}
-                aria-haspopup="listbox"
-                onClick={() => setPickerOpen((open) => !open)}
-              >
-                <IconPlus size={16} stroke={1.5} aria-hidden />
-                Add a life event
-              </button>
-              {pickerOpen ? (
-                <div className="life-events-panel__add-menu" role="listbox">
-                  {pickerGroups.map((group) => (
-                    <div key={group.label} className="life-events-panel__add-group">
-                      <p className="life-events-panel__add-group-label">{group.label}</p>
-                      <ul className="life-events-panel__add-group-list">
-                        {group.configs.map((config) => (
-                          <li key={config.id} role="none">
-                            <button
-                              type="button"
-                              className="life-events-panel__add-item"
-                              role="option"
-                              onClick={() => handleAddEvent(config)}
-                            >
-                              <span
-                                className="life-events-panel__add-item-dot"
-                                style={{ backgroundColor: config.color }}
-                                aria-hidden
-                              />
-                              {config.canonicalLabel}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          {/* Add-a-life-event picker temporarily disabled — preset cards only. */}
         </>
       )}
     </section>

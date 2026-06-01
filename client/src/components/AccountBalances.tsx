@@ -78,6 +78,7 @@ import { FidelityCsvImport } from './FidelityCsvImport'
 import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
 import { MarketScenarioSelector } from './MarketScenarioSelector'
 import { MarketScenarioContextRow } from './MarketScenarioContextRow'
+import { TaxBreakdownHeaderButton } from './TaxBreakdownHeaderButton'
 import { AccountBalancesManageMenu } from './AccountBalancesManageMenu'
 import {
   marketScenarioIsBase,
@@ -1937,6 +1938,7 @@ export function AccountBalances({
                   />
                 ) : null}
                 {headerManageMenu}
+                <TaxBreakdownHeaderButton />
               </div>
             </div>
           ) : null}

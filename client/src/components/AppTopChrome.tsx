@@ -5,11 +5,9 @@ import type { NavPanelContext } from '../lib/appNavDrawers'
 type Props = {
   targetRetirementAge: number
   drawer: DrawerName | null
-  snapshotOpen: boolean
   mobileNavOpen: boolean
   onMobileNavToggle: () => void
   onOpenDrawer: (name: DrawerName) => void
-  onSnapshotToggle: () => void
   onOpenConfig: () => void
   onOpenSignIn: () => void
   onOpenRegister: () => void

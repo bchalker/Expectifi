@@ -8,6 +8,7 @@ export const EXPECTIFI_ACCOUNTS_KEY = 'expectifi/accounts-v1'
 export const EXPECTIFI_SESSION_KEY = 'expectifi/session-v1'
 export const EXPECTIFI_LIFE_PLANS_KEY = 'expectifi/life-plans-v1'
 export const EXPECTIFI_LIFE_DISMISSED_KEY = 'expectifi/life-dismissed-suggestions-v1'
+export const EXPECTIFI_TAX_SUMMARY_PANEL_OPEN_KEY = 'expectifi/tax-summary-panel-open-v1'
 
 /** Legacy keys migrated once into expectifi/* */
 export const LEGACY_APP_STATE_KEY = 'retirement-calculator/app-state-v1'

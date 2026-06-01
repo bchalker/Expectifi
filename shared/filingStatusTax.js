@@ -1,6 +1,6 @@
 /** @typedef {'single' | 'marriedFilingJointly' | 'marriedFilingSeparately' | 'headOfHousehold'} FilingStatusId */
 
-export const DEFAULT_FILING_STATUS = 'marriedFilingJointly';
+export const DEFAULT_FILING_STATUS = 'single';
 
 /** @type {Record<FilingStatusId, number>} */
 export const STD_DEDUCTIONS_2024 = {

@@ -15,6 +15,7 @@ export const TEMP_HIDDEN_NAV_DRAWERS = new Set<DrawerName>([
   'scenarios',
   'sstiming',
   'taxfree',
+  'strategy',
 ])
 
 const ALL_NAV_DRAWER_ITEMS: readonly {
@@ -46,7 +47,7 @@ export const APP_NAV_ROUTE_ITEMS: readonly {
   },
 ]
 
-export const SNAPSHOT_NAV_REQUIRES: readonly NavPanelRequirement[] = ['portfolio']
+export const TAX_SUMMARY_NAV_REQUIRES: readonly NavPanelRequirement[] = ['portfolio']
 
 export function navRequirementsMet(
   requires: readonly NavPanelRequirement[],
@@ -90,6 +91,6 @@ export function isRouteNavAvailable(id: AppNavRouteId, ctx: NavPanelContext): bo
   return item ? navRequirementsMet(item.requires, ctx) : false
 }
 
-export function isSnapshotNavAvailable(ctx: NavPanelContext): boolean {
-  return navRequirementsMet(SNAPSHOT_NAV_REQUIRES, ctx)
+export function isTaxSummaryPanelAvailable(ctx: NavPanelContext): boolean {
+  return navRequirementsMet(TAX_SUMMARY_NAV_REQUIRES, ctx)
 }

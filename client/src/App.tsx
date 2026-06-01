@@ -6,7 +6,7 @@ import { UserLocaleProvider } from './context/UserLocaleContext'
 import { AccountBalances } from './components/AccountBalances'
 import { LifeEventsPanel, type LifeEventActiveImpact } from './components/LifeEventsPanel'
 import { DrawerPanel } from './components/DrawerPanel'
-import { SnapshotPanel } from './components/SnapshotPanel'
+import { TaxSummaryCard } from './components/TaxSummaryCard'
 import { Header } from './components/Header'
 import { AppLeftNav } from './components/AppLeftNav'
 import { StripHeader } from './components/StripHeader'
@@ -82,7 +82,7 @@ import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
 import { useAppPath } from './hooks/useAppPath'
 import { useAppHeaderStackHeight } from './hooks/useAppHeaderStackHeight'
 import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp, replaceAppPath } from './lib/appPaths'
-import { isDrawerNavAvailable, isSnapshotNavAvailable, type NavPanelContext } from './lib/appNavDrawers'
+import { isDrawerNavAvailable, isTaxSummaryPanelAvailable, type NavPanelContext } from './lib/appNavDrawers'
 import { AppPrivacyTrust } from './components/AppPrivacyTrust'
 import { WhereToRetire } from './pages/WhereToRetire'
 
@@ -120,7 +120,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const [inputs, setInputsState] = useState<CalculatorInputs>(() => hydration.inputs)
   const [ui, setUiState] = useState<CalculatorUi>(() => hydration.ui)
   const [phase, setPhase] = useState<'growth' | 'income'>(() => hydration.phase)
-  const [accordionOpen, setAccordionOpen] = useState(false)
   const [drawer, setDrawer] = useState<DrawerName | null>(null)
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>('profile')
   const [activePreset, setActivePreset] = useState<string | null>(() => hydration.activePreset)
@@ -536,18 +535,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
   }, [welcomeDone, c.hasPortfolioBalances])
 
   useEffect(() => {
-    if (!isSnapshotNavAvailable(navContext) && accordionOpen) {
-      setAccordionOpen(false)
-    }
     if (drawer != null && drawer !== 'config' && !isDrawerNavAvailable(drawer, navContext)) {
       setDrawer(null)
     }
-  }, [navContext, accordionOpen, drawer])
+  }, [navContext, drawer])
 
   useEffect(() => {
     if (!isWhereToRetire) return
     setDrawer(null)
-    setAccordionOpen(false)
     setMobileNavOpen(false)
     setPhase('income')
   }, [isWhereToRetire])
@@ -615,32 +610,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
           variant="app"
           onBrandClick={() => {
             setDrawer(null)
-            setAccordionOpen(false)
             setMobileNavOpen(false)
             navigateApp(APP_DASHBOARD_PATH)
           }}
           targetRetirementAge={inputs.targetRetirementAge}
           drawer={drawer}
-          snapshotOpen={accordionOpen}
           mobileNavOpen={mobileNavOpen}
           onMobileNavToggle={() => setMobileNavOpen((o) => !o)}
           onOpenDrawer={(name) => {
             if (!isDrawerNavAvailable(name, navContext)) return
-            setAccordionOpen(false)
             setDrawer(name)
-          }}
-          onSnapshotToggle={() => {
-            if (!isSnapshotNavAvailable(navContext)) return
-            setAccordionOpen((a) => {
-              const next = !a
-              if (next) setDrawer(null)
-              return next
-            })
           }}
           navContext={navContext}
           onOpenConfig={() => {
             setMobileNavOpen(false)
-            setAccordionOpen(false)
             setConfigTab(user ? 'profile' : 'plan')
             setDrawer('config')
           }}
@@ -651,24 +634,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <AppLeftNav
           targetRetirementAge={inputs.targetRetirementAge}
           drawer={drawer}
-          snapshotOpen={accordionOpen}
           mobileOpen={mobileNavOpen}
           onMobileOpenChange={setMobileNavOpen}
           onOpenDrawer={(name) => {
             if (!isDrawerNavAvailable(name, navContext)) return
-            setAccordionOpen(false)
             setDrawer(name)
           }}
-          onSnapshotToggle={() => {
-            if (!isSnapshotNavAvailable(navContext)) return
-            setAccordionOpen((a) => {
-              const next = !a
-              if (next) setDrawer(null)
-              return next
-            })
-          }}
           onOpenConfig={() => {
-            setAccordionOpen(false)
             setConfigTab(user ? 'profile' : 'plan')
             setDrawer('config')
           }}
@@ -707,7 +679,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
             ssTimingConfigured={welcomeDone && ssTimingConfigured}
             onOpenSsConfig={() => {
               setMobileNavOpen(false)
-              setAccordionOpen(false)
               setConfigTab('social-security')
               setDrawer('config')
             }}
@@ -814,7 +785,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
       />
 
       <div className="main">
-        <div className="section">
+        <div
+          className={[
+            'section',
+            isTaxSummaryPanelAvailable(navContext) && 'section--tax-summary',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <div
             className={
               c.hasPortfolioBalances
@@ -824,64 +802,69 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 : undefined
             }
           >
-            <AccountBalances
-              readOnly
+            <TaxSummaryCard
               c={cDisplay}
-              phase={phase}
-              uiSsIncluded={ui.ssIncluded}
-              onOpenSocialSecurity={() => {
-                setMobileNavOpen(false)
-                setAccordionOpen(false)
-                setConfigTab('social-security')
-                setDrawer('config')
-              }}
-              inputs={inputs}
-              setInputs={setInputs}
-              onManualPortfolioPlanApplied={(plan) => {
-                setInputs(plan)
-                setPhase('growth')
-                const merged = { ...sessionRef.current.inputs, ...plan }
-                persistCalculatorSession({
-                  inputs: applyFidelityBalanceOverrides(merged),
-                  ui: sessionRef.current.ui,
-                  phase: 'growth',
-                  activePreset: sessionRef.current.activePreset,
-                })
-              }}
-              onBases={(b) => setInputsState((prev) => ({ ...prev, ...b }))}
-              balanceMode={balanceMode}
-              onBalanceModeChange={onBalanceModeChange}
-              fidelityImportRev={fidelityImportRev}
-              manualAccountsRev={manualAccountsRev}
-              onFidelityApplyBalances={onFidelityApplyBalances}
-              onFidelityImportApplied={onFidelityImportAppliedRetirement}
-              onClearImportedForManual={() => {
-                clearAllFidelityImportFromCard()
-                saveBalanceInputMode('manual')
-                saveBrokerageBalanceMode('manual')
-                setInputsState((prev) => ({
-                  ...prev,
-                  positionReturnModels: filterAllFidelityPositionReturnModels(
-                    prev.positionReturnModels,
-                  ),
-                }))
-                setFidelityImportRev((n) => n + 1)
-              }}
-              onRemoveRetirementAccounts={onRemoveRetirementAccounts}
-              openReturnEditorRequest={returnEditorOpen}
-              onReturnEditorOpenHandled={onReturnEditorOpenHandled}
-              mergeBrokerageInRetirementCard
-              brkBal={inputs.brkBal}
-              brkRate={inputs.brkRate}
-              brokerageMode={brokerageMode}
-              onOpenSignIn={openAuthSignIn}
-              onOpenUpgradeCsv={openCsvUpgrade}
-              openImportRequest={openImportRequest || undefined}
-              onImportOpenHandled={() => setOpenImportRequest(0)}
-              onManualAccountsCommitted={() => setManualAccountsRev((n) => n + 1)}
-            />
+              showTaxSummary={isTaxSummaryPanelAvailable(navContext)}
+              filingStatus={inputs.filingStatus}
+              onFilingStatusChange={(filingStatus) => setInputs({ filingStatus })}
+            >
+              <AccountBalances
+                readOnly
+                c={cDisplay}
+                phase={phase}
+                uiSsIncluded={ui.ssIncluded}
+                onOpenSocialSecurity={() => {
+                  setMobileNavOpen(false)
+                  setConfigTab('social-security')
+                  setDrawer('config')
+                }}
+                inputs={inputs}
+                setInputs={setInputs}
+                onManualPortfolioPlanApplied={(plan) => {
+                  setInputs(plan)
+                  setPhase('growth')
+                  const merged = { ...sessionRef.current.inputs, ...plan }
+                  persistCalculatorSession({
+                    inputs: applyFidelityBalanceOverrides(merged),
+                    ui: sessionRef.current.ui,
+                    phase: 'growth',
+                    activePreset: sessionRef.current.activePreset,
+                  })
+                }}
+                onBases={(b) => setInputsState((prev) => ({ ...prev, ...b }))}
+                balanceMode={balanceMode}
+                onBalanceModeChange={onBalanceModeChange}
+                fidelityImportRev={fidelityImportRev}
+                manualAccountsRev={manualAccountsRev}
+                onFidelityApplyBalances={onFidelityApplyBalances}
+                onFidelityImportApplied={onFidelityImportAppliedRetirement}
+                onClearImportedForManual={() => {
+                  clearAllFidelityImportFromCard()
+                  saveBalanceInputMode('manual')
+                  saveBrokerageBalanceMode('manual')
+                  setInputsState((prev) => ({
+                    ...prev,
+                    positionReturnModels: filterAllFidelityPositionReturnModels(
+                      prev.positionReturnModels,
+                    ),
+                  }))
+                  setFidelityImportRev((n) => n + 1)
+                }}
+                onRemoveRetirementAccounts={onRemoveRetirementAccounts}
+                openReturnEditorRequest={returnEditorOpen}
+                onReturnEditorOpenHandled={onReturnEditorOpenHandled}
+                mergeBrokerageInRetirementCard
+                brkBal={inputs.brkBal}
+                brkRate={inputs.brkRate}
+                brokerageMode={brokerageMode}
+                onOpenSignIn={openAuthSignIn}
+                onOpenUpgradeCsv={openCsvUpgrade}
+                openImportRequest={openImportRequest || undefined}
+                onImportOpenHandled={() => setOpenImportRequest(0)}
+                onManualAccountsCommitted={() => setManualAccountsRev((n) => n + 1)}
+              />
+            </TaxSummaryCard>
           </div>
-
         </div>
 
         {c.hasPortfolioBalances && phase === 'growth' ? <hr className="divider" /> : null}
@@ -906,18 +889,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
       </div>
       <AppPrivacyTrust dividerAbove={isWhereToRetire} />
 
-      <SnapshotPanel
-        open={accordionOpen}
-        onClose={() => setAccordionOpen(false)}
-        c={cDisplay}
-        incomeMode={ui.incomeMode}
-        incYield={inputs.incYield}
-        incGrowth={inputs.incGrowth}
-        wdRate={inputs.wdRate}
-        brkBal={inputs.brkBal}
-        ssIncluded={ui.ssIncluded}
-        targetRetirementAge={inputs.targetRetirementAge}
-      />
       <DrawerPanel
         drawer={drawer}
         onClose={() => setDrawer(null)}

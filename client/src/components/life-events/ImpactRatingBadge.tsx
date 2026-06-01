@@ -36,6 +36,9 @@ export default function ImpactRatingBadge({ rating, isOutflow }: ImpactRatingBad
 
   return (
     <span className="impact-rating-badge" aria-label={`${rating} impact`}>
+      <span className="impact-rating-badge__label" style={{ color: activeColor }}>
+        {rating}
+      </span>
       <span className="impact-rating-badge__bars" aria-hidden>
         {BAR_HEIGHTS.map((height, index) => (
           <span
@@ -50,9 +53,6 @@ export default function ImpactRatingBadge({ rating, isOutflow }: ImpactRatingBad
             }}
           />
         ))}
-      </span>
-      <span className="impact-rating-badge__label" style={{ color: activeColor }}>
-        {rating}
       </span>
     </span>
   )

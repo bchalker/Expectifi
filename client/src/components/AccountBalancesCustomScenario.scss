@@ -5,10 +5,10 @@
   justify-content: space-between;
   gap: 0.5rem 0.75rem;
   width: 100%;
-  margin-bottom: 1rem;
-  padding-bottom: 6px;
+  margin-bottom: 0rem;
+  padding-bottom: 12px;
   margin-top: 2rem;
-  border-bottom: 1px solid var(--border);
+  // border-bottom: 1px solid var(--border);
 }
 
 .account-balances-header-row__title-block {
@@ -73,7 +73,7 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 1rem;
   flex-shrink: 0;
   margin-left: auto;
 }

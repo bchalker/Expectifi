@@ -2,8 +2,9 @@
   border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }
 
-/* Account header + holdings list — single white card per bucket */
+/* Account header + holdings list — single card per bucket */
 .tax-treatment-disclosure.portfolio-account-group {
+  --portfolio-account-row-bg-closed: var(--color-surface-sky-blue-muted);
   --portfolio-scenario-trigger-min: 8rem;
   --portfolio-scenario-col-pad-x: 0.75rem;
   --portfolio-account-chevron-pad-end: 1rem;
@@ -23,8 +24,8 @@
   border-bottom: none;
   // border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 0px 0px 1px;
+  background: var(--portfolio-account-row-bg-closed);
+  box-shadow: none;
   overflow: hidden;
   padding: 0;
   transition:
@@ -44,6 +45,7 @@
 .tax-treatment-disclosure.portfolio-account-group[open] {
   margin-top: 1rem;
   margin-bottom: 1rem;
+  background: var(--surface);
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
@@ -65,8 +67,12 @@
 }
 
 .tax-treatment-disclosure.portfolio-account-group > summary {
-  background: #fff;
+  background: var(--portfolio-account-row-bg-closed);
   box-shadow: none;
+}
+
+.tax-treatment-disclosure.portfolio-account-group[open] > summary {
+  background: var(--surface);
 }
 
 .tax-treatment-disclosure > summary.edit-row {
@@ -143,7 +149,7 @@
 .tax-treatment-disclosure.portfolio-account-group .tax-treatment-disclosure__body--import-style {
   padding: 0;
   // border-top: 1px solid var(--border);
-  background: #fff;
+  background: var(--surface);
 }
 
 .portfolio-account-group--inline {
@@ -174,8 +180,8 @@
   > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
   position: relative;
   z-index: 1;
-  background: #f9f9f9;
-border-bottom: 1px dashed var(--border);
+  background: var(--surface);
+  border-bottom: 1px dashed var(--border);
 }
 
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {

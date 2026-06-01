@@ -4,10 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import {
   APP_NAV_DRAWER_ITEMS,
   APP_NAV_ROUTE_ITEMS,
-  isSnapshotNavAvailable,
   navItemUnavailableReason,
   navRequirementsMet,
-  SNAPSHOT_NAV_REQUIRES,
   type NavPanelContext,
 } from "../lib/appNavDrawers";
 import { useAppPath } from "../hooks/useAppPath";
@@ -27,11 +25,9 @@ function readIsDesktopNav(): boolean {
 type Props = {
   targetRetirementAge: number;
   drawer: DrawerName | null;
-  snapshotOpen: boolean;
   mobileOpen: boolean;
   onMobileOpenChange: (open: boolean) => void;
   onOpenDrawer: (name: DrawerName) => void;
-  onSnapshotToggle: () => void;
   onOpenConfig: () => void;
   onOpenSignIn: () => void;
   onOpenRegister: () => void;
@@ -42,22 +38,15 @@ type Props = {
 export function AppLeftNav({
   targetRetirementAge,
   drawer,
-  snapshotOpen,
   mobileOpen,
   onMobileOpenChange,
   onOpenDrawer,
-  onSnapshotToggle,
   onOpenConfig,
   onOpenSignIn,
   onOpenRegister,
   navContext,
   welcomeDone = true,
 }: Props) {
-  const snapshotAvailable = isSnapshotNavAvailable(navContext);
-  const snapshotUnavailableReason = navItemUnavailableReason(
-    SNAPSHOT_NAV_REQUIRES,
-    navContext,
-  );
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone);
   const accountLabel = user
@@ -91,11 +80,6 @@ export function AppLeftNav({
     [onOpenDrawer, closeMobile],
   );
 
-  const toggleSnapshot = useCallback(() => {
-    onSnapshotToggle();
-    closeMobile();
-  }, [onSnapshotToggle, closeMobile]);
-
   const openConfig = useCallback(() => {
     onOpenConfig();
     closeMobile();
@@ -119,7 +103,6 @@ export function AppLeftNav({
   if (isDesktop) return null;
 
   const hasPanelItems =
-    snapshotAvailable ||
     APP_NAV_ROUTE_ITEMS.some(({ requires }) =>
       navRequirementsMet(requires, navContext),
     ) ||
@@ -155,30 +138,6 @@ export function AppLeftNav({
         aria-label="Panels and tools"
       >
         <div className="app-left-nav__scroll">
-          {snapshotAvailable ? (
-            <>
-              <button
-                id="app-left-nav-snapshot-btn"
-                type="button"
-                className={`app-left-nav__item${snapshotOpen && snapshotAvailable ? " app-left-nav__item--active" : ""}`}
-                aria-expanded={snapshotOpen && snapshotAvailable}
-                aria-controls="strip-snapshot-panel"
-                aria-disabled={!snapshotAvailable}
-                title={
-                  !snapshotAvailable
-                    ? (snapshotUnavailableReason ?? undefined)
-                    : undefined
-                }
-                onClick={() => {
-                  if (!snapshotAvailable) return;
-                  toggleSnapshot();
-                }}
-              >
-                <span className="app-left-nav__item-label">Snapshot</span>
-              </button>
-              <div className="app-left-nav__rule" aria-hidden />
-            </>
-          ) : null}
           {APP_NAV_ROUTE_ITEMS.map(
             ({ id, path: routePath, label, requires }) => {
               const available = navRequirementsMet(requires, navContext);

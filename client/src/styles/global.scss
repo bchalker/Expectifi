@@ -142,6 +142,9 @@
   --color-background-info: var(--blue6);
   --color-text-info: var(--blue3);
   --color-border-info: var(--blue5);
+  /* Light sky blue — account row chrome, tax panel header */
+  --color-surface-sky-blue: #ddf0ff;
+  --color-surface-sky-blue-muted: color-mix(in srgb, var(--color-surface-sky-blue) 68%, white);
   --color-background-success: var(--green6);
   --color-background-warning: var(--amber6);
   --color-background-secondary: var(--surface2);
@@ -256,6 +259,9 @@
   --layout-app-gutter: max(1rem, env(safe-area-inset-left, 0px));
   --layout-app-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
   --layout-app-inner-pad: 2rem;
+  /* Tax Summary: side panel width + viewport split (desktop panel above split) */
+  --layout-snapshot-panel-width: 18.75rem;
+  --layout-snapshot-split-min: 1280px;
   /* Centered column width (viewport minus side gutters) — header + main share this */
   --layout-app-boundary: min(
     var(--layout-app-max),
