@@ -69,7 +69,7 @@ import {
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
 } from './lib/userPrefs'
-import { normalizeMarketScenarioId } from './lib/marketScenario'
+import { normalizeMarketScenarioId, resolveMarketScenarioActive } from './lib/marketScenario'
 import { manualAccountsForBrowserSave } from './lib/manualAccountEntries'
 import {
   loadUserProfile,
@@ -711,6 +711,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
             }}
             hasPortfolioBalances={dashboardHasPortfolio}
             marketScenarioId={normalizeMarketScenarioId(inputs.marketScenario)}
+            marketScenarioActive={resolveMarketScenarioActive(inputs)}
           />
         ) : null}
         </div>

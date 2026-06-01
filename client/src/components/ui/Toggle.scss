@@ -75,3 +75,8 @@
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
+
+.ui-toggle--switch-only {
+  min-height: 0;
+  gap: 0;
+}

@@ -77,7 +77,11 @@ import { FidelityHoldingScenarioPanel } from './FidelityHoldingScenarioPopout'
 import { MarketScenarioSelector } from './MarketScenarioSelector'
 import { MarketScenarioContextRow } from './MarketScenarioContextRow'
 import { AccountBalancesManageMenu } from './AccountBalancesManageMenu'
-import { marketScenarioIsBase, normalizeMarketScenarioId } from '../lib/marketScenario'
+import {
+  marketScenarioIsBase,
+  normalizeMarketScenarioId,
+  resolveMarketScenarioActive,
+} from '../lib/marketScenario'
 import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideExamples'
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
@@ -237,6 +241,7 @@ export function AccountBalances({
   const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false)
   const retirementAge = inputs?.targetRetirementAge ?? c.targetRetirementAge
   const marketScenarioId = normalizeMarketScenarioId(inputs?.marketScenario)
+  const marketScenarioActive = inputs ? resolveMarketScenarioActive(inputs) : false
   const showMarketScenarioContext = Boolean(
     inputs && !marketScenarioIsBase(marketScenarioId) && c.hasPortfolioBalances,
   )
@@ -1818,7 +1823,10 @@ export function AccountBalances({
                 {inputs && setInputs ? (
                   <MarketScenarioSelector
                     value={normalizeMarketScenarioId(inputs.marketScenario)}
-                    onChange={(marketScenario) => setInputs({ marketScenario })}
+                    onChange={(marketScenario) => {
+                      const id = normalizeMarketScenarioId(marketScenario)
+                      setInputs({ marketScenario: id })
+                    }}
                   />
                 ) : null}
                 {headerManageMenu}
@@ -1837,6 +1845,8 @@ export function AccountBalances({
               {showMarketScenarioContext && inputs && setInputs ? (
                 <MarketScenarioContextRow
                   scenarioId={marketScenarioId}
+                  marketScenarioActive={marketScenarioActive}
+                  onMarketScenarioActiveChange={(active) => setInputs({ marketScenarioActive: active })}
                   c={c}
                   inputs={inputs}
                   balanceModes={{ retirement: balanceMode, brokerage: brokerageMode ?? 'manual' }}

@@ -47,6 +47,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   positionReturnModels: [],
   accountReturnScenarios: {},
   marketScenario: 'base',
+  marketScenarioActive: false,
   residenceCountry: '',
 }
 

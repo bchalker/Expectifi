@@ -220,6 +220,8 @@ type Props = {
   /** When false, header shows $0 — no manual balances or imported positions to project from. */
   hasPortfolioBalances: boolean;
   marketScenarioId?: MarketScenarioId;
+  /** When false, hide scenario pill and hero uses Base projections. */
+  marketScenarioActive?: boolean;
 };
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -241,13 +243,17 @@ export function SubHeader({
   onOpenSsConfig,
   hasPortfolioBalances,
   marketScenarioId = "base",
+  marketScenarioActive = false,
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon);
   const totalFvAnim = useAnimatedScalar(totalFV);
 
   const incomePhase = phase === "income";
   const showMarketScenarioPill =
-    !incomePhase && hasPortfolioBalances && !marketScenarioIsBase(marketScenarioId);
+    !incomePhase &&
+    hasPortfolioBalances &&
+    !marketScenarioIsBase(marketScenarioId) &&
+    marketScenarioActive;
   const marketScenarioLabel = showMarketScenarioPill
     ? getMarketScenarioDefinition(marketScenarioId).label
     : "";

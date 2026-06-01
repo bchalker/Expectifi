@@ -22,6 +22,8 @@ export type MarketScenarioSparklineProps = {
   deltaLabel: string
   deltaTone: MarketScenarioSparklineDeltaTone
   retirementYear: number
+  /** When false, hide the vs. Base delta callout (e.g. scenario paused). */
+  showDeltaHeadline?: boolean
   /** Changes trigger chart entrance + Recharts path animation. */
   animationKey?: MarketScenarioId | string
   className?: string
@@ -86,6 +88,7 @@ export function MarketScenarioSparkline({
   deltaLabel,
   deltaTone,
   retirementYear,
+  showDeltaHeadline = true,
   animationKey = 'default',
   className = '',
 }: MarketScenarioSparklineProps) {
@@ -132,17 +135,19 @@ export function MarketScenarioSparkline({
             .filter(Boolean)
             .join(' ')}
         >
-          <div
-            className={[
-              'market-scenario-sparkline__delta-headline',
-              `market-scenario-sparkline__delta-headline--${deltaTone}`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <p className="market-scenario-sparkline__delta-value">{deltaLabel}</p>
-            <p className="market-scenario-sparkline__delta-caption">vs. Base by {endpointYear}</p>
-          </div>
+          {showDeltaHeadline ? (
+            <div
+              className={[
+                'market-scenario-sparkline__delta-headline',
+                `market-scenario-sparkline__delta-headline--${deltaTone}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <p className="market-scenario-sparkline__delta-value">{deltaLabel}</p>
+              <p className="market-scenario-sparkline__delta-caption">vs. Base by {endpointYear}</p>
+            </div>
+          ) : null}
 
           <ResponsiveContainer
             className="market-scenario-sparkline__responsive"

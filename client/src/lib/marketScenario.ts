@@ -151,6 +151,29 @@ export function marketScenarioIsBase(scenarioId: MarketScenarioId | undefined): 
   return normalizeMarketScenarioId(scenarioId) === DEFAULT_MARKET_SCENARIO_ID
 }
 
+export type MarketScenarioInputState = {
+  marketScenario?: MarketScenarioId
+  /** When true, projections use the selected scenario; otherwise Base. Default false. */
+  marketScenarioActive?: boolean
+}
+
+/** UI + compute: non-Base scenarios apply only when explicitly enabled (`true`). */
+export function resolveMarketScenarioActive(inputs: MarketScenarioInputState): boolean {
+  const id = normalizeMarketScenarioId(inputs.marketScenario)
+  if (marketScenarioIsBase(id)) return false
+  return inputs.marketScenarioActive === true
+}
+
+/** Whether the selected macro scenario affects projections (non-Base and toggle on). */
+export function isMarketScenarioApplied(inputs: MarketScenarioInputState): boolean {
+  return resolveMarketScenarioActive(inputs)
+}
+
+/** Scenario id used in compute — Base when inactive or Base is selected. */
+export function effectiveMarketScenarioId(inputs: MarketScenarioInputState): MarketScenarioId {
+  return isMarketScenarioApplied(inputs) ? normalizeMarketScenarioId(inputs.marketScenario) : 'base'
+}
+
 /** One-line modifier summary for the dashboard context row. */
 export function marketScenarioModifierSummary(scenarioId: MarketScenarioId): string {
   const def = getMarketScenarioDefinition(scenarioId)

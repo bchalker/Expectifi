@@ -51,8 +51,8 @@ import type { MarketScenarioId } from './marketScenario'
 import {
   fvAnnuityWithYearlyRates,
   fvWithYearlyRates,
+  effectiveMarketScenarioId,
   marketScenarioIsBase,
-  normalizeMarketScenarioId,
   resolveGlobalMarketScenarioRates,
 } from './marketScenario'
 
@@ -109,6 +109,8 @@ export type CalculatorInputs = {
   accountReturnScenarios?: Partial<Record<AccountScenarioBucketId, AccountReturnScenario>>
   /** Macro market scenario applied to all buckets/holdings unless overridden. */
   marketScenario?: MarketScenarioId
+  /** When false, projections use Base while `marketScenario` selection is kept. */
+  marketScenarioActive?: boolean
   /** Welcome/settings residence — drives USD / GBP / EUR display. */
   residenceCountry: string
 }
@@ -252,7 +254,7 @@ export function computeResults(
   const rothRatio = retBal > 0 ? rothBal / retBal : DEFAULT_ROTH_RATIO
   const hsaRatio = retBal > 0 ? hsaBal / retBal : DEFAULT_HSA_RATIO
 
-  const marketScenario = normalizeMarketScenarioId(inputs.marketScenario)
+  const marketScenario = effectiveMarketScenarioId(inputs)
   const useMarketScenario = !marketScenarioIsBase(marketScenario)
 
   const retirementBuckets = ['trad401k', 'se401k', 'roth', 'hsa'] as const

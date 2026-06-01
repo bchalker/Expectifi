@@ -1,14 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import type { ComputedSnapshot, CalculatorInputs, ComputeBalanceModes } from '../lib/computeResults'
 import { computeResults } from '../lib/computeResults'
 import {
   getMarketScenarioDefinition,
+  marketScenarioIsBase,
   marketScenarioModifierSummary,
   type MarketScenarioId,
 } from '../lib/marketScenario'
 import { buildMarketScenarioProjectionSeries } from '../lib/marketScenarioProjection'
 import { fmtK } from '../utils/format'
 import { AccordionSection } from './ui/AccordionSection'
+import { Toggle } from './ui/Toggle'
 import { MarketScenarioSparkline } from './MarketScenarioSparkline'
 import './FidelityHoldingScenarioPopout.scss'
 import './MarketScenarioContextRow.scss'
@@ -25,18 +27,23 @@ function ScenarioHeadingBlock({
   label,
   dotClass,
   titleAs = 'h3',
+  scenarioControls = null,
 }: {
   label: string
   dotClass: string
   titleAs?: 'h3' | 'span'
+  scenarioControls?: ReactNode
 }) {
   const TitleTag = titleAs
   return (
     <div className="market-scenario-context-row__heading-block">
       <span className="market-scenario-context-row__sublabel">{ACTIVE_MARKET_SCENARIO_SUBLABEL}</span>
-      <div className={`market-scenario-context-row__title-row ${dotClass}`}>
-        <span className="holdings-scenario-trigger__dot" aria-hidden />
-        <TitleTag className="market-scenario-context-row__title">{label}</TitleTag>
+      <div className="market-scenario-context-row__title-toolbar">
+        <div className={`market-scenario-context-row__title-row ${dotClass}`}>
+          <span className="holdings-scenario-trigger__dot" aria-hidden />
+          <TitleTag className="market-scenario-context-row__title">{label}</TitleTag>
+        </div>
+        {scenarioControls}
       </div>
     </div>
   )
@@ -50,6 +57,8 @@ function formatSignedDeltaK(delta: number): string {
 
 export type MarketScenarioContextRowProps = {
   scenarioId: MarketScenarioId
+  marketScenarioActive: boolean
+  onMarketScenarioActiveChange: (active: boolean) => void
   c: ComputedSnapshot
   inputs: CalculatorInputs
   balanceModes: ComputeBalanceModes
@@ -61,6 +70,8 @@ export type MarketScenarioContextRowProps = {
 
 export function MarketScenarioContextRow({
   scenarioId,
+  marketScenarioActive,
+  onMarketScenarioActiveChange,
   c,
   inputs,
   balanceModes,
@@ -71,6 +82,8 @@ export function MarketScenarioContextRow({
 }: MarketScenarioContextRowProps) {
   const def = getMarketScenarioDefinition(scenarioId)
   const dotClass = marketScenarioDotClass(scenarioId)
+  const isPaused = !marketScenarioActive
+  const showActiveToggle = !marketScenarioIsBase(scenarioId)
 
   const chartUi = useMemo(
     () => ({ incomeMode: false, ssIncluded: false, incomeSecurityTicker: null }),
@@ -83,7 +96,7 @@ export function MarketScenarioContextRow({
   )
 
   const baseSnapshot = useMemo(
-    () => computeResults({ ...inputs, marketScenario: 'base' }, chartUi, balanceModes),
+    () => computeResults({ ...inputs, marketScenario: 'base', marketScenarioActive: false }, chartUi, balanceModes),
     [balanceModes, chartUi, inputs],
   )
 
@@ -123,8 +136,20 @@ export function MarketScenarioContextRow({
   const delta = scenarioEnd - baseEnd
   const deltaTone = delta > 0 ? 'positive' : delta < 0 ? 'negative' : 'neutral'
 
-  const scenarioTitle = (
-    <ScenarioHeadingBlock label={def.label} dotClass={dotClass} titleAs="span" />
+  const scenarioControls = showActiveToggle ? (
+    <div className="market-scenario-context-row__controls">
+      <Toggle
+        className="market-scenario-context-row__active-toggle"
+        accessibilityLabel="Active market scenario"
+        value={marketScenarioActive}
+        onChange={onMarketScenarioActiveChange}
+      />
+      {isPaused ? <span className="market-scenario-context-row__paused-pill font-xs">Paused</span> : null}
+    </div>
+  ) : null
+
+  const headingBlock = (
+    <ScenarioHeadingBlock label={def.label} dotClass={dotClass} scenarioControls={scenarioControls} />
   )
 
   const copyBlock = (
@@ -147,10 +172,18 @@ export function MarketScenarioContextRow({
         deltaLabel={formatSignedDeltaK(delta)}
         deltaTone={deltaTone}
         retirementYear={series.years[series.years.length - 1] ?? retirementYear}
+        showDeltaHeadline={marketScenarioActive}
         animationKey={scenarioId}
       />
     </div>
   )
+
+  const bodyClassName = [
+    'market-scenario-context-row__body',
+    isPaused && 'market-scenario-context-row__body--paused',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const variantClass = `market-scenario-context-row--${scenarioId}`
 
@@ -167,17 +200,22 @@ export function MarketScenarioContextRow({
           .join(' ')}
         aria-label={`${def.label} market scenario context`}
       >
-        <div className="market-scenario-context-row__col market-scenario-context-row__col--copy">
-          <ScenarioHeadingBlock label={def.label} dotClass={dotClass} />
-          {copyBlock}
-        </div>
-        <div className="market-scenario-context-row__col market-scenario-context-row__col--chart">
-          {chartBlock}
+        <div className={bodyClassName}>
+          <div className="market-scenario-context-row__col market-scenario-context-row__col--copy">
+            {headingBlock}
+            {copyBlock}
+          </div>
+          <div className="market-scenario-context-row__col market-scenario-context-row__col--chart">
+            {chartBlock}
+          </div>
         </div>
       </section>
 
       <AccordionSection
-        title={scenarioTitle}
+        title={
+          <ScenarioHeadingBlock label={def.label} dotClass={dotClass} titleAs="span" />
+        }
+        triggerAside={scenarioControls}
         defaultOpen={false}
         className={[
           'market-scenario-context-row',
@@ -189,7 +227,14 @@ export function MarketScenarioContextRow({
           .join(' ')}
         panelClassName="market-scenario-context-row__accordion-panel"
       >
-        <div className="market-scenario-context-row__mobile-stack">
+        <div
+          className={[
+            'market-scenario-context-row__mobile-stack',
+            isPaused && 'market-scenario-context-row__body--paused',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {copyBlock}
           {chartBlock}
         </div>
