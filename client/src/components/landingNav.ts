@@ -1,4 +1,4 @@
-import { APP_PATHS, navigateApp } from '../lib/appPaths'
+import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp } from '../lib/appPaths'
 import {
   clearForceOnboardingSession,
   guestHasCompletedOnboarding,
@@ -12,5 +12,5 @@ export function landingNavigateOnboarding(): void {
   } else {
     markForceOnboardingSession()
   }
-  navigateApp(APP_PATHS.onboarding)
+  navigateApp(guestHasCompletedOnboarding() ? APP_DASHBOARD_PATH : APP_PATHS.onboarding)
 }

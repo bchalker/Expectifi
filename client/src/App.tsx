@@ -81,7 +81,7 @@ import {
 import type { ConfigDrawerTab } from './components/ConfigDrawerBody'
 import { useAppPath } from './hooks/useAppPath'
 import { useAppHeaderStackHeight } from './hooks/useAppHeaderStackHeight'
-import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp } from './lib/appPaths'
+import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp, replaceAppPath } from './lib/appPaths'
 import { isDrawerNavAvailable, isSnapshotNavAvailable, type NavPanelContext } from './lib/appNavDrawers'
 import { AppPrivacyTrust } from './components/AppPrivacyTrust'
 import { WhereToRetire } from './pages/WhereToRetire'
@@ -727,6 +727,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onComplete={() => {
             welcomeBlockedRef.current = false
             setShowWelcome(false)
+            replaceAppPath(APP_DASHBOARD_PATH)
           }}
           onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
           onAccountsSaved={() => {

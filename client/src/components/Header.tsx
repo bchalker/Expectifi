@@ -2,7 +2,7 @@ import { IconAdjustments, IconMenu2, IconX } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { useWelcomeSettingsReveal } from '../hooks/useWelcomeSettingsReveal'
 import { useAppPath } from '../hooks/useAppPath'
-import { APP_PATHS, navigateApp } from '../lib/appPaths'
+import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp } from '../lib/appPaths'
 import type { DrawerName } from '../lib/computeResults'
 import {
   APP_NAV_DRAWER_ITEMS,
@@ -71,7 +71,7 @@ function HeaderBrand({
   const handleClick = () => {
     if (user) {
       onBrandClick?.()
-      navigateApp(APP_PATHS.onboarding)
+      navigateApp(APP_DASHBOARD_PATH)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }

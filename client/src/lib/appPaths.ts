@@ -7,8 +7,8 @@ export const APP_PATHS = {
   whereToRetire: '/where-to-retire',
 } as const
 
-/** Signed-in calculator dashboard (portfolio, income, configure drawers). */
-export const APP_DASHBOARD_PATH = APP_PATHS.onboarding
+/** Calculator dashboard after onboarding (not the onboarding flow URL). */
+export const APP_DASHBOARD_PATH = APP_PATHS.home
 
 export type AppPath = (typeof APP_PATHS)[keyof typeof APP_PATHS]
 
@@ -19,9 +19,22 @@ export function normalizeAppPath(pathname: string): string {
   return base
 }
 
-export function navigateApp(path: string): void {
+function syncAppPath(path: string, mode: 'push' | 'replace'): void {
   const next = normalizeAppPath(path)
   if (normalizeAppPath(window.location.pathname) === next) return
-  window.history.pushState({}, '', next)
+  if (mode === 'replace') {
+    window.history.replaceState({}, '', next)
+  } else {
+    window.history.pushState({}, '', next)
+  }
   window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
+export function navigateApp(path: string): void {
+  syncAppPath(path, 'push')
+}
+
+/** Replace URL without adding history (e.g. leave /onboarding after finishing setup). */
+export function replaceAppPath(path: string): void {
+  syncAppPath(path, 'replace')
 }

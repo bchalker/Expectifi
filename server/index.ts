@@ -814,6 +814,7 @@ function installProductionClient(app: express.Application) {
   app.get('*', (req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next()
     if (req.path.startsWith('/api/') || req.path === '/api') return next()
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     res.sendFile(path.join(distDir, 'index.html'))
   })
   console.log(`[static] serving client from ${distDir}`)
