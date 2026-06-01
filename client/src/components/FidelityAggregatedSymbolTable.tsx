@@ -34,6 +34,7 @@ import {
 } from "../lib/mergedDashboardPositionModels";
 import type { PositionReturnModel } from "../lib/positionReturnModel";
 import { fmt } from "../utils/format";
+import { BrokerMonogramPill } from "./ui/BrokerMonogramPill";
 import { HoldingsSymbolCard } from "./HoldingsSymbolCard";
 import { Tooltip } from "./Tooltip";
 import "./FidelityAggregatedSymbolTable.scss";
@@ -219,6 +220,7 @@ function FidelityAggregatedHoldingGroup({
         >
           <div className="holdings-breakdown-row__inner">
             <div className="holdings-breakdown-row__account-cell">
+              <BrokerMonogramPill source={line.brokerSource} plaidConnected={line.brokerSource === 'plaid'} />
               <span className="holdings-breakdown-row__source" aria-hidden>
                 <IconArrowNarrowRightDashed size={12} stroke={1.15} />
               </span>

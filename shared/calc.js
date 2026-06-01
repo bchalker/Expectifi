@@ -1,4 +1,26 @@
 import { SS_62, SS_67, SS_70, SP_SS_62, SP_SS_67, SP_SS_70, YEARS } from './constants.js';
+import {
+  DEFAULT_FILING_STATUS,
+  ltcgTaxRate,
+  normalizeFilingStatus,
+  ordinaryIncomeTax,
+  ssTaxableFromProvisional,
+  standardDeductionForFilingStatus,
+} from './filingStatusTax.js';
+
+export {
+  DEFAULT_FILING_STATUS,
+  STD_DEDUCTIONS_2024,
+  FILING_STATUS_LABELS,
+  normalizeFilingStatus,
+  standardDeductionForFilingStatus,
+  ordinaryIncomeTax,
+  ssTaxableFromProvisional,
+  ltcgTaxRate,
+  rothConversionRoom,
+  ssProvisionalThresholds,
+  filingStatusLabel,
+} from './filingStatusTax.js';
 
 function fv(pv, r, n) {
   return pv * Math.pow(1 + r, n);
@@ -11,36 +33,24 @@ function fvAnnuity(pmt, r, n) {
 }
 
 /**
- * Calculate federal tax — MARRIED FILING JOINTLY
- * Ported verbatim from retirement-calculator.html (calcTaxDetailed).
+ * Federal tax estimate by filing status (2024 brackets / thresholds).
+ * @param {import('./filingStatusTax.js').FilingStatusId} [filingStatus]
  */
-export function calcTaxDetailed(tradWd, rothWd, hsaWd, brkWd, ssMon) {
+export function calcTaxDetailed(tradWd, rothWd, hsaWd, brkWd, ssMon, filingStatus = DEFAULT_FILING_STATUS) {
+  const status = normalizeFilingStatus(filingStatus);
   const ssAnn = ssMon * 12;
   const brkGain = brkWd * 0.60; // ~60% of brokerage withdrawal is taxable gain
 
-  // ── Step 1: SS provisional income (MFJ thresholds) ──
   const provisional = tradWd + brkGain + ssAnn * 0.5;
-  let ssTaxable = 0;
-  if (provisional > 44000) ssTaxable = ssAnn * 0.85;
-  else if (provisional > 32000) ssTaxable = ssAnn * 0.5;
+  const ssTaxable = ssTaxableFromProvisional(ssAnn, provisional, status);
 
-  // ── Step 2: Ordinary income tax (MFJ) ──
-  const stdDed = 29200; // MFJ 2024 standard deduction
+  const stdDed = standardDeductionForFilingStatus(status);
   const ordinaryGross = tradWd + ssTaxable;
   const ordinaryIncome = Math.max(0, ordinaryGross - stdDed);
 
-  let ordTax = 0;
-  if (ordinaryIncome > 731200) ordTax = 196669 + (ordinaryIncome - 731200) * 0.37;
-  else if (ordinaryIncome > 487450) ordTax = 111357 + (ordinaryIncome - 487450) * 0.35;
-  else if (ordinaryIncome > 383350) ordTax = 78221 + (ordinaryIncome - 383350) * 0.32;
-  else if (ordinaryIncome > 201050) ordTax = 34647 + (ordinaryIncome - 201050) * 0.24;
-  else if (ordinaryIncome > 94300) ordTax = 10294 + (ordinaryIncome - 94300) * 0.22;
-  else if (ordinaryIncome > 23200) ordTax = 2320 + (ordinaryIncome - 23200) * 0.12;
-  else ordTax = ordinaryIncome * 0.1;
-
-  // ── Step 3: Long-term capital gains tax (MFJ) ──
-  const ltcgRate = ordinaryIncome + brkGain > 94050 ? 0.15 : 0;
-  const ltcgTax = brkGain * ltcgRate;
+  const ordTax = ordinaryIncomeTax(ordinaryIncome, status);
+  const ltcgRateApplied = ltcgTaxRate(ordinaryIncome, brkGain, status);
+  const ltcgTax = brkGain * ltcgRateApplied;
 
   const totalTax = ordTax + ltcgTax;
   const grossIncome = tradWd + brkWd + ssAnn;
@@ -64,7 +74,16 @@ export function calcTaxDetailed(tradWd, rothWd, hsaWd, brkWd, ssMon) {
 }
 
 /** Wrapper from HTML — splits total withdrawal by portfolio weights before calcTaxDetailed. */
-export function calcTax(annWd, ssMon, retFV, brkFV, tradRatio, rothRatio, hsaRatio) {
+export function calcTax(
+  annWd,
+  ssMon,
+  retFV,
+  brkFV,
+  tradRatio,
+  rothRatio,
+  hsaRatio,
+  filingStatus = DEFAULT_FILING_STATUS,
+) {
   const totalFV = retFV + brkFV;
   if (totalFV <= 0) return 0;
   const retWdAnn = annWd * (retFV / totalFV);
@@ -75,6 +94,7 @@ export function calcTax(annWd, ssMon, retFV, brkFV, tradRatio, rothRatio, hsaRat
     retWdAnn * hsaRatio,
     brkWdAnn,
     ssMon,
+    filingStatus,
   ).totalTax;
 }
 

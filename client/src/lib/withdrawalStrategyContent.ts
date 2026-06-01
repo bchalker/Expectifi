@@ -2,13 +2,14 @@ import type { TaxConfig } from '../config/taxConfig'
 import {
   accountLabelForWithdrawalBucket,
   formatMarginalRatesSummary,
-  standardDeductionForFilingStatus,
   taxFreeWithdrawalLabels,
 } from '../config/taxConfig'
 import type { OnboardingRegionId } from './onboardingRegions'
 import type { ComputedSnapshot } from './computeResults'
+import { filingStatusDisplayLabel } from './filingStatus'
 import { fmt, fmtK, fmtMon } from '../utils/format'
 import { pensionConfigForLocale } from './localePensionConfig'
+import { standardDeductionForFilingStatus, type FilingStatusId } from 'shared'
 
 export type StrategyStep = {
   title: string
@@ -29,20 +30,20 @@ export function buildWithdrawalStrategySteps(
   locale: OnboardingRegionId,
   taxConfig: TaxConfig,
   c: ComputedSnapshot,
-  filingStatus: string,
+  filingStatus: FilingStatusId,
 ): StrategyStep[] {
   const s = c.strategy
   const pension = pensionConfigForLocale(locale)
   const brokerageLabel = accountLabelForWithdrawalBucket(taxConfig, 'brokerage') ?? 'Taxable account'
   const pretaxLabel = accountLabelForWithdrawalBucket(taxConfig, 'pretax') ?? 'Pre-tax retirement'
   const taxFreeLabels = taxFreeWithdrawalLabels(taxConfig)
-  const stdDed = standardDeductionForFilingStatus(taxConfig, filingStatus)
-  const stdDedFmt = stdDed != null ? fmt(stdDed) : null
+  const stdDed = standardDeductionForFilingStatus(filingStatus)
+  const stdDedFmt = fmt(stdDed)
+  const filingLabel = filingStatusDisplayLabel(filingStatus)
   const ratesSummary = formatMarginalRatesSummary(taxConfig)
+  const room12 = s.rothConvRoom
 
   if (locale === 'us') {
-    const bracket12top = 89_075
-    const room12 = Math.max(0, bracket12top - Math.max(0, s.tradWdAnn - (stdDed ?? 29_200)))
     const steps: StrategyStep[] = [
       {
         title: `Cover fixed expenses with ${pension.stepTitle} + ${brokerageLabel}`,
@@ -66,7 +67,7 @@ export function buildWithdrawalStrategySteps(
         title: `${pretaxLabel}: stay inside lower brackets`,
         tag: 'Tax-managed',
         tagColor: '#BA7517',
-        body: `${pretaxLabel} withdrawals (${fmtMon(s.tradWdAnn / 12)}/mo) are ordinary income. After ${filingStatus.toLowerCase()} ${taxConfig.standardDeductionLabel?.toLowerCase() ?? 'standard deduction'} of ${stdDedFmt ?? fmt(29_200)}, you have about ${fmt(room12)} of room before higher brackets. Marginal rates: ${ratesSummary}.`,
+        body: `${pretaxLabel} withdrawals (${fmtMon(s.tradWdAnn / 12)}/mo) are ordinary income. After ${filingLabel.toLowerCase()} ${taxConfig.standardDeductionLabel?.toLowerCase() ?? 'standard deduction'} of ${stdDedFmt}, you have about ${fmt(room12)} of room before higher brackets. Marginal rates: ${ratesSummary}.`,
       },
     ]
     if (s.rothConvRoom > 500) {

@@ -2,6 +2,7 @@ import type { CalculatorInputs } from './computeResults'
 import type { FidelityPositionRow } from './fidelityCsv'
 import { isFidelityPendingActivityRow, normalizeFidelityImportSymbol, totalsFromPositionRows, totalsToCalculatorBases } from './fidelityCsv'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
+import { enrichBatchRows, enrichImportBatches } from './brokerMonogram'
 import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { stripCsvDerivedFromCalculatorInputs } from './calculatorInputSanitize'
 import type { UserTier } from './planStorage/types'
@@ -153,7 +154,10 @@ export function loadStoredFidelityImport(): StoredFidelityImportV2 | null {
     if (o?.version === 2 && Array.isArray((o as StoredFidelityImportV2).batches)) {
       const v2 = o as StoredFidelityImportV2
       if (!v2.balances) return null
-      return v2
+      return {
+        ...v2,
+        batches: enrichImportBatches(v2.batches),
+      }
     }
     if (o?.version === 1 && (o as StoredFidelityImportV1).balances && Array.isArray((o as StoredFidelityImportV1).positions)) {
       const v2 = migrateV1ToV2(o as StoredFidelityImportV1)
@@ -184,10 +188,11 @@ export function clearStoredFidelityImport(): void {
 }
 
 export function saveStoredFidelityImport(data: StoredFidelityImportV2) {
+  const batches = enrichImportBatches(data.batches)
   const payload: StoredFidelityImportV2 = {
     version: 2,
     savedAt: data.savedAt,
-    batches: data.batches,
+    batches,
     balances: data.balances,
   }
   if (!shouldPersistCsvToLocalStorage()) {
@@ -215,14 +220,14 @@ export function mergeFidelityBatches(
     if (already && opts.replaceDuplicateHashes) {
       batches = batches.filter((b) => b.contentHash !== inc.contentHash)
     }
-    batches.push({
+    batches.push(enrichBatchRows({
       contentHash: inc.contentHash,
       fileName: inc.fileName,
       importedAt: inc.importedAt,
       rows: inc.rows,
       custodian: inc.custodian,
       plaidItemId: inc.plaidItemId,
-    })
+    }))
   }
 
   const balances = computeBalancesFromBatches(batches)

@@ -1,0 +1,11 @@
+Ticker Symbol,Name,Quantity,Last Price,Market Value,Average Cost,Total Cost,Unrealized P&L,Account Type
+MU,Micron Technology Inc,420,165.25,"69,405.00",155.00,"65,100.00","4,305.00",Individual
+NASA,Nasa Corp,890,74.78,"66,554.20",70.00,"62,300.00","4,254.20",Individual
+IBM,International Business Machines,62,227.03,"14,075.86",210.00,"13,020.00","1,055.86",Individual
+VTI,Vanguard Total Stock Market ETF,35,285.42,"9,989.70",260.00,"9,100.00",889.70,Individual
+AAPL,Apple Inc,25,198.50,"4,962.50",170.00,"4,250.00",712.50,IRA
+QQQ,Invesco QQQ Trust,18,512.30,"9,221.40",480.00,"8,640.00",581.40,IRA
+FXAIX,Fidelity 500 Index Fund,30,215.80,"6,474.00",200.00,"6,000.00",474.00,Roth IRA
+VTI,Vanguard Total Stock Market ETF,12,285.42,"3,425.04",270.00,"3,240.00",185.04,Roth IRA
+TSLA,Tesla Inc,15,248.50,"3,727.50",220.00,"3,300.00",427.50,Roth IRA
+SPY,SPDR S&P 500 ETF Trust,8,512.30,"4,098.40",500.00,"4,000.00",98.40,Roth IRA

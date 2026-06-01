@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
 import { IconChevronDown, IconFileSpreadsheet } from '@tabler/icons-react'
 import { CSV_CUSTODIAN_OPTIONS, isPositionsCsvCustodian, type PositionsCsvCustodian } from '../lib/positionsCsvImport'
+import { custodianShowsMonogram, custodianToBrokerSource } from '../lib/brokerMonogram'
+import { custodianHasPlaidConnection } from '../lib/plaidInstitutionBroker'
+import { PlaidConnectionContext } from './PlaidConnectionHeader'
+import { BrokerMonogramPill } from './ui/BrokerMonogramPill'
 
 type Props = {
   onPickCustodian: (custodian: PositionsCsvCustodian) => void
@@ -9,6 +13,8 @@ type Props = {
 }
 
 export function FinancialsEntryCsvDropdown({ onPickCustodian, onRequestReplaceManual, className }: Props) {
+  const ctx = useContext(PlaidConnectionContext)
+  const plaidItems = ctx?.items ?? []
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -82,7 +88,13 @@ export function FinancialsEntryCsvDropdown({ onPickCustodian, onRequestReplaceMa
                   pickCustodian(o.id)
                 }}
               >
-                {o.label}
+                {custodianShowsMonogram(o.id) ? (
+                  <BrokerMonogramPill
+                    source={custodianToBrokerSource(o.id)}
+                    plaidConnected={custodianHasPlaidConnection(o.id, plaidItems)}
+                  />
+                ) : null}
+                <span className="financials-entry-csv-dropdown__item-label">{o.label}</span>
               </button>
             </li>
           ))}

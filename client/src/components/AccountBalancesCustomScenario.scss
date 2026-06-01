@@ -561,7 +561,9 @@
 }
 
 .financials-entry-csv-dropdown__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   width: 100%;
   min-height: 40px;
   margin: 0;
@@ -575,6 +577,10 @@
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+}
+
+.financials-entry-csv-dropdown__item-label {
+  min-width: 0;
 }
 
 .financials-entry-csv-dropdown__item:hover,

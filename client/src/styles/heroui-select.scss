@@ -345,3 +345,14 @@ button[data-slot='select-trigger'][data-disabled='true'] {
   color: var(--color-navy);
 }
 
+.csv-import-menu-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.csv-import-menu-option__label {
+  min-width: 0;
+}
+

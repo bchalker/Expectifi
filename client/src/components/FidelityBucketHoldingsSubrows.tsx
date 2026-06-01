@@ -1,9 +1,9 @@
-import { IconAdjustments, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
+import { IconAdjustments, IconAlertTriangle, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
 import { BucketTotalTrend } from './ui/BucketTotalTrend'
 import { ViewHoldingsHint } from './ui/ViewHoldingsHint'
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useContext } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { formatFidelityDescription } from '../lib/fidelityDisplay'
 import { groupPositionsByAccount, type FidelityPositionRow } from '../lib/fidelityCsv'
@@ -18,6 +18,11 @@ import {
 import { custodianLogoPublicUrl } from '../lib/custodianLogos'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { fmt } from '../utils/format'
+import { resolveBrokerSource } from '../lib/brokerMonogram'
+import { loadStoredFidelityImport } from '../lib/fidelityStorage'
+import { PlaidConnectionContext } from './PlaidConnectionHeader'
+import { BrokerMonogramPill } from './ui/BrokerMonogramPill'
+import { SyncStatus } from './ui/SyncStatus'
 import { PositionReturnPopover } from './PositionReturnPopover'
 
 type Props = {
@@ -46,6 +51,18 @@ function fmtSignedDelta(n: number): string {
   return (n >= 0 ? '+' : '') + fmt(n)
 }
 
+function plaidItemIdForAccountRows(rows: FidelityPositionRow[]): string | null {
+  if (!rows.length || resolveBrokerSource(rows[0]!) !== 'plaid') return null
+  const accountName = rows[0]!.accountName
+  const stored = loadStoredFidelityImport()
+  for (const batch of stored?.batches ?? []) {
+    if (!batch.plaidItemId) continue
+    if (batch.rows.some((r) => rows.includes(r))) return batch.plaidItemId
+    if (batch.rows.some((r) => r.accountName === accountName)) return batch.plaidItemId
+  }
+  return null
+}
+
 /** Fidelity CSV bucket: per-account ledgers + Holdings/Portfolio disclosure with position cards. */
 export function FidelityBucketHoldingsSubrows({
   positions,
@@ -62,6 +79,7 @@ export function FidelityBucketHoldingsSubrows({
   importCustodian = 'fidelity',
   holdingsSummaryEnd,
 }: Props) {
+  const plaidCtx = useContext(PlaidConnectionContext)
   const accountGroups = groupPositionsByAccount(positions)
   const showFidelityAccountNames = accountGroups.length > 1
 
@@ -117,13 +135,24 @@ export function FidelityBucketHoldingsSubrows({
           horizon={yearsToRetirement}
         />
       ) : null}
-      {accountGroups.map((g) => (
+      {accountGroups.map((g) => {
+        const isPlaidLive = g.brokerSource === 'plaid'
+        const plaidItemId = isPlaidLive ? plaidItemIdForAccountRows(g.rows) : null
+        const syncAt = plaidItemId ? plaidCtx?.syncTimeForPlaidItem(plaidItemId) : null
+
+        return (
         <div key={`${keyPrefix}-${g.accountName}`} className="import-ledger">
           <details className="imported-holdings-disclosure">
             <summary className="imported-holdings-summary">
               <div className="import-ledger__lead">
                 {showFidelityAccountNames ? (
-                  <span className="import-ledger-account">{g.accountName}</span>
+                  <span className="import-ledger-account">
+                    <span className="import-ledger-account__identity">
+                      <span className="import-ledger-account__name">{g.accountName}</span>
+                      {syncAt ? <SyncStatus syncedAt={syncAt} className="import-ledger-account__sync" /> : null}
+                    </span>
+                    <BrokerMonogramPill source={g.brokerSource} plaidConnected={isPlaidLive} />
+                  </span>
                 ) : null}
               </div>
               <div className="import-ledger__summary-end">
@@ -164,7 +193,17 @@ export function FidelityBucketHoldingsSubrows({
                         />
                       ) : null}
                       <div className="holding-return-row__symbol-name">
-                          <div className="holding-card-symbol">{r.symbol || '—'}</div>
+                          <div className="holding-card-symbol">
+                            {r.symbol || '—'}
+                            {r.plaidOverlapWarning ? (
+                              <span
+                                className="holding-card-symbol__overlap-warning"
+                                title="This symbol also exists in CSV and Plaid holdings"
+                              >
+                                <IconAlertTriangle size={13} stroke={1.5} aria-hidden />
+                              </span>
+                            ) : null}
+                          </div>
                           <div className="holding-card-name">{formatFidelityDescription(r.description)}</div>
                         </div>
                       </div>
@@ -220,7 +259,8 @@ export function FidelityBucketHoldingsSubrows({
             </div>
           </details>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

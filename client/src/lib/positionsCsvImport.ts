@@ -1,21 +1,30 @@
 import {
   isFidelityPendingActivityRow,
+  mapAccountToBucket,
   mapRowToBucket,
   normalizeFidelityImportSymbol,
   normalizeHeader,
   splitCsvLine,
+  type AccountBucket,
   type FidelityPositionRow,
   type ParsedFidelityCsv,
 } from './fidelityCsv'
 
-export type PositionsCsvCustodian = 'fidelity' | 'schwab' | 'vanguard' | 'other'
+export type PositionsCsvCustodian = 'fidelity' | 'schwab' | 'vanguard' | 'webull' | 'other'
 
-const POSITIONS_CSV_CUSTODIANS: PositionsCsvCustodian[] = ['fidelity', 'schwab', 'vanguard', 'other']
+const POSITIONS_CSV_CUSTODIANS: PositionsCsvCustodian[] = [
+  'fidelity',
+  'schwab',
+  'vanguard',
+  'webull',
+  'other',
+]
 
 export const CSV_CUSTODIAN_OPTIONS: { id: PositionsCsvCustodian; label: string }[] = [
   { id: 'fidelity', label: 'Fidelity' },
   { id: 'schwab', label: 'Charles Schwab' },
   { id: 'vanguard', label: 'Vanguard' },
+  { id: 'webull', label: 'Webull' },
   { id: 'other', label: 'Other' },
 ]
 
@@ -95,18 +104,28 @@ function rowFromHolding(
   name: string,
   currentValue: number,
   costBasis: number | null,
+  opts?: { quantity?: number; lastPrice?: number; calculatorBucket?: AccountBucket },
 ): FidelityPositionRow {
   return {
     accountName,
     symbol: normalizeFidelityImportSymbol(symbol),
     description: name,
-    quantity: 0,
-    lastPrice: 0,
+    quantity: opts?.quantity ?? 0,
+    lastPrice: opts?.lastPrice ?? 0,
     currentValue: Math.round(currentValue),
     costBasis,
     dailyChangeDollar: null,
     dailyChangePercent: null,
+    calculatorBucket: opts?.calculatorBucket,
   }
+}
+
+function mapWebullAccountType(accountType: string): AccountBucket {
+  const t = accountType.trim().toLowerCase()
+  if (t === 'individual') return 'brokerage'
+  if (t === 'ira') return 'trad401k'
+  if (t === 'roth ira' || t === 'roth') return 'roth'
+  return mapAccountToBucket(accountType.trim() || 'Individual')
 }
 
 /** Fidelity: header row is first row containing a cell exactly `Symbol`; skip trailing summary rows. */
@@ -256,6 +275,69 @@ export function parseVanguardPositionsExport(text: string): ParsedFidelityCsv {
   return { ...base, headers: rawHeaderCells }
 }
 
+/** Webull portfolio export: header row with Ticker Symbol; Account Type maps to tax buckets. */
+export function parseWebullPositionsExport(text: string): ParsedFidelityCsv {
+  const lines = csvLines(text)
+  if (lines.length < 2) return emptyParsed()
+
+  let headerIdx = -1
+  for (let i = 0; i < lines.length; i++) {
+    const cells = splitCsvLine(lines[i])
+    if (cells.some((c) => normalizeHeader(c.trim()) === normalizeHeader('Ticker Symbol'))) {
+      headerIdx = i
+      break
+    }
+  }
+  if (headerIdx < 0) return emptyParsed()
+
+  const rawHeaderCells = splitCsvLine(lines[headerIdx])
+  const headers = rawHeaderCells.map(normalizeHeader)
+  const idx = (name: string) => headers.indexOf(normalizeHeader(name))
+
+  const iSym = idx('Ticker Symbol')
+  const iName = idx('Name')
+  const iQty = idx('Quantity')
+  const iPrice = idx('Last Price')
+  const iVal = idx('Market Value')
+  let iCost = idx('Total Cost')
+  if (iCost < 0) iCost = idx('Average Cost')
+  const iAcct = idx('Account Type')
+
+  if (iSym < 0 || iName < 0 || iVal < 0) return emptyParsed()
+
+  const rows: FidelityPositionRow[] = []
+  for (let li = headerIdx + 1; li < lines.length; li++) {
+    const rawCells = splitCsvLine(lines[li])
+    if (rawCells.length === 0) continue
+    const cells = [...rawCells]
+    while (cells.length < rawHeaderCells.length) cells.push('')
+
+    const symRaw = (cells[iSym] ?? '').trim()
+    const symNorm = normalizeFidelityImportSymbol(symRaw)
+    if (!symNorm) continue
+
+    const accountType = iAcct >= 0 ? (cells[iAcct] ?? '').trim() : 'Individual'
+    const accountName = accountType || 'Individual'
+    const bucket = mapWebullAccountType(accountName)
+    const name = cells[iName] ?? ''
+    const quantity = iQty >= 0 ? parseNumericCell(cells[iQty] ?? '0') : 0
+    const lastPrice = iPrice >= 0 ? parseNumericCell(cells[iPrice] ?? '0') : 0
+    const currentValue = parseNumericCell(cells[iVal] ?? '0')
+    const costBasis = iCost >= 0 ? parseCostBasisNullable(cells[iCost] ?? '') : null
+
+    const row = rowFromHolding(accountName, symRaw, name, currentValue, costBasis, {
+      quantity,
+      lastPrice,
+      calculatorBucket: bucket,
+    })
+    if (isFidelityPendingActivityRow(row)) continue
+    rows.push(row)
+  }
+
+  const base = accumulateTotals(rows)
+  return { ...base, headers: rawHeaderCells }
+}
+
 function headerIndexFromLabel(rawHeaders: string[], label: string): number {
   if (!label) return -1
   const i = rawHeaders.findIndex((h) => h.trim() === label.trim())
@@ -310,6 +392,8 @@ export function parsePositionsCsv(
       return parseSchwabPositionsExport(text)
     case 'vanguard':
       return parseVanguardPositionsExport(text)
+    case 'webull':
+      return parseWebullPositionsExport(text)
     case 'other':
       return parseOtherPositionsExport(text, otherMap ?? { symbol: '', name: '', currentValue: '', costBasis: '' })
     default:
@@ -331,6 +415,8 @@ export function custodianDisplayName(c: PositionsCsvCustodian): string {
       return 'Charles Schwab'
     case 'vanguard':
       return 'Vanguard'
+    case 'webull':
+      return 'Webull'
     case 'other':
       return 'your custodian'
     default:

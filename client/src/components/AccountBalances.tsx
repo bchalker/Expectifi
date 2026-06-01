@@ -20,11 +20,13 @@ import {
 } from '../lib/manualAccountEntries'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
-import {
-  accountLabelForWithdrawalBucket,
-  accountTaxSubtextForWithdrawalBucket,
-  localeSupportsWithdrawalBucket,
-} from '../config/taxConfig'
+import { accountLabelForWithdrawalBucket, localeSupportsWithdrawalBucket } from '../config/taxConfig'
+import { resolveBucketRowHint } from '../hints/buildHintContext'
+import type { OnboardingAccountType } from '../lib/manualAccountEntries'
+import type { ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
+import { annualWithdrawalForAccountBucket } from '../lib/accountBucketWithdrawal'
+import { AccountBucketHint } from './AccountBucketHint'
+import { AccountBucketWithdrawalPill } from './AccountBucketWithdrawalPill'
 import { useUserLocale } from '../context/UserLocaleContext'
 import {
   withdrawalBadgeAndHint,
@@ -198,6 +200,12 @@ type Props = {
   onImportOpenHandled?: () => void
   /** After manual balances are committed to expectifi/accounts-v1. */
   onManualAccountsCommitted?: () => void
+  /** Growth vs income — drives personalized bucket row hints. */
+  phase?: 'growth' | 'income'
+  /** Whether SS/CPP is included in projections (for income hints). */
+  uiSsIncluded?: boolean
+  /** Opens Configure → Social Security / CPP tab (hint link). */
+  onOpenSocialSecurity?: () => void
 }
 
 const REMOVE_ACCOUNTS_CONFIRM_BODY =
@@ -232,6 +240,9 @@ export function AccountBalances({
   openImportRequest,
   onImportOpenHandled,
   onManualAccountsCommitted,
+  phase = 'growth',
+  uiSsIncluded = false,
+  onOpenSocialSecurity,
 }: Props) {
   const { isPro, hasSessionCsvHoldings } = useUserTier()
   const showCsvSessionBanner = hasSessionCsvHoldings && !isPro
@@ -346,6 +357,9 @@ export function AccountBalances({
   const [fidelityScenarioClosing, setFidelityScenarioClosing] = useState(false)
   const [accountScenarioPanel, setAccountScenarioPanel] = useState<AccountScenarioBucketId | null>(null)
   const [accountScenarioClosing, setAccountScenarioClosing] = useState(false)
+  const [accountScenarioInitialTab, setAccountScenarioInitialTab] = useState<ScenarioIntentTabId | undefined>(
+    undefined,
+  )
   const [balanceEditPanel, setBalanceEditPanel] = useState<'manual' | 'import' | null>(null)
   const [balanceEditClosing, setBalanceEditClosing] = useState(false)
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] = useState<PositionsCsvCustodian | null>(null)
@@ -459,6 +473,7 @@ export function AccountBalances({
   const finalizeAccountScenarioClose = useCallback(() => {
     setAccountScenarioPanel(null)
     setAccountScenarioClosing(false)
+    setAccountScenarioInitialTab(undefined)
   }, [])
 
   const requestAccountScenarioClose = useCallback(() => {
@@ -476,14 +491,18 @@ export function AccountBalances({
     [accountScenarioClosing, finalizeAccountScenarioClose],
   )
 
-  const onAccountScenarioOpen = useCallback((bucket: AccountScenarioBucketId) => {
-    setBalanceEditPanel(null)
-    setBalanceEditClosing(false)
-    setFidelityScenarioPanel(null)
-    setFidelityScenarioClosing(false)
-    setAccountScenarioClosing(false)
-    setAccountScenarioPanel(bucket)
-  }, [])
+  const onAccountScenarioOpen = useCallback(
+    (bucket: AccountScenarioBucketId, initialTab?: ScenarioIntentTabId) => {
+      setBalanceEditPanel(null)
+      setBalanceEditClosing(false)
+      setFidelityScenarioPanel(null)
+      setFidelityScenarioClosing(false)
+      setAccountScenarioClosing(false)
+      setAccountScenarioInitialTab(initialTab)
+      setAccountScenarioPanel(bucket)
+    },
+    [],
+  )
 
   const accountScenarioPanelTitle = useCallback(
     (bucket: AccountScenarioBucketId): string => {
@@ -853,6 +872,74 @@ export function AccountBalances({
     locale,
   ])
 
+  const userAccountTypes = useMemo((): OnboardingAccountType[] => {
+    if (balanceMode === 'manual') {
+      const types = manualAccountEntries
+        .map((e) => e.type)
+        .filter((t): t is OnboardingAccountType => t != null)
+      return [...new Set(types)]
+    }
+    const types: OnboardingAccountType[] = []
+    if (presentWithdrawalBuckets.includes('brokerage')) types.push('brokerage')
+    if (presentWithdrawalBuckets.includes('pretax')) types.push('pretax_401k_ira')
+    if (presentWithdrawalBuckets.includes('roth')) types.push('roth_ira')
+    if (presentWithdrawalBuckets.includes('hsa')) types.push('hsa')
+    return types
+  }, [balanceMode, manualAccountEntries, presentWithdrawalBuckets])
+
+  const showPersonalizedBucketHints = readOnly && !configureInputsOnly && hasAnyAccountCardData
+
+  const renderBucketSubtext = useCallback(
+    (bucket: AccountScenarioBucketId, balance: number): ReactNode | null => {
+      if (!showPersonalizedBucketHints) return null
+      const segments = resolveBucketRowHint({
+        bucket,
+        balance,
+        totalPortfolio: portfolioTotal,
+        locale,
+        mode: phase,
+        c,
+        inputs,
+        uiSsIncluded,
+        userAccountTypes,
+        presentBuckets: presentWithdrawalBuckets,
+        brkBal: brkBal ?? 0,
+      })
+      if (!segments?.length) return null
+      return (
+        <AccountBucketHint
+          segments={segments}
+          onScenarioAction={(action) => onAccountScenarioOpen(action.bucket, action.tab)}
+          onSocialSecurityAction={() => onOpenSocialSecurity?.()}
+        />
+      )
+    },
+    [
+      showPersonalizedBucketHints,
+      portfolioTotal,
+      locale,
+      phase,
+      c,
+      inputs,
+      uiSsIncluded,
+      userAccountTypes,
+      presentWithdrawalBuckets,
+      brkBal,
+      onAccountScenarioOpen,
+      onOpenSocialSecurity,
+    ],
+  )
+
+  const renderWithdrawalPill = useCallback(
+    (bucket: AccountScenarioBucketId): ReactNode | null => {
+      if (phase !== 'income' || !showPersonalizedBucketHints) return null
+      const annual = annualWithdrawalForAccountBucket(bucket, c)
+      if (annual == null) return null
+      return <AccountBucketWithdrawalPill annualWithdrawal={annual} />
+    },
+    [phase, showPersonalizedBucketHints, c],
+  )
+
   const showBalanceEntryActions = mergedDashboard ? canEditBalances : !readOnly && Boolean(onBalanceModeChange)
 
   function bucketBaseKey(key: BucketKey): keyof ManualBalancesDraft {
@@ -1090,6 +1177,7 @@ export function AccountBalances({
           onPickCsvCustodian={onPickCsvCustodian}
           onClearAccounts={() => removeAccountsModalState.open()}
           openRequest={openManageRequest}
+          onOpenUpgrade={onOpenUpgradeCsv}
           onImportApplied={() => {
             onBalanceModeChange?.('fidelity')
             onFidelityImportApplied?.()
@@ -1148,7 +1236,7 @@ export function AccountBalances({
   ) {
     const { label, bucket, total, withdrawalUi } = opts
     const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
-    const subtext = accountTaxSubtextForWithdrawalBucket(taxConfig, bucket)
+    const subtext = renderBucketSubtext(bucket, total)
     const scenario = buildAccountScenarioRowProps(bucket)
 
     return (
@@ -1161,6 +1249,7 @@ export function AccountBalances({
             badgeOrder={withdrawalUi ? order : null}
             label={label}
             subtext={subtext}
+            withdrawalPill={renderWithdrawalPill(bucket)}
             total={fmt(total)}
             showViewHoldings={false}
             scenario={scenario}
@@ -1178,7 +1267,7 @@ export function AccountBalances({
     const bucket: WithdrawalDisplayBucket = tax
     const accountBucket: AccountScenarioBucketId = tax
     const accountScenario = buildAccountScenarioRowProps(accountBucket)
-    const taxSubtext = accountTaxSubtextForWithdrawalBucket(taxConfig, accountBucket)
+    const taxSubtext = renderBucketSubtext(accountBucket, def.total)
     const { order } = withdrawalUi ? metaFor(bucket) : { order: null as number | null }
     const positions = positionsForTaxTreatment(fidelityRows, tax)
     const trend = computeBucketTrendDisplay(positions)
@@ -1190,6 +1279,7 @@ export function AccountBalances({
         badgeOrder={withdrawalUi ? order : null}
         label={def.label}
         subtext={taxSubtext}
+        withdrawalPill={renderWithdrawalPill(accountBucket)}
         total={fmt(def.total)}
         trend={trend}
         scenario={accountScenario}
@@ -1342,7 +1432,7 @@ export function AccountBalances({
     const brkMeta = withdrawalUi ? metaFor('brokerage') : { order: null as number | null }
     const brkTrend = computeBucketTrendDisplay(brokeragePositions)
     const brokerageScenario = buildAccountScenarioRowProps('brokerage')
-    const brokerageSubtext = accountTaxSubtextForWithdrawalBucket(taxConfig, 'brokerage')
+    const brokerageSubtext = renderBucketSubtext('brokerage', brkBal)
 
     if (!useFidelityBrokerageView) {
       return renderManualPortfolioAccountCard('brokerage', {
@@ -1358,6 +1448,7 @@ export function AccountBalances({
         badgeOrder={withdrawalUi ? brkMeta.order : null}
         label="Brokerage"
         subtext={brokerageSubtext}
+        withdrawalPill={renderWithdrawalPill('brokerage')}
         total={fmt(brkBal)}
         trend={brkTrend}
         scenario={brokerageScenario}
@@ -1429,6 +1520,7 @@ export function AccountBalances({
                 residenceCountry={inputs?.residenceCountry}
                 onApplyBalances={onFidelityApplyBalances}
                 onImportApplied={onFidelityImportApplied}
+                onOpenUpgrade={onOpenUpgradeCsv}
               />
             </div>
           ) : null}
@@ -1635,6 +1727,7 @@ export function AccountBalances({
             retirementCalendarYear={fidelityScenarioBundle.retirementCalendarYear}
             retRate={fidelityScenarioBundle.retRate}
             brkRate={fidelityScenarioBundle.brkRate}
+            initialTab={accountScenarioInitialTab}
             onClose={requestAccountScenarioClose}
           />
         </aside>

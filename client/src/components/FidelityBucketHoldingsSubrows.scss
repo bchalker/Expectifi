@@ -24,6 +24,9 @@
 }
 
 .import-ledger-account {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.35rem;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -31,6 +34,22 @@
   line-height: 1.3;
   word-break: break-word;
   margin: 0;
+}
+
+.import-ledger-account__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.import-ledger-account__name {
+  line-height: 1.3;
+}
+
+.import-ledger-account__sync {
+  font-weight: 400;
 }
 
 .import-ledger__summary-end {
@@ -267,12 +286,21 @@
 }
 
 .holding-card-symbol {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 400;
   line-height: var(--leading-snug);
   color: var(--text);
   letter-spacing: var(--tracking-normal);
+}
+
+.holding-card-symbol__overlap-warning {
+  display: inline-flex;
+  color: var(--color-amber-dark);
+  flex-shrink: 0;
 }
 .holding-card-name {
   font-family: var(--body);

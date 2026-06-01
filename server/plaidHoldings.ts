@@ -19,6 +19,7 @@ export type PlaidPositionRow = {
   dailyChangeDollar: null
   dailyChangePercent: null
   calculatorBucket?: PlaidAccountBucket
+  brokerSource?: 'plaid'
 }
 
 export type PlaidHoldingsSnapshot = {
@@ -219,6 +220,7 @@ export function buildPlaidHoldingsSnapshot(args: {
         dailyChangeDollar: null,
         dailyChangePercent: null,
         calculatorBucket: bucket === 'unknown' ? undefined : bucket,
+        brokerSource: 'plaid',
       })
       continue
     }
@@ -248,6 +250,7 @@ export function buildPlaidHoldingsSnapshot(args: {
         dailyChangeDollar: null,
         dailyChangePercent: null,
         calculatorBucket: bucket === 'unknown' ? undefined : bucket,
+        brokerSource: 'plaid',
       })
     }
   }

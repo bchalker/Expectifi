@@ -467,12 +467,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
         targetRetirementAge: inputs.targetRetirementAge,
         ssIncluded: ui.ssIncluded,
         retireRegions: normalizeRetireRegions(inputs.retireRegions, inputs.italyCost),
+        filingStatus: inputs.filingStatus,
       }),
     [
       c,
       lifeEventsPortfolioDelta,
       ui.incomeMode,
       ui.ssIncluded,
+      inputs.filingStatus,
       inputs.incYield,
       inputs.incGrowth,
       inputs.wdRate,
@@ -825,6 +827,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
             <AccountBalances
               readOnly
               c={cDisplay}
+              phase={phase}
+              uiSsIncluded={ui.ssIncluded}
+              onOpenSocialSecurity={() => {
+                setMobileNavOpen(false)
+                setAccordionOpen(false)
+                setConfigTab('social-security')
+                setDrawer('config')
+              }}
               inputs={inputs}
               setInputs={setInputs}
               onManualPortfolioPlanApplied={(plan) => {

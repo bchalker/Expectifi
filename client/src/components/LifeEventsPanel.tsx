@@ -399,21 +399,12 @@ export function LifeEventsPanel({
             </>
           )}
         </div>
-        {activePhase === "growth" ? (
+        {activePhase === "growth" && activeEventCount > 0 ? (
           <div className="life-events-panel__impact">
-            <span
-              className={[
-                "life-events-panel__impact-value",
-                activeEventCount === 0 && "life-events-panel__impact-value--none",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              {activeEventCount === 0
-                ? "NO"
-                : totalActiveImpact > 0
-                  ? `-${formatCurrency(totalActiveImpact)}`
-                  : formatCurrency(0)}
+            <span className="life-events-panel__impact-value">
+              {totalActiveImpact > 0
+                ? `-${formatCurrency(totalActiveImpact)}`
+                : formatCurrency(0)}
             </span>
             <span className="life-events-panel__impact-label">Impact</span>
           </div>

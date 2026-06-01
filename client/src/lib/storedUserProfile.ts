@@ -23,6 +23,8 @@ export type StoredUserProfile = {
   spouse_benefit_estimate?: number
   target_retirement_age?: number
   monthly_income_goal?: number
+  /** US federal filing status id (see FilingStatusId). */
+  filing_status?: string
   retirement_destination?: string
   welcome_banner_dismissed?: boolean
   transparency_note_seen?: boolean
@@ -68,6 +70,7 @@ export function parseStoredUserProfile(raw: unknown): StoredUserProfile | null {
   profile.spouse_benefit_estimate = num('spouse_benefit_estimate')
   profile.target_retirement_age = num('target_retirement_age')
   profile.monthly_income_goal = num('monthly_income_goal')
+  profile.filing_status = str('filing_status')
   profile.retirement_destination = str('retirement_destination')
   profile.welcome_banner_dismissed = bool('welcome_banner_dismissed')
   profile.transparency_note_seen = bool('transparency_note_seen')

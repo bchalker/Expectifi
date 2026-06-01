@@ -31,9 +31,21 @@ import {
   applyPlaidHoldingsSnapshots,
   removePlaidItemFromLocalStorage,
 } from '../lib/plaidImportApply'
+import type { PlaidHoldingsSnapshot } from '../lib/plaidImportApply'
+import {
+  detectPlaidManualOverlap,
+  type PlaidManualOverlapBucket,
+} from '../lib/plaidConflict'
+import type { PlaidConflictResolution } from '../lib/plaidConflict'
+import { plaidConnectedBrokers, type KnownBrokerSource } from '../lib/plaidInstitutionBroker'
+import { getAccountTypeMeta, loadStoredManualAccounts } from '../lib/manualAccountEntries'
+import { useUserLocale } from '../context/UserLocaleContext'
 import { markPortfolioBalancesFlush, triggerPortfolioWaveReveal } from '../lib/portfolioWaveReveal'
 import { AppButton } from './ui/AppButton'
 import { PlaidLinkButton } from './PlaidLinkButton'
+import { PlaidBrokerConflictModal } from './PlaidBrokerConflictModal'
+import { PlaidManualOverlapModal } from './PlaidManualOverlapModal'
+import type { PlaidBrokerConflictRequest } from '../hooks/usePlaidLinkFlow'
 import './PlaidConnectionHeader.scss'
 
 type PlaidConnectionHandlers = {
@@ -43,6 +55,7 @@ type PlaidConnectionHandlers = {
 
 type PlaidConnectionContextValue = {
   items: PlaidItemSummary[]
+  connectedBrokers: Set<KnownBrokerSource>
   initialLoaded: boolean
   configured: boolean | null
   connectButtonLabel: string
@@ -58,6 +71,7 @@ type PlaidConnectionContextValue = {
   linkErr: string | null
   linkInfo: string | null
   clearLinkInfo: () => void
+  syncTimeForPlaidItem: (itemId: string) => string | null
 }
 
 const PlaidConnectionContext = createContext<PlaidConnectionContextValue | null>(null)
@@ -211,6 +225,7 @@ export function PlaidConnectionProvider({
 }: ProviderProps) {
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
+  const { locale } = useUserLocale()
   const connectButtonLabel = 'Connect via Plaid'
   const userId = user?.id ?? null
   const [items, setItems] = useState<PlaidItemSummary[]>([])
@@ -218,9 +233,47 @@ export function PlaidConnectionProvider({
   const [configured, setConfigured] = useState<boolean | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
   const [disconnectBusyId, setDisconnectBusyId] = useState<string | null>(null)
+  const [conflictRequest, setConflictRequest] = useState<PlaidBrokerConflictRequest | null>(null)
+  const [manualOverlapBuckets, setManualOverlapBuckets] = useState<PlaidManualOverlapBucket[]>([])
+  const conflictResolverRef = useRef<((resolution: PlaidConflictResolution) => void) | null>(null)
   const reloadSeqRef = useRef(0)
   const onImportAppliedRef = useRef(onImportApplied)
   onImportAppliedRef.current = onImportApplied
+
+  const connectedBrokers = useMemo(() => plaidConnectedBrokers(items), [items])
+
+  const syncTimeForPlaidItem = useCallback(
+    (itemId: string) => items.find((i) => i.id === itemId)?.lastSyncedAt ?? null,
+    [items],
+  )
+
+  const resolveConflictFlow = useCallback((resolution: PlaidConflictResolution) => {
+    conflictResolverRef.current?.(resolution)
+    conflictResolverRef.current = null
+    setConflictRequest(null)
+  }, [])
+
+  const onBrokerConflict = useCallback((request: PlaidBrokerConflictRequest) => {
+    return new Promise<PlaidConflictResolution>((resolve) => {
+      conflictResolverRef.current = resolve
+      setConflictRequest(request)
+    })
+  }, [])
+
+  const onPlaidSnapshotReady = useCallback(
+    (snapshot: PlaidHoldingsSnapshot) => {
+      const stored = loadStoredManualAccounts()
+      const labelMap = new Map<string, string>()
+      for (const entry of stored?.entries ?? []) {
+        if (entry.type) {
+          labelMap.set(entry.type, getAccountTypeMeta(entry.type, locale).label)
+        }
+      }
+      const overlap = detectPlaidManualOverlap(snapshot, labelMap)
+      if (overlap.length) setManualOverlapBuckets(overlap)
+    },
+    [locale],
+  )
 
   const reload = useCallback(async () => {
     if (!userId || !hasPaidSubscription) {
@@ -265,6 +318,8 @@ export function PlaidConnectionProvider({
       onImportApplied: handleImportApplied,
       onComplete: () => void reload(),
       onAlreadyConnected: () => setPanelOpen(true),
+      onBrokerConflict,
+      onPlaidSnapshotReady,
       enabled: hasPaidSubscription,
     })
 
@@ -324,6 +379,7 @@ export function PlaidConnectionProvider({
   const value = useMemo<PlaidConnectionContextValue>(
     () => ({
       items,
+      connectedBrokers,
       initialLoaded,
       configured,
       connectButtonLabel,
@@ -339,10 +395,12 @@ export function PlaidConnectionProvider({
       linkErr,
       linkInfo,
       clearLinkInfo,
+      syncTimeForPlaidItem,
     }),
     [
       configured,
       connectButtonLabel,
+      connectedBrokers,
       disconnectItem,
       initialLoaded,
       items,
@@ -353,6 +411,7 @@ export function PlaidConnectionProvider({
       panelOpen,
       reload,
       startAddAccount,
+      syncTimeForPlaidItem,
     ],
   )
 
@@ -360,7 +419,22 @@ export function PlaidConnectionProvider({
     return <>{children}</>
   }
 
-  return <PlaidConnectionContext.Provider value={value}>{children}</PlaidConnectionContext.Provider>
+  return (
+    <PlaidConnectionContext.Provider value={value}>
+      {children}
+      <PlaidBrokerConflictModal
+        open={Boolean(conflictRequest)}
+        conflict={conflictRequest?.conflict ?? null}
+        onResolve={resolveConflictFlow}
+        onClose={() => resolveConflictFlow('skip_plaid')}
+      />
+      <PlaidManualOverlapModal
+        open={manualOverlapBuckets.length > 0}
+        buckets={manualOverlapBuckets}
+        onDismiss={() => setManualOverlapBuckets([])}
+      />
+    </PlaidConnectionContext.Provider>
+  )
 }
 
 /** Optional hook for siblings that need to refresh after Plaid Link from empty state. */

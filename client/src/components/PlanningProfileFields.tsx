@@ -15,6 +15,8 @@ import "./ui/CurrencyAmountInput.scss";
 import "./WelcomeProfileStepFields.scss";
 import "./WelcomeGoalStepFields.scss";
 import "./ConfigDrawerBody.scss";
+import { FilingStatusField } from "./FilingStatusField";
+import type { FilingStatusId } from "../lib/filingStatus";
 import "./PlanningProfileFields.scss";
 
 const ANNUAL_SAVE_MAX = 60_000;
@@ -49,6 +51,9 @@ type ConfigureProps = SharedProps & {
   onMonthlyIncomeGoal: (amount: number) => void;
   regionId: OnboardingRegionId | null | undefined;
   onRegionSelect: (regionId: OnboardingRegionId) => void;
+  filingStatus: FilingStatusId;
+  onFilingStatusChange: (status: FilingStatusId) => void;
+  showFilingStatus?: boolean;
 };
 
 type WelcomeProps = SharedProps & {
@@ -120,6 +125,15 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           dateOfBirth={dateOfBirth}
           showFillState
         />
+        {props.showFilingStatus !== false && props.regionId === "us" ? (
+          <>
+            <hr className="planning-profile-fields__divider" aria-hidden />
+            <FilingStatusField
+              value={props.filingStatus}
+              onChange={props.onFilingStatusChange}
+            />
+          </>
+        ) : null}
       </div>
     );
   }

@@ -15,12 +15,30 @@ export type TaxDetailedResult = {
   effectiveRate: number;
 };
 
+import type { FilingStatusId } from './filingStatusTax'
+
+export type { FilingStatusId } from './filingStatusTax'
+export {
+  DEFAULT_FILING_STATUS,
+  STD_DEDUCTIONS_2024,
+  FILING_STATUS_LABELS,
+  normalizeFilingStatus,
+  standardDeductionForFilingStatus,
+  ordinaryIncomeTax,
+  ssTaxableFromProvisional,
+  ltcgTaxRate,
+  rothConversionRoom,
+  ssProvisionalThresholds,
+  filingStatusLabel,
+} from './filingStatusTax'
+
 export function calcTaxDetailed(
   tradWd: number,
   rothWd: number,
   hsaWd: number,
   brkWd: number,
   ssMon: number,
+  filingStatus?: FilingStatusId,
 ): TaxDetailedResult;
 
 export function calcTax(
@@ -31,6 +49,7 @@ export function calcTax(
   tradRatio: number,
   rothRatio: number,
   hsaRatio: number,
+  filingStatus?: FilingStatusId,
 ): number;
 
 export function ssFromAge(age: number): number;

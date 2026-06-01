@@ -19,8 +19,12 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { usePlan } from '../hooks/usePlan'
 import { CSV_CUSTODIAN_OPTIONS, isPositionsCsvCustodian, type PositionsCsvCustodian } from '../lib/positionsCsvImport'
+import { custodianShowsMonogram, custodianToBrokerSource } from '../lib/brokerMonogram'
+import { custodianHasPlaidConnection } from '../lib/plaidInstitutionBroker'
 import type { PlaidItemSummary } from '../lib/api/plaid'
 import { AppButton } from './ui/AppButton'
+import { BrokerMonogramPill } from './ui/BrokerMonogramPill'
+import { UpgradePrompt } from './ui/UpgradePrompt'
 import { Tooltip } from './Tooltip'
 import {
   PlaidConnectionContext,
@@ -179,6 +183,8 @@ export type AccountBalancesManageMenuProps = {
   className?: string
   /** Increment to open the Manage menu programmatically. */
   openRequest?: number
+  /** Opens Pro checkout / register flow from upgrade prompt. */
+  onOpenUpgrade?: () => void
 }
 
 export function AccountBalancesManageMenu({
@@ -192,12 +198,14 @@ export function AccountBalancesManageMenu({
   onRequestReplaceImport,
   className,
   openRequest,
+  onOpenUpgrade,
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
   const ctx = useContext(PlaidConnectionContext)
 
   const [open, setOpen] = useState(false)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
   const [csvExpanded, setCsvExpanded] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -267,6 +275,11 @@ export function AccountBalancesManageMenu({
   )
 
   const handlePlaidConnect = useCallback(() => {
+    if (!hasPaidSubscription) {
+      close()
+      setUpgradeOpen(true)
+      return
+    }
     if (!showPlaidConnect || ctx?.linkBusy) return
     const run = () => {
       close()
@@ -281,7 +294,7 @@ export function AccountBalancesManageMenu({
       return
     }
     run()
-  }, [close, ctx, onImportApplied, onRequestReplaceManual, showPlaidConnect])
+  }, [close, ctx, hasPaidSubscription, onImportApplied, onRequestReplaceManual, showPlaidConnect])
 
   const syncTitle = 'Plaid synced'
   const syncTooltip = lastHealthySync ? (
@@ -370,35 +383,23 @@ export function AccountBalancesManageMenu({
               ) : null}
 
               <ul className="account-balances-manage__actions">
-                {showPlaidConnect && !hasConnections ? (
+                {!hasConnections ? (
                   <li role="none">
                     <button
                       type="button"
                       className="account-balances-manage__item"
                       role="menuitem"
-                      disabled={ctx?.linkBusy}
+                      disabled={hasPaidSubscription ? ctx?.linkBusy : false}
                       onClick={handlePlaidConnect}
                     >
+                      {!hasPaidSubscription ? (
+                        <span className="account-balances-manage__pro-pill" aria-hidden>
+                          PRO
+                        </span>
+                      ) : null}
                       <IconLink size={16} stroke={1.5} aria-hidden />
                       {ctx?.connectButtonLabel ?? 'Connect via Plaid'}
                     </button>
-                  </li>
-                ) : !showPlaidConnect && !hasPaidSubscription ? (
-                  <li role="none">
-                    <span
-                      className="account-balances-manage__item account-balances-manage__item--disabled"
-                      aria-label={
-                        user
-                          ? `${ctx?.connectButtonLabel ?? 'Connect via Plaid'} — Subscribe to Pro to connect`
-                          : `${ctx?.connectButtonLabel ?? 'Connect via Plaid'} — Pro subscribers only`
-                      }
-                    >
-                      <span className="account-balances-manage__pro-pill" aria-hidden>
-                        PRO
-                      </span>
-                      <IconLink size={16} stroke={1.5} aria-hidden />
-                      {ctx?.connectButtonLabel ?? 'Connect via Plaid'}
-                    </span>
                   </li>
                 ) : null}
 
@@ -432,7 +433,13 @@ export function AccountBalancesManageMenu({
                               runAndClose(() => onPickCsvCustodian(o.id))
                             }}
                           >
-                            {o.label}
+                            {custodianShowsMonogram(o.id) ? (
+                              <BrokerMonogramPill
+                                source={custodianToBrokerSource(o.id)}
+                                plaidConnected={custodianHasPlaidConnection(o.id, items)}
+                              />
+                            ) : null}
+                            <span className="account-balances-manage__csv-item-label">{o.label}</span>
                           </button>
                         </li>
                       ))}
@@ -481,6 +488,21 @@ export function AccountBalancesManageMenu({
             document.body,
           )
         : null}
+      <UpgradePrompt
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        onUpgrade={() => {
+          setUpgradeOpen(false)
+          onOpenUpgrade?.()
+        }}
+        title="Connect with live Plaid sync"
+        description={
+          user
+            ? 'Upgrade to Pro to link your brokerage accounts with automatic Plaid sync. CSV import and manual entry stay available on every plan.'
+            : 'Create a Pro account to link brokerage accounts with live Plaid sync. CSV import and manual entry remain free.'
+        }
+        feature="Live Plaid account linking"
+      />
     </div>
   )
 }

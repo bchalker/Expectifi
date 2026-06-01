@@ -85,6 +85,8 @@ export type FidelityAccountScenarioPanelProps = {
   retirementCalendarYear: number
   retRate: number
   brkRate: number
+  /** Focus this tab when the panel opens (e.g. from account row hint link). */
+  initialTab?: ScenarioIntentTabId
 }
 
 export function FidelityAccountScenarioPanel({
@@ -98,6 +100,7 @@ export function FidelityAccountScenarioPanel({
   retirementCalendarYear,
   retRate,
   brkRate,
+  initialTab,
 }: FidelityAccountScenarioPanelProps) {
   const h = horizonClamp(yearsToRetirement)
   const calY = retirementCalendarYear
@@ -122,6 +125,10 @@ export function FidelityAccountScenarioPanel({
     setUiChoice(resolvedChoice)
     setActiveTab(intentFromScenarioChoice(resolvedChoice))
   }, [resolvedChoice])
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab)
+  }, [initialTab, bucket])
 
   useEffect(() => {
     if (stored) {

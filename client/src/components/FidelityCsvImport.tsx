@@ -20,7 +20,6 @@ import {
   hashCsvText,
   isHashAlreadyImported,
   loadStoredFidelityImport,
-  mergeFidelityBatches,
   saveStoredFidelityImport,
   type FidelityImportBatch,
 } from "../lib/fidelityStorage";
@@ -40,8 +39,20 @@ import {
   triggerPortfolioWaveReveal,
 } from "../lib/portfolioWaveReveal";
 import { CSV_IMPORT_MANUAL_ACK_MSG } from "../lib/portfolioSourceExclusivity";
+import { applyImportWithIntent } from "../lib/csvImportApply";
+import {
+  computeCustodianImportDiff,
+  defaultRemovedActions,
+  hasStoredHoldings,
+  type ImportIntent,
+  type RemovedHoldingAction,
+} from "../lib/csvImportDiff";
+import { buildImportIntentExamples } from "../lib/csvImportIntentExamples";
+import { custodianToBrokerSource, stampRowsWithBrokerSource } from "../lib/brokerMonogram";
 import "./SidePanelShell.scss";
 import "./FidelityCsvImport.scss";
+
+type PostReviewStep = "review" | "intent" | "diff";
 
 type Props = {
   onApplyBalances: (
@@ -117,9 +128,9 @@ function buildIncomingBatches(
   if (pending.duplicateInStorage && !replaceDuplicateImports) return [];
   if (!custodian) return [];
   const now = new Date().toISOString();
-  const rows = applyBucketAssignmentsToRows(
-    pending.parsed.rows,
-    reviewAssignments,
+  const rows = stampRowsWithBrokerSource(
+    applyBucketAssignmentsToRows(pending.parsed.rows, reviewAssignments),
+    custodianToBrokerSource(custodian),
   );
   return [
     {
@@ -152,6 +163,7 @@ const CUSTODIANS: {
     label: "Vanguard",
     logoUrl: custodianLogoPublicUrl("vanguard"),
   },
+  { id: "webull", label: "Webull", logoUrl: custodianLogoPublicUrl("webull") },
   { id: "other", label: "Other", logoUrl: null },
 ];
 
@@ -232,6 +244,12 @@ export function FidelityCsvImport({
   const [reviewAssignments, setReviewAssignments] = useState<
     Record<string, AccountBucket>
   >({});
+  const [postReviewStep, setPostReviewStep] =
+    useState<PostReviewStep>("review");
+  const [importIntent, setImportIntent] = useState<ImportIntent | null>(null);
+  const [removedActions, setRemovedActions] = useState<
+    Record<string, RemovedHoldingAction>
+  >({});
   const [hideImportSourceUi, setHideImportSourceUi] = useState(
     () => Boolean(fileIngestRequest) || isPanel,
   );
@@ -250,6 +268,9 @@ export function FidelityCsvImport({
     setReplaceDuplicateImports(false);
     setManualReplaceAcknowledged(false);
     setReviewAssignments({});
+    setPostReviewStep("review");
+    setImportIntent(null);
+    setRemovedActions({});
     setConfirmOverlay({ mode: "idle" });
     if (pickInputRef.current) pickInputRef.current.value = "";
   }
@@ -316,6 +337,9 @@ export function FidelityCsvImport({
     setPending(null);
     setReplaceDuplicateImports(false);
     setManualReplaceAcknowledged(false);
+    setPostReviewStep("review");
+    setImportIntent(null);
+    setRemovedActions({});
     if (c === "other") {
       void readFileAsText(f).then((text) => {
         setHeaderOptions(peekCsvHeaderLabels(text));
@@ -424,6 +448,9 @@ export function FidelityCsvImport({
           duplicateInStorage,
           duplicateInSelection: false,
         });
+        setPostReviewStep("review");
+        setImportIntent(null);
+        setRemovedActions({});
 
         if (!parsed.rows.length) {
           setReviewAssignments({});
@@ -507,15 +534,89 @@ export function FidelityCsvImport({
     [pending, reviewAssignments],
   );
 
+  const hasExistingHoldings = useMemo(() => {
+    if (!pending) return false;
+    return hasStoredHoldings(loadStoredFidelityImport());
+  }, [pending]);
+
+  const importDiff = useMemo(() => {
+    if (!pending || !custodian || importIntent !== "update") return null;
+    return computeCustodianImportDiff(
+      loadStoredFidelityImport(),
+      rowsThisSelection,
+      custodian,
+    );
+  }, [pending, custodian, importIntent, rowsThisSelection]);
+
+  const intentExamples = useMemo(() => {
+    if (!hasExistingHoldings) return null;
+    return buildImportIntentExamples();
+  }, [hasExistingHoldings, pending, postReviewStep]);
+
   const hasStorageDuplicate = Boolean(pending?.duplicateInStorage);
   const manualReplaceAckOk =
     !showManualReplaceNotice || manualReplaceAcknowledged;
-  const canConfirm =
+  const duplicateAckOk = !hasStorageDuplicate || replaceDuplicateImports;
+
+  const canProceedFromReview =
     Boolean(
       pending?.parsed.rows.length && !parseError && incomingBatches.length > 0,
     ) &&
     reviewAssignmentsComplete &&
-    manualReplaceAckOk;
+    manualReplaceAckOk &&
+    duplicateAckOk;
+
+  const canProceedFromIntent =
+    canProceedFromReview && importIntent !== null;
+
+  function onPrimaryFooterPress() {
+    if (!canProceedFromReview) return;
+    if (postReviewStep === "review") {
+      if (hasExistingHoldings) {
+        setPostReviewStep("intent");
+        return;
+      }
+      void applyImportWithProgress();
+      return;
+    }
+    if (postReviewStep === "intent") {
+      if (importIntent === "update" && importDiff) {
+        setRemovedActions(defaultRemovedActions(importDiff.removed));
+        setPostReviewStep("diff");
+        return;
+      }
+      void applyImportWithProgress();
+      return;
+    }
+    void applyImportWithProgress();
+  }
+
+  function onBackFromPostReview() {
+    if (postReviewStep === "diff") {
+      setPostReviewStep("intent");
+      return;
+    }
+    if (postReviewStep === "intent") {
+      setPostReviewStep("review");
+      setImportIntent(null);
+    }
+  }
+
+  const primaryFooterLabel =
+    postReviewStep === "review"
+      ? hasExistingHoldings
+        ? "Continue"
+        : "Confirm"
+      : postReviewStep === "intent" && importIntent === "update"
+        ? "Continue"
+        : "Confirm";
+
+  const primaryFooterEnabled =
+    postReviewStep === "review"
+      ? canProceedFromReview
+      : postReviewStep === "intent"
+        ? canProceedFromIntent
+        : canProceedFromIntent;
 
   function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -559,8 +660,13 @@ export function FidelityCsvImport({
       }
 
       const existing = loadStoredFidelityImport();
-      const next = mergeFidelityBatches(existing, incoming, {
+      const intent: ImportIntent = hasExistingHoldings
+        ? (importIntent ?? "add")
+        : "add";
+      const next = applyImportWithIntent(existing, incoming, {
+        intent,
         replaceDuplicateHashes: rep,
+        removedActions: intent === "update" ? removedActions : undefined,
       });
       saveStoredFidelityImport(next);
       const mergedBalances = next.balances;
@@ -751,102 +857,278 @@ export function FidelityCsvImport({
 
         {pending && pending.parsed.rows.length > 0 && !parseError ? (
           <>
-            {!reviewAssignmentsComplete ? (
-              <div className="csv-import-review-hint csv-import-review-hint--warn">
-                Assign a tax bucket to every account below before importing.
-                Unrecognized names start as &ldquo;Unmapped&rdquo; — choose
-                Pre-tax, Roth, HSA, or Brokerage.
+            {postReviewStep === "review" ? (
+              <>
+                {!reviewAssignmentsComplete ? (
+                  <div className="csv-import-review-hint csv-import-review-hint--warn">
+                    Assign a tax bucket to every account below before importing.
+                    Unrecognized names start as &ldquo;Unmapped&rdquo; — choose
+                    Pre-tax, Roth, HSA, or Brokerage.
+                  </div>
+                ) : null}
+
+                <div className="csv-import-review">
+                  <div
+                    className={`csv-import-review-list${confirmBlocking ? " csv-import-review-list--applying" : ""}`}
+                    role="list"
+                    aria-label="Per-account bucket assignments"
+                  >
+                    {accountReviewRows.map((row, index) => {
+                      const sel = reviewAssignments[row.key];
+                      const unknown = sel === "unknown" || sel === undefined;
+                      const accountRows = rowsThisSelection.filter(
+                        (r) =>
+                          fidelityAccountKey(r.accountName) === row.key &&
+                          !isFidelityPendingActivityRow(r),
+                      );
+                      return (
+                        <details
+                          key={row.key}
+                          className={`imported-account-disclosure csv-import-review-acct${unknown ? " csv-import-review-acct--attention" : ""}`}
+                          style={{ animationDelay: `${index * 0.055}s` }}
+                        >
+                          <summary>
+                            <div className="csv-import-review-acct__identity">
+                              <span className="imported-account-name csv-import-review-acct__name">
+                                {row.label}
+                              </span>
+                            </div>
+                            <div
+                              className="csv-import-review-acct__bucket"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            >
+                              <Select
+                                className="csv-import-review-bucket-select app-select--compact"
+                                variant="secondary"
+                                aria-label={`Tax bucket for ${row.label}`}
+                                placeholder="Unmapped — choose…"
+                                selectedKey={unknown ? null : sel}
+                                isDisabled={confirmBlocking}
+                                onSelectionChange={(keys) => {
+                                  const id = firstKeyFromSelectSelection(keys);
+                                  if (!id || !isImportBucketValue(id)) return;
+                                  setReviewAssignments((m) => ({
+                                    ...m,
+                                    [row.key]: id,
+                                  }));
+                                }}
+                              >
+                                <Select.Trigger>
+                                  <Select.Value />
+                                  <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover className="app-select-import-menu__popover">
+                                  <ListBox className="app-select-import-menu__list">
+                                    {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
+                                      (o) => (
+                                        <ListBox.Item
+                                          key={o.value}
+                                          id={o.value}
+                                          textValue={o.label}
+                                        >
+                                          {o.label}
+                                        </ListBox.Item>
+                                      ),
+                                    )}
+                                  </ListBox>
+                                </Select.Popover>
+                              </Select>
+                            </div>
+                            <span className="csv-import-review-acct__summary-end">
+                              <div className="csv-import-review-acct__values">
+                                <div className="csv-import-review-acct__amount-row">
+                                  <span className="imported-account-summary-total">
+                                    {fmt(row.total)}
+                                  </span>
+                                  <ViewHoldingsHint />
+                                </div>
+                              </div>
+                            </span>
+                          </summary>
+                          <FidelityAccountPositionsTable
+                            rows={accountRows}
+                            showScenarioColumn={false}
+                          />
+                        </details>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            {postReviewStep === "intent" && intentExamples ? (
+              <div className="csv-import-intent">
+                <h3 className="csv-import-intent__title">
+                  You already have holdings loaded
+                </h3>
+                <p className="csv-import-intent__lead">
+                  How should this file affect your current portfolio?
+                </p>
+                <div
+                  className="csv-import-intent__options"
+                  role="radiogroup"
+                  aria-label="Import intent"
+                >
+                  <div className="csv-import-intent__pair">
+                    <label
+                      className={`csv-import-intent__option${importIntent === "update" ? " csv-import-intent__option--selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="csv-import-intent"
+                        className="csv-import-intent__radio"
+                        checked={importIntent === "update"}
+                        disabled={confirmBlocking}
+                        onChange={() => setImportIntent("update")}
+                      />
+                      <span className="csv-import-intent__option-body">
+                        <span className="csv-import-intent__option-title">
+                          Update existing
+                        </span>
+                        <span className="csv-import-intent__option-desc">
+                          Revise values for holdings you already have, add new
+                          ones, and flag anything no longer in this file.
+                        </span>
+                        <span className="csv-import-intent__option-example">
+                          {intentExamples.update}
+                        </span>
+                      </span>
+                    </label>
+                    <label
+                      className={`csv-import-intent__option${importIntent === "add" ? " csv-import-intent__option--selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="csv-import-intent"
+                        className="csv-import-intent__radio"
+                        checked={importIntent === "add"}
+                        disabled={confirmBlocking}
+                        onChange={() => setImportIntent("add")}
+                      />
+                      <span className="csv-import-intent__option-body">
+                        <span className="csv-import-intent__option-title">
+                          Add from new source
+                        </span>
+                        <span className="csv-import-intent__option-desc">
+                          Append these holdings without touching your current
+                          ones.
+                        </span>
+                        <span className="csv-import-intent__option-example">
+                          {intentExamples.add}
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                  <label
+                    className={`csv-import-intent__option csv-import-intent__option--replace${importIntent === "replace" ? " csv-import-intent__option--selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="csv-import-intent"
+                      className="csv-import-intent__radio csv-import-intent__radio--replace"
+                      checked={importIntent === "replace"}
+                      disabled={confirmBlocking}
+                      onChange={() => setImportIntent("replace")}
+                    />
+                    <span className="csv-import-intent__option-body">
+                      <span className="csv-import-intent__option-title">
+                        Replace all
+                      </span>
+                      <span className="csv-import-intent__option-desc">
+                        Remove all current holdings and start fresh with this
+                        file.
+                      </span>
+                      <span className="csv-import-intent__option-example">
+                        {intentExamples.replace}
+                      </span>
+                    </span>
+                  </label>
+                </div>
               </div>
             ) : null}
 
-            <div className="csv-import-review">
-              <div
-                className={`csv-import-review-list${confirmBlocking ? " csv-import-review-list--applying" : ""}`}
-                role="list"
-                aria-label="Per-account bucket assignments"
-              >
-                {accountReviewRows.map((row, index) => {
-                  const sel = reviewAssignments[row.key];
-                  const unknown = sel === "unknown" || sel === undefined;
-                  const accountRows = rowsThisSelection.filter(
-                    (r) =>
-                      fidelityAccountKey(r.accountName) === row.key &&
-                      !isFidelityPendingActivityRow(r),
-                  );
-                  return (
-                    <details
-                      key={row.key}
-                      className={`imported-account-disclosure csv-import-review-acct${unknown ? " csv-import-review-acct--attention" : ""}`}
-                      style={{ animationDelay: `${index * 0.055}s` }}
-                    >
-                      <summary>
-                        <div className="csv-import-review-acct__identity">
-                          <span className="imported-account-name csv-import-review-acct__name">
-                            {row.label}
-                          </span>
-                        </div>
-                        <div
-                          className="csv-import-review-acct__bucket"
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
-                        >
-                          <Select
-                            className="csv-import-review-bucket-select app-select--compact"
-                            variant="secondary"
-                            aria-label={`Tax bucket for ${row.label}`}
-                            placeholder="Unmapped — choose…"
-                            selectedKey={unknown ? null : sel}
-                            isDisabled={confirmBlocking}
-                            onSelectionChange={(keys) => {
-                              const id = firstKeyFromSelectSelection(keys);
-                              if (!id || !isImportBucketValue(id)) return;
-                              setReviewAssignments((m) => ({
-                                ...m,
-                                [row.key]: id,
-                              }));
-                            }}
+            {postReviewStep === "diff" && importDiff ? (
+              <div className="csv-import-diff">
+                <h3 className="csv-import-diff__title">Import changes</h3>
+                <p className="csv-import-diff__counts">
+                  <span className="csv-import-diff__count">
+                    {importDiff.counts.updated} updated
+                  </span>
+                  <span className="csv-import-diff__sep" aria-hidden>
+                    ·
+                  </span>
+                  <span className="csv-import-diff__count">
+                    {importDiff.counts.added} added
+                  </span>
+                  <span className="csv-import-diff__sep" aria-hidden>
+                    ·
+                  </span>
+                  <span className="csv-import-diff__count">
+                    {importDiff.counts.unchanged} unchanged
+                  </span>
+                </p>
+                {importDiff.removed.length > 0 ? (
+                  <div className="csv-import-diff__removed">
+                    <p className="csv-import-diff__removed-heading">
+                      No longer in this file:
+                    </p>
+                    <ul className="csv-import-diff__removed-list">
+                      {importDiff.removed.map((item) => {
+                        const action =
+                          removedActions[item.key] ?? ("keep" as const);
+                        return (
+                          <li
+                            key={item.key}
+                            className="csv-import-diff__removed-row"
                           >
-                            <Select.Trigger>
-                              <Select.Value />
-                              <Select.Indicator />
-                            </Select.Trigger>
-                            <Select.Popover className="app-select-import-menu__popover">
-                              <ListBox className="app-select-import-menu__list">
-                                {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
-                                  (o) => (
-                                    <ListBox.Item
-                                      key={o.value}
-                                      id={o.value}
-                                      textValue={o.label}
-                                    >
-                                      {o.label}
-                                    </ListBox.Item>
-                                  ),
-                                )}
-                              </ListBox>
-                            </Select.Popover>
-                          </Select>
-                        </div>
-                        <span className="csv-import-review-acct__summary-end">
-                          <div className="csv-import-review-acct__values">
-                            <div className="csv-import-review-acct__amount-row">
-                              <span className="imported-account-summary-total">
-                                {fmt(row.total)}
-                              </span>
-                              <ViewHoldingsHint />
-                            </div>
-                          </div>
-                        </span>
-                      </summary>
-                      <FidelityAccountPositionsTable
-                        rows={accountRows}
-                        showScenarioColumn={false}
-                      />
-                    </details>
-                  );
-                })}
+                            <span className="csv-import-diff__removed-label">
+                              {item.displayLabel}
+                            </span>
+                            <span className="csv-import-diff__removed-value tabular-nums">
+                              {fmt(item.row.currentValue)}
+                            </span>
+                            <span className="csv-import-diff__removed-actions">
+                              <AppButton
+                                size="sm"
+                                variant={
+                                  action === "keep" ? "primary" : "ghost"
+                                }
+                                isDisabled={confirmBlocking}
+                                onPress={() =>
+                                  setRemovedActions((m) => ({
+                                    ...m,
+                                    [item.key]: "keep",
+                                  }))
+                                }
+                              >
+                                Keep
+                              </AppButton>
+                              <AppButton
+                                size="sm"
+                                variant={
+                                  action === "remove" ? "primary" : "ghost"
+                                }
+                                isDisabled={confirmBlocking}
+                                onPress={() =>
+                                  setRemovedActions((m) => ({
+                                    ...m,
+                                    [item.key]: "remove",
+                                  }))
+                                }
+                              >
+                                Remove
+                              </AppButton>
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
-            </div>
+            ) : null}
 
             {confirmOverlay.mode === "error" ? (
               <div className="csv-import-error" role="alert">
@@ -873,9 +1155,13 @@ export function FidelityCsvImport({
           Import positions CSV
         </h2>
         <p className="csv-import-modal__lead">
-          {isPanel || hideImportSourceUi || stagedFile || pending
-            ? "Review each account and map it to the correct tax bucket, then confirm. Ballpark amounts are fine — you can refine them later."
-            : "Choose your custodian, then select a single positions export file."}
+          {postReviewStep === "intent"
+            ? "Choose how this import should merge with your existing holdings."
+            : postReviewStep === "diff"
+              ? "Review what will change, then confirm. Removed holdings stay unless you choose Remove."
+              : isPanel || hideImportSourceUi || stagedFile || pending
+                ? "Review each account and map it to the correct tax bucket, then confirm. Ballpark amounts are fine — you can refine them later."
+                : "Choose your custodian, then select a single positions export file."}
         </p>
       </header>
       <SimpleBar
@@ -946,12 +1232,28 @@ export function FidelityCsvImport({
           </AppButton>
           {pending && pending.parsed.rows.length > 0 && !parseError ? (
             <span className="csv-import-summary csv-import-summary--footer">
-              {pending.parsed.rows.length} holdings found
+              {postReviewStep === "diff" && importDiff
+                ? `${importDiff.counts.updated} updated · ${importDiff.counts.added} added · ${importDiff.counts.unchanged} unchanged`
+                : `${pending.parsed.rows.length} holdings found`}
             </span>
           ) : (
             <span />
           )}
           <div className="csv-import-modal__footer-actions">
+            {postReviewStep !== "review" &&
+            pending &&
+            pending.parsed.rows.length > 0 &&
+            !parseError &&
+            confirmOverlay.mode !== "error" ? (
+              <AppButton
+                size="sm"
+                variant="ghost"
+                isDisabled={importBusy !== null || confirmBlocking}
+                onPress={() => onBackFromPostReview()}
+              >
+                Back
+              </AppButton>
+            ) : null}
             {confirmOverlay.mode === "error" ? (
               <AppButton
                 size="sm"
@@ -965,11 +1267,11 @@ export function FidelityCsvImport({
                 size="sm"
                 variant="primary"
                 isDisabled={
-                  !canConfirm || importBusy !== null || confirmBlocking
+                  !primaryFooterEnabled || importBusy !== null || confirmBlocking
                 }
-                onPress={() => void applyImportWithProgress()}
+                onPress={() => onPrimaryFooterPress()}
               >
-                Confirm
+                {primaryFooterLabel}
               </AppButton>
             )}
           </div>

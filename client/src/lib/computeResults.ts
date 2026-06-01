@@ -6,9 +6,13 @@ import {
   calcTaxDetailed,
   fv,
   fvAnnuity,
+  rothConversionRoom,
   ssFromAge,
+  ssProvisionalThresholds,
+  type FilingStatusId,
 } from 'shared'
 import { clampedAgeFromDob } from './ageFromDob'
+import { normalizeCalculatorFilingStatus } from './filingStatus'
 import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
 import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
 import { positionsForBrokerage, positionsForRetirementBucket, type FidelityPositionRow } from './fidelityCsv'
@@ -113,7 +117,11 @@ export type CalculatorInputs = {
   marketScenarioActive?: boolean
   /** Welcome/settings residence — drives USD / GBP / EUR display. */
   residenceCountry: string
+  /** US federal filing status for tax, SS provisional income, and Roth conversion room. */
+  filingStatus: FilingStatusId
 }
+
+export type { FilingStatusId } from 'shared'
 
 export type { PositionReturnModel } from './positionReturnModel'
 
@@ -232,8 +240,10 @@ export function computeResults(
     targetRetirementAge,
     growthGoal,
     monthlyIncomeGoal,
+    filingStatus: filingStatusRaw,
   } = inputs
 
+  const filingStatus = normalizeCalculatorFilingStatus(filingStatusRaw)
   const retireRegions = normalizeRetireRegions(retireRegionsRaw, legacyItalyCost)
 
   const currentAge = clampedAgeFromDob(dateOfBirth)
@@ -425,6 +435,7 @@ export function computeResults(
     retWdAnn * hsaRatio,
     brkWdAnn,
     totalSS,
+    filingStatus,
   )
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
@@ -458,7 +469,7 @@ export function computeResults(
     const aWd = tFV * wdRate * infl
     const mPort = aWd / 12
     const gross = mPort + totalSS
-    const tax = calcTax(aWd, totalSS, rRet, brkFV, tradRatio, rothRatio, hsaRatio)
+    const tax = calcTax(aWd, totalSS, rRet, brkFV, tradRatio, rothRatio, hsaRatio, filingStatus)
     const after = (aWd + totalSS * 12 - tax) / 12
     return { rate, rFV: rRet, bFV: brkFV, tFV, mPort, gross, after }
   })
@@ -467,15 +478,25 @@ export function computeResults(
   const hsaMon = (retFV * 0.1 * 0.04) / 12
   const halfSS = (totalSS * 12) / 2
   const combinedInc = halfSS + other
-  const headroom0 = Math.max(0, 25000 - combinedInc)
-  const ssZone = combinedInc < 25000 ? 'free' : combinedInc < 34000 ? 'partial' : 'taxed'
+  const ssThresh = ssProvisionalThresholds(filingStatus)
+  const headroom0 = ssThresh.always85
+    ? 0
+    : Math.max(0, ssThresh.half50 - combinedInc)
+  const ssZone = ssThresh.always85
+    ? 'taxed'
+    : combinedInc < ssThresh.half50
+      ? 'free'
+      : combinedInc < ssThresh.full85
+        ? 'partial'
+        : 'taxed'
   const ssLabel =
     ssZone === 'free' ? '0% of SS taxable' : ssZone === 'partial' ? 'up to 50% taxable' : 'up to 85% taxable'
-  const barPct = Math.min(100, Math.round((combinedInc / 34000) * 100))
+  const barDenom = ssThresh.always85 ? 1 : Math.max(1, ssThresh.full85)
+  const barPct = Math.min(100, Math.round((combinedInc / barDenom) * 100))
   const barColor = ssZone === 'free' ? '#16DB65' : ssZone === 'partial' ? '#F9A03F' : '#C03221'
 
   const grossAnnualUsd = annWd + totalSS * 12
-  const usTax = calcTax(annWd, totalSS, retFV, brkFV, tradRatio, rothRatio, hsaRatio)
+  const usTax = calcTax(annWd, totalSS, retFV, brkFV, tradRatio, rothRatio, hsaRatio, filingStatus)
   const retireRegionComparisons = computeAllRetireRegionComparisons(retireRegions, grossAnnualUsd, usTax)
   const primaryRegion = retireRegionComparisons[0]
   const itAnn = grossAnnualUsd
@@ -500,6 +521,7 @@ export function computeResults(
     annWd,
     taxDetail,
     hasPortfolioBalances,
+    filingStatus,
   })
 
   return {
@@ -523,6 +545,7 @@ export function computeResults(
     tradRatio,
     rothRatio,
     hsaRatio,
+    filingStatus,
     savingsFV,
     retFV,
     brkFV,
@@ -617,6 +640,7 @@ function computeStrategyBlock({
   annWd,
   taxDetail,
   hasPortfolioBalances,
+  filingStatus,
 }: {
   i: { tradBal: number; retRate: number; ss: number; tradRatio: number; rothRatio: number; hsaRatio: number }
   retFV: number
@@ -625,6 +649,7 @@ function computeStrategyBlock({
   annWd: number
   taxDetail: ReturnType<typeof calcTaxDetailed>
   hasPortfolioBalances: boolean
+  filingStatus: FilingStatusId
 }) {
   if (!hasPortfolioBalances) {
     return {
@@ -650,17 +675,14 @@ function computeStrategyBlock({
   const tradWdAnn = retWdAnn * i.tradRatio
   const rothWdAnn = retWdAnn * i.rothRatio
   const hsaWdAnn = retWdAnn * i.hsaRatio
-  const stdDed = 29200
-  const bracket12top = 89075
-  const taxableTrad = Math.max(0, tradWdAnn - stdDed)
-  const rothConvRoom = Math.max(0, bracket12top - taxableTrad)
+  const rothConvRoomAmt = rothConversionRoom(tradWdAnn, filingStatus)
   return {
     retWdAnn,
     brkWdAnn,
     tradWdAnn,
     rothWdAnn,
     hsaWdAnn,
-    rothConvRoom,
+    rothConvRoom: rothConvRoomAmt,
     tradBalK: Math.round(i.tradBal / 1000),
     retRatePct: (i.retRate * 100).toFixed(1),
     tradFvK: retFV * i.tradRatio,
@@ -685,6 +707,7 @@ export function applyPortfolioDeltaAtRetirement(
     targetRetirementAge: number
     ssIncluded: boolean
     retireRegions: RetireRegionPick[]
+    filingStatus: FilingStatusId
   },
 ): ComputedSnapshot {
   const {
@@ -698,6 +721,7 @@ export function applyPortfolioDeltaAtRetirement(
     targetRetirementAge,
     ssIncluded,
     retireRegions,
+    filingStatus,
   } = params
 
   if (portfolioDelta === 0 || !snapshot.hasPortfolioBalances) return snapshot
@@ -723,6 +747,7 @@ export function applyPortfolioDeltaAtRetirement(
     retWdAnn * snapshot.hsaRatio,
     brkWdAnn,
     totalSS,
+    filingStatus,
   )
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
@@ -735,6 +760,9 @@ export function applyPortfolioDeltaAtRetirement(
     snapshot.growthGoal > 0
       ? Math.min(100, Math.round((adjustedTotalFV / snapshot.growthGoal) * 1000) / 10)
       : snapshot.growthGoalProgressPct
+
+  const tradWdAnn = retWdAnn * snapshot.tradRatio
+  const rothConvRoomAmt = rothConversionRoom(tradWdAnn, filingStatus)
 
   const incomePhase = incomeMode
     ? calcIncomePhase({
@@ -758,6 +786,7 @@ export function applyPortfolioDeltaAtRetirement(
     snapshot.tradRatio,
     snapshot.rothRatio,
     snapshot.hsaRatio,
+    filingStatus,
   )
   const retireRegionComparisons = computeAllRetireRegionComparisons(
     retireRegions,
@@ -768,6 +797,7 @@ export function applyPortfolioDeltaAtRetirement(
 
   return {
     ...snapshot,
+    filingStatus,
     retFV: adjustedRetFV,
     brkFV: adjustedBrkFV,
     totalFV: adjustedTotalFV,
@@ -780,6 +810,11 @@ export function applyPortfolioDeltaAtRetirement(
     incomeGoalProgressPct,
     growthGoalProgressPct,
     incomePhase,
+    strategy: {
+      ...snapshot.strategy,
+      rothConvRoom: rothConvRoomAmt,
+      taxDetail,
+    },
     survivorCallout: buildSurvivorCallout(monPort, snapshot.ssBreakdown),
     usTax,
     retireRegionComparisons,

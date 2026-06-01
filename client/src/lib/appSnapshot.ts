@@ -1,4 +1,5 @@
 import { approxIsoDobFromAge, isValidIsoDateString } from './ageFromDob'
+import { normalizeCalculatorFilingStatus } from './filingStatus'
 import { normalizeIncomePresets, type CalculatorInputs, type CalculatorUi } from './computeResults'
 import { normalizeRetireRegions } from './calc/retireRegions'
 import { findIncomeSecurity } from './incomeSecurities'
@@ -86,6 +87,9 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
           ? base.accountReturnScenarios
           : {},
       retireRegions: normalizeRetireRegions(base.retireRegions, legacyItalyCost),
+      filingStatus: normalizeCalculatorFilingStatus(
+        base.filingStatus ?? defaultInputs.filingStatus,
+      ),
       ...normalizeSocialSecurityFields(base, defaultInputs),
     },
     ui: {

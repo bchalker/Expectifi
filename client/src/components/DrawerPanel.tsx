@@ -252,7 +252,7 @@ function DrawerBody({
     case 'taxfree':
       return <TaxFreeBody c={c} />
     case 'strategy':
-      return <StrategyBody c={c} />
+      return <StrategyBody c={c} filingStatus={inputs.filingStatus} />
     default:
       return null
   }
@@ -582,13 +582,8 @@ function StackItem({
   )
 }
 
-function StrategyBody({ c }: { c: ComputedSnapshot }) {
+function StrategyBody({ c, filingStatus }: { c: ComputedSnapshot; filingStatus: CalculatorInputs['filingStatus'] }) {
   const { locale, taxConfig } = useUserLocale()
-  const [filingStatus, setFilingStatus] = useState(taxConfig.defaultFilingStatus)
-
-  useEffect(() => {
-    setFilingStatus(taxConfig.defaultFilingStatus)
-  }, [taxConfig.defaultFilingStatus, locale])
 
   if (!c.hasPortfolioBalances) {
     return (
@@ -658,25 +653,6 @@ function StrategyBody({ c }: { c: ComputedSnapshot }) {
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.6 }}>
         {taxConfig.withdrawalOrderNote} Figures use your current balances and sliders.
       </p>
-      {taxConfig.filingStatuses.length > 1 ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="strategy-filing-status" style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-            Filing status
-          </label>
-          <select
-            id="strategy-filing-status"
-            value={filingStatus}
-            onChange={(e) => setFilingStatus(e.target.value)}
-            style={{ fontSize: '1rem', maxWidth: '100%' }}
-          >
-            {taxConfig.filingStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
       <div
         style={{
           background: 'var(--surface2)',

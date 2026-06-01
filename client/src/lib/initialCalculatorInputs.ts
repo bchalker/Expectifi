@@ -9,6 +9,7 @@ import { DEFAULT_INCOME_PRESETS } from './incomePresets'
 import { stripFinancialFields } from './calculatorInputSanitize'
 import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hasPlanningProfilePrefs, loadLocalUserPrefs, userPrefsToCalculatorPatch } from './userPrefs'
+import { DEFAULT_CALCULATOR_FILING_STATUS } from './filingStatus'
 import { loadUserProfile, profileToCalculatorPatch } from './userProfileStorage'
 
 export const defaultCalculatorInputs: CalculatorInputs = {
@@ -49,6 +50,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   marketScenario: 'base',
   marketScenarioActive: false,
   residenceCountry: '',
+  filingStatus: DEFAULT_CALCULATOR_FILING_STATUS,
 }
 
 export const defaultCalculatorUi: CalculatorUi = {

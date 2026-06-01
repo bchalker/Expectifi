@@ -1,4 +1,9 @@
+import type { BrokerSource } from './brokerMonogram'
+import { resolveBrokerSource } from './brokerMonogram'
+
 export type AccountBucket = 'trad401k' | 'se401k' | 'roth' | 'hsa' | 'brokerage' | 'unknown'
+
+export type { BrokerSource } from './brokerMonogram'
 
 /** Fidelity Positions export row (normalized headers). */
 export type FidelityPositionRow = {
@@ -19,6 +24,10 @@ export type FidelityPositionRow = {
    * UI grouping, and calculator retirement buckets.
    */
   calculatorBucket?: AccountBucket
+  /** Import / link source for broker monogram display. */
+  brokerSource?: BrokerSource
+  /** Subtle warning when the same symbol exists in CSV and Plaid for one broker (keep-both resolution). */
+  plaidOverlapWarning?: boolean
 }
 
 /** Fidelity appends trailing `*` markers to some symbols (e.g. money market); strip for display/import. */
@@ -464,6 +473,7 @@ export type FidelityAccountGroup = {
   calculatorLabel: string
   total: number
   rows: FidelityPositionRow[]
+  brokerSource: BrokerSource
 }
 
 /** Group position rows by Fidelity account for UI breakdowns. */
@@ -486,6 +496,7 @@ export function groupPositionsByAccount(rows: FidelityPositionRow[]): FidelityAc
       calculatorLabel: accountBucketLabel(bucket),
       total,
       rows: groupRows,
+      brokerSource: resolveBrokerSource(groupRows[0]!),
     })
   }
   return out
@@ -627,6 +638,7 @@ export type FidelityHoldingAccountBreakdown = {
   quantity: number
   currentValue: number
   costBasis: number | null
+  brokerSource: BrokerSource
 }
 
 /** Short label for a source account row (Plaid "Institution — Account ·••1234" or CSV account name). */
@@ -664,6 +676,7 @@ export function breakdownAggregateByAccount(row: AggregatedFidelitySymbolRow): F
       quantity,
       currentValue,
       costBasis: costParts.length ? costParts.reduce((s, x) => s + x, 0) : null,
+      brokerSource: resolveBrokerSource(accountRows[0]!),
     })
   }
   out.sort((a, b) => b.currentValue - a.currentValue)

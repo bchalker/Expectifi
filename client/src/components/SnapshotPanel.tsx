@@ -5,11 +5,12 @@ import {
   accountLabelForWithdrawalBucket,
   formatMarginalRatesSummary,
   localeSupportsWithdrawalBucket,
-  standardDeductionForFilingStatus,
   taxFreeWithdrawalLabels,
 } from "../config/taxConfig";
 import { useUserLocale } from "../context/UserLocaleContext";
+import { filingStatusDisplayLabel } from "../lib/filingStatus";
 import { pensionConfigForLocale } from "../lib/localePensionConfig";
+import { standardDeductionForFilingStatus, type FilingStatusId } from "shared";
 import { fmt, fmtK, fmtMon } from "../utils/format";
 import { SidePanelShell } from "./SidePanelShell";
 import "./PanelChrome.scss";
@@ -154,22 +155,19 @@ function StripSnapshotNarrative({
 function StripTaxNarrative({
   td,
   annTax,
+  filingStatus,
 }: {
   td: C["taxDetail"];
   annTax: number;
+  filingStatus: FilingStatusId;
 }) {
   const { locale, taxConfig } = useUserLocale();
   const pension = pensionConfigForLocale(locale);
-  const [filingStatus, setFilingStatus] = useState(taxConfig.defaultFilingStatus);
-
-  useEffect(() => {
-    setFilingStatus(taxConfig.defaultFilingStatus);
-  }, [taxConfig.defaultFilingStatus, locale]);
-
+  const filingLabel = filingStatusDisplayLabel(filingStatus);
   const pretaxLabel =
     accountLabelForWithdrawalBucket(taxConfig, "pretax") ?? "Pre-tax retirement";
   const taxFree = taxFreeWithdrawalLabels(taxConfig);
-  const stdDed = standardDeductionForFilingStatus(taxConfig, filingStatus);
+  const stdDed = standardDeductionForFilingStatus(filingStatus);
   const stdDedLabel = taxConfig.standardDeductionLabel ?? "Standard deduction";
   const showRoth = localeSupportsWithdrawalBucket(locale, "roth") && td.rothWd > 0;
   const showHsa = localeSupportsWithdrawalBucket(locale, "hsa") && td.hsaWd > 0;
@@ -184,38 +182,17 @@ function StripTaxNarrative({
   return (
     <div className="strip-narrative">
       <p className="strip-narrative__kicker">Tax breakdown</p>
-      {taxConfig.filingStatuses.length > 1 ? (
-        <div className="strip-narrative__filing" style={{ marginBottom: "0.75rem" }}>
-          <label
-            htmlFor="snapshot-filing-status"
-            className="strip-narrative__kicker"
-            style={{ display: "block", marginBottom: 4 }}
-          >
-            Filing status
-          </label>
-          <select
-            id="snapshot-filing-status"
-            className="strip-narrative__select"
-            value={filingStatus}
-            onChange={(e) => setFilingStatus(e.target.value)}
-            style={{ fontSize: "1rem", maxWidth: "100%" }}
-          >
-            {taxConfig.filingStatuses.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <p className="strip-narrative__p" style={{ marginBottom: "0.5rem" }}>
-          Filing: <strong className="strip-narrative__em">{filingStatus}</strong>
-        </p>
-      )}
+      <p className="strip-narrative__p" style={{ marginBottom: "0.5rem" }}>
+        Filing: <strong className="strip-narrative__em">{filingLabel}</strong>
+        <span className="strip-narrative__filing-note">
+          {" "}
+          (change in Configure → Planning)
+        </span>
+      </p>
       <p className="strip-narrative__p">
         Your{" "}
         <strong className="strip-narrative__em">ordinary income tax</strong> (
-        {filingStatus}) is modeled at{" "}
+        {filingLabel}) is modeled at{" "}
         <strong className="strip-narrative__em strip-narrative__em--warn">
           {fmt(td.ordTax)}/year
         </strong>{" "}
@@ -409,7 +386,7 @@ export function SnapshotPanel({
             />
           </Tabs.Panel>
           <Tabs.Panel id="tax" className="strip-snapshot-tabpanel">
-            <StripTaxNarrative td={td} annTax={c.annTax} />
+            <StripTaxNarrative td={td} annTax={c.annTax} filingStatus={c.filingStatus} />
           </Tabs.Panel>
         </Tabs>
       </SidePanelShell>

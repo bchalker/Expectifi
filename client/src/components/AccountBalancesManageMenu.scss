@@ -281,7 +281,9 @@
 }
 
 .account-balances-manage__csv-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   width: 100%;
   min-height: 36px;
   padding: 0.35rem 0.5rem;
@@ -294,6 +296,10 @@
   color: var(--text-muted);
   text-align: left;
   cursor: pointer;
+}
+
+.account-balances-manage__csv-item-label {
+  min-width: 0;
 }
 
 .account-balances-manage__csv-item:hover,

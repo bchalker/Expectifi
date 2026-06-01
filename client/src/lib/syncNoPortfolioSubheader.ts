@@ -1,3 +1,4 @@
+import { DEFAULT_CALCULATOR_FILING_STATUS } from './filingStatus'
 import { defaultRetireRegionPick } from './calc/retireRegions'
 import { hydrateAppSnapshot } from './appSnapshot'
 import { loadStoredAppState } from './appStateStorage'
@@ -41,6 +42,7 @@ const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   incomePresets: [],
   positionReturnModels: [],
   residenceCountry: '',
+  filingStatus: DEFAULT_CALCULATOR_FILING_STATUS,
 }
 
 const BOOTSTRAP_DEFAULT_UI: CalculatorUi = {

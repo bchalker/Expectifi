@@ -165,6 +165,9 @@ export function ConfigDrawerTabPanels({
               onGrowthGoal={(growthGoal) => setInputs({ growthGoal })}
               monthlyIncomeGoal={planning.monthlyIncomeGoal}
               onMonthlyIncomeGoal={(monthlyIncomeGoal) => setInputs({ monthlyIncomeGoal })}
+              filingStatus={inputs.filingStatus}
+              onFilingStatusChange={(filingStatus) => setInputs({ filingStatus })}
+              showFilingStatus={locale === 'us'}
             />
           </section>
         </div>

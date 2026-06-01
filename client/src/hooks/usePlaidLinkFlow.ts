@@ -4,14 +4,22 @@ import type { PlaidLinkOnSuccessMetadata } from 'react-plaid-link'
 import { ApiRequestError } from '../lib/api'
 import {
   createPlaidLinkToken,
+  deletePlaidItem,
   exchangePlaidPublicToken,
   resolvePlaidInstitution,
   syncPlaidHoldings,
 } from '../lib/api/plaid'
 import {
-  applyPlaidHoldingsSnapshot,
   applyPlaidHoldingsSnapshots,
+  type PlaidHoldingsSnapshot,
 } from '../lib/plaidImportApply'
+import {
+  applyPlaidHoldingsSnapshotDefault,
+  detectPlaidBrokerConflict,
+  applyPlaidHoldingsWithResolution,
+  type PlaidBrokerConflict,
+  type PlaidConflictResolution,
+} from '../lib/plaidConflict'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { markPortfolioBalancesFlush, triggerPortfolioWaveReveal } from '../lib/portfolioWaveReveal'
 
@@ -40,11 +48,18 @@ export function plaidAlreadyConnectedMessage(institutionName: string): string {
   return `${institutionName} is already connected. You can manage it in the panel above.`
 }
 
+export type PlaidBrokerConflictRequest = {
+  snapshot: PlaidHoldingsSnapshot
+  conflict: PlaidBrokerConflict
+}
+
 type UsePlaidLinkFlowOptions = {
   onApplyBalances: (partial: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
   onImportApplied?: () => void
   onComplete?: () => void
   onAlreadyConnected?: () => void
+  onPlaidSnapshotReady?: (snapshot: PlaidHoldingsSnapshot) => void
+  onBrokerConflict?: (request: PlaidBrokerConflictRequest) => Promise<PlaidConflictResolution>
   enabled?: boolean
 }
 
@@ -53,6 +68,8 @@ export function usePlaidLinkFlow({
   onImportApplied,
   onComplete,
   onAlreadyConnected,
+  onPlaidSnapshotReady,
+  onBrokerConflict,
   enabled = true,
 }: UsePlaidLinkFlowOptions) {
   const [linkToken, setLinkToken] = useState<string | null>(null)
@@ -66,7 +83,11 @@ export function usePlaidLinkFlow({
   const exitingForDuplicateRef = useRef(false)
   const institutionCheckBusyRef = useRef(false)
   const onAlreadyConnectedRef = useRef(onAlreadyConnected)
+  const onBrokerConflictRef = useRef(onBrokerConflict)
+  const onPlaidSnapshotReadyRef = useRef(onPlaidSnapshotReady)
   onAlreadyConnectedRef.current = onAlreadyConnected
+  onBrokerConflictRef.current = onBrokerConflict
+  onPlaidSnapshotReadyRef.current = onPlaidSnapshotReady
 
   const launchLinkToken = useCallback(async (itemIdForReconnect?: string | null) => {
     reconnectItemIdRef.current = itemIdForReconnect?.trim() || null
@@ -84,6 +105,40 @@ export function usePlaidLinkFlow({
       setLinkToken(null)
     }
   }, [])
+
+  const applySnapshot = useCallback(
+    async (snapshot: PlaidHoldingsSnapshot, institutionId: string | null) => {
+      const conflict = detectPlaidBrokerConflict(institutionId, snapshot.institutionName)
+      let resolution: PlaidConflictResolution | null = null
+
+      if (conflict && onBrokerConflictRef.current) {
+        resolution = await onBrokerConflictRef.current({ snapshot, conflict })
+      }
+
+      if (conflict && resolution === 'skip_plaid') {
+        try {
+          await deletePlaidItem(snapshot.itemId)
+        } catch {
+          /* item may already be removed */
+        }
+        return
+      }
+
+      const balances = conflict
+        ? applyPlaidHoldingsWithResolution(snapshot, resolution ?? 'use_plaid', conflict.broker)
+        : applyPlaidHoldingsSnapshotDefault(snapshot)
+
+      if (!balances) return
+
+      markPortfolioBalancesFlush()
+      onApplyBalances(balances)
+      triggerPortfolioWaveReveal()
+      onPlaidSnapshotReadyRef.current?.(snapshot)
+      onImportApplied?.()
+      onComplete?.()
+    },
+    [onApplyBalances, onComplete, onImportApplied],
+  )
 
   const finishNewConnection = useCallback(
     async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
@@ -106,12 +161,11 @@ export function usePlaidLinkFlow({
           institutionId,
           institutionName,
         })
-        const balances = applyPlaidHoldingsSnapshot(snapshot)
-        markPortfolioBalancesFlush()
-        onApplyBalances(balances)
-        triggerPortfolioWaveReveal()
-        onImportApplied?.()
-        onComplete?.()
+        const enriched: PlaidHoldingsSnapshot = {
+          ...snapshot,
+          institutionId,
+        }
+        await applySnapshot(enriched, institutionId)
       } catch (e) {
         if (e instanceof ApiRequestError && e.code === 'already_connected') {
           const name = institutionName ?? 'This institution'
@@ -122,7 +176,7 @@ export function usePlaidLinkFlow({
         throw e
       }
     },
-    [onApplyBalances, onComplete, onImportApplied],
+    [applySnapshot],
   )
 
   const finishReconnect = useCallback(async () => {

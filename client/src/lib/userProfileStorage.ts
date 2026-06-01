@@ -11,6 +11,7 @@ import {
 } from './onboardingRegions'
 import type { UserPrefs } from './userPrefs'
 import { pensionConfigForLocale } from './localePensionConfig'
+import { normalizeCalculatorFilingStatus } from './filingStatus'
 import { clampClaimAgeInRange } from './socialSecurity'
 import { canWritePlanLocalStorage } from './planStorage/writeContext'
 import { loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage/profile'
@@ -174,6 +175,7 @@ export function profilePatchFromCalculatorInputs(
     spouse_benefit_estimate: inputs.married
       ? Math.max(0, Math.round(inputs.spouseBenefit67))
       : undefined,
+    filing_status: inputs.filingStatus,
   }
 }
 
@@ -344,6 +346,9 @@ export function profileToCalculatorPatch(profile: StoredUserProfile | null): Par
   }
   if (profile.spouse_claim_type != null) {
     patch.spouseHasOwnEarnings = profile.spouse_claim_type === 'own'
+  }
+  if (profile.filing_status) {
+    patch.filingStatus = normalizeCalculatorFilingStatus(profile.filing_status)
   }
   return patch
 }

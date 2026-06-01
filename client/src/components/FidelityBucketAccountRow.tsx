@@ -17,8 +17,10 @@ export type FidelityBucketAccountScenarioProps = {
 
 type Props = {
   label: string
-  /** Tax treatment line under the account name. */
-  subtext?: string | null
+  /** Personalized hint or tax line under the account name. */
+  subtext?: ReactNode | null
+  /** Income mode: annual withdrawal stat beneath the hint. */
+  withdrawalPill?: ReactNode | null
   total: ReactNode
   trend?: BucketTrendDisplay | null
   showViewHoldings?: boolean
@@ -31,6 +33,7 @@ type Props = {
 export function FidelityBucketAccountRow({
   label,
   subtext = null,
+  withdrawalPill = null,
   total,
   trend,
   showViewHoldings = true,
@@ -51,8 +54,17 @@ export function FidelityBucketAccountRow({
             ) : null}
             <div className="portfolio-bucket-account-row__identity">
               <span className="portfolio-bucket-account-row__name">{label}</span>
-              {subtext ? (
-                <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
+              {subtext || withdrawalPill ? (
+                <div className="portfolio-bucket-account-row__hint-stack">
+                  {subtext ? (
+                    typeof subtext === 'string' ? (
+                      <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
+                    ) : (
+                      subtext
+                    )
+                  ) : null}
+                  {withdrawalPill}
+                </div>
               ) : null}
               <BucketTotalTrend trend={trend} className="portfolio-bucket-account-row__trend" />
             </div>
