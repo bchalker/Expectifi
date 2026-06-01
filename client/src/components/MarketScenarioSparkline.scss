@@ -29,12 +29,46 @@
   max-width: 100%;
 }
 
+.market-scenario-sparkline__chart-visual {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.market-scenario-sparkline__chart-visual--paused {
+  --market-scenario-chart-line: var(--border-medium-dark);
+  --market-scenario-sparkline-base: var(--border);
+  --market-scenario-chart-fill-start: color-mix(in srgb, var(--surface2) 50%, transparent);
+  --market-scenario-chart-fill-end: transparent;
+  --market-scenario-base-fill-start: color-mix(in srgb, var(--surface-u2) 70%, transparent);
+  --market-scenario-base-fill-end: transparent;
+}
+
+.market-scenario-sparkline--color-transition .market-scenario-sparkline__chart-visual .recharts-curve {
+  transition: stroke 300ms ease;
+}
+
+.market-scenario-sparkline--color-transition .market-scenario-sparkline__chart-visual .recharts-area-area {
+  transition: fill 300ms ease;
+}
+
+.market-scenario-sparkline--color-transition .market-scenario-sparkline__gradient-stop {
+  transition: stop-color 300ms ease;
+}
+
 .market-scenario-sparkline__chart-canvas {
   position: relative;
   flex: 1;
   width: 100%;
   min-height: var(--market-scenario-chart-h);
   height: var(--market-scenario-chart-h);
+}
+
+.market-scenario-sparkline__chart-canvas--chart-only {
+  --market-scenario-chart-h: 100%;
 }
 
 .market-scenario-sparkline__chart-canvas--enter {

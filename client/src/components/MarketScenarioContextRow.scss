@@ -1,7 +1,6 @@
 .market-scenario-context-row-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   margin-top: 0;
   border-radius: 6px;
   background: linear-gradient(
@@ -9,19 +8,31 @@
     var(--surface) 0%,
     transparent 100%
   );
-
+  transition: grid-template-rows 150ms ease-in;
 }
 
 .market-scenario-context-row-wrap--open {
   grid-template-rows: 1fr;
   margin-top: 0.65rem;
-
-  // margin-bottom: 0.85rem;
+  margin-bottom: 1.25rem;
+  transition: grid-template-rows 200ms ease-out;
 }
 
 .market-scenario-context-row-wrap__inner {
-  overflow: hidden;
   min-height: 0;
+  opacity: 0;
+  transform: translateY(-0.4rem);
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in;
+}
+
+.market-scenario-context-row-wrap--open .market-scenario-context-row-wrap__inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
 }
 
 .market-scenario-context-row--desktop {
@@ -110,12 +121,46 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  transition: opacity 0.2s ease;
 }
 
-.market-scenario-context-row__body--paused,
-.market-scenario-context-row__mobile-stack.market-scenario-context-row__body--paused {
-  opacity: 0.5;
+.market-scenario-context-row--desktop:not(.market-scenario-context-row--paused) {
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
+  transition:
+    background 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.market-scenario-context-row--paused.market-scenario-context-row--desktop {
+  background: var(--surface1);
+  border-radius: 6px;
+  box-shadow: none;
+  transition:
+    background 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.accordion-section.market-scenario-context-row--mobile:not(.market-scenario-context-row--paused) {
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
+  transition:
+    background 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.accordion-section.market-scenario-context-row--paused.market-scenario-context-row--mobile {
+  background: var(--surface1);
+  border-radius: 6px;
+  box-shadow: none;
+  transition:
+    background 300ms ease,
+    box-shadow 300ms ease;
 }
 
 .market-scenario-context-row__paused-pill {
@@ -282,7 +327,8 @@
 }
 
 .market-scenario-context-row--mobile .market-scenario-sparkline__chart-wrap,
-.market-scenario-context-row--mobile .market-scenario-sparkline__chart-canvas {
+.market-scenario-context-row--mobile .market-scenario-sparkline__chart-canvas,
+.market-scenario-context-row--mobile .market-scenario-sparkline__chart-visual {
   flex: none;
   height: var(--market-scenario-chart-h);
   min-height: var(--market-scenario-chart-h);
@@ -309,6 +355,7 @@
 }
 
 .market-scenario-context-row--desktop .market-scenario-sparkline__chart-canvas,
+.market-scenario-context-row--desktop .market-scenario-sparkline__chart-visual,
 .market-scenario-context-row--desktop .market-scenario-sparkline__responsive {
   flex: 1;
   min-height: 6rem;
@@ -338,11 +385,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .market-scenario-context-row-wrap {
+  .market-scenario-context-row-wrap,
+  .market-scenario-context-row-wrap--open,
+  .market-scenario-context-row-wrap__inner,
+  .market-scenario-context-row-wrap--open .market-scenario-context-row-wrap__inner,
+  .market-scenario-context-row--paused.market-scenario-context-row--desktop,
+  .market-scenario-context-row--desktop:not(.market-scenario-context-row--paused),
+  .accordion-section.market-scenario-context-row--paused.market-scenario-context-row--mobile,
+  .accordion-section.market-scenario-context-row--mobile:not(.market-scenario-context-row--paused) {
     transition-duration: 0.01ms;
   }
 
   .market-scenario-context-row .market-scenario-sparkline__chart-canvas--enter {
     animation: none;
+  }
+
+  .market-scenario-sparkline--color-transition .market-scenario-sparkline__chart-visual .recharts-curve,
+  .market-scenario-sparkline--color-transition .market-scenario-sparkline__chart-visual .recharts-area-area,
+  .market-scenario-sparkline--color-transition .market-scenario-sparkline__gradient-stop {
+    transition: none;
   }
 }

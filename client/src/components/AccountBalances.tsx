@@ -246,6 +246,17 @@ export function AccountBalances({
     inputs && !marketScenarioIsBase(marketScenarioId) && c.hasPortfolioBalances,
   )
 
+  const [marketScenarioCardMounted, setMarketScenarioCardMounted] = useState(showMarketScenarioContext)
+
+  useEffect(() => {
+    if (showMarketScenarioContext) {
+      setMarketScenarioCardMounted(true)
+      return
+    }
+    const exitTimer = window.setTimeout(() => setMarketScenarioCardMounted(false), 150)
+    return () => window.clearTimeout(exitTimer)
+  }, [showMarketScenarioContext])
+
   const fidelityRows = useMemo(() => {
     void fidelityImportRev
     const imp = loadStoredFidelityImport()
@@ -1825,7 +1836,10 @@ export function AccountBalances({
                     value={normalizeMarketScenarioId(inputs.marketScenario)}
                     onChange={(marketScenario) => {
                       const id = normalizeMarketScenarioId(marketScenario)
-                      setInputs({ marketScenario: id })
+                      setInputs({
+                        marketScenario: id,
+                        marketScenarioActive: false,
+                      })
                     }}
                   />
                 ) : null}
@@ -1842,7 +1856,7 @@ export function AccountBalances({
               .join(' ')}
           >
             <div className="market-scenario-context-row-wrap__inner">
-              {showMarketScenarioContext && inputs && setInputs ? (
+              {marketScenarioCardMounted && inputs && setInputs ? (
                 <MarketScenarioContextRow
                   scenarioId={marketScenarioId}
                   marketScenarioActive={marketScenarioActive}
