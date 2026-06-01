@@ -135,6 +135,12 @@
   user-select: none;
 }
 
-.holding-scenario-intent-tabs__panel .holding-scenario-intent__year-grid {
+.holding-scenario-intent-tabs__panel .scenario-per-year-grid {
   margin-top: 0.15rem;
+}
+
+.holding-scenario-intent-tabs__panel--account-custom {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.75rem;
 }

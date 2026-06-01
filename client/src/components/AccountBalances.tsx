@@ -1871,16 +1871,14 @@ export function AccountBalances({
     </div>
   ) : null
 
-  const headerManageMenu = renderAccountBalancesManageMenu()
-
-  const csvSessionBanner = showCsvSessionBanner ? (
-    <div className="csv-session-banner-wrap">
-      <div className="csv-session-banner" role="status">
-        <div className="csv-session-banner__text">
-          <p className="csv-session-banner__headline">
+  const accountSectionFooter =
+    showCsvSessionBanner && !configureInputsOnly && (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData) ? (
+      <div className="account-balances-section-footer account-balances-section-footer--with-upgrade" role="status">
+        <div className="account-balances-section-footer__upgrade-copy">
+          <p className="account-balances-section-footer__headline">
             Your session is temporary — <strong>Pro</strong> keeps it safe.
           </p>
-          <p className="csv-session-banner__subhead">
+          <p className="account-balances-section-footer__subhead">
             $9/mo. No contracts, no hassle. Cancel anytime.
           </p>
         </div>
@@ -1888,20 +1886,22 @@ export function AccountBalances({
           type="button"
           size="sm"
           variant="primary"
-          className="csv-session-banner__cta"
+          className="account-balances-section-footer__cta"
           aria-label="Upgrade to Pro"
           onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
         >
-          <span className="csv-session-banner__cta-label csv-session-banner__cta-label--long">
-            Upgrade to Pro
-          </span>
-          <span className="csv-session-banner__cta-label csv-session-banner__cta-label--short">
-            Upgrade
-          </span>
+          Upgrade to Pro
         </AppButton>
+        <div className="account-balances-section-footer__total">
+          <span className="account-balances-section-footer__total-label">{portfolioTotalLabel}</span>
+          <span className="account-balances-section-footer__total-value">{fmt(portfolioTotal)}</span>
+        </div>
       </div>
-    </div>
-  ) : null
+    ) : (
+      totalRetirementBar
+    )
+
+  const headerManageMenu = renderAccountBalancesManageMenu()
 
   const accountBalancesBody = (
     <>
@@ -1965,7 +1965,6 @@ export function AccountBalances({
             </div>
           </div>
           <div className="account-balances-stack">
-            {csvSessionBanner}
             <div
               className={`account-balances-card-inner-wrap${
                 balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
@@ -1974,7 +1973,7 @@ export function AccountBalances({
             >
               {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
               {renderMergedDashboardOrderedContent()}
-              {totalRetirementBar}
+              {accountSectionFooter}
             </div>
           </div>
         </>
@@ -2000,7 +1999,6 @@ export function AccountBalances({
           ) : null}
 
           <div className="account-balances-stack">
-            {csvSessionBanner}
             <div
               className={`account-balances-card-inner-wrap account-balances-card-inner-wrap--standalone${
                 !hasRetirementAccountData ? ' account-balances-card-inner-wrap--empty-state' : ''
@@ -2014,7 +2012,7 @@ export function AccountBalances({
               {renderRemoveAccountsConfirmOverlay()}
             </div>
           </div>
-          {totalRetirementBar}
+          {accountSectionFooter}
         </>
       )}
       {mergedDashboard ? renderMergedDashboardOverlays() : null}

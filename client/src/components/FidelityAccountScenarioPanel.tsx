@@ -30,14 +30,15 @@ import {
 import { blendedRateForDashboardPositionId, computeMergedDashboardPositionModels } from '../lib/mergedDashboardPositionModels'
 import {
   decimalToPct,
-  modelingCalendarYears,
   padYearlyReturns,
   ratesMatchScenario,
   type PositionReturnModel,
 } from '../lib/positionReturnModel'
-import { FidelityYearPctField, parseScenarioPct } from './FidelityHoldingScenarioPopout'
+import { growthPhaseProjectionYears } from '../lib/marketScenarioProjection'
+import { parseScenarioPct } from './FidelityHoldingScenarioPopout'
 import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
 import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
+import { ScenarioPerYearGrid } from './ScenarioPerYearGrid'
 import { AppButton } from './ui/AppButton'
 import './FidelityHoldingScenarioPopout.scss'
 
@@ -106,6 +107,12 @@ export function FidelityAccountScenarioPanel({
   const calY = retirementCalendarYear
   const blended = blendedRateForAccountBucket(bucket, retRate, brkRate)
 
+  const perYearCalendarYears = useMemo(
+    () => growthPhaseProjectionYears(calY, yearsToRetirement),
+    [calY, yearsToRetirement],
+  )
+  const perYearCount = perYearCalendarYears.length
+
   const stored = getAccountReturnScenario(inputs, bucket)
 
   const merged = useMemo(
@@ -153,10 +160,11 @@ export function FidelityAccountScenarioPanel({
 
   const applyAccountPatch = useCallback(
     (choice: ScenarioUiChoice, customPct: number, yearly?: number[]) => {
-      const next = buildAccountReturnScenario(choice, blended, h, customPct, stored, yearly)
+      const horizon = choice === 'peryear' ? perYearCount : h
+      const next = buildAccountReturnScenario(choice, blended, horizon, customPct, stored, yearly)
       setInputs({ accountReturnScenarios: patchAccountReturnScenario(inputs, bucket, next) })
     },
-    [blended, bucket, h, inputs, setInputs, stored],
+    [blended, bucket, h, inputs, perYearCount, setInputs, stored],
   )
 
   const tryPatchAccount = useCallback(
@@ -188,7 +196,7 @@ export function FidelityAccountScenarioPanel({
     const nextAccount = buildAccountReturnScenario(
       overrideConflict.choice,
       blended,
-      h,
+      overrideConflict.choice === 'peryear' ? perYearCount : h,
       overrideConflict.customPct,
       stored,
       overrideConflict.yearly,
@@ -200,21 +208,21 @@ export function FidelityAccountScenarioPanel({
       accountReturnScenarios: patchAccountReturnScenario(inputs, bucket, nextAccount),
     })
     setOverrideConflict(null)
-  }, [blended, bucket, blendedForModel, h, inputs, overrideConflict, setInputs, stored, targets])
+  }, [blended, bucket, blendedForModel, h, inputs, overrideConflict, perYearCount, setInputs, stored, targets])
 
   const onKeepBothOverrides = useCallback(() => {
     if (!overrideConflict) return
     const nextAccount = buildAccountReturnScenario(
       overrideConflict.choice,
       blended,
-      h,
+      overrideConflict.choice === 'peryear' ? perYearCount : h,
       overrideConflict.customPct,
       stored,
       overrideConflict.yearly,
     )
     setInputs({ accountReturnScenarios: patchAccountReturnScenario(inputs, bucket, nextAccount) })
     setOverrideConflict(null)
-  }, [blended, bucket, h, inputs, overrideConflict, setInputs, stored])
+  }, [blended, bucket, h, inputs, overrideConflict, perYearCount, setInputs, stored])
 
   const clearToGlobalRate = useCallback(() => {
     setInputs({ accountReturnScenarios: patchAccountReturnScenario(inputs, bucket, null) })
@@ -267,10 +275,10 @@ export function FidelityAccountScenarioPanel({
 
   const patchYearRates = useCallback(
     (nextRates: number[]) => {
-      const padded = padYearlyReturns(nextRates, h, blended)
+      const padded = padYearlyReturns(nextRates, perYearCount, blended)
       tryPatchAccount('peryear', 0, padded)
     },
-    [blended, h, tryPatchAccount],
+    [blended, perYearCount, tryPatchAccount],
   )
 
   const globalPct = (blended * 100).toFixed(1)
@@ -286,25 +294,13 @@ export function FidelityAccountScenarioPanel({
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
-      <div className="holding-scenario-intent__year-grid">
-        {modelingCalendarYears(calY, h).map((y, i) => {
-          const rates = padYearlyReturns(primaryModel.yearlyReturns, h, primaryModel.flatRate)
-          return (
-            <div key={y} className="holding-scenario-intent__year-item">
-              <span className="holding-scenario-popout__year-key">{y}</span>
-              <FidelityYearPctField
-                calendarYear={y}
-                rateDecimal={rates[i] ?? 0}
-                onCommitDecimal={(dec) => {
-                  const next = [...rates]
-                  next[i] = dec
-                  patchYearRates(next)
-                }}
-              />
-            </div>
-          )
-        })}
-      </div>
+      <ScenarioPerYearGrid
+        retirementCalendarYear={calY}
+        yearsToRetirement={yearsToRetirement}
+        globalBlended={blended}
+        yearlyReturns={primaryModel.yearlyReturns}
+        onPatchRates={patchYearRates}
+      />
     ) : null
 
   return (
@@ -376,6 +372,9 @@ export function FidelityAccountScenarioPanel({
                 globalBlended={blended}
                 outlookHorizon={h}
                 outlookPreviewCurrentValue={outlookPreviewValue}
+                accountName={accountName}
+                accountRetirementYear={calY}
+                accountCurrentBalance={outlookPreviewValue}
                 draftPct={draftPct}
                 onDraftPctChange={(s) => {
                   setDraftPct(s)

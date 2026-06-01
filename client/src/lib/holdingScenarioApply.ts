@@ -291,8 +291,8 @@ export function applyScenarioUiChoice(
       }
     }
     case 'peryear': {
-      const base = yearlyOverride ?? padYearlyReturns(m.yearlyReturns, h, m.flatRate)
-      const padded = padYearlyReturns(base, h, m.flatRate)
+      const base = yearlyOverride ?? padYearlyReturns(m.yearlyReturns, h, blended)
+      const padded = padYearlyReturns(base, h, blended)
       return {
         ...m,
         returnMode: 'peryear',

@@ -69,6 +69,8 @@ function clampPct(n: number): number {
   return Math.max(-100, Math.min(100, Math.round(n * 10) / 10))
 }
 
+const YEAR_PCT_STEP = 0.5
+
 function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
   if (choice === 'peryear') return 'peryear'
   if (choice === 'custom') return 'custom'
@@ -100,6 +102,15 @@ export function FidelityYearPctField({
     [onCommitDecimal],
   )
 
+  const stepByArrow = useCallback(
+    (direction: -1 | 1) => {
+      const nextPct = clampPct(parsePct(text) + direction * YEAR_PCT_STEP)
+      setText(String(nextPct))
+      onCommitDecimal(pctToDecimal(nextPct))
+    },
+    [onCommitDecimal, text],
+  )
+
   return (
     <div className="holding-scenario-popout__year-input-wrap">
       <input
@@ -111,7 +122,13 @@ export function FidelityYearPctField({
         onChange={(e) => setText(e.target.value)}
         onBlur={() => commitText(text)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            stepByArrow(1)
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            stepByArrow(-1)
+          } else if (e.key === 'Enter') {
             commitText(text)
             e.currentTarget.blur()
           }

@@ -421,6 +421,10 @@
   font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.45;
+  padding: .5rem;
+  text-align: center;
+  border-radius: 6px;
+  background: var(--surface2);
   color: var(--text-muted);
 }
 
@@ -472,15 +476,17 @@
 
 .holding-scenario-popout__money-market-note {
   margin: 0 0 14px;
-  padding: 10px 12px;
+  padding-bottom: 12px;
   border-radius: 8px;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.45;
+  font-style: italic;
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--warn-light, #faeeda) 88%, var(--surface, #fff));
-  border: 1px solid color-mix(in srgb, var(--warn, #ba7517) 28%, var(--border));
+  background: var(--surface);
+  // background: color-mix(in srgb, var(--warn-light, #faeeda) 88%, var(--surface, #fff));
+  // border: 1px solid color-mix(in srgb, var(--warn, #ba7517) 28%, var(--border));
 }
 
 .holding-scenario-intent__accordion {
@@ -736,23 +742,26 @@
 }
 
 .holding-scenario-outlook-tabs__tab {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
   min-width: 0;
   margin: 0;
   min-height: 2.75rem;
   padding: 0.55rem 0.75rem;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 10px;
   background: var(--surface);
   font-family: var(--body);
   text-align: left;
   cursor: pointer;
   box-sizing: border-box;
+  box-shadow: none;
+  gap: 0.35rem;
   transition:
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+    box-shadow 0.2s ease,
+    background-color 0.15s ease;
 }
 
 .holding-scenario-outlook-tabs__tab-row {
@@ -792,41 +801,65 @@
   min-width: 0;
 }
 
+.holding-scenario-outlook-tabs__tab-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.holding-scenario-outlook-tabs__tab--very_bear .holdings-scenario-trigger__dot {
+  background: #ef4444;
+}
+
+.holding-scenario-outlook-tabs__tab--bear .holdings-scenario-trigger__dot {
+  background: #e8a5a5;
+}
+
+.holding-scenario-outlook-tabs__tab--base .holdings-scenario-trigger__dot {
+  background: color-mix(in srgb, var(--text-muted) 55%, var(--border));
+}
+
+.holding-scenario-outlook-tabs__tab--bull .holdings-scenario-trigger__dot {
+  background: #6bc9a8;
+}
+
+.holding-scenario-outlook-tabs__tab--very_bull .holdings-scenario-trigger__dot {
+  background: #16a34a;
+}
+
 .holding-scenario-outlook-tabs__tab--very_bear {
   background: color-mix(in srgb, var(--danger) 12%, var(--surface));
-  border-color: color-mix(in srgb, var(--danger) 22%, var(--border));
 }
 
 .holding-scenario-outlook-tabs__tab--bear {
   background: color-mix(in srgb, var(--danger) 8%, var(--surface));
-  border-color: color-mix(in srgb, var(--danger) 16%, var(--border));
 }
 
 .holding-scenario-outlook-tabs__tab--base {
   background: var(--surface2);
-  border-color: var(--border);
 }
 
 .holding-scenario-outlook-tabs__tab--bull {
   background: color-mix(in srgb, var(--accent-text) 10%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent-text) 20%, var(--border));
 }
 
 .holding-scenario-outlook-tabs__tab--very_bull {
   background: color-mix(in srgb, var(--accent-text) 14%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent-text) 24%, var(--border));
 }
 
 .holding-scenario-outlook-tabs__tab--selected {
   background: var(--surface);
-  border-color: color-mix(in srgb, var(--accent-text) 35%, var(--border));
   box-shadow:
-    rgba(50, 50, 93, 0.14) 0 2px 8px -2px,
-    rgba(0, 0, 0, 0.1) 0 1px 3px -1px;
+    rgba(50, 50, 93, 0.25) 0 13px 27px -5px,
+    rgba(0, 0, 0, 0.3) 0 8px 16px -8px;
 }
 
 .holding-scenario-outlook-tabs__tab--selected:hover {
   background: var(--surface);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0 13px 27px -5px,
+    rgba(0, 0, 0, 0.3) 0 8px 16px -8px;
 }
 
 .holding-scenario-outlook-tabs__tab:focus-visible {
@@ -862,8 +895,12 @@
   font-feature-settings: 'tnum';
 }
 
-.holding-scenario-outlook-tabs__callout {
-  margin: 0.65rem 0 0;
+.holding-scenario-outlook-tabs__tab-callout {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding-top: 0.25rem;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
@@ -893,7 +930,7 @@
 .holding-scenario-popout__foot--split {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 0.75rem 1rem;
 }
@@ -942,10 +979,21 @@
   color: var(--text-muted);
 }
 
+.holding-scenario-popout__no-scenario-pct {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
 .holding-scenario-popout__foot--split .holding-scenario-popout__done[data-slot='button'] {
   flex: 0 0 auto;
   width: auto !important;
   min-width: 5.5rem;
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: stretch;
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
 }
 
 .holding-scenario-intent__year-grid {
@@ -1078,8 +1126,7 @@
   font-weight: 600;
   color: var(--text-muted);
   line-height: 1;
-  user-select: none;
-  background: var(--surface2);
+
 }
 
 .holdings-value-popout {

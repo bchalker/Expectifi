@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import {
   formatOutlookScenarioRateRange,
   getOutlookScenarioTileLabel,
@@ -10,6 +10,7 @@ import {
   type OutlookScenarioTile,
 } from '../lib/holdingScenarioApply'
 import './HoldingScenarioIntentTabs.scss'
+import { AccountCustomRateTab } from './AccountCustomRateTab'
 
 /** Bear / Normal / Bull segmented control (no HeroUI Tabs.Indicator). */
 export function OutlookMarketTabs({
@@ -29,9 +30,6 @@ export function OutlookMarketTabs({
   previewCurrentValue: number
   scope?: 'account' | 'holding'
 }) {
-  const [hoveredChoice, setHoveredChoice] = useState<OutlookScenarioChoice | null>(null)
-  const focusChoice = hoveredChoice ?? value
-
   const tileDeltas = useMemo(() => {
     const deltas: Record<OutlookScenarioChoice, number> = {
       very_bear: 0,
@@ -46,11 +44,37 @@ export function OutlookMarketTabs({
     return deltas
   }, [globalBlended, horizon, previewCurrentValue, tiles])
 
-  const calloutDelta = focusChoice != null ? tileDeltas[focusChoice] : 0
-  const calloutTone = focusChoice != null ? outlookProjectionDeltaTone(focusChoice, calloutDelta) : 'neutral'
-  const calloutDirection =
-    focusChoice != null ? outlookCalloutDirectionWord(focusChoice, calloutDelta) : 'same'
   const scopeNoun = scope === 'holding' ? 'holding' : 'account'
+
+  function renderTabCallout(choice: OutlookScenarioChoice) {
+    const delta = tileDeltas[choice]
+    const tone = outlookProjectionDeltaTone(choice, delta)
+    const direction = outlookCalloutDirectionWord(choice, delta)
+    return (
+      <span className="holding-scenario-outlook-tabs__tab-callout" role="status">
+        Under {getOutlookScenarioTileLabel(choice)} this {scopeNoun} projects to{' '}
+        {direction === 'same' ? (
+          <span className="holding-scenario-outlook-tabs__callout-amount holding-scenario-outlook-tabs__callout-amount--neutral">
+            about the same
+          </span>
+        ) : (
+          <>
+            <span
+              className={[
+                'holding-scenario-outlook-tabs__callout-amount',
+                `holding-scenario-outlook-tabs__callout-amount--${tone}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {outlookCalloutAmountLabel(delta)}
+            </span>{' '}
+            {direction} at retirement
+          </>
+        )}
+      </span>
+    )
+  }
 
   return (
     <div className="holding-scenario-outlook-tabs">
@@ -58,7 +82,6 @@ export function OutlookMarketTabs({
         {tiles.map((t) => {
           const rateRangeLabel = formatOutlookScenarioRateRange(t.choice, horizon)
           const isSelected = value === t.choice
-          const isFocused = focusChoice === t.choice
 
           return (
             <button
@@ -70,19 +93,17 @@ export function OutlookMarketTabs({
                 'holding-scenario-outlook-tabs__tab',
                 `holding-scenario-outlook-tabs__tab--${t.choice}`,
                 isSelected && 'holding-scenario-outlook-tabs__tab--selected',
-                isFocused && 'holding-scenario-outlook-tabs__tab--focused',
               ]
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => onChange(t.choice)}
-              onMouseEnter={() => setHoveredChoice(t.choice)}
-              onMouseLeave={() => setHoveredChoice(null)}
-              onFocus={() => setHoveredChoice(t.choice)}
-              onBlur={() => setHoveredChoice(null)}
             >
               <span className="holding-scenario-outlook-tabs__tab-row">
                 <span className="holding-scenario-outlook-tabs__tab-copy">
-                  <span className="holding-scenario-outlook-tabs__tab-label">{t.label}</span>
+                  <span className="holding-scenario-outlook-tabs__tab-label-row">
+                    <span className="holdings-scenario-trigger__dot" aria-hidden />
+                    <span className="holding-scenario-outlook-tabs__tab-label">{t.label}</span>
+                  </span>
                   <span className="holding-scenario-outlook-tabs__tab-desc">{t.hint}</span>
                 </span>
                 <span className="holding-scenario-outlook-tabs__tab-range-col">
@@ -95,34 +116,11 @@ export function OutlookMarketTabs({
                   </span>
                 </span>
               </span>
+              {isSelected ? renderTabCallout(t.choice) : null}
             </button>
           )
         })}
       </div>
-      {focusChoice != null ? (
-        <p className="holding-scenario-outlook-tabs__callout" role="status">
-          Under {getOutlookScenarioTileLabel(focusChoice)} this {scopeNoun} projects to{' '}
-          {calloutDirection === 'same' ? (
-            <span className="holding-scenario-outlook-tabs__callout-amount holding-scenario-outlook-tabs__callout-amount--neutral">
-              about the same
-            </span>
-          ) : (
-            <>
-              <span
-                className={[
-                  'holding-scenario-outlook-tabs__callout-amount',
-                  `holding-scenario-outlook-tabs__callout-amount--${calloutTone}`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {outlookCalloutAmountLabel(calloutDelta)}
-              </span>{' '}
-              {calloutDirection} at retirement
-            </>
-          )}
-        </p>
-      ) : null}
     </div>
   )
 }
@@ -143,6 +141,9 @@ export type HoldingScenarioIntentTabsProps = {
   onDraftPctBlur: () => void
   yearGrid: ReactNode
   variant?: 'holding' | 'account'
+  accountName?: string
+  accountRetirementYear?: number
+  accountCurrentBalance?: number
   className?: string
 }
 
@@ -166,6 +167,9 @@ export function HoldingScenarioIntentTabs({
   onDraftPctBlur,
   yearGrid,
   variant = 'holding',
+  accountName,
+  accountRetirementYear,
+  accountCurrentBalance,
   className = '',
 }: HoldingScenarioIntentTabsProps) {
   const isAccount = variant === 'account'
@@ -225,32 +229,52 @@ export function HoldingScenarioIntentTabs({
           role="tabpanel"
           aria-labelledby="holding-scenario-intent-tab-custom"
           hidden={activeTab !== 'custom'}
-          className="holding-scenario-intent-tabs__panel"
+          className={[
+            'holding-scenario-intent-tabs__panel',
+            isAccount && accountName ? 'holding-scenario-intent-tabs__panel--account-custom' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
         >
-          <p className="holding-scenario-intent-tabs__desc">
-            {isAccount
-              ? 'Set one flat annual return for every holding in this account that does not have its own scenario.'
-              : 'Enter one flat annual return for this holding in every account where it appears.'}
-          </p>
-          <div className="holding-scenario-intent-tabs__custom-field">
-            <label className="holding-scenario-intent-tabs__custom-label" htmlFor="holding-scenario-custom-pct">
-              Annual return
-            </label>
-            <div className="holding-scenario-intent-tabs__custom-input-wrap">
-              <input
-                id="holding-scenario-custom-pct"
-                type="text"
-                inputMode="decimal"
-                className="holding-scenario-intent-tabs__custom-input"
-                value={draftPct}
-                onChange={(e) => onDraftPctChange(e.target.value)}
-                onBlur={onDraftPctBlur}
-              />
-              <span className="holding-scenario-intent-tabs__custom-suffix" aria-hidden>
-                %
-              </span>
-            </div>
-          </div>
+          {isAccount && accountName && accountRetirementYear != null && accountCurrentBalance != null ? (
+            <AccountCustomRateTab
+              accountName={accountName}
+              draftPct={draftPct}
+              onDraftPctChange={onDraftPctChange}
+              onDraftPctBlur={onDraftPctBlur}
+              globalBlended={globalBlended}
+              currentBalance={accountCurrentBalance}
+              horizon={outlookHorizon}
+              retirementYear={accountRetirementYear}
+            />
+          ) : (
+            <>
+              <p className="holding-scenario-intent-tabs__desc">
+                {isAccount
+                  ? 'Set one flat annual return for every holding in this account that does not have its own scenario.'
+                  : 'Enter one flat annual return for this holding in every account where it appears.'}
+              </p>
+              <div className="holding-scenario-intent-tabs__custom-field">
+                <label className="holding-scenario-intent-tabs__custom-label" htmlFor="holding-scenario-custom-pct">
+                  Annual return
+                </label>
+                <div className="holding-scenario-intent-tabs__custom-input-wrap">
+                  <input
+                    id="holding-scenario-custom-pct"
+                    type="text"
+                    inputMode="decimal"
+                    className="holding-scenario-intent-tabs__custom-input"
+                    value={draftPct}
+                    onChange={(e) => onDraftPctChange(e.target.value)}
+                    onBlur={onDraftPctBlur}
+                  />
+                  <span className="holding-scenario-intent-tabs__custom-suffix" aria-hidden>
+                    %
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div

@@ -360,6 +360,13 @@ body.app-left-nav--mobile-open-body {
   line-height: 1.35;
 }
 
+.font-base {
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
 @media (max-width: 680px) {
   :root {
     --drawer-panel-inset: 1rem;

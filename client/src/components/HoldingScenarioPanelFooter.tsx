@@ -30,9 +30,11 @@ export function HoldingScenarioPanelFooter({
         onPress={onNoScenario}
       >
         <span className="holding-scenario-popout__no-scenario-text">
-          <span className="holding-scenario-popout__no-scenario-label">No scenario</span>
+          <span className="holding-scenario-popout__no-scenario-label">Do not add a scenario</span>
           <span className="holding-scenario-popout__no-scenario-sub">
-            Uses your {globalPct}% global rate
+            Use my{' '}
+            <strong className="holding-scenario-popout__no-scenario-pct">{globalPct}%</strong>{' '}
+            global rate
           </span>
         </span>
       </AppButton>
