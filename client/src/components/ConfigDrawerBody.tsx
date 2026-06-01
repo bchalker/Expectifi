@@ -11,12 +11,17 @@ import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 import './ConfigProfileTab.scss'
 
-export type ConfigDrawerTab = 'profile' | 'plan' | 'social-security'
+import { ConfigLifeTab } from './ConfigLifeTab'
+import './ConfigLifeTab.scss'
+import type { LifePlans } from '../lib/planStorage/life'
+
+export type ConfigDrawerTab = 'profile' | 'plan' | 'social-security' | 'life'
 
 const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'social-security', label: 'Social Security' },
+  { id: 'life', label: 'Life' },
 ]
 
 type TabContextValue = {
@@ -86,6 +91,9 @@ type TabPanelsProps = {
   onDrawerClose?: () => void
   onOpenRegister?: () => void
   onResetGuestProfile?: () => void
+  lifePlans: LifePlans
+  onLifePlansChange: (next: LifePlans) => void
+  currentYear: number
 }
 
 export function ConfigDrawerTabPanels({
@@ -98,6 +106,9 @@ export function ConfigDrawerTabPanels({
   onDrawerClose,
   onOpenRegister,
   onResetGuestProfile,
+  lifePlans,
+  onLifePlansChange,
+  currentYear,
 }: TabPanelsProps) {
   const { tab } = useConfigDrawerTab()
   const { locale, refreshLocale } = useUserLocale()
@@ -175,6 +186,17 @@ export function ConfigDrawerTabPanels({
               benefitError={ssBenefitError}
             />
           </section>
+        </div>
+      ) : null}
+
+      {tab === 'life' ? (
+        <div
+          className="config-drawer-tabpanel"
+          role="tabpanel"
+          id="config-panel-life"
+          aria-labelledby="config-tab-life"
+        >
+          <ConfigLifeTab plans={lifePlans} onPlansChange={onLifePlansChange} currentYear={currentYear} />
         </div>
       ) : null}
     </div>

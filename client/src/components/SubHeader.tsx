@@ -7,6 +7,11 @@ import {
 } from "react";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
+import {
+  getMarketScenarioDefinition,
+  marketScenarioIsBase,
+  type MarketScenarioId,
+} from "../lib/marketScenario";
 import { SS_CLAIM_AGE_OPTIONS, clampClaimAge } from "../lib/socialSecurity";
 import { fmt } from "../utils/format";
 import "./SubHeader.scss";
@@ -93,6 +98,16 @@ function PhaseSegmentTabs({
       </button>
     </div>
   );
+}
+
+function subheaderMarketScenarioPillClass(id: MarketScenarioId): string {
+  if (id === "bull") return "subheader-market-scenario-pill--bull";
+  if (id === "bear" || id === "recession_recovery") {
+    return "subheader-market-scenario-pill--bear";
+  }
+  if (id === "stagflation") return "subheader-market-scenario-pill--stagflation";
+  if (id === "lost_decade") return "subheader-market-scenario-pill--lost_decade";
+  return "";
 }
 
 /** Claim age — trigger opens panel with 62 / 67 / 70 button group. */
@@ -204,6 +219,7 @@ type Props = {
   onOpenSsConfig: () => void;
   /** When false, header shows $0 — no manual balances or imported positions to project from. */
   hasPortfolioBalances: boolean;
+  marketScenarioId?: MarketScenarioId;
 };
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -224,11 +240,20 @@ export function SubHeader({
   ssTimingConfigured,
   onOpenSsConfig,
   hasPortfolioBalances,
+  marketScenarioId = "base",
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon);
   const totalFvAnim = useAnimatedScalar(totalFV);
 
   const incomePhase = phase === "income";
+  const showMarketScenarioPill =
+    !incomePhase && hasPortfolioBalances && !marketScenarioIsBase(marketScenarioId);
+  const marketScenarioLabel = showMarketScenarioPill
+    ? getMarketScenarioDefinition(marketScenarioId).label
+    : "";
+  const marketScenarioPillClass = showMarketScenarioPill
+    ? subheaderMarketScenarioPillClass(marketScenarioId)
+    : "";
 
   const showSsClaimPicker = incomePhase && ssTimingConfigured && ssIncluded;
   /** Reserve hero height/padding when SS is configured so toggling include does not shift the amount. */
@@ -294,6 +319,21 @@ export function SubHeader({
                     {incomePhase ? "/mo" : `/at ${targetRetirementAge}`}
                   </span>
                 </div>
+                {showMarketScenarioPill ? (
+                  <span
+                    className={[
+                      "font-xs",
+                      "subheader-market-scenario-pill",
+                      "subheader-estimate__note--enter",
+                      marketScenarioPillClass,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <span className="subheader-market-scenario-pill__dot" aria-hidden />
+                    {marketScenarioLabel}
+                  </span>
+                ) : null}
                 {incomePhase ? (
                   <div className="subheader-estimate__meta">
                     <div className="subheader-ss-block">

@@ -94,17 +94,17 @@ function hydratePlanStateForTier(
   let activePreset: string | null = null
 
   if (tier === 'browser_saved' || tier === 'pro' || tier === 'authenticated_free') {
+    if (profile) {
+      inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
+    }
     if (session) {
-      inputs = { ...session.inputs }
+      inputs = { ...inputs, ...session.inputs }
       ui = { ...defaultUi, ...session.ui }
       phase = session.phase
       activePreset = session.activePreset
       if (tier !== 'pro') {
         inputs = stripCsvDerivedFromCalculatorInputs(inputs)
       }
-    }
-    if (profile) {
-      inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
     }
     inputs = mergeManualAccountsIntoInputs(inputs, accounts)
     inputs = applyFidelityBalanceOverrides(inputs)

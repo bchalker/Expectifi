@@ -1,5 +1,5 @@
 import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { CalculatorInputs } from "../lib/computeResults";
 import type {
   AggregatedFidelitySymbolRow,
@@ -37,26 +37,6 @@ import { fmt } from "../utils/format";
 import { HoldingsSymbolCard } from "./HoldingsSymbolCard";
 import { Tooltip } from "./Tooltip";
 import "./FidelityAggregatedSymbolTable.scss";
-
-/** Phone / narrow portrait tablet — stacked card layout below this width. */
-const HOLDINGS_MOBILE_MQ = "(max-width: 620px)";
-
-function useHoldingsMobileLayout(): boolean {
-  const [mobile, setMobile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia(HOLDINGS_MOBILE_MQ).matches,
-  );
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia(HOLDINGS_MOBILE_MQ);
-    const sync = () => setMobile(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-  return mobile;
-}
 
 export type FidelityAggregatedScenarioBundle = {
   inputs: CalculatorInputs;
@@ -226,34 +206,33 @@ function FidelityAggregatedHoldingGroup({
       }
     : null;
 
+  const breakdownNote = showMergedTickerNote ? (
+    <p className="holdings-symbol-card__breakdown-note">Ticker is in:</p>
+  ) : null;
+
   const breakdownBlock = hasBreakdown ? (
-    <Fragment>
-      {showMergedTickerNote ? (
-        <p className="holdings-symbol-card__breakdown-note">Same ticker in:</p>
-      ) : null}
-      <div className="holdings-breakdown-block">
-        {breakdown.map((line) => (
-          <div
-            key={`${rowKey}-${line.accountKey}`}
-            className="holdings-breakdown-row"
-          >
-            <div className="holdings-breakdown-row__inner">
-              <div className="holdings-breakdown-row__account-cell">
-                <span className="holdings-breakdown-row__source" aria-hidden>
-                  <IconArrowNarrowRightDashed size={12} stroke={1.15} />
-                </span>
-                <span className="holdings-breakdown-row__account">
-                  {line.accountLabel}
-                </span>
-              </div>
-              <span className="holdings-breakdown-row__value">
-                {fmt(line.currentValue)}
+    <div className="holdings-breakdown-block">
+      {breakdown.map((line) => (
+        <div
+          key={`${rowKey}-${line.accountKey}`}
+          className="holdings-breakdown-row"
+        >
+          <div className="holdings-breakdown-row__inner">
+            <div className="holdings-breakdown-row__account-cell">
+              <span className="holdings-breakdown-row__source" aria-hidden>
+                <IconArrowNarrowRightDashed size={12} stroke={1.15} />
+              </span>
+              <span className="holdings-breakdown-row__account">
+                {line.accountLabel}
               </span>
             </div>
+            <span className="holdings-breakdown-row__value">
+              {fmt(line.currentValue)}
+            </span>
           </div>
-        ))}
-      </div>
-    </Fragment>
+        </div>
+      ))}
+    </div>
   ) : null;
 
   return (
@@ -265,6 +244,7 @@ function FidelityAggregatedHoldingGroup({
         currentValue={r.currentValue}
         costBasis={r.costBasis}
         scenario={scenarioProps}
+        breakdownNote={breakdownNote}
         breakdown={breakdownBlock}
       />
     </div>
@@ -281,8 +261,6 @@ export function FidelityAggregatedSymbolTable({
   activeScenarioSymbol,
   onScenarioOpen,
 }: Props) {
-  const mobileLayout = useHoldingsMobileLayout();
-
   const mergedModels = useMemo(() => {
     if (!scenarioBundle) return [] as PositionReturnModel[];
     return computeMergedDashboardPositionModels(
@@ -307,7 +285,6 @@ export function FidelityAggregatedSymbolTable({
       className={[
         "holdings-positions-table",
         "holdings-symbol-table",
-        mobileLayout && "holdings-symbol-table--mobile-cards",
         !scenarioBundle && "holdings-symbol-table--no-scenario",
       ]
         .filter(Boolean)
@@ -318,19 +295,6 @@ export function FidelityAggregatedSymbolTable({
         role="table"
         aria-label="Holdings by symbol"
       >
-        {scenarioBundle ? (
-          <div className="holdings-symbol-list__subheader" role="row">
-            <span className="holdings-symbol-list__subheader-holdings">
-              <span className="holdings-symbol-list__subheader-count">
-                {rows.length}
-              </span>{" "}
-              Holdings
-            </span>
-            <span className="holdings-symbol-list__subheader-override">
-              Want to override?
-            </span>
-          </div>
-        ) : null}
         {rows.map((r) => (
           <FidelityAggregatedHoldingGroup
             key={r.symbol}

@@ -1,9 +1,16 @@
-import { IconEdit } from '@tabler/icons-react'
+import { IconLibraryPlus, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import {
+  ACCOUNT_SCENARIO_SUBLABEL,
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import './FidelityHoldingScenarioPopout.scss'
+
+function scenarioTriggerTrailingIcon(choice: ScenarioUiChoice | typeof SCENARIO_MIXED) {
+  if (choice === 'bull' || choice === 'very_bull') return IconTrendingUp
+  if (choice === 'bear' || choice === 'very_bear') return IconTrendingDown
+  return null
+}
 
 export function holdingsScenarioTriggerChoiceClass(
   choice: ScenarioUiChoice | typeof SCENARIO_MIXED,
@@ -15,6 +22,8 @@ export function holdingsScenarioTriggerChoiceClass(
 
 function holdingsScenarioInheritShellClass(choice: ScenarioUiChoice): string {
   if (choice === 'base') return 'holdings-scenario-trigger-shell--normal'
+  if (choice === 'very_bull') return 'holdings-scenario-trigger-shell--very_bull'
+  if (choice === 'very_bear') return 'holdings-scenario-trigger-shell--very_bear'
   return `holdings-scenario-trigger-shell--${choice}`
 }
 
@@ -28,10 +37,12 @@ export type HoldingsScenarioTriggerProps = {
   inheritAccent?: ScenarioUiChoice | null
   rowActive: boolean
   onOpen: () => void
+  /** Badge sublabel — account rows vs holding rows. */
+  sublabel?: string
   className?: string
 }
 
-/** Scenario control button — outline placeholder or colored badge with edit icon. */
+/** Scenario control button — outline placeholder or white card badge with dot + trend icon. */
 export function HoldingsScenarioTrigger({
   label,
   common,
@@ -39,6 +50,7 @@ export function HoldingsScenarioTrigger({
   inheritAccent = null,
   rowActive,
   onOpen,
+  sublabel = ACCOUNT_SCENARIO_SUBLABEL,
   className = '',
 }: HoldingsScenarioTriggerProps) {
   const accentChoice =
@@ -46,6 +58,13 @@ export function HoldingsScenarioTrigger({
   const badgeChoice = variant === 'badge' ? common : null
   const choiceClass = badgeChoice ? holdingsScenarioTriggerChoiceClass(badgeChoice) : ''
   const shellClass = accentChoice ? holdingsScenarioInheritShellClass(accentChoice) : ''
+  const TrailingIcon =
+    variant === 'badge' && badgeChoice ? scenarioTriggerTrailingIcon(badgeChoice) : null
+  const showDot =
+    variant === 'badge' &&
+    badgeChoice != null &&
+    badgeChoice !== SCENARIO_MIXED &&
+    badgeChoice !== 'default'
 
   const button = (
     <button
@@ -66,12 +85,29 @@ export function HoldingsScenarioTrigger({
         onOpen()
       }}
     >
-      <span className="holdings-scenario-trigger__label">{label}</span>
       {variant === 'badge' ? (
-        <span className="holdings-scenario-trigger__edit" aria-hidden>
-          <IconEdit size={12} stroke={1.5} />
+        <span className="holdings-scenario-trigger__text">
+          <span className="holdings-scenario-trigger__sublabel">{sublabel}</span>
+          <span className="holdings-scenario-trigger__label-row">
+            {showDot ? (
+              <span className="holdings-scenario-trigger__dot" aria-hidden />
+            ) : null}
+            <span className="holdings-scenario-trigger__label">{label}</span>
+            {TrailingIcon ? (
+              <span className="holdings-scenario-trigger__trail" aria-hidden>
+                <TrailingIcon size={14} stroke={1.5} />
+              </span>
+            ) : null}
+          </span>
         </span>
-      ) : null}
+      ) : (
+        <>
+          <span className="holdings-scenario-trigger__label">{label}</span>
+          <span className="holdings-scenario-trigger__plus" aria-hidden>
+            <IconLibraryPlus size={14} stroke={1.5} />
+          </span>
+        </>
+      )}
     </button>
   )
 

@@ -60,3 +60,17 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* Mobile menu overlays goal/subheader but stays under the top chrome bar */
+.app-header-stack .header--app {
+  position: relative;
+  z-index: 2;
+}
+
+.app-header-stack .app-left-nav {
+  z-index: 1;
+}
+
+.app-header-stack .app-left-nav__backdrop {
+  z-index: 0;
+}

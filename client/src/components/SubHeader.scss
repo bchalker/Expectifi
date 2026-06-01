@@ -850,6 +850,69 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   letter-spacing: 0.01em;
 }
 
+.subheader-market-scenario-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--subheader-label-fg);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.subheader-market-scenario-pill__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.subheader-market-scenario-pill--bull {
+  color: #b8f0dc;
+  background: color-mix(in srgb, #6bc9a8 24%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, #6bc9a8 42%, transparent);
+}
+
+.subheader-market-scenario-pill--bull .subheader-market-scenario-pill__dot {
+  background: #6bc9a8;
+}
+
+.subheader-market-scenario-pill--bear {
+  color: #ffd6d6;
+  background: color-mix(in srgb, #ef4444 22%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, #ef4444 38%, transparent);
+}
+
+.subheader-market-scenario-pill--bear .subheader-market-scenario-pill__dot {
+  background: #e8a5a5;
+}
+
+.subheader-market-scenario-pill--stagflation {
+  color: #ffe8b8;
+  background: color-mix(in srgb, #e8b86a 24%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, #e8b86a 42%, transparent);
+}
+
+.subheader-market-scenario-pill--stagflation .subheader-market-scenario-pill__dot {
+  background: #e8b86a;
+}
+
+.subheader-market-scenario-pill--lost_decade {
+  color: color-mix(in srgb, #fff 78%, var(--text-muted));
+  background: color-mix(in srgb, var(--text-muted) 28%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
+}
+
+.subheader-market-scenario-pill--lost_decade .subheader-market-scenario-pill__dot {
+  background: color-mix(in srgb, var(--text-muted) 70%, #fff);
+}
+
 @media (max-width: 700px) {
   .subheader-content {
     padding: 0.4rem 0.75rem 0.45rem;

@@ -1,0 +1,512 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import {
+  blendedGrowthRate,
+  type LifeEventsProjectionData,
+} from "../lib/calc/lifeEvents";
+import GrowthEventCard from "./life-events/GrowthEventCard";
+import { growthEventConfigs } from "./life-events/eventConfigs";
+import {
+  calcEventImpactFutureValue,
+  formatCurrency,
+} from "./life-events/utils";
+import type { LifeEventConfig, LifeEventState } from "./life-events/types";
+import "./LifeEventsPanel.scss";
+
+export type LifeEventActiveImpact = {
+  portfolioDelta: number;
+  monthlyIncomeDelta: number;
+};
+
+export interface LifeEventsPanelProps {
+  projectionData: LifeEventsProjectionData;
+  retirementYear: number;
+  monthlyPortfolioIncome: number;
+  activePhase: "growth" | "income";
+  withdrawalRate: number;
+  hsaBalance: number;
+  onEventActiveChange?: (
+    eventId: string,
+    isActive: boolean,
+    impact: LifeEventActiveImpact,
+  ) => void;
+  className?: string;
+}
+
+let nextEventInstanceId = 1;
+
+function createEventInstanceId(): string {
+  nextEventInstanceId += 1;
+  return `life-event-${nextEventInstanceId}`;
+}
+
+const EVENT_PICKER_GROUPS: { label: string; configIds: string[] }[] = [
+  {
+    label: "One-time expenses",
+    configIds: ["buy-car-cash", "home-renovation", "medical-expense"],
+  },
+  {
+    label: "Pay off debt",
+    configIds: ["pay-off-mortgage"],
+  },
+  {
+    label: "Ongoing commitments",
+    configIds: ["tuition-support", "charitable-giving", "church-tithe"],
+  },
+];
+
+function buildInitialEventState(
+  config: LifeEventConfig,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventState {
+  return {
+    id: createEventInstanceId(),
+    configId: config.id,
+    amount: config.defaultAmount,
+    year: config.defaultYear(currentYear, retirementYear),
+    duration: config.defaultDuration,
+    isActive: false,
+    isExpanded: false,
+  };
+}
+
+function duplicateLabel(
+  config: LifeEventConfig,
+  eventStates: LifeEventState[],
+): string | undefined {
+  const sameTypeCount = eventStates.filter((s) => s.configId === config.id).length;
+  if (sameTypeCount === 0) return undefined;
+  return `${config.displayLabel} (${sameTypeCount + 1})`;
+}
+
+function lifeEventCountWord(count: number): string {
+  const words = [
+    "Zero",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+  ];
+  return words[count] ?? String(count);
+}
+
+function lifeEventCountTitle(count: number): { word: string; noun: string } {
+  return {
+    word: lifeEventCountWord(count),
+    noun: count === 1 ? "Life Event" : "Life Events",
+  };
+}
+
+function calcTotalActiveImpact(
+  eventStates: LifeEventState[],
+  retirementYear: number,
+  growthRate: number,
+  configs: LifeEventConfig[],
+  hsaBalance: number,
+): number {
+  return eventStates
+    .filter((s) => s.isActive)
+    .reduce((sum, s) => {
+      const config = configs.find((c) => c.id === s.configId);
+      if (!config) return sum;
+      const fv = calcEventImpactFutureValue(
+        config,
+        s.amount,
+        s.year,
+        retirementYear,
+        growthRate,
+        hsaBalance,
+        s.duration,
+      );
+      const isOutflow = config.type.includes("out");
+      return sum + (isOutflow ? fv : -fv);
+    }, 0);
+}
+
+function calcOtherActiveImpact(
+  excludeId: string,
+  eventStates: LifeEventState[],
+  retirementYear: number,
+  growthRate: number,
+  configs: LifeEventConfig[],
+  hsaBalance: number,
+): number {
+  return eventStates
+    .filter((s) => s.isActive && s.configId !== excludeId)
+    .reduce((sum, s) => {
+      const config = configs.find((c) => c.id === s.configId);
+      if (!config) return sum;
+      const fv = calcEventImpactFutureValue(
+        config,
+        s.amount,
+        s.year,
+        retirementYear,
+        growthRate,
+        hsaBalance,
+        s.duration,
+      );
+      const isOutflow = config.type.includes("out");
+      return sum + (isOutflow ? fv : -fv);
+    }, 0);
+}
+
+export function LifeEventsPanel({
+  projectionData,
+  retirementYear,
+  monthlyPortfolioIncome: _monthlyPortfolioIncome,
+  activePhase,
+  withdrawalRate: _withdrawalRate,
+  hsaBalance,
+  onEventActiveChange = () => {},
+  className = "",
+}: LifeEventsPanelProps) {
+  const currentYear = projectionData.currentYear;
+  const basePortfolio = projectionData.retBal + projectionData.brkBal;
+  const retirementPortfolio = projectionData.baselineTotalAtRetirement;
+  const growthRate = blendedGrowthRate(projectionData);
+
+  const [eventStates, setEventStates] = useState<LifeEventState[]>(() => {
+    const carConfig = growthEventConfigs.find((c) => c.id === "buy-car-cash");
+    const mortgageConfig = growthEventConfigs.find(
+      (c) => c.id === "pay-off-mortgage",
+    );
+    const renovationConfig = growthEventConfigs.find(
+      (c) => c.id === "home-renovation",
+    );
+    const medicalConfig = growthEventConfigs.find(
+      (c) => c.id === "medical-expense",
+    );
+    const tuitionConfig = growthEventConfigs.find(
+      (c) => c.id === "tuition-support",
+    );
+    const charitableConfig = growthEventConfigs.find(
+      (c) => c.id === "charitable-giving",
+    );
+    const churchTitheConfig = growthEventConfigs.find(
+      (c) => c.id === "church-tithe",
+    );
+
+    return [
+      {
+        id: createEventInstanceId(),
+        configId: "buy-car-cash",
+        amount: carConfig?.defaultAmount ?? 35000,
+        year:
+          carConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "pay-off-mortgage",
+        amount: mortgageConfig?.defaultAmount ?? 85000,
+        year:
+          mortgageConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 2,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "home-renovation",
+        amount: renovationConfig?.defaultAmount ?? 45000,
+        year:
+          renovationConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "medical-expense",
+        amount: medicalConfig?.defaultAmount ?? 25000,
+        year:
+          medicalConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 1,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "tuition-support",
+        amount: tuitionConfig?.defaultAmount ?? 600,
+        year:
+          tuitionConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear + 2,
+        duration: tuitionConfig?.defaultDuration ?? 4,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "charitable-giving",
+        amount: charitableConfig?.defaultAmount ?? 400,
+        year:
+          charitableConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear,
+        duration: charitableConfig?.defaultDuration ?? 20,
+        isActive: false,
+        isExpanded: false,
+      },
+      {
+        id: createEventInstanceId(),
+        configId: "church-tithe",
+        amount: churchTitheConfig?.defaultAmount ?? 500,
+        year:
+          churchTitheConfig?.defaultYear(currentYear, retirementYear) ??
+          currentYear,
+        duration: churchTitheConfig?.defaultDuration ?? 25,
+        isActive: false,
+        isExpanded: false,
+      },
+    ];
+  });
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!pickerOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setPickerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [pickerOpen]);
+
+  const pickerGroups = useMemo(
+    () =>
+      EVENT_PICKER_GROUPS.map((group) => ({
+        label: group.label,
+        configs: group.configIds
+          .map((id) => growthEventConfigs.find((c) => c.id === id))
+          .filter((c): c is LifeEventConfig => c != null),
+      })).filter((group) => group.configs.length > 0),
+    [],
+  );
+
+  const updateEventState = useCallback(
+    (id: string, updates: Partial<LifeEventState>) => {
+      setEventStates((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+      );
+    },
+    [],
+  );
+
+  const totalActiveImpact = useMemo(
+    () =>
+      calcTotalActiveImpact(
+        eventStates,
+        retirementYear,
+        growthRate,
+        growthEventConfigs,
+        hsaBalance,
+      ),
+    [eventStates, retirementYear, growthRate, hsaBalance],
+  );
+
+  const activeEventCount = useMemo(
+    () => eventStates.filter((s) => s.isActive).length,
+    [eventStates],
+  );
+
+  const activeEventTitle = useMemo(
+    () => (activeEventCount > 0 ? lifeEventCountTitle(activeEventCount) : null),
+    [activeEventCount],
+  );
+
+  const handleActiveChange = useCallback(
+    (id: string, isActive: boolean, futureValue: number) => {
+      onEventActiveChange(id, isActive, {
+        portfolioDelta: isActive ? -futureValue : 0,
+        monthlyIncomeDelta: 0,
+      });
+    },
+    [onEventActiveChange],
+  );
+
+  const handleAddEvent = useCallback(
+    (config: LifeEventConfig) => {
+      setEventStates((prev) => [
+        ...prev,
+        {
+          ...buildInitialEventState(config, currentYear, retirementYear),
+          label: duplicateLabel(config, prev),
+          isExpanded: true,
+        },
+      ]);
+      setPickerOpen(false);
+    },
+    [currentYear, retirementYear],
+  );
+
+  const panelClassName = ["life-events-panel", className]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <section className={panelClassName} aria-labelledby="life-events-heading">
+      <header className="life-events-panel__header account-balances-header-row">
+        <div className="account-balances-header-row__title-block">
+          {activePhase === "growth" ? (
+            <>
+              <h2
+                id="life-events-heading"
+                className="account-balances-header-row__title"
+              >
+                {activeEventTitle ? (
+                  <>
+                    {activeEventTitle.word}{" "}
+                    <span className="life-events-panel__active-count">
+                      ({activeEventCount})
+                    </span>{" "}
+                    {activeEventTitle.noun}
+                  </>
+                ) : (
+                  "Life events"
+                )}
+              </h2>
+              <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+                Moments that pull from your compounding portfolio before
+                retirement
+              </p>
+            </>
+          ) : (
+            <>
+              <h2
+                id="life-events-heading"
+                className="account-balances-header-row__title"
+              >
+                Life events — income phase
+              </h2>
+              <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+                Moments that affect your monthly draw and portfolio runway after
+                retirement
+              </p>
+            </>
+          )}
+        </div>
+        {activePhase === "growth" ? (
+          <div className="life-events-panel__impact">
+            <span
+              className={[
+                "life-events-panel__impact-value",
+                activeEventCount === 0 && "life-events-panel__impact-value--none",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {activeEventCount === 0
+                ? "NO"
+                : totalActiveImpact > 0
+                  ? `-${formatCurrency(totalActiveImpact)}`
+                  : formatCurrency(0)}
+            </span>
+            <span className="life-events-panel__impact-label">Impact</span>
+          </div>
+        ) : null}
+      </header>
+
+      {activePhase === "income" ? (
+        <div className="life-events-panel__income-empty">
+          <p className="life-events-panel__income-empty-text">
+            No income phase events yet.
+          </p>
+          <p className="life-events-panel__income-empty-subtext">
+            Switch to growth phase to model expenses before retirement.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="life-events-panel__cards">
+            {eventStates.map((state) => {
+              const config = growthEventConfigs.find(
+                (c) => c.id === state.configId,
+              );
+              if (!config) return null;
+              return (
+                <GrowthEventCard
+                  key={state.id}
+                  config={config}
+                  state={state}
+                  basePortfolio={basePortfolio}
+                  retirementYear={retirementYear}
+                  retirementPortfolio={retirementPortfolio}
+                  currentYear={currentYear}
+                  growthRate={growthRate}
+                  otherActiveImpact={calcOtherActiveImpact(
+                    state.configId,
+                    eventStates,
+                    retirementYear,
+                    growthRate,
+                    growthEventConfigs,
+                    hsaBalance,
+                  )}
+                  hsaBalance={hsaBalance}
+                  onStateChange={updateEventState}
+                  onActiveChange={handleActiveChange}
+                />
+              );
+            })}
+          </div>
+
+          {pickerGroups.length > 0 ? (
+            <div className="life-events-panel__add" ref={pickerRef}>
+              <button
+                type="button"
+                className="life-events-panel__add-btn"
+                aria-expanded={pickerOpen}
+                aria-haspopup="listbox"
+                onClick={() => setPickerOpen((open) => !open)}
+              >
+                <IconPlus size={16} stroke={1.5} aria-hidden />
+                Add a life event
+              </button>
+              {pickerOpen ? (
+                <div className="life-events-panel__add-menu" role="listbox">
+                  {pickerGroups.map((group) => (
+                    <div key={group.label} className="life-events-panel__add-group">
+                      <p className="life-events-panel__add-group-label">{group.label}</p>
+                      <ul className="life-events-panel__add-group-list">
+                        {group.configs.map((config) => (
+                          <li key={config.id} role="none">
+                            <button
+                              type="button"
+                              className="life-events-panel__add-item"
+                              role="option"
+                              onClick={() => handleAddEvent(config)}
+                            >
+                              <span
+                                className="life-events-panel__add-item-dot"
+                                style={{ backgroundColor: config.color }}
+                                aria-hidden
+                              />
+                              {config.canonicalLabel}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </>
+      )}
+    </section>
+  );
+}

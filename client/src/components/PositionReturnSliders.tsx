@@ -29,13 +29,15 @@ const RETURN_SLIDER_STEP = 0.5
 const MODE_HINTS: Record<PositionReturnMode, string> = {
   flat: 'One rate per year: annualized from the year strip',
   peryear: 'Set a different rate for each year',
-  scenario: 'Choose Bear, Base, or Bull',
+  scenario: 'Choose Bear, Base, Bull, or stronger Very Bear / Very Bull paths',
 }
 
 const SCENARIO_LABELS: { id: PositionScenarioId; label: string }[] = [
-  { id: 'bear', label: 'Bear' },
+  { id: 'very_bear', label: 'Very Bearish' },
+  { id: 'bear', label: 'Bearish' },
   { id: 'base', label: 'Base' },
-  { id: 'bull', label: 'Bull' },
+  { id: 'bull', label: 'Bullish' },
+  { id: 'very_bull', label: 'Very Bullish' },
 ]
 
 function fmtSignedPctFromDecimal(dec: number): string {

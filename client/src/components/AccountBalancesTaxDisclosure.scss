@@ -6,11 +6,18 @@
 .tax-treatment-disclosure.portfolio-account-group {
   --portfolio-scenario-trigger-min: 8rem;
   --portfolio-scenario-col-pad-x: 0.75rem;
-  --portfolio-account-chevron-pad-end: 0.85rem;
-  /* Single width: scenario col + chevron (16px icon, symmetric horizontal pad) */
+  --portfolio-account-chevron-pad-end: 1rem;
+  --portfolio-account-chevron-gap: 0.75rem;
+  --portfolio-value-col-pad: 1rem;
+  --portfolio-row-pad: 1rem;
+  --portfolio-row-pad-x: var(--portfolio-row-pad);
+  --portfolio-row-pad-y-start: var(--portfolio-row-pad);
+  --portfolio-row-pad-y-end: var(--portfolio-row-pad);
+  --portfolio-scenario-stack-pad-top: 0.75rem;
+  /* Single width: scenario col + chevron (16px icon + right gutter) */
   --portfolio-account-actions-width: calc(
     var(--portfolio-scenario-trigger-min) + 2 * var(--portfolio-scenario-col-pad-x) + 16px +
-      2 * var(--portfolio-account-chevron-pad-end)
+      var(--portfolio-account-chevron-gap) + var(--portfolio-account-chevron-pad-end)
   );
   margin: 0;
   border-bottom: none;
@@ -29,7 +36,7 @@
 .portfolio-account-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -78,20 +85,42 @@
 .tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
   .portfolio-bucket-account-row__order-badge-wrap {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-shrink: 0;
-  padding: 0.75rem 0 0.75rem 0.85rem;
+  padding: 0;
   box-sizing: border-box;
 }
 
-.tax-treatment-disclosure.portfolio-account-group
-  > summary.portfolio-bucket-account-summary
-  .portfolio-bucket-account-row__main,
-.tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
-  .portfolio-bucket-account-row__main {
-  padding: 0.75rem 0.85rem;
-  box-sizing: border-box;
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__actions {
+  flex: 0 0 auto;
+  width: var(--portfolio-account-actions-width);
+  min-width: var(--portfolio-account-actions-width);
+  max-width: var(--portfolio-account-actions-width);
+  box-shadow: none;
+}
+
+@container portfolio-bucket-account-row (min-width: 421px) {
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__actions {
+    align-items: center;
+    align-self: center;
+  }
+}
+
+@container portfolio-bucket-account-row (max-width: 420px) {
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__actions {
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+  }
+}
+
+.tax-treatment-disclosure.portfolio-account-group .portfolio-scenario-cell--account {
+  padding: 0;
 }
 
 .tax-treatment-disclosure > summary::-webkit-details-marker {
@@ -139,25 +168,25 @@
   border-top: 1px solid var(--border);
 }
 
-.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader {
-  border-bottom: 1px solid var(--border);
-  padding: 0.55rem 0 0.65rem 0.85rem;
-}
-
 .tax-treatment-disclosure.portfolio-account-group[open]
-  > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary,
-.tax-treatment-disclosure.portfolio-account-group[open] .holdings-symbol-list__subheader {
+  > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
+  position: relative;
+  z-index: 1;
   background: #f9f9f9;
-  // background: var(--bg);
+border-bottom: 1px dashed var(--border);
 }
 
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {
-  padding: 0.75rem 0.85rem;
+  padding: 0;
 }
 
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
-  padding: 0;
-  // border-left: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  flex: 0 0 auto;
+  width: var(--portfolio-account-actions-width);
+  min-width: var(--portfolio-account-actions-width);
+  max-width: var(--portfolio-account-actions-width);
+  display: flex;
+  align-items: flex-start;
   box-shadow: none;
 }
 
@@ -166,43 +195,76 @@
   padding: 0.75rem 0.85rem;
 }
 
-@media (min-width: 621px) {
-  .tax-treatment-disclosure.portfolio-account-group
-    .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
-    --holdings-scenario-col-w: var(--portfolio-account-actions-width);
-  }
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-table {
+  --holdings-scenario-col-w: var(--portfolio-account-actions-width);
+}
 
-  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader {
-    padding: 0.65rem 0 0.75rem 0.85rem;
-  }
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__summary-row {
+  gap: 0;
+}
 
-  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-list__subheader-override {
-    flex: 0 0 var(--portfolio-account-actions-width);
-    width: var(--portfolio-account-actions-width);
-    min-width: var(--portfolio-account-actions-width);
-    max-width: var(--portfolio-account-actions-width);
+@container holdings-symbol-card (min-width: 421px) {
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__summary-row {
+    align-items: center;
   }
 
   .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {
-    padding: 1rem 0.85rem;
+    align-items: center;
   }
 
   .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
-    flex: 0 0 var(--portfolio-account-actions-width);
-    width: var(--portfolio-account-actions-width);
-    min-width: var(--portfolio-account-actions-width);
-    max-width: var(--portfolio-account-actions-width);
-    box-sizing: border-box;
-    padding: 0;
-    display: flex;
-    align-items: stretch;
-    box-shadow: none;
+    align-items: center;
+    align-self: center;
   }
 }
 
-@media (max-width: 620px) {
+.tax-treatment-disclosure.portfolio-account-group .portfolio-scenario-cell--holding {
+  padding: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__main,
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__values,
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__actions,
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__left-main,
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__right,
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
+  padding: var(--portfolio-row-pad-y-start) var(--portfolio-row-pad-x) var(--portfolio-row-pad-y-end);
+  box-sizing: border-box;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__scenario {
+  padding: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__chevron.view-holdings-hint {
+  padding-right: 0;
+}
+
+@container portfolio-bucket-account-row (max-width: 420px) {
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__main,
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__values {
+    padding: var(--portfolio-row-pad-y-start) var(--portfolio-row-pad-x) 0.15rem;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__actions {
+    padding: var(--portfolio-scenario-stack-pad-top) var(--portfolio-row-pad-x) 0.5rem;
+  }
+}
+
+@container holdings-symbol-card (max-width: 420px) {
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__left-main,
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__right {
+    padding: var(--portfolio-row-pad-y-start) var(--portfolio-row-pad-x) 0.15rem;
+  }
+
   .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
-    padding: 0.65rem 0 0.75rem;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    align-items: stretch;
+    padding: var(--portfolio-scenario-stack-pad-top) var(--portfolio-row-pad-x) 0.5rem;
   }
 }
 

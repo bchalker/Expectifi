@@ -1,18 +1,21 @@
-/* Portfolio account header row (summary inside .portfolio-account-group) */
+/* Portfolio account header row — layout via @container portfolio-bucket-account-row */
 .portfolio-bucket-account-row {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
+  align-items: flex-start;
+  gap: 0;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  container-type: inline-size;
+  container-name: portfolio-bucket-account-row;
 }
 
 .portfolio-bucket-account-row__order-badge-wrap {
-  display: flex;
-  align-items: center;
+  display: inline-flex;
+  align-items: flex-start;
   justify-content: center;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .portfolio-bucket-account-row__order-badge {
@@ -35,13 +38,40 @@
   text-align: center;
 }
 
+.portfolio-bucket-account-row__summary-row {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.portfolio-bucket-account-row__content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
 .portfolio-bucket-account-row__main {
   display: flex;
   flex: 1 1 auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
   min-width: 0;
+  padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
+    var(--portfolio-row-pad-y-end, 0.25rem);
+  box-sizing: border-box;
 }
 
 .portfolio-bucket-account-row__identity {
@@ -74,11 +104,23 @@
   align-items: flex-start;
 }
 
+.portfolio-bucket-account-row__values {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: flex-start;
+  padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
+    var(--portfolio-row-pad-y-end, 0.25rem);
+  text-align: right;
+  box-sizing: border-box;
+}
+
 .portfolio-bucket-account-row__total {
   flex-shrink: 0;
-  font-family: var(--heading);
-  font-size: var(--text-lg);
-  font-weight: 600;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
   line-height: 1.2;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -88,57 +130,129 @@
 
 .portfolio-bucket-account-row__actions {
   display: flex;
-  flex: 0 0 var(--portfolio-account-actions-width, calc(9.5rem + 16px + 2 * 0.85rem));
-  align-items: center;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-self: auto;
+  align-items: flex-start;
   justify-content: flex-end;
-  gap: 0;
-  width: var(--portfolio-account-actions-width, calc(9.5rem + 16px + 2 * 0.85rem));
-  min-width: var(--portfolio-account-actions-width, calc(9.5rem + 16px + 2 * 0.85rem));
-  max-width: var(--portfolio-account-actions-width, calc(9.5rem + 16px + 2 * 0.85rem));
-  margin-left: auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
+    var(--portfolio-row-pad-y-end, 0.25rem);
   box-sizing: border-box;
-  // border-left: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-  // box-shadow: inset 8px 0 14px -8px color-mix(in srgb, var(--text) 16%, transparent);
-  box-shadow: 4px 0 14px 0px rgba(0, 0, 0, 0.2);
 }
 
-.portfolio-bucket-account-row__actions:has(.portfolio-scenario-cell--account-active) {
-  box-shadow: none;
+.portfolio-bucket-account-row__scenario {
+  display: flex;
+  flex: 1 1 auto;
+  align-self: auto;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.portfolio-bucket-account-row__actions--no-chevron {
-  flex: 0 0 calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
-  width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
-  min-width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
-  max-width: calc(var(--portfolio-scenario-trigger-min, 8rem) + 2 * var(--portfolio-scenario-col-pad-x, 0.75rem));
+.portfolio-bucket-account-row__scenario .portfolio-scenario-cell--account {
+  width: 100%;
+  min-width: 100%;
+  height: auto;
+  min-height: 0;
+  align-items: flex-start;
+}
+
+.portfolio-bucket-account-row .holdings-scenario-trigger--outline,
+.portfolio-bucket-account-row .holdings-scenario-trigger--badge {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  align-self: auto;
+  background: #fff;
+}
+
+.portfolio-bucket-account-row .holdings-scenario-trigger--outline:hover,
+.portfolio-bucket-account-row .holdings-scenario-trigger--badge:hover {
+  background: var(--surface-u2);
 }
 
 .portfolio-bucket-account-row__chevron.view-holdings-hint {
-  align-self: center;
+  display: inline-flex;
+  align-self: flex-start;
   flex: 0 0 auto;
-  margin-left: 0;
-  padding: var(--portfolio-account-chevron-pad-end, 0.85rem);
+  margin: 0;
+  padding: 0.45rem 0;
   box-sizing: border-box;
   justify-content: center;
 }
 
-@media (max-width: 620px) {
-  .portfolio-bucket-account-row {
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-
-  .portfolio-bucket-account-row__main {
-    flex: 1 1 100%;
-    order: 1;
-  }
-
-  .portfolio-bucket-account-row__order-badge-wrap {
-    order: 0;
+/* Narrow — stacked header, full-width scenario, chevron centered below */
+@container portfolio-bucket-account-row (max-width: 420px) {
+  .portfolio-bucket-account-row__main,
+  .portfolio-bucket-account-row__values {
+    padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem) 0.15rem;
   }
 
   .portfolio-bucket-account-row__actions {
-    order: 2;
-    margin-left: auto;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    min-height: 0;
+    padding: var(--portfolio-scenario-stack-pad-top, 0.75rem) var(--portfolio-row-pad-x, 1rem) 0.5rem;
+    justify-content: flex-start;
+  }
+
+  .portfolio-bucket-account-row__scenario {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .portfolio-bucket-account-row__chevron.view-holdings-hint {
+    align-self: center;
+    padding: 0.5rem 0 0;
+  }
+}
+
+/* Wide — content + scenario column on one row */
+@container portfolio-bucket-account-row (min-width: 421px) {
+  .portfolio-bucket-account-row__summary-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  .portfolio-bucket-account-row__content {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .portfolio-bucket-account-row__actions {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: var(--portfolio-account-chevron-gap, 0.75rem);
+    width: var(--portfolio-account-actions-width);
+    min-width: var(--portfolio-account-actions-width);
+    max-width: var(--portfolio-account-actions-width);
+    align-self: center;
+    align-items: center;
+  }
+
+  .portfolio-bucket-account-row__scenario {
+    align-items: center;
+  }
+
+  .portfolio-bucket-account-row__scenario .portfolio-scenario-cell--account {
+    align-items: center;
+  }
+
+  .portfolio-bucket-account-row__chevron.view-holdings-hint {
+    align-self: center;
   }
 }

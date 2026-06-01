@@ -7,13 +7,35 @@
 }
 
 .app-left-nav__backdrop {
-  display: none;
+  display: block;
+  position: fixed;
+  z-index: 0;
+  top: calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(15, 23, 35, 0.45);
+  cursor: pointer;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+}
+
+.app-left-nav__backdrop--open {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.28s ease, visibility 0s linear 0s;
 }
 
 .app-left-nav {
   position: fixed;
-  z-index: var(--z-mobile-nav);
-  top: var(--app-measured-header-h, var(--app-header-stack-h));
+  z-index: 1;
+  top: calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px));
   left: 0;
   right: 0;
   bottom: auto;
@@ -43,7 +65,10 @@
   transform: translate3d(0, 0, 0);
   pointer-events: auto;
   box-shadow: 0 10px 28px rgba(28, 43, 58, 0.2);
-  max-height: min(28rem, calc(100dvh - var(--app-measured-header-h, var(--app-header-stack-h))));
+  max-height: min(
+    28rem,
+    calc(100dvh - var(--app-top-chrome-h) - env(safe-area-inset-top, 0px))
+  );
   transition:
     transform 0.32s cubic-bezier(0.33, 1, 0.68, 1),
     visibility 0s linear 0s;
@@ -234,8 +259,16 @@
 }
 
 .app-left-nav__footer-actions {
+  display: none;
+}
+
+.app-left-nav__auth-toolbar {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .app-left-nav__settings-btn--slide-in,
@@ -259,9 +292,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  max-width: 100%;
-  height: 32px;
+  flex: 0 0 auto;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+  max-height: 2rem;
   margin: 0;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -335,16 +371,17 @@
 
 .app-left-nav__auth-row {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
   align-items: center;
-  width: 100%;
+  min-width: 0;
 }
 
 .app-left-nav__auth-link {
-  flex: 1 1 auto;
-  min-width: min(100%, 7rem);
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -376,8 +413,8 @@
 }
 
 .app-left-nav__auth-cta {
-  flex: 1 1 auto;
-  min-width: min(100%, 7rem);
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -411,6 +448,10 @@
   .app-left-nav {
     transition-duration: 0.01ms;
     will-change: auto;
+  }
+
+  .app-left-nav__backdrop {
+    transition-duration: 0.01ms;
   }
 
   .app-left-nav__item {

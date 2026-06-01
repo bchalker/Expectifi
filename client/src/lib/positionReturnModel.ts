@@ -11,7 +11,7 @@ export const POSITION_RETURN_HORIZON = 7 as const
 
 export type PositionReturnMode = 'flat' | 'peryear' | 'scenario'
 
-export type PositionScenarioId = 'bear' | 'base' | 'bull'
+export type PositionScenarioId = 'very_bear' | 'bear' | 'base' | 'bull' | 'very_bull'
 
 /** Treat flat rate as matching blended when within this (decimal return). */
 export const POSITION_FLAT_VS_BLENDED_EPS = 5e-5
@@ -53,9 +53,11 @@ export type PositionReturnModel = {
 
 /** Scenario presets as **percent** points (−5 = −5%). Base length 7; expanded for longer horizons. */
 export const SCENARIO_PRESETS: Record<PositionScenarioId, readonly number[]> = {
+  very_bear: [-12, -8, -3, 0, 1, 2, 2],
   bear: [-5, -3, 2, 4, 5, 5, 5],
   base: [6, 7, 7, 8, 7, 7, 6],
   bull: [15, 20, 18, 12, 10, 8, 7],
+  very_bull: [25, 32, 28, 22, 18, 12, 10],
 }
 
 export function modelingCalendarYears(retirementCalendarYear: number, horizon: number): number[] {
@@ -292,7 +294,15 @@ export function normalizePositionReturnModels(
     const returnMode =
       o.returnMode === 'flat' || o.returnMode === 'peryear' || o.returnMode === 'scenario' ? o.returnMode : 'flat'
     const scenario =
-      o.scenario === 'bear' || o.scenario === 'base' || o.scenario === 'bull' ? o.scenario : o.scenario === null ? null : null
+      o.scenario === 'very_bear' ||
+      o.scenario === 'bear' ||
+      o.scenario === 'base' ||
+      o.scenario === 'bull' ||
+      o.scenario === 'very_bull'
+        ? o.scenario
+        : o.scenario === null
+          ? null
+          : null
     let yearlyReturns: number[] = []
     if (Array.isArray(o.yearlyReturns)) {
       yearlyReturns = o.yearlyReturns.map((v) => (typeof v === 'number' && Number.isFinite(v) ? v : blendedFill))

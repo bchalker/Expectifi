@@ -4,6 +4,7 @@ import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 import { useAuth } from './context/AuthContext'
 import { UserLocaleProvider } from './context/UserLocaleContext'
 import { AccountBalances } from './components/AccountBalances'
+import { LifeEventsPanel, type LifeEventActiveImpact } from './components/LifeEventsPanel'
 import { DrawerPanel } from './components/DrawerPanel'
 import { SnapshotPanel } from './components/SnapshotPanel'
 import { Header } from './components/Header'
@@ -20,10 +21,14 @@ import {
 } from './lib/brokerageBalanceMode'
 import {
   computeResults,
+  applyPortfolioDeltaAtRetirement,
   type CalculatorInputs,
   type CalculatorUi,
   type DrawerName,
 } from './lib/computeResults'
+import { normalizeRetireRegions } from './lib/calc/retireRegions'
+import { buildLifeEventsProjectionData } from './lib/calc/lifeEvents'
+import { loadLifePlans, type LifePlans } from './lib/planStorage/life'
 import { clearStoredManualAccounts } from './lib/manualAccountEntries'
 import { inputsForPersistedCalculatorSession, loadStoredFidelityImport } from './lib/fidelityStorage'
 import {
@@ -64,6 +69,7 @@ import {
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
 } from './lib/userPrefs'
+import { normalizeMarketScenarioId } from './lib/marketScenario'
 import { manualAccountsForBrowserSave } from './lib/manualAccountEntries'
 import {
   loadUserProfile,
@@ -326,11 +332,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       syncUserProfileFromCalculatorInputs(inputs, ui)
       const planningPrefs = calculatorInputsToPlanningPrefs(inputs)
       if (user && planningPrefs) {
-        const monthlyGoal =
-          Math.max(0, Math.round(inputs.monthlyIncomeGoal)) || user.planPrefs?.monthlyGoal || 0
-        if (monthlyGoal > 0) {
-          void saveUserPrefs({ ...planningPrefs, monthlyGoal })
-        }
+        void saveUserPrefs(planningPrefs)
       }
     }, 400)
     return () => window.clearTimeout(id)
@@ -421,6 +423,77 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [inputs, ui, balanceMode, brokerageMode],
   )
 
+  const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans())
+  const [activeLifeEventImpact, setActiveLifeEventImpact] = useState<
+    Record<string, LifeEventActiveImpact>
+  >({})
+
+  const handleLifeEventActiveChange = useCallback(
+    (eventId: string, isActive: boolean, impact: LifeEventActiveImpact) => {
+      setActiveLifeEventImpact((prev) => {
+        if (!isActive) {
+          if (!(eventId in prev)) return prev
+          const next = { ...prev }
+          delete next[eventId]
+          return next
+        }
+        return { ...prev, [eventId]: impact }
+      })
+    },
+    [],
+  )
+
+  const lifeEventsPortfolioDelta = useMemo(
+    () => {
+      if (phase !== 'growth') return 0
+      return Object.values(activeLifeEventImpact).reduce(
+        (sum, impact) => sum + impact.portfolioDelta,
+        0,
+      )
+    },
+    [activeLifeEventImpact, phase],
+  )
+
+  const cDisplay = useMemo(
+    () =>
+      applyPortfolioDeltaAtRetirement(c, {
+        portfolioDelta: lifeEventsPortfolioDelta,
+        incomeMode: ui.incomeMode,
+        incYield: inputs.incYield,
+        incGrowth: inputs.incGrowth,
+        wdRate: inputs.wdRate,
+        wdInflation: inputs.wdInflation,
+        monthlyIncomeGoal: inputs.monthlyIncomeGoal,
+        targetRetirementAge: inputs.targetRetirementAge,
+        ssIncluded: ui.ssIncluded,
+        retireRegions: normalizeRetireRegions(inputs.retireRegions, inputs.italyCost),
+      }),
+    [
+      c,
+      lifeEventsPortfolioDelta,
+      ui.incomeMode,
+      ui.ssIncluded,
+      inputs.incYield,
+      inputs.incGrowth,
+      inputs.wdRate,
+      inputs.wdInflation,
+      inputs.monthlyIncomeGoal,
+      inputs.targetRetirementAge,
+      inputs.retireRegions,
+      inputs.italyCost,
+    ],
+  )
+
+  const lifeEventsProjectionData = useMemo(
+    () =>
+      buildLifeEventsProjectionData(c, {
+        retRate: inputs.retRate,
+        brkRate: inputs.brkRate,
+        save: inputs.save,
+      }),
+    [c, inputs.retRate, inputs.brkRate, inputs.save],
+  )
+
   const ssBenefitsConfigured = isSsConfigured(inputs)
   /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
   const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded
@@ -438,9 +511,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
     const dashboardVisible = welcomeDone && !isWhereToRetire && !user
     updateSavePlanPromptSignals({
       dashboardVisible,
-      projectedIncomeMonthly: dashboardVisible ? c.grossMon : 0,
+      projectedIncomeMonthly: dashboardVisible ? cDisplay.grossMon : 0,
     })
-  }, [welcomeDone, isWhereToRetire, user, c.grossMon, updateSavePlanPromptSignals])
+  }, [welcomeDone, isWhereToRetire, user, cDisplay.grossMon, updateSavePlanPromptSignals])
 
   const hasGoalBar =
     welcomeDone &&
@@ -573,13 +646,48 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onCreateAccount={openAuthRegister}
           welcomeDone={welcomeDone}
         />
+        <AppLeftNav
+          targetRetirementAge={inputs.targetRetirementAge}
+          drawer={drawer}
+          snapshotOpen={accordionOpen}
+          mobileOpen={mobileNavOpen}
+          onMobileOpenChange={setMobileNavOpen}
+          onOpenDrawer={(name) => {
+            if (!isDrawerNavAvailable(name, navContext)) return
+            setAccordionOpen(false)
+            setDrawer(name)
+          }}
+          onSnapshotToggle={() => {
+            if (!isSnapshotNavAvailable(navContext)) return
+            setAccordionOpen((a) => {
+              const next = !a
+              if (next) setDrawer(null)
+              return next
+            })
+          }}
+          onOpenConfig={() => {
+            setAccordionOpen(false)
+            setConfigTab(user ? 'profile' : 'plan')
+            setDrawer('config')
+          }}
+          onOpenSignIn={() => {
+            setMobileNavOpen(false)
+            openAuthSignIn()
+          }}
+          onOpenRegister={() => {
+            setMobileNavOpen(false)
+            openAuthRegister()
+          }}
+          navContext={navContext}
+          welcomeDone={welcomeDone}
+        />
         {hasGoalBar ? (
         <GoalProgressBar
           phase={phase}
           growthGoal={inputs.growthGoal}
-          growthGoalProgressPct={c.growthGoalProgressPct}
+          growthGoalProgressPct={cDisplay.growthGoalProgressPct}
           monthlyIncomeGoal={inputs.monthlyIncomeGoal}
-          incomeGoalProgressPct={c.incomeGoalProgressPct}
+          incomeGoalProgressPct={cDisplay.incomeGoalProgressPct}
           hasPortfolioBalances={dashboardHasPortfolio}
         />
         ) : null}
@@ -587,8 +695,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
           <SubHeader
             phase={phase}
             onPhase={setPhase}
-            grossMon={c.grossMon}
-            totalFV={c.totalFV}
+            grossMon={cDisplay.grossMon}
+            totalFV={cDisplay.totalFV}
             targetRetirementAge={inputs.targetRetirementAge}
             ssIncluded={ui.ssIncluded}
             onSsIncluded={(v) => setUi({ ssIncluded: v })}
@@ -602,6 +710,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               setDrawer('config')
             }}
             hasPortfolioBalances={dashboardHasPortfolio}
+            marketScenarioId={normalizeMarketScenarioId(inputs.marketScenario)}
           />
         ) : null}
         </div>
@@ -627,41 +736,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
           }}
         />
       ) : null}
-      <AppLeftNav
-        targetRetirementAge={inputs.targetRetirementAge}
-        drawer={drawer}
-        snapshotOpen={accordionOpen}
-        mobileOpen={mobileNavOpen}
-        onMobileOpenChange={setMobileNavOpen}
-        onOpenDrawer={(name) => {
-          if (!isDrawerNavAvailable(name, navContext)) return
-          setAccordionOpen(false)
-          setDrawer(name)
-        }}
-        onSnapshotToggle={() => {
-          if (!isSnapshotNavAvailable(navContext)) return
-          setAccordionOpen((a) => {
-            const next = !a
-            if (next) setDrawer(null)
-            return next
-          })
-        }}
-        onOpenConfig={() => {
-          setAccordionOpen(false)
-          setConfigTab(user ? 'profile' : 'plan')
-          setDrawer('config')
-        }}
-        onOpenSignIn={() => {
-          setMobileNavOpen(false)
-          openAuthSignIn()
-        }}
-        onOpenRegister={() => {
-          setMobileNavOpen(false)
-          openAuthRegister()
-        }}
-        navContext={navContext}
-        welcomeDone={welcomeDone}
-      />
       <div
         className={[
           'app-scroll-stack',
@@ -673,12 +747,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
       >
         <div className="app-scroll-stack__main">
       {welcomeDone && isWhereToRetire ? (
-        <WhereToRetire c={c} />
+        <WhereToRetire c={cDisplay} />
       ) : welcomeDone ? (
         <>
       <StripHeader
         phase={phase}
-        c={c}
+        c={cDisplay}
         portfolioControlsRevealed={portfolioControlsRevealed}
         incomeMode={ui.incomeMode}
         onIncomeMode={(incomeMode) => {
@@ -748,7 +822,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           >
             <AccountBalances
               readOnly
-              c={c}
+              c={cDisplay}
               inputs={inputs}
               setInputs={setInputs}
               onManualPortfolioPlanApplied={(plan) => {
@@ -798,7 +872,21 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
         </div>
 
-        <hr className="divider" />
+        {c.hasPortfolioBalances && phase === 'growth' ? <hr className="divider" /> : null}
+
+        {c.hasPortfolioBalances && phase === 'growth' ? (
+          <div className="section section--life-events">
+            <LifeEventsPanel
+              projectionData={lifeEventsProjectionData}
+              retirementYear={c.retirementCalendarYear}
+              monthlyPortfolioIncome={cDisplay.monPort}
+              activePhase={phase}
+              withdrawalRate={inputs.wdRate}
+              hsaBalance={inputs.baseHsa}
+              onEventActiveChange={handleLifeEventActiveChange}
+            />
+          </div>
+        ) : null}
       </div>
         </>
       ) : null}
@@ -809,7 +897,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       <SnapshotPanel
         open={accordionOpen}
         onClose={() => setAccordionOpen(false)}
-        c={c}
+        c={cDisplay}
         incomeMode={ui.incomeMode}
         incYield={inputs.incYield}
         incGrowth={inputs.incGrowth}
@@ -821,7 +909,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       <DrawerPanel
         drawer={drawer}
         onClose={() => setDrawer(null)}
-        c={c}
+        c={cDisplay}
         inputs={inputs}
         setInputs={setInputs}
         balanceMode={balanceMode}
@@ -837,6 +925,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
         setUi={setUi}
         onOpenRegister={openAuthRegister}
         onResetGuestProfile={onResetGuestProfile}
+        lifePlans={lifePlans}
+        onLifePlansChange={setLifePlans}
+        currentYear={lifeEventsProjectionData.currentYear}
       />
       <SavePlanPromptBanner />
       <AuthModal

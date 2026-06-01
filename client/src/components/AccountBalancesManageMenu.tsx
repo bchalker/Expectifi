@@ -27,9 +27,12 @@ import {
   PlaidDisconnectButton,
   formatPlaidSyncTime,
 } from './PlaidConnectionHeader'
+import './FidelityHoldingScenarioPopout.scss'
 import './AccountBalancesManageMenu.scss'
 
 const MANAGE_MENU_MAX_WIDTH = 240
+const MANAGE_SUBLABEL = 'Manage'
+const MANAGE_VALUE_LABEL = 'Financial Accounts'
 
 function computeManageMenuStyle(anchor: DOMRect): CSSProperties {
   const gap = 6
@@ -300,15 +303,32 @@ export function AccountBalancesManageMenu({
       <button
         ref={triggerRef}
         type="button"
-        className={`account-balances-manage__trigger${open ? ' account-balances-manage__trigger--open' : ''}`}
+        className={[
+          'holdings-scenario-trigger',
+          'holdings-scenario-trigger--badge',
+          'account-balances-manage__trigger',
+          open && 'account-balances-manage__trigger--open',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls="account-balances-manage-menu"
+        aria-labelledby="account-balances-manage-label"
         disabled={ctx?.linkBusy}
         onClick={toggleMenu}
       >
-        <span>Manage</span>
-        <IconChevronDown size={14} stroke={1.5} aria-hidden />
+        <span className="holdings-scenario-trigger__text">
+          <span className="holdings-scenario-trigger__sublabel" id="account-balances-manage-label">
+            {MANAGE_SUBLABEL}
+          </span>
+          <span className="holdings-scenario-trigger__label-row">
+            <span className="holdings-scenario-trigger__label">{MANAGE_VALUE_LABEL}</span>
+            <span className="holdings-scenario-trigger__trail" aria-hidden>
+              <IconChevronDown size={14} stroke={1.5} />
+            </span>
+          </span>
+        </span>
       </button>
       {open
         ? createPortal(

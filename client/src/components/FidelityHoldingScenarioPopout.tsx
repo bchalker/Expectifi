@@ -10,7 +10,10 @@ import {
   horizonClamp,
   inferCommonScenarioChoiceForModels,
   inferScenarioUiChoice,
+  isOutlookScenarioChoice,
   mergePatchPositionModelsIntoInputs,
+  OUTLOOK_SCENARIO_TILES,
+  type OutlookScenarioChoice,
   type ScenarioUiChoice,
   SCENARIO_MIXED,
 } from '../lib/holdingScenarioApply'
@@ -69,7 +72,7 @@ function clampPct(n: number): number {
 function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
   if (choice === 'peryear') return 'peryear'
   if (choice === 'custom') return 'custom'
-  if (choice === 'bull' || choice === 'bear' || choice === 'base') return 'outlook'
+  if (isOutlookScenarioChoice(choice)) return 'outlook'
   return 'default'
 }
 
@@ -174,21 +177,25 @@ export function FidelityHoldingScenarioPanel({
     [targets, h, retRate, brkRate],
   )
 
+  const resolvedChoice = commonChoice === SCENARIO_MIXED ? 'default' : commonChoice
+
   const [draftPct, setDraftPct] = useState(String(decimalToPct(retRate)))
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
   const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('default')
 
   useEffect(() => {
-    const resolved = commonChoice === SCENARIO_MIXED ? 'default' : commonChoice
-    setUiChoice(resolved)
-    setActiveTab(intentFromScenarioChoice(resolved))
+    setUiChoice(resolvedChoice)
+    setActiveTab(intentFromScenarioChoice(resolvedChoice))
+  }, [resolvedChoice])
+
+  useEffect(() => {
     const first = targets[0]
     if (first) {
       const blended = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
       const ch = inferScenarioUiChoice(first, blended, h)
       setDraftPct(String(decimalToPct(ch === 'custom' ? first.flatRate : blended)))
     }
-  }, [commonChoice, targets, h, retRate, brkRate])
+  }, [targets, h, retRate, brkRate])
 
   const patchAll = useCallback(
     (choice: ScenarioUiChoice, customPct: number, yearly?: number[]) => {
@@ -222,7 +229,7 @@ export function FidelityHoldingScenarioPanel({
   }, [patchAll])
 
   const onSelectOutlookTile = useCallback(
-    (choice: 'bull' | 'bear' | 'base') => {
+    (choice: OutlookScenarioChoice) => {
       setUiChoice(choice)
       patchAll(choice, 0)
     },
@@ -233,7 +240,7 @@ export function FidelityHoldingScenarioPanel({
     (tab: ScenarioIntentTabId) => {
       setActiveTab(tab)
       if (tab === 'outlook') {
-        if (uiChoice === 'bull' || uiChoice === 'bear' || uiChoice === 'base') return
+        if (isOutlookScenarioChoice(uiChoice)) return
         setUiChoice('base')
         patchAll('base', 0)
       } else if (tab === 'custom') {
@@ -267,17 +274,9 @@ export function FidelityHoldingScenarioPanel({
   const globalUsingActive = commonChoice === 'default'
   const nHoldings = importLineCountForSymbol
 
-  const outlookTiles = useMemo(
-    () => [
-      { choice: 'bear' as const, label: 'Bear', hint: 'Leans negative' },
-      { choice: 'base' as const, label: 'Normal', hint: 'Neutral' },
-      { choice: 'bull' as const, label: 'Bull', hint: 'Leans positive' },
-    ],
-    [],
-  )
+  const outlookTiles = OUTLOOK_SCENARIO_TILES
 
-  const outlookTabKey =
-    uiChoice === 'bull' || uiChoice === 'bear' || uiChoice === 'base' ? uiChoice : 'base'
+  const outlookTabKey = isOutlookScenarioChoice(uiChoice) ? uiChoice : 'base'
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (

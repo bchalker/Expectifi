@@ -5,7 +5,10 @@ import {
   type ScenarioUiChoice,
 } from './holdingScenarioApply'
 import { horizonClamp } from './holdingScenarioApply'
+import type { MarketScenarioId } from './marketScenario'
+import { resolveGlobalMarketScenarioRates } from './marketScenario'
 import {
+  annualizedReturnFromYearlyPath,
   padYearlyReturns,
   positionUsesCustomReturnMode,
   type PositionReturnMode,
@@ -99,7 +102,7 @@ export function accountScenarioIsActive(
   return getAccountReturnScenario(inputs, bucket) != null
 }
 
-/** Which tier supplies this holding's growth rate (holding → account → global). */
+/** Which tier supplies this holding's growth rate (holding → bucket → global market scenario). */
 export function holdingReturnRateSource(
   model: PositionReturnModel,
   accountScenario: AccountReturnScenario | undefined,
@@ -171,12 +174,17 @@ export function effectiveHoldingFlatRate(
   return blended
 }
 
-/** Ephemeral model for FV projection — does not mutate stored holding or account state. */
+/**
+ * Ephemeral model for FV projection — does not mutate stored holding or account state.
+ *
+ * Override precedence: holding custom → bucket/account → global market scenario → global slider.
+ */
 export function projectionModelForHolding(
   model: PositionReturnModel,
   accountScenario: AccountReturnScenario | undefined,
   blended: number,
   horizon: number,
+  marketScenario?: MarketScenarioId,
 ): PositionReturnModel {
   const h = horizonClamp(horizon)
   const source = holdingReturnRateSource(model, accountScenario, blended)
@@ -191,12 +199,17 @@ export function projectionModelForHolding(
       scenario: accountScenario.scenario ?? null,
     }
   }
-  const rate = effectiveHoldingFlatRate(model, accountScenario, blended)
+  const rates = resolveGlobalMarketScenarioRates(marketScenario, blended, h)
+  const flat = annualizedReturnFromYearlyPath(rates)
+  const usePerYear =
+    marketScenario != null &&
+    marketScenario !== 'base' &&
+    rates.some((r, i) => i > 0 && Math.abs(r - (rates[0] ?? r)) > 1e-6)
   return {
     ...model,
-    returnMode: 'flat',
-    flatRate: rate,
+    returnMode: usePerYear ? 'peryear' : 'flat',
+    flatRate: flat,
     scenario: null,
-    yearlyReturns: Array.from({ length: h }, () => rate),
+    yearlyReturns: rates,
   }
 }

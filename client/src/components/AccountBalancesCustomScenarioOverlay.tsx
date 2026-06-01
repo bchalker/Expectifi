@@ -70,9 +70,11 @@ function ScenarioSelect({
     >
       {mixed ? <option value={SCENARIO_MIXED}>Various — choose to apply</option> : null}
       <option value="default">Default return</option>
-      <option value="bull">Bull</option>
+      <option value="very_bull">Very Bullish</option>
+      <option value="bull">Bullish</option>
       <option value="base">Base (Normal)</option>
-      <option value="bear">Bear</option>
+      <option value="bear">Bearish</option>
+      <option value="very_bear">Very Bearish</option>
       <option value="custom">Custom %</option>
       <option value="peryear">Per year</option>
     </select>

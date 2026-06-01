@@ -1,4 +1,4 @@
-/* Shared holdings symbol row — default stacks scenario below at ≤620px; row layout above */
+/* Shared holdings symbol row — layout via @container holdings-symbol-card */
 .holdings-symbol-card {
   position: relative;
   display: flex;
@@ -12,8 +12,10 @@
   background: rgba(255,255,255,1);
   box-shadow: var(--shadow-account-divider);
   box-sizing: border-box;
-  // border: 1px solid var(--border);
   overflow: hidden;
+  container-type: inline-size;
+  container-name: holdings-symbol-card;
+  --holdings-accent-orange: var(--header-income-orange, #c4610a);
 }
 
 /* 4px green inset bar — scales in/out from the left (no blur). */
@@ -68,6 +70,8 @@
 .holdings-symbol-card__summary-row {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -79,40 +83,110 @@
   flex-wrap: nowrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
-  padding: 0.75rem var(--layout-app-inner-pad, 10px);
+  gap: 0.75rem;
+  padding: 0;
   min-width: 0;
   flex: 1 1 auto;
   box-sizing: border-box;
 }
 
-.holdings-symbol-card__breakdown {
-  display: grid;
-  grid-template-rows: 0fr;
-  width: 100%;
-  min-width: 0;
-  margin: 0;
+.holdings-breakdown-popout.popover,
+.holdings-breakdown-popout {
+  z-index: 450;
+  width: min(17rem, calc(100vw - 1rem));
   padding: 0;
-  border: none;
-  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid var(--border, #e2e8ed);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.16);
   overflow: hidden;
-  transition: grid-template-rows 0.22s ease;
+  box-sizing: border-box;
 }
 
-.holdings-symbol-card__breakdown--open {
-  grid-template-rows: 1fr;
-  // border-top: 1px solid var(--border);
+.holdings-breakdown-popout--open {
+  animation: holdings-breakdown-popout-in 0.15s ease forwards;
+}
+
+.holdings-breakdown-popout[data-entering='true'] {
+  animation: holdings-breakdown-popout-in 0.15s ease forwards;
+}
+
+.holdings-breakdown-popout[data-exiting='true'] {
+  animation: holdings-breakdown-popout-out 0.12s ease forwards;
+}
+
+@keyframes holdings-breakdown-popout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes holdings-breakdown-popout-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holdings-breakdown-popout--open,
+  .holdings-breakdown-popout[data-entering='true'],
+  .holdings-breakdown-popout[data-exiting='true'] {
+    animation: none;
+  }
+}
+
+.holdings-breakdown-popout__dialog {
+  padding: 0.5rem 0.65rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.holdings-symbol-card__breakdown-note,
+.holdings-symbol-card__breakdown-inner {
+  animation: holdings-breakdown-content-in 0.15s ease both;
+}
+
+@keyframes holdings-breakdown-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holdings-symbol-card__breakdown-note,
+  .holdings-symbol-card__breakdown-inner {
+    animation: none;
+    transform: none;
+  }
 }
 
 .holdings-symbol-card__breakdown-inner {
   min-height: 0;
   overflow: hidden;
-
+  box-sizing: border-box;
 }
 
 .holdings-symbol-card__breakdown-note {
-  margin: 0;
-  padding: 0.35rem var(--layout-app-inner-pad, 10px) 0.2rem;
+  margin: 0 0 0.35rem;
+  padding: 0;
   border: none;
   box-sizing: border-box;
   max-width: none;
@@ -120,15 +194,10 @@
   font-size: var(--text-xs);
   font-weight: 400;
   line-height: 1.35;
-  color: var(--text-faint);
+  color: var(--text);
 }
 
-.holdings-symbol-card__breakdown-note + .holdings-breakdown-block {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-.holdings-symbol-card__breakdown .holdings-breakdown-block {
+.holdings-breakdown-popout .holdings-breakdown-block {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -138,58 +207,103 @@
   box-sizing: border-box;
 }
 
-.holdings-symbol-card__breakdown .holdings-breakdown-block .holdings-breakdown-row__inner {
+.holdings-breakdown-popout .holdings-breakdown-block .holdings-breakdown-row__inner {
   margin-inline: 0;
 }
 
-.holdings-symbol-card__breakdown .holdings-breakdown-row {
+.holdings-breakdown-popout .holdings-breakdown-row {
   padding: 0;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
-  border-left: 3px solid var(--gold, var(--amber1));
+  border-left: none;
+  padding: 0.25rem 0;
+  border-top: 1px dashed #dddddd;
+
+  &:first-child {
+    border-top: none;
+  }
 }
 
-.holdings-symbol-card__breakdown .holdings-breakdown-row__inner {
+.holdings-breakdown-popout .holdings-breakdown-row__inner {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   margin: 0;
-  padding: 0 var(--layout-app-inner-pad, 10px) 0 0.45rem;
+  padding: 0;
   border-left: none;
   box-sizing: border-box;
 }
 
-.holdings-symbol-card__breakdown--open .holdings-breakdown-block {
-  padding-bottom: 0.35rem;
+.holdings-breakdown-popout .holdings-breakdown-row__account {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.holdings-breakdown-popout .holdings-breakdown-row__value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .holdings-symbol-card__aggregate-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  flex: 0 0 1rem;
+  width: 1rem;
+  height: 1rem;
   margin: 0;
-  padding: var(--portfolio-account-chevron-pad-end, 0.85rem);
-  min-width: 44px;
-  min-height: 44px;
+  padding: 0;
   border: none;
+  border-radius: 0;
   background: transparent;
+  color: var(--text-muted);
   cursor: pointer;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease;
+}
+
+.holdings-symbol-card__aggregate-toggle .holding-aggregate-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.holdings-symbol-card__aggregate-toggle .holding-aggregate-hint__icon {
+  display: block;
+  transform: translateY(0.5px);
+  color: currentColor;
+  transition: color 0.15s ease;
+}
+
+.holdings-symbol-card__aggregate-toggle--open,
+.holdings-symbol-card--breakdown-open .holdings-symbol-card__aggregate-toggle {
+  color: var(--color-amber-dark);
+}
+
+.holdings-symbol-card__aggregate-toggle--open .holding-aggregate-hint,
+.holdings-symbol-card__aggregate-toggle--open .holding-aggregate-hint__icon,
+.holdings-symbol-card--breakdown-open .holdings-symbol-card__aggregate-toggle .holding-aggregate-hint,
+.holdings-symbol-card--breakdown-open .holdings-symbol-card__aggregate-toggle .holding-aggregate-hint__icon {
+  color: var(--color-amber-dark);
 }
 
 .holdings-symbol-card__aggregate-toggle:focus-visible {
-  outline: 2px solid var(--color-amber-dark);
+  outline: 2px solid var(--border);
   outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .holdings-symbol-card__breakdown {
-    transition: none;
-  }
+.holdings-symbol-card--breakdown-open .holdings-symbol-card__aggregate-toggle:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
 }
 
 .holdings-symbol-card__left {
@@ -229,21 +343,31 @@
   align-items: flex-start;
   gap: 0.15rem;
   min-width: 0;
+  padding: 0.5rem 1rem 0.25rem;
   flex: 1 1 auto;
 }
 
 .holdings-symbol-card__symbol-row {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 0.35rem;
   min-width: 0;
+  height: 1rem;
+}
+
+/* Let the toggle button participate directly in the symbol-row flex layout. */
+.holdings-symbol-card__symbol-row [data-slot='tooltip-root'] {
+  display: contents;
 }
 
 .holdings-symbol-card__symbol {
   font-family: var(--body);
   font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: var(--leading-snug);
+  font-weight: 700;
+  line-height: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -276,7 +400,9 @@
   align-items: flex-end;
   gap: 0.15rem;
   flex-shrink: 0;
+  padding: 0.5rem 1rem 0.25rem;
   text-align: right;
+  box-sizing: border-box;
 }
 
 .holdings-symbol-card__trailing {
@@ -325,37 +451,77 @@
 
 .holdings-symbol-card__actions {
   display: flex;
+  flex: 0 0 auto;
   flex-shrink: 0;
-  align-items: center;
+  flex-direction: row;
+  align-self: auto;
+  align-items: flex-start;
   justify-content: flex-end;
-  gap: 0;
   width: 100%;
   min-width: 0;
+  min-height: 0;
   box-sizing: border-box;
 }
 
-.holdings-symbol-card--has-breakdown .holdings-symbol-card__actions {
-  box-shadow: none;
+.holdings-symbol-card__actions--inherits-account {
+  background: #f9f9f9;
+  box-shadow: inset -8px 0 14px -8px rgba(0, 0, 0, 0.1);
+}
+
+.holdings-symbol-card__actions--inherits-account .holdings-scenario-trigger--outline {
+  background: transparent;
 }
 
 .holdings-symbol-card__scenario {
+  display: flex;
   flex: 1 1 auto;
+  align-self: auto;
+  align-items: flex-start;
   min-width: 0;
-  width: 100%;
-  padding: 0.65rem var(--layout-app-inner-pad, 10px);
+  padding: 0;
   box-sizing: border-box;
 }
 
-.holdings-symbol-card__aggregate-hint {
-  pointer-events: none;
+.holdings-symbol-card .holdings-scenario-trigger--outline,
+.holdings-symbol-card .holdings-scenario-trigger--badge {
+  width: 100%;
+  height: auto;
+  min-height: 0;
 }
 
 .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {
   width: 100%;
   min-width: 100%;
+  height: auto;
+  min-height: 0;
+  align-items: flex-start;
 }
 
-.holdings-symbol-table--no-scenario .holdings-symbol-card__actions:not(:has(.holdings-symbol-card__aggregate-toggle)) {
+.holdings-symbol-card__scenario .portfolio-scenario-cell--holding .holdings-scenario-trigger,
+.holdings-symbol-card__scenario .portfolio-scenario-cell--holding .holdings-scenario-trigger-shell {
+  height: auto;
+  min-height: 0;
+  align-self: auto;
+  width: 100%;
+}
+
+.holdings-symbol-card .holdings-scenario-trigger--outline {
+  background: #fff;
+  background: rgba(0,0,0, .05);
+  opacity: 1;
+  border-color: var(--border);
+}
+
+.holdings-symbol-card .holdings-scenario-trigger--outline:hover {
+  background: var(--surface-u2);
+  opacity: 1;
+}
+
+.holdings-symbol-card .holdings-scenario-trigger--badge {
+  background: #fff;
+}
+
+.holdings-symbol-table--no-scenario .holdings-symbol-card__actions {
   display: none;
 }
 
@@ -363,48 +529,90 @@
   display: none;
 }
 
-/* ≥621px — scenario column to the right of left/right grouping */
-@media (min-width: 621px) {
-  .holdings-symbol-table:not(.holdings-symbol-table--mobile-cards) {
-    --holdings-scenario-col-w: calc(19.5ch + 30px);
+/* Narrow card — stacked header + full-width action row */
+@container holdings-symbol-card (max-width: 420px) {
+  .holdings-symbol-card__summary-row {
+    flex-direction: column;
+    gap: 0;
   }
 
-  .holdings-symbol-card {
-    box-shadow: none;
+  .holdings-symbol-card__left-main,
+  .holdings-symbol-card__right {
+    padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem) 0.15rem;
   }
 
+  .holdings-symbol-card__content {
+    width: 100%;
+  }
+
+  .holdings-symbol-card__right {
+    flex: 0 0 auto;
+    align-items: flex-end;
+  }
+
+  .holdings-symbol-card__field--value .holdings-symbol-card__field-label {
+    display: none;
+  }
+
+  .holdings-symbol-card__field--basis {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.35rem;
+    text-align: right;
+  }
+
+  .holdings-symbol-card__actions {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    min-height: 0;
+    align-items: stretch;
+    padding: var(--portfolio-scenario-stack-pad-top, 0.75rem) var(--portfolio-row-pad-x, 1rem) 0.5rem;
+  }
+
+  .holdings-symbol-card__scenario {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .holdings-symbol-card__actions--inherits-account {
+    background: transparent;
+    box-shadow: inset -8px 0 14px -8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Wide card — single horizontal row */
+@container holdings-symbol-card (min-width: 421px) {
   .holdings-symbol-card__summary-row {
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
+    gap: 0;
   }
 
   .holdings-symbol-card__content {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 1rem;
+    align-self: auto;
+    align-items: center;
   }
 
-  .holdings-symbol-card__breakdown-note {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .holdings-symbol-card__actions {
+    flex: 0 0 auto;
+    width: var(--holdings-scenario-col-w, auto);
+    min-width: var(--holdings-scenario-col-w, auto);
+    max-width: var(--holdings-scenario-col-w, auto);
+    align-self: center;
+    align-items: center;
+    min-height: 0;
   }
 
-  .holdings-symbol-card__breakdown .holdings-breakdown-row__inner {
-    padding-left: 0.5rem;
-    padding-right: 1rem;
+  .holdings-symbol-card__scenario {
+    align-items: center;
   }
 
-  .holdings-symbol-card__breakdown--open .holdings-breakdown-block {
-    padding-bottom: 0.45rem;
-  }
-
-  .holdings-symbol-card__desc--trunc {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    -webkit-line-clamp: unset;
-    -webkit-box-orient: unset;
+  .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {
+    align-items: center;
   }
 
   .holdings-symbol-card__field {
@@ -418,33 +626,13 @@
     flex-shrink: 0;
   }
 
-  .holdings-symbol-card__actions {
-    flex: 0 0 var(--holdings-scenario-col-w);
-    width: var(--holdings-scenario-col-w);
-    min-width: var(--holdings-scenario-col-w);
-    max-width: var(--holdings-scenario-col-w);
-    align-self: stretch;
-    box-shadow: none;
-  }
-
-  .holdings-symbol-card--has-breakdown .holdings-symbol-card__actions {
-    flex: 0 0 var(--portfolio-account-actions-width, var(--holdings-scenario-col-w));
-    width: var(--portfolio-account-actions-width, var(--holdings-scenario-col-w));
-    min-width: var(--portfolio-account-actions-width, var(--holdings-scenario-col-w));
-    max-width: var(--portfolio-account-actions-width, var(--holdings-scenario-col-w));
-  }
-
-  .holdings-symbol-card__scenario {
-    flex: 1 1 auto;
-    align-self: stretch;
-    display: flex;
-    align-items: stretch;
-    padding: 0;
-    box-shadow: none;
-  }
-
-  .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {
-    align-self: stretch;
+  .holdings-symbol-card__desc--trunc {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
   }
 
   .holdings-symbol-card__scenario .portfolio-scenario-cell__trigger .holdings-scenario-trigger__label {
@@ -453,4 +641,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+.holdings-symbol-table {
+  --holdings-scenario-col-w: calc(19.5ch + 30px);
+}
+
+.holdings-symbol-table .holdings-symbol-card {
+  box-shadow: none;
 }

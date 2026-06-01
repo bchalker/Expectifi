@@ -1,0 +1,77 @@
+.ui-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.ui-toggle__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.ui-toggle__switch-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.ui-toggle__track {
+  position: relative;
+  display: block;
+  width: 2.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: var(--surface2);
+  border: 1px solid var(--border-strong);
+  box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ui-toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transform: translateY(-50%);
+  transition: transform 0.15s ease;
+  box-sizing: border-box;
+}
+
+.ui-toggle__input:checked + .ui-toggle__track {
+  background: color-mix(in srgb, var(--accent-text) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent-text) 35%, var(--border-strong));
+}
+
+.ui-toggle__input:checked + .ui-toggle__track::after {
+  transform: translate(1rem, -50%);
+  border-color: color-mix(in srgb, var(--accent-text) 25%, var(--border));
+}
+
+.ui-toggle__input:focus-visible + .ui-toggle__track {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}

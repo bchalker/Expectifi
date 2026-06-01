@@ -1,12 +1,14 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useId, useRef, useState, type ReactNode } from 'react'
 import type { HoldingReturnRateSource } from '../lib/accountReturnScenario'
 import {
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
 import { fmt } from '../utils/format'
+import { HoldingsBreakdownPopout } from './HoldingsBreakdownPopout'
 import { PortfolioScenarioCell } from './PortfolioScenarioCell'
 import type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
+import { Tooltip } from './Tooltip'
 import { HoldingAggregateHint } from './ui/HoldingAggregateHint'
 import './HoldingsSymbolCard.scss'
 
@@ -34,6 +36,7 @@ export type HoldingsSymbolCardProps = {
   currentValue: number
   costBasis: number | null
   scenario?: HoldingsSymbolCardScenarioProps | null
+  breakdownNote?: ReactNode
   breakdown?: ReactNode
 }
 
@@ -45,13 +48,62 @@ export function HoldingsSymbolCard({
   currentValue,
   costBasis,
   scenario = null,
+  breakdownNote = null,
   breakdown = null,
 }: HoldingsSymbolCardProps) {
   const [breakdownOpen, setBreakdownOpen] = useState(false)
   const breakdownPanelId = useId()
+  const breakdownToggleRef = useRef<HTMLButtonElement>(null)
+  const inheritsAccountScenario =
+    scenario != null &&
+    scenario.rateSource === 'account' &&
+    scenario.variant === 'outline'
   const valueAmount = (
     <span className="holdings-symbol-card__value">{fmt(currentValue)}</span>
   )
+
+  const breakdownToggle = breakdown ? (
+    <>
+      <Tooltip
+        nativeTrigger
+        variant="dark"
+        delay={400}
+        closeDelay={150}
+        placement="bottom"
+        content={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
+      >
+        <button
+          ref={breakdownToggleRef}
+          type="button"
+          className={[
+            'holdings-symbol-card__aggregate-toggle',
+            breakdownOpen && 'holdings-symbol-card__aggregate-toggle--open',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-expanded={breakdownOpen}
+          aria-haspopup="dialog"
+          aria-controls={breakdownPanelId}
+          aria-label={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
+          onClick={(e) => {
+            e.stopPropagation()
+            setBreakdownOpen((open) => !open)
+          }}
+        >
+          <HoldingAggregateHint expanded={breakdownOpen} />
+        </button>
+      </Tooltip>
+      <HoldingsBreakdownPopout
+        open={breakdownOpen}
+        anchorRef={breakdownToggleRef}
+        panelId={breakdownPanelId}
+        onClose={() => setBreakdownOpen(false)}
+        note={breakdownNote}
+      >
+        {breakdown}
+      </HoldingsBreakdownPopout>
+    </>
+  ) : null
 
   return (
     <article
@@ -71,6 +123,7 @@ export function HoldingsSymbolCard({
             <div className="holdings-symbol-card__left-main">
               <div className="holdings-symbol-card__symbol-row">
                 <span className="holdings-symbol-card__symbol">{symbol}</span>
+                {breakdownToggle}
               </div>
               {description}
             </div>
@@ -88,40 +141,19 @@ export function HoldingsSymbolCard({
             </div>
           </div>
         </div>
-        {scenario || breakdown ? (
-          <div className="holdings-symbol-card__actions">
-            {scenario ? <HoldingsSymbolCardScenarioPanel scenario={scenario} /> : null}
-            {breakdown ? (
-              <button
-                type="button"
-                className="holdings-symbol-card__aggregate-toggle"
-                aria-expanded={breakdownOpen}
-                aria-controls={breakdownPanelId}
-                aria-label={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
-                onClick={() => setBreakdownOpen((open) => !open)}
-              >
-                <HoldingAggregateHint
-                  className="holdings-symbol-card__aggregate-hint"
-                  expanded={breakdownOpen}
-                />
-              </button>
-            ) : null}
+        {scenario ? (
+          <div
+            className={[
+              'holdings-symbol-card__actions',
+              inheritsAccountScenario && 'holdings-symbol-card__actions--inherits-account',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <HoldingsSymbolCardScenarioPanel scenario={scenario} />
           </div>
         ) : null}
       </div>
-      {breakdown ? (
-        <div
-          id={breakdownPanelId}
-          className={[
-            'holdings-symbol-card__breakdown',
-            breakdownOpen ? 'holdings-symbol-card__breakdown--open' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <div className="holdings-symbol-card__breakdown-inner">{breakdown}</div>
-        </div>
-      ) : null}
     </article>
   )
 }

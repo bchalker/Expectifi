@@ -46,6 +46,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   incomePresets: [...DEFAULT_INCOME_PRESETS],
   positionReturnModels: [],
   accountReturnScenarios: {},
+  marketScenario: 'base',
   residenceCountry: '',
 }
 
@@ -73,7 +74,7 @@ export function getInitialCalculatorInputs(): CalculatorInputs {
     stripFinancial: true,
   })
   if (persisted) {
-    return mergeStoredProfile(applyFidelityBalanceOverrides(stripFinancialFields(persisted.inputs)))
+    return applyFidelityBalanceOverrides(stripFinancialFields(persisted.inputs))
   }
   const stored = loadStoredAppState()
   if (stored) {
