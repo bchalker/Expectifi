@@ -1,7 +1,7 @@
 /* Portfolio account header row — layout via @container portfolio-bucket-account-row */
 .portfolio-bucket-account-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0;
   width: 100%;
   min-width: 0;
@@ -12,8 +12,9 @@
 
 .portfolio-bucket-account-row__order-badge-wrap {
   display: inline-flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  align-self: center;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -42,7 +43,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0;
   width: 100%;
   min-width: 0;
@@ -53,7 +54,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
@@ -66,11 +67,11 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   min-width: 0;
   padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
-    var(--portfolio-row-pad-y-end, 0.25rem);
+    var(--portfolio-row-pad-y-end, 0.5rem);
   box-sizing: border-box;
 }
 
@@ -109,9 +110,10 @@
   flex-shrink: 0;
   flex-direction: column;
   align-items: flex-end;
-  align-self: flex-start;
+  align-self: center;
+  justify-content: center;
   padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
-    var(--portfolio-row-pad-y-end, 0.25rem);
+    var(--portfolio-row-pad-y-end, 0.5rem);
   text-align: right;
   box-sizing: border-box;
 }
@@ -133,22 +135,22 @@
   flex: 0 0 auto;
   flex-shrink: 0;
   flex-direction: row;
-  align-self: auto;
-  align-items: flex-start;
+  align-self: center;
+  align-items: center;
   justify-content: flex-end;
   width: 100%;
   min-width: 0;
   min-height: 0;
   padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem)
-    var(--portfolio-row-pad-y-end, 0.25rem);
+    var(--portfolio-row-pad-y-end, 0.5rem);
   box-sizing: border-box;
 }
 
 .portfolio-bucket-account-row__scenario {
   display: flex;
   flex: 1 1 auto;
-  align-self: auto;
-  align-items: flex-start;
+  align-self: center;
+  align-items: center;
   min-width: 0;
   padding: 0;
   box-sizing: border-box;
@@ -159,7 +161,7 @@
   min-width: 100%;
   height: auto;
   min-height: 0;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline,
@@ -178,10 +180,10 @@
 
 .portfolio-bucket-account-row__chevron.view-holdings-hint {
   display: inline-flex;
-  align-self: flex-start;
+  align-self: center;
   flex: 0 0 auto;
   margin: 0;
-  padding: 0.45rem 0;
+  padding: 0;
   box-sizing: border-box;
   justify-content: center;
 }
@@ -230,7 +232,7 @@
   .portfolio-bucket-account-row__content {
     flex: 1 1 auto;
     min-width: 0;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .portfolio-bucket-account-row__actions {

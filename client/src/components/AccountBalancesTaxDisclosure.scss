@@ -85,8 +85,9 @@
 .tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
   .portfolio-bucket-account-row__order-badge-wrap {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  align-self: center;
   flex-shrink: 0;
   padding: 0;
   box-sizing: border-box;
