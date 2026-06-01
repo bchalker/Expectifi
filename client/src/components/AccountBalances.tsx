@@ -1812,11 +1812,6 @@ export function AccountBalances({
             <div className="account-balances-header-row">
               <div className="account-balances-header-row__title-block">
                 <h2 className="account-balances-header-row__title">Retirement Account Balances</h2>
-                {hasCustomScenarioBadge ? (
-                  <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
-                    Some holdings use custom scenarios
-                  </p>
-                ) : null}
                 {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
               </div>
               <div className="account-balances-header-row__actions">

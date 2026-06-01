@@ -9,6 +9,7 @@ import {
   Filler,
   Tooltip,
   type ChartOptions,
+  type TooltipItem,
 } from 'chart.js'
 
 let activeEventColor = '#EF9F27'
@@ -142,7 +143,7 @@ const CHART_OPTIONS: ChartOptions<'line'> = {
     legend: { display: false },
     tooltip: {
       callbacks: {
-        label: (ctx) => {
+        label: (ctx: TooltipItem<'line'>) => {
           const value = ctx.parsed.y ?? 0
           if (value >= 1_000_000) return `${ctx.dataset.label}: $${(value / 1_000_000).toFixed(1)}M`
           return `${ctx.dataset.label}: $${(value / 1000).toFixed(0)}k`
@@ -167,7 +168,7 @@ const CHART_OPTIONS: ChartOptions<'line'> = {
       },
       ticks: {
         color: 'var(--color-text-secondary, var(--text-muted))',
-        callback: (value) => {
+        callback: (value: string | number) => {
           const n = typeof value === 'number' ? value : Number(value)
           if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
           return '$' + (n / 1000).toFixed(0) + 'k'
