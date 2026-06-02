@@ -2,7 +2,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md, 10px);
   background: var(--surface2);
-  padding: 0.875rem 1rem;
+  padding: var(--space-3) /* review: was 0.875rem */ var(--space-4);
 }
 
 .wtr-exchange-rate--compact {
@@ -24,8 +24,8 @@
 .wtr-exchange-rate__head {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
   color: var(--text-muted);
 }
 
@@ -46,7 +46,7 @@
 }
 
 .wtr-exchange-rate__currency-name {
-  margin: 0.25rem 0 0;
+  margin: var(--space-1) 0 0;
   font-size: var(--text-sm);
   color: var(--text-muted);
 }
@@ -60,8 +60,8 @@
 }
 
 .wtr-exchange-rate__footnote {
-  margin-top: 0.625rem;
-  padding-top: 0.625rem;
+  margin-top: var(--space-2) /* review: was 0.625rem */;
+  padding-top: var(--space-2) /* review: was 0.625rem */;
   border-top: 1px solid var(--border);
 }
 

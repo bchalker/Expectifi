@@ -19,7 +19,7 @@
 
 .onboarding-field-shell--filled {
   background: #fff;
-  padding-right: calc(var(--onboarding-field-inset) + 1.15rem);
+  padding-right: calc(var(--onboarding-field-inset) + var(--space-4));
 }
 
 .onboarding-field-shell__input {

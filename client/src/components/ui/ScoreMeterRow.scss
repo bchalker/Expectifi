@@ -5,7 +5,7 @@
 
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2) /* review: was 0.4rem */;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
 }
 
 .score-meter-row--compact .score-meter-row__track {
@@ -72,6 +72,6 @@
 @media (max-width: 480px) {
   .score-meter-row--labeled {
     grid-template-columns: minmax(0, auto) minmax(2.5rem, 1fr) auto;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 }

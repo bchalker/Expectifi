@@ -24,9 +24,11 @@ type ThumbRect = { left: number; width: number };
 function PhaseSegmentTabs({
   phase,
   onPhase,
+  targetRetirementAge,
 }: {
   phase: Phase;
   onPhase: (p: Phase) => void;
+  targetRetirementAge: number;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const growthRef = useRef<HTMLButtonElement>(null);
@@ -91,10 +93,13 @@ function PhaseSegmentTabs({
         aria-selected={phase === "income"}
         aria-controls="subheader-phase-income-panel"
         tabIndex={phase === "income" ? 0 : -1}
-        className="subheader-phase-segment__tab"
+        className="subheader-phase-segment__tab subheader-phase-segment__tab--income"
         onClick={() => onPhase("income")}
       >
-        Income
+        <span className="subheader-phase-segment__income-label">
+          <span className="subheader-phase-segment__income-word">Income</span>{" "}
+          <span className="subheader-phase-segment__income-at">at</span> {targetRetirementAge}
+        </span>
       </button>
     </div>
   );
@@ -296,7 +301,11 @@ export function SubHeader({
         <div className="subheader-content">
           <div className="subheader-estimate" aria-live="polite">
             <div className="subheader-estimate__top">
-              <PhaseSegmentTabs phase={phase} onPhase={onPhase} />
+              <PhaseSegmentTabs
+                phase={phase}
+                onPhase={onPhase}
+                targetRetirementAge={targetRetirementAge}
+              />
               <div
                 id="subheader-phase-growth-panel"
                 className="subheader-phase-segment__sr"

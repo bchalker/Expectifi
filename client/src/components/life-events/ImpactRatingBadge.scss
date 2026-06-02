@@ -2,7 +2,7 @@
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1) /* review: was 5px */;
 }
 
 .impact-rating-badge__bars {
@@ -14,7 +14,7 @@
   width: 3px;
   border-radius: 2px;
   display: inline-block;
-  margin-right: 2px;
+  margin-right: var(--space-1) /* review: was 2px */;
   vertical-align: bottom;
 }
 

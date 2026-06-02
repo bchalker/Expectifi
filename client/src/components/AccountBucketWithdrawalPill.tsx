@@ -1,3 +1,4 @@
+import { IconCornerDownRight } from '@tabler/icons-react'
 import { fmt } from '../utils/format'
 import './AccountBucketWithdrawalPill.scss'
 
@@ -12,7 +13,13 @@ export function AccountBucketWithdrawalPill({ annualWithdrawal, className }: Pro
 
   return (
     <span className={rootClass}>
-      {fmt(annualWithdrawal)}/yr withdrawal
+      <span className="account-bucket-withdrawal-pill__amount">
+        <span className="account-bucket-withdrawal-pill__amount-icon" aria-hidden>
+          <IconCornerDownRight size={14} stroke={1.25} />
+        </span>
+        {fmt(annualWithdrawal)}/yr
+      </span>
+      <span className="account-bucket-withdrawal-pill__label">withdrawal</span>
     </span>
   )
 }

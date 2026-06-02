@@ -57,6 +57,9 @@ export const defaultCalculatorUi: CalculatorUi = {
   incomeMode: true,
   ssIncluded: false,
   incomeSecurityTicker: null,
+  accountIncomeFunds: {},
+  accountIncomeStrategies: {},
+  accountWithdrawRates: {},
 }
 
 function mergeStoredWelcomePrefs(inputs: CalculatorInputs): CalculatorInputs {

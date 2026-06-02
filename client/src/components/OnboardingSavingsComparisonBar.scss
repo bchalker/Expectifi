@@ -1,9 +1,9 @@
 .onboarding-savings-comparison {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   width: 100%;
-  padding: 0.85rem 0 0;
+  padding: var(--space-3) /* review: was 0.85rem */ 0 0;
   box-sizing: border-box;
 }
 

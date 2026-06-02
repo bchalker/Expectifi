@@ -13,6 +13,11 @@ import {
 } from 'shared'
 import { clampedAgeFromDob } from './ageFromDob'
 import { normalizeCalculatorFilingStatus } from './filingStatus'
+import { monthlyPortfolioIncomeFromAccountStrategies } from './accountIncomeMonthly'
+import { computePortfolioGuidanceMetrics, type PortfolioGuidanceMetrics } from './portfolioGuidance'
+import type { AccountIncomeStrategy } from './accountIncomeStrategy'
+import { retirementFvForAccountBucket } from './accountBucketRetirementBalance'
+import { resolveOnboardingAccountLocale } from './onboardingAccountTypesByLocale'
 import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
 import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
 import { positionsForBrokerage, positionsForRetirementBucket, type FidelityPositionRow } from './fidelityCsv'
@@ -130,6 +135,12 @@ export type CalculatorUi = {
   ssIncluded: boolean
   /** Selected income security ticker; null = custom yield entry. */
   incomeSecurityTicker: string | null
+  /** Per-account dividend fund in income phase (`bucket:*` or `manual:*` keys). */
+  accountIncomeFunds: Record<string, string>
+  /** Per-account income strategy in income phase. */
+  accountIncomeStrategies: Record<string, AccountIncomeStrategy>
+  /** Per-account withdrawal rate when strategy is withdraw or both. */
+  accountWithdrawRates: Record<string, number>
   /** Incremented from the strip to open the income preset editor on the Income page. */
   incomePresetEditorFocusSeq?: number
 }
@@ -411,8 +422,45 @@ export function computeResults(
     totalFV = 0
   }
 
+  const portfolioFvSum = retFV + brkFV
+  const fallbackAnnWd = portfolioFvSum * wdRate * (1 + wdInflation)
+  const fallbackRetWdAnn = portfolioFvSum > 0 ? fallbackAnnWd * (retFV / portfolioFvSum) : 0
+  const hsaAtRetirement = retirementFvForAccountBucket('hsa', {
+    hasPortfolioBalances,
+    retFV,
+    brkFV,
+    tradRatio,
+    rothRatio,
+    hsaRatio,
+  })
+  const hsaMedicalAnnualDraw = Math.min(fallbackRetWdAnn * hsaRatio, hsaAtRetirement)
+
+  const incomeMonthlyCtx = {
+    inputs,
+    accountIncomeFunds: ui.accountIncomeFunds ?? {},
+    accountIncomeStrategies: ui.accountIncomeStrategies ?? {},
+    accountWithdrawRates: ui.accountWithdrawRates ?? {},
+    wdInflation,
+    hsaMedicalAnnualDraw,
+    hasPortfolioBalances,
+    retFV,
+    brkFV,
+    tradRatio,
+    rothRatio,
+    hsaRatio,
+    tradBal,
+    rothBal,
+    hsaBal,
+    brkBal,
+    retirementAge: targetRetirementAge,
+    locale: resolveOnboardingAccountLocale(),
+    retirementBalanceMode: retirementInputMode,
+  }
+
   const annWd = ui.incomeMode
-    ? totalFV * incYield
+    ? hasPortfolioBalances
+      ? monthlyPortfolioIncomeFromAccountStrategies(incomeMonthlyCtx) * 12
+      : 0
     : totalFV * wdRate * (1 + wdInflation)
   const monPort = annWd / 12
 
@@ -524,6 +572,25 @@ export function computeResults(
     filingStatus,
   })
 
+  const portfolioGuidance: PortfolioGuidanceMetrics | null =
+    ui.incomeMode && hasPortfolioBalances
+      ? computePortfolioGuidanceMetrics(
+          {
+            totalFV,
+            monPort,
+            annWd,
+            monthlyIncomeGoal,
+            targetRetirementAge,
+            taxDetail,
+            strategy,
+            filingStatus,
+            tradRatio,
+            retFV,
+          },
+          incomeMonthlyCtx,
+        )
+      : null
+
   return {
     currentAge,
     targetRetirementAge,
@@ -584,6 +651,7 @@ export function computeResults(
     survivorCallout,
     ssConfigured: isSsConfigured(inputs),
     strategy,
+    portfolioGuidance,
     growthRetFvLegacy,
     growthRetFvCompareDelta,
     hasFidelityRetirementModeling,
@@ -731,10 +799,10 @@ export function applyPortfolioDeltaAtRetirement(
   const adjustedRetFV = snapshot.retFV * scale
   const adjustedBrkFV = snapshot.brkFV * scale
 
-  const annWd = incomeMode
-    ? adjustedTotalFV * incYield
-    : adjustedTotalFV * wdRate * (1 + wdInflation)
-  const monPort = annWd / 12
+  const monPort = incomeMode
+    ? snapshot.monPort * scale
+    : (adjustedTotalFV * wdRate * (1 + wdInflation)) / 12
+  const annWd = monPort * 12
   const totalSS = snapshot.totalSS
   const grossMon = monPort + totalSS
 

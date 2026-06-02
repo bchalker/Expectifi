@@ -6,7 +6,7 @@
 }
 
 .wtr-dest-tax__hero .wtr-tax-cell--static {
-  margin-bottom: 0.65rem;
+  margin-bottom: var(--space-3) /* review: was 0.65rem */;
 }
 
 .wtr-dest-tax__hero-rows {
@@ -21,7 +21,7 @@
 .wtr-dest-tax__card-body {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
   width: 100%;
 }
 
@@ -34,14 +34,14 @@
 
 .wtr-dest-tax__flags {
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: var(--space-4) /* review: was 1.1rem */;
   font-size: var(--text-sm);
   line-height: 1.45;
   color: var(--text-muted);
 }
 
 .wtr-dest-tax__flags li + li {
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .wtr-dest-tax__disclaimer {

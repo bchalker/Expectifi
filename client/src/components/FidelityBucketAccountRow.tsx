@@ -26,7 +26,13 @@ type Props = {
   showViewHoldings?: boolean
   /** Withdrawal-order index badge (1, 2, …) when withdrawal guidance is on. */
   badgeOrder?: number | null
+  /** Content below name/hint (e.g. income strategy segment). */
+  identityExtra?: ReactNode | null
   scenario?: FidelityBucketAccountScenarioProps | null
+  /** Income mode: dividend fund selector in the scenario column. */
+  actionSlot?: ReactNode | null
+  /** Extra figures under the total in the values column (income yield / monthly). */
+  valuesExtra?: ReactNode | null
 }
 
 /** Portfolio account summary row: order count, name + tax subtext, total, scenario, chevron. */
@@ -38,9 +44,14 @@ export function FidelityBucketAccountRow({
   trend,
   showViewHoldings = true,
   badgeOrder = null,
+  identityExtra = null,
   scenario = null,
+  actionSlot = null,
+  valuesExtra = null,
 }: Props) {
   const showScenario = Boolean(scenario)
+  const showActionSlot = Boolean(actionSlot)
+  const showActionsColumn = showScenario || showActionSlot || showViewHoldings
 
   return (
     <div className="portfolio-bucket-account-row">
@@ -66,16 +77,24 @@ export function FidelityBucketAccountRow({
                   {withdrawalPill}
                 </div>
               ) : null}
+              {identityExtra ? (
+                <div className="portfolio-bucket-account-row__identity-extra">{identityExtra}</div>
+              ) : null}
               <BucketTotalTrend trend={trend} className="portfolio-bucket-account-row__trend" />
             </div>
           </div>
           <div className="portfolio-bucket-account-row__values">
             <span className="portfolio-bucket-account-row__total">{total}</span>
+            {valuesExtra ? (
+              <div className="portfolio-bucket-account-row__values-extra">{valuesExtra}</div>
+            ) : null}
           </div>
         </div>
-        {showScenario || showViewHoldings ? (
+        {showActionsColumn ? (
           <div className="portfolio-bucket-account-row__actions">
-            {showScenario ? (
+            {showActionSlot ? (
+              <div className="portfolio-bucket-account-row__scenario">{actionSlot}</div>
+            ) : showScenario ? (
               <div className="portfolio-bucket-account-row__scenario">
                 <PortfolioScenarioCell layout="account" {...scenario!} />
               </div>

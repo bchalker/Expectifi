@@ -1,5 +1,6 @@
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { IconX } from "@tabler/icons-react";
+import { useState } from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import {
@@ -14,6 +15,7 @@ import { pensionConfigForLocale } from "../lib/localePensionConfig";
 import { standardDeductionForFilingStatus } from "shared";
 import { fmt } from "../utils/format";
 import { FilingStatusField } from "./FilingStatusField";
+import { PortfolioGuidancePanel } from "./PortfolioGuidancePanel";
 import "./TaxSummaryPanel.scss";
 
 export type TaxSummaryContentProps = {
@@ -175,6 +177,102 @@ export function TaxSummaryPanelFooter({ className = "" }: { className?: string }
   );
 }
 
+type ExpectifinsightsTabId = "tax-breakdown" | "portfolio-guidance";
+
+function ExpectifinsightsPanelTabs({
+  c,
+  filingStatus,
+  onFilingStatusChange,
+}: {
+  c: ComputedSnapshot;
+  filingStatus: FilingStatusId;
+  onFilingStatusChange: (status: FilingStatusId) => void;
+}) {
+  const [activeTab, setActiveTab] = useState<ExpectifinsightsTabId>("tax-breakdown");
+
+  return (
+    <div className="tax-summary-slide-panel__tabs">
+      <div
+        className="tax-summary-slide-panel__tablist"
+        role="tablist"
+        aria-label="Expectifinsights sections"
+      >
+        <button
+          type="button"
+          id="expectifinsights-tab-tax-breakdown"
+          role="tab"
+          className={[
+            "tax-summary-slide-panel__tab",
+            activeTab === "tax-breakdown" && "tax-summary-slide-panel__tab--active",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-selected={activeTab === "tax-breakdown"}
+          aria-controls="expectifinsights-panel-tax-breakdown"
+          onClick={() => setActiveTab("tax-breakdown")}
+        >
+          Tax Breakdown
+        </button>
+        <button
+          type="button"
+          id="expectifinsights-tab-portfolio-guidance"
+          role="tab"
+          className={[
+            "tax-summary-slide-panel__tab",
+            activeTab === "portfolio-guidance" && "tax-summary-slide-panel__tab--active",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-selected={activeTab === "portfolio-guidance"}
+          aria-controls="expectifinsights-panel-portfolio-guidance"
+          onClick={() => setActiveTab("portfolio-guidance")}
+        >
+          Portfolio Guidance
+        </button>
+      </div>
+      <div
+        id="expectifinsights-panel-tax-breakdown"
+        role="tabpanel"
+        aria-labelledby="expectifinsights-tab-tax-breakdown"
+        hidden={activeTab !== "tax-breakdown"}
+        className="tax-summary-slide-panel__tab-panel"
+      >
+        <SimpleBar
+          className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
+          autoHide={false}
+        >
+          <div className="tax-summary-slide-panel__scroll-inner">
+            <FilingStatusField
+              id="tax-summary-slide-filing-status"
+              variant="compact"
+              value={filingStatus}
+              onChange={onFilingStatusChange}
+              className="tax-summary-slide-panel__filing"
+            />
+            <TaxSummaryContent c={c} />
+          </div>
+        </SimpleBar>
+      </div>
+      <div
+        id="expectifinsights-panel-portfolio-guidance"
+        role="tabpanel"
+        aria-labelledby="expectifinsights-tab-portfolio-guidance"
+        hidden={activeTab !== "portfolio-guidance"}
+        className="tax-summary-slide-panel__tab-panel"
+      >
+        <SimpleBar
+          className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
+          autoHide={false}
+        >
+          <div className="tax-summary-slide-panel__scroll-inner">
+            <PortfolioGuidancePanel c={c} />
+          </div>
+        </SimpleBar>
+      </div>
+    </div>
+  );
+}
+
 export function TaxSummarySlidePanel({
   className = "",
   c,
@@ -182,12 +280,14 @@ export function TaxSummarySlidePanel({
   onClose,
   filingStatus,
   onFilingStatusChange,
+  incomeMode = false,
 }: TaxSummaryContentProps & {
   className?: string;
   open: boolean;
   onClose: () => void;
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
+  incomeMode?: boolean;
 }) {
   return (
     <aside
@@ -205,30 +305,38 @@ export function TaxSummarySlidePanel({
       <header className="tax-summary-slide-panel__head">
         <div className="tax-summary-slide-panel__head-row">
           <h2 id="tax-summary-panel-title" className="tax-summary-slide-panel__title">
-            Tax Breakdown
+            Expectifinsights
           </h2>
           <button
             type="button"
             className="tax-summary-slide-panel__close"
             onClick={onClose}
-            aria-label="Close tax breakdown"
+            aria-label="Close Expectifinsights"
           >
             <IconX size={18} stroke={1.5} aria-hidden />
           </button>
         </div>
-        <FilingStatusField
-          id="tax-summary-filing-status"
-          variant="compact"
-          value={filingStatus}
-          onChange={onFilingStatusChange}
-          className="tax-summary-slide-panel__filing"
-        />
       </header>
-      <SimpleBar className="tax-summary-slide-panel__scroll" autoHide={false}>
-        <div className="tax-summary-slide-panel__scroll-inner">
-          <TaxSummaryContent c={c} />
-        </div>
-      </SimpleBar>
+      {incomeMode ? (
+        <ExpectifinsightsPanelTabs
+          c={c}
+          filingStatus={filingStatus}
+          onFilingStatusChange={onFilingStatusChange}
+        />
+      ) : (
+        <SimpleBar className="tax-summary-slide-panel__scroll" autoHide={false}>
+          <div className="tax-summary-slide-panel__scroll-inner">
+            <FilingStatusField
+              id="tax-summary-slide-filing-status"
+              variant="compact"
+              value={filingStatus}
+              onChange={onFilingStatusChange}
+              className="tax-summary-slide-panel__filing"
+            />
+            <TaxSummaryContent c={c} />
+          </div>
+        </SimpleBar>
+      )}
       <TaxSummaryPanelFooter />
     </aside>
   );

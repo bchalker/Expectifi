@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   min-height: 2.75rem;
   cursor: pointer;
   box-sizing: border-box;

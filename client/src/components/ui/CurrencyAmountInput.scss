@@ -1,7 +1,7 @@
 .currency-amount-input {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   min-width: 0;
 }
@@ -10,7 +10,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.5rem;
+  gap: var(--space-1) /* review: was 0.35rem */ var(--space-2);
 }
 
 .currency-amount-input__label {
@@ -30,7 +30,7 @@
   font-weight: 600;
   line-height: 1.2;
   color: var(--text-muted);
-  padding: 0.15rem 0.45rem;
+  padding: var(--space-1) /* review: was 0.15rem */ var(--space-2) /* review: was 0.45rem */;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
@@ -49,7 +49,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   max-width: 100%;
 }
@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
@@ -123,7 +123,7 @@
   max-height: 1.5rem;
   opacity: 1;
   transform: translateY(0);
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -155,7 +155,7 @@
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: var(--space-1) /* review: was -1px */;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;

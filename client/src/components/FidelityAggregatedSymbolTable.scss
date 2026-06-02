@@ -6,7 +6,7 @@
   border-radius: 12px;
   // overflow: hidden;
   box-sizing: border-box;
-  gap: 1px;
+  gap: var(--space-1) /* review: was 1px */;
   --holdings-stagger-base: 0.04s;
   --holdings-stagger-step: 0.045s;
 }

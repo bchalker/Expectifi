@@ -90,14 +90,14 @@
   display: flex;
   align-items: center;
   min-height: 3.25rem;
-  padding: 0.5rem 0.65rem 0.5rem 0.85rem;
+  padding: var(--space-2) var(--space-3) /* review: was 0.65rem */ var(--space-2) var(--space-3) /* review: was 0.85rem */;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .where-to-retire__main-panel .wtr-explorer__list-head {
-  padding: 0.5rem var(--wtr-panel-inline-pad, 1.25rem);
+  padding: var(--space-2) var(--wtr-panel-inline-pad, 1.25rem);
 }
 
 .wtr-explorer__list-collapse {
@@ -146,10 +146,10 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   min-width: 2.75rem;
   min-height: 5.5rem;
-  padding: 0.55rem 0.4rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-2) /* review: was 0.4rem */;
   border: 1px solid var(--border);
   border-left: none;
   border-radius: 0 10px 10px 0;
@@ -191,7 +191,7 @@
   align-items: center;
   justify-content: center;
   min-width: 1.35rem;
-  padding: 0.1rem 0.3rem;
+  padding: var(--space-1) /* review: was 0.1rem */ var(--space-1) /* review: was 0.3rem */;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 12%, var(--surface));
   font-size: var(--text-xs);
@@ -229,7 +229,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-width: 0;
   min-height: 0;
   padding: 0;
@@ -257,7 +257,7 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: var(--space-1) /* review: was 0.1rem */;
   min-width: 0;
 }
 
@@ -305,7 +305,7 @@
 .wtr-explorer__list-head .wtr-map-filters__sort-select--list-head button[data-slot='select-trigger'] {
   width: 100%;
   min-height: 0;
-  padding: 0 1.75rem 0 0;
+  padding: 0 var(--space-5) /* review: was 1.75rem */ 0 0;
   border: none;
   border-radius: 0;
   background: var(--surface);
@@ -337,7 +337,7 @@
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: var(--space-1) /* review: was -1px */;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -353,8 +353,8 @@
 }
 
 .wtr-explorer__hide-undo {
-  margin: 0.5rem 0.65rem 0;
-  padding: 0.45rem 0.55rem;
+  margin: var(--space-2) var(--space-3) /* review: was 0.65rem */ 0;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
   font-family: var(--body);
@@ -379,11 +379,11 @@
 .wtr-explorer__list-scroll-inner {
   box-sizing: border-box;
   min-width: 0;
-  padding: 0.55rem 0.5rem 0.65rem 0.65rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-2) var(--space-3) /* review: was 0.65rem */ var(--space-3) /* review: was 0.65rem */;
 }
 
 .where-to-retire__main-panel .wtr-explorer__list-scroll-inner {
-  padding: 0.55rem var(--wtr-panel-inline-pad, 1.25rem) 0.65rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--wtr-panel-inline-pad, 1.25rem) var(--space-3) /* review: was 0.65rem */;
   padding: 0;
 }
 
@@ -469,7 +469,7 @@
 
 .wtr-explorer__list-panel .wtr-dest-card {
   min-height: 52px;
-  padding: 0.65rem 0.85rem 0.7rem;
+  padding: var(--space-3) /* review: was 0.65rem */ var(--space-3) /* review: was 0.85rem */ var(--space-3) /* review: was 0.7rem */;
   border: none;
   border-radius: 0;
   border-bottom: 1px solid var(--border);
@@ -502,11 +502,11 @@
 }
 
 .wtr-explorer__list-empty {
-  margin: 0.65rem;
+  margin: var(--space-3) /* review: was 0.65rem */;
 }
 
 .where-to-retire__main-panel .wtr-explorer__list-empty {
-  margin: 0.65rem var(--wtr-panel-inline-pad, 1.25rem);
+  margin: var(--space-3) /* review: was 0.65rem */ var(--wtr-panel-inline-pad, 1.25rem);
 }
 
 @media (max-width: 680px) {

@@ -128,14 +128,6 @@ function HeaderAuthTail({
             .filter(Boolean)
             .join(' ')}
         >
-          <span className="header__account-group__profile">
-            {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
-            {showRetireByInProfile && targetRetirementAge != null ? (
-              <span className="header__profile-ages" aria-hidden>
-                Retire by {targetRetirementAge}
-              </span>
-            ) : null}
-          </span>
           <button
             type="button"
             className={[
@@ -153,6 +145,14 @@ function HeaderAuthTail({
             <span className="header__settings-label">My Plans</span>
             <IconAdjustments size={18} stroke={1.65} aria-hidden />
           </button>
+          <span className="header__account-group__profile">
+            {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
+            {showRetireByInProfile && targetRetirementAge != null ? (
+              <span className="header__profile-ages" aria-hidden>
+                Retire by {targetRetirementAge}
+              </span>
+            ) : null}
+          </span>
         </div>
       </div>
     )

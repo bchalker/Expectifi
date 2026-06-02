@@ -82,7 +82,7 @@
 
 .app-left-nav--auth-only .app-left-nav__footer {
   margin-top: 0;
-  padding-top: 0.35rem;
+  padding-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .app-left-nav__scroll {
@@ -92,8 +92,8 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0.35rem 1rem 0.5rem;
+  gap: var(--space-1) /* review: was 2px */;
+  padding: var(--space-1) /* review: was 0.35rem */ var(--space-4) var(--space-2);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -105,7 +105,7 @@
 
 .app-left-nav__rule {
   height: 1px;
-  margin: 8px 4px 10px;
+  margin: var(--space-2) var(--space-1) var(--space-2) /* review: was 10px */;
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -120,7 +120,7 @@
   display: block;
   width: 100%;
   margin: 0;
-  padding: 8px 10px 8px 12px;
+  padding: var(--space-2) var(--space-2) /* review: was 10px */ var(--space-2) var(--space-3);
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -167,12 +167,12 @@
 .app-left-nav__footer {
   flex-shrink: 0;
   margin-top: 0;
-  padding: 0.35rem 1rem 0.85rem;
+  padding: var(--space-1) /* review: was 0.35rem */ var(--space-4) var(--space-3) /* review: was 0.85rem */;
   border-top: none;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
+  gap: var(--space-2) /* review: was 10px */;
   min-width: 0;
 }
 
@@ -186,13 +186,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-height: 44px;
   min-width: 0;
   margin: 0;
-  margin-top: 8px;
-  padding: 0.35rem 0.55rem 0.35rem 0.65rem;
+  margin-top: var(--space-2);
+  padding: var(--space-1) /* review: was 0.35rem */ var(--space-2) /* review: was 0.55rem */ var(--space-1) /* review: was 0.35rem */ var(--space-3) /* review: was 0.65rem */;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
@@ -230,7 +230,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: var(--space-1) /* review: was 2px */;
   min-width: 0;
 }
 
@@ -238,18 +238,18 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.1rem;
+  gap: var(--space-1) /* review: was 0.1rem */;
   flex-shrink: 0;
   color: inherit;
 }
 
 .app-left-nav__profile {
   flex-shrink: 0;
-  padding-top: 10px;
+  padding-top: var(--space-2) /* review: was 10px */;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: var(--space-1) /* review: was 2px */;
   min-width: 0;
 }
 
@@ -266,7 +266,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-width: 0;
 }
@@ -356,7 +356,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -374,7 +374,7 @@
   flex: 1 1 auto;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
   min-width: 0;
 }
@@ -386,7 +386,7 @@
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 0 0.65rem;
+  padding: 0 var(--space-3) /* review: was 0.65rem */;
   height: 2rem;
   min-height: 2rem;
   max-height: 2rem;
@@ -419,7 +419,7 @@
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 0 0.85rem;
+  padding: 0 var(--space-3) /* review: was 0.85rem */;
   height: 2rem;
   min-height: 2rem;
   max-height: 2rem;

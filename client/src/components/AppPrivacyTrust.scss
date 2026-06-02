@@ -7,7 +7,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0.875rem var(--layout-app-inner-pad)
+  padding: var(--space-3) var(--layout-app-inner-pad)
     calc(0.875rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   background: var(--surface);
@@ -15,7 +15,7 @@
 }
 
 .app-privacy-trust--divider {
-  padding-top: 1rem;
+  padding-top: var(--space-4);
 }
 
 .app-privacy-trust__text {

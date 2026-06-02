@@ -1,4 +1,15 @@
-/* Typography tokens — loaded before calculator.scss */
+/* Typography + spacing tokens — loaded before calculator.scss
+ *
+ * SPACING CONVENTION (base-8 scale)
+ * ─────────────────────────────────
+ * All padding, margin, and gap in this app MUST use --space-* variables below.
+ * Do not hardcode px/rem/em for spacing in components, pages, or utilities.
+ * Half-steps (--space-1, --space-3) exist for tight UI; default to full steps when unsure.
+ * Map values to the nearest step; if rounding is ambiguous, add a review comment.
+ * Do not use --space-* for font-size, line-height, border-radius, or layout widths.
+ *
+ * Color tokens (including --sky-blue*) live in styles/global.scss :root.
+ */
 :root {
   /* Body + tabular UI: Nunito */
   --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
@@ -34,4 +45,18 @@
   --tracking-wide: 0.04em;
   --tracking-wider: 0.08em;
   --tracking-widest: 0.12em;
+
+  /* Base-8 spacing scale — padding, margin, gap only */
+  --space-half: 2px;
+  --space-1: 4px;   /* half-step — micro spacing */
+  --space-2: 8px;
+  --space-3: 12px;  /* half-step */
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+  --space-9: 64px;
+  --space-10: 80px;
+  --space-11: 96px;
 }

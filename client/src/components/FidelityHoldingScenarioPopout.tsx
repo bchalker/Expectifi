@@ -337,22 +337,22 @@ export function FidelityHoldingScenarioPanel({
               <IconX size={14} stroke={1.5} aria-hidden />
             </button>
           </div>
+          {showMoneyMarketNotice ? (
+            <p className="holding-scenario-popout__head-subtext" role="note">
+              Money market funds are pretty stable but won't move the needle much on returns, so scenario modeling isn't really useful here — but you can have at it if you want!
+            </p>
+          ) : null}
+          {nHoldings > 1 ? (
+            <p className="holding-scenario-popout__head-subtext" role="note">
+              This will apply to the <strong>{nHoldings}</strong> holdings of this ticker across your accounts.
+            </p>
+          ) : null}
         </div>
       </header>
       <div className="holding-scenario-popout__body">
         <SimpleBar className="holding-scenario-popout__scroll" autoHide={false}>
           <div className="holding-scenario-popout__scroll-inner">
-            {showMoneyMarketNotice ? (
-              <p className="holding-scenario-popout__money-market-note" role="note">
-                Money market funds are pretty stable but won't move the needle much on returns, so scenario modeling isn't really useful here — but you can have at it if you want!
-              </p>
-            ) : null}
             <div className="holding-scenario-popout__intent-stack">
-              {nHoldings > 1 ? (
-                <p className="holding-scenario-popout__question-sub">
-                  This will apply to the <strong>{nHoldings}</strong> holdings of this ticker across your accounts.
-                </p>
-              ) : null}
               <HoldingScenarioIntentTabs
                 variant="holding"
                 activeTab={activeTab}

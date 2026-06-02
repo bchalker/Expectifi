@@ -26,6 +26,7 @@ import {
   type CalculatorUi,
   type DrawerName,
 } from './lib/computeResults'
+import { defaultWithdrawRateForStrategy } from './lib/accountIncomeStrategy'
 import { normalizeRetireRegions } from './lib/calc/retireRegions'
 import { buildLifeEventsProjectionData } from './lib/calc/lifeEvents'
 import { loadLifePlans, type LifePlans } from './lib/planStorage/life'
@@ -417,9 +418,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
     onBrokerageModeChange('fidelity')
   }, [onBrokerageModeChange])
 
+  const uiForCompute = useMemo(
+    () => (phase === 'income' ? { ...ui, incomeMode: true } : ui),
+    [phase, ui],
+  )
+
   const c = useMemo(
-    () => computeResults(inputs, ui, { retirement: balanceMode, brokerage: brokerageMode }),
-    [inputs, ui, balanceMode, brokerageMode],
+    () => computeResults(inputs, uiForCompute, { retirement: balanceMode, brokerage: brokerageMode }),
+    [inputs, uiForCompute, balanceMode, brokerageMode],
   )
 
   const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans())
@@ -457,7 +463,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     () =>
       applyPortfolioDeltaAtRetirement(c, {
         portfolioDelta: lifeEventsPortfolioDelta,
-        incomeMode: ui.incomeMode,
+        incomeMode: phase === 'income' || ui.incomeMode,
         incYield: inputs.incYield,
         incGrowth: inputs.incGrowth,
         wdRate: inputs.wdRate,
@@ -805,6 +811,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
             <TaxSummaryCard
               c={cDisplay}
               showTaxSummary={isTaxSummaryPanelAvailable(navContext)}
+              incomeMode={phase === 'income'}
               filingStatus={inputs.filingStatus}
               onFilingStatusChange={(filingStatus) => setInputs({ filingStatus })}
             >
@@ -862,6 +869,35 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 openImportRequest={openImportRequest || undefined}
                 onImportOpenHandled={() => setOpenImportRequest(0)}
                 onManualAccountsCommitted={() => setManualAccountsRev((n) => n + 1)}
+                accountIncomeFunds={ui.accountIncomeFunds}
+                onAccountIncomeFundChange={(storageKey, ticker) =>
+                  setUi({
+                    accountIncomeFunds: { ...ui.accountIncomeFunds, [storageKey]: ticker },
+                  })
+                }
+                accountIncomeStrategies={ui.accountIncomeStrategies}
+                onAccountIncomeStrategyChange={(storageKey, strategy) => {
+                  const nextRates = { ...ui.accountWithdrawRates }
+                  if (
+                    (strategy === 'withdraw' || strategy === 'both') &&
+                    nextRates[storageKey] == null
+                  ) {
+                    nextRates[storageKey] = defaultWithdrawRateForStrategy(strategy)
+                  }
+                  setUi({
+                    accountIncomeStrategies: {
+                      ...ui.accountIncomeStrategies,
+                      [storageKey]: strategy,
+                    },
+                    accountWithdrawRates: nextRates,
+                  })
+                }}
+                accountWithdrawRates={ui.accountWithdrawRates}
+                onAccountWithdrawRateChange={(storageKey, rate) =>
+                  setUi({
+                    accountWithdrawRates: { ...ui.accountWithdrawRates, [storageKey]: rate },
+                  })
+                }
               />
             </TaxSummaryCard>
           </div>

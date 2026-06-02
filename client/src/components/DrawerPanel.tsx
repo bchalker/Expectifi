@@ -263,7 +263,7 @@ function ScenariosBody({ c }: { c: ComputedSnapshot }) {
   return (
     <>
       <div className="section-title">Return scenarios — retirement accounts</div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-5)' }}>
         Six return rates applied to retirement accounts. Brokerage uses the dividend yield and return sliders from your
         dashboard (income phase).
       </p>
@@ -339,10 +339,10 @@ function SSTimingBody({
   return (
     <div id="ss-timing-section">
       <div className="section-title">Social Security timing — breakeven analysis</div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-5)' }}>
         SSA projected benefits × 75% (expected solvency factor): age 62 = $1,949/mo · age 67 = $2,916/mo · age 70 = $3,704/mo. Breakeven accounts for investment returns on early payments.
       </p>
-      <div className="grid-3" style={{ marginBottom: '1.25rem' }}>
+      <div className="grid-3" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="card" style={{ borderTop: '3px solid #A32D2D' }}>
           <div className="card-label">Draw at 62</div>
           <div className="card-value" style={{ color: 'var(--color-danger)' }}>
@@ -365,7 +365,7 @@ function SSTimingBody({
           <div className="card-sub">75% of $4,939 · Dec 2040</div>
         </div>
       </div>
-      <div className="slider-group" style={{ maxWidth: 420, marginBottom: '1.5rem' }}>
+      <div className="slider-group" style={{ maxWidth: 420, marginBottom: 'var(--space-5)' }}>
         <span className="slider-val">{inputs.ssInvestPct.toFixed(1)}%</span>
         <div className="slider-name">Portfolio return on reinvested early SS payments</div>
         <input
@@ -377,7 +377,7 @@ function SSTimingBody({
           onChange={(e) => setInputs({ ssInvestPct: Number(e.target.value) })}
         />
       </div>
-      <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+      <div className="grid-4" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="card">
           <div className="card-label">Breakeven: 62 vs. 67</div>
           <div className="card-value">{beStr(t.be6267)}</div>
@@ -401,7 +401,7 @@ function SSTimingBody({
           <div className="card-sub">Low cost of living means you don&apos;t need max SS — take it early and invest the difference</div>
         </div>
       </div>
-      <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
+      <div style={{ overflowX: 'auto', marginBottom: 'var(--space-4)' }}>
         <table className="scenario-table">
           <thead>
             <tr>
@@ -459,7 +459,7 @@ function TaxFreeBody({ c }: { c: ComputedSnapshot }) {
   return (
     <>
       <div className="section-title">Tax-advantaged withdrawals</div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-5)' }}>
         {taxConfig.withdrawalOrderNote} {taxConfig.taxFreeNote}
       </p>
       <div>
@@ -606,7 +606,7 @@ function StrategyBody({ c, filingStatus }: { c: ComputedSnapshot; filingStatus: 
   const steps = buildWithdrawalStrategySteps(locale, taxConfig, c, filingStatus)
 
   const fmtStep = (n: number, title: string, tag: string, tagColor: string, body: string) => (
-    <div key={n} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+    <div key={n} style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
       <div
         style={{
           flexShrink: 0,
@@ -625,14 +625,14 @@ function StrategyBody({ c, filingStatus }: { c: ComputedSnapshot; filingStatus: 
       >
         {n}
       </div>
-      <div style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '1rem 1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
+      <div style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 'var(--space-4) var(--space-5)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>{title}</span>
           <span
             style={{
               fontFamily: 'var(--mono)',
               fontSize: 10,
-              padding: '2px 8px',
+              padding: 'var(--space-1) var(--space-2)',
               borderRadius: 100,
               background: `${tagColor}20`,
               color: tagColor,
@@ -650,18 +650,18 @@ function StrategyBody({ c, filingStatus }: { c: ComputedSnapshot; filingStatus: 
   return (
     <>
       <div className="section-title">Optimal withdrawal strategy</div>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.6 }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-4)', lineHeight: 1.6 }}>
         {taxConfig.withdrawalOrderNote} Figures use your current balances and sliders.
       </p>
       <div
         style={{
           background: 'var(--surface2)',
           borderRadius: 10,
-          padding: '1rem 1.25rem',
-          marginBottom: '1.5rem',
+          padding: 'var(--space-4) var(--space-5)',
+          marginBottom: 'var(--space-5)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 10,
+          gap: 'var(--space-3)',
         }}
       >
         <Cell k={`${pretaxLabel} withdrawal/yr`} v={fmt(s.tradWdAnn)} color="var(--warn)" />
@@ -692,7 +692,7 @@ function StrategyBody({ c, filingStatus }: { c: ComputedSnapshot; filingStatus: 
 function Cell({ k, v, color }: { k: string; v: string; color?: string }) {
   return (
     <div>
-      <div style={{ fontFamily: 'var(--body)', fontSize: 9, color: 'var(--text-faint)', textTransform: 'uppercase', marginBottom: 2 }}>{k}</div>
+      <div style={{ fontFamily: 'var(--body)', fontSize: 9, color: 'var(--text-faint)', textTransform: 'uppercase', marginBottom: 'var(--space-1)' }}>{k}</div>
       <div style={{ fontFamily: 'var(--heading)', fontSize: '1rem', fontWeight: 500, color: color ?? 'var(--text)' }}>{v}</div>
     </div>
   )

@@ -1,10 +1,7 @@
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
 import type { ComputedSnapshot, PositionReturnModel } from "../lib/computeResults";
 import { GrowthSliderLabel } from "./GrowthSliderLabel";
-import { YieldControlsSection } from "./YieldControlsSection";
-import { WithdrawControlsSection } from "./WithdrawControlsSection";
 import "./StripHeader.scss";
-import "./IncomeSecuritySelector.scss";
 
 type C = ComputedSnapshot;
 
@@ -42,8 +39,8 @@ export function StripHeader({
   phase,
   c,
   portfolioControlsRevealed,
-  incomeMode,
-  onIncomeMode,
+  incomeMode: _incomeMode,
+  onIncomeMode: _onIncomeMode,
   ssIncluded: _ssIncluded,
   mergedRetirementPositionModels,
   mergedBrokeragePositionModels,
@@ -52,25 +49,21 @@ export function StripHeader({
   onRemovePositionReturn,
   retRate,
   onRetRate,
-  incYield,
-  onIncYield,
-  incGrowth,
+  incYield: _incYield,
+  onIncYield: _onIncYield,
+  incGrowth: _incGrowth,
   onIncGrowth: _onIncGrowth,
   brkBal: _brkBal,
-  wdRate,
-  onWdRate,
-  wdInflation,
-  onWdInflation,
+  wdRate: _wdRate,
+  onWdRate: _onWdRate,
+  wdInflation: _wdInflation,
+  onWdInflation: _onWdInflation,
   currentAge: _currentAge,
   targetRetirementAge,
-  incomeSecurityTicker,
-  onIncomeSecuritySelect,
+  incomeSecurityTicker: _incomeSecurityTicker,
+  onIncomeSecuritySelect: _onIncomeSecuritySelect,
 }: Props) {
   const retPctAnim = useAnimatedScalar(retRate * 100);
-  const incYieldPctAnim = useAnimatedScalar(incYield * 100);
-  const incGrowthPctAnim = useAnimatedScalar(incGrowth * 100);
-  const wdPctAnim = useAnimatedScalar(wdRate * 100);
-  const wdInflPctAnim = useAnimatedScalar(wdInflation * 100);
 
   const showEquation = c.hasPortfolioBalances && portfolioControlsRevealed
 
@@ -79,7 +72,7 @@ export function StripHeader({
       className={`results-strip${c.hasPortfolioBalances ? " results-strip--has-portfolio" : " results-strip--empty"}`}
     >
       <div className="results-strip-inner results-strip-inner--equation-first">
-        {showEquation ? (
+        {showEquation && phase === "growth" ? (
         <div
           className={`strip-equation-row strip-equation-row--phase-${phase} portfolio-controls-reveal portfolio-controls-reveal--in`}
           style={{
@@ -126,33 +119,7 @@ export function StripHeader({
                 </div>
               </div>
           ) : (
-          <div className="strip-income-rail">
-            <div className="strip-income-main">
-              {incomeMode ? (
-                <YieldControlsSection
-                  incomeMode={incomeMode}
-                  onIncomeMode={onIncomeMode}
-                  incYield={incYield}
-                  onIncYield={onIncYield}
-                  incYieldPctDisplay={incYieldPctAnim}
-                  incGrowthPctDisplay={incGrowthPctAnim}
-                  incomeSecurityTicker={incomeSecurityTicker}
-                  onIncomeSecuritySelect={onIncomeSecuritySelect}
-                />
-              ) : (
-                <WithdrawControlsSection
-                  incomeMode={incomeMode}
-                  onIncomeMode={onIncomeMode}
-                  wdRate={wdRate}
-                  onWdRate={onWdRate}
-                  wdPctDisplay={wdPctAnim}
-                  wdInflation={wdInflation}
-                  onWdInflation={onWdInflation}
-                  wdInflPctDisplay={wdInflPctAnim}
-                />
-              )}
-            </div>
-          </div>
+          null
           )}
         </div>
         ) : null}

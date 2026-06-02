@@ -7,7 +7,7 @@
 .wtr-climate-monthly-chart__bars {
   display: flex;
   align-items: flex-end;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   height: 100%;
 }
@@ -17,7 +17,7 @@
   flex: 1 1 0;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   min-width: 0;
   height: 100%;
 }

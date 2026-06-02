@@ -5,7 +5,7 @@
   border-radius: 9999px;
   border: 1px solid var(--border-strong);
   background: var(--surface2);
-  padding: 2px;
+  padding: var(--space-1) /* review: was 2px */;
   box-sizing: border-box;
 }
 
@@ -29,7 +29,7 @@
   flex: 1 1 0;
   min-width: 2.5rem;
   min-height: 28px;
-  padding: 0 10px;
+  padding: 0 var(--space-2) /* review: was 10px */;
   border: 0;
   border-radius: 9999px;
   font-family: var(--mono);

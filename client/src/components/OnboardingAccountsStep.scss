@@ -3,7 +3,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
   width: 100%;
   min-width: 0;
   min-height: 0;
@@ -13,18 +13,18 @@
 .onboarding-accounts-step__row-fields {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.75fr);
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
   align-items: center;
 }
 
 .onboarding-accounts-step__header-row {
-  margin-bottom: 0.15rem;
+  margin-bottom: var(--space-1) /* review: was 0.15rem */;
 }
 
 .onboarding-accounts-step__balance-header {
   display: flex;
   align-items: flex-end;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   min-width: 0;
 }
 
@@ -58,12 +58,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-width: 0;
   flex: 1 1 auto;
   min-height: 8rem;
-  padding: 1.75rem 1.25rem;
+  padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) /* review: was 1.25rem */;
   box-sizing: border-box;
   text-align: center;
   border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
@@ -83,7 +83,7 @@
 }
 
 .onboarding-accounts-step__empty-title {
-  margin: 0.15rem 0 0;
+  margin: var(--space-1) /* review: was 0.15rem */ 0 0;
   font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 600;
@@ -102,7 +102,7 @@
 }
 
 .onboarding-accounts-step__empty-cta {
-  margin-top: 0.35rem;
+  margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button'] {
@@ -120,7 +120,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 .onboarding-accounts-step__rows {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .onboarding-accounts-step__row {
@@ -156,7 +156,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   max-height: var(--accounts-control-height);
   min-height: 0;
   box-sizing: border-box;
-  padding: 0 0.65rem;
+  padding: 0 var(--space-3) /* review: was 0.65rem */;
 }
 
 .onboarding-accounts-step__type-select [data-slot='select-value'] {
@@ -173,9 +173,9 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 0.1rem;
+  gap: var(--space-1) /* review: was 0.1rem */;
   min-width: 0;
-  padding-right: 0.35rem;
+  padding-right: var(--space-1) /* review: was 0.35rem */;
   text-align: left;
 }
 
@@ -217,7 +217,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 0.1rem;
+  gap: var(--space-1) /* review: was 0.1rem */;
   min-width: 0;
   width: 100%;
 }
@@ -266,7 +266,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   border: none !important;
   outline: none !important;
   box-shadow: none;
-  padding: 0.35rem 0;
+  padding: var(--space-1) /* review: was 0.35rem */ 0;
   text-align: left;
 }
 
@@ -280,7 +280,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   max-width: 100%;
   box-sizing: border-box;
   min-height: 2.75rem;
-  padding: 0.45rem 1rem;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-4);
   text-align: left;
   white-space: nowrap;
   font-family: var(--body);
@@ -317,7 +317,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 .onboarding-accounts-step__balance-row {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   min-width: 0;
 }
 
@@ -346,7 +346,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   min-height: 0;
   height: var(--accounts-control-height);
   max-height: var(--accounts-control-height);
-  padding: 0 0.65rem;
+  padding: 0 var(--space-3) /* review: was 0.65rem */;
 }
 
 .onboarding-accounts-step__balance-input {
@@ -386,9 +386,9 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 .onboarding-accounts-step__add {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   align-self: flex-start;
-  margin: 0.15rem 0 0;
+  margin: var(--space-1) /* review: was 0.15rem */ 0 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -419,9 +419,9 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
   margin: 0;
-  padding: 0.85rem 1rem;
+  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
@@ -463,7 +463,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 .onboarding-overlay__footer-actions--accounts {
   justify-content: space-between;
   width: 100%;
-  padding-top: 1.15rem;
+  padding-top: var(--space-4) /* review: was 1.15rem */;
 }
 
 .onboarding-overlay__footer:has(.onboarding-overlay__accounts-total) {

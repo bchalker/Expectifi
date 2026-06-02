@@ -1,7 +1,7 @@
 .planning-profile-fields {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: var(--space-4) /* review: was 1.1rem */;
   width: 100%;
   min-width: 0;
 }
@@ -25,7 +25,7 @@
 .planning-profile-fields__row-duo {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: var(--space-4) /* review: was 1.1rem */;
   width: 100%;
   min-width: 0;
 }
@@ -42,7 +42,7 @@
 .planning-profile-fields__row-duo .config-plan-savings-row {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
 }
 
 .planning-profile-fields__row-duo .config-plan-saveval {
@@ -63,7 +63,7 @@
 .planning-profile-fields__welcome-goal-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: var(--space-4) /* review: was 0.9rem */;
   width: 100%;
   min-width: 0;
 }
@@ -71,10 +71,10 @@
 .planning-profile-fields__goals {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
   min-width: 0;
-  padding-top: 1.15rem;
+  padding-top: var(--space-4) /* review: was 1.15rem */;
   border-top: 1px solid var(--border);
   text-align: center;
 }
@@ -114,7 +114,7 @@
   .planning-profile-fields__row-duo {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: var(--space-3);
     align-items: start;
   }
 

@@ -189,7 +189,7 @@ body.onboarding-overlay--open {
   }
 
   .onboarding-overlay__footer {
-    padding-bottom: max(1.15rem, env(safe-area-inset-bottom, 0px));
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -203,13 +203,13 @@ body.onboarding-overlay--open {
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  padding: 1.25rem 1.25rem 0.85rem;
+  padding: var(--space-4) /* review: was 1.25rem */ var(--space-4) /* review: was 1.25rem */ var(--space-3) /* review: was 0.85rem */;
   background: var(--surface);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.85rem;
+  gap: var(--space-3) /* review: was 0.85rem */;
   box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--blue1) 14%, transparent);
 }
 
@@ -222,13 +222,13 @@ body.onboarding-overlay--open {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   max-width: 28rem;
   margin-inline: auto;
 }
 
 .onboarding-overlay__field-hint {
-  margin: 0.35rem 0 0;
+  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 400;
@@ -239,7 +239,7 @@ body.onboarding-overlay--open {
 .onboarding-overlay__field-with-validation {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   min-width: 0;
 }
@@ -249,7 +249,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__field-error {
-  margin: 0.35rem 0 0;
+  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -258,7 +258,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__field-grid .config-plan-field .onboarding-overlay__field-hint {
-  margin-top: 0.35rem;
+  margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .onboarding-overlay__title {
@@ -280,7 +280,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__accounts-import-note {
-  margin: 0.35rem 0 0;
+  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 400;
@@ -326,7 +326,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__body {
-  padding: 1.25rem 1.25rem;
+  padding: var(--space-4) /* review: was 1.25rem */ var(--space-4) /* review: was 1.25rem */;
   min-width: 0;
   box-sizing: border-box;
 }
@@ -342,7 +342,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__body .config-plan-field:has(.claim-age-slider) {
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .onboarding-overlay__section {
@@ -352,7 +352,7 @@ body.onboarding-overlay--open {
 .onboarding-overlay__field-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: var(--space-3) /* review: was 0.85rem */;
   margin-bottom: 0;
 }
 
@@ -364,7 +364,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__body .currency-amount-input__amount-row--external-prefix {
-  gap: 0.4rem;
+  gap: var(--space-2) /* review: was 0.4rem */;
   width: 100%;
 }
 
@@ -380,32 +380,32 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__body .currency-amount-input__annual-hint {
-  padding-left: calc(0.4rem + var(--onboarding-field-inset));
+  padding-left: calc(var(--space-2) + var(--onboarding-field-inset));
 }
 
 .onboarding-overlay__body .currency-amount-input__annual-hint--visible {
-  margin-top: 0.3rem;
+  margin-top: var(--space-1) /* review: was 0.3rem */;
 }
 
 .onboarding-overlay__body > .onboarding-overlay__section + .onboarding-overlay__field-grid,
 .onboarding-overlay__body > .onboarding-overlay__field-grid + .onboarding-overlay__section,
 .onboarding-overlay__body > .onboarding-overlay__section + .onboarding-overlay__section {
   border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
+  padding-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__body > .onboarding-overlay__section:has(+ .onboarding-overlay__field-grid),
 .onboarding-overlay__body > .onboarding-overlay__field-grid:has(+ .onboarding-overlay__section),
 .onboarding-overlay__body > .onboarding-overlay__section:has(+ .onboarding-overlay__section) {
-  padding-bottom: 1.1rem;
+  padding-bottom: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__spouse-fields {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-top: 0.85rem;
-  padding-top: 0.85rem;
+  gap: var(--space-3) /* review: was 0.85rem */;
+  margin-top: var(--space-3) /* review: was 0.85rem */;
+  padding-top: var(--space-3) /* review: was 0.85rem */;
   border-top: 1px solid var(--border);
 }
 
@@ -443,14 +443,14 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__section--spouse {
   border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
-  margin-top: 1.1rem;
+  padding-top: var(--space-4) /* review: was 1.1rem */;
+  margin-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__ss-fields > .onboarding-overlay__section--spouse {
   border-top: none;
   padding-top: 0;
-  margin-top: 1.1rem;
+  margin-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__age-input-wrap {
@@ -484,7 +484,7 @@ body.onboarding-overlay--open {
   align-items: center;
   min-height: 2.75rem;
   padding: var(--onboarding-field-inset);
-  padding-right: calc(var(--onboarding-field-inset) + 1.25rem);
+  padding-right: calc(var(--onboarding-field-inset) + var(--space-5));
   line-height: 1.25;
   background: var(--surface2);
   border-color: var(--border-medium-dark);
@@ -532,7 +532,7 @@ body.onboarding-overlay--open {
   display: flex;
   align-items: center;
   min-height: 2.75rem;
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
   line-height: 1.25;
 }
 
@@ -597,12 +597,12 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__results-hero {
   text-align: center;
-  padding: 0.5rem 0 0;
+  padding: var(--space-2) 0 0;
   margin-bottom: 0;
 }
 
 .onboarding-overlay__results-label {
-  margin: 0 0 0.35rem;
+  margin: 0 0 var(--space-1) /* review: was 0.35rem */;
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-muted);
@@ -620,7 +620,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__results-meta {
-  margin: 0.5rem 0 0;
+  margin: var(--space-2) 0 0;
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-faint);
@@ -629,11 +629,11 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__refine {
   border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
+  padding-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__refine-heading {
-  margin: 0 0 0.85rem;
+  margin: 0 0 var(--space-3) /* review: was 0.85rem */;
   font-family: var(--body);
   font-size: var(--text-base);
   font-weight: 600;
@@ -642,7 +642,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__connect-prompt {
-  margin: 1.25rem 0 0;
+  margin: var(--space-4) /* review: was 1.25rem */ 0 0;
   text-align: center;
 }
 
@@ -676,8 +676,8 @@ body.onboarding-overlay--open {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.85rem 1.25rem 1.15rem;
+  gap: var(--space-2);
+  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4) /* review: was 1.25rem */ var(--space-4) /* review: was 1.15rem */;
   // border-top: 1px solid var(--border);
   background: var(--surface);
   box-shadow: 0 -4px 16px rgba(17, 12, 46, 0.06);
@@ -694,7 +694,7 @@ body.onboarding-overlay--open {
   width: 100%;
   min-height: 3rem;
   margin: 0;
-  padding: 0.85rem 1.25rem;
+  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4) /* review: was 1.25rem */;
   border: none;
   border-radius: 10px;
   background: var(--color-primary);
@@ -732,7 +732,7 @@ body.onboarding-overlay--open {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
   width: 100%;
 }
 
@@ -763,7 +763,7 @@ body.onboarding-overlay--open {
 .onboarding-overlay__skip-wrap--visible {
   grid-template-rows: 1fr;
   opacity: 1;
-  margin-top: 0.65rem;
+  margin-top: var(--space-3) /* review: was 0.65rem */;
 }
 
 .onboarding-overlay__skip-wrap > * {
@@ -773,7 +773,7 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__skip-link {
   margin: 0;
-  padding: 0.35rem 0;
+  padding: var(--space-1) /* review: was 0.35rem */ 0;
   border: none;
   background: none;
   font-family: var(--body);
@@ -803,7 +803,7 @@ body.onboarding-overlay--open {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
 }
 
@@ -812,7 +812,7 @@ body.onboarding-overlay--open {
   min-width: 0;
   min-height: 2.75rem;
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
   border: none;
   border-radius: 8px;
   box-sizing: border-box;
@@ -874,12 +874,12 @@ body.onboarding-overlay--open {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
 }
 
 .onboarding-overlay__goal-step .onboarding-overlay__goal-input {
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .onboarding-overlay__goal-step .currency-amount-input__label {
@@ -890,13 +890,13 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__goal-step .currency-amount-input__value-group {
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2) /* review: was 0.4rem */;
   margin-inline: auto;
 }
 
 .onboarding-overlay__goal-step .currency-amount-input__amount-row--external-prefix,
 .onboarding-overlay__goal-step .currency-amount-input__amount-row--external-affixes {
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   width: auto;
   justify-content: center;
   max-width: 230px
@@ -945,10 +945,10 @@ body.onboarding-overlay--open {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--border);
 }
 
@@ -969,14 +969,14 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__section--ss-toggle {
-  padding-bottom: 1.1rem;
+  padding-bottom: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__ss-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .onboarding-overlay__ss-toggle-row .config-plan-label {
@@ -1020,12 +1020,12 @@ body.onboarding-overlay--open {
   left: 2px;
   width: 10px;
   height: 10px;
-  margin-top: -5px;
   border-radius: 50%;
   background: #fff;
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.18),
     0 0 0 1px rgb(0 0 0 / 0.08);
+  transform: translateY(-50%);
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -1034,12 +1034,12 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__ss-toggle--on .onboarding-overlay__ss-toggle-track::after {
-  transform: translateX(12px);
+  transform: translate(12px, -50%);
 }
 
 .onboarding-overlay__ss-fields {
   border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
+  padding-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 .onboarding-overlay__ss-fields--disabled {
@@ -1051,21 +1051,21 @@ body.onboarding-overlay--open {
 .onboarding-overlay__ss-claim-row {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: var(--space-3) /* review: was 0.85rem */;
   margin-bottom: 0;
 }
 
 .onboarding-overlay__ss-fields > .onboarding-overlay__section {
   border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
-  margin-top: 1.1rem;
+  padding-top: var(--space-4) /* review: was 1.1rem */;
+  margin-top: var(--space-4) /* review: was 1.1rem */;
 }
 
 @media (min-width: 680px) {
   .onboarding-overlay__field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem 1.15rem;
+    gap: var(--space-4) var(--space-4) /* review: was 1.15rem */;
   }
 
   .onboarding-overlay__field-grid > .currency-amount-input.onboarding-overlay__field--wide,
@@ -1076,7 +1076,7 @@ body.onboarding-overlay--open {
   .onboarding-overlay__ss-claim-row {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    gap: 1rem 1.15rem;
+    gap: var(--space-4) var(--space-4) /* review: was 1.15rem */;
     align-items: start;
   }
 }
@@ -1139,5 +1139,5 @@ body.onboarding-overlay--open {
   align-items: stretch;
   width: 100%;
   min-width: 0;
-  padding-top: 1.35rem;
+  padding-top: var(--space-5) /* review: was 1.35rem */;
 }

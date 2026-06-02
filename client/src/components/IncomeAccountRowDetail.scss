@@ -1,0 +1,107 @@
+.income-account-row-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.income-account-row-detail__title {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text);
+}
+
+.income-account-row-detail__prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.income-account-row-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.income-account-row-detail__heading {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text);
+}
+
+.income-account-row-detail__p {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: var(--leading-relaxed, 1.65);
+  color: var(--text-muted);
+}
+
+.income-account-row-detail__stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  box-sizing: border-box;
+}
+
+.income-account-row-detail__stat {
+  display: contents;
+}
+
+.income-account-row-detail__stat dt {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text-muted);
+}
+
+.income-account-row-detail__stat dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (max-width: 680px) {
+  .income-account-row-detail__stats {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .income-account-row-detail__stat {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .income-account-row-detail__stat dd {
+    white-space: normal;
+  }
+}

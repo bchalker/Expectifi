@@ -46,7 +46,7 @@ import {
   IMPORT_REMOVED_ON_MANUAL_MSG,
   MANUAL_REMOVED_ON_CONNECT_MSG,
 } from '../lib/portfolioSourceExclusivity'
-import { fmt, fmtInput, parseNum } from '../utils/format'
+import { fmt, fmtInput, fmtMon, parseNum } from '../utils/format'
 import { currencySymbol } from '../lib/displayCurrency'
 import {
   accountScenarioIsActive,
@@ -87,6 +87,26 @@ import {
 } from '../lib/marketScenario'
 import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideExamples'
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
+import { IncomeAccountRow } from './IncomeAccountRow'
+import {
+  accountIncomeFundStorageKey,
+  resolveAccountIncomeFundTicker,
+} from '../lib/accountIncomeFund'
+import {
+  computeAccountIncomeBreakdown,
+  defaultWithdrawRateForStrategy,
+  resolveAccountIncomeStrategy,
+  resolveAccountWithdrawRate,
+  type AccountIncomeStrategy,
+} from '../lib/accountIncomeStrategy'
+import {
+  listAccountIncomeLines,
+  monthlyPortfolioIncomeFromAccountStrategies,
+} from '../lib/accountIncomeMonthly'
+import {
+  accountRetirementBalance,
+  currentBalanceForAccountBucket,
+} from '../lib/accountBucketRetirementBalance'
 import { ManualProjectionsCallout } from './ManualProjectionsCallout'
 import { PlaidConnectionProvider } from './PlaidConnectionHeader'
 import { PlaidLinkButton } from './PlaidLinkButton'
@@ -207,6 +227,15 @@ type Props = {
   uiSsIncluded?: boolean
   /** Opens Configure → Social Security / CPP tab (hint link). */
   onOpenSocialSecurity?: () => void
+  /** Per-account dividend fund selections (income phase). */
+  accountIncomeFunds?: Record<string, string>
+  onAccountIncomeFundChange?: (storageKey: string, ticker: string) => void
+  /** Per-account income strategy (income phase). */
+  accountIncomeStrategies?: Record<string, AccountIncomeStrategy>
+  onAccountIncomeStrategyChange?: (storageKey: string, strategy: AccountIncomeStrategy) => void
+  /** Per-account withdrawal rate when strategy is withdraw or both. */
+  accountWithdrawRates?: Record<string, number>
+  onAccountWithdrawRateChange?: (storageKey: string, rate: number) => void
 }
 
 const REMOVE_ACCOUNTS_CONFIRM_BODY =
@@ -244,6 +273,12 @@ export function AccountBalances({
   phase = 'growth',
   uiSsIncluded = false,
   onOpenSocialSecurity,
+  accountIncomeFunds = {},
+  onAccountIncomeFundChange,
+  accountIncomeStrategies = {},
+  onAccountIncomeStrategyChange,
+  accountWithdrawRates = {},
+  onAccountWithdrawRateChange,
 }: Props) {
   const { isPro, hasSessionCsvHoldings } = useUserTier()
   const showCsvSessionBanner = hasSessionCsvHoldings && !isPro
@@ -255,7 +290,10 @@ export function AccountBalances({
   const marketScenarioId = normalizeMarketScenarioId(inputs?.marketScenario)
   const marketScenarioActive = inputs ? resolveMarketScenarioActive(inputs) : false
   const showMarketScenarioContext = Boolean(
-    inputs && !marketScenarioIsBase(marketScenarioId) && c.hasPortfolioBalances,
+    phase === 'growth' &&
+      inputs &&
+      !marketScenarioIsBase(marketScenarioId) &&
+      c.hasPortfolioBalances,
   )
 
   const [marketScenarioCardMounted, setMarketScenarioCardMounted] = useState(showMarketScenarioContext)
@@ -282,6 +320,7 @@ export function AccountBalances({
   )
 
   const showImportedHoldingsScenarioGuide =
+    phase === 'growth' &&
     mergedDashboard &&
     fidelityScenarioEditingEnabled &&
     balanceMode === 'fidelity' &&
@@ -325,11 +364,110 @@ export function AccountBalances({
 
   const hasAnyAccountCardData = hasRetirementAccountData || Boolean(hasBrokerageAccountData)
 
+  const showImportedAccountsYieldGuide =
+    phase === 'income' &&
+    mergedDashboard &&
+    readOnly &&
+    !configureInputsOnly &&
+    hasAnyAccountCardData
+
+  const incomeModeDashboard = phase === 'income' && mergedDashboard && readOnly
+
   /** Merged dashboard lists brokerage in the same card — footer matches sum of all rows. */
   const portfolioTotal =
     mergedDashboard && hasBrokerageAccountData ? c.retBal + (brkBal ?? 0) : c.retBal
-  const portfolioTotalLabel =
-    mergedDashboard && hasBrokerageAccountData ? 'Total balances' : 'Total retirement'
+
+  const incomeMonthlyTotal = useMemo(() => {
+    if (!incomeModeDashboard || !inputs || !c.hasPortfolioBalances) return 0
+    return monthlyPortfolioIncomeFromAccountStrategies({
+      inputs,
+      accountIncomeFunds,
+      accountIncomeStrategies,
+      accountWithdrawRates,
+      wdInflation: inputs.wdInflation,
+      hsaMedicalAnnualDraw: c.strategy.hsaWdAnn,
+      hasPortfolioBalances: c.hasPortfolioBalances,
+      retFV: c.retFV,
+      brkFV: c.brkFV,
+      tradRatio: c.tradRatio,
+      rothRatio: c.rothRatio,
+      hsaRatio: c.hsaRatio,
+      tradBal: c.tradBal,
+      rothBal: c.rothBal,
+      hsaBal: c.hsaBal,
+      brkBal: brkBal ?? 0,
+      retirementAge,
+      locale,
+      manualEntries: manualAccountEntries,
+      retirementBalanceMode: balanceMode,
+    })
+  }, [
+    incomeModeDashboard,
+    inputs,
+    c,
+    accountIncomeFunds,
+    accountIncomeStrategies,
+    accountWithdrawRates,
+    brkBal,
+    retirementAge,
+    locale,
+    manualAccountEntries,
+    balanceMode,
+  ])
+
+  const portfolioTotalLabel = incomeModeDashboard
+    ? 'Total monthly income'
+    : mergedDashboard && hasBrokerageAccountData
+      ? 'Total balances'
+      : 'Total retirement'
+
+  const portfolioTotalDisplay = incomeModeDashboard ? fmtMon(incomeMonthlyTotal) : fmt(portfolioTotal)
+
+  const incomeUsesWithdrawOrBothStrategies = useMemo(() => {
+    if (!incomeModeDashboard || !inputs || !c.hasPortfolioBalances) return false
+    const lines = listAccountIncomeLines({
+      inputs,
+      accountIncomeFunds,
+      accountIncomeStrategies,
+      accountWithdrawRates,
+      wdInflation: inputs.wdInflation,
+      hsaMedicalAnnualDraw: c.strategy.hsaWdAnn,
+      hasPortfolioBalances: c.hasPortfolioBalances,
+      retFV: c.retFV,
+      brkFV: c.brkFV,
+      tradRatio: c.tradRatio,
+      rothRatio: c.rothRatio,
+      hsaRatio: c.hsaRatio,
+      tradBal: c.tradBal,
+      rothBal: c.rothBal,
+      hsaBal: c.hsaBal,
+      brkBal: brkBal ?? 0,
+      retirementAge,
+      locale,
+      manualEntries: manualAccountEntries,
+      retirementBalanceMode: balanceMode,
+    })
+    return lines.some((line) => {
+      const strategy = resolveAccountIncomeStrategy(
+        line.storageKey,
+        line.bucket,
+        accountIncomeStrategies,
+      )
+      return strategy === 'withdraw' || strategy === 'both'
+    })
+  }, [
+    incomeModeDashboard,
+    inputs,
+    c,
+    accountIncomeFunds,
+    accountIncomeStrategies,
+    accountWithdrawRates,
+    brkBal,
+    retirementAge,
+    locale,
+    manualAccountEntries,
+    balanceMode,
+  ])
 
   const mergedPositionModels = useMemo(() => {
     if (!mergedDashboard || !inputs) return []
@@ -837,10 +975,13 @@ export function AccountBalances({
   }, [fidelityScenarioEditingEnabled, inputs, setInputs, c.yearsToRetirement, c.retirementCalendarYear])
 
   const showWithdrawalGuidance =
+    phase === 'income' &&
     readOnly &&
     !configureInputsOnly &&
     hasAnyAccountCardData &&
     (mergedDashboard || (balanceMode === 'fidelity' && hasAnyFidelityRetirement))
+
+  const incomeModeAccountRows = phase === 'income' && mergedDashboard && readOnly
 
   const presentWithdrawalBuckets = useMemo((): WithdrawalDisplayBucket[] => {
     const buckets = new Set<WithdrawalDisplayBucket>()
@@ -1410,7 +1551,7 @@ export function AccountBalances({
       }
       if (hasAnyFidelityRetirement) {
         return (
-          <p className="footnote" style={{ marginTop: 8, marginBottom: 8, border: 'none', padding: 0 }}>
+          <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', padding: 0 }}>
             Apply balances from your import to update the model. Per-account totals and holdings are shown on the main dashboard only—not in
             this panel.
           </p>
@@ -1530,8 +1671,248 @@ export function AccountBalances({
     )
   }
 
+  const manualEntryBucketTotals = useMemo(() => {
+    const totals: Partial<Record<AccountScenarioBucketId, number>> = {}
+    for (const entry of manualAccountEntries) {
+      if (entry.type == null || entry.balance <= 0) continue
+      const bucket = getAccountTypeMeta(entry.type, locale).withdrawalBucket
+      totals[bucket] = (totals[bucket] ?? 0) + entry.balance
+    }
+    return totals
+  }, [manualAccountEntries, locale])
+
+  const resolveIncomeRowRetirementBalance = useCallback(
+    (bucket: AccountScenarioBucketId, currentBalance: number, bucketCurrentTotal?: number) => {
+      const bucketTotal =
+        bucketCurrentTotal ??
+        currentBalanceForAccountBucket(bucket, c, brkBal ?? 0)
+      return accountRetirementBalance(bucket, currentBalance, bucketTotal, c)
+    },
+    [c, brkBal],
+  )
+
+  const renderIncomeAccountRow = useCallback(
+    (
+      storageKey: string,
+      label: string,
+      bucket: AccountScenarioBucketId,
+      currentBalance: number,
+      bucketCurrentTotal?: number,
+      badgeOrder: number | null = null,
+    ) => {
+      const ticker = resolveAccountIncomeFundTicker(storageKey, bucket, accountIncomeFunds)
+      const balanceAtRetirement = resolveIncomeRowRetirementBalance(
+        bucket,
+        currentBalance,
+        bucketCurrentTotal,
+      )
+      const strategy = resolveAccountIncomeStrategy(storageKey, bucket, accountIncomeStrategies)
+      const withdrawRate = resolveAccountWithdrawRate(storageKey, strategy, accountWithdrawRates)
+      const medicalAnnualDraw = bucket === 'hsa' ? c.strategy.hsaWdAnn : undefined
+      const line = {
+        storageKey,
+        bucket,
+        currentBalance,
+        bucketCurrentTotal: bucketCurrentTotal ?? currentBalance,
+      }
+      const breakdown = computeAccountIncomeBreakdown({
+        line,
+        balanceAtRetirement,
+        strategy,
+        withdrawRate,
+        inflationAdj: inputs?.wdInflation ?? 0.025,
+        accountIncomeFunds,
+        medicalAnnualDraw,
+      })
+
+      return (
+        <IncomeAccountRow
+          key={storageKey}
+          label={label}
+          balanceAtRetirement={balanceAtRetirement}
+          bucket={bucket}
+          selectedTicker={ticker}
+          strategy={strategy}
+          onStrategyChange={(next) => {
+            onAccountIncomeStrategyChange?.(storageKey, next)
+            if (
+              (next === 'withdraw' || next === 'both') &&
+              accountWithdrawRates[storageKey] == null
+            ) {
+              onAccountWithdrawRateChange?.(storageKey, defaultWithdrawRateForStrategy(next))
+            }
+          }}
+          withdrawRate={withdrawRate}
+          onWithdrawRateChange={(rate) => onAccountWithdrawRateChange?.(storageKey, rate)}
+          breakdown={breakdown}
+          badgeOrder={badgeOrder}
+          onFundSelect={(t) => onAccountIncomeFundChange?.(storageKey, t)}
+        />
+      )
+    },
+    [
+      accountIncomeFunds,
+      accountIncomeStrategies,
+      accountWithdrawRates,
+      c.strategy.hsaWdAnn,
+      inputs,
+      onAccountIncomeFundChange,
+      onAccountIncomeStrategyChange,
+      onAccountWithdrawRateChange,
+      resolveIncomeRowRetirementBalance,
+    ],
+  )
+
+  function renderMergedDashboardIncomeContent() {
+    const withdrawalUi = Boolean(showWithdrawalGuidance)
+    const seq = withdrawalBucketOrder(retirementAge, true, locale)
+    const pretaxTotal = retirementPretaxDisplayTotal(c.bal)
+    const nodes: ReactNode[] = []
+
+    if (!hasAnyAccountCardData) return null
+
+    if (balanceMode === 'manual' && manualAccountEntries.length > 0) {
+      for (const step of seq) {
+        if (!localeSupportsWithdrawalBucket(locale, step)) continue
+        const entriesForStep = manualAccountEntries.filter(
+          (entry) =>
+            entry.type != null && getAccountTypeMeta(entry.type, locale).withdrawalBucket === step,
+        )
+        for (const entry of entriesForStep) {
+          const meta = getAccountTypeMeta(entry.type!, locale)
+          const storageKey = accountIncomeFundStorageKey('manual', entry.id)
+          const { order } = withdrawalUi ? metaFor(meta.withdrawalBucket) : { order: null }
+          nodes.push(
+            renderIncomeAccountRow(
+              storageKey,
+              meta.label,
+              meta.withdrawalBucket,
+              entry.balance,
+              manualEntryBucketTotals[meta.withdrawalBucket],
+              withdrawalUi ? order : null,
+            ),
+          )
+        }
+      }
+      return <div className="portfolio-account-list portfolio-account-list--income">{nodes}</div>
+    }
+
+    for (const step of seq) {
+      if (!localeSupportsWithdrawalBucket(locale, step)) continue
+      if (step === 'brokerage') {
+        if (!hasBrokerageAccountData || brkBal == null) continue
+        const { order: brkOrder } = withdrawalUi ? metaFor('brokerage') : { order: null }
+        nodes.push(
+          renderIncomeAccountRow(
+            accountIncomeFundStorageKey('bucket', 'brokerage'),
+            fidelityBucketLabel('brokerage', 'Brokerage'),
+            'brokerage',
+            brkBal,
+            brkBal,
+            withdrawalUi ? brkOrder : null,
+          ),
+        )
+        continue
+      }
+      if (!hasRetirementAccountData) continue
+      if (step === 'pretax' && pretaxTotal > 0 && localeSupportsWithdrawalBucket(locale, 'pretax')) {
+        const { order: pretaxOrder } = withdrawalUi ? metaFor('pretax') : { order: null }
+        if (balanceMode === 'manual') {
+          for (const row of visibleManualRetirementRows().filter(
+            (r) => r.key === 'ret401k' || r.key === 'se401k' || r.key === 'tradIra',
+          )) {
+            nodes.push(
+              renderIncomeAccountRow(
+                accountIncomeFundStorageKey('manual', row.key),
+                row.label,
+                'pretax',
+                display(row.key),
+                pretaxTotal,
+                withdrawalUi ? pretaxOrder : null,
+              ),
+            )
+          }
+        } else {
+          nodes.push(
+            renderIncomeAccountRow(
+              accountIncomeFundStorageKey('bucket', 'pretax'),
+              fidelityBucketLabel('pretax', 'Pre-tax'),
+              'pretax',
+              pretaxTotal,
+              pretaxTotal,
+              withdrawalUi ? pretaxOrder : null,
+            ),
+          )
+        }
+        continue
+      }
+      if (step === 'roth' && c.bal.balRoth > 0 && localeSupportsWithdrawalBucket(locale, 'roth')) {
+        const { order: rothOrder } = withdrawalUi ? metaFor('roth') : { order: null }
+        if (balanceMode === 'manual') {
+          const rothRow = visibleManualRetirementRows().find((r) => r.key === 'roth')
+          if (rothRow) {
+            nodes.push(
+              renderIncomeAccountRow(
+                accountIncomeFundStorageKey('manual', rothRow.key),
+                rothRow.label,
+                'roth',
+                display(rothRow.key),
+                c.bal.balRoth,
+                withdrawalUi ? rothOrder : null,
+              ),
+            )
+          }
+        } else {
+          nodes.push(
+            renderIncomeAccountRow(
+              accountIncomeFundStorageKey('bucket', 'roth'),
+              fidelityBucketLabel('roth', 'Tax-advantaged'),
+              'roth',
+              c.bal.balRoth,
+              c.bal.balRoth,
+              withdrawalUi ? rothOrder : null,
+            ),
+          )
+        }
+        continue
+      }
+      if (step === 'hsa' && c.bal.balHsa > 0 && localeSupportsWithdrawalBucket(locale, 'hsa')) {
+        const { order: hsaOrder } = withdrawalUi ? metaFor('hsa') : { order: null }
+        if (balanceMode === 'manual') {
+          const hsaRow = visibleManualRetirementRows().find((r) => r.key === 'hsa')
+          if (hsaRow) {
+            nodes.push(
+              renderIncomeAccountRow(
+                accountIncomeFundStorageKey('manual', hsaRow.key),
+                hsaRow.label,
+                'hsa',
+                display(hsaRow.key),
+                c.bal.balHsa,
+                withdrawalUi ? hsaOrder : null,
+              ),
+            )
+          }
+        } else {
+          nodes.push(
+            renderIncomeAccountRow(
+              accountIncomeFundStorageKey('bucket', 'hsa'),
+              fidelityBucketLabel('hsa', 'HSA'),
+              'hsa',
+              c.bal.balHsa,
+              c.bal.balHsa,
+              withdrawalUi ? hsaOrder : null,
+            ),
+          )
+        }
+      }
+    }
+
+    return <div className="portfolio-account-list portfolio-account-list--income">{nodes}</div>
+  }
+
   function renderMergedDashboardOrderedContent() {
     if (!mergedDashboard) return null
+    if (incomeModeAccountRows) return renderMergedDashboardIncomeContent()
 
     const withdrawalUi = Boolean(showWithdrawalGuidance)
     const seq = withdrawalBucketOrder(retirementAge, true, locale)
@@ -1674,7 +2055,11 @@ export function AccountBalances({
 
   const cardStyle: CSSProperties = {
     borderRadius: 10,
-    marginBottom: mergedDashboard ? 0 : configureInputsOnly && stackWithBrokerage ? '0.5rem' : '1rem',
+    marginBottom: mergedDashboard
+      ? 0
+      : configureInputsOnly && stackWithBrokerage
+        ? 'var(--space-2)'
+        : 'var(--space-4)',
   }
 
   const balanceEditPanelOpen = Boolean(
@@ -1862,13 +2247,14 @@ export function AccountBalances({
       className={[
         'account-balances-total-retirement',
         mergedDashboard ? 'account-balances-total-retirement--merged' : '',
+        incomeModeDashboard ? 'account-balances-total-retirement--income' : '',
         !mergedDashboard && stackWithBrokerage ? 'account-balances-total-retirement--stack-with-brokerage' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
       <span className="account-balances-total-retirement__label">{portfolioTotalLabel}</span>
-      <span className="account-balances-total-retirement__value">{fmt(portfolioTotal)}</span>
+      <span className="account-balances-total-retirement__value">{portfolioTotalDisplay}</span>
     </div>
   ) : null
 
@@ -1893,9 +2279,16 @@ export function AccountBalances({
         >
           Upgrade to Pro
         </AppButton>
-        <div className="account-balances-section-footer__total">
+        <div
+          className={[
+            'account-balances-section-footer__total',
+            incomeModeDashboard ? 'account-balances-section-footer__total--income' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <span className="account-balances-section-footer__total-label">{portfolioTotalLabel}</span>
-          <span className="account-balances-section-footer__total-value">{fmt(portfolioTotal)}</span>
+          <span className="account-balances-section-footer__total-value">{portfolioTotalDisplay}</span>
         </div>
       </div>
     ) : (
@@ -1916,7 +2309,20 @@ export function AccountBalances({
             onImportCsv={() => setOpenManageRequest((n) => n + 1)}
           />
           {showImportedHoldingsScenarioGuide ? (
-            <ImportedHoldingsScenarioGuide holdings={aggregatedHoldingsForGuide} />
+            <ImportedHoldingsScenarioGuide holdings={aggregatedHoldingsForGuide} variant="growth" />
+          ) : null}
+          {showImportedAccountsYieldGuide ? (
+            <ImportedHoldingsScenarioGuide
+              holdings={aggregatedHoldingsForGuide}
+              variant="income"
+              incomeUsesWithdrawalStrategies={incomeUsesWithdrawOrBothStrategies}
+              inflationAdj={inputs?.wdInflation ?? 0.025}
+              onInflationAdjChange={
+                inputs && setInputs
+                  ? (value) => setInputs({ wdInflation: value })
+                  : undefined
+              }
+            />
           ) : null}
           {hasAnyAccountCardData ? (
             <div className="account-balances-header-row">
@@ -1925,7 +2331,7 @@ export function AccountBalances({
                 {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
               </div>
               <div className="account-balances-header-row__actions">
-                {inputs && setInputs ? (
+                {phase === 'growth' && inputs && setInputs ? (
                   <MarketScenarioSelector
                     value={normalizeMarketScenarioId(inputs.marketScenario)}
                     onChange={(marketScenario) => {
@@ -1971,7 +2377,7 @@ export function AccountBalances({
               className={`account-balances-card-inner-wrap${
                 balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
               }${!hasAnyAccountCardData ? ' account-balances-card-inner-wrap--empty-state' : ''}`}
-              style={hasAnyAccountCardData ? { ...cardStyle, marginBottom: '1.75rem' } : undefined}
+              style={hasAnyAccountCardData ? cardStyle : undefined}
             >
               {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
               {renderMergedDashboardOrderedContent()}

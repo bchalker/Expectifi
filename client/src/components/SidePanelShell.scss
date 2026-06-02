@@ -20,7 +20,7 @@
 }
 
 .drawer-shell--config .side-panel-shell__below-header {
-  padding: 0 1.75rem;
+  padding: 0 var(--space-5) /* review: was 1.75rem */;
   box-shadow: 0 6px 12px -8px rgba(28, 24, 18, 0.18);
 }
 
@@ -34,7 +34,7 @@
   position: relative;
   z-index: 2;
   border-top: 1px solid var(--border);
-  padding: 0.75rem 1.25rem;
+  padding: var(--space-3) var(--space-4) /* review: was 1.25rem */;
   background: var(--surface);
 }
 

@@ -22,6 +22,9 @@
   --blue9: var(--blue6);
   --blue10: var(--blue6);
 
+
+
+
   --amber1: #ED7E07;
   --amber-d5: color-mix(in srgb, var(--amber1) 10%, black);
   --amber-d4: color-mix(in srgb, var(--amber1) 30%, black);
@@ -104,6 +107,7 @@
   --border-medium-dark: var(--surface6);
   --divider: var(--border-medium-dark);
   --shadow-account-divider: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  --shadow-button-hover: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 
   /* Legacy aliases (prefer blue1–blue10 in new code) */
   --header-brand-navy: var(--blue1);
@@ -142,9 +146,19 @@
   --color-background-info: var(--blue6);
   --color-text-info: var(--blue3);
   --color-border-info: var(--blue5);
-  /* Light sky blue — account row chrome, tax panel header */
-  --color-surface-sky-blue: #ddf0ff;
-  --color-surface-sky-blue-muted: color-mix(in srgb, var(--color-surface-sky-blue) 68%, white);
+  /* Sky blue — chroma #ddf0ff; default fill is 68% mix (--sky-blue) */
+  --sky-blue-chroma: #ddf0ff;
+  --sky-blue-h: 207;
+  --sky-blue-s: 100%;
+  
+  --sky-blue-u2: hsl(var(--sky-blue-h), var(--sky-blue-s), 97%);
+  --sky-blue-u1: hsl(var(--sky-blue-h), var(--sky-blue-s), 95%);
+  --sky-blue:    hsl(var(--sky-blue-h), var(--sky-blue-s), 92%);
+  --sky-blue-d1: hsl(var(--sky-blue-h), var(--sky-blue-s), 84%);
+  --sky-blue-d2: hsl(var(--sky-blue-h), var(--sky-blue-s), 74%);
+  --sky-blue-d3: hsl(var(--sky-blue-h), var(--sky-blue-s), 62%);
+  --sky-blue-d4: hsl(var(--sky-blue-h), var(--sky-blue-s), 50%);
+  
   --color-background-success: var(--green6);
   --color-background-warning: var(--amber6);
   --color-background-secondary: var(--surface2);
@@ -253,14 +267,14 @@
   --app-left-nav-edge: 14px;
   /* Header inner + page content share these (marketing: 68rem; app: 1100px + gutters) */
   --layout-marketing-max: 68rem;
-  --layout-marketing-gutter: max(1rem, env(safe-area-inset-left, 0px));
-  --layout-marketing-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
+  --layout-marketing-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
+  --layout-marketing-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
   --layout-app-max: 1100px;
-  --layout-app-gutter: max(1rem, env(safe-area-inset-left, 0px));
-  --layout-app-gutter-end: max(1rem, env(safe-area-inset-right, 0px));
-  --layout-app-inner-pad: 2rem;
+  --layout-app-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
+  --layout-app-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
+  --layout-app-inner-pad: var(--space-6);
   /* Tax Summary: side panel width + viewport split (desktop panel above split) */
-  --layout-snapshot-panel-width: 18.75rem;
+  --layout-snapshot-panel-width: 21rem;
   --layout-snapshot-split-min: 1280px;
   /* Centered column width (viewport minus side gutters) — header + main share this */
   --layout-app-boundary: min(
@@ -298,12 +312,12 @@
   /* Full-screen auth / legacy onboarding layer */
   --z-onboarding: 520;
   /* Right / bottom inset for slide-over panels (drawer shell) */
-  --drawer-panel-inset: 2rem;
+  --drawer-panel-inset: var(--space-6);
 }
 
 @media (max-width: 900px) {
   :root {
-    --layout-app-inner-pad: 1rem;
+    --layout-app-inner-pad: var(--space-4);
   }
 }
 

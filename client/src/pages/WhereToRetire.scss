@@ -35,7 +35,7 @@
   min-height: 0;
   margin-inline: auto;
   padding-top: 0;
-  padding-bottom: calc(var(--app-privacy-trust-h) + 0.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--app-privacy-trust-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 
@@ -74,7 +74,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   background: var(--surface);
@@ -85,7 +85,7 @@
 
 .where-to-retire__body > .where-to-retire__panel-back {
   align-self: flex-start;
-  margin: 0 0 0.4rem;
+  margin: 0 0 var(--space-2) /* review: was 0.4rem */;
 }
 
 .where-to-retire__compare-overlay {
@@ -96,7 +96,7 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  padding: 0.75rem var(--wtr-panel-inline-pad) 1rem;
+  padding: var(--space-3) var(--wtr-panel-inline-pad) var(--space-4);
   border-radius: inherit;
   background: var(--surface);
   box-sizing: border-box;
@@ -119,9 +119,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem 1.15rem;
+  gap: var(--space-3) /* review: was 0.65rem */ var(--space-4) /* review: was 1.15rem */;
   flex-shrink: 0;
-  padding: 1rem var(--wtr-panel-inline-pad, 1.25rem) 1rem;
+  padding: var(--space-4) var(--wtr-panel-inline-pad, 1.25rem) var(--space-4);
   // border-bottom: 1px solid var(--border);
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   box-sizing: border-box;
@@ -133,7 +133,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.15rem;
+  gap: var(--space-1) /* review: was 0.15rem */;
   margin: 0;
   min-width: 0;
 }
@@ -141,7 +141,7 @@
 .where-to-retire__income-toolbar-slider {
   flex: 1 1 16rem;
   min-width: 0;
-  padding-left: 1.25rem;
+  padding-left: var(--space-4) /* review: was 1.25rem */;
   border-left: 1px solid var(--border);
   box-sizing: border-box;
 }
@@ -158,8 +158,8 @@
   align-items: center;
   justify-content: center;
   align-self: stretch;
-  margin: -1rem calc(-1 * var(--wtr-panel-inline-pad, 1.25rem)) -1rem 0;
-  padding: 0 0.65rem;
+  margin: var(--space-1) /* review: was -1rem */ calc(-1 * var(--wtr-panel-inline-pad, 1.25rem)) var(--space-1) /* review: was -1rem */ 0;
+  padding: 0 var(--space-3) /* review: was 0.65rem */;
   border-left: 1px solid var(--border);
   background: var(--surface);
   box-sizing: border-box;
@@ -169,7 +169,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 0.75rem 1rem 1rem;
+  padding: var(--space-3) var(--space-4) var(--space-4);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -179,8 +179,8 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto auto auto;
     align-items: center;
-    column-gap: 0.75rem;
-    row-gap: 0.65rem;
+    column-gap: var(--space-3);
+    row-gap: var(--space-3) /* review: was 0.65rem */;
   }
 
   .where-to-retire__showing-count {
@@ -244,7 +244,7 @@
   .where-to-retire__body--map .where-to-retire__main-panel {
     flex: 1 1 auto;
     min-height: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .where-to-retire__main-panel-map {
@@ -264,7 +264,7 @@
 
 @media (min-width: 1024px) {
   .where-to-retire__income-toolbar-actions {
-    padding: 0 0.85rem 0 0.65rem;
+    padding: 0 var(--space-3) /* review: was 0.85rem */ 0 var(--space-3) /* review: was 0.65rem */;
   }
 }
 
@@ -322,7 +322,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   background: var(--surface);
@@ -337,7 +337,7 @@
 
 .where-to-retire__view-panel .where-to-retire__view-bar {
   margin-bottom: 0;
-  padding: 0.75rem 0.85rem;
+  padding: var(--space-3) var(--space-3) /* review: was 0.85rem */;
   border-bottom: 1px solid var(--border);
 }
 
@@ -485,21 +485,21 @@
   align-content: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
+  gap: var(--space-2) var(--space-3);
   flex-shrink: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 @media (min-width: 681px) {
   .app-page--where-to-retire.main {
-    padding-top: 2.75rem;
+    padding-top: var(--space-7) /* review: was 2.75rem */;
   }
 }
 
 .app-page--where-to-retire .app-page-back {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   padding: 0;
   border: none;
   background: transparent;
@@ -518,7 +518,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 0.75rem;
+  gap: var(--space-2) var(--space-3);
 }
 
 .where-to-retire__prefs-copy {
@@ -545,7 +545,7 @@
 .where-to-retire__prefs-pill {
   flex-shrink: 0;
   min-height: 36px;
-  padding: 0.4rem 0.85rem;
+  padding: var(--space-2) /* review: was 0.4rem */ var(--space-3) /* review: was 0.85rem */;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
@@ -562,8 +562,8 @@
 }
 
 .where-to-retire__discover {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--border);
   border-radius: 12px;
   background: color-mix(in srgb, var(--surface2) 35%, var(--surface));
@@ -571,11 +571,11 @@
 }
 
 .where-to-retire__discover .where-to-retire__prefs-row {
-  margin-bottom: 0rem;
+  margin-bottom: 0;
 }
 
 .where-to-retire__discover .wtr-chips {
-  margin-bottom: 0rem;
+  margin-bottom: 0;
 }
 
 .where-to-retire__discover .wtr-search {
@@ -587,12 +587,12 @@
   width: var(--wtr-content-boundary);
   max-width: 100%;
   margin-inline: auto;
-  padding: 0 0 1rem;
+  padding: 0 0 var(--space-4);
   box-sizing: border-box;
 }
 
 .where-to-retire__catalog-note {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   text-align: center;
   font-size: var(--text-sm);
   color: var(--text-muted);
@@ -601,7 +601,7 @@
 
 .where-to-retire__disclaimer {
   margin: 0;
-  padding: 0.85rem 1rem;
+  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4);
   border-radius: 10px;
   background: color-mix(in srgb, var(--surface2) 92%, var(--bg));
   border: 1px solid var(--border);

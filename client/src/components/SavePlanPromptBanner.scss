@@ -5,7 +5,7 @@
   z-index: 200;
   display: flex;
   justify-content: center;
-  padding: 0 0 max(0.75rem, env(safe-area-inset-bottom));
+  padding: 0 0 max(var(--space-3), env(safe-area-inset-bottom));
   pointer-events: none;
   transform: translateY(calc(100% + 0.5rem));
   opacity: 0;
@@ -52,11 +52,11 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
+  gap: var(--space-3) var(--space-4);
   width: 100%;
   max-width: 56rem;
-  margin-inline: 0.75rem;
-  padding: 0.875rem 1rem;
+  margin-inline: var(--space-3);
+  padding: var(--space-3) /* review: was 0.875rem */ var(--space-4);
   background: #fff;
   border-radius: 0.75rem 0.75rem 0 0;
   box-shadow:
@@ -77,18 +77,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 0.75rem;
+  gap: var(--space-2) var(--space-3);
   flex-shrink: 0;
 }
 
 .save-plan-prompt__save.app-btn--primary {
   min-height: 2.75rem;
-  padding-inline: 1rem;
+  padding-inline: var(--space-4);
 }
 
 .save-plan-prompt__dismiss {
   min-height: 2.75rem;
-  padding: 0 0.5rem;
+  padding: 0 var(--space-2);
   border: none;
   background: transparent;
   font-family: inherit;
@@ -108,6 +108,6 @@
 @media (min-width: 680px) {
   .save-plan-prompt__inner {
     border-radius: 0.75rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--space-3);
   }
 }

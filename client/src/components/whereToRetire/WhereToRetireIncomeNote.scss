@@ -1,6 +1,6 @@
 .wtr-income-note {
-  margin: 0 auto 1rem;
-  padding: 0 1rem;
+  margin: 0 auto var(--space-4);
+  padding: 0 var(--space-4);
   max-width: var(--wtr-content-boundary);
   text-align: center;
   font-size: var(--text-sm);
@@ -17,9 +17,9 @@
 .wtr-income-note__link {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  margin-left: 0.5rem;
-  padding: 0.15rem 0.35rem;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  padding: var(--space-1) /* review: was 0.15rem */ var(--space-1) /* review: was 0.35rem */;
   border: none;
   background: transparent;
   font-size: var(--text-sm);
@@ -32,12 +32,12 @@
 
 .wtr-income-note__edit {
   display: inline-block;
-  margin-left: 0.35rem;
+  margin-left: var(--space-1) /* review: was 0.35rem */;
 }
 
 .wtr-income-note__input {
   width: 6.5rem;
-  padding: 0.25rem 0.4rem;
+  padding: var(--space-1) var(--space-2) /* review: was 0.4rem */;
   border: 1px solid color-mix(in srgb, #fff 40%, transparent);
   border-radius: 6px;
   background: color-mix(in srgb, #000 25%, transparent);

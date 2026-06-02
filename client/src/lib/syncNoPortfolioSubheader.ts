@@ -49,6 +49,9 @@ const BOOTSTRAP_DEFAULT_UI: CalculatorUi = {
   incomeMode: true,
   ssIncluded: false,
   incomeSecurityTicker: null,
+  accountIncomeFunds: {},
+  accountIncomeStrategies: {},
+  accountWithdrawRates: {},
 }
 
 function bootstrapInputsFromStorage(): CalculatorInputs {

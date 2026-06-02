@@ -3,7 +3,7 @@
 .account-balances-manage {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -24,7 +24,7 @@
 
 .account-balances-manage__tooltip-time {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: var(--space-1) /* review: was 0.15rem */;
   color: var(--text-muted);
 }
 
@@ -35,7 +35,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  padding: 0.45rem 0.55rem;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border-radius: 6px;
   border: none;
   background: #fff;
@@ -94,7 +94,7 @@
   min-width: 11.5rem;
   max-height: min(70vh, 520px);
   overflow: auto;
-  padding: 0.5rem;
+  padding: var(--space-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -102,17 +102,17 @@
 }
 
 .account-balances-manage__plaid-section {
-  padding: 0.25rem 0.25rem 0.5rem;
+  padding: var(--space-1) var(--space-1) var(--space-2);
 }
 
 .account-balances-manage__plaid-add {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-height: 40px;
-  margin-top: 0.35rem;
-  padding: 0.45rem 0.55rem;
+  margin-top: var(--space-1) /* review: was 0.35rem */;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -142,7 +142,7 @@
 }
 
 .account-balances-manage__plaid-section .plaid-connection-panel__institution-text {
-  padding: 0.55rem 0.45rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-2) /* review: was 0.45rem */;
 }
 
 .account-balances-manage__plaid-section .plaid-connection-panel__row--synced {
@@ -153,7 +153,7 @@
 .account-balances-manage__plaid-section .plaid-connection-panel__name-row {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   max-width: 100%;
 }
 
@@ -183,7 +183,7 @@
   width: auto;
   min-width: 36px;
   height: auto;
-  padding: 0 5px;
+  padding: 0 var(--space-1) /* review: was 5px */;
   border-radius: 0 8px 8px 0;
   background: rgba(0, 0, 0, 0.05);
 }
@@ -196,7 +196,7 @@
 
 .account-balances-manage__divider {
   height: 1px;
-  margin: 0.35rem 0;
+  margin: var(--space-1) /* review: was 0.35rem */ 0;
   background: var(--border);
 }
 
@@ -209,10 +209,10 @@
 .account-balances-manage__item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-height: 40px;
-  padding: 0.45rem 0.55rem;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -276,17 +276,17 @@
 
 .account-balances-manage__csv-list {
   list-style: none;
-  margin: 0.15rem 0 0;
-  padding: 0 0 0 1.65rem;
+  margin: var(--space-1) /* review: was 0.15rem */ 0 0;
+  padding: 0 0 0 var(--space-5) /* review: was 1.65rem */;
 }
 
 .account-balances-manage__csv-item {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   width: 100%;
   min-height: 36px;
-  padding: 0.35rem 0.5rem;
+  padding: var(--space-1) /* review: was 0.35rem */ var(--space-2);
   border: none;
   border-radius: 6px;
   background: transparent;
@@ -315,7 +315,7 @@
   justify-content: center;
   align-self: center;
   min-height: 1.125rem;
-  padding: 0.1rem 0.35rem;
+  padding: var(--space-1) /* review: was 0.1rem */ var(--space-1) /* review: was 0.35rem */;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface2, var(--surface));
@@ -329,8 +329,8 @@
 
 .account-balances-manage__info,
 .account-balances-manage__replace-notice {
-  margin: 0 0 0.35rem;
-  padding: 0.45rem 0.55rem;
+  margin: 0 0 var(--space-1) /* review: was 0.35rem */;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 8%, var(--surface));
   font-family: var(--body);
@@ -340,8 +340,8 @@
 }
 
 .account-balances-manage__err {
-  margin: 0.35rem 0 0;
-  padding: 0 0.55rem;
+  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
+  padding: 0 var(--space-2) /* review: was 0.55rem */;
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--danger, #b91c1c);

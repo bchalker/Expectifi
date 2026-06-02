@@ -1,7 +1,7 @@
 .wtr-col-budget-bar {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   width: 100%;
 }
 
@@ -43,7 +43,7 @@
 .wtr-col-budget-bar__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.75rem;
+  gap: var(--space-1) /* review: was 0.35rem */ var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -52,7 +52,7 @@
 .wtr-col-budget-bar__legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1) /* review: was 0.3rem */;
 }
 
 .wtr-col-budget-bar__dot {

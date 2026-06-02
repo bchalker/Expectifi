@@ -13,6 +13,7 @@ import "./TaxSummaryLayout.scss";
 type Props = {
   c: ComputedSnapshot;
   showTaxSummary: boolean;
+  incomeMode?: boolean;
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
   children: ReactNode;
@@ -23,7 +24,8 @@ function TaxSummarySlidePanelHost({
   c,
   filingStatus,
   onFilingStatusChange,
-}: Pick<Props, "c" | "filingStatus" | "onFilingStatusChange">) {
+  incomeMode = false,
+}: Pick<Props, "c" | "filingStatus" | "onFilingStatusChange" | "incomeMode">) {
   const taxPanel = useTaxSummaryPanelOptional();
   if (!taxPanel?.showTaxSummary) return null;
 
@@ -34,6 +36,7 @@ function TaxSummarySlidePanelHost({
       onClose={taxPanel.closePanel}
       filingStatus={filingStatus}
       onFilingStatusChange={onFilingStatusChange}
+      incomeMode={incomeMode}
     />
   );
 }
@@ -41,6 +44,7 @@ function TaxSummarySlidePanelHost({
 export function TaxSummaryCard({
   c,
   showTaxSummary,
+  incomeMode = false,
   filingStatus,
   onFilingStatusChange,
   children,
@@ -62,6 +66,7 @@ export function TaxSummaryCard({
           c={c}
           filingStatus={filingStatus}
           onFilingStatusChange={onFilingStatusChange}
+          incomeMode={incomeMode}
         />
 
         <div className="tax-summary-card__accordion">

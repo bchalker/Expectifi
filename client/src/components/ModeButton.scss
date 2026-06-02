@@ -1,14 +1,14 @@
 .mode-button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1) /* review: was 6px */;
 }
 
 .mode-button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: var(--space-1);
+  padding: var(--space-1) /* review: was 5px */ var(--space-2) /* review: was 10px */;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
   background: var(--surface);

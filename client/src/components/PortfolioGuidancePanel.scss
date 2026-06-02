@@ -1,0 +1,118 @@
+.portfolio-guidance {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.portfolio-guidance__empty {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed, 1.65);
+  color: var(--text-muted);
+}
+
+.portfolio-guidance__item {
+  opacity: 0.75;
+  filter: grayscale(100%);
+  transition: opacity 200ms ease, filter 200ms ease;
+  box-sizing: border-box;
+}
+
+.portfolio-guidance__item--open {
+  opacity: 1;
+  filter: none;
+}
+
+.portfolio-guidance__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3) 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.portfolio-guidance__trigger:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+
+.portfolio-guidance__trigger-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text);
+}
+
+.portfolio-guidance__chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 200ms ease;
+}
+
+.portfolio-guidance__item--open .portfolio-guidance__chevron {
+  transform: rotate(180deg);
+}
+
+.portfolio-guidance__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms ease;
+}
+
+.portfolio-guidance__item--open .portfolio-guidance__panel {
+  grid-template-rows: 1fr;
+}
+
+.portfolio-guidance__panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.portfolio-guidance__panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 0 var(--space-3);
+  box-sizing: border-box;
+}
+
+.portfolio-guidance__p {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: var(--leading-relaxed, 1.65);
+  color: var(--text-muted);
+}
+
+.portfolio-guidance__em {
+  font-family: var(--body);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-guidance__item,
+  .portfolio-guidance__chevron,
+  .portfolio-guidance__panel,
+  .portfolio-guidance__trigger {
+    transition-duration: 0.01ms;
+  }
+}

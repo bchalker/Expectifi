@@ -3,12 +3,13 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 0.75rem;
+  gap: var(--space-2) var(--space-3);
   width: 100%;
-  margin-bottom: 0rem;
-  padding-bottom: 12px;
-  margin-top: 2rem;
-  // border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+  padding: var(--space-4);
+  margin-top: var(--space-6);
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  border-bottom: 1px solid var(--border);
 }
 
 .account-balances-header-row__title-block {
@@ -30,7 +31,7 @@
 }
 
 .account-balances-header-row__subtitle {
-  margin: 0.2rem 0 0;
+  margin: var(--space-1) /* review: was 0.2rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
@@ -51,21 +52,21 @@
 }
 
 .account-balances-withdrawal-helper + .withdrawal-order-explainer {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
 }
 
 .input-col-title:has(+ .account-balances-withdrawal-helper) {
-  margin-bottom: 0.35rem;
+  margin-bottom: var(--space-1) /* review: was 0.35rem */;
 }
 
 .input-col-title + .account-balances-withdrawal-helper {
   margin-top: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .input-col-title + .account-balances-withdrawal-helper + .withdrawal-order-explainer {
   margin-top: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .account-balances-header-row__actions {
@@ -73,7 +74,7 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: var(--space-4);
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -83,7 +84,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.35rem 0.5rem;
+  gap: var(--space-1) /* review: was 0.35rem */ var(--space-2);
 }
 
 .account-balances-header-row__import-select {
@@ -95,7 +96,7 @@
 .account-balances-header-row__manual-btn {
   min-height: auto;
   height: auto;
-  padding: 0.3rem 0.5rem;
+  padding: var(--space-1) /* review: was 0.3rem */ var(--space-2);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -110,7 +111,7 @@
 .account-balances-header-row__clear-btn {
   min-height: auto;
   height: auto;
-  padding: 0.3rem 0.5rem;
+  padding: var(--space-1) /* review: was 0.3rem */ var(--space-2);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -126,7 +127,7 @@
   align-self: stretch;
   width: 1px;
   min-height: 1.5rem;
-  margin: 0 0.1rem;
+  margin: 0 var(--space-1) /* review: was 0.1rem */;
   background: var(--border);
 }
 
@@ -145,8 +146,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 1.75rem 1rem 1.5rem;
+  gap: var(--space-3);
+  padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) var(--space-5);
   text-align: center;
   box-sizing: border-box;
 }
@@ -158,7 +159,7 @@
   justify-content: center;
   align-items: stretch;
   min-height: min(16rem, 48vh);
-  padding: 1.75rem 1.25rem;
+  padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) /* review: was 1.25rem */;
   box-sizing: border-box;
   border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
   border-radius: 12px;
@@ -194,7 +195,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 0.35rem;
+  margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .account-balances-empty__actions--financials-entry {
@@ -219,16 +220,18 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 1.75rem;
+  margin-bottom: var(--space-5) /* review: was 1.75rem */;
 }
 
 .account-balances-total-retirement--merged {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  // margin-top: 10px;
+  // margin-bottom: 10px;
+  margin: 0 auto;
+  padding: var(--space-4);
 }
 
 .account-balances-total-retirement--stack-with-brokerage {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .account-balances-total-retirement__label {
@@ -257,11 +260,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 0 1rem;
+  gap: 0 var(--space-4);
   border-radius: 6px;
-  margin-top: 1.75rem;
-  margin-bottom: 0.625rem;
-  padding: 0.85rem var(--portfolio-row-pad-x, 1rem);
+  margin-top: var(--space-5) /* review: was 1.75rem */;
+  margin-bottom: var(--space-2) /* review: was 0.625rem */;
+  padding: var(--space-3) /* review: was 0.85rem */ var(--portfolio-row-pad-x, 1rem);
   background: color-mix(in srgb, var(--secondary-light) 52%, var(--surface));
   background: rgba(0,0,0, .05);
 }
@@ -284,7 +287,7 @@
 }
 
 .account-balances-section-footer__subhead {
-  margin: 0.2rem 0 0;
+  margin: var(--space-1) /* review: was 0.2rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
@@ -299,7 +302,7 @@
   justify-content: center;
   align-self: center;
   min-height: 2rem;
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -312,9 +315,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.15rem;
+  gap: var(--space-1) /* review: was 0.15rem */;
   min-width: 0;
-  padding-left: 1rem;
+  padding-left: var(--space-4);
   border-left: 1px solid var(--border);
 }
 
@@ -344,8 +347,8 @@
       'copy cta'
       'total total';
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem var(--portfolio-row-pad-x, 1rem);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--portfolio-row-pad-x, 1rem);
   }
 
   .account-balances-section-footer__upgrade-copy {
@@ -370,7 +373,7 @@
 
 .account-balances-financials-shell {
   position: relative;
-  margin-bottom: 1.75rem;
+  margin-bottom: var(--space-5) /* review: was 1.75rem */;
   box-sizing: border-box;
 }
 
@@ -397,7 +400,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.85rem;
+  gap: var(--space-3) /* review: was 0.85rem */;
   width: 100%;
   text-align: left;
   font-variant-numeric: tabular-nums;
@@ -444,7 +447,7 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  margin: 0.1rem 0 0.05rem;
+  margin: var(--space-1) /* review: was 0.1rem */ 0 var(--space-1) /* review: was 0.05rem */;
   color: var(--text-faint);
   line-height: 0;
 }
@@ -505,7 +508,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  gap: var(--space-3) /* review: was 0.65rem */;
   width: 100%;
 }
 
@@ -513,7 +516,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.55rem;
+  gap: var(--space-2) /* review: was 0.55rem */;
   width: 100%;
   max-width: 20rem;
   margin-inline: auto;
@@ -524,7 +527,7 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: auto;
   max-width: none;
 }
@@ -548,7 +551,7 @@
 .financials-entry-choice-wrap {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   min-width: 0;
 }
 
@@ -556,11 +559,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   width: 100%;
   min-height: 44px;
   margin: 0;
-  padding: 0.55rem 1rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-4);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface2);
@@ -587,7 +590,7 @@
 }
 
 .financials-entry-choice-wrap--pro-gated {
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .financials-entry-choice--pro-gated {
@@ -631,10 +634,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: var(--space-2) /* review: was 0.45rem */;
   min-height: 44px;
   margin: 0;
-  padding: 0.55rem 1rem;
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-4);
   border: none;
   border-radius: 8px;
   background: var(--accent);
@@ -670,7 +673,7 @@
   z-index: 20;
   min-width: 11.5rem;
   margin: 0;
-  padding: 0.35rem;
+  padding: var(--space-1) /* review: was 0.35rem */;
   list-style: none;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -683,11 +686,11 @@
 .financials-entry-csv-dropdown__item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
   min-height: 40px;
   margin: 0;
-  padding: 0.45rem 0.65rem;
+  padding: var(--space-2) /* review: was 0.45rem */ var(--space-3) /* review: was 0.65rem */;
   border: none;
   border-radius: 6px;
   background: transparent;
@@ -732,7 +735,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
   box-sizing: border-box;
   background: var(--surface);
   animation: account-balances-import-sheet-in 0.26s ease forwards;
@@ -782,7 +785,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
   box-sizing: border-box;
   background: transparent;
   animation: account-balances-manual-sheet-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -854,7 +857,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px)) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -877,8 +880,8 @@
 .account-balances-manual-confirm-progress {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 2rem 1.25rem 2.5rem;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4) /* review: was 1.25rem */ var(--space-7);
   min-height: 8rem;
   justify-content: center;
 }
@@ -909,15 +912,15 @@
 .account-balances-manual-plan-step {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 0.25rem 0 0.5rem;
+  gap: var(--space-4);
+  padding: var(--space-1) 0 var(--space-2);
   text-align: left;
 }
 
 .account-balances-manual-plan-step__stack {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: var(--space-4) /* review: was 1.1rem */;
   width: 100%;
   min-width: 0;
 }
@@ -941,7 +944,7 @@
 .account-balances-manual-plan-step__row-duo {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: var(--space-4) /* review: was 1.1rem */;
   width: 100%;
   min-width: 0;
 }
@@ -959,7 +962,7 @@
 .account-balances-manual-plan-step__row-duo .config-plan-savings-row {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
 }
 
 .account-balances-manual-plan-step__row-duo .config-plan-saveval {
@@ -976,7 +979,7 @@
   .account-balances-manual-plan-step__row-duo {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
+    gap: var(--space-3);
     align-items: start;
   }
 
@@ -1008,9 +1011,9 @@
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
-  padding-top: 0.35rem;
+  padding-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .account-balances-manual-plan-step__btn {
@@ -1018,7 +1021,7 @@
   min-width: 0;
   min-height: 2.75rem;
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid transparent;
   border-radius: 8px;
   box-sizing: border-box;
@@ -1066,7 +1069,7 @@
 }
 
 .account-balances-manual-sheet .account-balances-edit-sheet__body:has(.account-balances-manual-plan-step) {
-  padding-inline: 1rem;
+  padding-inline: var(--space-4);
 }
 
 .account-balances-manual-panel-host {
@@ -1091,14 +1094,14 @@
 
 .account-balances-edit-sheet__foot--manual-confirm {
   justify-content: stretch;
-  padding: 0.85rem 1rem 1rem;
+  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4) var(--space-4);
 }
 
 .account-balances-manual-sheet__confirm-btn {
   width: 100%;
   min-height: 2.75rem;
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-primary);
   border-radius: 8px;
   box-sizing: border-box;
@@ -1129,13 +1132,13 @@
 .account-balances-edit-sheet--manual .edit-row--manual-balance,
 .account-balances-card-inner-wrap .edit-row--manual-balance {
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .edit-row--manual-balance--stacked {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
 }
 
 .manual-balance-row__head,
@@ -1143,7 +1146,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   width: 100%;
   min-width: 0;
 }
@@ -1158,7 +1161,7 @@
 }
 
 .edit-row--manual-balance--stacked .withdrawal-order-hint {
-  margin-top: 0.15rem;
+  margin-top: var(--space-1) /* review: was 0.15rem */;
 }
 
 .edit-row--manual-balance--stacked .edit-row-right {
@@ -1207,7 +1210,7 @@
 }
 
 .edit-row--manual-balance .edit-row-right {
-  padding-top: 0.15rem;
+  padding-top: var(--space-1) /* review: was 0.15rem */;
 }
 
 .account-balances-import-sheet.account-balances-edit-sheet--import {
@@ -1253,16 +1256,16 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex-shrink: 0;
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3) /* review: was 14px */;
   border-bottom: 1px solid var(--border);
 }
 
 .account-balances-edit-sheet__head-text {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   min-width: 0;
   flex: 1 1 auto;
 }
@@ -1281,7 +1284,7 @@
 }
 
 .account-balances-edit-sheet__hint {
-  margin: 0.35rem 0 0;
+  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
@@ -1308,7 +1311,7 @@
 
 .account-balances-edit-sheet__close {
   margin: 0;
-  padding: 4px 8px;
+  padding: var(--space-1) var(--space-2);
   border: none;
   background: transparent;
   cursor: pointer;
@@ -1330,14 +1333,14 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 4px 14px;
+  padding: var(--space-1) var(--space-3) /* review: was 14px */;
 }
 
 .account-balances-edit-sheet__foot {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
-  padding: 10px 14px;
+  padding: var(--space-2) /* review: was 10px */ var(--space-3) /* review: was 14px */;
   border-top: 1px solid var(--border);
 }
 
@@ -1348,11 +1351,11 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  padding: 0.25rem 0.4rem;
+  padding: var(--space-1) var(--space-2) /* review: was 0.4rem */;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   min-height: 44px;
 }
 
@@ -1366,8 +1369,10 @@
 
 .account-balances-card-inner-wrap {
   position: relative;
-  padding: 0;
+  padding: var(--space-4);
   border: none;
+
+
 }
 
 @media (min-width: 680px) {
@@ -1388,7 +1393,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--space-4);
   box-sizing: border-box;
 }
 
@@ -1409,7 +1414,7 @@
   z-index: 1;
   width: 100%;
   max-width: 22rem;
-  padding: 1.25rem 1.35rem;
+  padding: var(--space-4) /* review: was 1.25rem */ var(--space-5) /* review: was 1.35rem */;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -1418,7 +1423,7 @@
 }
 
 .account-balances-remove-overlay__title {
-  margin: 0 0 0.65rem;
+  margin: 0 0 var(--space-3) /* review: was 0.65rem */;
   font-family: var(--heading);
   font-size: var(--text-lg);
   font-weight: 600;
@@ -1427,7 +1432,7 @@
 }
 
 .account-balances-remove-overlay__body {
-  margin: 0 0 1.15rem;
+  margin: 0 0 var(--space-4) /* review: was 1.15rem */;
   font-family: var(--body);
   font-size: var(--text-sm);
   line-height: 1.5;
@@ -1438,21 +1443,21 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .account-balances-remove-overlay__btn {
   font-size: var(--text-sm);
   border-radius: 0.5rem;
   min-height: 2.75rem;
-  padding-inline: 1rem;
+  padding-inline: var(--space-4);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
 
 /* HeroUI primary `size="sm"` can zero out horizontal padding */
 .account-balances-remove-overlay__btn.account-balances-remove-modal-confirm {
-  padding-inline: 1rem !important;
+  padding-inline: var(--space-4) !important;
 }
 
 .account-balances-remove-modal-confirm {
@@ -1547,7 +1552,7 @@
 }
 
 .custom-scenario-footnote {
-  margin: 4px 0 0;
+  margin: var(--space-1) 0 0;
   border: none;
   padding: 0;
 }
@@ -1558,7 +1563,7 @@
   z-index: 3;
   background: var(--surface);
   border-radius: inherit;
-  padding: 10px 14px 12px;
+  padding: var(--space-2) /* review: was 10px */ var(--space-3) /* review: was 14px */ var(--space-3);
   overflow: auto;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 80%, transparent);
   animation: account-balances-custom-scenario-in 0.18s ease-out;
@@ -1577,7 +1582,7 @@
 
 .custom-scenario-scope {
   border: none;
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   padding: 0;
 }
 
@@ -1586,19 +1591,19 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 0.35rem;
+  margin-bottom: var(--space-1) /* review: was 0.35rem */;
 }
 
 .custom-scenario-scope__options {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1rem;
+  gap: var(--space-2) var(--space-4);
 }
 
 .custom-scenario-scope__opt {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1) /* review: was 0.35rem */;
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text);
@@ -1610,12 +1615,12 @@
 }
 
 .custom-scenario-panel {
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .custom-scenario-bucket-grid {
   display: grid;
-  gap: 0.5rem 0.75rem;
+  gap: var(--space-2) var(--space-3);
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   align-items: center;
 }
@@ -1634,8 +1639,8 @@
 
 .custom-scenario-table-wrap {
   overflow-x: auto;
-  margin: 0 -4px;
-  padding: 0 4px;
+  margin: 0 var(--space-1) /* review: was -4px */;
+  padding: 0 var(--space-1);
 }
 
 .custom-scenario-table-wrap .scenario-table {
@@ -1646,7 +1651,7 @@
   font-family: var(--body);
   font-size: 1rem;
   line-height: 1.25;
-  padding: 0.35rem 0.5rem;
+  padding: var(--space-1) /* review: was 0.35rem */ var(--space-2);
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface2);
@@ -1657,8 +1662,8 @@
 .custom-scenario-inline-pct {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.35rem;
+  gap: var(--space-1);
+  margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .custom-scenario-inline-pct .num-input-wrap {
@@ -1668,16 +1673,16 @@
 .custom-scenario-year-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.5rem;
-  padding: 0.5rem 0 0.25rem;
+  gap: var(--space-1) /* review: was 0.35rem */ var(--space-2);
+  padding: var(--space-2) 0 var(--space-1);
   border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
-  margin-top: 0.35rem;
+  margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 
 .custom-scenario-year-field {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: var(--space-1) /* review: was 0.15rem */;
   min-width: 3.25rem;
 }
 
@@ -1690,7 +1695,7 @@
 
 .custom-scenario-year-field .num-input {
   font-size: 1rem;
-  padding: 0.25rem 0.35rem;
+  padding: var(--space-1) var(--space-1) /* review: was 0.35rem */;
   min-height: 2.25rem;
 }
 

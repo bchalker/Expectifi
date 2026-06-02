@@ -82,8 +82,8 @@ export function BrokerageCard({
     if (readOnly) {
       if (brokerageMode === 'manual') {
         return (
-          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
               <span className="edit-row-label">Taxable brokerage</span>
               <span style={{ fontFamily: 'var(--heading)', fontSize: 'var(--text-base)', fontWeight: 500 }}>{fmt(brkBal)}</span>
             </div>
@@ -92,7 +92,7 @@ export function BrokerageCard({
       }
       if (!hasFidelityBrokerage) {
         return (
-          <p className="footnote" style={{ marginTop: 8, marginBottom: 8, border: 'none', paddingTop: 0 }}>
+          <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
             No brokerage / taxable positions found in your saved Fidelity import. Open Configure (gear icon) to import, apply balances, or switch to
             manual entry.
           </p>
@@ -113,8 +113,8 @@ export function BrokerageCard({
     if (configureInputsOnly) {
       if (brokerageMode === 'manual') {
         return (
-          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
               <span className="edit-row-label">Taxable brokerage</span>
               <div className="num-input-wrap">
                 <span className="num-input-prefix">{currencySymbol()}</span>
@@ -131,7 +131,7 @@ export function BrokerageCard({
         )
       }
       return (
-        <p className="footnote" style={{ marginTop: 8, marginBottom: 8, border: 'none', paddingTop: 0 }}>
+        <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
           {hasFidelityBrokerage
             ? 'Apply balances from your import to update taxable total. Dollar amount and holdings appear on the main dashboard only—not here.'
             : 'No brokerage / taxable positions in your saved import yet. Drop a CSV above and apply, or switch to manual entry.'}
@@ -141,8 +141,8 @@ export function BrokerageCard({
 
     if (brokerageMode === 'manual') {
       return (
-        <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div className="edit-row edit-row--no-divider" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
             <span className="edit-row-label">Taxable brokerage</span>
             <div className="num-input-wrap">
               <span className="num-input-prefix">$</span>
@@ -160,7 +160,7 @@ export function BrokerageCard({
     }
     if (!hasFidelityBrokerage) {
       return (
-        <p className="footnote" style={{ marginTop: 8, marginBottom: 8, border: 'none', paddingTop: 0 }}>
+        <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
           No brokerage / taxable positions found in your saved Fidelity import. Map accounts containing “Brokerage” or “Individual” in the export,
           apply balances, then return here — or switch to manual entry.
         </p>
@@ -214,8 +214,8 @@ export function BrokerageCard({
           background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: 10,
-          padding: '4px 14px',
-          marginBottom: '0.75rem',
+          padding: 'var(--space-1) var(--space-3)',
+          marginBottom: 'var(--space-3)',
         }}
       >
         {renderBrokerageBalanceSection()}
@@ -224,10 +224,10 @@ export function BrokerageCard({
       {readOnly ? (
         <div
           style={{
-            marginBottom: '1.75rem',
+            marginBottom: 'var(--space-5)',
             border: '1px solid var(--border)',
             borderRadius: 10,
-            padding: '10px 14px',
+            padding: 'var(--space-2) var(--space-3)',
             background: '#fff',
           }}
         >
@@ -237,17 +237,17 @@ export function BrokerageCard({
         <details
           className="brokerage-growth-details"
           style={{
-            marginBottom: '1.75rem',
+            marginBottom: 'var(--space-5)',
             border: '1px solid var(--border)',
             borderRadius: 10,
-            padding: '10px 14px',
+            padding: 'var(--space-2) var(--space-3)',
             background: '#fff',
           }}
         >
           <summary style={{ cursor: 'pointer', fontFamily: 'var(--body)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
             Brokerage Return
           </summary>
-          <div style={{ marginTop: '0.75rem' }}>{brokerageReturnPanel}</div>
+          <div style={{ marginTop: 'var(--space-3)' }}>{brokerageReturnPanel}</div>
         </details>
       )}
     </>

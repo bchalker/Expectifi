@@ -1,6 +1,6 @@
 .manual-projections-callout {
-  margin: 0 0 0.75rem;
-  padding: 0.55rem 0.75rem;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) /* review: was 0.55rem */ var(--space-3);
   border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 6%, var(--surface2));
   border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));

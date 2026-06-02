@@ -98,6 +98,9 @@ export function MarketScenarioContextRow({
       incomeMode: false,
       ssIncluded: false,
       incomeSecurityTicker: null,
+      accountIncomeFunds: {},
+      accountIncomeStrategies: {},
+      accountWithdrawRates: {},
     }),
     [],
   );

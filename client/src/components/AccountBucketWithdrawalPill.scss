@@ -1,14 +1,43 @@
 .account-bucket-withdrawal-pill {
-  display: inline-block;
-  margin-top: 0.35rem;
-  padding: 0.2rem 0.45rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
   font-family: var(--body);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.3;
-  color: var(--text-muted);
+  color: var(--text);
+}
+
+.account-bucket-withdrawal-pill__amount {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  line-height: 1;
+}
+
+.account-bucket-withdrawal-pill__amount-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.account-bucket-withdrawal-pill__label {
+  flex-shrink: 0;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Collapsed account row — slightly deeper blue than --portfolio-account-row-bg-closed */
+.tax-treatment-disclosure.portfolio-account-group:not([open]) .account-bucket-withdrawal-pill__amount {
+  background: var(--sky-blue);
 }

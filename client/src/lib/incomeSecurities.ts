@@ -60,7 +60,7 @@ export const INCOME_SECURITY_FILTER_DESCRIPTIONS: Record<IncomeSecurityFilterId,
     'Individual dividend-paying companies. More control and transparency than funds, but concentration risk to consider.',
 }
 
-const BOND_CATEGORIES = new Set([
+export const BOND_CATEGORIES = new Set([
   'High Yield Bond',
   'Investment Grade Bond',
   'Preferred Stock',
@@ -150,6 +150,25 @@ export function filterIncomeSecurities(
   })
 }
 
+export function navErosionRiskBarLevel(risk: NavErosionRisk): 2 | 3 | 4 | 5 {
+  switch (risk) {
+    case 'Very Low':
+    case 'Low':
+      return 2
+    case 'Low-Moderate':
+    case 'Moderate':
+      return 3
+    case 'Moderate-High':
+      return 4
+    case 'High':
+    case 'Very High':
+      return 5
+    default:
+      return 3
+  }
+}
+
+/** NAV erosion risk tier → icon color class (green / amber / orange / red). */
 export function navErosionRiskTextClass(risk: NavErosionRisk): string {
   switch (risk) {
     case 'Very Low':

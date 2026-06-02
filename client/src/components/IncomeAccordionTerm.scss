@@ -1,0 +1,25 @@
+/* Match yield-controls NAV erosion link — dashed underline, no button chrome. */
+.income-accordion-term {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 3px;
+  cursor: help;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.income-accordion-term:hover {
+  color: var(--text);
+}
+
+.app-tooltip__trigger-inner:has(.income-accordion-term):focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

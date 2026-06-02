@@ -13,11 +13,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: var(--space-1) /* review: was 1px */;
   width: var(--strip-slider-value-pin-diameter);
   height: var(--strip-slider-value-pin-diameter);
-  padding: 12px 8px 0;
-  padding: 0 8px calc(var(--strip-slider-value-pin-diameter) / 2);
+  padding: var(--space-3) var(--space-2) 0;
+  padding: 0 var(--space-2) calc(var(--strip-slider-value-pin-diameter) / 2);
   text-align: center;
   box-sizing: border-box;
   background: var(--strip-slider-value-pin-bg);
@@ -50,7 +50,7 @@
 .range-inline-row--with-value-pin {
   --strip-range-track-h: 4px;
   --strip-slider-value-pin-visible-h: 36px;
-  margin-top: 10px;
+  margin-top: var(--space-2) /* review: was 10px */;
 }
 
 .range-inline-track-pin-cell {

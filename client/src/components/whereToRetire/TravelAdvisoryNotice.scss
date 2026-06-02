@@ -1,6 +1,6 @@
 .wtr-travel-advisory {
-  margin-top: 0.75rem;
-  padding: 0.75rem 0.9rem;
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4) /* review: was 0.9rem */;
   border: 1px solid color-mix(in srgb, #ca8a04 35%, var(--border));
   border-radius: 10px;
   background: color-mix(in srgb, #fef9c3 55%, var(--surface));
