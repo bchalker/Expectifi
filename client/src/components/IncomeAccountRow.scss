@@ -193,7 +193,22 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  border-top: 1px dashed var(--border);
+  box-sizing: border-box;
+}
+
+.income-account-row__recommendation-section {
+  padding: 0 var(--space-5) var(--space-4);
+  box-sizing: border-box;
+}
+
+.income-account-row__divider {
+  margin: 0 var(--space-5);
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.income-account-row__detail-section {
+  padding: var(--space-4) var(--space-5);
   box-sizing: border-box;
 }
 

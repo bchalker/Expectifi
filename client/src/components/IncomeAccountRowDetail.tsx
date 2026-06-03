@@ -3,7 +3,12 @@ import type {
   IncomeAccordionPart,
 } from '../lib/incomeAccountAccordionContent'
 import { IncomeAccordionTerm } from './IncomeAccordionTerm'
-import { renderIncomeTextWithRmdTerms } from './renderIncomeTextWithRmdTerms'
+import { IncomeAccordionSources } from './IncomeAccordionSources'
+import { formatIncomeSectionHeading } from '../lib/incomeAccountAccordionHeadings'
+import {
+  renderIncomeAmountEmphasis,
+  renderIncomeTextWithRmdTerms,
+} from './renderIncomeTextWithRmdTerms'
 import './IncomeAccountRowDetail.scss'
 
 type Props = {
@@ -18,7 +23,12 @@ function renderPart(part: IncomeAccordionPart, index: number) {
       </IncomeAccordionTerm>
     )
   }
-  return <span key={`text-${index}`}>{renderIncomeTextWithRmdTerms(part.value)}</span>
+  if (part.type === 'amount') {
+    return <span key={`amount-${index}`}>{renderIncomeAmountEmphasis(part.value)}</span>
+  }
+  return (
+    <span key={`text-${index}`}>{renderIncomeTextWithRmdTerms(part.value)}</span>
+  )
 }
 
 function RichParagraph({ parts }: { parts: IncomeAccordionPart[] }) {
@@ -31,23 +41,34 @@ function RichParagraph({ parts }: { parts: IncomeAccordionPart[] }) {
 
 /** Expandable tax / draw guidance for income-mode account rows. */
 export function IncomeAccountRowDetail({ content }: Props) {
+  const hasProse =
+    content.sections.length > 0 &&
+    content.sections.some((section) => section.heading || section.parts.length > 0)
+
   return (
     <article className="income-account-row-detail">
-      <h3 className="income-account-row-detail__title">{renderIncomeTextWithRmdTerms(content.title)}</h3>
-
-      <div className="income-account-row-detail__prose">
-        {content.introParagraphs.map((parts) => (
-          <RichParagraph key={parts.map((p) => (p.type === 'text' ? p.value : p.id)).join('|')} parts={parts} />
-        ))}
-        {content.sections.map((section) => (
-          <section key={section.heading} className="income-account-row-detail__section">
-            <h4 className="income-account-row-detail__heading">
-              {renderIncomeTextWithRmdTerms(section.heading)}
-            </h4>
+      {hasProse ? (
+        <div className="income-account-row-detail__prose">
+        {content.sections.map((section, sectionIndex) => (
+          <section
+            key={section.heading || `section-${sectionIndex}`}
+            className={[
+              'income-account-row-detail__section',
+              !section.heading && 'income-account-row-detail__section--continued',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {section.heading ? (
+              <h4 className="income-account-row-detail__heading">
+                {formatIncomeSectionHeading(section.heading)}
+              </h4>
+            ) : null}
             <RichParagraph parts={section.parts} />
           </section>
         ))}
-      </div>
+        </div>
+      ) : null}
 
       <dl className="income-account-row-detail__stats">
         {content.stats.map((row) => (
@@ -63,6 +84,8 @@ export function IncomeAccountRowDetail({ content }: Props) {
           </div>
         ))}
       </dl>
+
+      <IncomeAccordionSources sources={content.sources} />
     </article>
   )
 }

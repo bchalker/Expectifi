@@ -1,3 +1,4 @@
+import { recommendedAccountIncomeStrategy } from './accountIncomeRecommendation'
 import type { AccountScenarioBucketId } from './accountReturnScenario'
 import { monthlyIncomeFromFund, resolveAccountIncomeFundTicker } from './accountIncomeFund'
 import {
@@ -33,7 +34,8 @@ export type AccountIncomeBreakdown = {
   strategyBadgeLabel: string
 }
 
-export function defaultAccountIncomeStrategy(_bucket: AccountScenarioBucketId): AccountIncomeStrategy {
+export function defaultAccountIncomeStrategy(bucket: AccountScenarioBucketId): AccountIncomeStrategy {
+  if (bucket === 'hsa') return recommendedAccountIncomeStrategy('hsa')
   return 'none'
 }
 
@@ -71,7 +73,8 @@ export function resolveAccountIncomeStrategy(
   stored: Record<string, AccountIncomeStrategy> | undefined,
 ): AccountIncomeStrategy {
   const raw = stored?.[storageKey]
-  if (raw === 'none' || raw === 'dividend' || raw === 'withdraw' || raw === 'both') return raw
+  if (raw === 'dividend' || raw === 'withdraw' || raw === 'both') return raw
+  if (raw === 'none') return bucket === 'hsa' ? 'withdraw' : 'none'
   return defaultAccountIncomeStrategy(bucket)
 }
 

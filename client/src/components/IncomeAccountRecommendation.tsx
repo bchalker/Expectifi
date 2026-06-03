@@ -3,7 +3,6 @@ import {
   incomeStrategyDisplayName,
 } from '../lib/accountIncomeRecommendation'
 import type { AccountScenarioBucketId } from '../lib/accountReturnScenario'
-import { renderIncomeTextWithRmdTerms } from './renderIncomeTextWithRmdTerms'
 import './IncomeAccountRecommendation.scss'
 
 type Props = {
@@ -18,14 +17,12 @@ export function IncomeAccountRecommendation({ bucket }: Props) {
       className="income-account-recommendation"
       aria-label="Income strategy recommendation"
     >
-      <span className="income-account-recommendation__pill">
-        <strong className="income-account-recommendation__pill-strategy">
+      <p className="income-account-recommendation__text">
+        We recommend{' '}
+        <strong className="income-account-recommendation__strategy">
           {incomeStrategyDisplayName(recommendation.strategy)}
-        </strong>
-        <span className="income-account-recommendation__pill-suffix">Recommended</span>
-      </span>
-      <p className="income-account-recommendation__reason">
-        {renderIncomeTextWithRmdTerms(recommendation.reason)}
+        </strong>{' '}
+        for this account.
       </p>
     </aside>
   )

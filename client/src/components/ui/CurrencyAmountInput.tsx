@@ -34,6 +34,8 @@ type Props = {
   errorVariant?: 'message' | 'label'
   /** Optional benchmark badge beside the label (e.g. national average). */
   averageBadge?: string | null
+  /** Keep label for screen readers only (no visible label row). */
+  hideLabel?: boolean
 }
 
 export function CurrencyAmountInput({
@@ -54,6 +56,7 @@ export function CurrencyAmountInput({
   error,
   errorVariant = 'message',
   averageBadge,
+  hideLabel = false,
 }: Props) {
   const [focused, setFocused] = useState(false)
   const invalid = Boolean(error)
@@ -228,7 +231,13 @@ export function CurrencyAmountInput({
         .filter(Boolean)
         .join(' ')}
     >
-      {labelRow}
+      {hideLabel ? (
+        <label className="currency-amount-input__sr-only" htmlFor={id}>
+          {label}
+        </label>
+      ) : (
+        labelRow
+      )}
       {externalPrefix || externalSuffix ? (
         <div className="currency-amount-input__value-group">
           {amountRow}

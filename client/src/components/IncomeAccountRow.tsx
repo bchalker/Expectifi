@@ -8,8 +8,11 @@ import {
   type AccountIncomeBreakdown,
   type AccountIncomeStrategy,
 } from '../lib/accountIncomeStrategy'
+import type { IncomeAccordionContent } from '../lib/incomeAccountAccordionContent'
 import type { AccountScenarioBucketId } from '../lib/accountReturnScenario'
 import { fmt } from '../utils/format'
+import { IncomeAccountRecommendation } from './IncomeAccountRecommendation'
+import { IncomeAccountRowDetail } from './IncomeAccountRowDetail'
 import './AccountBalancesTaxDisclosure.scss'
 import './IncomeAccountRow.scss'
 
@@ -23,6 +26,7 @@ type Props = {
   withdrawRate: number
   onWithdrawRateChange: (rate: number) => void
   breakdown: AccountIncomeBreakdown
+  accordionContent?: IncomeAccordionContent | null
   badgeOrder?: number | null
   onFundSelect: (ticker: string) => void
 }
@@ -37,6 +41,7 @@ export function IncomeAccountRow({
   withdrawRate,
   onWithdrawRateChange,
   breakdown,
+  accordionContent = null,
   badgeOrder = null,
   onFundSelect,
 }: Props) {
@@ -92,6 +97,17 @@ export function IncomeAccountRow({
             onWithdrawRateChange={onWithdrawRateChange}
           />
         </div>
+        <div className="income-account-row__recommendation-section">
+          <IncomeAccountRecommendation bucket={bucket} />
+        </div>
+        {accordionContent ? (
+          <>
+            <hr className="income-account-row__divider" aria-hidden />
+            <div className="income-account-row__detail-section">
+              <IncomeAccountRowDetail content={accordionContent} />
+            </div>
+          </>
+        ) : null}
       </div>
     </details>
   )

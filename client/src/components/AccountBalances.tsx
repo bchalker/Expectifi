@@ -89,6 +89,10 @@ import { aggregatedHoldingsForScenarioGuide } from '../lib/holdingScenarioGuideE
 import { ImportedHoldingsScenarioGuide } from './ImportedHoldingsScenarioGuide'
 import { IncomeAccountRow } from './IncomeAccountRow'
 import {
+  buildIncomeAccountAccordionContent,
+  buildIncomeAccountAccordionParams,
+} from '../lib/incomeAccountAccordionContent'
+import {
   accountIncomeFundStorageKey,
   resolveAccountIncomeFundTicker,
 } from '../lib/accountIncomeFund'
@@ -1676,6 +1680,24 @@ export function AccountBalances({
         medicalAnnualDraw,
       })
 
+      const accordionContent =
+        locale === 'us'
+          ? buildIncomeAccountAccordionContent(
+              buildIncomeAccountAccordionParams({
+                bucket,
+                retirementAge,
+                balanceAtRetirement,
+                annualDraw: breakdown.monthlyTotal * 12,
+                locale,
+                inputs,
+                tradWdAnn: c.strategy.tradWdAnn,
+                medicalAnnualDraw,
+                taxDetail: c.taxDetail,
+                filingStatus: inputs?.filingStatus,
+              }),
+            )
+          : null
+
       return (
         <IncomeAccountRow
           key={storageKey}
@@ -1684,6 +1706,7 @@ export function AccountBalances({
           bucket={bucket}
           selectedTicker={ticker}
           strategy={strategy}
+          accordionContent={accordionContent}
           onStrategyChange={(next) => {
             onAccountIncomeStrategyChange?.(storageKey, next)
             if (
@@ -1706,11 +1729,15 @@ export function AccountBalances({
       accountIncomeStrategies,
       accountWithdrawRates,
       c.strategy.hsaWdAnn,
+      c.taxDetail,
+      c.strategy.tradWdAnn,
       inputs,
+      locale,
       onAccountIncomeFundChange,
       onAccountIncomeStrategyChange,
       onAccountWithdrawRateChange,
       resolveIncomeRowRetirementBalance,
+      retirementAge,
     ],
   )
 

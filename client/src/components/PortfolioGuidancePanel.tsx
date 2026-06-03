@@ -6,8 +6,11 @@ import type { IncomeAccordionGlossaryTermId } from '../lib/incomeAccountAccordio
 import type { ComputedSnapshot } from '../lib/computeResults'
 import { filingStatusDisplayLabel } from '../lib/filingStatus'
 import type { PortfolioGuidanceMetrics } from '../lib/portfolioGuidance'
+import { PORTFOLIO_GUIDANCE_HSA_SOURCES } from '../lib/incomeAccountAccordionSources'
+import type { IncomeAccordionSourceLink } from '../lib/incomeAccountAccordionSources'
 import { fmt, fmtMon } from '../utils/format'
 import { IncomeAccordionTerm } from './IncomeAccordionTerm'
+import { IncomeAccordionSources } from './IncomeAccordionSources'
 import { IncomeRmdTerm } from './IncomeRmdTerm'
 import './PortfolioGuidancePanel.scss'
 
@@ -98,6 +101,7 @@ type GuidanceSection = {
   id: string
   title: string
   paragraphs: GuidancePart[][]
+  sources?: IncomeAccordionSourceLink[]
 }
 
 function formatRunwayYears(years: number | null): string {
@@ -285,17 +289,89 @@ function buildGuidanceSections(
         ],
       ],
     },
+    {
+      id: 'hsa-retirement',
+      title: 'How do I use my HSA in retirement?',
+      paragraphs: [
+        [
+          {
+            type: 'text',
+            value:
+              'Your HSA is one of the most tax-efficient accounts you own and most people underuse it in retirement.',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value:
+              'Before 65, withdrawals must be for qualified medical expenses or you face income tax plus a 20 percent penalty. After 65 the penalty disappears and non-medical withdrawals are taxed like a traditional IRA, making it a flexible backup income source.',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value: 'The priority order for HSA withdrawals in retirement:',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value: 'First: ',
+          },
+          { type: 'term', id: 'qualifiedMedical', label: 'qualified medical expenses' },
+          {
+            type: 'text',
+            value:
+              '. Always tax-free regardless of age. Covers doctor visits, prescriptions, dental, vision, hearing aids, and long-term care premiums.',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value:
+              'Second: Medicare premiums after 65. Part B, Part D, and Medicare Advantage premiums all qualify. This effectively gives you tax-free Medicare coverage funded by pre-tax dollars you saved years ago.',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value: 'Third: general income after 65. Taxed as ',
+          },
+          { type: 'term', id: 'ordinaryIncome' },
+          {
+            type: 'text',
+            value:
+              ' but no penalty. Treat it like a traditional IRA at this point and draw strategically to stay in lower brackets.',
+          },
+        ],
+        [
+          {
+            type: 'text',
+            value: 'Your HSA has no ',
+          },
+          { type: 'term', id: 'rmds' },
+          {
+            type: 'text',
+            value:
+              ' and no expiration date. Leave it untouched as long as possible and let it compound. The longer it sits the more tax-free medical coverage it generates.',
+          },
+        ],
+      ],
+      sources: PORTFOLIO_GUIDANCE_HSA_SOURCES,
+    },
   ]
 }
 
 function GuidanceAccordionItem({
   title,
   paragraphs,
+  sources,
   open,
   onToggle,
 }: {
   title: string
   paragraphs: GuidancePart[][]
+  sources?: IncomeAccordionSourceLink[]
   open: boolean
   onToggle: () => void
 }) {
@@ -326,6 +402,12 @@ function GuidanceAccordionItem({
             {paragraphs.map((parts, paragraphIndex) => (
               <GuidanceParagraph key={`${title}-${paragraphIndex}`} parts={parts} />
             ))}
+            {sources?.length ? (
+              <IncomeAccordionSources
+                sources={sources}
+                className="portfolio-guidance__sources"
+              />
+            ) : null}
           </div>
         </div>
       </div>
@@ -361,6 +443,7 @@ export function PortfolioGuidancePanel({ c }: Props) {
           key={section.id}
           title={section.title}
           paragraphs={section.paragraphs}
+          sources={section.sources}
           open={openId === section.id}
           onToggle={() => setOpenId((current) => (current === section.id ? null : section.id))}
         />

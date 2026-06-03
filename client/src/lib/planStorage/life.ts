@@ -6,9 +6,10 @@ export const LIFE_PLANS_VERSION = 1 as const
 
 export type SellPlanOption = 'Yes' | 'Maybe' | 'No'
 export type InheritanceExpectation = 'Yes' | 'Possibly' | 'No'
+export type HomeOwnershipStatus = 'rent' | 'mortgage' | 'own'
 
 export type LifePlansHousing = {
-  owns: boolean
+  ownership: HomeOwnershipStatus
   mortgageBalance: number
   mortgagePayoffYear: number
   planToSell: SellPlanOption
@@ -59,7 +60,7 @@ export function defaultLifePlans(currentYear: number = new Date().getFullYear())
   return {
     version: LIFE_PLANS_VERSION,
     housing: {
-      owns: true,
+      ownership: 'own',
       mortgageBalance: 0,
       mortgagePayoffYear: currentYear + 5,
       planToSell: 'Maybe',
@@ -117,6 +118,22 @@ function bool(raw: unknown, fallback = false): boolean {
   return typeof raw === 'boolean' ? raw : fallback
 }
 
+function normalizeOwnership(
+  h: Record<string, unknown>,
+  fallback: HomeOwnershipStatus,
+): HomeOwnershipStatus {
+  if (h.ownership === 'rent' || h.ownership === 'mortgage' || h.ownership === 'own') {
+    return h.ownership
+  }
+  const owns = bool(h.owns, fallback !== 'rent')
+  if (!owns) return 'rent'
+  const paidOff =
+    typeof h.mortgageFullyPaidOff === 'boolean'
+      ? h.mortgageFullyPaidOff
+      : num(h.mortgageBalance) <= 0
+  return paidOff ? 'own' : 'mortgage'
+}
+
 export function normalizeLifePlans(raw: unknown, currentYear = new Date().getFullYear()): LifePlans {
   const base = defaultLifePlans(currentYear)
   if (!raw || typeof raw !== 'object') return base
@@ -125,11 +142,14 @@ export function normalizeLifePlans(raw: unknown, currentYear = new Date().getFul
   const f = o.family && typeof o.family === 'object' ? (o.family as Record<string, unknown>) : {}
   const v = o.vehicles && typeof o.vehicles === 'object' ? (o.vehicles as Record<string, unknown>) : {}
   const ot = o.other && typeof o.other === 'object' ? (o.other as Record<string, unknown>) : {}
+  const ownership = normalizeOwnership(h, base.housing.ownership)
+  const mortgageBalance =
+    ownership === 'mortgage' ? Math.max(0, num(h.mortgageBalance)) : 0
   return {
     version: LIFE_PLANS_VERSION,
     housing: {
-      owns: bool(h.owns, base.housing.owns),
-      mortgageBalance: Math.max(0, num(h.mortgageBalance)),
+      ownership,
+      mortgageBalance,
       mortgagePayoffYear: num(h.mortgagePayoffYear, base.housing.mortgagePayoffYear),
       planToSell: normalizeSellPlan(h.planToSell),
       sellYear: num(h.sellYear, base.housing.sellYear),

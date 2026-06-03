@@ -1,0 +1,45 @@
+.config-plan-stepper {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.config-plan-stepper__btn {
+  flex-shrink: 0;
+  width: 2.75rem !important;
+  min-width: 2.75rem !important;
+  height: 2.75rem !important;
+  min-height: 2.75rem !important;
+  padding: 0 !important;
+  font-family: var(--body) !important;
+  font-size: var(--text-md) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  border-radius: 8px !important;
+  border-color: var(--border-strong) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+.config-plan-stepper__btn:hover:not(:disabled) {
+  background: var(--surface2) !important;
+  border-color: var(--strip-drawer-border) !important;
+}
+
+.config-plan-stepper__btn:disabled {
+  opacity: 0.4;
+}
+
+.config-plan-stepper__value {
+  min-width: 2rem;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}

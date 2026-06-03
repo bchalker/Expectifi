@@ -93,7 +93,7 @@ export function generateSuggestions(
     })
   }
 
-  if (life.housing.owns && life.housing.mortgageBalance > 0) {
+  if (life.housing.ownership === 'mortgage' && life.housing.mortgageBalance > 0) {
     push('Pay off mortgage early', {
       amount: life.housing.mortgageBalance,
       year: life.housing.mortgagePayoffYear,
@@ -102,7 +102,10 @@ export function generateSuggestions(
     })
   }
 
-  if (life.housing.planToSell === 'Yes' || life.housing.planToSell === 'Maybe') {
+  if (
+    life.housing.ownership !== 'rent' &&
+    (life.housing.planToSell === 'Yes' || life.housing.planToSell === 'Maybe')
+  ) {
     push('Sell primary home', {
       amount: life.housing.saleProceeds || 200000,
       year: life.housing.sellYear,
@@ -110,12 +113,10 @@ export function generateSuggestions(
     })
   }
 
-  if (life.family.hasChildren && life.family.dependentAges.some((a) => a < 22)) {
-    const youngest = Math.min(...life.family.dependentAges.filter((a) => a < 22))
-    const startYear = currentYear + Math.max(0, 18 - youngest)
+  if (life.family.hasChildren) {
     push('Grandkid / child tuition support', {
       amount: 600,
-      year: startYear,
+      year: currentYear + 5,
       duration: 4,
       reason: 'Supporting tuition could reduce your retirement income. Know the number before you commit.',
     })
@@ -123,9 +124,9 @@ export function generateSuggestions(
 
   if (life.family.supportingParent) {
     push('Support a family member', {
-      amount: life.family.parentSupportAmount || 500,
+      amount: 500,
       year: currentYear,
-      duration: life.family.parentSupportYears,
+      duration: 5,
       reason: "You're currently supporting a family member.",
     })
   }

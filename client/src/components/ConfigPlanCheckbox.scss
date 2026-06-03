@@ -1,0 +1,12 @@
+.config-plan-checkbox {
+  align-self: flex-start;
+}
+
+.config-plan-checkbox__label {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  color: var(--text);
+  cursor: pointer;
+}

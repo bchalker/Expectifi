@@ -1,0 +1,90 @@
+.config-plan-button-group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  align-self: flex-start;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.config-plan-button-group button {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 2rem !important;
+  height: 2rem !important;
+  max-height: 2rem !important;
+  margin: 0 !important;
+  padding: 0 var(--space-3) !important;
+  border: 0 !important;
+  border-right: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  background: var(--surface) !important;
+  font-family: var(--body) !important;
+  font-size: var(--text-xs) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: var(--tracking-normal) !important;
+  text-transform: none !important;
+  color: var(--text-muted) !important;
+  white-space: nowrap;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+.config-plan-button-group button:last-of-type {
+  border-right: none !important;
+}
+
+.config-plan-button-group button:first-of-type {
+  border-top-left-radius: 5px !important;
+  border-bottom-left-radius: 5px !important;
+}
+
+.config-plan-button-group button:last-of-type {
+  border-top-right-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
+}
+
+.config-plan-button-group button:hover:not(:disabled):not(.config-plan-button-group__btn--active) {
+  background: var(--surface2) !important;
+  color: var(--text) !important;
+}
+
+.config-plan-button-group button.config-plan-button-group__btn--active {
+  background: var(--strip-drawer-strong) !important;
+  color: #fff !important;
+  border-color: var(--border) !important;
+}
+
+.config-plan-button-group button.config-plan-button-group__btn--active:hover {
+  background: var(--strip-drawer) !important;
+  color: #fff !important;
+}
+
+.config-plan-button-group button:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.config-plan-button-group button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 680px) {
+  .config-plan-button-group button {
+    min-height: 2.75rem !important;
+    height: 2.75rem !important;
+    max-height: 2.75rem !important;
+    padding: 0 var(--space-3) !important;
+    font-size: var(--text-sm) !important;
+  }
+}

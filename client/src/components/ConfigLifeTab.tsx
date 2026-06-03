@@ -1,413 +1,484 @@
-import { useCallback, useMemo } from 'react'
-import { CurrencyAmountInput } from './ui/CurrencyAmountInput'
-import type { LifePlans, SellPlanOption, InheritanceExpectation } from '../lib/planStorage/life'
-import { saveLifePlans } from '../lib/planStorage/life'
-import './ConfigLifeTab.scss'
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
+import { CurrencyAmountInput } from "./ui/CurrencyAmountInput";
+import { ConfigPlanButtonGroup } from "./ConfigPlanButtonGroup";
+import { ConfigPlanYearSelect } from "./ConfigPlanYearSelect";
+import type {
+  LifePlans,
+  SellPlanOption,
+  InheritanceExpectation,
+  HomeOwnershipStatus,
+} from "../lib/planStorage/life";
+import { saveLifePlans } from "../lib/planStorage/life";
+import "./ConfigPlanButtonGroup.scss";
+import "./ConfigPlanYearSelect.scss";
+import "./OnboardingFieldShell.scss";
+import "./ConfigLifeTab.scss";
 
 type Props = {
-  plans: LifePlans
-  onPlansChange: (next: LifePlans) => void
-  currentYear: number
+  plans: LifePlans;
+  onPlansChange: (next: LifePlans) => void;
+  currentYear: number;
+};
+
+const YES_NO_OPTIONS = [
+  { value: "yes" as const, label: "Yes" },
+  { value: "no" as const, label: "No" },
+];
+
+const TITHE_SLIDE_MS = 280;
+
+function clampInt(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-function Segment<T extends string>({
-  options,
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  options: { value: T; label: string }[]
-  value: T
-  onChange: (v: T) => void
-  ariaLabel: string
-}) {
+function LifeEventHint({ children, id }: { children: ReactNode; id?: string }) {
   return (
-    <div className="config-life-segment" role="group" aria-label={ariaLabel}>
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          className={`config-life-segment__btn${value === opt.value ? ' config-life-segment__btn--on' : ''}`}
-          aria-pressed={value === opt.value}
-          onClick={() => onChange(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
+    <p className="config-life-tab__life-event-hint" id={id}>
+      {children}
+    </p>
+  );
 }
 
-function Toggle({ value, onChange, ariaLabel }: { value: boolean; onChange: (v: boolean) => void; ariaLabel: string }) {
-  return (
-    <Segment
-      ariaLabel={ariaLabel}
-      value={value ? 'yes' : 'no'}
-      onChange={(v) => onChange(v === 'yes')}
-      options={[
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ]}
-    />
-  )
-}
-
-function NumberStepper({
+function LifeNumberField({
+  id,
+  label,
+  labelId,
   value,
   min,
   max,
   onChange,
-  ariaLabel,
+  className,
 }: {
-  value: number
-  min: number
-  max: number
-  onChange: (v: number) => void
-  ariaLabel: string
+  id: string;
+  label: string;
+  labelId: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  className?: string;
 }) {
   return (
-    <div className="config-life-stepper" aria-label={ariaLabel}>
-      <button type="button" className="config-life-stepper__btn" disabled={value <= min} onClick={() => onChange(value - 1)}>
-        −
-      </button>
-      <span className="config-life-stepper__value">{value}</span>
-      <button type="button" className="config-life-stepper__btn" disabled={value >= max} onClick={() => onChange(value + 1)}>
-        +
-      </button>
-    </div>
-  )
-}
-
-function YearSelect({
-  value,
-  from,
-  to,
-  onChange,
-  id,
-  label,
-}: {
-  value: number
-  from: number
-  to: number
-  onChange: (y: number) => void
-  id: string
-  label: string
-}) {
-  const years = useMemo(() => {
-    const a: number[] = []
-    for (let y = from; y <= to; y++) a.push(y)
-    return a
-  }, [from, to])
-  return (
-    <div className="config-plan-field">
-      <label className="config-plan-label" htmlFor={id}>
+    <div
+      className={["config-plan-field", className].filter(Boolean).join(" ")}
+    >
+      <label className="config-plan-label" id={labelId} htmlFor={id}>
         {label}
       </label>
-      <select id={id} className="config-life-year-select" value={value} onChange={(e) => onChange(Number(e.target.value))}>
-        {years.map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
-        ))}
-      </select>
+      <div className="onboarding-field-shell config-life-tab__text-shell">
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          className="onboarding-field-shell__input"
+          value={String(value)}
+          aria-labelledby={labelId}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "");
+            const next =
+              raw === "" ? min : clampInt(parseInt(raw, 10), min, max);
+            onChange(next);
+          }}
+        />
+      </div>
     </div>
-  )
+  );
+}
+
+function LifeSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="config-life-tab__section">
+      <h3 className="config-life-section-label">{title}</h3>
+      <div className="config-life-tab__group">{children}</div>
+    </section>
+  );
 }
 
 export function ConfigLifeTab({ plans, onPlansChange, currentYear }: Props) {
   const patch = useCallback(
     (partial: Partial<LifePlans>) => {
-      const next = saveLifePlans(partial)
-      onPlansChange(next)
+      const next = saveLifePlans(partial);
+      onPlansChange(next);
     },
     [onPlansChange],
-  )
+  );
 
-  const h = plans.housing
-  const f = plans.family
-  const v = plans.vehicles
-  const o = plans.other
-  const yearMax = currentYear + 30
+  const h = plans.housing;
+  const f = plans.family;
+  const v = plans.vehicles;
+  const o = plans.other;
+  const [titheAmountMounted, setTitheAmountMounted] = useState(o.tithes);
+  const [titheAmountVisible, setTitheAmountVisible] = useState(o.tithes);
+
+  useEffect(() => {
+    if (o.tithes) {
+      setTitheAmountMounted(true);
+      const raf = requestAnimationFrame(() => setTitheAmountVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+
+    setTitheAmountVisible(false);
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) {
+      setTitheAmountMounted(false);
+      return;
+    }
+
+    const timer = window.setTimeout(
+      () => setTitheAmountMounted(false),
+      TITHE_SLIDE_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [o.tithes]);
+
+  const yearMax = currentYear + 30;
+  const showSellYear = h.planToSell === "Yes" || h.planToSell === "Maybe";
+  const isHomeowner = h.ownership !== "rent";
+
+  const setOwnership = (ownership: HomeOwnershipStatus) =>
+    patch({
+      housing: {
+        ...h,
+        ownership,
+        mortgageBalance: ownership === "mortgage" ? h.mortgageBalance : 0,
+      },
+    });
 
   return (
     <div className="config-life-tab">
-      <section className="config-drawer-section">
-        <h3 className="config-life-section-label">Your home</h3>
+      <LifeSection title="Your home">
         <div className="config-plan-field">
-          <span className="config-plan-question">Ownership status</span>
-          <Segment
+          <span className="config-plan-question" id="life-ownership-label">
+            Ownership status
+          </span>
+          <ConfigPlanButtonGroup<HomeOwnershipStatus>
             ariaLabel="Home ownership"
-            value={h.owns ? 'own' : 'rent'}
-            onChange={(v) => patch({ housing: { ...h, owns: v === 'own' } })}
+            value={h.ownership}
+            onChange={setOwnership}
             options={[
-              { value: 'rent', label: 'I rent' },
-              { value: 'own', label: 'I own' },
+              { value: "rent", label: "I rent" },
+              { value: "mortgage", label: "I have a mortgage" },
+              { value: "own", label: "I fully own" },
             ]}
           />
         </div>
-        {h.owns ? (
+        {h.ownership === "mortgage" ? (
+          <CurrencyAmountInput
+            id="life-mortgage-balance"
+            label="Mortgage balance remaining"
+            value={h.mortgageBalance}
+            onChange={(mortgageBalance) =>
+              patch({ housing: { ...h, mortgageBalance } })
+            }
+            placeholder="0"
+            externalPrefix
+          />
+        ) : null}
+        {isHomeowner ? (
           <>
-            <CurrencyAmountInput
-              id="life-mortgage-balance"
-              label="Mortgage balance remaining"
-              value={h.mortgageBalance}
-              onChange={(mortgageBalance) => patch({ housing: { ...h, mortgageBalance } })}
-              placeholder="0"
-              hint="Leave at $0 if your mortgage is paid off."
-              externalPrefix
-            />
-            {h.mortgageBalance > 0 ? (
-              <YearSelect
+            {h.ownership === "mortgage" && h.mortgageBalance > 0 ? (
+              <ConfigPlanYearSelect
                 id="life-mortgage-payoff"
                 label="Estimated payoff year"
                 value={h.mortgagePayoffYear}
                 from={currentYear}
                 to={yearMax}
-                onChange={(mortgagePayoffYear) => patch({ housing: { ...h, mortgagePayoffYear } })}
+                onChange={(mortgagePayoffYear) =>
+                  patch({ housing: { ...h, mortgagePayoffYear } })
+                }
               />
             ) : null}
             <div className="config-plan-field">
-              <span className="config-plan-question">Do you plan to sell or downsize?</span>
-              <Segment<SellPlanOption>
+              <span
+                className="config-plan-question"
+                id="life-sell-plan-label"
+              >
+                Plans to sell or downsize?
+              </span>
+              <ConfigPlanButtonGroup<SellPlanOption>
                 ariaLabel="Plan to sell home"
                 value={h.planToSell}
-                onChange={(planToSell) => patch({ housing: { ...h, planToSell } })}
+                onChange={(planToSell) =>
+                  patch({ housing: { ...h, planToSell } })
+                }
                 options={[
-                  { value: 'Yes', label: 'Yes' },
-                  { value: 'Maybe', label: 'Maybe' },
-                  { value: 'No', label: 'No' },
+                  { value: "Yes", label: "Yes" },
+                  { value: "Maybe", label: "Maybe" },
+                  { value: "No", label: "No" },
                 ]}
               />
             </div>
-            {h.planToSell === 'Yes' || h.planToSell === 'Maybe' ? (
-              <>
-                <YearSelect
-                  id="life-sell-year"
-                  label="Rough year you might sell"
-                  value={h.sellYear}
-                  from={currentYear}
-                  to={yearMax}
-                  onChange={(sellYear) => patch({ housing: { ...h, sellYear } })}
-                />
-                <CurrencyAmountInput
-                  id="life-sale-proceeds"
-                  label="Estimated sale proceeds"
-                  value={h.saleProceeds}
-                  onChange={(saleProceeds) => patch({ housing: { ...h, saleProceeds } })}
-                  hint="We'll suggest this as a one-time inflow in your Life Events."
-                  externalPrefix
-                />
-              </>
+            {showSellYear ? (
+              <div className="config-life-tab__field-group config-life-tab__fade-in">
+                <LifeEventHint id="life-sale-proceeds-hint">
+                  We'll suggest this as a one-time inflow in your Life Events.
+                </LifeEventHint>
+                <div className="config-life-tab__field-group-row">
+                  <CurrencyAmountInput
+                    id="life-sale-proceeds"
+                    className="config-life-tab__field-group-main"
+                    label="Estimated sale proceeds"
+                    value={h.saleProceeds}
+                    onChange={(saleProceeds) =>
+                      patch({ housing: { ...h, saleProceeds } })
+                    }
+                    externalPrefix
+                  />
+                  <ConfigPlanYearSelect
+                    id="life-sell-year"
+                    className="config-life-tab__field-group-year"
+                    label="Rough year you might sell"
+                    value={h.sellYear}
+                    from={currentYear}
+                    to={yearMax}
+                    onChange={(sellYear) =>
+                      patch({ housing: { ...h, sellYear } })
+                    }
+                  />
+                </div>
+              </div>
             ) : null}
           </>
         ) : null}
-      </section>
+      </LifeSection>
 
-      <section className="config-drawer-section">
-        <h3 className="config-life-section-label">Your family</h3>
+      <LifeSection title="Your family">
         <div className="config-plan-field">
-          <span className="config-plan-question">Marital status</span>
-          <Segment
+          <span className="config-plan-question" id="life-marital-label">
+            Marital status
+          </span>
+          <ConfigPlanButtonGroup
             ariaLabel="Marital status"
-            value={f.married ? 'married' : 'single'}
-            onChange={(v) => patch({ family: { ...f, married: v === 'married' } })}
+            value={f.married ? "married" : "single"}
+            onChange={(v) =>
+              patch({ family: { ...f, married: v === "married" } })
+            }
             options={[
-              { value: 'single', label: 'Single' },
-              { value: 'married', label: 'Married / partnered' },
+              { value: "single", label: "Single" },
+              { value: "married", label: "Married / partnered" },
             ]}
           />
         </div>
         <div className="config-plan-field">
-          <span className="config-plan-question">Do you have children or grandchildren?</span>
-          <Toggle
+          <span className="config-plan-question" id="life-children-label">
+            Do you have children or grandchildren?
+          </span>
+          <ConfigPlanButtonGroup
             ariaLabel="Has children or grandchildren"
-            value={f.hasChildren}
-            onChange={(hasChildren) => patch({ family: { ...f, hasChildren } })}
+            value={f.hasChildren ? "yes" : "no"}
+            onChange={(v) => {
+              const hasChildren = v === "yes";
+              patch({
+                family: {
+                  ...f,
+                  hasChildren,
+                  ...(hasChildren
+                    ? {}
+                    : { dependentCount: 0, dependentAges: [] }),
+                },
+              });
+            }}
+            options={YES_NO_OPTIONS}
           />
         </div>
-        {f.hasChildren ? (
-          <>
-            <div className="config-plan-field">
-              <span className="config-plan-question">
-                Number of children / grandchildren you may support financially
-              </span>
-              <NumberStepper
-                ariaLabel="Dependent count"
-                value={f.dependentCount}
-                min={0}
-                max={10}
-                onChange={(dependentCount) => patch({ family: { ...f, dependentCount } })}
-              />
-            </div>
-            <div className="config-plan-field">
-              <label className="config-plan-label" htmlFor="life-dependent-ages">
-                Ages (optional)
-              </label>
-              <input
-                id="life-dependent-ages"
-                type="text"
-                className="config-life-text-input"
-                placeholder="e.g. 8, 14, 22"
-                value={f.dependentAges.join(', ')}
-                onChange={(e) => {
-                  const dependentAges = e.target.value
-                    .split(/[,;\s]+/)
-                    .map((s) => parseInt(s.trim(), 10))
-                    .filter((n) => Number.isFinite(n) && n >= 0)
-                  patch({ family: { ...f, dependentAges } })
-                }}
-              />
-              <p className="config-plan-age-hint">
-                Helps us estimate when tuition or support events might start.
-              </p>
-            </div>
-          </>
-        ) : null}
         <div className="config-plan-field">
-          <span className="config-plan-question">
+          <span className="config-plan-question" id="life-parent-support-label">
             Are you currently supporting a parent or family member financially?
           </span>
-          <Toggle
+          <ConfigPlanButtonGroup
             ariaLabel="Supporting a parent"
-            value={f.supportingParent}
-            onChange={(supportingParent) => patch({ family: { ...f, supportingParent } })}
+            value={f.supportingParent ? "yes" : "no"}
+            onChange={(v) => {
+              const supportingParent = v === "yes";
+              patch({
+                family: {
+                  ...f,
+                  supportingParent,
+                  ...(supportingParent
+                    ? {}
+                    : { parentSupportAmount: 0, parentSupportYears: 5 }),
+                },
+              });
+            }}
+            options={YES_NO_OPTIONS}
           />
         </div>
-        {f.supportingParent ? (
-          <>
-            <CurrencyAmountInput
-              id="life-parent-support"
-              label="Monthly support amount"
-              value={f.parentSupportAmount}
-              onChange={(parentSupportAmount) => patch({ family: { ...f, parentSupportAmount } })}
-              externalPrefix
-              externalSuffix="/mo"
+      </LifeSection>
+
+      <LifeSection title="Your vehicles">
+        <div className="config-life-tab__field-group">
+          {v.count > 0 ? (
+            <LifeEventHint id="life-vehicle-hint">
+              We'll suggest a replacement event in your Life Events when your
+              vehicle is getting long in the tooth.
+            </LifeEventHint>
+          ) : null}
+          <div className="config-life-tab__field-group-row">
+            <LifeNumberField
+              id="life-vehicle-count"
+              labelId="life-vehicle-count-label"
+              className="config-life-tab__field-group-main"
+              label="How many vehicles do you own?"
+              value={v.count}
+              min={0}
+              max={6}
+              onChange={(count) => patch({ vehicles: { ...v, count } })}
             />
-            <div className="config-plan-field">
-              <span className="config-plan-question">How many more years do you expect to help?</span>
-              <NumberStepper
-                ariaLabel="Parent support years"
-                value={f.parentSupportYears}
-                min={1}
-                max={20}
-                onChange={(parentSupportYears) => patch({ family: { ...f, parentSupportYears } })}
+            {v.count > 0 ? (
+              <ConfigPlanYearSelect
+                id="life-oldest-vehicle"
+                className="config-life-tab__field-group-year config-life-tab__fade-in"
+                label="Year of your oldest vehicle"
+                value={v.oldestYear}
+                from={1990}
+                to={currentYear}
+                onChange={(oldestYear) =>
+                  patch({ vehicles: { ...v, oldestYear } })
+                }
               />
-            </div>
-          </>
-        ) : null}
-      </section>
-
-      <section className="config-drawer-section">
-        <h3 className="config-life-section-label">Your vehicles</h3>
-        <div className="config-plan-field">
-          <span className="config-plan-question">How many vehicles do you own?</span>
-          <NumberStepper
-            ariaLabel="Vehicle count"
-            value={v.count}
-            min={0}
-            max={6}
-            onChange={(count) => patch({ vehicles: { ...v, count } })}
-          />
+            ) : null}
+          </div>
         </div>
-        {v.count > 0 ? (
-          <YearSelect
-            id="life-oldest-vehicle"
-            label="Year of your oldest vehicle"
-            value={v.oldestYear}
-            from={1990}
-            to={currentYear}
-            onChange={(oldestYear) => patch({ vehicles: { ...v, oldestYear } })}
-          />
-        ) : null}
-        {v.count > 0 ? (
-          <p className="config-plan-age-hint">
-            We'll suggest a replacement event when your vehicle is getting long in the tooth.
-          </p>
-        ) : null}
-      </section>
+      </LifeSection>
 
-      <section className="config-drawer-section config-drawer-section--last">
-        <h3 className="config-life-section-label">Other things we should know</h3>
+      <LifeSection title="Other things we should know">
         <div className="config-plan-field">
-          <span className="config-plan-question">Do you own rental property?</span>
-          <Toggle
+          <span className="config-plan-question" id="life-rental-label">
+            Do you own rental property?
+          </span>
+          <ConfigPlanButtonGroup
             ariaLabel="Own rental property"
-            value={o.hasRental}
-            onChange={(hasRental) => patch({ other: { ...o, hasRental } })}
+            value={o.hasRental ? "yes" : "no"}
+            onChange={(v) => patch({ other: { ...o, hasRental: v === "yes" } })}
+            options={YES_NO_OPTIONS}
           />
         </div>
         {o.hasRental ? (
-          <>
-            <CurrencyAmountInput
-              id="life-rental-income"
-              label="Monthly rental income"
-              value={o.rentalIncome}
-              onChange={(rentalIncome) => patch({ other: { ...o, rentalIncome } })}
-              externalPrefix
-              externalSuffix="/mo"
-            />
-            <YearSelect
-              id="life-rental-start"
-              label="When did / will it start?"
-              value={o.rentalStartYear}
-              from={currentYear - 5}
-              to={yearMax}
-              onChange={(rentalStartYear) => patch({ other: { ...o, rentalStartYear } })}
-            />
-          </>
+          <div className="config-life-tab__field-group config-life-tab__fade-in">
+            <div className="config-life-tab__field-group-row">
+              <CurrencyAmountInput
+                id="life-rental-income"
+                className="config-life-tab__field-group-main"
+                label="Monthly rental income"
+                value={o.rentalIncome}
+                onChange={(rentalIncome) =>
+                  patch({ other: { ...o, rentalIncome } })
+                }
+                externalPrefix
+                externalSuffix="/mo"
+              />
+              <ConfigPlanYearSelect
+                id="life-rental-start"
+                className="config-life-tab__field-group-year"
+                label="When did / will it start?"
+                value={o.rentalStartYear}
+                from={currentYear - 5}
+                to={yearMax}
+                onChange={(rentalStartYear) =>
+                  patch({ other: { ...o, rentalStartYear } })
+                }
+              />
+            </div>
+          </div>
         ) : null}
         <div className="config-plan-field">
-          <span className="config-plan-question">Do you expect to receive an inheritance?</span>
-          <Segment<InheritanceExpectation>
+          <span className="config-plan-question" id="life-inheritance-label">
+            Do you expect to receive an inheritance?
+          </span>
+          <ConfigPlanButtonGroup<InheritanceExpectation>
             ariaLabel="Expect inheritance"
             value={o.expectsInheritance}
-            onChange={(expectsInheritance) => patch({ other: { ...o, expectsInheritance } })}
+            onChange={(expectsInheritance) =>
+              patch({ other: { ...o, expectsInheritance } })
+            }
             options={[
-              { value: 'Yes', label: 'Yes' },
-              { value: 'Possibly', label: 'Possibly' },
-              { value: 'No', label: 'No' },
+              { value: "Yes", label: "Yes" },
+              { value: "Possibly", label: "Possibly" },
+              { value: "No", label: "No" },
             ]}
           />
         </div>
-        {o.expectsInheritance !== 'No' ? (
-          <>
-            <CurrencyAmountInput
-              id="life-inheritance-amt"
-              label="Rough amount (optional)"
-              value={o.inheritanceAmount}
-              onChange={(inheritanceAmount) => patch({ other: { ...o, inheritanceAmount } })}
-              placeholder="Estimate is fine"
-              externalPrefix
-            />
-            <YearSelect
-              id="life-inheritance-year"
-              label="Rough year (optional)"
-              value={o.inheritanceYear}
-              from={currentYear}
-              to={yearMax}
-              onChange={(inheritanceYear) => patch({ other: { ...o, inheritanceYear } })}
-            />
-          </>
+        {o.expectsInheritance !== "No" ? (
+          <div className="config-life-tab__field-group config-life-tab__fade-in">
+            <div className="config-life-tab__field-group-row">
+              <CurrencyAmountInput
+                id="life-inheritance-amt"
+                className="config-life-tab__field-group-main"
+                label="Rough amount (optional)"
+                value={o.inheritanceAmount}
+                onChange={(inheritanceAmount) =>
+                  patch({ other: { ...o, inheritanceAmount } })
+                }
+                placeholder="Estimate is fine"
+                externalPrefix
+              />
+              <ConfigPlanYearSelect
+                id="life-inheritance-year"
+                className="config-life-tab__field-group-year"
+                label="Rough year (optional)"
+                value={o.inheritanceYear}
+                from={currentYear}
+                to={yearMax}
+                onChange={(inheritanceYear) =>
+                  patch({ other: { ...o, inheritanceYear } })
+                }
+              />
+            </div>
+          </div>
         ) : null}
-        <div className="config-plan-field">
-          <span className="config-plan-question">Do you tithe or give regularly to charity?</span>
-          <Toggle
-            ariaLabel="Tithes or charity"
-            value={o.tithes}
-            onChange={(tithes) => patch({ other: { ...o, tithes } })}
-          />
+        <div className="config-plan-field config-life-tab__tithe-field">
+          <span className="config-plan-question" id="life-tithe-label">
+            Do you tithe or give regularly to charity?
+          </span>
+          <div className="config-life-tab__tithe-controls">
+            <ConfigPlanButtonGroup
+              ariaLabel="Tithes or charity"
+              value={o.tithes ? "yes" : "no"}
+              onChange={(v) => patch({ other: { ...o, tithes: v === "yes" } })}
+              options={YES_NO_OPTIONS}
+            />
+            {titheAmountMounted ? (
+            <div
+              className={[
+                "config-life-tab__tithe-amount",
+                titheAmountVisible
+                  ? "config-life-tab__tithe-amount--visible"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-hidden={!titheAmountVisible}
+            >
+              <span className="config-life-tab__tithe-arrow" aria-hidden>
+                <IconArrowNarrowRightDashed size={16} stroke={1.5} />
+              </span>
+              <CurrencyAmountInput
+                id="life-tithe-amt"
+                className="config-life-tab__tithe-amount-input"
+                label="Monthly giving amount"
+                hideLabel
+                value={o.titheAmount}
+                onChange={(titheAmount) =>
+                  patch({ other: { ...o, titheAmount } })
+                }
+                disabled={!o.tithes}
+                externalPrefix
+                externalSuffix="/mo"
+              />
+            </div>
+            ) : null}
+          </div>
         </div>
-        {o.tithes ? (
-          <CurrencyAmountInput
-            id="life-tithe-amt"
-            label="Monthly giving amount"
-            value={o.titheAmount}
-            onChange={(titheAmount) => patch({ other: { ...o, titheAmount } })}
-            externalPrefix
-            externalSuffix="/mo"
-          />
-        ) : null}
-      </section>
+      </LifeSection>
     </div>
-  )
+  );
 }

@@ -91,6 +91,12 @@
   box-sizing: border-box;
 }
 
+.portfolio-guidance__sources {
+  margin-top: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+}
+
 .portfolio-guidance__p {
   margin: 0;
   font-family: var(--body);

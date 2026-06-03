@@ -1,0 +1,15 @@
+.config-plan-year-select__control {
+  width: 100%;
+  min-width: 0;
+}
+
+.config-plan-year-select__control button[data-slot='select-trigger'] {
+  width: 100%;
+  min-height: 2.75rem;
+  font-size: var(--text-sm);
+}
+
+.config-plan-year-select__list [data-slot='list-box-item'] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
