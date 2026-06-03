@@ -32,8 +32,11 @@
 
 .portfolio-account-list--income
   .income-account-row.tax-treatment-disclosure.portfolio-account-group[open]
-  > summary {
-  background: var(--surface);
+  > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
+  border-bottom: 1px dashed var(--border);
 }
 
 .portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__order-badge {
