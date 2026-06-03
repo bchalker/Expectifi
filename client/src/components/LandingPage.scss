@@ -224,7 +224,7 @@
 }
 
 .landing-feature-card__title {
-  margin: 0 0 var(--space-2) /* review: was 0.45rem */;
+  // margin: 0 0 var(--space-2) /* review: was 0.45rem */;
   font-family: var(--heading);
   font-size: var(--text-lg);
   font-weight: 600;
@@ -233,33 +233,37 @@
 
 .landing-feature-card__subheading {
   margin: 0 0 var(--space-3) /* review: was 0.85rem */;
-  font-size: var(--text-base);
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: 400;
   line-height: var(--leading-relaxed);
   color: var(--landing-text-on-light);
 }
 
 .landing-feature-card__media {
   margin: 0 0 var(--space-4);
-  border: 1px solid var(--border, #e2e8ed);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--surface);
-  box-shadow: 0 8px 24px rgba(28, 43, 58, 0.08);
-}
-
-.landing-feature-card__image {
-  display: block;
   width: 100%;
-  height: auto;
-  vertical-align: middle;
+  aspect-ratio: 16 / 10;
+  // border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-color: var(--surface);
+  background-size: contain;
+  background-position: right top;
+  background-repeat: no-repeat;
+// background-position-x: right;
+  height: 400px;
+  /* Centers the zoom focal point */
+ 
+  
+  /* 100% is normal. 150% zooms in by 1.5x */
+  // background-size: 150%; 
 }
 
 .landing-feature-card__body {
   margin: 0;
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
-  color: var(--landing-text-muted-light);
+  color: var(--landing-text-on-light);
   white-space: pre-line;
 }
 
@@ -494,10 +498,6 @@
 
 .landing-anchor-section--alt {
   background: var(--color-surface);
-}
-
-.landing-anchor-section__prose {
-  max-width: 40rem;
 }
 
 .landing-anchor-section__body {

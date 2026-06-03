@@ -140,6 +140,7 @@
   --color-text-tertiary: var(--color-text-hint);
   --color-text-secondary: var(--color-text-muted);
   --color-border-tertiary: color-mix(in srgb, var(--color-border) 65%, transparent);
+  --border-radius-lg: 0.75rem;
   --color-danger: var(--red1);
   --color-text-success: color-mix(in srgb, var(--green1) 40%, var(--blue1));
   --color-text-danger: var(--color-danger);

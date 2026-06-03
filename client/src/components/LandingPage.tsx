@@ -16,24 +16,26 @@ const FEATURE_CARDS = [
     icon: IconChartLine,
     title: "Your retirement portfolio, mapped out",
     subheading:
-      "Add your accounts in 60 seconds. See what they\u2019re worth when you retire.",
-    imageSrc: "/landing/portfolio-calculator.png",
+      "Add your accounts in 60 seconds. See what they are worth when you retire.",
+    imageSrc: "/screenshots/income-mode-preview.png",
     imageAlt:
       "Expectifi withdrawal strategy showing monthly income, yield settings, and retirement account balances.",
-    body: `Built for United States and Canadian savers. Enter Roth, 401(k), RRSP, TFSA, brokerage, and other balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid (premium, US & Canada). Choose your expected annual return — or run scenarios by market sentiment or per-holding assumptions.
+    body: `Set growth scenarios per holding, model life events that pull from your portfolio before retirement, and see your projected balance at your target retirement age.
 
-The growth phase shows your projected balance at retirement. The income phase shows what you can draw each month, whether by dividends or withdrawal rate. Tax and withdrawal guidance follows US or Canadian rules based on your country.`,
+The income phase shows what you can draw each month by dividend fund per account, withdrawal rate, or a combination of both. Each account gets its own strategy based on how it is taxed and how long you want it to last. Tax breakdown, runway projections, and withdrawal order guidance are built in.`,
   },
   {
     id: "where-to-retire",
     icon: IconWorld,
     title: "Find where your income goes furthest",
     subheading:
-      "638 cities. 70 countries. Ranked by your real surplus after taxes.",
-    imageSrc: "/landing/where-to-retire-map.png",
+      "870 cities. 135 countries. Ranked by your real surplus after taxes.",
+    imageSrc: "/screenshots/wtr-preview.png",
     imageAlt:
       "Where to retire map with city list sorted by expat community size, region filters, and an interactive world map.",
-    body: `Most retirement calculators stop at your savings. Expectifi goes further — comparing cost of living, local tax rates on foreign pension income, visa requirements, healthcare, and quality of life so you can see which destinations actually work on your budget.`,
+    body: `Most retirement calculators stop at your savings. Expectifi goes further, comparing cost of living, local tax rates on foreign pension income, food prices, healthcare, climate, and air quality so you can see which destinations actually work on your budget.
+
+Your projected retirement income connects directly to the map. As you configure your accounts the cities update in real time showing exactly where your money goes furthest.`,
   },
 ] as const;
 
@@ -48,9 +50,12 @@ const PRICING_FREE_FEATURES = [
   "Manual account entry",
   "CSV import (Fidelity, Vanguard, Schwab)",
   "Growth and income projections",
-  "Where to retire map ranked by real after-tax surplus",
-  "Social Security timing",
+  "Per-account income strategy (dividend, withdraw, or both)",
   "Withdrawal strategy",
+  "Tax breakdown at retirement",
+  "Runway projections per account",
+  "Where to Retire map with 870 cities",
+  "Social Security timing",
 ] as const;
 
 const PRICING_PREMIUM_FEATURES = [
@@ -64,7 +69,7 @@ const PRICING_PREMIUM_FEATURES = [
 const FAQ_ITEMS = [
   {
     q: "Do I need an account?",
-    a: "No — you can run the calculator and add balances locally before signing up.",
+    a: "No. You can run the calculator and add balances locally before signing up.",
   },
   {
     q: "Is my financial data stored?",
@@ -72,15 +77,19 @@ const FAQ_ITEMS = [
   },
   {
     q: "How do I add my accounts?",
-    a: "You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account (United States and Canada). Only account balances are stored — not individual holdings.",
+    a: "You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account (United States and Canada). Only account balances are stored, not individual holdings.",
   },
   {
     q: "What's the difference between the growth and income phases?",
-    a: "The growth phase shows how your portfolio compounds from today until your retirement date, based on the return assumptions you choose. The income phase shows what you can draw each month after retirement — based on your withdrawal rate or dividend income strategy.",
+    a: "The growth phase shows your portfolio compounding from today until your retirement date based on the return assumptions you choose. The income phase shows what you can draw each month after retirement using a per-account strategy: dividend income from a fund of your choice, a withdrawal rate, or both combined. Tax and withdrawal guidance follows US or Canadian rules based on your country.",
   },
   {
     q: "Does the retirement map account for taxes?",
-    a: "Yes. Each destination calculates your estimated net income after local tax rates on foreign pension income, then compares it against real cost-of-living data. The surplus figure shown is what you'd actually have left each month — not just raw COL.",
+    a: "Yes. Each destination calculates your estimated net income after local taxes on foreign pension income, compares it against real cost of living data, and scores it on quality of life, food prices, healthcare, climate, and air quality. The surplus figure shown is what you would actually have left each month, not just raw cost of living.",
+  },
+  {
+    q: "How does the income phase work?",
+    a: "Each retirement account can use a different income strategy. Choose a dividend fund and live off the yield without selling shares, set a withdrawal rate to draw down principal over time, or combine both. The app shows your monthly income per account, estimated runway, and tax treatment side by side so you can optimize before you retire.",
   },
 ] as const;
 
@@ -175,15 +184,12 @@ export function LandingPage({
                     <p className="landing-feature-card__subheading">
                       {card.subheading}
                     </p>
-                    <div className="landing-feature-card__media">
-                      <img
-                        className="landing-feature-card__image"
-                        src={card.imageSrc}
-                        alt={card.imageAlt}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
+                    <div
+                      className="landing-feature-card__media"
+                      role="img"
+                      aria-label={card.imageAlt}
+                      style={{ backgroundImage: `url("${card.imageSrc}")` }}
+                    />
                     <p className="landing-feature-card__body">{card.body}</p>
                   </article>
                 );
@@ -311,7 +317,7 @@ export function LandingPage({
             >
               FAQ
             </h2>
-            <dl className="landing-faq landing-anchor-section__prose">
+            <dl className="landing-faq">
               {FAQ_ITEMS.map((item) => (
                 <div key={item.q}>
                   <dt>{item.q}</dt>
