@@ -19,6 +19,8 @@ export type PortfolioScenarioCellProps = {
   inheritAccent?: ScenarioUiChoice | null
   /** Holding rows: whether return rate follows account vs custom override. */
   rateSource?: HoldingReturnRateSource
+  /** Holding badge differs from account scenario. */
+  overridesAccountScenario?: boolean
   rowActive: boolean
   onOpen: () => void
   layout: 'account' | 'holding'
@@ -34,6 +36,7 @@ export function PortfolioScenarioCell({
   variant,
   inheritAccent: _inheritAccent = null,
   rateSource,
+  overridesAccountScenario = false,
   rowActive,
   onOpen,
   layout,
@@ -56,18 +59,23 @@ export function PortfolioScenarioCell({
         .filter(Boolean)
         .join(' ')}
     >
-      <HoldingsScenarioTrigger
-        label={label}
-        common={common}
-        variant={variant}
-        inheritAccent={null}
-        rowActive={rowActive}
-        onOpen={onOpen}
-        sublabel={
-          layout === 'holding' ? HOLDING_ROW_SCENARIO_SUBLABEL : ACCOUNT_SCENARIO_SUBLABEL
-        }
-        className="portfolio-scenario-cell__trigger"
-      />
+      <div className="portfolio-scenario-cell__stack">
+        <HoldingsScenarioTrigger
+          label={label}
+          common={common}
+          variant={variant}
+          inheritAccent={null}
+          rowActive={rowActive}
+          onOpen={onOpen}
+          sublabel={
+            layout === 'holding' ? HOLDING_ROW_SCENARIO_SUBLABEL : ACCOUNT_SCENARIO_SUBLABEL
+          }
+          className="portfolio-scenario-cell__trigger"
+        />
+        {layout === 'holding' && overridesAccountScenario ? (
+          <span className="portfolio-scenario-cell__override-note">Overrides account scenario</span>
+        ) : null}
+      </div>
     </div>
   )
 }

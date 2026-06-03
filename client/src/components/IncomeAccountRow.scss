@@ -13,8 +13,8 @@
 }
 
 .portfolio-account-list--income .income-account-row.tax-treatment-disclosure.portfolio-account-group {
-  --portfolio-account-row-bg-closed: color-mix(in srgb, var(--amber6) 60%, transparent);
-  --portfolio-account-order-badge-bg: var(--amber4);
+  --portfolio-account-row-bg-closed: color-mix(in srgb, var(--sky-blue) 20%, transparent);
+  --portfolio-account-order-badge-bg: var(--sky-blue-d1);
   --portfolio-row-pad-x: var(--space-5);
   --portfolio-row-pad-y-start: var(--space-4);
   --portfolio-row-pad-y-end: var(--space-4);
@@ -38,7 +38,7 @@
 
 .portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__order-badge {
   background: var(--portfolio-account-order-badge-bg);
-  color: var(--color-amber-dark);
+  color: white;
 }
 
 .portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__main {
@@ -160,7 +160,7 @@
 }
 
 .runway-years--at-risk {
-  color: var(--color-danger);
+  color: var(--color-sky-blue-dark);
 }
 
 .income-account-row__balance {

@@ -7,6 +7,25 @@
   // background: #fff;
 }
 
+.portfolio-scenario-cell__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.portfolio-scenario-cell__override-note {
+  margin: 0;
+  padding: 0 var(--space-1);
+  font-family: var(--body);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
 .portfolio-scenario-cell--accent-bear {
   border-left: 4px solid color-mix(in srgb, #fce9e9 92%, var(--surface));
 }

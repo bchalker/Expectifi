@@ -16,6 +16,7 @@ import {
   accountScenarioBucketForPositionId,
   getAccountReturnScenario,
   holdingReturnRateSource,
+  holdingScenarioOverridesAccount,
   inferAccountScenarioUiChoice,
   type AccountScenarioBucketId,
 } from "../lib/accountReturnScenario";
@@ -190,6 +191,11 @@ function FidelityAggregatedHoldingGroup({
       ? inferAccountScenarioUiChoice(accountScenario, primaryBlended, h)
       : null;
 
+  const overridesAccountScenario =
+    primaryModel && accountScenario && scenarioBundle
+      ? holdingScenarioOverridesAccount(primaryModel, accountScenario, primaryBlended, h)
+      : false;
+
   const scenarioProps = scenarioBundle
     ? {
         label,
@@ -204,6 +210,7 @@ function FidelityAggregatedHoldingGroup({
         rowActive,
         onOpen: openScenario,
         rateSource,
+        overridesAccountScenario,
       }
     : null;
 

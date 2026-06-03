@@ -23,6 +23,8 @@ export type HoldingsSymbolCardScenarioProps = {
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
   variant: HoldingsScenarioTriggerVariant
   inheritAccent?: ScenarioUiChoice | null
+  /** Holding rows: show when holding scenario diverges from account scenario. */
+  overridesAccountScenario?: boolean
   rowActive: boolean
   onOpen: () => void
   rateSource?: HoldingReturnRateSource
@@ -175,6 +177,7 @@ export function HoldingsSymbolCardScenarioPanel({
         variant={scenario.variant}
         inheritAccent={inheritAccent}
         rateSource={scenario.rateSource}
+        overridesAccountScenario={scenario.overridesAccountScenario}
         rowActive={scenario.rowActive}
         onOpen={scenario.onOpen}
       />

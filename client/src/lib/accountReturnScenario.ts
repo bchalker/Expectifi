@@ -1,14 +1,18 @@
 import type { CalculatorInputs } from './computeResults'
 import {
   applyScenarioUiChoice,
+  formatOutlookScenarioRateRange,
+  horizonClamp,
   inferScenarioUiChoice,
+  isOutlookScenarioChoice,
+  scenarioColumnShortLabel,
   type ScenarioUiChoice,
 } from './holdingScenarioApply'
-import { horizonClamp } from './holdingScenarioApply'
 import type { MarketScenarioId } from './marketScenario'
-import { resolveGlobalMarketScenarioRates } from './marketScenario'
+import { getMarketScenarioDefinition, resolveGlobalMarketScenarioRates } from './marketScenario'
 import {
   annualizedReturnFromYearlyPath,
+  decimalToPct,
   padYearlyReturns,
   positionUsesCustomReturnMode,
   type PositionReturnMode,
@@ -211,5 +215,101 @@ export function projectionModelForHolding(
     flatRate: flat,
     scenario: null,
     yearlyReturns: rates,
+  }
+}
+
+function effectiveRateRangeLabel(
+  choice: ScenarioUiChoice,
+  model: PositionReturnModel,
+  blended: number,
+  horizon: number,
+): string {
+  const h = horizonClamp(horizon)
+  if (isOutlookScenarioChoice(choice)) {
+    return formatOutlookScenarioRateRange(choice, h)
+  }
+  if (choice === 'custom') {
+    return `${decimalToPct(model.flatRate).toFixed(1)}%`
+  }
+  if (choice === 'peryear') {
+    const rates = padYearlyReturns(model.yearlyReturns, h, model.flatRate).map((d) => decimalToPct(d))
+    const min = Math.min(...rates)
+    const max = Math.max(...rates)
+    if (Math.abs(max - min) < 0.05) return `${min.toFixed(1)}%`
+    return `${min.toFixed(1)}% … ${max.toFixed(1)}%`
+  }
+  return `${decimalToPct(blended).toFixed(1)}%`
+}
+
+/** True when a holding-level scenario is active and differs from the account scenario. */
+export function holdingScenarioOverridesAccount(
+  model: PositionReturnModel,
+  accountScenario: AccountReturnScenario | undefined,
+  blended: number,
+  horizon: number,
+): boolean {
+  if (!accountScenario) return false
+  if (holdingReturnRateSource(model, accountScenario, blended) !== 'custom') return false
+  const holdingChoice = inferScenarioUiChoice(model, blended, horizon)
+  const accountChoice = inferAccountScenarioUiChoice(accountScenario, blended, horizon)
+  if (holdingChoice === 'default' || accountChoice === 'default') return false
+  return holdingChoice !== accountChoice
+}
+
+/** Dev/audit log line for growth-mode scenario precedence (holding → account → global). */
+export function formatScenarioCascadeLogLine(
+  model: PositionReturnModel,
+  accountScenario: AccountReturnScenario | undefined,
+  blended: number,
+  horizon: number,
+  marketScenario?: MarketScenarioId,
+): string {
+  const ticker = model.ticker || '—'
+  const h = horizonClamp(horizon)
+  const source = holdingReturnRateSource(model, accountScenario, blended)
+
+  if (source === 'custom') {
+    const holdingChoice = inferScenarioUiChoice(model, blended, h)
+    const range = effectiveRateRangeLabel(holdingChoice, model, blended, h)
+    let suffix = ''
+    if (accountScenario) {
+      const accountChoice = inferAccountScenarioUiChoice(accountScenario, blended, h)
+      if (accountChoice !== 'default' && holdingChoice !== accountChoice) {
+        suffix = ` | account: ${scenarioColumnShortLabel(accountChoice)} ignored for this holding`
+      }
+    }
+    return `[Scenario Cascade] ${ticker}: holding-override → ${scenarioColumnShortLabel(holdingChoice)} (${range})${suffix}`
+  }
+
+  if (source === 'account' && accountScenario) {
+    const accountChoice = inferAccountScenarioUiChoice(accountScenario, blended, h)
+    const range = effectiveRateRangeLabel(accountChoice, accountScenarioAsModel(accountScenario), blended, h)
+    return `[Scenario Cascade] ${ticker}: account-level → ${scenarioColumnShortLabel(accountChoice)} (${range}) | no holding override`
+  }
+
+  const projection = projectionModelForHolding(model, accountScenario, blended, h, marketScenario)
+  const globalChoice = inferScenarioUiChoice(projection, blended, h)
+  const range = effectiveRateRangeLabel(globalChoice, projection, blended, h)
+  const marketLabel =
+    marketScenario != null && marketScenario !== 'base'
+      ? getMarketScenarioDefinition(marketScenario).label
+      : 'global rate'
+  return `[Scenario Cascade] ${ticker}: global → ${scenarioColumnShortLabel(globalChoice)} (${range}) via ${marketLabel} | no holding override`
+}
+
+/** Temporary audit helper — logs cascade resolution for each holding. */
+export function logScenarioCascadeAudit(
+  models: PositionReturnModel[],
+  inputs: CalculatorInputs,
+  retRate: number,
+  brkRate: number,
+  horizon: number,
+  marketScenario?: MarketScenarioId,
+): void {
+  for (const model of models) {
+    const bucket = accountScenarioBucketForPositionId(model.id)
+    const accountScenario = bucket ? getAccountReturnScenario(inputs, bucket) : undefined
+    const blended = bucket ? blendedRateForAccountBucket(bucket, retRate, brkRate) : retRate
+    console.log(formatScenarioCascadeLogLine(model, accountScenario, blended, horizon, marketScenario))
   }
 }
