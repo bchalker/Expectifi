@@ -16,7 +16,7 @@ export function ConfigProfileTab({
   onOpenRegister,
   onResetGuestProfile,
 }: Props) {
-  const { user, cancelAccount, loading } = useAuth()
+  const { user, cancelAccount, signOut, loading } = useAuth()
   const confirmState = useOverlayState()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -88,36 +88,48 @@ export function ConfigProfileTab({
 
   return (
     <section className="config-profile-tab" aria-labelledby="config-profile-heading">
-      <div className="config-profile-tab__identity">
-        <p id="config-profile-heading" className="config-profile-tab__name">
-          {displayName}
-        </p>
-        <p className="config-profile-tab__email">{user.email}</p>
+      <div className="config-profile-tab__identity-row">
+        <div className="config-profile-tab__identity">
+          <p id="config-profile-heading" className="config-profile-tab__name">
+            {displayName}
+          </p>
+          <p className="config-profile-tab__email">{user.email}</p>
+        </div>
+        <AppButton
+          type="button"
+          size="sm"
+          variant="secondary"
+          className="config-profile-tab__signout-btn"
+          onPress={() => void signOut()}
+        >
+          Sign out
+        </AppButton>
       </div>
 
       <div className="config-profile-tab__cancel-card">
-        {err ? (
-          <p className="config-profile-tab__error" role="alert">
-            {err}
-          </p>
-        ) : null}
-        <button
-          type="button"
-          className="config-profile-tab__cancel-btn"
-          disabled={busy}
-          onClick={() => {
-            setErr(null)
-            confirmState.open()
-          }}
-        >
-          Cancel my Account
-        </button>
         <p className="config-profile-tab__cancel-note">
           <strong>Note.</strong> Your privacy is the utmost concern. When you cancel your account, it ends your Stripe
           subscription, disconnects linked banks, permanently deletes your Expectifi account and all saved data on our
           servers, and clears plan data stored in this browser. This cannot be undone.
         </p>
       </div>
+
+      {err ? (
+        <p className="config-profile-tab__error" role="alert">
+          {err}
+        </p>
+      ) : null}
+      <button
+        type="button"
+        className="config-profile-tab__cancel-link"
+        disabled={busy}
+        onClick={() => {
+          setErr(null)
+          confirmState.open()
+        }}
+      >
+        Cancel my account
+      </button>
 
       {confirmState.isOpen && drawerShell
         ? createPortal(

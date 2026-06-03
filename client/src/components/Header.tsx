@@ -109,7 +109,7 @@ function HeaderAuthTail({
   welcomeDone?: boolean
   wrapInTail?: boolean
 }) {
-  const { apiReady, loading, user, googleCheckoutUi } = useAuth()
+  const { apiReady, loading, user, googleCheckoutUi, signOut } = useAuth()
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone)
   const accountLabel = user
     ? user.displayName?.trim() || user.email
@@ -150,14 +150,34 @@ function HeaderAuthTail({
           <span className="header__settings-label">My Plans</span>
           <IconAdjustments size={18} stroke={1.65} aria-hidden />
         </button>
-        <span className="header__account-group__profile">
-          {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
-          {showRetireByInProfile && targetRetirementAge != null ? (
-            <span className="header__profile-ages" aria-hidden>
-              Retire by {targetRetirementAge}
-            </span>
-          ) : null}
-        </span>
+        <div className="header__profile-menu">
+          <button
+            type="button"
+            className="header__account-group__profile"
+            aria-label="My Plans: profile"
+            aria-haspopup="menu"
+            aria-expanded={drawer === 'config'}
+            aria-controls="drawer"
+            onClick={onOpenConfig}
+          >
+            {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
+            {showRetireByInProfile && targetRetirementAge != null ? (
+              <span className="header__profile-ages" aria-hidden>
+                Retire by {targetRetirementAge}
+              </span>
+            ) : null}
+          </button>
+          <div className="header__profile-popout" role="menu" aria-label="Profile">
+            <button
+              type="button"
+              role="menuitem"
+              className="header__profile-popout-action"
+              onClick={() => void signOut()}
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       </div>,
     )
   }

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { useAuth } from '../context/AuthContext'
 import { useUserLocale } from '../context/UserLocaleContext'
 import {
   accountLabelForWithdrawalBucket,
@@ -86,7 +85,6 @@ export function DrawerPanel({
   const lastDrawerRef = useRef<DrawerName | null>(null)
   if (drawer) lastDrawerRef.current = drawer
   const panelDrawer = drawer ?? lastDrawerRef.current
-  const { user, signOut } = useAuth()
   const [ssBenefitError, setSsBenefitError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -114,17 +112,6 @@ export function DrawerPanel({
   const configFooter =
     panelDrawer === 'config' ? (
       <div className="drawer-config-footer">
-        {user?.email ? (
-          <AppButton
-            type="button"
-            size="sm"
-            variant="secondary"
-            className="drawer-config-footer__signout"
-            onPress={() => void signOut()}
-          >
-            Sign out
-          </AppButton>
-        ) : null}
         <AppButton
           type="button"
           size="md"
