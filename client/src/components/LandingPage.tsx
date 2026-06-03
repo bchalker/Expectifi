@@ -62,7 +62,7 @@ const PRICING_PREMIUM_FEATURES = [
   "Everything in free",
   "Saved scenarios you can revisit anytime",
   "Settings and balances saved across visits",
-  "Plaid bank sync (US & Canada)",
+  "Plaid bank sync + Fidelity CSV import (US & Canada)",
   "All future features as we ship them",
 ] as const;
 
@@ -77,7 +77,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How do I add my accounts?",
-    a: "You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid on a premium account (United States and Canada). Only account balances are stored, not individual holdings.",
+    a: "You can enter balances manually, import a CSV from Fidelity, Vanguard, or Schwab, or connect via Plaid for most other institutions (US and Canada). Note: Fidelity accounts are not supported by Plaid — use CSV import or manual entry for Fidelity.",
   },
   {
     q: "What's the difference between the growth and income phases?",
