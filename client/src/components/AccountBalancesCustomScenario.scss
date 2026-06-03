@@ -162,7 +162,6 @@
   padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) /* review: was 1.25rem */;
   box-sizing: border-box;
   border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
-  border-radius: 12px;
 }
 
 .account-balances-card-inner-wrap--empty-state > .account-balances-empty {
@@ -219,15 +218,20 @@
 .account-balances-total-retirement {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
   margin-bottom: var(--space-5) /* review: was 1.75rem */;
 }
 
 .account-balances-total-retirement--merged {
-  // margin-top: 10px;
-  // margin-bottom: 10px;
-  margin: 0 auto;
+  width: calc(100% + 2 * var(--space-4));
+  margin-inline: calc(-1 * var(--space-4));
+  margin-block: 0;
   padding: var(--space-4);
+  box-sizing: border-box;
+  align-self: stretch;
 }
 
 .account-balances-total-retirement--stack-with-brokerage {
@@ -249,6 +253,11 @@
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: var(--space-2);
+  background: rgba(255,255,255, .35);
+  border-radius: var(--space-2);
 }
 
 .account-balances-section-footer {
@@ -1369,10 +1378,11 @@
 
 .account-balances-card-inner-wrap {
   position: relative;
-  padding: var(--space-2);
+  padding: var(--space-4);
+  padding-bottom: 0;
   border: none;
-
-
+  border-radius: 0;
+  background: var(--sky-blue);
 }
 
 @media (min-width: 680px) {

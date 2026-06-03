@@ -27,14 +27,16 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 
 .section--tax-summary--income-harvest .tax-summary-card {
   position: relative;
-  z-index: 1;
+  z-index: auto;
   border: none;
   border-radius: 0;
-  box-shadow: var(--shadow-account-divider);
+  box-shadow: none;
 }
 
 .section--tax-summary--income-harvest .where-to-retire-preview-panel {
   order: 2;
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: none;
   height: auto;
@@ -42,6 +44,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   flex: none;
   border: none;
   border-radius: 0;
+  box-shadow: rgba(33, 35, 38, 0.1) 0 -10px 10px -10px;
 }
 
 @media (min-width: 768px) {
@@ -53,16 +56,56 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 
   .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
     order: unset;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card {
-    box-shadow: rgba(33, 35, 38, 0.1) 6px 0 10px -8px;
+    box-shadow: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--income-harvest .tax-summary-card__accounts {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--income-harvest .tax-summary-card__accounts > .account-balances-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--income-harvest .account-balances-card-inner-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--income-harvest
+    .account-balances-card-inner-wrap
+    > .account-balances-total-retirement--merged,
+  .section--tax-summary--income-harvest
+    .account-balances-card-inner-wrap
+    > .account-balances-section-footer {
+    // margin-top: auto;
+    margin-bottom: 0;
   }
 
   .section--tax-summary--income-harvest .where-to-retire-preview-panel {
     order: unset;
     width: 280px;
     height: 100%;
+    /* Mirror the old tax-card divider; must sit above accounts (z-index: 1). */
+    box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
 }
 
