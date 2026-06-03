@@ -4,7 +4,7 @@
 
 /* Account header + holdings list — single card per bucket */
 .tax-treatment-disclosure.portfolio-account-group {
-  --portfolio-account-row-bg-closed: var(--sky-blue);
+  --portfolio-account-row-bg-closed: color-mix(in srgb, var(--sky-blue) 50%, transparent);
   --portfolio-scenario-trigger-min: 8rem;
   --portfolio-scenario-col-pad-x: var(--space-3);
   --portfolio-account-chevron-pad-end: var(--space-4);

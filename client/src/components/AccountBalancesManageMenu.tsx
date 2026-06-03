@@ -2,11 +2,11 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
+  type MouseEvent,
+  type AnimationEvent,
 } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -14,16 +14,14 @@ import {
   IconChevronDown,
   IconLink,
   IconPencil,
-  IconFileSpreadsheet,
+  IconUpload,
+  IconX,
 } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { usePlan } from '../hooks/usePlan'
 import { CSV_CUSTODIAN_OPTIONS, isPositionsCsvCustodian, type PositionsCsvCustodian } from '../lib/positionsCsvImport'
-import { custodianShowsMonogram, custodianToBrokerSource } from '../lib/brokerMonogram'
-import { custodianHasPlaidConnection } from '../lib/plaidInstitutionBroker'
 import type { PlaidItemSummary } from '../lib/api/plaid'
 import { AppButton } from './ui/AppButton'
-import { BrokerMonogramPill } from './ui/BrokerMonogramPill'
 import { UpgradePrompt } from './ui/UpgradePrompt'
 import { Tooltip } from './Tooltip'
 import {
@@ -34,33 +32,15 @@ import {
 import './FidelityHoldingScenarioPopout.scss'
 import './AccountBalancesManageMenu.scss'
 
-const MANAGE_MENU_MAX_WIDTH = 240
 const MANAGE_SUBLABEL = 'Manage'
 const MANAGE_VALUE_LABEL = 'Financial Accounts'
 
-function computeManageMenuStyle(anchor: DOMRect): CSSProperties {
-  const gap = 6
-  const right = Math.max(8, window.innerWidth - anchor.right)
+const CSV_IMPORT_OPTIONS = CSV_CUSTODIAN_OPTIONS.filter((o) => o.id !== 'other' && o.id !== 'webull')
 
-  const estimatedHeight = 420
-  const spaceBelow = window.innerHeight - anchor.bottom - gap
-  if (spaceBelow >= estimatedHeight) {
-    return {
-      position: 'fixed',
-      top: anchor.bottom + gap,
-      right,
-      width: 'max-content',
-      maxWidth: `min(92vw, ${MANAGE_MENU_MAX_WIDTH}px)`,
-    }
-  }
-  return {
-    position: 'fixed',
-    top: anchor.top - gap,
-    right,
-    width: 'max-content',
-    maxWidth: `min(92vw, ${MANAGE_MENU_MAX_WIDTH}px)`,
-    transform: 'translateY(-100%)',
-  }
+const CSV_EXPORT_HINTS: Partial<Record<PositionsCsvCustodian, string>> = {
+  fidelity: 'Export from Accounts & Trade',
+  schwab: 'Export from Positions',
+  vanguard: 'Export from My Accounts',
 }
 
 function latestHealthySyncTime(items: PlaidItemSummary[]): string | null {
@@ -90,15 +70,10 @@ function PlaidConnectionsSection({
   linkBusy,
   onReconnect,
   onDisconnect,
-  showConnectAnother = false,
-  onConnectAnother,
-  connectAnotherLabel,
 }: PlaidConnectionsSectionProps) {
   if (!items.length) return null
-  const sectionLabel = 'Connected Plaid accounts'
-  const addLabel = connectAnotherLabel ?? 'Connect another account via Plaid'
   return (
-    <div className="account-balances-manage__plaid-section" aria-label={sectionLabel}>
+    <div className="account-balances-manage__plaid-section" aria-label="Connected Plaid accounts">
       <ul className="plaid-connection-panel__list">
         {items.map((item) => {
           const healthy = item.status === 'healthy'
@@ -153,17 +128,6 @@ function PlaidConnectionsSection({
           )
         })}
       </ul>
-      {showConnectAnother && onConnectAnother ? (
-        <button
-          type="button"
-          className="account-balances-manage__plaid-add"
-          disabled={linkBusy}
-          onClick={onConnectAnother}
-        >
-          <IconLink size={16} stroke={1.5} aria-hidden />
-          {addLabel}
-        </button>
-      ) : null}
     </div>
   )
 }
@@ -203,11 +167,11 @@ export function AccountBalancesManageMenu({
   const { user } = useAuth()
   const { hasPaidSubscription } = usePlan()
   const ctx = useContext(PlaidConnectionContext)
+  const showPlanBadges = !user
 
   const [open, setOpen] = useState(false)
+  const [closing, setClosing] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
-  const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
-  const [csvExpanded, setCsvExpanded] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -219,13 +183,26 @@ export function AccountBalancesManageMenu({
   const plaidConfigured = ctx?.configured !== false
   const showPlaidConnect = hasPaidSubscription && plaidConfigured
 
-  const close = useCallback(() => {
+  const completeClose = useCallback(() => {
+    setClosing(false)
     setOpen(false)
-    setCsvExpanded(false)
     ctx?.setPanelOpen(false)
   }, [ctx])
 
+  const close = useCallback(() => {
+    if (!open || closing) return
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      completeClose()
+      return
+    }
+    setClosing(true)
+  }, [closing, completeClose, open])
+
   const openMenu = useCallback(() => {
+    setClosing(false)
     setOpen(true)
     ctx?.setPanelOpen(true)
   }, [ctx])
@@ -242,29 +219,34 @@ export function AccountBalancesManageMenu({
     openMenu()
   }, [openRequest, openMenu])
 
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current) return
-    setMenuStyle(computeManageMenuStyle(triggerRef.current.getBoundingClientRect()))
-  }, [open, hasConnections, csvExpanded])
-
   useEffect(() => {
-    if (!open) return
-    function onPointerDown(e: MouseEvent) {
-      const target = e.target as Node
-      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) return
-      if ((target as HTMLElement).closest?.('.plaid-disconnect-popover')) return
-      close()
-    }
+    if (!open || closing) return
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') close()
     }
-    document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
     return () => {
-      document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [close, open])
+  }, [close, closing, open])
+
+  const handleBackdropAnimationEnd = useCallback(
+    (e: AnimationEvent<HTMLDivElement>) => {
+      if (e.target !== e.currentTarget) return
+      if (e.animationName !== 'account-balances-manage-backdrop-out') return
+      if (!closing) return
+      completeClose()
+    },
+    [closing, completeClose],
+  )
+
+  const handleBackdropMouseDown = useCallback(
+    (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest?.('.plaid-disconnect-popover')) return
+      close()
+    },
+    [close],
+  )
 
   const runAndClose = useCallback(
     (action: () => void) => {
@@ -296,6 +278,24 @@ export function AccountBalancesManageMenu({
     run()
   }, [close, ctx, hasPaidSubscription, onImportApplied, onRequestReplaceManual, showPlaidConnect])
 
+  const handleCsvPick = useCallback(
+    (custodian: PositionsCsvCustodian) => {
+      if (!isPositionsCsvCustodian(custodian)) return
+      runAndClose(() => onPickCsvCustodian(custodian))
+    },
+    [onPickCsvCustodian, runAndClose],
+  )
+
+  const handleManualAdd = useCallback(() => {
+    const run = () => runAndClose(onManualAdd)
+    if (onRequestReplaceImport) onRequestReplaceImport(run)
+    else run()
+  }, [onManualAdd, onRequestReplaceImport, runAndClose])
+
+  const connectLabel = hasConnections
+    ? (ctx?.connectButtonLabel ?? 'Connect another account')
+    : 'Connect an account'
+
   const syncTitle = 'Plaid synced'
   const syncTooltip = lastHealthySync ? (
     <>
@@ -325,7 +325,7 @@ export function AccountBalancesManageMenu({
           .filter(Boolean)
           .join(' ')}
         aria-expanded={open}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
         aria-controls="account-balances-manage-menu"
         aria-labelledby="account-balances-manage-label"
         disabled={ctx?.linkBusy}
@@ -346,29 +346,37 @@ export function AccountBalancesManageMenu({
       {open
         ? createPortal(
             <div
-              ref={menuRef}
-              id="account-balances-manage-menu"
-              className="account-balances-manage__menu"
-              style={menuStyle}
-              role="menu"
+              className={[
+                'account-balances-manage__backdrop',
+                closing && 'account-balances-manage__backdrop--closing',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              role="presentation"
+              onMouseDown={handleBackdropMouseDown}
+              onAnimationEnd={handleBackdropAnimationEnd}
             >
-              {hasConnections && ctx ? (
-                <>
-                  <PlaidConnectionsSection
-                    items={items}
-                    linkBusy={ctx.linkBusy}
-                    onReconnect={(id) => {
-                      close()
-                      ctx.reconnectItem(id)
-                    }}
-                    onDisconnect={ctx.disconnectItem}
-                    showConnectAnother={showPlaidConnect}
-                    onConnectAnother={handlePlaidConnect}
-                    connectAnotherLabel={ctx.connectButtonLabel}
-                  />
-                  <div className="account-balances-manage__divider" role="separator" />
-                </>
-              ) : null}
+              <div
+                ref={menuRef}
+                id="account-balances-manage-menu"
+                className="account-balances-manage__menu"
+                role="dialog"
+                aria-labelledby="account-balances-manage-panel-title"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+              <header className="account-balances-manage__header">
+                <h2 id="account-balances-manage-panel-title" className="account-balances-manage__title">
+                  Add accounts
+                </h2>
+                <button
+                  type="button"
+                  className="account-balances-manage__close"
+                  aria-label="Close"
+                  onClick={close}
+                >
+                  <IconX size={16} stroke={1.5} aria-hidden />
+                </button>
+              </header>
 
               {ctx?.linkInfo ? (
                 <p className="account-balances-manage__info" role="status">
@@ -382,108 +390,126 @@ export function AccountBalancesManageMenu({
                 </p>
               ) : null}
 
-              <ul className="account-balances-manage__actions">
-                {!hasConnections ? (
-                  <li role="none">
-                    <button
-                      type="button"
-                      className="account-balances-manage__item"
-                      role="menuitem"
-                      disabled={hasPaidSubscription ? ctx?.linkBusy : false}
-                      onClick={handlePlaidConnect}
-                    >
-                      {!hasPaidSubscription ? (
-                        <span className="account-balances-manage__pro-pill" aria-hidden>
-                          PRO
-                        </span>
-                      ) : null}
-                      <IconLink size={16} stroke={1.5} aria-hidden />
-                      {ctx?.connectButtonLabel ?? 'Connect via Plaid'}
-                    </button>
-                  </li>
-                ) : null}
+              {hasConnections && ctx ? (
+                <PlaidConnectionsSection
+                  items={items}
+                  linkBusy={ctx.linkBusy}
+                  onReconnect={(id) => {
+                    close()
+                    ctx.reconnectItem(id)
+                  }}
+                  onDisconnect={ctx.disconnectItem}
+                />
+              ) : null}
 
-                <li role="none" className="account-balances-manage__csv-group">
-                  <button
-                    type="button"
-                    className="account-balances-manage__item account-balances-manage__item--submenu"
-                    role="menuitem"
-                    aria-expanded={csvExpanded}
-                    onClick={() => setCsvExpanded((v) => !v)}
-                  >
-                    <IconFileSpreadsheet size={16} stroke={1.5} aria-hidden />
-                    <span>Import a CSV</span>
-                    <IconChevronDown
-                      size={14}
-                      stroke={1.5}
-                      className={`account-balances-manage__csv-chevron${csvExpanded ? ' account-balances-manage__csv-chevron--open' : ''}`}
-                      aria-hidden
-                    />
-                  </button>
-                  {csvExpanded ? (
-                    <ul className="account-balances-manage__csv-list">
-                      {CSV_CUSTODIAN_OPTIONS.map((o) => (
-                        <li key={o.id} role="none">
+              <div className="account-balances-manage__panel-grid">
+                <div className="account-balances-manage__panel-col account-balances-manage__panel-col--plaid">
+                  <div className="account-balances-manage__plaid-navy">
+                    {showPlanBadges ? (
+                      <span className="account-balances-manage__col-badge account-balances-manage__col-badge--pro">Pro</span>
+                    ) : null}
+                    <div className="account-balances-manage__plaid-content">
+                      <img
+                        className="account-balances-manage__plaid-logo"
+                        src="/plaid-logo.svg"
+                        alt=""
+                        width={126}
+                        height={48}
+                        aria-hidden
+                      />
+                      <h3 className="account-balances-manage__plaid-heading">Connect via Plaid</h3>
+                      <p className="account-balances-manage__plaid-subtext">
+                        Securely link most banks and brokerages in seconds. Works with Schwab, Vanguard,
+                        and thousands more.
+                      </p>
+                      <div className="account-balances-manage__plaid-white">
+                        <button
+                          type="button"
+                          className="account-balances-manage__plaid-connect"
+                          disabled={hasPaidSubscription ? ctx?.linkBusy : false}
+                          onClick={handlePlaidConnect}
+                        >
+                          <IconLink size={14} stroke={1.5} aria-hidden />
+                          {connectLabel}
+                        </button>
+                      </div>
+                      <p className="account-balances-manage__fidelity-note">
+                        Unfortunately Fidelity uses its own data network and is not available through Plaid.
+                        Import a CSV using the options on the right.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="account-balances-manage__panel-col account-balances-manage__panel-col--import">
+                  {showPlanBadges ? (
+                    <span className="account-balances-manage__col-badge account-balances-manage__col-badge--free">Free</span>
+                  ) : null}
+                  <div className="account-balances-manage__import-body">
+                    <p className="account-balances-manage__import-label">Import a CSV</p>
+                    <ul className="account-balances-manage__import-list">
+                      {CSV_IMPORT_OPTIONS.map((o) => (
+                        <li key={o.id}>
                           <button
                             type="button"
-                            className="account-balances-manage__csv-item"
-                            role="menuitem"
-                            onClick={() => {
-                              if (!isPositionsCsvCustodian(o.id)) return
-                              runAndClose(() => onPickCsvCustodian(o.id))
-                            }}
+                            className="account-balances-manage__import-row"
+                            onClick={() => handleCsvPick(o.id)}
                           >
-                            {custodianShowsMonogram(o.id) ? (
-                              <BrokerMonogramPill
-                                source={custodianToBrokerSource(o.id)}
-                                plaidConnected={custodianHasPlaidConnection(o.id, items)}
-                              />
-                            ) : null}
-                            <span className="account-balances-manage__csv-item-label">{o.label}</span>
+                            <span
+                              className={`account-balances-manage__brand-icon account-balances-manage__brand-icon--${o.id}`}
+                              aria-hidden
+                            >
+                              {o.id === 'schwab' ? 'S' : o.label.charAt(0)}
+                            </span>
+                            <span className="account-balances-manage__import-row-text">
+                              <span className="account-balances-manage__import-row-label">{o.label}</span>
+                              {CSV_EXPORT_HINTS[o.id] ? (
+                                <span className="account-balances-manage__import-row-hint">
+                                  {CSV_EXPORT_HINTS[o.id]}
+                                </span>
+                              ) : null}
+                            </span>
+                            <IconUpload
+                              className="account-balances-manage__import-row-upload"
+                              size={14}
+                              stroke={1.5}
+                              aria-hidden
+                            />
                           </button>
                         </li>
                       ))}
                     </ul>
+                    <div className="account-balances-manage__manual-section">
+                      <button
+                        type="button"
+                        className="account-balances-manage__manual-row"
+                        onClick={handleManualAdd}
+                      >
+                        <IconPencil size={16} stroke={1.5} aria-hidden />
+                        Manually add accounts
+                      </button>
+                    </div>
+                  </div>
+                  {canClearAccounts ? (
+                    <div className="account-balances-manage__import-footer">
+                      <button
+                        type="button"
+                        className="account-balances-manage__clear-btn"
+                        onClick={() => runAndClose(onClearAccounts)}
+                      >
+                        Clear all accounts
+                      </button>
+                    </div>
                   ) : null}
-                </li>
-
-                <li role="none">
-                  <button
-                    type="button"
-                    className="account-balances-manage__item"
-                    role="menuitem"
-                    onClick={() => {
-                      const run = () => runAndClose(onManualAdd)
-                      if (onRequestReplaceImport) onRequestReplaceImport(run)
-                      else run()
-                    }}
-                  >
-                    <IconPencil size={16} stroke={1.5} aria-hidden />
-                    Manually Add
-                  </button>
-                </li>
-              </ul>
-
-              {canClearAccounts ? (
-                <>
-                  <div className="account-balances-manage__divider" role="separator" />
-                  <AppButton
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="account-balances-manage__clear-btn"
-                    onPress={() => runAndClose(onClearAccounts)}
-                  >
-                    Clear all accounts
-                  </AppButton>
-                </>
-              ) : null}
+                </div>
+              </div>
 
               {ctx?.linkErr ? (
                 <p className="account-balances-manage__err" role="alert">
                   {ctx.linkErr}
                 </p>
               ) : null}
+              </div>
             </div>,
             document.body,
           )
