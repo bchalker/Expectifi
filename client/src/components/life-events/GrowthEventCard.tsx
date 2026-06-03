@@ -428,10 +428,6 @@ export default function GrowthEventCard({
         </span>
       </div>
 
-      {state.isActive || state.isExpanded ? (
-        <div className="life-events-event__divider" aria-hidden />
-      ) : null}
-
       <div className="life-events-event__content">
         {state.isActive ? (
           <>

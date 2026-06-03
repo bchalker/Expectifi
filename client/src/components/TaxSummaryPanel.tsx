@@ -15,6 +15,8 @@ import { pensionConfigForLocale } from "../lib/localePensionConfig";
 import { standardDeductionForFilingStatus } from "shared";
 import { fmt } from "../utils/format";
 import { FilingStatusField } from "./FilingStatusField";
+import { AccountIncomeStrategiesPanel } from "./AccountIncomeStrategiesPanel";
+import { HoldingScenarioGuidePanel } from "./HoldingScenarioGuidePanel";
 import { PortfolioGuidancePanel } from "./PortfolioGuidancePanel";
 import "./TaxSummaryPanel.scss";
 
@@ -165,6 +167,9 @@ export function TaxSummaryContent({ c }: TaxSummaryContentProps) {
   );
 }
 
+export const INSIGHTS_PANEL_TITLE_GROWTH = "The Forecast";
+export const INSIGHTS_PANEL_TITLE_INCOME = "The Harvest";
+
 export function TaxSummaryPanelFooter({ className = "" }: { className?: string }) {
   const { taxConfig } = useUserLocale();
 
@@ -177,16 +182,24 @@ export function TaxSummaryPanelFooter({ className = "" }: { className?: string }
   );
 }
 
-type ExpectifinsightsTabId = "tax-breakdown" | "portfolio-guidance";
+type ExpectifinsightsTabId =
+  | "tax-breakdown"
+  | "portfolio-guidance"
+  | "scenario-guide"
+  | "strategies";
 
 function ExpectifinsightsPanelTabs({
   c,
   filingStatus,
   onFilingStatusChange,
+  variant,
+  panelTitle,
 }: {
   c: ComputedSnapshot;
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
+  variant: "income" | "growth";
+  panelTitle: string;
 }) {
   const [activeTab, setActiveTab] = useState<ExpectifinsightsTabId>("tax-breakdown");
 
@@ -195,7 +208,7 @@ function ExpectifinsightsPanelTabs({
       <div
         className="tax-summary-slide-panel__tablist"
         role="tablist"
-        aria-label="Expectifinsights sections"
+        aria-label={`${panelTitle} sections`}
       >
         <button
           type="button"
@@ -213,22 +226,62 @@ function ExpectifinsightsPanelTabs({
         >
           Tax Breakdown
         </button>
-        <button
-          type="button"
-          id="expectifinsights-tab-portfolio-guidance"
-          role="tab"
-          className={[
-            "tax-summary-slide-panel__tab",
-            activeTab === "portfolio-guidance" && "tax-summary-slide-panel__tab--active",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          aria-selected={activeTab === "portfolio-guidance"}
-          aria-controls="expectifinsights-panel-portfolio-guidance"
-          onClick={() => setActiveTab("portfolio-guidance")}
-        >
-          Portfolio Guidance
-        </button>
+        {variant === "income" ? (
+          <>
+            <button
+              type="button"
+              id="expectifinsights-tab-strategies"
+              role="tab"
+              className={[
+                "tax-summary-slide-panel__tab",
+                activeTab === "strategies" &&
+                  "tax-summary-slide-panel__tab--active",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-selected={activeTab === "strategies"}
+              aria-controls="expectifinsights-panel-strategies"
+              onClick={() => setActiveTab("strategies")}
+            >
+              Strategies
+            </button>
+            <button
+              type="button"
+              id="expectifinsights-tab-portfolio-guidance"
+              role="tab"
+              className={[
+                "tax-summary-slide-panel__tab",
+                activeTab === "portfolio-guidance" &&
+                  "tax-summary-slide-panel__tab--active",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-selected={activeTab === "portfolio-guidance"}
+              aria-controls="expectifinsights-panel-portfolio-guidance"
+              onClick={() => setActiveTab("portfolio-guidance")}
+            >
+              Portfolio Guidance
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            id="expectifinsights-tab-scenario-guide"
+            role="tab"
+            className={[
+              "tax-summary-slide-panel__tab",
+              activeTab === "scenario-guide" &&
+                "tax-summary-slide-panel__tab--active",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-selected={activeTab === "scenario-guide"}
+            aria-controls="expectifinsights-panel-scenario-guide"
+            onClick={() => setActiveTab("scenario-guide")}
+          >
+            Scenario Guide
+          </button>
+        )}
       </div>
       <div
         id="expectifinsights-panel-tax-breakdown"
@@ -253,22 +306,59 @@ function ExpectifinsightsPanelTabs({
           </div>
         </SimpleBar>
       </div>
-      <div
-        id="expectifinsights-panel-portfolio-guidance"
-        role="tabpanel"
-        aria-labelledby="expectifinsights-tab-portfolio-guidance"
-        hidden={activeTab !== "portfolio-guidance"}
-        className="tax-summary-slide-panel__tab-panel"
-      >
-        <SimpleBar
-          className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
-          autoHide={false}
-        >
-          <div className="tax-summary-slide-panel__scroll-inner">
-            <PortfolioGuidancePanel c={c} />
+      {variant === "income" ? (
+        <>
+          <div
+            id="expectifinsights-panel-strategies"
+            role="tabpanel"
+            aria-labelledby="expectifinsights-tab-strategies"
+            hidden={activeTab !== "strategies"}
+            className="tax-summary-slide-panel__tab-panel"
+          >
+            <SimpleBar
+              className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
+              autoHide={false}
+            >
+              <div className="tax-summary-slide-panel__scroll-inner">
+                <AccountIncomeStrategiesPanel />
+              </div>
+            </SimpleBar>
           </div>
-        </SimpleBar>
-      </div>
+          <div
+            id="expectifinsights-panel-portfolio-guidance"
+            role="tabpanel"
+            aria-labelledby="expectifinsights-tab-portfolio-guidance"
+            hidden={activeTab !== "portfolio-guidance"}
+            className="tax-summary-slide-panel__tab-panel"
+          >
+            <SimpleBar
+              className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
+              autoHide={false}
+            >
+              <div className="tax-summary-slide-panel__scroll-inner">
+                <PortfolioGuidancePanel c={c} />
+              </div>
+            </SimpleBar>
+          </div>
+        </>
+      ) : (
+        <div
+          id="expectifinsights-panel-scenario-guide"
+          role="tabpanel"
+          aria-labelledby="expectifinsights-tab-scenario-guide"
+          hidden={activeTab !== "scenario-guide"}
+          className="tax-summary-slide-panel__tab-panel"
+        >
+          <SimpleBar
+            className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
+            autoHide={false}
+          >
+            <div className="tax-summary-slide-panel__scroll-inner">
+              <HoldingScenarioGuidePanel />
+            </div>
+          </SimpleBar>
+        </div>
+      )}
     </div>
   );
 }
@@ -281,6 +371,7 @@ export function TaxSummarySlidePanel({
   filingStatus,
   onFilingStatusChange,
   incomeMode = false,
+  showScenarioGuideTab = false,
 }: TaxSummaryContentProps & {
   className?: string;
   open: boolean;
@@ -288,7 +379,13 @@ export function TaxSummarySlidePanel({
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
   incomeMode?: boolean;
+  /** Growth mode: Tax Breakdown + Scenario Guide tabs. */
+  showScenarioGuideTab?: boolean;
 }) {
+  const panelTitle = incomeMode
+    ? INSIGHTS_PANEL_TITLE_INCOME
+    : INSIGHTS_PANEL_TITLE_GROWTH;
+
   return (
     <aside
       id="tax-summary-panel"
@@ -305,23 +402,25 @@ export function TaxSummarySlidePanel({
       <header className="tax-summary-slide-panel__head">
         <div className="tax-summary-slide-panel__head-row">
           <h2 id="tax-summary-panel-title" className="tax-summary-slide-panel__title">
-            Expectifinsights
+            {panelTitle}
           </h2>
           <button
             type="button"
             className="tax-summary-slide-panel__close"
             onClick={onClose}
-            aria-label="Close Expectifinsights"
+            aria-label={`Close ${panelTitle}`}
           >
             <IconX size={18} stroke={1.5} aria-hidden />
           </button>
         </div>
       </header>
-      {incomeMode ? (
+      {incomeMode || showScenarioGuideTab ? (
         <ExpectifinsightsPanelTabs
           c={c}
           filingStatus={filingStatus}
           onFilingStatusChange={onFilingStatusChange}
+          variant={incomeMode ? "income" : "growth"}
+          panelTitle={panelTitle}
         />
       ) : (
         <SimpleBar className="tax-summary-slide-panel__scroll" autoHide={false}>

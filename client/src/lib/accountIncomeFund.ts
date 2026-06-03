@@ -60,22 +60,22 @@ export function incomeFundTaxHint(bucket: AccountScenarioBucketId, security: Inc
   switch (bucket) {
     case 'brokerage':
       if (coveredCall) {
-        return 'Options premium — ordinary income; tax-deferred accounts often work better'
+        return 'Options premium (ordinary income); tax-deferred accounts often work better'
       }
-      if (bond) return 'Bond interest — taxable as ordinary income in brokerage'
+      if (bond) return 'Bond interest, taxable as ordinary income in brokerage'
       if (dividendEquity) {
-        return 'Qualified dividends — tax efficient in taxable accounts'
+        return 'Qualified dividends, tax efficient in taxable accounts'
       }
       return 'Check qualified vs ordinary dividend treatment in taxable accounts'
     case 'pretax':
-      if (coveredCall) return 'Options premium — best held in tax-deferred'
-      if (bond) return 'Bond income — taxed on withdrawal from pre-tax accounts'
-      return 'Income taxed on withdrawal — focus on after-tax spendable yield'
+      if (coveredCall) return 'Options premium, best held in tax-deferred'
+      if (bond) return 'Bond income, taxed on withdrawal from pre-tax accounts'
+      return 'Income taxed on withdrawal; focus on after-tax spendable yield'
     case 'roth':
-      if (coveredCall) return 'Options premium — ideal in tax-free accounts'
-      return 'Tax-free withdrawals — no annual tax drag on distributions'
+      if (coveredCall) return 'Options premium, ideal in tax-free accounts'
+      return 'Tax-free withdrawals, no annual tax drag on distributions'
     case 'hsa':
-      if (bond) return 'Stable bond income — suitable for healthcare savings'
-      return 'Conservative income — preserve principal for qualified medical expenses'
+      if (bond) return 'Stable bond income, suitable for healthcare savings'
+      return 'Conservative income, preserve principal for qualified medical expenses'
   }
 }

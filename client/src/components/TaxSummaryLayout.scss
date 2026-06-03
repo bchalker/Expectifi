@@ -6,6 +6,66 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   overflow: hidden;
 }
 
+.section--tax-summary--income-harvest .section--tax-summary__income-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md, 8px);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
+  order: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.section--tax-summary--income-harvest .tax-summary-card {
+  position: relative;
+  z-index: 1;
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--shadow-account-divider);
+}
+
+.section--tax-summary--income-harvest .where-to-retire-preview-panel {
+  order: 2;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  flex: none;
+  border: none;
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .section--tax-summary--income-harvest .section--tax-summary__income-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: stretch;
+  }
+
+  .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
+    order: unset;
+  }
+
+  .section--tax-summary--income-harvest .tax-summary-card {
+    box-shadow: rgba(33, 35, 38, 0.1) 6px 0 10px -8px;
+  }
+
+  .section--tax-summary--income-harvest .where-to-retire-preview-panel {
+    order: unset;
+    width: 280px;
+    height: 100%;
+  }
+}
+
 .tax-summary-card {
   position: relative;
   width: 100%;

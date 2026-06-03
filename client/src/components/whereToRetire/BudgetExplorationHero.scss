@@ -223,15 +223,32 @@
   pointer-events: none;
 }
 
-.wtr-budget-hero__fill {
+.wtr-budget-hero__fill-group {
   position: absolute;
   top: 50%;
   z-index: 1;
+  display: grid;
+  gap: 0;
   height: var(--wtr-hero-range-track-h);
   transform: translateY(-50%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 45%, var(--border));
+  overflow: hidden;
   pointer-events: none;
+}
+
+.wtr-budget-hero__fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.wtr-budget-hero__fill--within {
+  background: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.wtr-budget-hero__fill--over {
+  background: color-mix(in srgb, var(--color-amber) 55%, var(--border));
 }
 
 .wtr-budget-hero__plan-mark-wrap {

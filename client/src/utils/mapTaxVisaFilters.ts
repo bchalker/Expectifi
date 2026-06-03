@@ -55,7 +55,6 @@ const RETIREMENT_VISA_PROGRAM_COUNTRIES = new Set([
   'Spain',
   'Croatia',
   'Indonesia',
-  'Oman',
   'Bahrain',
   'United Arab Emirates',
   'South Africa',

@@ -7,6 +7,8 @@ import { AccountBalances } from './components/AccountBalances'
 import { LifeEventsPanel, type LifeEventActiveImpact } from './components/LifeEventsPanel'
 import { DrawerPanel } from './components/DrawerPanel'
 import { TaxSummaryCard } from './components/TaxSummaryCard'
+import { IncomeHarvestPreviewPanel } from './components/IncomeHarvestPreviewPanel'
+import { useIncomeHarvestMonthlyTotal } from './hooks/useIncomeHarvestMonthlyTotal'
 import { Header } from './components/Header'
 import { AppLeftNav } from './components/AppLeftNav'
 import { StripHeader } from './components/StripHeader'
@@ -84,6 +86,8 @@ import { useAppPath } from './hooks/useAppPath'
 import { useAppHeaderStackHeight } from './hooks/useAppHeaderStackHeight'
 import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp, replaceAppPath } from './lib/appPaths'
 import { isDrawerNavAvailable, isTaxSummaryPanelAvailable, type NavPanelContext } from './lib/appNavDrawers'
+import { aggregatedHoldingsForScenarioGuide } from './lib/holdingScenarioGuideExamples'
+import { flattenBatches } from './lib/fidelityStorage'
 import { AppPrivacyTrust } from './components/AppPrivacyTrust'
 import { WhereToRetire } from './pages/WhereToRetire'
 
@@ -504,6 +508,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const ssBenefitsConfigured = isSsConfigured(inputs)
   /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
   const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded
+  const showScenarioGuideTab = useMemo(() => {
+    if (phase !== 'growth' || balanceMode !== 'fidelity') return false
+    const imp = loadStoredFidelityImport()
+    if (!imp?.batches?.length) return false
+    return aggregatedHoldingsForScenarioGuide(flattenBatches(imp.batches)).length > 0
+  }, [phase, balanceMode, fidelityImportRev])
   const dashboardHasPortfolio = welcomeDone && c.hasPortfolioBalances
   const navContext: NavPanelContext = useMemo(
     () => ({
@@ -512,6 +522,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }),
     [dashboardHasPortfolio, welcomeDone, ssTimingConfigured],
   )
+  const taxSummaryAvailable = isTaxSummaryPanelAvailable(navContext)
+  const showIncomeHarvestPreview =
+    phase === 'income' && c.hasPortfolioBalances && taxSummaryAvailable && welcomeDone
+  const incomeHarvestMonthly = useIncomeHarvestMonthlyTotal({
+    enabled: showIncomeHarvestPreview,
+    c: cDisplay,
+    inputs,
+    accountIncomeFunds: ui.accountIncomeFunds,
+    accountIncomeStrategies: ui.accountIncomeStrategies,
+    accountWithdrawRates: ui.accountWithdrawRates,
+    balanceMode,
+    manualAccountsRev,
+    brkBal: inputs.brkBal,
+  })
   const isWhereToRetire = path === APP_PATHS.whereToRetire
 
   useEffect(() => {
@@ -794,28 +818,36 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <div
           className={[
             'section',
-            isTaxSummaryPanelAvailable(navContext) && 'section--tax-summary',
+            taxSummaryAvailable && 'section--tax-summary',
+            showIncomeHarvestPreview && 'section--tax-summary--income-harvest',
           ]
             .filter(Boolean)
             .join(' ')}
         >
           <div
             className={
-              c.hasPortfolioBalances
-                ? portfolioAccountsRevealed
-                  ? 'portfolio-accounts-reveal portfolio-accounts-reveal--in'
-                  : 'portfolio-accounts-reveal portfolio-accounts-reveal--pending'
-                : undefined
+              showIncomeHarvestPreview ? 'section--tax-summary__income-layout' : undefined
             }
+            style={showIncomeHarvestPreview ? undefined : { display: 'contents' }}
           >
-            <TaxSummaryCard
-              c={cDisplay}
-              showTaxSummary={isTaxSummaryPanelAvailable(navContext)}
-              incomeMode={phase === 'income'}
-              filingStatus={inputs.filingStatus}
-              onFilingStatusChange={(filingStatus) => setInputs({ filingStatus })}
+            <div
+              className={
+                c.hasPortfolioBalances
+                  ? portfolioAccountsRevealed
+                    ? 'portfolio-accounts-reveal portfolio-accounts-reveal--in'
+                    : 'portfolio-accounts-reveal portfolio-accounts-reveal--pending'
+                  : undefined
+              }
             >
-              <AccountBalances
+              <TaxSummaryCard
+                c={cDisplay}
+                showTaxSummary={taxSummaryAvailable}
+                incomeMode={phase === 'income'}
+                showScenarioGuideTab={showScenarioGuideTab}
+                filingStatus={inputs.filingStatus}
+                onFilingStatusChange={(filingStatus) => setInputs({ filingStatus })}
+              >
+                <AccountBalances
                 readOnly
                 c={cDisplay}
                 phase={phase}
@@ -899,7 +931,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
                   })
                 }
               />
-            </TaxSummaryCard>
+              </TaxSummaryCard>
+            </div>
+            {showIncomeHarvestPreview ? (
+              <IncomeHarvestPreviewPanel monthlyIncome={incomeHarvestMonthly} />
+            ) : null}
           </div>
         </div>
 

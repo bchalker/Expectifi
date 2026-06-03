@@ -394,7 +394,7 @@ function buildDividendStrategyOverlay(
         {
           type: 'text',
           value:
-            'Modeling dividend income from a pre-tax account is conservative — real-world dividends in an IRA are typically reinvested. Use this when you plan to take taxable distributions from the account for spending.',
+            'Modeling dividend income from a pre-tax account is conservative; real-world dividends in an IRA are typically reinvested. Use this when you plan to take taxable distributions from the account for spending.',
         },
       ],
     ],
@@ -430,7 +430,7 @@ function buildBothStrategyOverlay(
       {
         type: 'text',
         value:
-          'When both are active, monitor estimated principal runway closely. Dividend yield may not fully cover spending, so the withdrawal portion still erodes balance — and funds flagged for NAV erosion compound that effect year over year.',
+          'When both are active, monitor estimated principal runway closely. Dividend yield may not fully cover spending, so the withdrawal portion still erodes balance, and funds flagged for NAV erosion compound that effect year over year.',
       },
     ],
   ]

@@ -14,6 +14,7 @@ type Props = {
   c: ComputedSnapshot;
   showTaxSummary: boolean;
   incomeMode?: boolean;
+  showScenarioGuideTab?: boolean;
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
   children: ReactNode;
@@ -25,7 +26,11 @@ function TaxSummarySlidePanelHost({
   filingStatus,
   onFilingStatusChange,
   incomeMode = false,
-}: Pick<Props, "c" | "filingStatus" | "onFilingStatusChange" | "incomeMode">) {
+  showScenarioGuideTab = false,
+}: Pick<
+  Props,
+  "c" | "filingStatus" | "onFilingStatusChange" | "incomeMode" | "showScenarioGuideTab"
+>) {
   const taxPanel = useTaxSummaryPanelOptional();
   if (!taxPanel?.showTaxSummary) return null;
 
@@ -37,6 +42,7 @@ function TaxSummarySlidePanelHost({
       filingStatus={filingStatus}
       onFilingStatusChange={onFilingStatusChange}
       incomeMode={incomeMode}
+      showScenarioGuideTab={showScenarioGuideTab}
     />
   );
 }
@@ -45,6 +51,7 @@ export function TaxSummaryCard({
   c,
   showTaxSummary,
   incomeMode = false,
+  showScenarioGuideTab = false,
   filingStatus,
   onFilingStatusChange,
   children,
@@ -67,6 +74,7 @@ export function TaxSummaryCard({
           filingStatus={filingStatus}
           onFilingStatusChange={onFilingStatusChange}
           incomeMode={incomeMode}
+          showScenarioGuideTab={showScenarioGuideTab}
         />
 
         <div className="tax-summary-card__accordion">

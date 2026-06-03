@@ -44,7 +44,7 @@ const SOUTHEAST_ASIA = new Set([
 ])
 
 const MIDDLE_EAST = new Set([
-  'United Arab Emirates', 'Oman', 'Bahrain', 'Qatar', 'Kuwait', 'Jordan',
+  'United Arab Emirates', 'Bahrain', 'Qatar', 'Kuwait', 'Jordan',
   'Israel', 'Lebanon', 'Saudi Arabia', 'Egypt', 'Morocco', 'Tunisia',
   'Algeria',
 ])

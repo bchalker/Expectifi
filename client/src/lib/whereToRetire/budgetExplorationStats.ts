@@ -6,17 +6,23 @@ import {
 import { regionFromCountry, type DestinationRegion } from './cityMapScoring'
 
 export const INCOME_EXPLORE_MIN = 0
-export const INCOME_EXPLORE_MAX = 8_000
+export const INCOME_EXPLORE_HEADROOM = 1_000
 export const INCOME_EXPLORE_STEP = 50
+
+/** Slider max is always ~$1k above projected monthly income, stepped to $50. */
+export function explorationIncomeMax(planMonthlyIncome: number): number {
+  const raw = planMonthlyIncome + INCOME_EXPLORE_HEADROOM
+  return Math.ceil(raw / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
+}
 
 export function getTotalMapCityCount(): number {
   return getAllMapCities().length
 }
 
-export function incomeSliderPct(value: number): number {
-  if (INCOME_EXPLORE_MAX <= INCOME_EXPLORE_MIN) return 0
-  const clamped = Math.min(INCOME_EXPLORE_MAX, Math.max(INCOME_EXPLORE_MIN, value))
-  return ((clamped - INCOME_EXPLORE_MIN) / (INCOME_EXPLORE_MAX - INCOME_EXPLORE_MIN)) * 100
+export function incomeSliderPct(value: number, max: number): number {
+  if (max <= INCOME_EXPLORE_MIN) return 0
+  const clamped = Math.min(max, Math.max(INCOME_EXPLORE_MIN, value))
+  return ((clamped - INCOME_EXPLORE_MIN) / (max - INCOME_EXPLORE_MIN)) * 100
 }
 
 const REGION_LABELS: Record<DestinationRegion, string> = {
@@ -99,10 +105,12 @@ export function computeBudgetExplorationStats(monthlyIncome: number): BudgetExpl
 
 export function clampExplorationIncome(
   value: number,
+  planMonthlyIncome: number,
   floor = INCOME_EXPLORE_MIN,
 ): number {
+  const max = explorationIncomeMax(planMonthlyIncome)
   const stepped = Math.round(value / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
-  return Math.min(INCOME_EXPLORE_MAX, Math.max(floor, stepped))
+  return Math.min(max, Math.max(floor, stepped))
 }
 
 export function defaultExplorationIncome(planMonthlyIncome: number): number {

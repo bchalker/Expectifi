@@ -99,10 +99,7 @@ import {
   resolveAccountWithdrawRate,
   type AccountIncomeStrategy,
 } from '../lib/accountIncomeStrategy'
-import {
-  listAccountIncomeLines,
-  monthlyPortfolioIncomeFromAccountStrategies,
-} from '../lib/accountIncomeMonthly'
+import { monthlyPortfolioIncomeFromAccountStrategies } from '../lib/accountIncomeMonthly'
 import {
   accountRetirementBalance,
   currentBalanceForAccountBucket,
@@ -422,52 +419,6 @@ export function AccountBalances({
       : 'Total retirement'
 
   const portfolioTotalDisplay = incomeModeDashboard ? fmtMon(incomeMonthlyTotal) : fmt(portfolioTotal)
-
-  const incomeUsesWithdrawOrBothStrategies = useMemo(() => {
-    if (!incomeModeDashboard || !inputs || !c.hasPortfolioBalances) return false
-    const lines = listAccountIncomeLines({
-      inputs,
-      accountIncomeFunds,
-      accountIncomeStrategies,
-      accountWithdrawRates,
-      wdInflation: inputs.wdInflation,
-      hsaMedicalAnnualDraw: c.strategy.hsaWdAnn,
-      hasPortfolioBalances: c.hasPortfolioBalances,
-      retFV: c.retFV,
-      brkFV: c.brkFV,
-      tradRatio: c.tradRatio,
-      rothRatio: c.rothRatio,
-      hsaRatio: c.hsaRatio,
-      tradBal: c.tradBal,
-      rothBal: c.rothBal,
-      hsaBal: c.hsaBal,
-      brkBal: brkBal ?? 0,
-      retirementAge,
-      locale,
-      manualEntries: manualAccountEntries,
-      retirementBalanceMode: balanceMode,
-    })
-    return lines.some((line) => {
-      const strategy = resolveAccountIncomeStrategy(
-        line.storageKey,
-        line.bucket,
-        accountIncomeStrategies,
-      )
-      return strategy === 'withdraw' || strategy === 'both'
-    })
-  }, [
-    incomeModeDashboard,
-    inputs,
-    c,
-    accountIncomeFunds,
-    accountIncomeStrategies,
-    accountWithdrawRates,
-    brkBal,
-    retirementAge,
-    locale,
-    manualAccountEntries,
-    balanceMode,
-  ])
 
   const mergedPositionModels = useMemo(() => {
     if (!mergedDashboard || !inputs) return []
@@ -2315,7 +2266,6 @@ export function AccountBalances({
             <ImportedHoldingsScenarioGuide
               holdings={aggregatedHoldingsForGuide}
               variant="income"
-              incomeUsesWithdrawalStrategies={incomeUsesWithdrawOrBothStrategies}
               inflationAdj={inputs?.wdInflation ?? 0.025}
               onInflationAdjChange={
                 inputs && setInputs
@@ -2375,7 +2325,9 @@ export function AccountBalances({
           <div className="account-balances-stack">
             <div
               className={`account-balances-card-inner-wrap${
-                balanceEditPanelOpen ? ' account-balances-card-inner-wrap--scenario-slide-open' : ''
+                balanceEditPanelOpen
+                  ? ' account-balances-card-inner-wrap--scenario-slide-open'
+                  : ''
               }${!hasAnyAccountCardData ? ' account-balances-card-inner-wrap--empty-state' : ''}`}
               style={hasAnyAccountCardData ? cardStyle : undefined}
             >

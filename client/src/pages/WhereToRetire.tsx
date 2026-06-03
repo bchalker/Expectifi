@@ -16,10 +16,12 @@ import {
   type MapFilters,
 } from "../lib/whereToRetire/cityMapScoring";
 import {
+  clampExplorationIncome,
   defaultExplorationIncome,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
 } from "../lib/whereToRetire/budgetExplorationStats";
+import { readStashedWtrExplorationIncome } from "../lib/whereToRetire/wtrPreviewIncome";
 import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
 import type { MapCity } from "../utils/costOfLiving";
 import "./WhereToRetire.scss";
@@ -38,9 +40,11 @@ export function WhereToRetire({ c }: Props) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
   const storage = useRetirementMapStorage();
-  const [explorationIncome, setExplorationIncome] = useState(() =>
-    defaultExplorationIncome(grossMonthlyIncome),
-  );
+  const [explorationIncome, setExplorationIncome] = useState(() => {
+    const stashed = readStashedWtrExplorationIncome();
+    if (stashed != null) return clampExplorationIncome(stashed, grossMonthlyIncome);
+    return defaultExplorationIncome(grossMonthlyIncome);
+  });
   const mapExplorationIncome = useMemo(
     () => resolveExplorationIncome(grossMonthlyIncome, explorationIncome),
     [grossMonthlyIncome, explorationIncome],

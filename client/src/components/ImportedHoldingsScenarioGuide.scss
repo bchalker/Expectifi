@@ -76,6 +76,12 @@
   color: var(--accent-text);
 }
 
+.imported-holdings-scenario-guide__lead-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .imported-holdings-scenario-guide__lead {
   margin: 0;
   font-family: var(--body);
@@ -138,6 +144,39 @@
   color: var(--text);
 }
 
+.imported-holdings-scenario-guide__options-heading {
+  margin: 0 0 var(--space-3);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-snug, 1.35);
+  color: var(--text);
+}
+
+.imported-holdings-scenario-guide__options-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.imported-holdings-scenario-guide__options-body p {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.imported-holdings-scenario-guide__term {
+  font-weight: 600;
+  color: var(--color-amber-dark);
+}
+
+.imported-holdings-scenario-guide__options-aside {
+  color: var(--text-muted);
+}
+
 .imported-holdings-scenario-guide__examples {
   margin: var(--space-2) /* review: was 0.45rem */ 0 0;
   font-family: var(--body);
@@ -145,6 +184,19 @@
   font-weight: 400;
   line-height: 1.45;
   color: var(--text-muted);
+}
+
+.holding-scenario-guide-panel,
+.account-income-strategies-panel {
+  min-width: 0;
+}
+
+.imported-holdings-scenario-guide--income-lead-only .imported-holdings-scenario-guide__context {
+  max-width: none;
+}
+
+.imported-holdings-scenario-guide--growth-lead-only .imported-holdings-scenario-guide__context {
+  max-width: none;
 }
 
 .imported-holdings-scenario-guide__ticker {

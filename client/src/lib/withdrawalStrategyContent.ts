@@ -49,7 +49,7 @@ export function buildWithdrawalStrategySteps(
         title: `Cover fixed expenses with ${pension.stepTitle} + ${brokerageLabel}`,
         tag: 'Year 1 priority',
         tagColor: '#0F6E56',
-        body: `Your combined ${pension.stepTitle.toLowerCase()} (${fmtMon(s.totalSS)}) plus ${brokerageLabel.toLowerCase()} withdrawals (${fmtMon(s.brkWdAnn / 12)}) covers the base. Use ${brokerageLabel.toLowerCase()} first for discretionary spending — ${taxConfig.capitalGainsNote.toLowerCase()}, and drawing from it first lets retirement accounts continue compounding.`,
+        body: `Your combined ${pension.stepTitle.toLowerCase()} (${fmtMon(s.totalSS)}) plus ${brokerageLabel.toLowerCase()} withdrawals (${fmtMon(s.brkWdAnn / 12)}) covers the base. Use ${brokerageLabel.toLowerCase()} first for discretionary spending (${taxConfig.capitalGainsNote.toLowerCase()}), and drawing from it first lets retirement accounts continue compounding.`,
       },
       {
         title: 'Draw HSA for all medical expenses',

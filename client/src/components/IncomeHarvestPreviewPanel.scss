@@ -1,0 +1,213 @@
+.where-to-retire-preview-panel {
+  --where-to-retire-preview-travel-size: 80px;
+
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.where-to-retire-preview-panel__header {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  background: #ffffff;
+  text-align: center;
+}
+
+.where-to-retire-preview-panel__title {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+.where-to-retire-preview-panel__title-income {
+  color: var(--color-amber);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.where-to-retire-preview-panel__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 var(--space-5) var(--space-4);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #ffffff;
+}
+
+.where-to-retire-preview-panel__main .income-harvest-preview-map {
+  margin-bottom: 14px;
+}
+
+.where-to-retire-preview-panel__section {
+  display: flex;
+  flex-direction: column;
+}
+
+.where-to-retire-preview-panel__section-label {
+  margin: 0 0 6px;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+}
+
+.where-to-retire-preview-panel__city-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.where-to-retire-preview-panel__city-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.where-to-retire-preview-panel__city-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.where-to-retire-preview-panel__rank {
+  flex: none;
+  min-width: 12px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--color-text-secondary);
+}
+
+.where-to-retire-preview-panel__flag {
+  flex: none;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.where-to-retire-preview-panel__city-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.where-to-retire-preview-panel__score {
+  flex: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--color-text-secondary);
+}
+
+.where-to-retire-preview-panel__score--top {
+  font-weight: 500;
+  color: #0f9544;
+}
+
+.where-to-retire-preview-panel__divider {
+  height: 1px;
+  margin: 10px 0;
+  background: var(--color-border-tertiary);
+}
+
+.where-to-retire-preview-panel__context {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.where-to-retire-preview-panel__context-emphasis {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.where-to-retire-preview-panel__travel-mark {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.where-to-retire-preview-panel__travel-icon {
+  display: block;
+  width: var(--where-to-retire-preview-travel-size);
+  height: var(--where-to-retire-preview-travel-size);
+  background-color: var(--blue1);
+  mask: url('/icons/income-harvest-travel.png') center / contain no-repeat;
+  -webkit-mask: url('/icons/income-harvest-travel.png') center / contain no-repeat;
+}
+
+.where-to-retire-preview-panel__footer {
+  flex-shrink: 0;
+  padding: 0 var(--space-5) var(--space-4);
+  background: #ffffff;
+}
+
+.where-to-retire-preview-panel__explore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 0 0;
+  border: none;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  background: transparent;
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #0f9544;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.where-to-retire-preview-panel__explore:hover {
+  color: var(--green-d1);
+}
+
+.where-to-retire-preview-panel__explore:focus-visible {
+  outline: 2px solid var(--green1);
+  outline-offset: 2px;
+}
+
+.where-to-retire-preview-panel__sections-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.where-to-retire-preview-panel__skeleton-line {
+  height: 0.6875rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-border) 55%, transparent);
+}
+
+.where-to-retire-preview-panel__skeleton-line--short {
+  width: 55%;
+}
+
+@media (max-width: 767px) {
+  .where-to-retire-preview-panel__city-row--mobile-hide {
+    display: none;
+  }
+}

@@ -62,7 +62,7 @@ function recommendationReason(
     'pretax:withdraw':
       'We recommend Withdraw for this account. Drawing from pre-tax in early retirement fills lower tax brackets and reduces future RMD pressure before required distributions begin at 73.',
     'pretax:dividend':
-      'We recommend Dividend for this account. Modeling dividend distributions from pre-tax is conservative — IRA income is usually modeled as withdrawals rather than dividend-driven cash flow.',
+      'We recommend Dividend for this account. Modeling dividend distributions from pre-tax is conservative; IRA income is usually modeled as withdrawals rather than dividend-driven cash flow.',
     'pretax:both':
       'We recommend Both for this account. A hybrid can increase income, but pre-tax dividends still represent taxable distributions when withdrawn for spending.',
 

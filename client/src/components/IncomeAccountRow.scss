@@ -311,26 +311,6 @@
   font-weight: 700;
 }
 
-
-/* Total monthly income footer (income mode) */
-.portfolio-account-list--income + .account-balances-total-retirement--income {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin: 0;
-  padding: var(--space-4) calc(var(--space-5) + var(--income-row-actions-width, 0px)) 0
-    var(--space-5);
-  border-top: 1px solid var(--border);
-  box-sizing: border-box;
-}
-
-.account-balances-section-footer--with-upgrade .account-balances-section-footer__total--income {
-  margin-top: 0;
-  padding: var(--space-4) var(--space-5) 0;
-  border-top: 1px solid var(--border);
-}
-
 @container portfolio-bucket-account-row (max-width: 420px) {
   .income-account-row .portfolio-bucket-account-row__values {
     align-items: flex-end;

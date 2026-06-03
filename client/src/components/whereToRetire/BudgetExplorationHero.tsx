@@ -4,9 +4,9 @@ import { Tooltip } from '../Tooltip'
 import {
   clampExplorationIncome,
   defaultExplorationIncome,
+  explorationIncomeMax,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
-  INCOME_EXPLORE_MAX,
   INCOME_EXPLORE_MIN,
   INCOME_EXPLORE_STEP,
   incomeSliderPct,
@@ -28,13 +28,21 @@ export function BudgetExplorationHero({
   onExplorationIncomeChange,
   section = 'slider',
 }: Props) {
+  const incomeMax = useMemo(
+    () => explorationIncomeMax(planMonthlyIncome),
+    [planMonthlyIncome],
+  )
+
   const mapIncome = useMemo(
     () => resolveExplorationIncome(planMonthlyIncome, explorationIncome),
     [planMonthlyIncome, explorationIncome],
   )
 
-  const fillWidth = incomeSliderPct(explorationIncome)
-  const planMarkerPct = incomeSliderPct(planMonthlyIncome)
+  const fillWidth = incomeSliderPct(explorationIncome, incomeMax)
+  const planMarkerPct = incomeSliderPct(planMonthlyIncome, incomeMax)
+  const withinFillWidth = Math.min(fillWidth, planMarkerPct)
+  const overFillWidth = Math.max(0, fillWidth - planMarkerPct)
+  const showOverFill = overFillWidth > 0
   const planMarkTooltip = `${fmtMon(planMonthlyIncome)} projected income`
   const resetTooltip = `Reset to ${fmtMon(planMonthlyIncome)} income`
   const atProjected = isAtProjectedExplorationIncome(
@@ -112,10 +120,21 @@ export function BudgetExplorationHero({
             <div className="wtr-budget-hero__track-wrap">
               <div className="wtr-budget-hero__track" aria-hidden />
               <div
-                className="wtr-budget-hero__fill"
-                style={{ left: '0%', width: `${fillWidth}%` }}
+                className="wtr-budget-hero__fill-group"
+                style={{
+                  left: '0%',
+                  width: `${fillWidth}%`,
+                  gridTemplateColumns: showOverFill
+                    ? `${withinFillWidth}fr ${overFillWidth}fr`
+                    : '1fr',
+                }}
                 aria-hidden
-              />
+              >
+                <div className="wtr-budget-hero__fill wtr-budget-hero__fill--within" />
+                {showOverFill ? (
+                  <div className="wtr-budget-hero__fill wtr-budget-hero__fill--over" />
+                ) : null}
+              </div>
               <div
                 className="wtr-budget-hero__plan-mark-wrap"
                 style={{ left: `${planMarkerPct}%` }}
@@ -139,18 +158,20 @@ export function BudgetExplorationHero({
                 type="range"
                 className="wtr-budget-hero__input"
                 min={INCOME_EXPLORE_MIN}
-                max={INCOME_EXPLORE_MAX}
+                max={incomeMax}
                 step={INCOME_EXPLORE_STEP}
                 value={explorationIncome}
                 aria-label="Monthly retirement income"
                 aria-valuetext={fmtMon(mapIncome)}
                 onChange={(e) =>
-                  onExplorationIncomeChange(clampExplorationIncome(Number(e.target.value)))
+                  onExplorationIncomeChange(
+                    clampExplorationIncome(Number(e.target.value), planMonthlyIncome),
+                  )
                 }
               />
             </div>
             <span className="wtr-budget-hero__tick-edge wtr-budget-hero__tick-edge--max">
-              {fmtMon(INCOME_EXPLORE_MAX)}
+              {fmtMon(incomeMax)}
             </span>
           </div>
         </div>

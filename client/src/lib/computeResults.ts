@@ -13,6 +13,7 @@ import {
 } from 'shared'
 import { clampedAgeFromDob } from './ageFromDob'
 import { normalizeCalculatorFilingStatus } from './filingStatus'
+import { calcTaxDetailedForAccountStrategies } from './accountIncomeTax'
 import { monthlyPortfolioIncomeFromAccountStrategies } from './accountIncomeMonthly'
 import { computePortfolioGuidanceMetrics, type PortfolioGuidanceMetrics } from './portfolioGuidance'
 import type { AccountIncomeStrategy } from './accountIncomeStrategy'
@@ -477,14 +478,67 @@ export function computeResults(
   const portSum = retFV + brkFV
   const retWdAnn = portSum > 0 ? annWd * (retFV / portSum) : 0
   const brkWdAnn = portSum > 0 ? annWd * (brkFV / portSum) : 0
-  const taxDetail = calcTaxDetailed(
-    retWdAnn * tradRatio,
-    retWdAnn * rothRatio,
-    retWdAnn * hsaRatio,
-    brkWdAnn,
-    totalSS,
-    filingStatus,
-  )
+
+  /*
+   * AUDIT — Expectifinsights Tax Breakdown (growth / non–account-strategy path)
+   * -------------------------------------------------------------------------
+   * When ui.incomeMode is false (typical growth phase on the dashboard), withdrawal
+   * dollars passed to calcTaxDetailed are NOT current-balance × wdRate.
+   *
+   * annWd (line ~465): totalFV * wdRate * (1 + wdInflation)
+   *   - totalFV = retFV + brkFV (projected portfolio at targetRetirementAge; see
+   *     retFV/brkFV computation above ~301–416)
+   *
+   * taxDetail.tradWd = retWdAnn * tradRatio
+   *   = annWd * (retFV / portSum) * tradRatio
+   *   ≈ (retFV * tradRatio) * wdRate * (1 + wdInflation)
+   *   i.e. projected pre-tax bucket FV at retirement × withdrawal rate (same basis as
+   *   retirementFvForAccountBucket('pretax') in accountBucketRetirementBalance.ts).
+   *
+   * tradRatio / rothRatio / hsaRatio (lines ~271–277): split uses TODAY's tradBal/rothBal/
+   * hsaBal ÷ retBal — current mix applied to projected retirement totals, not per-bucket FV
+   * grown separately. If bucket growth rates diverge, pretax share at retirement may differ.
+   *
+   * Income-mode path (ui.incomeMode true): calcTaxDetailedForAccountStrategies uses
+   * accountRetirementBalance() → projected per-account FV; see accountIncomeTax.ts.
+   *
+   * WRONG basis (not used on growth path): tradBal * wdRate, retBal * wdRate.
+   */
+  const taxDetail =
+    ui.incomeMode && hasPortfolioBalances
+      ? calcTaxDetailedForAccountStrategies(incomeMonthlyCtx, totalSS, filingStatus)
+      : calcTaxDetailed(
+          retWdAnn * tradRatio,
+          retWdAnn * rothRatio,
+          retWdAnn * hsaRatio,
+          brkWdAnn,
+          totalSS,
+          filingStatus,
+        )
+
+  if (import.meta.env.DEV && hasPortfolioBalances) {
+    const growthTaxPath = !(ui.incomeMode && hasPortfolioBalances)
+    console.info('[Expectifinsights Tax Breakdown audit]', {
+      path: growthTaxPath ? 'growth (portfolio wdRate × projected FV)' : 'income (per-account strategies)',
+      balanceBasisForWithdrawalEstimates: growthTaxPath
+        ? 'PROJECTED at retirement (retFV/brkFV), not current retBal/brkBal'
+        : 'PROJECTED per account via accountRetirementBalance()',
+      current_retBal: retBal,
+      current_tradBal: tradBal,
+      projected_retFV: retFV,
+      projected_brkFV: brkFV,
+      projected_totalFV: totalFV,
+      projected_pretaxBucketFV: retFV * tradRatio,
+      tradRatio_sourcedFrom: 'current tradBal / retBal (computeResults ~275)',
+      wdRate,
+      wdInflation,
+      annWd_annualWithdrawal: annWd,
+      taxDetail_tradWd_pretax: taxDetail.tradWd,
+      taxDetail_brkWd: taxDetail.brkWd,
+      counterfactual_if_current_pretax_used: tradBal * wdRate * (1 + wdInflation),
+    })
+  }
+
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
   const incomeGoalProgressPct =
@@ -809,14 +863,23 @@ export function applyPortfolioDeltaAtRetirement(
   const portSum = adjustedRetFV + adjustedBrkFV
   const retWdAnn = portSum > 0 ? annWd * (adjustedRetFV / portSum) : 0
   const brkWdAnn = portSum > 0 ? annWd * (adjustedBrkFV / portSum) : 0
-  const taxDetail = calcTaxDetailed(
-    retWdAnn * snapshot.tradRatio,
-    retWdAnn * snapshot.rothRatio,
-    retWdAnn * snapshot.hsaRatio,
-    brkWdAnn,
-    totalSS,
-    filingStatus,
-  )
+  const taxDetail = incomeMode
+    ? calcTaxDetailed(
+        snapshot.taxDetail.tradWd * scale,
+        snapshot.taxDetail.rothWd * scale,
+        snapshot.taxDetail.hsaWd * scale,
+        snapshot.taxDetail.brkWd * scale,
+        totalSS,
+        filingStatus,
+      )
+    : calcTaxDetailed(
+        retWdAnn * snapshot.tradRatio,
+        retWdAnn * snapshot.rothRatio,
+        retWdAnn * snapshot.hsaRatio,
+        brkWdAnn,
+        totalSS,
+        filingStatus,
+      )
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
   const incomeGoalProgressPct =

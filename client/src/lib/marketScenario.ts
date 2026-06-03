@@ -36,9 +36,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Base',
     description: 'Your global slider rate, no adjustment.',
     contextDescription:
-      'Your global growth rate applies across the board. No adjustments, no assumptions — just the rate you set.',
+      'Your global growth rate applies across the board. No adjustments, no assumptions, just the rate you set.',
     contextSummary:
-      'Your global growth rate applies across the board. No adjustments, no assumptions — just the rate you set.',
+      'Your global growth rate applies across the board. No adjustments, no assumptions, just the rate you set.',
     modifierLabel: '0%',
     kind: 'flat_modifier',
     flatModifier: 0,
@@ -48,9 +48,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Bull run',
     description: 'Optimistic sustained growth above your global slider rate.',
     contextDescription:
-      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017 — long stretches where things just kept going up.',
+      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017: long stretches where things just kept going up.',
     contextSummary:
-      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017 — long stretches where things just kept going up.',
+      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017: long stretches where things just kept going up.',
     modifierLabel: '+3%',
     kind: 'flat_modifier',
     flatModifier: 0.03,
@@ -60,9 +60,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Bear market',
     description: 'Prolonged downturn below your global slider rate.',
     contextDescription:
-      "Prices fall and stay down for a while. It's not a crash — it's a grind. Returns shrink, recovery is slow, and the drag compounds over time the same way gains do, just in the wrong direction.",
+      "Prices fall and stay down for a while. It's not a crash, it's a grind. Returns shrink, recovery is slow, and the drag compounds over time the same way gains do, just in the wrong direction.",
     contextSummary:
-      "Prices fall and stay down for a while. It's not a crash — it's a grind. Returns shrink, recovery is slow, and the drag compounds over time the same way gains do, just in the wrong direction.",
+      "Prices fall and stay down for a while. It's not a crash, it's a grind. Returns shrink, recovery is slow, and the drag compounds over time the same way gains do, just in the wrong direction.",
     modifierLabel: '-4%',
     kind: 'flat_modifier',
     flatModifier: -0.04,
@@ -84,9 +84,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Lost decade',
     description: 'Flat or near-zero growth for five years, then recovery.',
     contextDescription:
-      "Growth doesn't crash — it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
+      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
     contextSummary:
-      "Growth doesn't crash — it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
+      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
     modifierLabel: 'Custom curve',
     kind: 'curve',
     curveOffsetsPct: [-6, -6, -5, -5, -4, 2, 3, 4, 3, 2],
@@ -96,9 +96,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Recession + recovery',
     description: 'Two negative years, then an above-average bounce.',
     contextDescription:
-      'A sharp contraction — negative returns for a year or two — followed by a faster-than-normal rebound. The net outcome depends almost entirely on where you are in your timeline. Early in your window it can average out fine. Close to retirement, the early losses hit harder.',
+      'A sharp contraction, with negative returns for a year or two, followed by a faster-than-normal rebound. The net outcome depends almost entirely on where you are in your timeline. Early in your window it can average out fine. Close to retirement, the early losses hit harder.',
     contextSummary:
-      'A sharp contraction — negative returns for a year or two — followed by a faster-than-normal rebound. The net outcome depends almost entirely on where you are in your timeline. Early in your window it can average out fine. Close to retirement, the early losses hit harder.',
+      'A sharp contraction, with negative returns for a year or two, followed by a faster-than-normal rebound. The net outcome depends almost entirely on where you are in your timeline. Early in your window it can average out fine. Close to retirement, the early losses hit harder.',
     modifierLabel: 'Custom curve',
     kind: 'curve',
     curveOffsetsPct: [-4, -3, 4, 5, 4, 3],
