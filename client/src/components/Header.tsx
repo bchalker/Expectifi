@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { IconAdjustments, IconMenu2, IconX } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { useWelcomeSettingsReveal } from '../hooks/useWelcomeSettingsReveal'
@@ -99,12 +100,14 @@ function HeaderAuthTail({
   onOpenConfig,
   targetRetirementAge,
   welcomeDone = true,
+  wrapInTail = true,
 }: HeaderAuthProps & {
   variant: HeaderProps['variant']
   drawer?: DrawerName | null
   onOpenConfig?: () => void
   targetRetirementAge?: number
   welcomeDone?: boolean
+  wrapInTail?: boolean
 }) {
   const { apiReady, loading, user, googleCheckoutUi } = useAuth()
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone)
@@ -116,51 +119,52 @@ function HeaderAuthTail({
   const showRetireByInProfile = Boolean(user?.onboardingDone)
   const isApp = variant === 'app'
 
+  const wrap = (node: ReactNode) =>
+    wrapInTail ? <div className="header__tail">{node}</div> : node
+
   if (!loading && user?.email && isApp && onOpenConfig && showSettings) {
-    return (
-      <div className="header__tail">
-        <div
+    return wrap(
+      <div
+        className={[
+          'header__account-group',
+          drawer === 'config' ? 'header__account-group--active' : '',
+          slideIn ? 'header__account-group--slide-in' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <button
+          type="button"
           className={[
-            'header__account-group',
-            drawer === 'config' ? 'header__account-group--active' : '',
-            slideIn ? 'header__account-group--slide-in' : '',
+            'header__settings',
+            'header__settings--signed-in',
+            drawer === 'config' ? 'header__settings--active' : '',
           ]
             .filter(Boolean)
             .join(' ')}
+          aria-label="My Plans: planning and Social Security"
+          aria-expanded={drawer === 'config'}
+          aria-controls="drawer"
+          onClick={onOpenConfig}
         >
-          <button
-            type="button"
-            className={[
-              'header__settings',
-              'header__settings--signed-in',
-              drawer === 'config' ? 'header__settings--active' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            aria-label="My Plans: planning and Social Security"
-            aria-expanded={drawer === 'config'}
-            aria-controls="drawer"
-            onClick={onOpenConfig}
-          >
-            <span className="header__settings-label">My Plans</span>
-            <IconAdjustments size={18} stroke={1.65} aria-hidden />
-          </button>
-          <span className="header__account-group__profile">
-            {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
-            {showRetireByInProfile && targetRetirementAge != null ? (
-              <span className="header__profile-ages" aria-hidden>
-                Retire by {targetRetirementAge}
-              </span>
-            ) : null}
-          </span>
-        </div>
-      </div>
+          <span className="header__settings-label">My Plans</span>
+          <IconAdjustments size={18} stroke={1.65} aria-hidden />
+        </button>
+        <span className="header__account-group__profile">
+          {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
+          {showRetireByInProfile && targetRetirementAge != null ? (
+            <span className="header__profile-ages" aria-hidden>
+              Retire by {targetRetirementAge}
+            </span>
+          ) : null}
+        </span>
+      </div>,
     )
   }
 
   if (!loading && (!user?.email || !isApp)) {
-    return (
-      <div className="header__tail">
+    return wrap(
+      <>
         {isApp && onOpenConfig && showSettings ? (
           <button
             type="button"
@@ -193,11 +197,11 @@ function HeaderAuthTail({
             Create account
           </button>
         </div>
-      </div>
+      </>,
     )
   }
 
-  return <div className="header__tail" />
+  return wrapInTail ? <div className="header__tail" /> : null
 }
 
 function HeaderMarketingNav({
@@ -216,37 +220,51 @@ function HeaderMarketingNav({
   )
 }
 
+function headerAppDrawerNavVisible(navContext: NavPanelContext): boolean {
+  return APP_NAV_DRAWER_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext))
+}
+
+function HeaderAppRouteLinks({ navContext }: { navContext: NavPanelContext }) {
+  const path = useAppPath()
+  const links = APP_NAV_ROUTE_ITEMS.flatMap(({ id, path: routePath, label, requires }) => {
+    const available = navRequirementsMet(requires, navContext)
+    const unavailableReason = navItemUnavailableReason(requires, navContext)
+    if (!available) return []
+    const isActive = path === routePath
+    return [
+      <button
+        key={id}
+        type="button"
+        className={`header__link${isActive ? ' header__link--active' : ''}`}
+        aria-current={isActive ? 'page' : undefined}
+        aria-disabled={!available}
+        title={!available ? (unavailableReason ?? undefined) : undefined}
+        onClick={() => {
+          if (!available) return
+          navigateApp(routePath)
+        }}
+      >
+        {label}
+      </button>,
+    ]
+  })
+
+  if (links.length === 0) return null
+
+  return (
+    <nav className="header__route-nav" aria-label="App pages">
+      {links}
+    </nav>
+  )
+}
+
 function HeaderAppNav({
   drawer,
   navContext,
   onOpenDrawer,
 }: Pick<HeaderAppProps, 'drawer' | 'navContext' | 'onOpenDrawer'>) {
-  const path = useAppPath()
-
   return (
     <nav className="header__nav header__nav--app" aria-label="Panels and tools">
-      {APP_NAV_ROUTE_ITEMS.map(({ id, path: routePath, label, requires }) => {
-        const available = navRequirementsMet(requires, navContext)
-        const unavailableReason = navItemUnavailableReason(requires, navContext)
-        if (!available) return null
-        const isActive = path === routePath && available
-        return (
-          <button
-            key={id}
-            type="button"
-            className={`header__link${isActive ? ' header__link--active' : ''}`}
-            aria-current={isActive ? 'page' : undefined}
-            aria-disabled={!available}
-            title={!available ? (unavailableReason ?? undefined) : undefined}
-            onClick={() => {
-              if (!available) return
-              navigateApp(routePath)
-            }}
-          >
-            {label}
-          </button>
-        )
-      })}
       {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
         const available = navRequirementsMet(requires, navContext)
         const unavailableReason = navItemUnavailableReason(requires, navContext)
@@ -295,7 +313,7 @@ export function Header(props: HeaderProps) {
           <HeaderMarketingNav onMarketingAnchor={props.onMarketingAnchor} />
         ) : null}
 
-        {!onboardingChrome && variant === 'app' ? (
+        {!onboardingChrome && variant === 'app' && headerAppDrawerNavVisible(props.navContext) ? (
           <HeaderAppNav
             drawer={props.drawer}
             navContext={props.navContext}
@@ -321,15 +339,19 @@ export function Header(props: HeaderProps) {
         ) : null}
 
         {!onboardingChrome ? (
-          <HeaderAuthTail
-            variant={variant}
-            onSignIn={onSignIn}
-            onCreateAccount={onCreateAccount}
-            drawer={variant === 'app' ? props.drawer : undefined}
-            onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
-            targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
-            welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
-          />
+          <div className="header__tail">
+            {variant === 'app' ? <HeaderAppRouteLinks navContext={props.navContext} /> : null}
+            <HeaderAuthTail
+              variant={variant}
+              onSignIn={onSignIn}
+              onCreateAccount={onCreateAccount}
+              drawer={variant === 'app' ? props.drawer : undefined}
+              onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
+              targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
+              welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
+              wrapInTail={false}
+            />
+          </div>
         ) : null}
       </div>
     </header>

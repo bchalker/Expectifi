@@ -13,7 +13,7 @@
 }
 
 .portfolio-account-list--income .income-account-row.tax-treatment-disclosure.portfolio-account-group {
-  --portfolio-account-row-bg-closed: var(--amber6);
+  --portfolio-account-row-bg-closed: color-mix(in srgb, var(--amber6) 60%, transparent);
   --portfolio-account-order-badge-bg: var(--amber4);
   --portfolio-row-pad-x: var(--space-5);
   --portfolio-row-pad-y-start: var(--space-4);
@@ -27,7 +27,7 @@
 .portfolio-account-list--income
   .income-account-row.tax-treatment-disclosure.portfolio-account-group
   > summary {
-  background: var(--amber6);
+  background: var(--portfolio-account-row-bg-closed);
 }
 
 .portfolio-account-list--income
