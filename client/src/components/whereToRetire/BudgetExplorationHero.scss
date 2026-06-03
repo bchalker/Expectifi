@@ -83,10 +83,19 @@
 
 .where-to-retire__income-toolbar .wtr-budget-hero__slider-card {
   width: 100%;
+  min-width: 0;
 }
 
 .where-to-retire__income-toolbar .wtr-budget-hero__slider-row {
-  gap: var(--space-3) /* review: was 0.85rem */ var(--space-4) /* review: was 1.15rem */;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  gap: var(--space-4);
+}
+
+.where-to-retire__income-toolbar .wtr-budget-hero__slider-main {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 @media (max-width: 680px) {

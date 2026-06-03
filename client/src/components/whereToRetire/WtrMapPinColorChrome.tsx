@@ -1,7 +1,8 @@
+import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import {
   resolveWhereToLook,
   type MapFilters,
-} from '../../lib/whereToRetire/cityMapScoring'
+} from "../../lib/whereToRetire/cityMapScoring";
 import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import {
   mapPinViewChromeCopy,
@@ -35,8 +36,8 @@ export function WtrMapPinColorChrome({
       className={["wtr-pin-color-chrome", className].filter(Boolean).join(" ")}
       aria-label="Map pin coloring"
     >
-      <div className="wtr-pin-color-chrome__toolbar-grid">
-        <div className="wtr-pin-color-chrome__toolbar-block wtr-pin-color-chrome__toolbar-block--view">
+      <div className="wtr-pin-color-chrome__toolbar">
+        <div className="wtr-pin-color-chrome__toolbar-block">
           <h2 className="wtr-pin-color-chrome__heading">{title}</h2>
           <div
             className="wtr-pin-color-chrome__view-group wtr-pin-color-chrome__view-group--buttons"
@@ -48,12 +49,12 @@ export function WtrMapPinColorChrome({
                 key={opt.id}
                 type="button"
                 className={[
-                  'wtr-pin-color-chrome__view-btn',
+                  "wtr-pin-color-chrome__view-btn",
                   pinColorView === opt.id &&
-                    'wtr-pin-color-chrome__view-btn--active',
+                    "wtr-pin-color-chrome__view-btn--active",
                 ]
                   .filter(Boolean)
-                  .join(' ')}
+                  .join(" ")}
                 aria-pressed={pinColorView === opt.id}
                 onClick={() => onPinColorViewChange(opt.id)}
               >
@@ -70,12 +71,16 @@ export function WtrMapPinColorChrome({
           />
         </div>
 
+        <span className="wtr-pin-color-chrome__toolbar-separator" aria-hidden>
+          <IconArrowNarrowRightDashed size={18} stroke={1.5} />
+        </span>
+
         <div className="wtr-pin-color-chrome__toolbar-block wtr-pin-color-chrome__toolbar-block--scope">
           <h2 className="wtr-pin-color-chrome__heading">Where to look:</h2>
           <WtrMapWhereToLookGroup
             filters={filters}
             onChange={onFiltersChange}
-            disableUs={pinColorView === 'expat'}
+            disableUs={pinColorView === "expat"}
           />
         </div>
       </div>

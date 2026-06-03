@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import { ScoreMeterRow } from "../ui/ScoreMeterRow";
 import type { RetirementScoreBand } from "../../utils/retirementScore";
 import "./RetirementScoreHeader.scss";
@@ -72,10 +71,6 @@ export function RetirementScoreHeader({
           </ul>
         ) : null}
       </div>
-
-      <span className="wtr-score-header__panel-sep" aria-hidden>
-        <IconArrowNarrowRightDashed size={18} stroke={1.5} />
-      </span>
 
       <div className="wtr-score-header__panel-score-card">
         <p className="wtr-score-header__panel-score">

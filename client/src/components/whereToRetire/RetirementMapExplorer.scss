@@ -53,10 +53,9 @@
   flex-direction: column;
   width: var(--wtr-list-panel-w);
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   // border-right: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: 14px 0 20px -20px rgb(28 43 58 / 0.4);
+  background: transparent;
   transform: translateX(0);
   transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1);
 }
@@ -75,6 +74,8 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  background: var(--surface);
+  box-shadow: 14px 0 20px -20px rgb(28 43 58 / 0.4);
 }
 
 .wtr-explorer__list-body {
@@ -97,14 +98,14 @@
 }
 
 .where-to-retire__main-panel .wtr-explorer__list-head {
-  padding: var(--space-2) var(--wtr-panel-inline-pad, 1.25rem);
+  padding: var(--space-4) var(--space-5);
 }
 
 .wtr-explorer__list-collapse {
   position: absolute;
   top: 50%;
   right: 0;
-  z-index: 5;
+  z-index: 6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -113,14 +114,15 @@
   height: 3.25rem;
   min-height: 3.25rem;
   padding: 0;
-  border: none;
+  // border: 1px solid var(--border);
+  border-left: none;
   border-radius: 0 6px 6px 0;
   background: var(--surface);
   color: var(--text-muted);
   cursor: pointer;
   box-sizing: border-box;
   box-shadow: 4px 0 10px -4px color-mix(in srgb, var(--color-navy) 10%, transparent);
-  transform: translateY(-50%);
+  transform: translate(50%, -50%);
   transition:
     color 0.15s ease,
     background 0.15s ease,
@@ -469,7 +471,7 @@
 
 .wtr-explorer__list-panel .wtr-dest-card {
   min-height: 52px;
-  padding: var(--space-3) /* review: was 0.65rem */ var(--space-3) /* review: was 0.85rem */ var(--space-3) /* review: was 0.7rem */;
+  padding: 0;
   border: none;
   border-radius: 0;
   border-bottom: 1px solid var(--border);
@@ -477,14 +479,46 @@
   box-shadow: none;
 }
 
-.wtr-explorer__list-panel .wtr-dest-card__rank {
-  min-width: 1.5rem;
-  font-size: var(--text-lg);
+.wtr-explorer__list-panel .wtr-dest-card__top {
+  flex: 1 1 auto;
+  gap: 0;
+  align-items: stretch;
+  min-height: 100%;
+  width: 100%;
 }
 
-.wtr-explorer__list-panel .wtr-dest-card__meta-pill--visa {
+.wtr-explorer__list-panel .wtr-dest-card__body {
+  padding: var(--space-3);
+  box-sizing: border-box;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__rank-col {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  align-self: stretch;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__rank-stack {
+  justify-content: center;
+  min-height: 100%;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__rank {
+  font-size: var(--text-sm);
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__visa-inline {
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__advisory-footer {
+  margin-top: var(--space-2);
+  margin-left: calc(-1 * var(--space-3));
+  margin-right: calc(-1 * var(--space-3));
+  margin-bottom: calc(-1 * var(--space-3));
 }
 
 .wtr-explorer__list-panel .wtr-dest-card:last-child {

@@ -104,12 +104,13 @@ function sortCitiesForPinView(
 ): ScoredMapCity[] {
   if (pinColorView === "score") {
     const scoreDelta = scoreSortDescending
-      ? (a: ScoredMapCity, b: ScoredMapCity) => b.retirementScore - a.retirementScore
-      : (a: ScoredMapCity, b: ScoredMapCity) => a.retirementScore - b.retirementScore;
-
-    return [...cities].sort(
-      (a, b) => scoreDelta(a, b) || b.retirementScore - a.retirementScore,
-    );
+      ? (a: ScoredMapCity, b: ScoredMapCity) => b.displayScore - a.displayScore
+      : (a: ScoredMapCity, b: ScoredMapCity) => a.displayScore - b.displayScore;
+    return [...cities].sort((a, b) => {
+      const byScore = scoreDelta(a, b);
+      if (byScore !== 0) return byScore;
+      return a.city.city.localeCompare(b.city.city);
+    });
   }
   if (pinColorView === "expat") {
     const expatDelta = expatSortDescending
@@ -257,59 +258,6 @@ export function RetirementMapExplorer({
     ],
   );
 
-  /** Overall-fit list ranks stay fixed (best score = 1) when sort direction toggles. */
-  const scoreRankByCityId = useMemo(() => {
-    if (pinColorView !== "score") return null;
-    const ranked = sortCitiesForPinView(
-      baseFilteredCities,
-      "score",
-      explorationIncome,
-      filters,
-      true,
-      false,
-      true,
-    );
-    const map = new Map<string, number>();
-    ranked.forEach((item, index) => {
-      map.set(item.city.id, index + 1);
-    });
-    return map;
-  }, [baseFilteredCities, pinColorView, explorationIncome, filters]);
-
-  /** Expat list ranks stay fixed (largest community = 1) when sort direction toggles. */
-  const expatRankByCityId = useMemo(() => {
-    if (pinColorView !== "expat") return null;
-    const ranked = sortCitiesForPinView(
-      baseFilteredCities,
-      "expat",
-      explorationIncome,
-      filters,
-      true,
-    );
-    const map = new Map<string, number>();
-    ranked.forEach((item, index) => {
-      map.set(item.city.id, index + 1);
-    });
-    return map;
-  }, [baseFilteredCities, pinColorView, explorationIncome, filters]);
-
-  /** Budget list ranks stay fixed (lowest cost = 1) when sort direction toggles. */
-  const budgetRankByCityId = useMemo(() => {
-    if (pinColorView !== "budget") return null;
-    const ranked = sortCitiesForPinView(
-      baseFilteredCities,
-      "budget",
-      explorationIncome,
-      filters,
-      false,
-    );
-    const map = new Map<string, number>();
-    ranked.forEach((item, index) => {
-      map.set(item.city.id, index + 1);
-    });
-    return map;
-  }, [baseFilteredCities, pinColorView, explorationIncome, filters]);
-
   const listPageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredCities.length / LIST_PAGE_SIZE)),
     [filteredCities.length],
@@ -413,7 +361,13 @@ export function RetirementMapExplorer({
     el.classList.remove("wtr-explorer__list-cards--refresh");
     void el.offsetHeight;
     el.classList.add("wtr-explorer__list-cards--refresh");
-  }, [structuralFiltersKey, safeListPage]);
+  }, [
+    structuralFiltersKey,
+    safeListPage,
+    scoreSortDescending,
+    budgetSortDescending,
+    expatSortDescending,
+  ]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -731,12 +685,7 @@ export function RetirementMapExplorer({
                           scored={item}
                           monthlyIncome={explorationIncome}
                           pinColorView={pinColorView}
-                          rank={
-                            expatRankByCityId?.get(item.city.id) ??
-                            budgetRankByCityId?.get(item.city.id) ??
-                            scoreRankByCityId?.get(item.city.id) ??
-                            safeListPage * LIST_PAGE_SIZE + index + 1
-                          }
+                          rank={safeListPage * LIST_PAGE_SIZE + index + 1}
                           active={selectedId === item.city.id}
                           staggerIndex={index}
                           incomeFit={mapIncomeFitDisplayForCity(

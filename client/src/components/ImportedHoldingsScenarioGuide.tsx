@@ -41,7 +41,11 @@ function GrowthLeadCopy({ dynamicHoldings }: { dynamicHoldings: string[] }) {
           differently from the rest of your portfolio.
         </>
       ) : (
-        <> for positions that may behave differently from the rest of your portfolio.</>
+        <>
+          {" "}
+          for positions that may behave differently from the rest of your
+          portfolio.
+        </>
       )}
     </p>
   );
@@ -70,12 +74,12 @@ export function ImportedHoldingsScenarioGuide({
           </h3>
           <p className="imported-holdings-scenario-guide__lead">
             <>
-              When you retire your portfolio stops accumulating and starts paying
-              you. How you draw from each account matters. The order, the method,
-              and the rate all affect how much you keep after taxes and how long
-              your money lasts. Some accounts are better suited for dividend
-              income. Others are better drawn down strategically before required
-              distributions force your hand.{" "}
+              When you retire your portfolio stops accumulating and starts
+              paying you. How you draw from each account matters. The order, the
+              method, and the rate all affect how much you keep after taxes and
+              how long your money lasts. Some accounts are better suited for
+              dividend income. Others are better drawn down strategically before
+              required distributions force your hand.{" "}
               <strong>
                 Inflation adjustment{" "}
                 {onInflationAdjChange ? (

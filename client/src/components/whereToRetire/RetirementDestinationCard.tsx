@@ -137,22 +137,22 @@ export function RetirementDestinationCard({
           <span className="wtr-dest-card__rank-sep" aria-hidden />
         </div>
         <span className="wtr-dest-card__body">
+          {incomeFit ? (
+            <WtrIncomeFitBadges fit={incomeFit} variant="list" part="tax" />
+          ) : null}
           <span className="wtr-dest-card__head-row">
             <span className="wtr-dest-card__identity">
               <span className="wtr-dest-card__name-row">
                 <span className="wtr-dest-card__name">{city.city}</span>
-                {showAdvisory ? (
-                  <span className="wtr-dest-card__advisory-badge">
-                    <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
-                    Travel advisory
-                  </span>
-                ) : null}
               </span>
               <span className="wtr-dest-card__country">
                 <span className="wtr-dest-card__flag" aria-hidden>
                   {countryToFlagEmoji(city.country)}
                 </span>
                 <span className="wtr-dest-card__country-name">{city.country}</span>
+                {incomeFit ? (
+                  <WtrIncomeFitBadges fit={incomeFit} variant="list" part="visa" />
+                ) : null}
               </span>
             </span>
             {pinColorView === "budget" && monthlyCost != null ? (
@@ -205,7 +205,12 @@ export function RetirementDestinationCard({
               className="wtr-dest-card__score"
             />
           )}
-          {incomeFit ? <WtrIncomeFitBadges fit={incomeFit} variant="list" /> : null}
+          {showAdvisory ? (
+            <span className="wtr-dest-card__advisory-footer">
+              <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
+              Travel advisory
+            </span>
+          ) : null}
         </span>
       </div>
     </div>

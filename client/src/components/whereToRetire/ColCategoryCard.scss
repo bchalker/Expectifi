@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4) /* review: was 0.9rem */ var(--space-4) /* review: was 0.95rem */ var(--space-4) /* review: was 0.95rem */;
+  padding: var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg, 12px);
   background: var(--color-card);
@@ -71,7 +71,7 @@
   flex-shrink: 0;
   margin: 0;
   font-family: var(--heading);
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.1;
   color: var(--text);
