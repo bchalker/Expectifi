@@ -14,7 +14,7 @@ export function AppPrivacyTrust({ dividerAbove = false }: Props) {
     >
       <p className="app-privacy-trust__text">
         This is <strong>your data</strong>. We don’t use AI to analyze it, we don’t sell it, and we don’t share it
-        with anyone. What you enter here stays here.
+        with anyone. All projections are educational estimates only and are not financial, tax, or legal advice.
       </p>
     </footer>
   )
