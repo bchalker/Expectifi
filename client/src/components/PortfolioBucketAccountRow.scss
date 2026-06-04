@@ -1,7 +1,8 @@
 /* Portfolio account header row — layout via @container portfolio-bucket-account-row */
 .portfolio-bucket-account-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0;
   width: 100%;
   min-width: 0;
@@ -45,6 +46,15 @@
   flex-direction: column;
   align-items: stretch;
   gap: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.portfolio-bucket-account-row__header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -107,6 +117,20 @@
   max-width: 36rem;
 }
 
+.portfolio-bucket-account-row__allocation-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--portfolio-row-pad-x, var(--space-4))
+    var(--portfolio-row-pad-y-end, 0.5rem);
+    padding: var(--space-2) var(--space-4);
+  border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
+  box-sizing: border-box;
+}
+
 .portfolio-bucket-account-row__subtext.account-bucket-hint {
   display: block;
   max-width: 36rem;
@@ -128,6 +152,27 @@
     var(--portfolio-row-pad-y-end, 0.5rem);
   text-align: right;
   box-sizing: border-box;
+  overflow: visible;
+}
+
+.portfolio-bucket-account-row__values:has([data-balance-editing='true']) {
+  position: relative;
+  z-index: 5;
+}
+
+.portfolio-bucket-account-row__values-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: visible;
+}
+
+.portfolio-bucket-account-row:has([data-balance-editing='true']) .portfolio-bucket-account-row__actions {
+  pointer-events: none;
 }
 
 .portfolio-bucket-account-row__total {
@@ -220,6 +265,11 @@
 }
 
 @container portfolio-bucket-account-row (max-width: 420px) {
+  .portfolio-bucket-account-row__header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .portfolio-bucket-account-row__main,
   .portfolio-bucket-account-row__values {
     padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4)) var(--space-1) /* review: was 0.15rem */;
@@ -251,9 +301,9 @@
   }
 }
 
-/* Wide — content + scenario column on one row */
+/* Wide — name/balance + scenario on one row; allocation stays below */
 @container portfolio-bucket-account-row (min-width: 421px) {
-  .portfolio-bucket-account-row__summary-row {
+  .portfolio-bucket-account-row__header-row {
     flex-direction: row;
     align-items: center;
     gap: 0;

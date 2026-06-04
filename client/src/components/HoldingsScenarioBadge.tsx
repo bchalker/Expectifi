@@ -3,7 +3,7 @@ import {
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 
 function scenarioTriggerTrailingIcon(choice: ScenarioUiChoice | typeof SCENARIO_MIXED) {
   if (choice === 'bull' || choice === 'very_bull') return IconTrendingUp

@@ -1,3 +1,7 @@
+import type { AccountScenarioBucketId } from './accountReturnScenario'
+import type { AccountDataSource, AllocationProfile } from './allocationProfile'
+
+export type { AllocationProfile } from './allocationProfile'
 import type { WithdrawalDisplayBucket } from './withdrawalDisplayOrder'
 import type { OnboardingRegionId } from './onboardingRegions'
 import {
@@ -67,6 +71,9 @@ export type ManualAccountEntry = {
   id: string
   type: OnboardingAccountType | null
   balance: number
+  /** How this account was added — manual entry only uses allocation_profile. */
+  source?: AccountDataSource
+  allocation_profile?: AllocationProfile | null
 }
 
 export type StoredManualAccounts = {
@@ -182,6 +189,29 @@ const META_BY_ID = {
   ...LOCALE_META_BY_ID,
 } as Record<OnboardingAccountType, ManualAccountTypeMeta>
 
+/** Typed manual rows with balance — for dashboard account cards (not gated on onboarding flag). */
+export function activeManualAccountEntries(
+  stored: StoredManualAccounts | null | undefined,
+): ManualAccountEntry[] {
+  if (!stored?.entries?.length) return []
+  return normalizeManualAccountEntries(stored.entries).filter(
+    (entry) => entry.type != null && entry.balance > 0,
+  )
+}
+
+export function manualAccountEntryForBucket(
+  entries: ManualAccountEntry[],
+  bucket: AccountScenarioBucketId,
+  locale?: OnboardingRegionId | null,
+): ManualAccountEntry | undefined {
+  return entries.find(
+    (entry) =>
+      entry.type != null &&
+      entry.balance > 0 &&
+      getAccountTypeMeta(entry.type, locale).withdrawalBucket === bucket,
+  )
+}
+
 export function getAccountTypeMeta(
   type: OnboardingAccountType,
   locale?: OnboardingRegionId | null,
@@ -245,17 +275,33 @@ export function buildDefaultOnboardingAccountEntries(
   return options.slice(0, 3).map((option) => newManualAccountEntry(option.id))
 }
 
+/** Stable id for bucket-derived dashboard rows (survives re-derive from calculator balances). */
+export function manualEntryIdForAccountType(type: OnboardingAccountType): string {
+  return `manual-entry-${type}`
+}
+
 export function newManualAccountEntry(type: OnboardingAccountType | null = null): ManualAccountEntry {
   return {
     id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `acct-${Date.now()}-${Math.random()}`,
     type,
     balance: 0,
+    source: 'manual',
+    allocation_profile: null,
   }
+}
+
+function normalizeManualAccountEntries(entries: ManualAccountEntry[]): ManualAccountEntry[] {
+  return entries.map((entry) => ({
+    ...entry,
+    source: entry.source ?? 'manual',
+  }))
 }
 
 export function loadStoredManualAccounts(): StoredManualAccounts | null {
   const fromPlan = loadPlanAccounts()
-  if (fromPlan) return fromPlan
+  if (fromPlan) {
+    return { ...fromPlan, entries: normalizeManualAccountEntries(fromPlan.entries) }
+  }
 
   if (!canWritePlanLocalStorage()) return null
 
@@ -264,7 +310,7 @@ export function loadStoredManualAccounts(): StoredManualAccounts | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as StoredManualAccounts
     if (parsed?.version !== 1 || !Array.isArray(parsed.entries)) return null
-    return parsed
+    return { ...parsed, entries: normalizeManualAccountEntries(parsed.entries) }
   } catch {
     return null
   }
@@ -302,6 +348,46 @@ export function saveCompletedManualAccounts(entries: ManualAccountEntry[]): void
   })
 }
 
+function storedManualAccountsOrEmpty(): StoredManualAccounts {
+  return (
+    loadStoredManualAccounts() ?? {
+      version: 1,
+      entries: [],
+      onboardingCompleted: true,
+      onboardingSkipped: false,
+    }
+  )
+}
+
+/** Update one manual entry's balance (local plan storage). */
+export function updateManualAccountEntryBalance(
+  entryId: string,
+  balance: number,
+): ManualAccountEntry[] | null {
+  const stored = storedManualAccountsOrEmpty()
+  const rounded = Math.max(0, Math.round(balance))
+  const entries = stored.entries.map((entry) =>
+    entry.id === entryId ? { ...entry, balance: rounded } : entry,
+  )
+  saveStoredManualAccounts({ ...stored, entries })
+  return entries
+}
+
+/** Update one manual entry's allocation profile (local plan storage). */
+export function updateManualAccountAllocationProfile(
+  entryId: string,
+  allocationProfile: AllocationProfile | null,
+): ManualAccountEntry[] | null {
+  const stored = storedManualAccountsOrEmpty()
+  const entries = stored.entries.map((entry) =>
+    entry.id === entryId
+      ? { ...entry, source: entry.source ?? 'manual', allocation_profile: allocationProfile }
+      : entry,
+  )
+  saveStoredManualAccounts({ ...stored, entries })
+  return entries
+}
+
 /** Bucket totals from the dashboard manual-balance editor (matches `manualBalanceRows`). */
 export type ManualBucketBases = {
   base401k: number
@@ -325,12 +411,37 @@ const DASHBOARD_BUCKET_ACCOUNT_TYPES: {
 ]
 
 /** Build onboarding-style entries from dashboard bucket inputs (for localStorage restore). */
+/** Calculator bucket totals → manual entries (legacy dashboard users without stored entries). */
+export function deriveManualAccountEntriesFromBalances(
+  bal: {
+    bal401k: number
+    balSE401k: number
+    balTradIRA: number
+    balRoth: number
+    balHsa: number
+  },
+  brkBal: number,
+): ManualAccountEntry[] {
+  return manualEntriesFromBucketBases({
+    base401k: Math.max(0, Math.round(bal.bal401k)),
+    baseSE401k: Math.max(0, Math.round(bal.balSE401k)),
+    baseTradIRA: Math.max(0, Math.round(bal.balTradIRA)),
+    baseRoth: Math.max(0, Math.round(bal.balRoth)),
+    baseHsa: Math.max(0, Math.round(bal.balHsa)),
+    brkBal: Math.max(0, Math.round(brkBal)),
+  })
+}
+
 export function manualEntriesFromBucketBases(bases: ManualBucketBases): ManualAccountEntry[] {
   const entries: ManualAccountEntry[] = []
   for (const { field, type } of DASHBOARD_BUCKET_ACCOUNT_TYPES) {
     const balance = Math.max(0, Math.round(bases[field]))
     if (balance <= 0) continue
-    entries.push({ ...newManualAccountEntry(type), balance })
+    entries.push({
+      ...newManualAccountEntry(type),
+      id: manualEntryIdForAccountType(type),
+      balance,
+    })
   }
   return entries
 }
@@ -346,15 +457,20 @@ function parseSessionOnboardingAccountEntries(): ManualAccountEntry[] | null {
   try {
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return null
-    return parsed.filter(
-      (entry): entry is ManualAccountEntry =>
-        !!entry &&
-        typeof entry === 'object' &&
-        typeof (entry as ManualAccountEntry).id === 'string' &&
-        ((entry as ManualAccountEntry).type == null ||
-          typeof (entry as ManualAccountEntry).type === 'string') &&
-        typeof (entry as ManualAccountEntry).balance === 'number',
-    )
+    return parsed
+      .filter(
+        (entry): entry is ManualAccountEntry =>
+          !!entry &&
+          typeof entry === 'object' &&
+          typeof (entry as ManualAccountEntry).id === 'string' &&
+          ((entry as ManualAccountEntry).type == null ||
+            typeof (entry as ManualAccountEntry).type === 'string') &&
+          typeof (entry as ManualAccountEntry).balance === 'number',
+      )
+      .map((entry) => ({
+        ...entry,
+        source: entry.source ?? 'manual',
+      }))
   } catch {
     return null
   }

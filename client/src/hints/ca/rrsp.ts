@@ -1,4 +1,4 @@
-import { hintJoin, hintLink, hintText } from '../segments'
+import { hintJoin, hintText } from '../segments'
 import type { AccountHintDefinition } from '../types'
 
 export const caRrspHint: AccountHintDefinition = {
@@ -6,18 +6,12 @@ export const caRrspHint: AccountHintDefinition = {
   taxTreatment: 'taxDeferred',
   growthHint: (ctx) => {
     if (ctx.accountScenarioActive && ctx.accountScenario) {
-      return hintJoin([
-        hintText(`Using ${ctx.accountScenario} scenario. `),
-        hintLink('Change →', { type: 'scenario', bucket: 'pretax', tab: 'outlook' }),
-      ])
+      return hintJoin([hintText(`Using ${ctx.accountScenario} scenario. `)])
     }
     return hintJoin([
-      hintText('Tax-deferred compounding — no annual drag until withdrawal. '),
-      hintLink("Fine-tune this account's growth →", {
-        type: 'scenario',
-        bucket: 'pretax',
-        tab: 'custom',
-      }),
+      hintText(
+        'Taxes are deferred, helping more of your money stay invested over time. ',
+      ),
     ])
   },
   incomeHint: () =>

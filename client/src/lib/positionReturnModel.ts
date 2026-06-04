@@ -1,10 +1,10 @@
 import {
   mapRowToBucket,
-  normalizeFidelityImportSymbol,
+  normalizeImportSymbol,
   positionsForBrokerage,
   positionsForRetirementBucket,
-  type FidelityPositionRow,
-} from './fidelityCsv'
+  type ImportedPositionRow,
+} from './positionsCsv'
 
 /** Default discrete annual steps in the UI (expanded to actual horizon). */
 export const POSITION_RETURN_HORIZON = 7 as const
@@ -168,17 +168,17 @@ export function defaultPositionReturns(
 }
 
 function positionIdForRow(keyPrefix: string, accountName: string, symbol: string, index: number): string {
-  const sym = normalizeFidelityImportSymbol(symbol).replace(/\s+/g, '-')
+  const sym = normalizeImportSymbol(symbol).replace(/\s+/g, '-')
   const acct = accountName.replace(/\s+/g, '-')
   return `fid-${keyPrefix}-${acct}-${sym}-${index}`
 }
 
-export function makeFidelityPositionReturnId(keyPrefix: string, accountName: string, symbol: string, index: number): string {
+export function makeImportedPositionReturnId(keyPrefix: string, accountName: string, symbol: string, index: number): string {
   return positionIdForRow(keyPrefix, accountName, symbol, index)
 }
 
 /** Stable `positionReturnModels` id for a retirement import row (uses index within that bucket's rows). */
-export function fidelityRowToRetirementPositionReturnId(row: FidelityPositionRow, allRows: FidelityPositionRow[]): string | null {
+export function fidelityRowToRetirementPositionReturnId(row: ImportedPositionRow, allRows: ImportedPositionRow[]): string | null {
   const bucket = mapRowToBucket(row)
   if (bucket === 'brokerage' || bucket === 'unknown') return null
   const keyPrefix =
@@ -186,20 +186,20 @@ export function fidelityRowToRetirementPositionReturnId(row: FidelityPositionRow
   const bucketRows = positionsForRetirementBucket(allRows, bucket)
   const idx = bucketRows.indexOf(row)
   if (idx < 0) return null
-  return makeFidelityPositionReturnId(keyPrefix, row.accountName, row.symbol, idx)
+  return makeImportedPositionReturnId(keyPrefix, row.accountName, row.symbol, idx)
 }
 
 /** Stable `positionReturnModels` id for a brokerage import row (index within brokerage rows). */
-export function fidelityRowToBrokeragePositionReturnId(row: FidelityPositionRow, allRows: FidelityPositionRow[]): string | null {
+export function fidelityRowToBrokeragePositionReturnId(row: ImportedPositionRow, allRows: ImportedPositionRow[]): string | null {
   const bucket = mapRowToBucket(row)
   if (bucket !== 'brokerage') return null
   const bucketRows = positionsForBrokerage(allRows)
   const idx = bucketRows.indexOf(row)
   if (idx < 0) return null
-  return makeFidelityPositionReturnId('brk', row.accountName, row.symbol, idx)
+  return makeImportedPositionReturnId('brk', row.accountName, row.symbol, idx)
 }
 
-export function fidelityRowToDashboardPositionReturnId(row: FidelityPositionRow, allRows: FidelityPositionRow[]): string | null {
+export function fidelityRowToDashboardPositionReturnId(row: ImportedPositionRow, allRows: ImportedPositionRow[]): string | null {
   return fidelityRowToRetirementPositionReturnId(row, allRows) ?? fidelityRowToBrokeragePositionReturnId(row, allRows)
 }
 
@@ -209,7 +209,7 @@ export function fidelityRowToDashboardPositionReturnId(row: FidelityPositionRow,
  */
 export function mergePositionModelsForHoldings(
   existing: PositionReturnModel[],
-  rows: FidelityPositionRow[],
+  rows: ImportedPositionRow[],
   keyPrefix: string,
   blendedRate: number,
   horizon: number,
@@ -224,7 +224,7 @@ export function mergePositionModelsForHoldings(
       next.push({
         ...prev,
         currentValue: r.currentValue,
-        ticker: normalizeFidelityImportSymbol(r.symbol) || prev.ticker,
+        ticker: normalizeImportSymbol(r.symbol) || prev.ticker,
         label: prev.label || r.description,
         accountId: r.accountName,
         yearlyReturns: padYearlyReturns(prev.yearlyReturns, horizon, prev.flatRate),
@@ -234,7 +234,7 @@ export function mergePositionModelsForHoldings(
         defaultPositionReturns(
           id,
           {
-            ticker: normalizeFidelityImportSymbol(r.symbol) || '—',
+            ticker: normalizeImportSymbol(r.symbol) || '—',
             label: r.description || r.symbol,
             currentValue: r.currentValue,
             accountId: r.accountName,
@@ -252,7 +252,7 @@ export function mergePositionModelsForHoldings(
 /** Replace models for `fid-${keyPrefix}-*` with merged bucket rows; keep other buckets. */
 export function mergeBucketIntoAllModels(
   all: PositionReturnModel[],
-  bucketRows: FidelityPositionRow[],
+  bucketRows: ImportedPositionRow[],
   keyPrefix: string,
   blendedRate: number,
   horizon: number,

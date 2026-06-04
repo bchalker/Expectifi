@@ -1,12 +1,12 @@
 import type { ImportIntent, RemovedHoldingAction } from './csvImportDiff'
 import { importPositionKey } from './csvImportDiff'
-import { isFidelityPendingActivityRow } from './fidelityCsv'
+import { isPendingActivityImportRow } from './positionsCsv'
 import {
   computeBalancesFromBatches,
-  mergeFidelityBatches,
-  type FidelityImportBatch,
-  type StoredFidelityImportV2,
-} from './fidelityStorage'
+  mergePositionsImportBatches,
+  type PositionsImportBatch,
+  type StoredPositionsImportV2,
+} from './positionsImportStorage'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
 
 export type ApplyImportOptions = {
@@ -16,15 +16,15 @@ export type ApplyImportOptions = {
   removedActions?: Record<string, RemovedHoldingAction>
 }
 
-function batchCustodian(b: FidelityImportBatch): PositionsCsvCustodian {
+function batchCustodian(b: PositionsImportBatch): PositionsCsvCustodian {
   return b.custodian ?? 'fidelity'
 }
 
 function applyUpdateIntent(
-  existing: StoredFidelityImportV2 | null,
-  incoming: FidelityImportBatch[],
+  existing: StoredPositionsImportV2 | null,
+  incoming: PositionsImportBatch[],
   removedActions: Record<string, RemovedHoldingAction>,
-): StoredFidelityImportV2 {
+): StoredPositionsImportV2 {
   if (!incoming.length) {
     throw new Error('Could not build import from the current review state.')
   }
@@ -33,7 +33,7 @@ function applyUpdateIntent(
   const custodian = batchCustodian(inc)
   const incomingKeys = new Set<string>()
   for (const r of inc.rows) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     incomingKeys.add(importPositionKey(r))
   }
 
@@ -43,7 +43,7 @@ function applyUpdateIntent(
   for (const b of existing?.batches ?? []) {
     if (batchCustodian(b) !== custodian) continue
     for (const r of b.rows) {
-      if (isFidelityPendingActivityRow(r)) continue
+      if (isPendingActivityImportRow(r)) continue
       const key = importPositionKey(r)
       if (incomingKeys.has(key)) continue
       if (removedActions[key] === 'remove') continue
@@ -51,9 +51,9 @@ function applyUpdateIntent(
     }
   }
 
-  const mergedRows = [...inc.rows.filter((r) => !isFidelityPendingActivityRow(r)), ...keptFromPrior]
+  const mergedRows = [...inc.rows.filter((r) => !isPendingActivityImportRow(r)), ...keptFromPrior]
 
-  const updatedBatch: FidelityImportBatch = {
+  const updatedBatch: PositionsImportBatch = {
     ...inc,
     rows: mergedRows,
   }
@@ -67,7 +67,7 @@ function applyUpdateIntent(
   }
 }
 
-function applyReplaceIntent(incoming: FidelityImportBatch[]): StoredFidelityImportV2 {
+function applyReplaceIntent(incoming: PositionsImportBatch[]): StoredPositionsImportV2 {
   const batches = incoming.map((b) => ({
     contentHash: b.contentHash,
     fileName: b.fileName,
@@ -91,10 +91,10 @@ function applyReplaceIntent(incoming: FidelityImportBatch[]): StoredFidelityImpo
  * - `update`: replace same-custodian batches; merge incoming with kept removed rows.
  */
 export function applyImportWithIntent(
-  existing: StoredFidelityImportV2 | null,
-  incoming: FidelityImportBatch[],
+  existing: StoredPositionsImportV2 | null,
+  incoming: PositionsImportBatch[],
   opts: ApplyImportOptions,
-): StoredFidelityImportV2 {
+): StoredPositionsImportV2 {
   if (!incoming.length) {
     throw new Error('Could not build import from the current review state.')
   }
@@ -103,13 +103,13 @@ export function applyImportWithIntent(
     case 'replace':
       return applyReplaceIntent(incoming)
     case 'add':
-      return mergeFidelityBatches(existing, incoming, {
+      return mergePositionsImportBatches(existing, incoming, {
         replaceDuplicateHashes: opts.replaceDuplicateHashes,
       })
     case 'update':
       return applyUpdateIntent(existing, incoming, opts.removedActions ?? {})
     default:
-      return mergeFidelityBatches(existing, incoming, {
+      return mergePositionsImportBatches(existing, incoming, {
         replaceDuplicateHashes: opts.replaceDuplicateHashes,
       })
   }

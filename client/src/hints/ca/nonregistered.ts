@@ -7,8 +7,9 @@ export const caNonregisteredHint: AccountHintDefinition = {
   growthHint: (ctx) => {
     if (ctx.isLargestAccount) {
       return hintJoin([
-        hintText('Your largest account — small scenario changes here move the needle most. '),
-        hintLink('Adjust scenario →', { type: 'scenario', bucket: 'brokerage', tab: 'outlook' }),
+        hintText(
+          'This is your most flexible retirement money. Changes here often have the biggest impact on your plan. ',
+        ),
       ])
     }
     return hintJoin([

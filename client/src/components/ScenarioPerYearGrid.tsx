@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { growthPhaseProjectionYears } from '../lib/marketScenarioProjection'
 import { padYearlyReturns } from '../lib/positionReturnModel'
-import { FidelityYearPctField } from './FidelityHoldingScenarioPopout'
+import { HoldingYearPctField } from './HoldingScenarioPopout'
 import './ScenarioPerYearGrid.scss'
 
 function ratesMatchGlobal(rate: number, globalBlended: number): boolean {
@@ -57,7 +57,7 @@ export function ScenarioPerYearGrid({
               ].join(' ')}
             >
               <span className="scenario-per-year-grid__year">{calendarYear}</span>
-              <FidelityYearPctField
+              <HoldingYearPctField
                 calendarYear={calendarYear}
                 rateDecimal={rateDecimal}
                 onCommitDecimal={(dec) => {

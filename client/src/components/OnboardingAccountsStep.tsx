@@ -15,6 +15,7 @@ import {
 import type { OnboardingRegionId } from "../lib/onboardingRegions";
 import { resolveOnboardingAccountLocale } from "../lib/onboardingAccountTypesByLocale";
 import { firstKeyFromSelectSelection } from "../lib/dateOfBirthSelect";
+import { AllocationProfilePicker } from "./AllocationProfilePicker";
 import "./OnboardingAccountsStep.scss";
 import "./OnboardingFieldShell.scss";
 
@@ -233,6 +234,15 @@ export function OnboardingAccountsStep({
                     </div>
                   </div>
                 </div>
+                {typeSelected ? (
+                  <AllocationProfilePicker
+                    className="onboarding-accounts-step__allocation"
+                    value={entry.allocation_profile}
+                    onChange={(allocation_profile) =>
+                      updateEntry(entry.id, { allocation_profile })
+                    }
+                  />
+                ) : null}
               </div>
             );
           })}
@@ -274,5 +284,6 @@ export function normalizedManualAccountEntries(
       ...entry,
       type: entry.type as OnboardingAccountType,
       balance: Math.round(entry.balance),
+      source: entry.source ?? "manual",
     }));
 }

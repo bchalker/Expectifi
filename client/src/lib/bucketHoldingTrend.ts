@@ -1,19 +1,19 @@
 import {
-  isFidelityPendingActivityRow,
-  type FidelityPositionRow,
-} from './fidelityCsv'
+  isPendingActivityImportRow,
+  type ImportedPositionRow,
+} from './positionsCsv'
 
 export type BucketTrendDisplay = {
   changePercent: number | null
 }
 
 /** Value-weighted daily % from imported holding rows (CSV daily change columns). */
-export function computeBucketTrendDisplay(positions: FidelityPositionRow[]): BucketTrendDisplay {
+export function computeBucketTrendDisplay(positions: ImportedPositionRow[]): BucketTrendDisplay {
   let csvPctNum = 0
   let csvPctDen = 0
 
   for (const r of positions) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     const val = r.currentValue
     if (!(val > 0)) continue
 

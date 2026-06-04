@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   blendedRateForAccountBucket,
   buildAccountReturnScenario,
+  currentBalanceForScenarioBucket,
   getAccountReturnScenario,
   inferAccountScenarioUiChoice,
   mergedModelsForAccountBucket,
@@ -12,8 +13,14 @@ import {
   type AccountReturnScenario,
   type AccountScenarioBucketId,
 } from '../lib/accountReturnScenario'
+import {
+  accountScenarioManualHeaderNote,
+  scenarioAllocationMismatchNote,
+  type AccountDataSource,
+  type AllocationProfile,
+} from '../lib/allocationProfile'
 import type { CalculatorInputs } from '../lib/computeResults'
-import type { FidelityPositionRow } from '../lib/fidelityCsv'
+import type { ImportedPositionRow } from '../lib/positionsCsv'
 import {
   countHoldingsWithScenarioChoice,
   holdingModelsClearedToDefault,
@@ -35,12 +42,12 @@ import {
   type PositionReturnModel,
 } from '../lib/positionReturnModel'
 import { growthPhaseProjectionYears } from '../lib/marketScenarioProjection'
-import { parseScenarioPct } from './FidelityHoldingScenarioPopout'
+import { parseScenarioPct } from './HoldingScenarioPopout'
 import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
 import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
 import { ScenarioPerYearGrid } from './ScenarioPerYearGrid'
 import { AppButton } from './ui/AppButton'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 
 function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boolean {
   const h = horizonClamp(horizon)
@@ -75,11 +82,11 @@ function accountScenarioToPositionModel(scenario: AccountReturnScenario): Positi
   }
 }
 
-export type FidelityAccountScenarioPanelProps = {
+export type AccountScenarioPanelProps = {
   accountName: string
   bucket: AccountScenarioBucketId
   onClose: () => void
-  fidelityAllRows: FidelityPositionRow[]
+  importedPositionRows: ImportedPositionRow[]
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
   yearsToRetirement: number
@@ -88,13 +95,17 @@ export type FidelityAccountScenarioPanelProps = {
   brkRate: number
   /** Focus this tab when the panel opens (e.g. from account row hint link). */
   initialTab?: ScenarioIntentTabId
+  accountSource?: AccountDataSource | null
+  allocationProfile?: AllocationProfile | null
+  /** Manual account with no profile: close drawer and open row inline picker. */
+  onRequestSetAllocationProfile?: () => void
 }
 
-export function FidelityAccountScenarioPanel({
+export function AccountScenarioPanel({
   accountName,
   bucket,
   onClose,
-  fidelityAllRows,
+  importedPositionRows,
   inputs,
   setInputs,
   yearsToRetirement,
@@ -102,7 +113,10 @@ export function FidelityAccountScenarioPanel({
   retRate,
   brkRate,
   initialTab,
-}: FidelityAccountScenarioPanelProps) {
+  accountSource = null,
+  allocationProfile = null,
+  onRequestSetAllocationProfile,
+}: AccountScenarioPanelProps) {
   const h = horizonClamp(yearsToRetirement)
   const calY = retirementCalendarYear
   const blended = blendedRateForAccountBucket(bucket, retRate, brkRate)
@@ -116,8 +130,8 @@ export function FidelityAccountScenarioPanel({
   const stored = getAccountReturnScenario(inputs, bucket)
 
   const merged = useMemo(
-    () => computeMergedDashboardPositionModels(inputs, fidelityAllRows, yearsToRetirement, retirementCalendarYear),
-    [inputs, fidelityAllRows, yearsToRetirement, retirementCalendarYear],
+    () => computeMergedDashboardPositionModels(inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear),
+    [inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear],
   )
 
   const targets = useMemo(() => mergedModelsForAccountBucket(bucket, merged), [bucket, merged])
@@ -283,14 +297,25 @@ export function FidelityAccountScenarioPanel({
 
   const globalPct = (blended * 100).toFixed(1)
 
-  const outlookPreviewValue = useMemo(
+  const holdingsPreviewValue = useMemo(
     () => targets.reduce((sum, m) => sum + (m.currentValue > 0 ? m.currentValue : 0), 0),
     [targets],
   )
 
+  const outlookPreviewValue = useMemo(() => {
+    const fromInputs = currentBalanceForScenarioBucket(bucket, inputs)
+    return holdingsPreviewValue > 0 ? holdingsPreviewValue : fromInputs
+  }, [bucket, holdingsPreviewValue, inputs])
+
   const outlookTiles = OUTLOOK_SCENARIO_TILES
 
   const outlookSelection = isOutlookScenarioChoice(uiChoice) ? uiChoice : null
+
+  const scenarioMismatchNote = scenarioAllocationMismatchNote(allocationProfile, outlookSelection)
+  const isManual = accountSource === 'manual'
+  const isHoldingsKnown = accountSource === 'csv' || accountSource === 'plaid'
+  const manualHeaderNote = isManual ? accountScenarioManualHeaderNote(allocationProfile) : null
+  const showSetProfileLink = isManual && !allocationProfile && Boolean(onRequestSetAllocationProfile)
 
   const yearGrid =
     primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
@@ -315,9 +340,31 @@ export function FidelityAccountScenarioPanel({
               <IconX size={14} stroke={1.5} aria-hidden />
             </button>
           </div>
-          <p className="holding-scenario-popout__head-subtext" role="note">
-            This rate applies to all holdings in <strong>{accountName}</strong> without a custom scenario.
-          </p>
+          {isHoldingsKnown ? (
+            <p className="holding-scenario-popout__head-subtext" role="note">
+              This rate applies to all holdings in <strong>{accountName}</strong> without a custom scenario.
+            </p>
+          ) : isManual && manualHeaderNote ? (
+            <p className="holding-scenario-popout__head-subtext" role="note">
+              {manualHeaderNote}
+              {showSetProfileLink ? (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    className="holding-scenario-popout__head-link"
+                    onClick={() => onRequestSetAllocationProfile?.()}
+                  >
+                    Set profile
+                  </button>
+                </>
+              ) : null}
+            </p>
+          ) : (
+            <p className="holding-scenario-popout__head-subtext" role="note">
+              This rate applies to all holdings in <strong>{accountName}</strong> without a custom scenario.
+            </p>
+          )}
         </div>
       </header>
       <div className="holding-scenario-popout__body">
@@ -374,7 +421,7 @@ export function FidelityAccountScenarioPanel({
                 outlookPreviewCurrentValue={outlookPreviewValue}
                 accountName={accountName}
                 accountRetirementYear={calY}
-                accountCurrentBalance={outlookPreviewValue}
+                accountCurrentBalance={outlookPreviewValue > 0 ? outlookPreviewValue : undefined}
                 draftPct={draftPct}
                 onDraftPctChange={(s) => {
                   setDraftPct(s)
@@ -386,6 +433,7 @@ export function FidelityAccountScenarioPanel({
                   tryPatchAccount('custom', nextPct)
                 }}
                 yearGrid={yearGrid}
+                scenarioMismatchNote={scenarioMismatchNote}
               />
             </div>
           </div>

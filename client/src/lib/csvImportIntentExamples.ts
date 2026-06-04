@@ -1,10 +1,10 @@
 import { formatMoney } from './displayCurrency'
 import {
-  isFidelityPendingActivityRow,
-  normalizeFidelityImportSymbol,
-  type FidelityPositionRow,
-} from './fidelityCsv'
-import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
+  isPendingActivityImportRow,
+  normalizeImportSymbol,
+  type ImportedPositionRow,
+} from './positionsCsv'
+import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
 
 export type ImportIntentExamples = {
   update: string
@@ -19,18 +19,18 @@ function formatConjunctionList(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
 }
 
-function loadedHoldingsRows(): FidelityPositionRow[] {
-  const stored = loadStoredFidelityImport()
+function loadedHoldingsRows(): ImportedPositionRow[] {
+  const stored = loadStoredPositionsImport()
   if (!stored?.batches.length) return []
-  return flattenBatches(stored.batches).filter((r) => !isFidelityPendingActivityRow(r))
+  return flattenBatches(stored.batches).filter((r) => !isPendingActivityImportRow(r))
 }
 
-function topHoldingsByValue(rows: FidelityPositionRow[], limit: number): FidelityPositionRow[] {
+function topHoldingsByValue(rows: ImportedPositionRow[], limit: number): ImportedPositionRow[] {
   return [...rows].sort((a, b) => b.currentValue - a.currentValue).slice(0, limit)
 }
 
-function holdingWithValue(row: FidelityPositionRow): string {
-  const sym = normalizeFidelityImportSymbol(row.symbol)
+function holdingWithValue(row: ImportedPositionRow): string {
+  const sym = normalizeImportSymbol(row.symbol)
   return `${sym} (${formatMoney(row.currentValue)})`
 }
 
@@ -42,10 +42,10 @@ export function buildImportIntentExamples(): ImportIntentExamples {
 
   const valuedList = formatConjunctionList(top.map(holdingWithValue))
   const symbolList = formatConjunctionList(
-    top.map((r) => normalizeFidelityImportSymbol(r.symbol)),
+    top.map((r) => normalizeImportSymbol(r.symbol)),
   )
 
-  const topTwo = top.slice(0, 2).map((r) => normalizeFidelityImportSymbol(r.symbol))
+  const topTwo = top.slice(0, 2).map((r) => normalizeImportSymbol(r.symbol))
   const replaceInclude =
     topTwo.length >= 2
       ? `${topTwo[0]} and ${topTwo[1]}`

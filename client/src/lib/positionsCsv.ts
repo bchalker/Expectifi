@@ -6,7 +6,7 @@ export type AccountBucket = 'trad401k' | 'se401k' | 'roth' | 'hsa' | 'brokerage'
 export type { BrokerSource } from './brokerMonogram'
 
 /** Fidelity Positions export row (normalized headers). */
-export type FidelityPositionRow = {
+export type ImportedPositionRow = {
   accountName: string
   symbol: string
   description: string
@@ -31,13 +31,13 @@ export type FidelityPositionRow = {
 }
 
 /** Fidelity appends trailing `*` markers to some symbols (e.g. money market); strip for display/import. */
-export function normalizeFidelityImportSymbol(symbol: string): string {
+export function normalizeImportSymbol(symbol: string): string {
   return String(symbol).replace(/\*+$/g, '').trim()
 }
 
 /** Fidelity exports a synthetic "Pending activity" line for unsettled cash; exclude from imports and UI. */
-export function isFidelityPendingActivityRow(r: FidelityPositionRow): boolean {
-  const sym = normalizeFidelityImportSymbol(r.symbol).toLowerCase()
+export function isPendingActivityImportRow(r: ImportedPositionRow): boolean {
+  const sym = normalizeImportSymbol(r.symbol).toLowerCase()
   const desc = r.description.trim().toLowerCase()
   return sym === 'pending activity' || desc === 'pending activity'
 }
@@ -69,8 +69,8 @@ const MONEY_MARKET_STYLE_SYMBOLS = new Set(
 )
 
 /** True when this import row is very likely a money market / cash sweep style fund. */
-export function isFidelityMoneyMarketRow(r: FidelityPositionRow): boolean {
-  const sym = normalizeFidelityImportSymbol(r.symbol).toUpperCase()
+export function isMoneyMarketImportRow(r: ImportedPositionRow): boolean {
+  const sym = normalizeImportSymbol(r.symbol).toUpperCase()
   if (sym && MONEY_MARKET_STYLE_SYMBOLS.has(sym)) return true
   const desc = r.description.trim().toLowerCase()
   if (desc.includes('money market')) return true
@@ -80,9 +80,9 @@ export function isFidelityMoneyMarketRow(r: FidelityPositionRow): boolean {
   return false
 }
 
-export type ParsedFidelityCsv = {
+export type ParsedPositionsCsv = {
   headers: string[]
-  rows: FidelityPositionRow[]
+  rows: ImportedPositionRow[]
   /** Per-bucket sum of Current Value */
   totals: Record<Exclude<AccountBucket, 'unknown'>, number>
   unknownAccounts: Set<string>
@@ -239,7 +239,7 @@ function parseNum(s: string): number {
   return Number.isFinite(v) ? v : 0
 }
 
-export function mapRowToBucket(r: FidelityPositionRow): AccountBucket {
+export function mapRowToBucket(r: ImportedPositionRow): AccountBucket {
   return r.calculatorBucket ?? mapAccountToBucket(r.accountName)
 }
 
@@ -302,21 +302,21 @@ export function taxTreatmentFromCalculatorBucket(b: AccountBucket): TaxTreatment
 }
 
 export function positionsForTaxTreatment(
-  rows: FidelityPositionRow[],
+  rows: ImportedPositionRow[],
   tax: Exclude<TaxTreatmentBucket, 'unknown'>,
-): FidelityPositionRow[] {
-  return rows.filter((r) => !isFidelityPendingActivityRow(r) && taxTreatmentFromCalculatorBucket(mapRowToBucket(r)) === tax)
+): ImportedPositionRow[] {
+  return rows.filter((r) => !isPendingActivityImportRow(r) && taxTreatmentFromCalculatorBucket(mapRowToBucket(r)) === tax)
 }
 
 export function fidelityAccountKey(accountName: string): string {
   return accountName.trim() || '(blank)'
 }
 
-export function uniqueAccountKeysFromRows(rows: FidelityPositionRow[]): string[] {
+export function uniqueAccountKeysFromRows(rows: ImportedPositionRow[]): string[] {
   const seen = new Set<string>()
   const order: string[] = []
   for (const r of rows) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     const k = fidelityAccountKey(r.accountName)
     if (seen.has(k)) continue
     seen.add(k)
@@ -325,7 +325,7 @@ export function uniqueAccountKeysFromRows(rows: FidelityPositionRow[]): string[]
   return order
 }
 
-export function buildDefaultAccountAssignments(rows: FidelityPositionRow[]): Record<string, AccountBucket> {
+export function buildDefaultAccountAssignments(rows: ImportedPositionRow[]): Record<string, AccountBucket> {
   const m: Record<string, AccountBucket> = {}
   for (const k of uniqueAccountKeysFromRows(rows)) {
     const label = k === '(blank)' ? '' : k
@@ -335,11 +335,11 @@ export function buildDefaultAccountAssignments(rows: FidelityPositionRow[]): Rec
 }
 
 export function applyBucketAssignmentsToRows(
-  rows: FidelityPositionRow[],
+  rows: ImportedPositionRow[],
   byAccount: Record<string, AccountBucket>,
-): FidelityPositionRow[] {
+): ImportedPositionRow[] {
   return rows.map((r) => {
-    if (isFidelityPendingActivityRow(r)) return r
+    if (isPendingActivityImportRow(r)) return r
     const k = fidelityAccountKey(r.accountName)
     const b = byAccount[k]
     if (b === undefined) return r
@@ -356,7 +356,7 @@ export const IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS: { value: Exclude<AccountBucke
   { value: 'brokerage', label: 'Brokerage / taxable' },
 ]
 
-export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
+export function parseFidelityPositionsCsv(text: string): ParsedPositionsCsv {
   const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim().length > 0)
   if (lines.length < 2) {
     return { headers: [], rows: [], totals: { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }, unknownAccounts: new Set() }
@@ -381,8 +381,8 @@ export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
     )
   }
 
-  const rows: FidelityPositionRow[] = []
-  const totals: ParsedFidelityCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
+  const rows: ImportedPositionRow[] = []
+  const totals: ParsedPositionsCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
   const unknownAccounts = new Set<string>()
   let contextAccount = ''
 
@@ -394,7 +394,7 @@ export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
     const accRaw = (cells[iAcc] ?? '').trim()
     if (accRaw) contextAccount = accRaw
     const accountName = accRaw || contextAccount
-    const symbol = normalizeFidelityImportSymbol(cells[iSym] ?? '')
+    const symbol = normalizeImportSymbol(cells[iSym] ?? '')
     const description = cells[iDesc] ?? ''
     const quantity = parseNum(cells[iQty] ?? '0')
     const lastPrice = parseMoney(cells[iPrice] ?? '0')
@@ -404,7 +404,7 @@ export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
     const dailyChangePercent = iPct >= 0 ? parsePercentPointsMaybe(cells[iPct] ?? '') : null
     if (!accountName && !symbol) continue
 
-    const row: FidelityPositionRow = {
+    const row: ImportedPositionRow = {
       accountName,
       symbol,
       description,
@@ -415,7 +415,7 @@ export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
       dailyChangeDollar,
       dailyChangePercent,
     }
-    if (isFidelityPendingActivityRow(row)) continue
+    if (isPendingActivityImportRow(row)) continue
 
     const bucket = mapRowToBucket(row)
     if (bucket === 'unknown') unknownAccounts.add(fidelityAccountKey(accountName))
@@ -428,17 +428,17 @@ export function parseFidelityPositionsCsv(text: string): ParsedFidelityCsv {
 }
 
 /** Sum current value by mapped bucket from arbitrary position rows (e.g. merged imports). */
-export function totalsFromPositionRows(rows: FidelityPositionRow[]): ParsedFidelityCsv['totals'] {
-  const totals: ParsedFidelityCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
+export function totalsFromPositionRows(rows: ImportedPositionRow[]): ParsedPositionsCsv['totals'] {
+  const totals: ParsedPositionsCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
   for (const r of rows) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     const bucket = mapRowToBucket(r)
     if (bucket !== 'unknown') totals[bucket] += r.currentValue
   }
   return totals
 }
 
-export function totalsToCalculatorBases(totals: ParsedFidelityCsv['totals']) {
+export function totalsToCalculatorBases(totals: ParsedPositionsCsv['totals']) {
   return {
     base401k: Math.round(totals.trad401k),
     baseSE401k: Math.round(totals.se401k),
@@ -466,26 +466,26 @@ export function accountBucketLabel(bucket: AccountBucket): string {
   }
 }
 
-export type FidelityAccountGroup = {
+export type ImportedAccountGroup = {
   /** Raw account name from the CSV. */
   accountName: string
   bucket: AccountBucket
   calculatorLabel: string
   total: number
-  rows: FidelityPositionRow[]
+  rows: ImportedPositionRow[]
   brokerSource: BrokerSource
 }
 
 /** Group position rows by Fidelity account for UI breakdowns. */
-export function groupPositionsByAccount(rows: FidelityPositionRow[]): FidelityAccountGroup[] {
-  const byName = new Map<string, FidelityPositionRow[]>()
+export function groupPositionsByAccount(rows: ImportedPositionRow[]): ImportedAccountGroup[] {
+  const byName = new Map<string, ImportedPositionRow[]>()
   for (const r of rows) {
     const key = r.accountName.trim() || '(Unnamed account)'
     const list = byName.get(key)
     if (list) list.push(r)
     else byName.set(key, [r])
   }
-  const out: FidelityAccountGroup[] = []
+  const out: ImportedAccountGroup[] = []
   for (const [accountName, groupRows] of byName) {
     const bucket = mapRowToBucket(groupRows[0]!)
     const total = groupRows.reduce((s, x) => s + x.currentValue, 0)
@@ -503,7 +503,7 @@ export function groupPositionsByAccount(rows: FidelityPositionRow[]): FidelityAc
 }
 
 /** One row per ticker after merging lines in `rows` (e.g. all positions in a tax bucket). */
-export type AggregatedFidelitySymbolRow = {
+export type AggregatedSymbolRow = {
   symbol: string
   description: string
   quantity: number
@@ -513,7 +513,7 @@ export type AggregatedFidelitySymbolRow = {
   /** How many import lines were rolled into this row */
   lineCount: number
   /** Raw rows merged into this aggregate (same references as input). */
-  contributingRows: FidelityPositionRow[]
+  contributingRows: ImportedPositionRow[]
   /** Sum of line daily $ changes when available */
   dailyChangeDollar: number | null
   /** Value-weighted average of line daily % when available */
@@ -524,7 +524,7 @@ export type AggregatedFidelitySymbolRow = {
  * Sum holdings by normalized symbol within a set of rows (same tax treatment, multiple accounts).
  * Last price is a value-weighted blend when quantity is zero on source lines (typical for custodian CSV exports).
  */
-export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]): AggregatedFidelitySymbolRow[] {
+export function aggregatePositionsBySymbol(rows: ImportedPositionRow[]): AggregatedSymbolRow[] {
   type Acc = {
     symbolDisplay: string
     bestVal: number
@@ -535,7 +535,7 @@ export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]):
     currentValue: number
     costParts: number[]
     lineCount: number
-    contributingRows: FidelityPositionRow[]
+    contributingRows: ImportedPositionRow[]
     dailyDollarSum: number
     dailyDollarAny: boolean
     dailyPctNum: number
@@ -544,8 +544,8 @@ export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]):
   const m = new Map<string, Acc>()
 
   for (const r of rows) {
-    if (isFidelityPendingActivityRow(r)) continue
-    const symNorm = normalizeFidelityImportSymbol(r.symbol)
+    if (isPendingActivityImportRow(r)) continue
+    const symNorm = normalizeImportSymbol(r.symbol)
     const key = symNorm.toUpperCase() || '__EMPTY__'
     const disp = symNorm || '—'
     let acc = m.get(key)
@@ -601,7 +601,7 @@ export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]):
     if (d) acc.descriptions.set(d, (acc.descriptions.get(d) ?? 0) + r.currentValue)
   }
 
-  const out: AggregatedFidelitySymbolRow[] = []
+  const out: AggregatedSymbolRow[] = []
   for (const [, acc] of m) {
     let description = ''
     let bestDescVal = -1
@@ -632,7 +632,7 @@ export function aggregateFidelityPositionsBySymbol(rows: FidelityPositionRow[]):
   return out
 }
 
-export type FidelityHoldingAccountBreakdown = {
+export type HoldingAccountBreakdown = {
   accountKey: string
   accountLabel: string
   quantity: number
@@ -655,15 +655,15 @@ export function shortSourceAccountLabel(accountName: string): string {
 }
 
 /** Per-account lines for one aggregated symbol row (multiple Plaid/CSV source accounts). */
-export function breakdownAggregateByAccount(row: AggregatedFidelitySymbolRow): FidelityHoldingAccountBreakdown[] {
-  const byAccount = new Map<string, FidelityPositionRow[]>()
+export function breakdownAggregateByAccount(row: AggregatedSymbolRow): HoldingAccountBreakdown[] {
+  const byAccount = new Map<string, ImportedPositionRow[]>()
   for (const r of row.contributingRows) {
     const key = fidelityAccountKey(r.accountName)
     const list = byAccount.get(key) ?? []
     list.push(r)
     byAccount.set(key, list)
   }
-  const out: FidelityHoldingAccountBreakdown[] = []
+  const out: HoldingAccountBreakdown[] = []
   for (const [accountKey, accountRows] of byAccount) {
     const quantity = accountRows.reduce((s, x) => s + x.quantity, 0)
     const currentValue = accountRows.reduce((s, x) => s + x.currentValue, 0)
@@ -683,20 +683,20 @@ export function breakdownAggregateByAccount(row: AggregatedFidelitySymbolRow): F
   return out
 }
 
-export function aggregateRowHasAccountBreakdown(row: AggregatedFidelitySymbolRow): boolean {
+export function aggregateRowHasAccountBreakdown(row: AggregatedSymbolRow): boolean {
   const keys = new Set(row.contributingRows.map((r) => fidelityAccountKey(r.accountName)))
   return keys.size > 1
 }
 
 /** Rows assigned to a retirement calculator bucket (excludes brokerage / unknown). */
 export function positionsForRetirementBucket(
-  rows: FidelityPositionRow[],
+  rows: ImportedPositionRow[],
   bucket: 'trad401k' | 'se401k' | 'roth' | 'hsa',
-): FidelityPositionRow[] {
+): ImportedPositionRow[] {
   return rows.filter((r) => mapRowToBucket(r) === bucket)
 }
 
 /** Brokerage / taxable rows from merged imports. */
-export function positionsForBrokerage(rows: FidelityPositionRow[]): FidelityPositionRow[] {
+export function positionsForBrokerage(rows: ImportedPositionRow[]): ImportedPositionRow[] {
   return rows.filter((r) => mapRowToBucket(r) === 'brokerage')
 }

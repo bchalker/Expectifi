@@ -23,11 +23,24 @@ export const DOB_MONTHS: { id: string; label: string; short: string }[] = [
 
 function firstKeyFromSelectSelection(keys: unknown): string | null {
   if (keys == null || keys === 'all') return null
-  if (typeof keys === 'object' && 'values' in keys) {
-    const it = (keys as Set<unknown>).values().next()
-    return it.done || it.value == null ? null : String(it.value)
+  if (typeof keys === 'string' || typeof keys === 'number') return String(keys)
+  if (typeof keys === 'object') {
+    if (keys instanceof Set) {
+      const it = keys.values().next()
+      return it.done || it.value == null ? null : String(it.value)
+    }
+    if ('currentKey' in keys && keys.currentKey != null) {
+      return String(keys.currentKey)
+    }
+    if ('anchorKey' in keys && keys.anchorKey != null) {
+      return String(keys.anchorKey)
+    }
+    if ('values' in keys && typeof (keys as Set<unknown>).values === 'function') {
+      const it = (keys as Set<unknown>).values().next()
+      return it.done || it.value == null ? null : String(it.value)
+    }
   }
-  return String(keys)
+  return null
 }
 
 export { firstKeyFromSelectSelection }

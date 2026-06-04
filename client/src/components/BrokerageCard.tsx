@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
 import { Button, ButtonGroup } from '@heroui/react'
-import { positionsForBrokerage, type FidelityPositionRow } from '../lib/fidelityCsv'
-import { flattenBatches, latestBatchCustodian, loadStoredFidelityImport } from '../lib/fidelityStorage'
+import { positionsForBrokerage, type ImportedPositionRow } from '../lib/positionsCsv'
+import { flattenBatches, latestBatchCustodian, loadStoredPositionsImport } from '../lib/positionsImportStorage'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { computeBucketTrendDisplay } from '../lib/bucketHoldingTrend'
-import { FidelityBucketAccountRow } from './FidelityBucketAccountRow'
-import { FidelityBucketHoldingsSubrows } from './FidelityBucketHoldingsSubrows'
-import { FidelityCsvImport } from './FidelityCsvImport'
+import { PortfolioBucketAccountRow } from './PortfolioBucketAccountRow'
+import { BucketHoldingsSubrows } from './BucketHoldingsSubrows'
+import { PositionsCsvImport } from './PositionsCsvImport'
 import { fmt, fmtInput, parseNum } from '../utils/format'
 import { currencySymbol } from '../lib/displayCurrency'
 
@@ -19,9 +19,9 @@ type Props = {
   onBrkRate?: (r: number) => void
   brokerageMode: BrokerageBalanceMode
   onBrokerageModeChange?: (m: BrokerageBalanceMode) => void
-  fidelityImportRev: number
-  onFidelityApplyBalances?: (partial: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
-  onFidelityImportApplied?: () => void
+  positionsImportRev: number
+  onImportedApplyBalances?: (partial: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
+  onPositionsImportApplied?: () => void
   /** When true, show balance, import breakdown, and return % only — no editors or import UI. */
   readOnly?: boolean
   /** Configure drawer: toggles + import + manual balance fields + return slider; hide balance output rows for Fidelity CSV mode. */
@@ -35,29 +35,29 @@ export function BrokerageCard({
   onBrkRate,
   brokerageMode,
   onBrokerageModeChange,
-  fidelityImportRev,
-  onFidelityApplyBalances,
-  onFidelityImportApplied,
+  positionsImportRev,
+  onImportedApplyBalances,
+  onPositionsImportApplied,
   readOnly = false,
   configureInputsOnly = false,
 }: Props) {
-  const fidelityRows = useMemo(() => {
-    void fidelityImportRev
-    const imp = loadStoredFidelityImport()
-    if (!imp?.batches?.length) return [] as FidelityPositionRow[]
+  const importedPositionRows = useMemo(() => {
+    void positionsImportRev
+    const imp = loadStoredPositionsImport()
+    if (!imp?.batches?.length) return [] as ImportedPositionRow[]
     return flattenBatches(imp.batches)
-  }, [fidelityImportRev])
+  }, [positionsImportRev])
 
-  const brokeragePositions = useMemo(() => positionsForBrokerage(fidelityRows), [fidelityRows])
-  const hasFidelityBrokerage = brokeragePositions.length > 0
+  const brokeragePositions = useMemo(() => positionsForBrokerage(importedPositionRows), [importedPositionRows])
+  const hasImportedBrokerage = brokeragePositions.length > 0
   const brokerageTrend = computeBucketTrendDisplay(brokeragePositions)
 
   const importCustodian = useMemo(() => {
-    void fidelityImportRev
-    const imp = loadStoredFidelityImport()
+    void positionsImportRev
+    const imp = loadStoredPositionsImport()
     if (!imp?.batches?.length) return 'fidelity' as const
     return latestBatchCustodian(imp.batches)
-  }, [fidelityImportRev])
+  }, [positionsImportRev])
 
   const brokerageReturnPanel: ReactNode = readOnly ? (
     <div style={{ fontFamily: 'var(--body)', fontSize: 13, color: 'var(--text-muted)' }}>
@@ -90,7 +90,7 @@ export function BrokerageCard({
           </div>
         )
       }
-      if (!hasFidelityBrokerage) {
+      if (!hasImportedBrokerage) {
         return (
           <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
             No brokerage / taxable positions found in your saved Fidelity import. Open Configure (gear icon) to import, apply balances, or switch to
@@ -100,8 +100,8 @@ export function BrokerageCard({
       }
       return (
         <div className="edit-row edit-row--portfolio-bucket edit-row--no-divider">
-          <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
-          <FidelityBucketHoldingsSubrows
+          <PortfolioBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
+          <BucketHoldingsSubrows
             positions={brokeragePositions}
             keyPrefix="brk"
             importCustodian={importCustodian}
@@ -132,7 +132,7 @@ export function BrokerageCard({
       }
       return (
         <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
-          {hasFidelityBrokerage
+          {hasImportedBrokerage
             ? 'Apply balances from your import to update taxable total. Dollar amount and holdings appear on the main dashboard only—not here.'
             : 'No brokerage / taxable positions in your saved import yet. Drop a CSV above and apply, or switch to manual entry.'}
         </p>
@@ -158,7 +158,7 @@ export function BrokerageCard({
         </div>
       )
     }
-    if (!hasFidelityBrokerage) {
+    if (!hasImportedBrokerage) {
       return (
         <p className="footnote" style={{ marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)', border: 'none', paddingTop: 0 }}>
           No brokerage / taxable positions found in your saved Fidelity import. Map accounts containing “Brokerage” or “Individual” in the export,
@@ -168,8 +168,8 @@ export function BrokerageCard({
     }
     return (
       <div className="edit-row edit-row--portfolio-bucket edit-row--no-divider">
-        <FidelityBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
-        <FidelityBucketHoldingsSubrows
+        <PortfolioBucketAccountRow label="Taxable brokerage" total={fmt(brkBal)} trend={brokerageTrend} />
+        <BucketHoldingsSubrows
           positions={brokeragePositions}
           keyPrefix="brk"
           importCustodian={importCustodian}
@@ -193,17 +193,17 @@ export function BrokerageCard({
             </Button>
             <Button
               variant="outline"
-              className={brokerageMode === 'fidelity' ? 'balance-mode-seg-active' : undefined}
-              onPress={() => onBrokerageModeChange?.('fidelity')}
+              className={brokerageMode === 'imported' ? 'balance-mode-seg-active' : undefined}
+              onPress={() => onBrokerageModeChange?.('imported')}
             >
               Use imported CSV
             </Button>
           </ButtonGroup>
-          {brokerageMode === 'fidelity' ? (
-            <FidelityCsvImport
+          {brokerageMode === 'imported' ? (
+            <PositionsCsvImport
               variant="toolbar"
-              onApplyBalances={onFidelityApplyBalances!}
-              onImportApplied={onFidelityImportApplied}
+              onApplyBalances={onImportedApplyBalances!}
+              onImportApplied={onPositionsImportApplied}
             />
           ) : null}
         </div>

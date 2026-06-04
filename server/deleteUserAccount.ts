@@ -67,6 +67,7 @@ export async function deleteUserAccountPermanently(userId: string): Promise<void
   if (!user) return
 
   await revokeAllPlaidItemsForUser(trimmedId)
+  await dbQuery('DELETE FROM accounts WHERE user_id = ?', [trimmedId])
   await dbQuery('DELETE FROM scenarios WHERE user_id = ?', [trimmedId])
 
   const stripeCustomerId = user.stripe_customer_id?.trim() || null

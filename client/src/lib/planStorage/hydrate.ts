@@ -3,8 +3,8 @@ import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
 } from '../initialCalculatorInputs'
-import { clearNonProCsvHoldingsOnBoot } from '../fidelityStorage'
-import { applyFidelityBalanceOverrides } from '../portfolioSourceExclusivity'
+import { clearNonProCsvHoldingsOnBoot } from '../positionsImportStorage'
+import { applyImportedBalanceOverrides } from '../portfolioSourceExclusivity'
 import { stripCsvDerivedFromCalculatorInputs } from '../calculatorInputSanitize'
 import type { CalculatorInputs, CalculatorUi } from '../computeResults'
 import {
@@ -107,7 +107,7 @@ function hydratePlanStateForTier(
       }
     }
     inputs = mergeManualAccountsIntoInputs(inputs, accounts)
-    inputs = applyFidelityBalanceOverrides(inputs)
+    inputs = applyImportedBalanceOverrides(inputs)
   }
 
   const onboardingComplete = resolveOnboardingComplete(tier, profile, accounts)

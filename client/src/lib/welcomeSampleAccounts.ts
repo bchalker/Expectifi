@@ -20,5 +20,7 @@ export function buildWelcomeSampleAccountEntries(): ManualAccountEntry[] {
   return rows.map((row) => ({
     ...newManualAccountEntry(row.type),
     balance: row.balance,
+    source: 'manual' as const,
+    allocation_profile: 'moderate' as const,
   }))
 }

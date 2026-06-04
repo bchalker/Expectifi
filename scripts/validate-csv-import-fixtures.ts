@@ -4,11 +4,11 @@
  */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { applyBucketAssignmentsToRows, buildDefaultAccountAssignments } from '../client/src/lib/fidelityCsv.ts'
+import { applyBucketAssignmentsToRows, buildDefaultAccountAssignments } from '../client/src/lib/positionsCsv.ts'
 import { applyImportWithIntent } from '../client/src/lib/csvImportApply.ts'
 import { computeCustodianImportDiff, defaultRemovedActions } from '../client/src/lib/csvImportDiff.ts'
 import { parsePositionsCsv } from '../client/src/lib/positionsCsvImport.ts'
-import type { StoredFidelityImportV2 } from '../client/src/lib/fidelityStorage.ts'
+import type { StoredPositionsImportV2 } from '../client/src/lib/positionsImportStorage.ts'
 
 const FIXTURES = join(import.meta.dirname, '../test-fixtures/csv')
 const BROKERAGE_ACCOUNT = 'Individual · CSV import'
@@ -17,7 +17,7 @@ function loadCsv(name: string): string {
   return readFileSync(join(FIXTURES, name), 'utf8')
 }
 
-function applyFidelity(name: string, contentHash: string): StoredFidelityImportV2 {
+function applyFidelity(name: string, contentHash: string): StoredPositionsImportV2 {
   const parsed = parsePositionsCsv('fidelity', loadCsv(name))
   const assignments = buildDefaultAccountAssignments(parsed.rows)
   const rows = applyBucketAssignmentsToRows(parsed.rows, assignments)
@@ -44,10 +44,10 @@ function countSymbol(rows: { symbol: string }[], sym: string): number {
 const fidelityOnly = applyFidelity('fidelity-sample.csv', 'hash-fidelity-1')
 assert(fidelityOnly.batches.length === 1, 'expected one fidelity batch')
 
-const fidelityRows = fidelityOnly.batches[0]!.rows
-assert(countSymbol(fidelityRows, 'MU') === 1, 'expected 1 MU in fidelity brokerage')
-assert(countSymbol(fidelityRows, 'NASA') === 1, 'expected 1 NASA in fidelity brokerage')
-assert(countSymbol(fidelityRows, 'IBM') === 2, 'expected IBM in fidelity brokerage + Roth')
+const importedPositionRows = fidelityOnly.batches[0]!.rows
+assert(countSymbol(importedPositionRows, 'MU') === 1, 'expected 1 MU in fidelity brokerage')
+assert(countSymbol(importedPositionRows, 'NASA') === 1, 'expected 1 NASA in fidelity brokerage')
+assert(countSymbol(importedPositionRows, 'IBM') === 2, 'expected IBM in fidelity brokerage + Roth')
 
 // 2. Add Vanguard — overlapping MU, NASA, IBM in brokerage (no dedup)
 const vanguardParsed = parsePositionsCsv('vanguard', loadCsv('vanguard-sample.csv'))

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { IconArrowDown, IconArrowUp, IconMinus, IconPlus } from '@tabler/icons-react'
-import { parseScenarioPct } from './FidelityHoldingScenarioPopout'
+import { parseScenarioPct } from './HoldingScenarioPopout'
 import { blendedBaselineFV } from '../lib/positionReturnModel'
 import { horizonClamp } from '../lib/holdingScenarioApply'
 import { useAnimatedScalar } from '../hooks/useAnimatedScalar'

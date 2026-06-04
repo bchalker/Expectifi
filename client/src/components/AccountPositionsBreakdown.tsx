@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
-import { formatFidelityDescription } from '../lib/fidelityDisplay'
-import { groupPositionsByAccount, type FidelityPositionRow } from '../lib/fidelityCsv'
-import { truncateForHoldingsTable } from '../lib/fidelityHoldingDisplay'
+import { formatHoldingDescription } from '../lib/holdingsDisplay'
+import { groupPositionsByAccount, type ImportedPositionRow } from '../lib/positionsCsv'
+import { truncateForHoldingsTable } from '../lib/holdingDisplay'
 import { fmt } from '../utils/format'
-import { FidelityValueHoverPortal } from './FidelityValueHoverPortal'
+import { HoldingValueHoverPortal } from './HoldingValueHoverPortal'
 import { Tooltip } from './Tooltip'
 
 type Props = {
-  rows: FidelityPositionRow[]
+  rows: ImportedPositionRow[]
 }
 
 function placementForHover(rect: DOMRect): 'above' | 'below' {
@@ -15,7 +15,7 @@ function placementForHover(rect: DOMRect): 'above' | 'below' {
   return spaceBelow >= 100 ? 'below' : 'above'
 }
 
-function BreakdownValueCell({ r }: { r: FidelityPositionRow }) {
+function BreakdownValueCell({ r }: { r: ImportedPositionRow }) {
   const [pop, setPop] = useState<{ rect: DOMRect; placement: 'above' | 'below' } | null>(null)
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lock = useRef(false)
@@ -48,7 +48,7 @@ function BreakdownValueCell({ r }: { r: FidelityPositionRow }) {
       >
         {fmt(r.currentValue)}
       </span>
-      <FidelityValueHoverPortal
+      <HoldingValueHoverPortal
         open={Boolean(pop)}
         rect={pop?.rect ?? null}
         placement={pop?.placement ?? 'below'}
@@ -66,11 +66,11 @@ function BreakdownValueCell({ r }: { r: FidelityPositionRow }) {
   )
 }
 
-export function FidelityAccountPositionsTable({
+export function AccountPositionsTable({
   rows,
   showScenarioColumn = false,
 }: {
-  rows: FidelityPositionRow[]
+  rows: ImportedPositionRow[]
   /** Scenario editing is post-import only (dashboard aggregated table). */
   showScenarioColumn?: boolean
 }) {
@@ -99,7 +99,7 @@ export function FidelityAccountPositionsTable({
         <tbody>
           {sorted.map((r, i) => {
             const rowKey = `${r.accountName}-${r.symbol}-${i}`
-            const fullDesc = formatFidelityDescription(r.description)
+            const fullDesc = formatHoldingDescription(r.description)
             const shortDesc = truncateForHoldingsTable(fullDesc)
             const showTip = fullDesc.length > shortDesc.length
             return (
@@ -135,7 +135,7 @@ export function FidelityAccountPositionsTable({
 }
 
 /** Collapsible per-account position tables (Fidelity export rows). */
-export function FidelityAccountBreakdown({ rows }: Props) {
+export function AccountPositionsBreakdown({ rows }: Props) {
   const accountGroups = useMemo(() => (rows.length ? groupPositionsByAccount(rows) : []), [rows])
   if (!accountGroups.length) return null
 
@@ -153,7 +153,7 @@ export function FidelityAccountBreakdown({ rows }: Props) {
             </div>
             <span className="imported-account-summary-total">{fmt(g.total)}</span>
           </summary>
-          <FidelityAccountPositionsTable rows={g.rows} />
+          <AccountPositionsTable rows={g.rows} />
         </details>
       ))}
     </>

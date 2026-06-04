@@ -6,23 +6,23 @@ import { AppButton } from "./ui/AppButton";
 import { IconBuildingBank, IconCheck } from "@tabler/icons-react";
 import { ViewHoldingsHint } from "./ui/ViewHoldingsHint";
 import { fmt } from "../utils/format";
-import { FidelityAccountPositionsTable } from "./FidelityAccountBreakdown";
-import type { ParsedFidelityCsv, AccountBucket } from "../lib/fidelityCsv";
+import { AccountPositionsTable } from "./AccountPositionsBreakdown";
+import type { ParsedPositionsCsv, AccountBucket } from "../lib/positionsCsv";
 import {
   applyBucketAssignmentsToRows,
   buildDefaultAccountAssignments,
   fidelityAccountKey,
   IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS,
-  isFidelityPendingActivityRow,
+  isPendingActivityImportRow,
   uniqueAccountKeysFromRows,
-} from "../lib/fidelityCsv";
+} from "../lib/positionsCsv";
 import {
   hashCsvText,
   isHashAlreadyImported,
-  loadStoredFidelityImport,
-  saveStoredFidelityImport,
-  type FidelityImportBatch,
-} from "../lib/fidelityStorage";
+  loadStoredPositionsImport,
+  saveStoredPositionsImport,
+  type PositionsImportBatch,
+} from "../lib/positionsImportStorage";
 import type { CalculatorInputs } from "../lib/computeResults";
 import { custodianLogoPublicUrl } from "../lib/custodianLogos";
 import {
@@ -50,7 +50,7 @@ import {
 import { buildImportIntentExamples } from "../lib/csvImportIntentExamples";
 import { custodianToBrokerSource, stampRowsWithBrokerSource } from "../lib/brokerMonogram";
 import "./SidePanelShell.scss";
-import "./FidelityCsvImport.scss";
+import "./PositionsCsvImport.scss";
 
 type PostReviewStep = "review" | "intent" | "diff";
 
@@ -87,7 +87,7 @@ type Props = {
 type PendingImport = {
   fileName: string;
   contentHash: string;
-  parsed: ParsedFidelityCsv;
+  parsed: ParsedPositionsCsv;
   duplicateInStorage: boolean;
   duplicateInSelection: boolean;
 };
@@ -123,7 +123,7 @@ function buildIncomingBatches(
   replaceDuplicateImports: boolean,
   custodian: PositionsCsvCustodian | null,
   reviewAssignments: Record<string, AccountBucket>,
-): FidelityImportBatch[] {
+): PositionsImportBatch[] {
   if (!pending || pending.duplicateInSelection) return [];
   if (pending.duplicateInStorage && !replaceDuplicateImports) return [];
   if (!custodian) return [];
@@ -197,7 +197,7 @@ function isImportBucketValue(
   return IMPORT_BUCKET_VALUES.has(v as Exclude<AccountBucket, "unknown">);
 }
 
-export function FidelityCsvImport({
+export function PositionsCsvImport({
   onApplyBalances,
   onImportApplied,
   variant = "default",
@@ -423,7 +423,7 @@ export function FidelityCsvImport({
             "Comparing this file to imports already saved in this browser",
           ],
         });
-        const existing = loadStoredFidelityImport();
+        const existing = loadStoredPositionsImport();
         const duplicateInStorage = isHashAlreadyImported(contentHash, existing);
 
         const rowCount = parsed.rows.length;
@@ -511,7 +511,7 @@ export function FidelityCsvImport({
           .filter(
             (r) =>
               fidelityAccountKey(r.accountName) === k &&
-              !isFidelityPendingActivityRow(r),
+              !isPendingActivityImportRow(r),
           )
           .reduce((s, r) => s + r.currentValue, 0),
       }))
@@ -536,13 +536,13 @@ export function FidelityCsvImport({
 
   const hasExistingHoldings = useMemo(() => {
     if (!pending) return false;
-    return hasStoredHoldings(loadStoredFidelityImport());
+    return hasStoredHoldings(loadStoredPositionsImport());
   }, [pending]);
 
   const importDiff = useMemo(() => {
     if (!pending || !custodian || importIntent !== "update") return null;
     return computeCustodianImportDiff(
-      loadStoredFidelityImport(),
+      loadStoredPositionsImport(),
       rowsThisSelection,
       custodian,
     );
@@ -659,7 +659,7 @@ export function FidelityCsvImport({
         );
       }
 
-      const existing = loadStoredFidelityImport();
+      const existing = loadStoredPositionsImport();
       const intent: ImportIntent = hasExistingHoldings
         ? (importIntent ?? "add")
         : "add";
@@ -668,7 +668,7 @@ export function FidelityCsvImport({
         replaceDuplicateHashes: rep,
         removedActions: intent === "update" ? removedActions : undefined,
       });
-      saveStoredFidelityImport(next);
+      saveStoredPositionsImport(next);
       const mergedBalances = next.balances;
 
       setConfirmOverlay({ mode: "exiting" });
@@ -879,7 +879,7 @@ export function FidelityCsvImport({
                       const accountRows = rowsThisSelection.filter(
                         (r) =>
                           fidelityAccountKey(r.accountName) === row.key &&
-                          !isFidelityPendingActivityRow(r),
+                          !isPendingActivityImportRow(r),
                       );
                       return (
                         <details
@@ -946,7 +946,7 @@ export function FidelityCsvImport({
                               </div>
                             </span>
                           </summary>
-                          <FidelityAccountPositionsTable
+                          <AccountPositionsTable
                             rows={accountRows}
                             showScenarioColumn={false}
                           />

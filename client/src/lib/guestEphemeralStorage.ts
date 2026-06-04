@@ -1,5 +1,5 @@
 import { clearStoredAppState } from './appStateStorage'
-import { clearStoredFidelityImport } from './fidelityStorage'
+import { clearStoredPositionsImport } from './positionsImportStorage'
 import { getPlanWriteTier } from './planStorage/writeContext'
 import { hasSavePlanBeenAccepted, loadMeta } from './planStorage/meta'
 import { clearBalanceInputModeStorage } from './retirementBalanceMode'
@@ -72,7 +72,7 @@ export function clearEphemeralGuestStorage(): void {
       clearStoredAppState()
       clearStoredManualAccounts()
     }
-    clearStoredFidelityImport()
+    clearStoredPositionsImport()
     clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearGuestWhereToRetireStorage()

@@ -1,14 +1,14 @@
-import type { FidelityPositionRow } from './fidelityCsv'
-import { mapRowToBucket, totalsFromPositionRows, totalsToCalculatorBases } from './fidelityCsv'
+import type { ImportedPositionRow } from './positionsCsv'
+import { mapRowToBucket, totalsFromPositionRows, totalsToCalculatorBases } from './positionsCsv'
 import { custodianToBrokerSource, enrichBatchRows, resolveBrokerSource, stampRowsWithBrokerSource } from './brokerMonogram'
 import type { PlaidHoldingsSnapshot } from './plaidImportApply'
-import type { FidelityImportBatch, StoredFidelityImportV2 } from './fidelityStorage'
+import type { PositionsImportBatch, StoredPositionsImportV2 } from './positionsImportStorage'
 import {
   computeBalancesFromBatches,
-  loadStoredFidelityImport,
-  mergeFidelityBatches,
-  saveStoredFidelityImport,
-} from './fidelityStorage'
+  loadStoredPositionsImport,
+  mergePositionsImportBatches,
+  saveStoredPositionsImport,
+} from './positionsImportStorage'
 import type { KnownBrokerSource } from './plaidInstitutionBroker'
 import { brokerDisplayLabel, institutionToBrokerSource } from './plaidInstitutionBroker'
 import type { ManualAccountEntry } from './manualAccountEntries'
@@ -38,7 +38,7 @@ export type PlaidManualOverlapBucket = {
   plaidTotal: number
 }
 
-function batchBrokerSource(batch: FidelityImportBatch): KnownBrokerSource | null {
+function batchBrokerSource(batch: PositionsImportBatch): KnownBrokerSource | null {
   if (batch.plaidItemId) return null
   const custodian = batch.custodian ?? 'fidelity'
   if (custodian === 'other') {
@@ -51,9 +51,9 @@ function batchBrokerSource(batch: FidelityImportBatch): KnownBrokerSource | null
 }
 
 function stripCsvBatchesForBroker(
-  stored: StoredFidelityImportV2 | null,
+  stored: StoredPositionsImportV2 | null,
   broker: KnownBrokerSource,
-): StoredFidelityImportV2 | null {
+): StoredPositionsImportV2 | null {
   if (!stored?.batches?.length) return stored
   const batches = stored.batches.filter((b) => {
     if (b.plaidItemId) return true
@@ -69,9 +69,9 @@ function stripCsvBatchesForBroker(
 }
 
 function stripPlaidBatches(
-  stored: StoredFidelityImportV2 | null,
+  stored: StoredPositionsImportV2 | null,
   itemIds: string[],
-): StoredFidelityImportV2 | null {
+): StoredPositionsImportV2 | null {
   if (!stored?.batches?.length) return stored
   const idSet = new Set(itemIds)
   const batches = stored.batches.filter((b) => !b.plaidItemId || !idSet.has(b.plaidItemId))
@@ -98,17 +98,17 @@ function snapshotToBatch(snapshot: PlaidHoldingsSnapshot) {
   })
 }
 
-function symbolBucketKey(row: FidelityPositionRow): string {
+function symbolBucketKey(row: ImportedPositionRow): string {
   const bucket = mapRowToBucket(row)
   const sym = (row.symbol || '').trim().toUpperCase()
   return `${bucket}:${sym}`
 }
 
 function markKeepBothDuplicates(
-  stored: StoredFidelityImportV2,
+  stored: StoredPositionsImportV2,
   broker: KnownBrokerSource,
-  plaidRows: FidelityPositionRow[],
-): StoredFidelityImportV2 {
+  plaidRows: ImportedPositionRow[],
+): StoredPositionsImportV2 {
   const csvKeys = new Set<string>()
   for (const batch of stored.batches) {
     if (batch.plaidItemId) continue
@@ -137,7 +137,7 @@ function markKeepBothDuplicates(
 export function detectPlaidBrokerConflict(
   institutionId: string | null | undefined,
   institutionName: string | null | undefined,
-  stored: StoredFidelityImportV2 | null = loadStoredFidelityImport(),
+  stored: StoredPositionsImportV2 | null = loadStoredPositionsImport(),
 ): PlaidBrokerConflict | null {
   const broker = institutionToBrokerSource(institutionId, institutionName)
   if (!broker) return null
@@ -158,34 +158,34 @@ export function applyPlaidHoldingsWithResolution(
   snapshot: PlaidHoldingsSnapshot,
   resolution: PlaidConflictResolution,
   conflictBroker?: KnownBrokerSource,
-): StoredFidelityImportV2['balances'] | null {
+): StoredPositionsImportV2['balances'] | null {
   if (resolution === 'skip_plaid') return null
 
   const batch = snapshotToBatch(snapshot)
-  let existing = loadStoredFidelityImport()
+  let existing = loadStoredPositionsImport()
 
   if (resolution === 'use_plaid' && conflictBroker) {
     existing = stripCsvBatchesForBroker(existing, conflictBroker)
   }
 
   const withoutItem = stripPlaidBatches(existing, [snapshot.itemId])
-  let next = mergeFidelityBatches(withoutItem, [batch], { replaceDuplicateHashes: true })
+  let next = mergePositionsImportBatches(withoutItem, [batch], { replaceDuplicateHashes: true })
 
   if (resolution === 'keep_both' && conflictBroker) {
     next = markKeepBothDuplicates(next!, conflictBroker, snapshot.rows)
   }
 
-  saveStoredFidelityImport(next!)
+  saveStoredPositionsImport(next!)
   return next!.balances
 }
 
 /** Default apply when no broker CSV conflict — merge Plaid without removing unrelated CSV batches. */
 export function applyPlaidHoldingsSnapshotDefault(snapshot: PlaidHoldingsSnapshot) {
   const batch = snapshotToBatch(snapshot)
-  const existing = loadStoredFidelityImport()
+  const existing = loadStoredPositionsImport()
   const withoutItem = stripPlaidBatches(existing, [snapshot.itemId])
-  const next = mergeFidelityBatches(withoutItem, [batch], { replaceDuplicateHashes: true })
-  saveStoredFidelityImport(next!)
+  const next = mergePositionsImportBatches(withoutItem, [batch], { replaceDuplicateHashes: true })
+  saveStoredPositionsImport(next!)
   return next!.balances
 }
 
@@ -196,7 +196,7 @@ const BUCKET_LABELS: Record<PlaidManualOverlapBucket['bucketKey'], string> = {
   brokerage: 'Brokerage',
 }
 
-function plaidTotalsByUiBucket(rows: FidelityPositionRow[]): Record<PlaidManualOverlapBucket['bucketKey'], number> {
+function plaidTotalsByUiBucket(rows: ImportedPositionRow[]): Record<PlaidManualOverlapBucket['bucketKey'], number> {
   const totals: Record<PlaidManualOverlapBucket['bucketKey'], number> = {
     pretax: 0,
     roth: 0,

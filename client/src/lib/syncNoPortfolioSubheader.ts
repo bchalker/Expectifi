@@ -5,7 +5,7 @@ import { loadStoredAppState } from './appStateStorage'
 import { computeResults, type CalculatorInputs, type CalculatorUi } from './computeResults'
 import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
 import { loadBalanceInputMode } from './retirementBalanceMode'
-import { applyFidelityBalanceOverrides } from './portfolioSourceExclusivity'
+import { applyImportedBalanceOverrides } from './portfolioSourceExclusivity'
 
 const BOOTSTRAP_DEFAULT_INPUTS: CalculatorInputs = {
   base401k: 0,
@@ -61,7 +61,7 @@ function bootstrapInputsFromStorage(): CalculatorInputs {
     const hydrated = hydrateAppSnapshot(stored, inputs)
     if (hydrated) inputs = hydrated.inputs
   }
-  return applyFidelityBalanceOverrides(inputs)
+  return applyImportedBalanceOverrides(inputs)
 }
 
 /** Match `computeResults().hasPortfolioBalances` from persisted local state (pre-React). */

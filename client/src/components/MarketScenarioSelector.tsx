@@ -14,7 +14,7 @@ import {
   MARKET_SCENARIOS,
   type MarketScenarioId,
 } from '../lib/marketScenario'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 import './MarketScenarioSelector.scss'
 
 const MARKET_SCENARIO_SUBLABEL = 'Market Scenario'

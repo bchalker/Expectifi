@@ -3,7 +3,7 @@ import {
   loadPersistedCalculatorSession,
   loadStoredAppState,
 } from './appStateStorage'
-import { applyFidelityBalanceOverrides } from './portfolioSourceExclusivity'
+import { applyImportedBalanceOverrides } from './portfolioSourceExclusivity'
 import type { CalculatorInputs, CalculatorUi } from './computeResults'
 import { DEFAULT_INCOME_PRESETS } from './incomePresets'
 import { stripFinancialFields } from './calculatorInputSanitize'
@@ -80,16 +80,16 @@ export function getInitialCalculatorInputs(): CalculatorInputs {
     stripFinancial: true,
   })
   if (persisted) {
-    return applyFidelityBalanceOverrides(stripFinancialFields(persisted.inputs))
+    return applyImportedBalanceOverrides(stripFinancialFields(persisted.inputs))
   }
   const stored = loadStoredAppState()
   if (stored) {
     const hydrated = hydrateAppSnapshot(stored, defaultCalculatorInputs)
     if (hydrated) {
       return mergeStoredProfile(
-        mergeStoredWelcomePrefs(applyFidelityBalanceOverrides(stripFinancialFields(hydrated.inputs))),
+        mergeStoredWelcomePrefs(applyImportedBalanceOverrides(stripFinancialFields(hydrated.inputs))),
       )
     }
   }
-  return mergeStoredProfile(mergeStoredWelcomePrefs(applyFidelityBalanceOverrides({ ...defaultCalculatorInputs })))
+  return mergeStoredProfile(mergeStoredWelcomePrefs(applyImportedBalanceOverrides({ ...defaultCalculatorInputs })))
 }

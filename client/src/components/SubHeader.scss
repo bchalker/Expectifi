@@ -131,7 +131,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   transition: none;
 }
 
-/* Post-import: explicit 0 → 1 reveal (FidelityCsvImport sets data attribute during overlay fade) */
+/* Post-import: explicit 0 → 1 reveal (PositionsCsvImport sets data attribute during overlay fade) */
 html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
   transition: none;
   animation: subheader-front-wave-reveal var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;

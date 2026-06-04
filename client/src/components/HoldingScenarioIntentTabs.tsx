@@ -144,6 +144,8 @@ export type HoldingScenarioIntentTabsProps = {
   accountName?: string
   accountRetirementYear?: number
   accountCurrentBalance?: number
+  /** Soft note when manual allocation profile conflicts with outlook preset. */
+  scenarioMismatchNote?: string | null
   className?: string
 }
 
@@ -170,6 +172,7 @@ export function HoldingScenarioIntentTabs({
   accountName,
   accountRetirementYear,
   accountCurrentBalance,
+  scenarioMismatchNote = null,
   className = '',
 }: HoldingScenarioIntentTabsProps) {
   const isAccount = variant === 'account'
@@ -222,6 +225,11 @@ export function HoldingScenarioIntentTabs({
             previewCurrentValue={outlookPreviewCurrentValue}
             scope={variant}
           />
+          {scenarioMismatchNote ? (
+            <p className="holding-scenario-intent-tabs__mismatch-note" role="note">
+              {scenarioMismatchNote}
+            </p>
+          ) : null}
         </div>
 
         <div

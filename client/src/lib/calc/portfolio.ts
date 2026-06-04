@@ -15,7 +15,7 @@ export {
   padYearlyReturns,
   mergePositionModelsForHoldings,
   mergeBucketIntoAllModels,
-  makeFidelityPositionReturnId,
+  makeImportedPositionReturnId,
   type PositionReturnModel,
   type PositionReturnMode,
   type PositionScenarioId,

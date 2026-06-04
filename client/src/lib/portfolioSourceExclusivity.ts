@@ -1,7 +1,7 @@
 import type { BrokerageBalanceMode } from './brokerageBalanceMode'
 import { loadBrokerageBalanceMode } from './brokerageBalanceMode'
 import type { CalculatorInputs } from './computeResults'
-import { loadStoredFidelityImport } from './fidelityStorage'
+import { loadStoredPositionsImport } from './positionsImportStorage'
 import { storedManualAccountsHaveBalances } from './manualAccountEntries'
 import { loadBalanceInputMode, type BalanceInputMode } from './retirementBalanceMode'
 
@@ -42,8 +42,18 @@ export function hasManualPortfolioAmounts(
 }
 
 export function hasImportedPortfolioData(): boolean {
-  const imp = loadStoredFidelityImport()
+  const imp = loadStoredPositionsImport()
   return Boolean(imp?.batches?.some((b) => b.rows.length > 0))
+}
+
+/**
+ * Dashboard display mode: stay on imported UI when CSV/Plaid data exists and manual
+ * account rows were cleared (e.g. replace-manual import applied balances but mode lagged).
+ */
+export function resolvePortfolioBalanceMode(mode: BalanceInputMode): BalanceInputMode {
+  if (mode === 'imported') return 'imported'
+  if (hasImportedPortfolioData() && !storedManualAccountsHaveBalances()) return 'imported'
+  return mode
 }
 
 export type ImportedPortfolioBalances = Pick<
@@ -71,20 +81,20 @@ export function portfolioBalancesFromImport(
 }
 
 /** Overlay stored CSV/Plaid totals onto calculator inputs when fidelity mode is active. */
-export function applyFidelityBalanceOverrides(inputs: CalculatorInputs): CalculatorInputs {
-  const imp = loadStoredFidelityImport()
+export function applyImportedBalanceOverrides(inputs: CalculatorInputs): CalculatorInputs {
+  const imp = loadStoredPositionsImport()
   if (!imp?.balances) return inputs
   const rabMode = loadBalanceInputMode()
   const brkMode = loadBrokerageBalanceMode()
   const d = { ...inputs }
-  if (rabMode === 'fidelity') {
+  if (rabMode === 'imported') {
     d.base401k = imp.balances.base401k
     d.baseSE401k = imp.balances.baseSE401k
     d.baseRoth = imp.balances.baseRoth
     d.baseHsa = imp.balances.baseHsa
     d.baseTradIRA = 0
   }
-  if (brkMode === 'fidelity' || rabMode === 'fidelity') {
+  if (brkMode === 'imported' || rabMode === 'imported') {
     d.brkBal = imp.balances.brkBal
   }
   return d

@@ -1,14 +1,14 @@
 import {
-  isFidelityPendingActivityRow,
+  isPendingActivityImportRow,
   mapAccountToBucket,
   mapRowToBucket,
-  normalizeFidelityImportSymbol,
+  normalizeImportSymbol,
   normalizeHeader,
   splitCsvLine,
   type AccountBucket,
-  type FidelityPositionRow,
-  type ParsedFidelityCsv,
-} from './fidelityCsv'
+  type ImportedPositionRow,
+  type ParsedPositionsCsv,
+} from './positionsCsv'
 
 export type PositionsCsvCustodian = 'fidelity' | 'schwab' | 'vanguard' | 'webull' | 'other'
 
@@ -75,7 +75,7 @@ export function parseCostBasisNullable(raw: string): number | null {
   return Number.isFinite(v) ? v : null
 }
 
-function emptyParsed(): ParsedFidelityCsv {
+function emptyParsed(): ParsedPositionsCsv {
   return {
     headers: [],
     rows: [],
@@ -84,11 +84,11 @@ function emptyParsed(): ParsedFidelityCsv {
   }
 }
 
-function accumulateTotals(rows: FidelityPositionRow[]): ParsedFidelityCsv {
-  const totals: ParsedFidelityCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
+function accumulateTotals(rows: ImportedPositionRow[]): ParsedPositionsCsv {
+  const totals: ParsedPositionsCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
   const unknownAccounts = new Set<string>()
   for (const r of rows) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     const bucket = mapRowToBucket(r)
     if (bucket === 'unknown') unknownAccounts.add(r.accountName.trim() || '(blank)')
     else totals[bucket] += r.currentValue
@@ -105,10 +105,10 @@ function rowFromHolding(
   currentValue: number,
   costBasis: number | null,
   opts?: { quantity?: number; lastPrice?: number; calculatorBucket?: AccountBucket },
-): FidelityPositionRow {
+): ImportedPositionRow {
   return {
     accountName,
-    symbol: normalizeFidelityImportSymbol(symbol),
+    symbol: normalizeImportSymbol(symbol),
     description: name,
     quantity: opts?.quantity ?? 0,
     lastPrice: opts?.lastPrice ?? 0,
@@ -129,7 +129,7 @@ function mapWebullAccountType(accountType: string): AccountBucket {
 }
 
 /** Fidelity: header row is first row containing a cell exactly `Symbol`; skip trailing summary rows. */
-export function parseFidelityPositionsExport(text: string): ParsedFidelityCsv {
+export function parseFidelityPositionsExport(text: string): ParsedPositionsCsv {
   const lines = csvLines(text)
   if (lines.length < 2) return emptyParsed()
 
@@ -156,7 +156,7 @@ export function parseFidelityPositionsExport(text: string): ParsedFidelityCsv {
 
   if (iSym < 0 || iDesc < 0 || iVal < 0) return emptyParsed()
 
-  const rows: FidelityPositionRow[] = []
+  const rows: ImportedPositionRow[] = []
   let contextAccount = ''
 
   for (let li = headerIdx + 1; li < lines.length; li++) {
@@ -169,7 +169,7 @@ export function parseFidelityPositionsExport(text: string): ParsedFidelityCsv {
     if (accCell) contextAccount = accCell
 
     const symRaw = (cells[iSym] ?? '').trim()
-    const symNorm = normalizeFidelityImportSymbol(symRaw)
+    const symNorm = normalizeImportSymbol(symRaw)
     if (!symNorm) continue
     if (symRaw.trim().toLowerCase() === 'account total') continue
 
@@ -180,7 +180,7 @@ export function parseFidelityPositionsExport(text: string): ParsedFidelityCsv {
     const costBasis = iCost >= 0 ? parseCostBasisNullable(costRaw) : null
 
     const row = rowFromHolding(accountName, symRaw, description, currentValue, costBasis)
-    if (isFidelityPendingActivityRow(row)) continue
+    if (isPendingActivityImportRow(row)) continue
     rows.push(row)
   }
 
@@ -189,7 +189,7 @@ export function parseFidelityPositionsExport(text: string): ParsedFidelityCsv {
 }
 
 /** Schwab: skip first row; row 2 is headers; skip trailing rows with empty Symbol or Symbol starting with `Totals`. */
-export function parseSchwabPositionsExport(text: string): ParsedFidelityCsv {
+export function parseSchwabPositionsExport(text: string): ParsedPositionsCsv {
   const lines = csvLines(text)
   if (lines.length < 3) return emptyParsed()
 
@@ -206,7 +206,7 @@ export function parseSchwabPositionsExport(text: string): ParsedFidelityCsv {
 
   if (iSym < 0 || iDesc < 0 || iVal < 0) return emptyParsed()
 
-  const rows: FidelityPositionRow[] = []
+  const rows: ImportedPositionRow[] = []
   for (let li = 2; li < lines.length; li++) {
     const rawCells = splitCsvLine(lines[li])
     if (rawCells.length === 0) continue
@@ -229,7 +229,7 @@ export function parseSchwabPositionsExport(text: string): ParsedFidelityCsv {
 }
 
 /** Vanguard brokerage: locate header row with Symbol; cost basis column absent → null. */
-export function parseVanguardPositionsExport(text: string): ParsedFidelityCsv {
+export function parseVanguardPositionsExport(text: string): ParsedPositionsCsv {
   const lines = csvLines(text)
   if (lines.length < 2) return emptyParsed()
 
@@ -255,7 +255,7 @@ export function parseVanguardPositionsExport(text: string): ParsedFidelityCsv {
 
   if (iSym < 0 || iName < 0 || iVal < 0) return emptyParsed()
 
-  const rows: FidelityPositionRow[] = []
+  const rows: ImportedPositionRow[] = []
   for (let li = headerIdx + 1; li < lines.length; li++) {
     const rawCells = splitCsvLine(lines[li])
     if (rawCells.length === 0) continue
@@ -263,7 +263,7 @@ export function parseVanguardPositionsExport(text: string): ParsedFidelityCsv {
     while (cells.length < rawHeaderCells.length) cells.push('')
 
     const symRaw = (cells[iSym] ?? '').trim()
-    const symNorm = normalizeFidelityImportSymbol(symRaw)
+    const symNorm = normalizeImportSymbol(symRaw)
     if (!symNorm) continue
 
     const name = cells[iName] ?? ''
@@ -276,7 +276,7 @@ export function parseVanguardPositionsExport(text: string): ParsedFidelityCsv {
 }
 
 /** Webull portfolio export: header row with Ticker Symbol; Account Type maps to tax buckets. */
-export function parseWebullPositionsExport(text: string): ParsedFidelityCsv {
+export function parseWebullPositionsExport(text: string): ParsedPositionsCsv {
   const lines = csvLines(text)
   if (lines.length < 2) return emptyParsed()
 
@@ -305,7 +305,7 @@ export function parseWebullPositionsExport(text: string): ParsedFidelityCsv {
 
   if (iSym < 0 || iName < 0 || iVal < 0) return emptyParsed()
 
-  const rows: FidelityPositionRow[] = []
+  const rows: ImportedPositionRow[] = []
   for (let li = headerIdx + 1; li < lines.length; li++) {
     const rawCells = splitCsvLine(lines[li])
     if (rawCells.length === 0) continue
@@ -313,7 +313,7 @@ export function parseWebullPositionsExport(text: string): ParsedFidelityCsv {
     while (cells.length < rawHeaderCells.length) cells.push('')
 
     const symRaw = (cells[iSym] ?? '').trim()
-    const symNorm = normalizeFidelityImportSymbol(symRaw)
+    const symNorm = normalizeImportSymbol(symRaw)
     if (!symNorm) continue
 
     const accountType = iAcct >= 0 ? (cells[iAcct] ?? '').trim() : 'Individual'
@@ -330,7 +330,7 @@ export function parseWebullPositionsExport(text: string): ParsedFidelityCsv {
       lastPrice,
       calculatorBucket: bucket,
     })
-    if (isFidelityPendingActivityRow(row)) continue
+    if (isPendingActivityImportRow(row)) continue
     rows.push(row)
   }
 
@@ -345,7 +345,7 @@ function headerIndexFromLabel(rawHeaders: string[], label: string): number {
 }
 
 /** Other: first row = headers; map columns by user-selected labels. */
-export function parseOtherPositionsExport(text: string, map: OtherColumnMap): ParsedFidelityCsv {
+export function parseOtherPositionsExport(text: string, map: OtherColumnMap): ParsedPositionsCsv {
   const lines = csvLines(text)
   if (lines.length < 2) return emptyParsed()
   if (!map.symbol || !map.name || !map.currentValue) return emptyParsed()
@@ -358,7 +358,7 @@ export function parseOtherPositionsExport(text: string, map: OtherColumnMap): Pa
 
   if (iSym < 0 || iName < 0 || iVal < 0) return emptyParsed()
 
-  const rows: FidelityPositionRow[] = []
+  const rows: ImportedPositionRow[] = []
   for (let li = 1; li < lines.length; li++) {
     const rawCells = splitCsvLine(lines[li])
     if (rawCells.length === 0) continue
@@ -366,7 +366,7 @@ export function parseOtherPositionsExport(text: string, map: OtherColumnMap): Pa
     while (cells.length < rawHeaderCells.length) cells.push('')
 
     const symRaw = (cells[iSym] ?? '').trim()
-    const symNorm = normalizeFidelityImportSymbol(symRaw)
+    const symNorm = normalizeImportSymbol(symRaw)
     if (!symNorm) continue
 
     const name = cells[iName] ?? ''
@@ -384,7 +384,7 @@ export function parsePositionsCsv(
   custodian: PositionsCsvCustodian,
   text: string,
   otherMap?: OtherColumnMap,
-): ParsedFidelityCsv {
+): ParsedPositionsCsv {
   switch (custodian) {
     case 'fidelity':
       return parseFidelityPositionsExport(text)

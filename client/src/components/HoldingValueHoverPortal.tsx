@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { formatHoldingDailyChangeLine, formatHoldingLastPerShare, formatHoldingShareCount } from '../lib/fidelityHoldingDisplay'
-import './FidelityHoldingScenarioPopout.scss'
+import { formatHoldingDailyChangeLine, formatHoldingLastPerShare, formatHoldingShareCount } from '../lib/holdingDisplay'
+import './HoldingScenarioPopout.scss'
 
-export type FidelityValueHoverSource = {
+export type HoldingValueHoverSource = {
   quantity: number
   lastPrice: number
   dailyChangeDollar: number | null
@@ -14,12 +14,12 @@ type Props = {
   open: boolean
   rect: DOMRect | null
   placement: 'above' | 'below'
-  source: FidelityValueHoverSource
+  source: HoldingValueHoverSource
   onMouseEnterPopout: () => void
   onMouseLeavePopout: () => void
 }
 
-export function FidelityValueHoverPortal({
+export function HoldingValueHoverPortal({
   open,
   rect,
   placement,

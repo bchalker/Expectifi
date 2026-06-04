@@ -1,4 +1,4 @@
-import type { FidelityPositionRow } from './fidelityCsv'
+import type { ImportedPositionRow } from './positionsCsv'
 import {
   applyPlaidHoldingsSnapshotDefault,
   applyPlaidHoldingsWithResolution,
@@ -6,12 +6,12 @@ import {
 } from './plaidConflict'
 import {
   computeBalancesFromBatches,
-  loadStoredFidelityImport,
-  mergeFidelityBatches,
-  saveStoredFidelityImport,
-  type StoredFidelityImportV2,
-} from './fidelityStorage'
-import { totalsFromPositionRows, totalsToCalculatorBases } from './fidelityCsv'
+  loadStoredPositionsImport,
+  mergePositionsImportBatches,
+  saveStoredPositionsImport,
+  type StoredPositionsImportV2,
+} from './positionsImportStorage'
+import { totalsFromPositionRows, totalsToCalculatorBases } from './positionsCsv'
 import { enrichBatchRows, stampRowsWithBrokerSource } from './brokerMonogram'
 
 export type { PlaidConflictResolution } from './plaidConflict'
@@ -20,7 +20,7 @@ export type PlaidHoldingsSnapshot = {
   itemId: string
   institutionName: string
   institutionId?: string | null
-  rows: FidelityPositionRow[]
+  rows: ImportedPositionRow[]
   balances: {
     base401k: number
     baseSE401k: number
@@ -43,9 +43,9 @@ function snapshotToBatch(snapshot: PlaidHoldingsSnapshot) {
 }
 
 function stripPlaidBatches(
-  stored: StoredFidelityImportV2 | null,
+  stored: StoredPositionsImportV2 | null,
   itemIds: string[],
-): StoredFidelityImportV2 | null {
+): StoredPositionsImportV2 | null {
   if (!stored?.batches?.length) return stored
   const idSet = new Set(itemIds)
   const batches = stored.batches.filter((b) => !b.plaidItemId || !idSet.has(b.plaidItemId))
@@ -62,9 +62,9 @@ function stripPlaidBatches(
 
 /** Remove one Plaid item's batch from local import storage; returns updated calculator balances. */
 export function removePlaidItemFromLocalStorage(itemId: string) {
-  const existing = loadStoredFidelityImport()
+  const existing = loadStoredPositionsImport()
   const next = stripPlaidBatches(existing, [itemId])
-  if (next && next !== existing) saveStoredFidelityImport(next)
+  if (next && next !== existing) saveStoredPositionsImport(next)
   return next?.balances ?? null
 }
 
@@ -86,20 +86,20 @@ export function applyPlaidHoldingsSnapshots(snapshots: PlaidHoldingsSnapshot[]) 
   if (snapshots.length === 0) return null
   const itemIds = snapshots.map((s) => s.itemId)
   const batches = snapshots.map(snapshotToBatch)
-  const existing = loadStoredFidelityImport()
+  const existing = loadStoredPositionsImport()
   const withoutItems = stripPlaidBatches(existing, itemIds)
   let next = withoutItems
   for (const batch of batches) {
-    next = mergeFidelityBatches(next, [batch], { replaceDuplicateHashes: true })
+    next = mergePositionsImportBatches(next, [batch], { replaceDuplicateHashes: true })
   }
-  saveStoredFidelityImport(next!)
+  saveStoredPositionsImport(next!)
   return next!.balances
 }
 
 export function recomputeStoredImportBalances() {
-  const stored = loadStoredFidelityImport()
+  const stored = loadStoredPositionsImport()
   if (!stored?.batches?.length) return null
   const balances = computeBalancesFromBatches(stored.batches)
-  saveStoredFidelityImport({ ...stored, balances, savedAt: new Date().toISOString() })
+  saveStoredPositionsImport({ ...stored, balances, savedAt: new Date().toISOString() })
   return balances
 }

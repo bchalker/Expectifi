@@ -1,11 +1,11 @@
-import type { AggregatedFidelitySymbolRow } from "../lib/fidelityCsv";
+import type { AggregatedSymbolRow } from "../lib/positionsCsv";
 import { pickScenarioGuideLeadTickers } from "../lib/holdingScenarioGuideExamples";
 import { INCOME_RECOMMENDATION_DISCLAIMER } from "../lib/accountIncomeRecommendation";
 import "./ImportedHoldingsScenarioGuide.scss";
 import { IncomeInflationPercentControl } from "./IncomeGlobalInflationControl";
 
 type Props = {
-  holdings: AggregatedFidelitySymbolRow[];
+  holdings: AggregatedSymbolRow[];
   /** Growth: per-holding scenarios; income: per-account yield assumptions. */
   variant?: "growth" | "income";
   /** Global withdrawal inflation uplift (decimal, e.g. 0.025). */

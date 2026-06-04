@@ -1,10 +1,10 @@
-import { positionsForBrokerage } from './fidelityCsv'
-import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
+import { positionsForBrokerage } from './positionsCsv'
+import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
 import { getPlanWriteTier } from './planStorage/writeContext'
 
 export const BROKERAGE_BALANCE_MODE_KEY = 'retirement-calculator/brokerage-balance-mode'
 
-export type BrokerageBalanceMode = 'manual' | 'fidelity'
+export type BrokerageBalanceMode = 'manual' | 'imported'
 
 function brokerageModeStorage(): Storage {
   const tier = getPlanWriteTier()
@@ -13,7 +13,7 @@ function brokerageModeStorage(): Storage {
 }
 
 function hasBrokerageRowsInStorage(): boolean {
-  const imp = loadStoredFidelityImport()
+  const imp = loadStoredPositionsImport()
   if (!imp?.batches?.length) return false
   return positionsForBrokerage(flattenBatches(imp.batches)).length > 0
 }
@@ -21,11 +21,12 @@ function hasBrokerageRowsInStorage(): boolean {
 export function loadBrokerageBalanceMode(): BrokerageBalanceMode {
   try {
     const raw = brokerageModeStorage().getItem(BROKERAGE_BALANCE_MODE_KEY)
-    if (raw === 'manual' || raw === 'fidelity') return raw
+    if (raw === 'manual' || raw === 'imported') return raw
+    if (raw === 'fidelity') return 'imported'
   } catch {
     /* ignore */
   }
-  if (hasBrokerageRowsInStorage()) return 'fidelity'
+  if (hasBrokerageRowsInStorage()) return 'imported'
   return 'manual'
 }
 

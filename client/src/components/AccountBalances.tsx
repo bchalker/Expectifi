@@ -9,23 +9,35 @@ import { IconChevronDown, IconPencil } from "@tabler/icons-react";
 import { Button, useOverlayState } from "@heroui/react";
 import type { CalculatorInputs, ComputedSnapshot } from "../lib/computeResults";
 import {
-  aggregateFidelityPositionsBySymbol,
-  isFidelityPendingActivityRow,
+  aggregatePositionsBySymbol,
+  isPendingActivityImportRow,
   mapRowToBucket,
   positionsForBrokerage,
   positionsForTaxTreatment,
-  type FidelityPositionRow,
-} from "../lib/fidelityCsv";
+  type ImportedPositionRow,
+} from "../lib/positionsCsv";
 import {
   flattenBatches,
-  loadStoredFidelityImport,
-} from "../lib/fidelityStorage";
+  loadStoredPositionsImport,
+} from "../lib/positionsImportStorage";
 import {
+  activeManualAccountEntries,
+  aggregateManualAccountsToBases,
+  deriveManualAccountEntriesFromBalances,
   getAccountTypeMeta,
   loadStoredManualAccounts,
+  manualAccountEntryForBucket,
+  saveCompletedManualAccounts,
   saveManualAccountsFromBucketBases,
+  type AllocationProfile,
   type ManualAccountEntry,
 } from "../lib/manualAccountEntries";
+import {
+  accountScenarioContextForBucket,
+  manualEntryIdForScenarioBucket,
+} from "../lib/allocationProfile";
+import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
+import { ManualAccountBalanceField } from "./ManualAccountBalanceField";
 import type { BrokerageBalanceMode } from "../lib/brokerageBalanceMode";
 import type { BalanceInputMode } from "../lib/retirementBalanceMode";
 import {
@@ -62,7 +74,9 @@ import {
   hasManualPortfolioAmounts,
   IMPORT_REMOVED_ON_MANUAL_MSG,
   MANUAL_REMOVED_ON_CONNECT_MSG,
+  resolvePortfolioBalanceMode,
 } from "../lib/portfolioSourceExclusivity";
+import { incomeBalanceForProjection } from "../lib/accountIncomeMonthly";
 import { fmt, fmtInput, fmtMon, parseNum } from "../utils/format";
 import { currencySymbol } from "../lib/displayCurrency";
 import {
@@ -95,16 +109,16 @@ import {
 import { positionUsesCustomReturnMode } from "../lib/positionReturnModel";
 import { computeBucketTrendDisplay } from "../lib/bucketHoldingTrend";
 import {
-  FidelityAggregatedSymbolTable,
-  type FidelityAggregatedScenarioBundle,
-} from "./FidelityAggregatedSymbolTable";
-import { FidelityAccountScenarioPanel } from "./FidelityAccountScenarioPanel";
+  AggregatedHoldingsTable,
+  type HoldingsScenarioBundle,
+} from "./AggregatedHoldingsTable";
+import { AccountScenarioPanel } from "./AccountScenarioPanel";
 import {
-  FidelityBucketAccountRow,
-  type FidelityBucketAccountScenarioProps,
-} from "./FidelityBucketAccountRow";
-import { FidelityCsvImport } from "./FidelityCsvImport";
-import { FidelityHoldingScenarioPanel } from "./FidelityHoldingScenarioPopout";
+  PortfolioBucketAccountRow,
+  type PortfolioBucketAccountScenarioProps,
+} from "./PortfolioBucketAccountRow";
+import { PositionsCsvImport } from "./PositionsCsvImport";
+import { HoldingScenarioPanel } from "./HoldingScenarioPopout";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
 import { TaxBreakdownHeaderButton } from "./TaxBreakdownHeaderButton";
@@ -133,10 +147,7 @@ import {
   type AccountIncomeStrategy,
 } from "../lib/accountIncomeStrategy";
 import { monthlyPortfolioIncomeFromAccountStrategies } from "../lib/accountIncomeMonthly";
-import {
-  accountRetirementBalance,
-  currentBalanceForAccountBucket,
-} from "../lib/accountBucketRetirementBalance";
+import { currentBalanceForAccountBucket } from "../lib/accountBucketRetirementBalance";
 import { ManualProjectionsCallout } from "./ManualProjectionsCallout";
 import { PlaidConnectionProvider } from "./PlaidConnectionHeader";
 import { PlaidLinkButton } from "./PlaidLinkButton";
@@ -226,18 +237,18 @@ type Props = {
   ) => void;
   balanceMode: BalanceInputMode;
   onBalanceModeChange?: (m: BalanceInputMode) => void;
-  fidelityImportRev: number;
+  positionsImportRev: number;
   /** Bumps when onboarding/manual account rows change. */
   manualAccountsRev?: number;
   /** Tighter bottom margin when Brokerage card follows in the same visual group. */
   stackWithBrokerage?: boolean;
-  onFidelityApplyBalances?: (
+  onImportedApplyBalances?: (
     partial: Pick<
       CalculatorInputs,
       "base401k" | "baseSE401k" | "baseRoth" | "baseHsa" | "brkBal"
     >,
   ) => void;
-  onFidelityImportApplied?: () => void;
+  onPositionsImportApplied?: () => void;
   /** Clear CSV/Plaid import storage when user commits manual amounts. */
   onClearImportedForManual?: () => void;
   /** Clear manual balances, stored import, and per-holding return overrides for this card. */
@@ -301,11 +312,11 @@ export function AccountBalances({
   onBases,
   balanceMode,
   onBalanceModeChange,
-  fidelityImportRev,
+  positionsImportRev,
   manualAccountsRev = 0,
   stackWithBrokerage,
-  onFidelityApplyBalances,
-  onFidelityImportApplied,
+  onImportedApplyBalances,
+  onPositionsImportApplied,
   onClearImportedForManual,
   onRemoveRetirementAccounts,
   readOnly = false,
@@ -338,8 +349,26 @@ export function AccountBalances({
   const showCsvSessionBanner = hasSessionCsvHoldings && !isPro;
   const { locale, taxConfig } = useUserLocale();
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly;
-  const fidelityScenarioEditingEnabled = Boolean(
-    readOnly && inputs && setInputs && balanceMode === "fidelity",
+
+  const displayBalanceMode = useMemo(
+    () => resolvePortfolioBalanceMode(balanceMode),
+    [balanceMode, positionsImportRev, manualAccountsRev],
+  );
+
+  useEffect(() => {
+    if (!onBalanceModeChange || balanceMode === "imported") return;
+    if (displayBalanceMode !== "imported") return;
+    onBalanceModeChange("imported");
+  }, [balanceMode, displayBalanceMode, onBalanceModeChange]);
+
+  const holdingsScenarioEditingEnabled = Boolean(
+    readOnly && inputs && setInputs && displayBalanceMode === "imported",
+  );
+  const accountScenarioEditingEnabled = Boolean(
+    readOnly &&
+    inputs &&
+    setInputs &&
+    (displayBalanceMode === "imported" || displayBalanceMode === "manual"),
   );
   const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false);
   const retirementAge = inputs?.targetRetirementAge ?? c.targetRetirementAge;
@@ -370,46 +399,107 @@ export function AccountBalances({
     return () => window.clearTimeout(exitTimer);
   }, [showMarketScenarioContext]);
 
-  const fidelityRows = useMemo(() => {
-    void fidelityImportRev;
-    const imp = loadStoredFidelityImport();
-    if (!imp?.batches?.length) return [] as FidelityPositionRow[];
+  const importedPositionRows = useMemo(() => {
+    void positionsImportRev;
+    const imp = loadStoredPositionsImport();
+    if (!imp?.batches?.length) return [] as ImportedPositionRow[];
     return flattenBatches(imp.batches);
-  }, [fidelityImportRev]);
+  }, [positionsImportRev]);
 
   const aggregatedHoldingsForGuide = useMemo(
-    () => aggregatedHoldingsForScenarioGuide(fidelityRows),
-    [fidelityRows],
+    () => aggregatedHoldingsForScenarioGuide(importedPositionRows),
+    [importedPositionRows],
   );
 
   const showImportedHoldingsScenarioGuide =
     phase === "growth" &&
     mergedDashboard &&
-    fidelityScenarioEditingEnabled &&
-    balanceMode === "fidelity" &&
+    holdingsScenarioEditingEnabled &&
+    displayBalanceMode === "imported" &&
     aggregatedHoldingsForGuide.length > 0;
+
+  const [allocationEntriesPatch, setAllocationEntriesPatch] = useState<
+    ManualAccountEntry[] | null
+  >(null);
+  const manualEntriesHydrationAttempted = useRef(false);
+  const onManualAccountsCommittedRef = useRef(onManualAccountsCommitted);
+  onManualAccountsCommittedRef.current = onManualAccountsCommitted;
+  useEffect(() => {
+    setAllocationEntriesPatch(null);
+  }, [manualAccountsRev]);
+
+  const manualRowEditingEnabled = Boolean(
+    mergedDashboard && displayBalanceMode === "manual" && onBases,
+  );
 
   const manualAccountEntries = useMemo(() => {
     void manualAccountsRev;
-    const stored = loadStoredManualAccounts();
-    if (!stored?.onboardingCompleted) return [] as ManualAccountEntry[];
-    return stored.entries.filter((e) => e.balance > 0);
-  }, [manualAccountsRev]);
+    if (allocationEntriesPatch) {
+      return allocationEntriesPatch.filter(
+        (e) => e.type != null && e.balance > 0,
+      );
+    }
+    const storedActive = activeManualAccountEntries(loadStoredManualAccounts());
+    if (storedActive.length > 0) return storedActive;
+    if (!mergedDashboard || displayBalanceMode !== "manual") return [];
+    return deriveManualAccountEntriesFromBalances(c.bal, brkBal ?? 0).filter(
+      (e) => e.type != null && e.balance > 0,
+    );
+  }, [
+    manualAccountsRev,
+    allocationEntriesPatch,
+    mergedDashboard,
+    displayBalanceMode,
+    c.bal.bal401k,
+    c.bal.balSE401k,
+    c.bal.balTradIRA,
+    c.bal.balRoth,
+    c.bal.balHsa,
+    brkBal,
+  ]);
+
+  useEffect(() => {
+    if (!mergedDashboard || displayBalanceMode !== "manual") return;
+    if (manualEntriesHydrationAttempted.current) return;
+    if (activeManualAccountEntries(loadStoredManualAccounts()).length > 0) {
+      manualEntriesHydrationAttempted.current = true;
+      return;
+    }
+    const derived = deriveManualAccountEntriesFromBalances(
+      c.bal,
+      brkBal ?? 0,
+    ).filter((e) => e.type != null && e.balance > 0);
+    if (derived.length === 0) return;
+    manualEntriesHydrationAttempted.current = true;
+    saveCompletedManualAccounts(derived);
+    if (activeManualAccountEntries(loadStoredManualAccounts()).length > 0) {
+      onManualAccountsCommittedRef.current?.();
+    }
+  }, [
+    mergedDashboard,
+    displayBalanceMode,
+    c.bal.bal401k,
+    c.bal.balSE401k,
+    c.bal.balTradIRA,
+    c.bal.balRoth,
+    c.bal.balHsa,
+    brkBal,
+  ]);
 
   const brokeragePositions = useMemo(
-    () => positionsForBrokerage(fidelityRows),
-    [fidelityRows],
+    () => positionsForBrokerage(importedPositionRows),
+    [importedPositionRows],
   );
-  const hasFidelityBrokerage = brokeragePositions.length > 0;
+  const hasImportedBrokerage = brokeragePositions.length > 0;
 
-  const hasAnyFidelityRetirement = useMemo(
+  const hasAnyImportedRetirement = useMemo(
     () =>
-      fidelityRows.some((r) => {
-        if (isFidelityPendingActivityRow(r)) return false;
+      importedPositionRows.some((r) => {
+        if (isPendingActivityImportRow(r)) return false;
         const b = mapRowToBucket(r);
         return b !== "unknown" && b !== "brokerage";
       }),
-    [fidelityRows],
+    [importedPositionRows],
   );
 
   const hasManualRetirementBalances =
@@ -420,15 +510,17 @@ export function AccountBalances({
     c.bal.balHsa > 0;
 
   const hasRetirementAccountData =
-    balanceMode === "manual"
+    displayBalanceMode === "manual"
       ? hasManualRetirementBalances
-      : hasAnyFidelityRetirement;
+      : hasAnyImportedRetirement;
 
   const hasManualBrokerageBalance = (brkBal ?? 0) > 0;
   const hasBrokerageAccountData =
-    mergedDashboard && (hasFidelityBrokerage || hasManualBrokerageBalance);
-  const useFidelityBrokerageView =
-    hasFidelityBrokerage && (mergedDashboard || brokerageMode === "fidelity");
+    mergedDashboard && (hasImportedBrokerage || hasManualBrokerageBalance);
+  const useImportedBrokerageView =
+    mergedDashboard &&
+    displayBalanceMode === "imported" &&
+    hasBrokerageAccountData;
 
   const hasAnyAccountCardData =
     hasRetirementAccountData || Boolean(hasBrokerageAccountData);
@@ -470,7 +562,7 @@ export function AccountBalances({
       retirementAge,
       locale,
       manualEntries: manualAccountEntries,
-      retirementBalanceMode: balanceMode,
+      retirementBalanceMode: displayBalanceMode,
     });
   }, [
     incomeModeDashboard,
@@ -483,7 +575,7 @@ export function AccountBalances({
     retirementAge,
     locale,
     manualAccountEntries,
-    balanceMode,
+    displayBalanceMode,
   ]);
 
   const portfolioTotalLabel = incomeModeDashboard
@@ -500,14 +592,14 @@ export function AccountBalances({
     if (!mergedDashboard || !inputs) return [];
     return computeMergedDashboardPositionModels(
       inputs,
-      fidelityRows,
+      importedPositionRows,
       c.yearsToRetirement,
       c.retirementCalendarYear,
     );
   }, [
     mergedDashboard,
     inputs,
-    fidelityRows,
+    importedPositionRows,
     c.yearsToRetirement,
     c.retirementCalendarYear,
   ]);
@@ -535,11 +627,11 @@ export function AccountBalances({
     ).some((bucket) => accountScenarioIsActive(inputs, bucket));
   }, [hasCustomScenarioBadge, inputs]);
 
-  const [fidelityScenarioPanel, setFidelityScenarioPanel] = useState<{
+  const [holdingScenarioPanel, setHoldingScenarioPanel] = useState<{
     symbol: string;
-    contributingRows: FidelityPositionRow[];
+    contributingRows: ImportedPositionRow[];
   } | null>(null);
-  const [fidelityScenarioClosing, setFidelityScenarioClosing] = useState(false);
+  const [holdingScenarioClosing, setHoldingScenarioClosing] = useState(false);
   const [accountScenarioPanel, setAccountScenarioPanel] =
     useState<AccountScenarioBucketId | null>(null);
   const [accountScenarioClosing, setAccountScenarioClosing] = useState(false);
@@ -581,7 +673,7 @@ export function AccountBalances({
     mergedDashboard &&
     onBases &&
     onBalanceModeChange &&
-    onFidelityApplyBalances,
+    onImportedApplyBalances,
   );
 
   const removeAccountsModalState = useOverlayState();
@@ -591,7 +683,7 @@ export function AccountBalances({
   } | null>(null);
 
   const portfolioModes = useMemo(
-    () => ({ retirement: balanceMode, brokerage: brokerageMode ?? "fidelity" }),
+    () => ({ retirement: balanceMode, brokerage: brokerageMode ?? "imported" }),
     [balanceMode, brokerageMode],
   );
 
@@ -635,8 +727,8 @@ export function AccountBalances({
 
   const confirmRemoveAccounts = useCallback(() => {
     removeAccountsModalState.close();
-    setFidelityScenarioPanel(null);
-    setFidelityScenarioClosing(false);
+    setHoldingScenarioPanel(null);
+    setHoldingScenarioClosing(false);
     setAccountScenarioPanel(null);
     setAccountScenarioClosing(false);
     setBalanceEditPanel(null);
@@ -644,39 +736,39 @@ export function AccountBalances({
     onRemoveRetirementAccounts?.();
   }, [removeAccountsModalState, onRemoveRetirementAccounts]);
 
-  const finalizeFidelityScenarioClose = useCallback(() => {
-    setFidelityScenarioPanel(null);
-    setFidelityScenarioClosing(false);
+  const finalizeHoldingScenarioClose = useCallback(() => {
+    setHoldingScenarioPanel(null);
+    setHoldingScenarioClosing(false);
   }, []);
 
-  const requestFidelityScenarioClose = useCallback(() => {
-    if (!fidelityScenarioPanel || fidelityScenarioClosing) return;
-    setFidelityScenarioClosing(true);
-  }, [fidelityScenarioPanel, fidelityScenarioClosing]);
+  const requestHoldingScenarioClose = useCallback(() => {
+    if (!holdingScenarioPanel || holdingScenarioClosing) return;
+    setHoldingScenarioClosing(true);
+  }, [holdingScenarioPanel, holdingScenarioClosing]);
 
-  const fidelityActiveScenarioSymbol =
-    fidelityScenarioPanel && !fidelityScenarioClosing
-      ? fidelityScenarioPanel.symbol
+  const activeHoldingScenarioSymbol =
+    holdingScenarioPanel && !holdingScenarioClosing
+      ? holdingScenarioPanel.symbol
       : null;
 
-  const onFidelityScenarioSheetAnimationEnd = useCallback(
+  const onHoldingScenarioSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return;
       if (e.animationName !== "holding-scenario-slide-sheet-out") return;
-      if (!fidelityScenarioClosing) return;
-      finalizeFidelityScenarioClose();
+      if (!holdingScenarioClosing) return;
+      finalizeHoldingScenarioClose();
     },
-    [fidelityScenarioClosing, finalizeFidelityScenarioClose],
+    [holdingScenarioClosing, finalizeHoldingScenarioClose],
   );
 
-  const onFidelityScenarioOpen = useCallback(
-    (payload: { symbol: string; contributingRows: FidelityPositionRow[] }) => {
+  const onHoldingScenarioOpen = useCallback(
+    (payload: { symbol: string; contributingRows: ImportedPositionRow[] }) => {
       setBalanceEditPanel(null);
       setBalanceEditClosing(false);
       setAccountScenarioPanel(null);
       setAccountScenarioClosing(false);
-      setFidelityScenarioClosing(false);
-      setFidelityScenarioPanel(payload);
+      setHoldingScenarioClosing(false);
+      setHoldingScenarioPanel(payload);
     },
     [],
   );
@@ -686,6 +778,127 @@ export function AccountBalances({
     setAccountScenarioClosing(false);
     setAccountScenarioInitialTab(undefined);
   }, []);
+
+  const syncManualEntriesToInputs = useCallback(
+    (entries: ManualAccountEntry[]) => {
+      if (!onBases) return;
+      const bases = aggregateManualAccountsToBases(entries);
+      onBases({
+        base401k: bases.base401k,
+        baseSE401k: bases.baseSE401k,
+        baseTradIRA: bases.baseTradIRA,
+        baseRoth: bases.baseRoth,
+        baseHsa: bases.baseHsa,
+        brkBal: bases.brkBal,
+      });
+    },
+    [onBases],
+  );
+
+  const patchManualEntryAllocation = useCallback(
+    (entryId: string, profile: AllocationProfile | null) => {
+      const stored = loadStoredManualAccounts();
+      const base =
+        allocationEntriesPatch ??
+        (stored?.entries?.length ? stored.entries : null) ??
+        manualAccountEntries;
+      const optimistic = base.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              source: entry.source ?? "manual",
+              allocation_profile: profile,
+            }
+          : entry,
+      );
+      setAllocationEntriesPatch(optimistic);
+      saveCompletedManualAccounts(optimistic);
+    },
+    [allocationEntriesPatch, manualAccountEntries],
+  );
+
+  const patchManualEntryBalance = useCallback(
+    (entryId: string, balance: number) => {
+      const stored = loadStoredManualAccounts();
+      const base =
+        allocationEntriesPatch ?? stored?.entries ?? manualAccountEntries;
+      const rounded = Math.max(0, Math.round(balance));
+      const optimistic = base.map((entry) =>
+        entry.id === entryId ? { ...entry, balance: rounded } : entry,
+      );
+      setAllocationEntriesPatch(optimistic);
+      saveCompletedManualAccounts(optimistic);
+      syncManualEntriesToInputs(optimistic);
+      onManualAccountsCommitted?.();
+    },
+    [
+      allocationEntriesPatch,
+      manualAccountEntries,
+      onManualAccountsCommitted,
+      syncManualEntriesToInputs,
+    ],
+  );
+
+  const renderManualRowValuesControls = useCallback(
+    (entry: ManualAccountEntry | undefined) => {
+      if (
+        !manualRowEditingEnabled ||
+        !entry ||
+        (entry.source ?? "manual") !== "manual"
+      ) {
+        return { allocation: null, total: null as ReactNode | null };
+      }
+      return {
+        allocation: (
+          <ManualAccountAllocationSlider
+            entryId={entry.id}
+            value={entry.allocation_profile}
+            onChange={(profile) =>
+              patchManualEntryAllocation(entry.id, profile)
+            }
+          />
+        ),
+        total: (
+          <ManualAccountBalanceField
+            balance={entry.balance}
+            onCommit={(next) => patchManualEntryBalance(entry.id, next)}
+          />
+        ),
+      };
+    },
+    [
+      manualRowEditingEnabled,
+      patchManualEntryAllocation,
+      patchManualEntryBalance,
+    ],
+  );
+
+  const handleRequestSetAllocationProfile = useCallback(() => {
+    if (!accountScenarioPanel) return;
+    const entryId = manualEntryIdForScenarioBucket(
+      manualAccountEntries,
+      accountScenarioPanel,
+    );
+    finalizeAccountScenarioClose();
+    if (!entryId) return;
+    const el = document.querySelector(
+      `[data-manual-account-entry="${entryId}"]`,
+    );
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const trigger = el?.querySelector<HTMLButtonElement>(
+      ".manual-account-allocation__trigger",
+    );
+    trigger?.click();
+    requestAnimationFrame(() => {
+      el?.querySelector<HTMLInputElement>(
+        ".manual-account-allocation-slider-panel__range",
+      )?.focus();
+    });
+  }, [
+    accountScenarioPanel,
+    finalizeAccountScenarioClose,
+    manualAccountEntries,
+  ]);
 
   const requestAccountScenarioClose = useCallback(() => {
     if (!accountScenarioPanel || accountScenarioClosing) return;
@@ -706,8 +919,8 @@ export function AccountBalances({
     (bucket: AccountScenarioBucketId, initialTab?: ScenarioIntentTabId) => {
       setBalanceEditPanel(null);
       setBalanceEditClosing(false);
-      setFidelityScenarioPanel(null);
-      setFidelityScenarioClosing(false);
+      setHoldingScenarioPanel(null);
+      setHoldingScenarioClosing(false);
       setAccountScenarioClosing(false);
       setAccountScenarioInitialTab(initialTab);
       setAccountScenarioPanel(bucket);
@@ -721,11 +934,11 @@ export function AccountBalances({
         case "brokerage":
           return "Brokerage";
         case "pretax":
-          return fidelityBucketLabel("pretax", "Pre-tax 401(k) / IRA");
+          return importedBucketLabel("pretax", "Pre-tax 401(k) / IRA");
         case "roth":
-          return fidelityBucketLabel("roth", "Roth IRA");
+          return importedBucketLabel("roth", "Roth IRA");
         case "hsa":
-          return fidelityBucketLabel("hsa", "HSA");
+          return importedBucketLabel("hsa", "HSA");
       }
     },
     [locale, taxConfig],
@@ -734,8 +947,8 @@ export function AccountBalances({
   const buildAccountScenarioRowProps = useCallback(
     (
       bucket: AccountScenarioBucketId,
-    ): FidelityBucketAccountScenarioProps | null => {
-      if (!fidelityScenarioEditingEnabled || !inputs) return null;
+    ): PortfolioBucketAccountScenarioProps | null => {
+      if (!accountScenarioEditingEnabled || !inputs) return null;
       const blended = blendedRateForAccountBucket(
         bucket,
         inputs.retRate,
@@ -762,8 +975,8 @@ export function AccountBalances({
     [
       accountScenarioPanel,
       accountScenarioClosing,
+      accountScenarioEditingEnabled,
       c.yearsToRetirement,
-      fidelityScenarioEditingEnabled,
       inputs,
       onAccountScenarioOpen,
     ],
@@ -866,8 +1079,8 @@ export function AccountBalances({
 
   const openBalanceEditPanel = useCallback(
     (panel: "manual" | "import") => {
-      setFidelityScenarioPanel(null);
-      setFidelityScenarioClosing(false);
+      setHoldingScenarioPanel(null);
+      setHoldingScenarioClosing(false);
       setAccountScenarioPanel(null);
       setAccountScenarioClosing(false);
       setBalanceEditClosing(false);
@@ -890,7 +1103,7 @@ export function AccountBalances({
       }
       setBalanceEditPanel(panel);
       if (panel === "import") {
-        onBalanceModeChange?.("fidelity");
+        onBalanceModeChange?.("imported");
       }
     },
     [
@@ -907,7 +1120,7 @@ export function AccountBalances({
 
   const lastOpenImportRequestRef = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (!openImportRequest || !mergedDashboard || !onFidelityApplyBalances)
+    if (!openImportRequest || !mergedDashboard || !onImportedApplyBalances)
       return;
     if (lastOpenImportRequestRef.current === openImportRequest) return;
     lastOpenImportRequestRef.current = openImportRequest;
@@ -916,7 +1129,7 @@ export function AccountBalances({
   }, [
     openImportRequest,
     mergedDashboard,
-    onFidelityApplyBalances,
+    onImportedApplyBalances,
     onImportOpenHandled,
   ]);
 
@@ -1030,25 +1243,19 @@ export function AccountBalances({
     financialsCsvFileInputRef.current?.click();
   }, []);
 
-  const onCsvFileIngestConsumed = useCallback(() => {
-    setCsvFileIngestRequest(null);
-  }, []);
+  const finishCsvImportLaunch = useCallback(() => {
+    clearCsvImportLaunchUi();
+    setBalanceEditPanel((panel) => (panel === "import" ? null : panel));
+    setBalanceEditClosing(false);
+  }, [clearCsvImportLaunchUi]);
 
   const launchCsvImportFromFile = useCallback(
     (file: File, custodian: PositionsCsvCustodian) => {
       setCsvImportPrefillCustodian(custodian);
       setCsvFileIngestRequest({ id: Date.now(), file, custodian });
-      onBalanceModeChange?.("fidelity");
-      if (mergedDashboard && onFidelityApplyBalances) {
-        openBalanceEditPanel("import");
-      }
+      onBalanceModeChange?.("imported");
     },
-    [
-      mergedDashboard,
-      onBalanceModeChange,
-      onFidelityApplyBalances,
-      openBalanceEditPanel,
-    ],
+    [onBalanceModeChange],
   );
 
   const onFinancialsCsvFileChange = useCallback(
@@ -1065,7 +1272,7 @@ export function AccountBalances({
 
   useEffect(() => {
     if (
-      !fidelityScenarioPanel &&
+      !holdingScenarioPanel &&
       !accountScenarioPanel &&
       !balanceEditPanel &&
       !removeAccountsModalState.isOpen
@@ -1076,39 +1283,60 @@ export function AccountBalances({
       if (removeAccountsModalState.isOpen) removeAccountsModalState.close();
       else if (balanceEditPanel) requestBalanceEditClose();
       else if (accountScenarioPanel) requestAccountScenarioClose();
-      else if (fidelityScenarioPanel) requestFidelityScenarioClose();
+      else if (holdingScenarioPanel) requestHoldingScenarioClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [
-    fidelityScenarioPanel,
+    holdingScenarioPanel,
     accountScenarioPanel,
     balanceEditPanel,
     removeAccountsModalState.isOpen,
     removeAccountsModalState.close,
-    requestFidelityScenarioClose,
+    requestHoldingScenarioClose,
     requestAccountScenarioClose,
     requestBalanceEditClose,
   ]);
 
-  const fidelityScenarioBundle =
-    useMemo((): FidelityAggregatedScenarioBundle | null => {
-      if (!fidelityScenarioEditingEnabled || !inputs || !setInputs) return null;
-      return {
-        inputs,
-        setInputs,
-        yearsToRetirement: c.yearsToRetirement,
-        retirementCalendarYear: c.retirementCalendarYear,
-        retRate: inputs.retRate,
-        brkRate: inputs.brkRate,
-      };
-    }, [
-      fidelityScenarioEditingEnabled,
+  const accountScenarioBundle = useMemo((): HoldingsScenarioBundle | null => {
+    if (!accountScenarioEditingEnabled || !inputs || !setInputs) return null;
+    return {
       inputs,
       setInputs,
-      c.yearsToRetirement,
-      c.retirementCalendarYear,
-    ]);
+      yearsToRetirement: c.yearsToRetirement,
+      retirementCalendarYear: c.retirementCalendarYear,
+      retRate: inputs.retRate,
+      brkRate: inputs.brkRate,
+    };
+  }, [
+    accountScenarioEditingEnabled,
+    inputs,
+    setInputs,
+    c.yearsToRetirement,
+    c.retirementCalendarYear,
+  ]);
+
+  const holdingsScenarioBundle = holdingsScenarioEditingEnabled
+    ? accountScenarioBundle
+    : null;
+
+  const openAccountScenarioContext = useMemo(
+    () =>
+      accountScenarioPanel
+        ? accountScenarioContextForBucket({
+            bucket: accountScenarioPanel,
+            balanceMode: displayBalanceMode,
+            manualEntries: manualAccountEntries,
+            importedPositionRows,
+          })
+        : { source: null, allocationProfile: null },
+    [
+      accountScenarioPanel,
+      displayBalanceMode,
+      manualAccountEntries,
+      importedPositionRows,
+    ],
+  );
 
   const showWithdrawalGuidance =
     phase === "income" &&
@@ -1116,14 +1344,14 @@ export function AccountBalances({
     !configureInputsOnly &&
     hasAnyAccountCardData &&
     (mergedDashboard ||
-      (balanceMode === "fidelity" && hasAnyFidelityRetirement));
+      (displayBalanceMode === "imported" && hasAnyImportedRetirement));
 
   const incomeModeAccountRows =
     phase === "income" && mergedDashboard && readOnly;
 
   const presentWithdrawalBuckets = useMemo((): WithdrawalDisplayBucket[] => {
     const buckets = new Set<WithdrawalDisplayBucket>();
-    if (balanceMode === "manual" && manualAccountEntries.length > 0) {
+    if (displayBalanceMode === "manual" && manualAccountEntries.length > 0) {
       for (const entry of manualAccountEntries) {
         if (entry.type == null || entry.balance <= 0) continue;
         buckets.add(getAccountTypeMeta(entry.type, locale).withdrawalBucket);
@@ -1133,7 +1361,7 @@ export function AccountBalances({
       if (pretaxTotal > 0) buckets.add("pretax");
       if (c.bal.balRoth > 0) buckets.add("roth");
       if (c.bal.balHsa > 0) buckets.add("hsa");
-      if ((brkBal ?? 0) > 0 || hasFidelityBrokerage) buckets.add("brokerage");
+      if ((brkBal ?? 0) > 0 || hasImportedBrokerage) buckets.add("brokerage");
     }
     return withdrawalBucketOrder(retirementAge, true, locale).filter(
       (b) => buckets.has(b) && localeSupportsWithdrawalBucket(locale, b),
@@ -1147,13 +1375,13 @@ export function AccountBalances({
     c.bal.balRoth,
     c.bal.balHsa,
     brkBal,
-    hasFidelityBrokerage,
+    hasImportedBrokerage,
     retirementAge,
     locale,
   ]);
 
   const userAccountTypes = useMemo((): OnboardingAccountType[] => {
-    if (balanceMode === "manual") {
+    if (displayBalanceMode === "manual") {
       const types = manualAccountEntries
         .map((e) => e.type)
         .filter((t): t is OnboardingAccountType => t != null);
@@ -1166,7 +1394,7 @@ export function AccountBalances({
     if (presentWithdrawalBuckets.includes("roth")) types.push("roth_ira");
     if (presentWithdrawalBuckets.includes("hsa")) types.push("hsa");
     return types;
-  }, [balanceMode, manualAccountEntries, presentWithdrawalBuckets]);
+  }, [displayBalanceMode, manualAccountEntries, presentWithdrawalBuckets]);
 
   const showPersonalizedBucketHints =
     readOnly && !configureInputsOnly && hasAnyAccountCardData;
@@ -1490,9 +1718,9 @@ export function AccountBalances({
           openRequest={openManageRequest}
           onOpenUpgrade={onOpenUpgradeCsv}
           onImportApplied={() => {
-            onBalanceModeChange?.("fidelity");
-            onFidelityImportApplied?.();
-            if (balanceEditPanel === "import") requestBalanceEditClose();
+            onBalanceModeChange?.("imported");
+            onPositionsImportApplied?.();
+            finishCsvImportLaunch();
           }}
         />
       </>
@@ -1544,7 +1772,7 @@ export function AccountBalances({
     );
   }
 
-  function fidelityBucketLabel(
+  function importedBucketLabel(
     bucket: WithdrawalDisplayBucket,
     fallback: string,
   ): string {
@@ -1558,27 +1786,41 @@ export function AccountBalances({
       bucket: AccountScenarioBucketId;
       total: number;
       withdrawalUi: boolean;
+      manualEntry?: ManualAccountEntry;
     },
   ) {
-    const { label, bucket, total, withdrawalUi } = opts;
+    const { label, bucket, total, withdrawalUi, manualEntry } = opts;
+    const entryForAllocation =
+      manualEntry ??
+      (displayBalanceMode === "manual"
+        ? manualAccountEntryForBucket(manualAccountEntries, bucket, locale)
+        : undefined);
     const { order } = withdrawalUi
       ? metaFor(bucket)
       : { order: null as number | null };
-    const subtext = renderBucketSubtext(bucket, total);
+    const subtext = renderBucketSubtext(
+      bucket,
+      entryForAllocation?.balance ?? total,
+    );
     const scenario = buildAccountScenarioRowProps(bucket);
+    const rowValues = renderManualRowValuesControls(entryForAllocation);
+    const displayTotal =
+      rowValues.total ?? fmt(entryForAllocation?.balance ?? total);
 
     return (
       <div
         key={key}
         className="tax-treatment-disclosure portfolio-account-group portfolio-account-group--static"
+        data-manual-account-entry={entryForAllocation?.id}
       >
         <div className="portfolio-bucket-account-summary">
-          <FidelityBucketAccountRow
+          <PortfolioBucketAccountRow
             badgeOrder={withdrawalUi ? order : null}
             label={label}
             subtext={subtext}
+            allocationSlot={rowValues.allocation}
             withdrawalPill={renderWithdrawalPill(bucket)}
-            total={fmt(total)}
+            total={displayTotal}
             showViewHoldings={false}
             scenario={scenario}
           />
@@ -1587,7 +1829,7 @@ export function AccountBalances({
     );
   }
 
-  function renderFidelityTaxDisclosure(
+  function renderImportedTaxDisclosure(
     tax: "pretax" | "roth" | "hsa",
     def: { label: string; total: number },
     withdrawalUi: boolean,
@@ -1599,13 +1841,13 @@ export function AccountBalances({
     const { order } = withdrawalUi
       ? metaFor(bucket)
       : { order: null as number | null };
-    const positions = positionsForTaxTreatment(fidelityRows, tax);
+    const positions = positionsForTaxTreatment(importedPositionRows, tax);
     const trend = computeBucketTrendDisplay(positions);
-    const aggregated = aggregateFidelityPositionsBySymbol(positions);
+    const aggregated = aggregatePositionsBySymbol(positions);
     const combinedLines = positions.length > aggregated.length;
 
     const summaryInner = (
-      <FidelityBucketAccountRow
+      <PortfolioBucketAccountRow
         badgeOrder={withdrawalUi ? order : null}
         label={def.label}
         subtext={taxSubtext}
@@ -1630,14 +1872,14 @@ export function AccountBalances({
               No positions mapped to this bucket in your import.
             </p>
           ) : (
-            <FidelityAggregatedSymbolTable
+            <AggregatedHoldingsTable
               rows={aggregated}
               combinedLines={combinedLines}
-              fidelityAllRows={fidelityRows}
-              scenarioBundle={fidelityScenarioBundle}
+              importedPositionRows={importedPositionRows}
+              scenarioBundle={holdingsScenarioBundle}
               accountScenarioBucket={accountBucket}
-              activeScenarioSymbol={fidelityActiveScenarioSymbol}
-              onScenarioOpen={onFidelityScenarioOpen}
+              activeScenarioSymbol={activeHoldingScenarioSymbol}
+              onScenarioOpen={onHoldingScenarioOpen}
             />
           )}
         </div>
@@ -1645,23 +1887,23 @@ export function AccountBalances({
     );
   }
 
-  function renderFidelityImportedTaxBuckets(withdrawalUi: boolean) {
+  function renderImportedTaxBuckets(withdrawalUi: boolean) {
     const pretaxTotal = retirementPretaxDisplayTotal(c.bal);
     const defs = (
       [
         {
           tax: "pretax" as const,
-          label: fidelityBucketLabel("pretax", "Pre-tax"),
+          label: importedBucketLabel("pretax", "Pre-tax"),
           total: pretaxTotal,
         },
         {
           tax: "roth" as const,
-          label: fidelityBucketLabel("roth", "Tax-advantaged"),
+          label: importedBucketLabel("roth", "Tax-advantaged"),
           total: c.bal.balRoth,
         },
         {
           tax: "hsa" as const,
-          label: fidelityBucketLabel("hsa", "HSA"),
+          label: importedBucketLabel("hsa", "HSA"),
           total: c.bal.balHsa,
         },
       ] as const
@@ -1678,11 +1920,11 @@ export function AccountBalances({
         if (b === "brokerage") return [];
         const def = defByTax[b];
         if (!def) return [];
-        return [renderFidelityTaxDisclosure(b, def, true)];
+        return [renderImportedTaxDisclosure(b, def, true)];
       });
     }
 
-    return defs.map((d) => renderFidelityTaxDisclosure(d.tax, d, false));
+    return defs.map((d) => renderImportedTaxDisclosure(d.tax, d, false));
   }
 
   function renderManualBalanceEditRow(
@@ -1749,7 +1991,7 @@ export function AccountBalances({
     }
 
     if (readOnly) {
-      if (balanceMode === "manual") {
+      if (displayBalanceMode === "manual") {
         const rows = visibleManualRetirementRows();
         return rows.map((row, idx) =>
           renderManualBalanceEditRow(row, idx, {
@@ -1758,18 +2000,18 @@ export function AccountBalances({
           }),
         );
       }
-      return renderFidelityImportedTaxBuckets(
+      return renderImportedTaxBuckets(
         showWithdrawalGuidance && !mergedDashboard,
       );
     }
 
     if (configureInputsOnly) {
-      if (balanceMode === "manual") {
+      if (displayBalanceMode === "manual") {
         return manualBalanceRows.map((row, idx) =>
           renderManualBalanceEditRow(row, idx, { omitLastBorder: true }),
         );
       }
-      if (hasAnyFidelityRetirement) {
+      if (hasAnyImportedRetirement) {
         return (
           <p
             className="footnote"
@@ -1789,12 +2031,12 @@ export function AccountBalances({
       return null;
     }
 
-    if (balanceMode === "manual") {
+    if (displayBalanceMode === "manual") {
       return manualBalanceRows.map((row, idx) =>
         renderManualBalanceEditRow(row, idx, { omitLastBorder: true }),
       );
     }
-    return renderFidelityImportedTaxBuckets(false);
+    return renderImportedTaxBuckets(false);
   }
 
   function renderMergedBrokerageBlock(withdrawalUi: boolean) {
@@ -1814,17 +2056,28 @@ export function AccountBalances({
     const brokerageScenario = buildAccountScenarioRowProps("brokerage");
     const brokerageSubtext = renderBucketSubtext("brokerage", brkBal);
 
-    if (!useFidelityBrokerageView) {
+    if (!useImportedBrokerageView) {
+      const brokerageEntry =
+        displayBalanceMode === "manual"
+          ? manualAccountEntryForBucket(
+              manualAccountEntries,
+              "brokerage",
+              locale,
+            )
+          : undefined;
       return renderManualPortfolioAccountCard("brokerage", {
-        label: "Brokerage",
+        label: brokerageEntry
+          ? getAccountTypeMeta(brokerageEntry.type!, locale).label
+          : "Brokerage",
         bucket: "brokerage",
         total: brkBal,
         withdrawalUi,
+        manualEntry: brokerageEntry,
       });
     }
 
     const summaryInner = (
-      <FidelityBucketAccountRow
+      <PortfolioBucketAccountRow
         badgeOrder={withdrawalUi ? brkMeta.order : null}
         label="Brokerage"
         subtext={brokerageSubtext}
@@ -1835,8 +2088,7 @@ export function AccountBalances({
       />
     );
 
-    const brkAggregated =
-      aggregateFidelityPositionsBySymbol(brokeragePositions);
+    const brkAggregated = aggregatePositionsBySymbol(brokeragePositions);
     const brkCombinedLines = brokeragePositions.length > brkAggregated.length;
 
     return (
@@ -1848,14 +2100,14 @@ export function AccountBalances({
           {summaryInner}
         </summary>
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
-          <FidelityAggregatedSymbolTable
+          <AggregatedHoldingsTable
             rows={brkAggregated}
             combinedLines={brkCombinedLines}
-            fidelityAllRows={fidelityRows}
-            scenarioBundle={fidelityScenarioBundle}
+            importedPositionRows={importedPositionRows}
+            scenarioBundle={holdingsScenarioBundle}
             accountScenarioBucket="brokerage"
-            activeScenarioSymbol={fidelityActiveScenarioSymbol}
-            onScenarioOpen={onFidelityScenarioOpen}
+            activeScenarioSymbol={activeHoldingScenarioSymbol}
+            onScenarioOpen={onHoldingScenarioOpen}
           />
         </div>
       </details>
@@ -1907,7 +2159,7 @@ export function AccountBalances({
               onRequestReplaceManual={guardReplaceManual}
             />
           </div>
-          {onFidelityApplyBalances ? (
+          {onImportedApplyBalances ? (
             <div
               className="account-balances-financials-entry__choices account-balances-financials-entry__choices--secondary"
               role="list"
@@ -1915,8 +2167,8 @@ export function AccountBalances({
               <PlaidLinkButton
                 variant="choice"
                 residenceCountry={inputs?.residenceCountry}
-                onApplyBalances={onFidelityApplyBalances}
-                onImportApplied={onFidelityImportApplied}
+                onApplyBalances={onImportedApplyBalances}
+                onImportApplied={onPositionsImportApplied}
                 onOpenUpgrade={onOpenUpgradeCsv}
               />
             </div>
@@ -1942,10 +2194,15 @@ export function AccountBalances({
       currentBalance: number,
       bucketCurrentTotal?: number,
     ) => {
-      const bucketTotal =
-        bucketCurrentTotal ??
-        currentBalanceForAccountBucket(bucket, c, brkBal ?? 0);
-      return accountRetirementBalance(bucket, currentBalance, bucketTotal, c);
+      const line = {
+        storageKey: "",
+        bucket,
+        currentBalance,
+        bucketCurrentTotal:
+          bucketCurrentTotal ??
+          currentBalanceForAccountBucket(bucket, c, brkBal ?? 0),
+      };
+      return incomeBalanceForProjection(line, c, brkBal ?? 0);
     },
     [c, brkBal],
   );
@@ -1958,6 +2215,7 @@ export function AccountBalances({
       currentBalance: number,
       bucketCurrentTotal?: number,
       badgeOrder: number | null = null,
+      manualEntry?: ManualAccountEntry,
     ) => {
       const ticker = resolveAccountIncomeFundTicker(
         storageKey,
@@ -2023,6 +2281,18 @@ export function AccountBalances({
           bucket={bucket}
           selectedTicker={ticker}
           strategy={strategy}
+          allocationSlot={
+            renderManualRowValuesControls(
+              manualEntry ??
+                (displayBalanceMode === "manual"
+                  ? manualAccountEntryForBucket(
+                      manualAccountEntries,
+                      bucket,
+                      locale,
+                    )
+                  : undefined),
+            ).allocation
+          }
           accordionContent={accordionContent}
           onStrategyChange={(next) => {
             onAccountIncomeStrategyChange?.(storageKey, next);
@@ -2060,6 +2330,10 @@ export function AccountBalances({
       onAccountWithdrawRateChange,
       resolveIncomeRowRetirementBalance,
       retirementAge,
+      renderManualRowValuesControls,
+      displayBalanceMode,
+      manualAccountEntries,
+      locale,
     ],
   );
 
@@ -2071,7 +2345,7 @@ export function AccountBalances({
 
     if (!hasAnyAccountCardData) return null;
 
-    if (balanceMode === "manual" && manualAccountEntries.length > 0) {
+    if (displayBalanceMode === "manual" && manualAccountEntries.length > 0) {
       for (const step of seq) {
         if (!localeSupportsWithdrawalBucket(locale, step)) continue;
         const entriesForStep = manualAccountEntries.filter(
@@ -2093,6 +2367,7 @@ export function AccountBalances({
               entry.balance,
               manualEntryBucketTotals[meta.withdrawalBucket],
               withdrawalUi ? order : null,
+              entry,
             ),
           );
         }
@@ -2114,7 +2389,7 @@ export function AccountBalances({
         nodes.push(
           renderIncomeAccountRow(
             accountIncomeFundStorageKey("bucket", "brokerage"),
-            fidelityBucketLabel("brokerage", "Brokerage"),
+            importedBucketLabel("brokerage", "Brokerage"),
             "brokerage",
             brkBal,
             brkBal,
@@ -2132,7 +2407,7 @@ export function AccountBalances({
         const { order: pretaxOrder } = withdrawalUi
           ? metaFor("pretax")
           : { order: null };
-        if (balanceMode === "manual") {
+        if (displayBalanceMode === "manual") {
           for (const row of visibleManualRetirementRows().filter(
             (r) =>
               r.key === "ret401k" || r.key === "se401k" || r.key === "tradIra",
@@ -2145,6 +2420,11 @@ export function AccountBalances({
                 display(row.key),
                 pretaxTotal,
                 withdrawalUi ? pretaxOrder : null,
+                manualAccountEntryForBucket(
+                  manualAccountEntries,
+                  "pretax",
+                  locale,
+                ),
               ),
             );
           }
@@ -2152,7 +2432,7 @@ export function AccountBalances({
           nodes.push(
             renderIncomeAccountRow(
               accountIncomeFundStorageKey("bucket", "pretax"),
-              fidelityBucketLabel("pretax", "Pre-tax"),
+              importedBucketLabel("pretax", "Pre-tax"),
               "pretax",
               pretaxTotal,
               pretaxTotal,
@@ -2170,7 +2450,7 @@ export function AccountBalances({
         const { order: rothOrder } = withdrawalUi
           ? metaFor("roth")
           : { order: null };
-        if (balanceMode === "manual") {
+        if (displayBalanceMode === "manual") {
           const rothRow = visibleManualRetirementRows().find(
             (r) => r.key === "roth",
           );
@@ -2183,6 +2463,11 @@ export function AccountBalances({
                 display(rothRow.key),
                 c.bal.balRoth,
                 withdrawalUi ? rothOrder : null,
+                manualAccountEntryForBucket(
+                  manualAccountEntries,
+                  "roth",
+                  locale,
+                ),
               ),
             );
           }
@@ -2190,7 +2475,7 @@ export function AccountBalances({
           nodes.push(
             renderIncomeAccountRow(
               accountIncomeFundStorageKey("bucket", "roth"),
-              fidelityBucketLabel("roth", "Tax-advantaged"),
+              importedBucketLabel("roth", "Tax-advantaged"),
               "roth",
               c.bal.balRoth,
               c.bal.balRoth,
@@ -2208,7 +2493,7 @@ export function AccountBalances({
         const { order: hsaOrder } = withdrawalUi
           ? metaFor("hsa")
           : { order: null };
-        if (balanceMode === "manual") {
+        if (displayBalanceMode === "manual") {
           const hsaRow = visibleManualRetirementRows().find(
             (r) => r.key === "hsa",
           );
@@ -2221,6 +2506,11 @@ export function AccountBalances({
                 display(hsaRow.key),
                 c.bal.balHsa,
                 withdrawalUi ? hsaOrder : null,
+                manualAccountEntryForBucket(
+                  manualAccountEntries,
+                  "hsa",
+                  locale,
+                ),
               ),
             );
           }
@@ -2228,7 +2518,7 @@ export function AccountBalances({
           nodes.push(
             renderIncomeAccountRow(
               accountIncomeFundStorageKey("bucket", "hsa"),
-              fidelityBucketLabel("hsa", "HSA"),
+              importedBucketLabel("hsa", "HSA"),
               "hsa",
               c.bal.balHsa,
               c.bal.balHsa,
@@ -2255,17 +2545,17 @@ export function AccountBalances({
     const pretaxTotal = retirementPretaxDisplayTotal(c.bal);
     const pretaxDef = {
       tax: "pretax" as const,
-      label: fidelityBucketLabel("pretax", "Pre-tax"),
+      label: importedBucketLabel("pretax", "Pre-tax"),
       total: pretaxTotal,
     };
     const rothDef = {
       tax: "roth" as const,
-      label: fidelityBucketLabel("roth", "Tax-advantaged"),
+      label: importedBucketLabel("roth", "Tax-advantaged"),
       total: c.bal.balRoth,
     };
     const hsaDef = {
       tax: "hsa" as const,
-      label: fidelityBucketLabel("hsa", "HSA"),
+      label: importedBucketLabel("hsa", "HSA"),
       total: c.bal.balHsa,
     };
 
@@ -2275,7 +2565,7 @@ export function AccountBalances({
       return null;
     }
 
-    if (balanceMode === "manual") {
+    if (displayBalanceMode === "manual") {
       if (manualAccountEntries.length > 0) {
         for (const step of seq) {
           const entriesForStep = manualAccountEntries.filter(
@@ -2292,6 +2582,7 @@ export function AccountBalances({
                   bucket: meta.withdrawalBucket,
                   total: entry.balance,
                   withdrawalUi,
+                  manualEntry: entry,
                 }),
               );
             }
@@ -2307,6 +2598,7 @@ export function AccountBalances({
                 bucket: meta.withdrawalBucket,
                 total: entry.balance,
                 withdrawalUi,
+                manualEntry: entry,
               }),
             );
           }
@@ -2382,20 +2674,20 @@ export function AccountBalances({
       if (step === "pretax") {
         if (pretaxDef.total > 0)
           nodes.push(
-            renderFidelityTaxDisclosure("pretax", pretaxDef, withdrawalUi),
+            renderImportedTaxDisclosure("pretax", pretaxDef, withdrawalUi),
           );
         continue;
       }
       if (step === "roth") {
         if (rothDef.total > 0)
           nodes.push(
-            renderFidelityTaxDisclosure("roth", rothDef, withdrawalUi),
+            renderImportedTaxDisclosure("roth", rothDef, withdrawalUi),
           );
         continue;
       }
       if (step === "hsa") {
         if (hsaDef.total > 0)
-          nodes.push(renderFidelityTaxDisclosure("hsa", hsaDef, withdrawalUi));
+          nodes.push(renderImportedTaxDisclosure("hsa", hsaDef, withdrawalUi));
       }
     }
 
@@ -2413,8 +2705,8 @@ export function AccountBalances({
   const balanceEditPanelOpen = Boolean(
     balanceEditPanel ||
     balanceEditClosing ||
-    fidelityScenarioPanel ||
-    fidelityScenarioClosing ||
+    holdingScenarioPanel ||
+    holdingScenarioClosing ||
     accountScenarioPanel ||
     accountScenarioClosing ||
     removeAccountsModalState.isOpen,
@@ -2422,30 +2714,30 @@ export function AccountBalances({
 
   const renderMergedDashboardOverlays = () => (
     <div className="account-balances-dashboard-overlays">
-      {fidelityScenarioPanel && fidelityScenarioBundle ? (
+      {holdingScenarioPanel && holdingsScenarioBundle ? (
         <aside
-          className={`holding-scenario-slide__sheet${fidelityScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
+          className={`holding-scenario-slide__sheet${holdingScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby="holding-scenario-panel-title"
-          onAnimationEnd={onFidelityScenarioSheetAnimationEnd}
+          onAnimationEnd={onHoldingScenarioSheetAnimationEnd}
         >
-          <FidelityHoldingScenarioPanel
-            contributingRows={fidelityScenarioPanel.contributingRows}
-            fidelityAllRows={fidelityRows}
-            inputs={fidelityScenarioBundle.inputs}
-            setInputs={fidelityScenarioBundle.setInputs}
-            yearsToRetirement={fidelityScenarioBundle.yearsToRetirement}
+          <HoldingScenarioPanel
+            contributingRows={holdingScenarioPanel.contributingRows}
+            importedPositionRows={importedPositionRows}
+            inputs={holdingsScenarioBundle.inputs}
+            setInputs={holdingsScenarioBundle.setInputs}
+            yearsToRetirement={holdingsScenarioBundle.yearsToRetirement}
             retirementCalendarYear={
-              fidelityScenarioBundle.retirementCalendarYear
+              holdingsScenarioBundle.retirementCalendarYear
             }
-            retRate={fidelityScenarioBundle.retRate}
-            brkRate={fidelityScenarioBundle.brkRate}
-            onClose={requestFidelityScenarioClose}
+            retRate={holdingsScenarioBundle.retRate}
+            brkRate={holdingsScenarioBundle.brkRate}
+            onClose={requestHoldingScenarioClose}
           />
         </aside>
       ) : null}
-      {accountScenarioPanel && fidelityScenarioBundle ? (
+      {accountScenarioPanel && accountScenarioBundle ? (
         <aside
           className={`holding-scenario-slide__sheet${accountScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
           role="dialog"
@@ -2453,19 +2745,27 @@ export function AccountBalances({
           aria-labelledby="account-scenario-panel-title"
           onAnimationEnd={onAccountScenarioSheetAnimationEnd}
         >
-          <FidelityAccountScenarioPanel
+          <AccountScenarioPanel
             accountName={accountScenarioPanelTitle(accountScenarioPanel)}
             bucket={accountScenarioPanel}
-            fidelityAllRows={fidelityRows}
-            inputs={fidelityScenarioBundle.inputs}
-            setInputs={fidelityScenarioBundle.setInputs}
-            yearsToRetirement={fidelityScenarioBundle.yearsToRetirement}
+            importedPositionRows={importedPositionRows}
+            inputs={accountScenarioBundle.inputs}
+            setInputs={accountScenarioBundle.setInputs}
+            yearsToRetirement={accountScenarioBundle.yearsToRetirement}
             retirementCalendarYear={
-              fidelityScenarioBundle.retirementCalendarYear
+              accountScenarioBundle.retirementCalendarYear
             }
-            retRate={fidelityScenarioBundle.retRate}
-            brkRate={fidelityScenarioBundle.brkRate}
+            retRate={accountScenarioBundle.retRate}
+            brkRate={accountScenarioBundle.brkRate}
             initialTab={accountScenarioInitialTab}
+            accountSource={openAccountScenarioContext.source}
+            allocationProfile={openAccountScenarioContext.allocationProfile}
+            onRequestSetAllocationProfile={
+              openAccountScenarioContext.source === "manual" &&
+              !openAccountScenarioContext.allocationProfile
+                ? handleRequestSetAllocationProfile
+                : undefined
+            }
             onClose={requestAccountScenarioClose}
           />
         </aside>
@@ -2578,34 +2878,6 @@ export function AccountBalances({
           </div>
         </aside>
       ) : null}
-      {balanceEditPanel === "import" && onFidelityApplyBalances ? (
-        <aside
-          className={`account-balances-import-sheet account-balances-edit-sheet account-balances-edit-sheet--import${balanceEditClosing ? " account-balances-import-sheet--closing" : ""}`}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="csv-import-modal-title"
-          onAnimationEnd={onBalanceEditSheetAnimationEnd}
-        >
-          <FidelityCsvImport
-            presentation="panel"
-            open
-            hideTrigger
-            initialCustodian={csvImportPrefillCustodian}
-            fileIngestRequest={csvFileIngestRequest}
-            onFileIngestConsumed={onCsvFileIngestConsumed}
-            onImportFlowClose={clearCsvImportLaunchUi}
-            onOpenChange={(open) => {
-              if (!open) requestBalanceEditClose();
-            }}
-            onApplyBalances={onFidelityApplyBalances}
-            onImportApplied={() => {
-              onFidelityImportApplied?.();
-              requestBalanceEditClose();
-            }}
-            showManualReplaceNotice={willRemoveManualOnConnect}
-          />
-        </aside>
-      ) : null}
       {renderReplaceSourceConfirmOverlay()}
       {renderRemoveAccountsConfirmOverlay()}
     </div>
@@ -2694,7 +2966,7 @@ export function AccountBalances({
           {renderHiddenCsvFileInput()}
           <ManualProjectionsCallout
             hasPortfolioBalances={c.hasPortfolioBalances}
-            fidelityImportRev={fidelityImportRev}
+            positionsImportRev={positionsImportRev}
             onConnectAccounts={() => setOpenManageRequest((n) => n + 1)}
             onImportCsv={() => setOpenManageRequest((n) => n + 1)}
           />
@@ -2794,20 +3066,22 @@ export function AccountBalances({
           <div className="input-col-title">Retirement account balances</div>
           {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
           {!readOnly &&
-          (hasRetirementAccountData || balanceMode === "fidelity") ? (
+          (hasRetirementAccountData || balanceMode === "imported") ? (
             <div className="balance-input-toolbar">
               {showBalanceEntryActions
                 ? renderAccountBalancesManageMenu()
                 : null}
-              {balanceMode === "fidelity" ? (
-                <FidelityCsvImport
+              {balanceMode === "imported" ? (
+                <PositionsCsvImport
                   variant="toolbar"
                   initialCustodian={csvImportPrefillCustodian}
                   fileIngestRequest={csvFileIngestRequest}
-                  onFileIngestConsumed={onCsvFileIngestConsumed}
-                  onImportFlowClose={clearCsvImportLaunchUi}
-                  onApplyBalances={onFidelityApplyBalances!}
-                  onImportApplied={onFidelityImportApplied}
+                  onImportFlowClose={finishCsvImportLaunch}
+                  onApplyBalances={onImportedApplyBalances!}
+                  onImportApplied={() => {
+                    onPositionsImportApplied?.();
+                    finishCsvImportLaunch();
+                  }}
                 />
               ) : null}
             </div>
@@ -2838,14 +3112,32 @@ export function AccountBalances({
     </>
   );
 
-  if (onFidelityApplyBalances) {
+  const csvImportModal =
+    mergedDashboard && csvFileIngestRequest && onImportedApplyBalances ? (
+      <PositionsCsvImport
+        presentation="modal"
+        hideTrigger
+        initialCustodian={csvImportPrefillCustodian}
+        fileIngestRequest={csvFileIngestRequest}
+        onImportFlowClose={finishCsvImportLaunch}
+        onApplyBalances={onImportedApplyBalances}
+        onImportApplied={() => {
+          onPositionsImportApplied?.();
+          finishCsvImportLaunch();
+        }}
+        showManualReplaceNotice={willRemoveManualOnConnect}
+      />
+    ) : null;
+
+  if (onImportedApplyBalances) {
     return (
       <PlaidConnectionProvider
         residenceCountry={inputs?.residenceCountry}
-        onApplyBalances={onFidelityApplyBalances}
-        onImportApplied={onFidelityImportApplied}
+        onApplyBalances={onImportedApplyBalances}
+        onImportApplied={onPositionsImportApplied}
       >
         {accountBalancesBody}
+        {csvImportModal}
       </PlaidConnectionProvider>
     );
   }

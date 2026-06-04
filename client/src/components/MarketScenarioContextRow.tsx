@@ -16,7 +16,7 @@ import { fmtK } from "../utils/format";
 import { AccordionSection } from "./ui/AccordionSection";
 import { Toggle } from "./ui/Toggle";
 import { MarketScenarioSparkline } from "./MarketScenarioSparkline";
-import "./FidelityHoldingScenarioPopout.scss";
+import "./HoldingScenarioPopout.scss";
 import "./MarketScenarioContextRow.scss";
 
 function marketScenarioDotClass(id: MarketScenarioId): string {

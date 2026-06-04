@@ -2,7 +2,10 @@ import type { AccountScenarioBucketId } from './accountReturnScenario'
 import {
   accountIncomeFundStorageKey,
 } from './accountIncomeFund'
-import { accountRetirementBalance } from './accountBucketRetirementBalance'
+import {
+  accountRetirementBalance,
+  type AccountRetirementFvSnapshot,
+} from './accountBucketRetirementBalance'
 import {
   computeAccountIncomeBreakdown,
   resolveAccountIncomeStrategy,
@@ -49,7 +52,7 @@ export type AccountIncomeMonthlyContext = {
   locale?: OnboardingRegionId
   /** When manual onboarding entries exist, use per-account rows; else bucket totals. */
   manualEntries?: ManualAccountEntry[]
-  retirementBalanceMode?: 'manual' | 'fidelity'
+  retirementBalanceMode?: 'manual' | 'imported'
 }
 
 function pretaxCurrentTotal(inputs: CalculatorInputs): number {
@@ -190,6 +193,44 @@ function snapshotFromContext(ctx: AccountIncomeMonthlyContext) {
   }
 }
 
+/** True when at least one account row has dividend, withdraw, or both enabled. */
+export function hasAnyAccountIncomeStrategySelected(
+  ctx: AccountIncomeMonthlyContext,
+): boolean {
+  if (!ctx.hasPortfolioBalances) return false
+  for (const line of listAccountIncomeLines(ctx)) {
+    const raw = ctx.accountIncomeStrategies[line.storageKey]
+    if (raw === 'dividend' || raw === 'withdraw' || raw === 'both') return true
+    const strategy = resolveAccountIncomeStrategy(
+      line.storageKey,
+      line.bucket,
+      ctx.accountIncomeStrategies,
+    )
+    if (strategy !== 'none') return true
+  }
+  return false
+}
+
+/** Balance at retirement for income draw; falls back to current balance when FV is unavailable. */
+export function incomeBalanceForProjection(
+  line: AccountIncomeLine,
+  snapshot: AccountRetirementFvSnapshot,
+  brkBal: number,
+): number {
+  const bucketTotal =
+    line.bucketCurrentTotal > 0 ? line.bucketCurrentTotal : line.currentBalance
+  const atRetirement = accountRetirementBalance(
+    line.bucket,
+    line.currentBalance,
+    bucketTotal,
+    snapshot,
+  )
+  if (atRetirement > 0) return atRetirement
+  if (line.currentBalance > 0) return line.currentBalance
+  if (line.bucket === 'brokerage' && brkBal > 0) return brkBal
+  return 0
+}
+
 /** Sum of per-account income (matches income-mode account rows). */
 export function monthlyPortfolioIncomeFromAccountStrategies(ctx: AccountIncomeMonthlyContext): number {
   if (!ctx.hasPortfolioBalances) return 0
@@ -198,12 +239,7 @@ export function monthlyPortfolioIncomeFromAccountStrategies(ctx: AccountIncomeMo
   let total = 0
 
   for (const line of listAccountIncomeLines(ctx)) {
-    const atRetirement = accountRetirementBalance(
-      line.bucket,
-      line.currentBalance,
-      line.bucketCurrentTotal,
-      snapshot,
-    )
+    const atRetirement = incomeBalanceForProjection(line, snapshot, ctx.brkBal)
     const strategy = resolveAccountIncomeStrategy(
       line.storageKey,
       line.bucket,

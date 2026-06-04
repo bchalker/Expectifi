@@ -1,5 +1,5 @@
-import type { FidelityPositionRow } from './fidelityCsv'
-import type { FidelityImportBatch } from './fidelityStorage'
+import type { ImportedPositionRow } from './positionsCsv'
+import type { PositionsImportBatch } from './positionsImportStorage'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
 
 export type BrokerSource =
@@ -39,24 +39,24 @@ export function custodianShowsMonogram(custodian: PositionsCsvCustodian): boolea
   return custodian !== 'other'
 }
 
-export function brokerSourceForBatch(batch: FidelityImportBatch): BrokerSource {
+export function brokerSourceForBatch(batch: PositionsImportBatch): BrokerSource {
   if (batch.plaidItemId) return 'plaid'
   return custodianToBrokerSource(batch.custodian ?? 'fidelity')
 }
 
-export function resolveBrokerSource(row: FidelityPositionRow): BrokerSource {
+export function resolveBrokerSource(row: ImportedPositionRow): BrokerSource {
   if (row.brokerSource) return row.brokerSource
   return 'fidelity'
 }
 
 export function stampRowsWithBrokerSource(
-  rows: FidelityPositionRow[],
+  rows: ImportedPositionRow[],
   source: BrokerSource,
-): FidelityPositionRow[] {
+): ImportedPositionRow[] {
   return rows.map((r) => (r.brokerSource === source ? r : { ...r, brokerSource: source }))
 }
 
-export function enrichBatchRows(batch: FidelityImportBatch): FidelityImportBatch {
+export function enrichBatchRows(batch: PositionsImportBatch): PositionsImportBatch {
   const source = brokerSourceForBatch(batch)
   return {
     ...batch,
@@ -64,6 +64,6 @@ export function enrichBatchRows(batch: FidelityImportBatch): FidelityImportBatch
   }
 }
 
-export function enrichImportBatches(batches: FidelityImportBatch[]): FidelityImportBatch[] {
+export function enrichImportBatches(batches: PositionsImportBatch[]): PositionsImportBatch[] {
   return batches.map(enrichBatchRows)
 }

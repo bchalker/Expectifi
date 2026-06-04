@@ -115,6 +115,23 @@
   color: var(--text);
 }
 
+.holding-scenario-popout--panel .holding-scenario-popout__head-link {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.holding-scenario-popout--panel .holding-scenario-popout__head-link:hover {
+  color: var(--text);
+}
+
 .holding-scenario-popout__close {
   display: inline-flex;
   flex-shrink: 0;

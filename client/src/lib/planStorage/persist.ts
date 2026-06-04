@@ -1,5 +1,5 @@
 import { buildSnapshot } from '../appSnapshot'
-import { inputsForPersistedCalculatorSession } from '../fidelityStorage'
+import { inputsForPersistedCalculatorSession } from '../positionsImportStorage'
 import type { PlanPersistSnapshot } from './types'
 import { savePlanAccounts } from './accounts'
 import { savePlanProfile } from './profile'

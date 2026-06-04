@@ -1,6 +1,6 @@
 import { Button } from '@heroui/react'
 import { AppButton } from './ui/AppButton'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 
 export type HoldingScenarioPanelFooterProps = {
   globalPct: string

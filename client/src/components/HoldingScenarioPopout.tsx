@@ -3,7 +3,7 @@ import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
-import { isFidelityMoneyMarketRow, normalizeFidelityImportSymbol, type FidelityPositionRow } from '../lib/fidelityCsv'
+import { isMoneyMarketImportRow, normalizeImportSymbol, type ImportedPositionRow } from '../lib/positionsCsv'
 import {
   applyScenarioUiChoice,
   horizonClamp,
@@ -19,9 +19,9 @@ import {
 import {
   blendedRateForDashboardPositionId,
   computeMergedDashboardPositionModels,
-  countFidelityImportLinesMatchingTickerKeys,
+  countImportedLinesMatchingTickerKeys,
   mergedDashboardModelsForTickerKeys,
-  tickerKeySetFromFidelityRows,
+  tickerKeySetFromImportedRows,
 } from '../lib/mergedDashboardPositionModels'
 import {
   decimalToPct,
@@ -33,7 +33,7 @@ import {
 } from '../lib/positionReturnModel'
 import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
 import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 
 function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boolean {
   const h = horizonClamp(horizon)
@@ -44,10 +44,10 @@ function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boo
   )
 }
 
-export type FidelityHoldingScenarioPanelProps = {
+export type HoldingScenarioPanelProps = {
   onClose: () => void
-  contributingRows: FidelityPositionRow[]
-  fidelityAllRows: FidelityPositionRow[]
+  contributingRows: ImportedPositionRow[]
+  importedPositionRows: ImportedPositionRow[]
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
   yearsToRetirement: number
@@ -78,7 +78,7 @@ function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId
 }
 
 /** Plain percent text field; syncs when `rateDecimal` changes from outside. */
-export function FidelityYearPctField({
+export function HoldingYearPctField({
   calendarYear,
   rateDecimal,
   onCommitDecimal,
@@ -144,36 +144,36 @@ export function FidelityYearPctField({
 export { OutlookMarketTabs } from './HoldingScenarioIntentTabs'
 
 /** Return scenario editor body (slide panel / popover). */
-export function FidelityHoldingScenarioPanel({
+export function HoldingScenarioPanel({
   onClose,
   contributingRows,
-  fidelityAllRows,
+  importedPositionRows,
   inputs,
   setInputs,
   yearsToRetirement,
   retirementCalendarYear,
   retRate,
   brkRate,
-}: FidelityHoldingScenarioPanelProps) {
+}: HoldingScenarioPanelProps) {
   const h = horizonClamp(yearsToRetirement)
   const calY = retirementCalendarYear
 
   const merged = useMemo(
-    () => computeMergedDashboardPositionModels(inputs, fidelityAllRows, yearsToRetirement, retirementCalendarYear),
-    [inputs, fidelityAllRows, yearsToRetirement, retirementCalendarYear],
+    () => computeMergedDashboardPositionModels(inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear),
+    [inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear],
   )
 
-  const symbolKeys = useMemo(() => tickerKeySetFromFidelityRows(contributingRows), [contributingRows])
+  const symbolKeys = useMemo(() => tickerKeySetFromImportedRows(contributingRows), [contributingRows])
 
   const scenarioTickerLabel = useMemo(() => {
     const keys = [...symbolKeys].filter(Boolean).sort((a, b) => a.localeCompare(b))
     if (keys.length === 1) return keys[0]!
     if (keys.length > 1) return keys.join(', ')
     const row = contributingRows[0]
-    return row ? normalizeFidelityImportSymbol(row.symbol).toUpperCase() : ''
+    return row ? normalizeImportSymbol(row.symbol).toUpperCase() : ''
   }, [symbolKeys, contributingRows])
 
-  const showMoneyMarketNotice = useMemo(() => contributingRows.some(isFidelityMoneyMarketRow), [contributingRows])
+  const showMoneyMarketNotice = useMemo(() => contributingRows.some(isMoneyMarketImportRow), [contributingRows])
 
   const targets = useMemo(() => {
     const list = mergedDashboardModelsForTickerKeys(merged, symbolKeys)
@@ -181,8 +181,8 @@ export function FidelityHoldingScenarioPanel({
   }, [merged, symbolKeys])
 
   const importLineCountForSymbol = useMemo(
-    () => countFidelityImportLinesMatchingTickerKeys(fidelityAllRows, symbolKeys),
-    [fidelityAllRows, symbolKeys],
+    () => countImportedLinesMatchingTickerKeys(importedPositionRows, symbolKeys),
+    [importedPositionRows, symbolKeys],
   )
 
   const commonChoice = useMemo(
@@ -308,7 +308,7 @@ export function FidelityHoldingScenarioPanel({
           return (
             <div key={y} className="holding-scenario-intent__year-item">
               <span className="holding-scenario-popout__year-key">{y}</span>
-              <FidelityYearPctField
+              <HoldingYearPctField
                 calendarYear={y}
                 rateDecimal={rates[i] ?? 0}
                 onCommitDecimal={(dec) => {

@@ -146,6 +146,26 @@ export async function ensureSchema(): Promise<void> {
   await p.query(`CREATE INDEX IF NOT EXISTS plaid_items_user_id ON plaid_items (user_id)`)
 
   await p.query(`
+    CREATE TABLE IF NOT EXISTS accounts (
+      id TEXT NOT NULL PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      account_type VARCHAR(64) NOT NULL,
+      balance BIGINT NOT NULL DEFAULT 0,
+      source VARCHAR(16) NOT NULL DEFAULT 'manual'
+        CHECK (source IN ('manual', 'csv', 'plaid')),
+      allocation_profile VARCHAR(20)
+        CHECK (
+          allocation_profile IS NULL
+          OR allocation_profile IN ('aggressive', 'moderate', 'conservative', 'all_equities')
+        ),
+      label VARCHAR(512),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await p.query(`CREATE INDEX IF NOT EXISTS accounts_user_id ON accounts (user_id)`)
+
+  await p.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT NOT NULL PRIMARY KEY,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

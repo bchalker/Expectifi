@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
-import { loadStoredFidelityImport } from '../lib/fidelityStorage'
+import { loadStoredPositionsImport } from '../lib/positionsImportStorage'
 import {
   markManualProjectionsCalloutDismissed,
   isManualProjectionsCalloutDismissed,
@@ -11,24 +11,24 @@ import './ManualProjectionsCallout.scss'
 
 type Props = {
   hasPortfolioBalances: boolean
-  fidelityImportRev: number
+  positionsImportRev: number
   onConnectAccounts: () => void
   onImportCsv: () => void
 }
 
 export function ManualProjectionsCallout({
   hasPortfolioBalances,
-  fidelityImportRev,
+  positionsImportRev,
   onConnectAccounts,
   onImportCsv,
 }: Props) {
   const ctx = useContext(PlaidConnectionContext)
   const hasPlaidConnections = (ctx?.items.length ?? 0) > 0
   const hasImportedData = useMemo(() => {
-    void fidelityImportRev
-    const imp = loadStoredFidelityImport()
+    void positionsImportRev
+    const imp = loadStoredPositionsImport()
     return (imp?.batches?.length ?? 0) > 0
-  }, [fidelityImportRev])
+  }, [positionsImportRev])
 
   const [dismissed, setDismissed] = useState(() => isManualProjectionsCalloutDismissed())
 

@@ -78,6 +78,15 @@
   color: var(--text-muted);
 }
 
+.holding-scenario-intent-tabs__mismatch-note {
+  margin: var(--space-2) 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
 .holding-scenario-intent-tabs__custom-field {
   display: flex;
   flex-direction: column;

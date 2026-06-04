@@ -2,7 +2,7 @@ import { IconX } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useClickOutside } from '../hooks/useClickOutside'
-import { formatFidelityDescription } from '../lib/fidelityDisplay'
+import { formatHoldingDescription } from '../lib/holdingsDisplay'
 import type { PositionReturnModel } from '../lib/positionReturnModel'
 import { PositionReturnSlidersForm } from './PositionReturnSliders'
 import './PositionReturnPopover.scss'
@@ -78,7 +78,7 @@ export function PositionReturnPopover({
             <div id={`position-return-popover-title-${position.id}`} className="position-return-popover__badge">
               {position.ticker || '—'}
             </div>
-            <div className="position-return-popover__name">{formatFidelityDescription(position.label)}</div>
+            <div className="position-return-popover__name">{formatHoldingDescription(position.label)}</div>
             <p className="position-return-popover__intro">
               Set your own growth expectations for this line: flat rate, year-by-year returns, or a Bear / Base / Bull
               scenario. Changes apply to the retirement model only—imported balances stay as they are in Configure.

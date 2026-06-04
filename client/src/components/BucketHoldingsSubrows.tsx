@@ -5,11 +5,11 @@ import { ViewHoldingsHint } from './ui/ViewHoldingsHint'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState, useContext } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
-import { formatFidelityDescription } from '../lib/fidelityDisplay'
-import { groupPositionsByAccount, type FidelityPositionRow } from '../lib/fidelityCsv'
+import { formatHoldingDescription } from '../lib/holdingsDisplay'
+import { groupPositionsByAccount, type ImportedPositionRow } from '../lib/positionsCsv'
 import {
   blendedBaselineFV,
-  makeFidelityPositionReturnId,
+  makeImportedPositionReturnId,
   mergeBucketIntoAllModels,
   normalizePositionReturnModels,
   projectPositionAtRetirement,
@@ -19,14 +19,14 @@ import { custodianLogoPublicUrl } from '../lib/custodianLogos'
 import type { PositionsCsvCustodian } from '../lib/positionsCsvImport'
 import { fmt } from '../utils/format'
 import { resolveBrokerSource } from '../lib/brokerMonogram'
-import { loadStoredFidelityImport } from '../lib/fidelityStorage'
+import { loadStoredPositionsImport } from '../lib/positionsImportStorage'
 import { PlaidConnectionContext } from './PlaidConnectionHeader'
 import { BrokerMonogramPill } from './ui/BrokerMonogramPill'
 import { SyncStatus } from './ui/SyncStatus'
 import { PositionReturnPopover } from './PositionReturnPopover'
 
 type Props = {
-  positions: FidelityPositionRow[]
+  positions: ImportedPositionRow[]
   /** Disambiguate React keys across multiple buckets on the same page (e.g. `ret401k`, `brk`). */
   keyPrefix: string
   /** Dashboard: return editor popover per holding. */
@@ -51,10 +51,10 @@ function fmtSignedDelta(n: number): string {
   return (n >= 0 ? '+' : '') + fmt(n)
 }
 
-function plaidItemIdForAccountRows(rows: FidelityPositionRow[]): string | null {
+function plaidItemIdForAccountRows(rows: ImportedPositionRow[]): string | null {
   if (!rows.length || resolveBrokerSource(rows[0]!) !== 'plaid') return null
   const accountName = rows[0]!.accountName
-  const stored = loadStoredFidelityImport()
+  const stored = loadStoredPositionsImport()
   for (const batch of stored?.batches ?? []) {
     if (!batch.plaidItemId) continue
     if (batch.rows.some((r) => rows.includes(r))) return batch.plaidItemId
@@ -64,7 +64,7 @@ function plaidItemIdForAccountRows(rows: FidelityPositionRow[]): string | null {
 }
 
 /** Fidelity CSV bucket: per-account ledgers + Holdings/Portfolio disclosure with position cards. */
-export function FidelityBucketHoldingsSubrows({
+export function BucketHoldingsSubrows({
   positions,
   keyPrefix,
   showReturnSliders,
@@ -81,7 +81,7 @@ export function FidelityBucketHoldingsSubrows({
 }: Props) {
   const plaidCtx = useContext(PlaidConnectionContext)
   const accountGroups = groupPositionsByAccount(positions)
-  const showFidelityAccountNames = accountGroups.length > 1
+  const showMultipleAccountNames = accountGroups.length > 1
 
   const custodianLogoSrc = useMemo(
     () => custodianLogoPublicUrl(importCustodian),
@@ -145,7 +145,7 @@ export function FidelityBucketHoldingsSubrows({
           <details className="imported-holdings-disclosure">
             <summary className="imported-holdings-summary">
               <div className="import-ledger__lead">
-                {showFidelityAccountNames ? (
+                {showMultipleAccountNames ? (
                   <span className="import-ledger-account">
                     <span className="import-ledger-account__identity">
                       <span className="import-ledger-account__name">{g.accountName}</span>
@@ -159,7 +159,7 @@ export function FidelityBucketHoldingsSubrows({
                 <div className="import-ledger__values">
                   <div className="import-ledger__amount-row">
                     <span className="import-ledger__total">{fmt(g.total)}</span>
-                    {showFidelityAccountNames ? <ViewHoldingsHint /> : null}
+                    {showMultipleAccountNames ? <ViewHoldingsHint /> : null}
                   </div>
                   <BucketTotalTrend trend={computeBucketTrendDisplay(g.rows)} />
                 </div>
@@ -170,7 +170,7 @@ export function FidelityBucketHoldingsSubrows({
               {g.rows.map((r) => {
                 const rowIndex = positions.indexOf(r)
                 const modelId =
-                  rowIndex >= 0 ? makeFidelityPositionReturnId(keyPrefix, r.accountName, r.symbol, rowIndex) : ''
+                  rowIndex >= 0 ? makeImportedPositionReturnId(keyPrefix, r.accountName, r.symbol, rowIndex) : ''
                 const model = modelId ? mergedModels.find((m) => m.id === modelId) : undefined
                 const projected =
                   model != null ? projectPositionAtRetirement(model, calYear, yearsToRetirement) : null
@@ -204,7 +204,7 @@ export function FidelityBucketHoldingsSubrows({
                               </span>
                             ) : null}
                           </div>
-                          <div className="holding-card-name">{formatFidelityDescription(r.description)}</div>
+                          <div className="holding-card-name">{formatHoldingDescription(r.description)}</div>
                         </div>
                       </div>
                       <div className="holding-return-row__values">

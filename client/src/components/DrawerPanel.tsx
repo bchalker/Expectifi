@@ -44,10 +44,10 @@ type Props = {
   onBalanceModeChange: (m: BalanceInputMode) => void
   brokerageMode: BrokerageBalanceMode
   onBrokerageModeChange: (m: BrokerageBalanceMode) => void
-  fidelityImportRev: number
-  onFidelityApplyBalances: (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
-  onFidelityImportAppliedRetirement: () => void
-  onFidelityImportAppliedBrokerage: () => void
+  positionsImportRev: number
+  onImportedApplyBalances: (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
+  onPositionsImportAppliedRetirement: () => void
+  onPositionsImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
   ssIncluded: boolean
   setUi: (p: Partial<CalculatorUi>) => void
@@ -68,10 +68,10 @@ export function DrawerPanel({
   onBalanceModeChange,
   brokerageMode,
   onBrokerageModeChange,
-  fidelityImportRev,
-  onFidelityApplyBalances,
-  onFidelityImportAppliedRetirement,
-  onFidelityImportAppliedBrokerage,
+  positionsImportRev,
+  onImportedApplyBalances,
+  onPositionsImportAppliedRetirement,
+  onPositionsImportAppliedBrokerage,
   configInitialTab,
   ssIncluded,
   setUi,
@@ -176,10 +176,10 @@ export function DrawerPanel({
             onBalanceModeChange={onBalanceModeChange}
             brokerageMode={brokerageMode}
             onBrokerageModeChange={onBrokerageModeChange}
-            fidelityImportRev={fidelityImportRev}
-            onFidelityApplyBalances={onFidelityApplyBalances}
-            onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
-            onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
+            positionsImportRev={positionsImportRev}
+            onImportedApplyBalances={onImportedApplyBalances}
+            onPositionsImportAppliedRetirement={onPositionsImportAppliedRetirement}
+            onPositionsImportAppliedBrokerage={onPositionsImportAppliedBrokerage}
           />
         )
       ) : null}
@@ -213,10 +213,10 @@ function DrawerBody({
   onBalanceModeChange: _onBalanceModeChange,
   brokerageMode: _brokerageMode,
   onBrokerageModeChange: _onBrokerageModeChange,
-  fidelityImportRev: _fidelityImportRev,
-  onFidelityApplyBalances: _onFidelityApplyBalances,
-  onFidelityImportAppliedRetirement: _onFidelityImportAppliedRetirement,
-  onFidelityImportAppliedBrokerage: _onFidelityImportAppliedBrokerage,
+  positionsImportRev: _positionsImportRev,
+  onImportedApplyBalances: _onImportedApplyBalances,
+  onPositionsImportAppliedRetirement: _onPositionsImportAppliedRetirement,
+  onPositionsImportAppliedBrokerage: _onPositionsImportAppliedBrokerage,
 }: {
   id: DrawerName
   c: ComputedSnapshot
@@ -226,10 +226,10 @@ function DrawerBody({
   onBalanceModeChange: (m: BalanceInputMode) => void
   brokerageMode: BrokerageBalanceMode
   onBrokerageModeChange: (m: BrokerageBalanceMode) => void
-  fidelityImportRev: number
-  onFidelityApplyBalances: (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
-  onFidelityImportAppliedRetirement: () => void
-  onFidelityImportAppliedBrokerage: () => void
+  positionsImportRev: number
+  onImportedApplyBalances: (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => void
+  onPositionsImportAppliedRetirement: () => void
+  onPositionsImportAppliedBrokerage: () => void
 }) {
   switch (id) {
     case 'scenarios':

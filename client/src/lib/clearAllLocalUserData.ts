@@ -1,5 +1,5 @@
 import { clearStoredAppState } from './appStateStorage'
-import { clearStoredFidelityImport } from './fidelityStorage'
+import { clearStoredPositionsImport } from './positionsImportStorage'
 import { clearGuestProfileAndSession } from './guestEphemeralStorage'
 import { ALL_EXPECTIFI_PLAN_KEYS } from './planStorage/keys'
 import { clearSessionOnboardingComplete } from './sessionFlags'
@@ -65,7 +65,7 @@ export function clearAllLocalUserData(): void {
     clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)
     clearStoredAppState()
-    clearStoredFidelityImport()
+    clearStoredPositionsImport()
   } catch {
     /* ignore */
   }

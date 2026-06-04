@@ -13,8 +13,10 @@ import { getMarketScenarioDefinition, resolveGlobalMarketScenarioRates } from '.
 import {
   annualizedReturnFromYearlyPath,
   decimalToPct,
+  defaultPositionReturns,
   padYearlyReturns,
   positionUsesCustomReturnMode,
+  projectPositionAtRetirement,
   type PositionReturnMode,
   type PositionReturnModel,
   type PositionScenarioId,
@@ -62,6 +64,57 @@ export function blendedRateForAccountBucket(
   brkRate: number,
 ): number {
   return bucket === 'brokerage' ? brkRate : retRate
+}
+
+/** Current balance for a tax bucket from manual bases / inputs (not CSV line items). */
+export function currentBalanceForScenarioBucket(
+  bucket: AccountScenarioBucketId,
+  inputs: CalculatorInputs,
+): number {
+  switch (bucket) {
+    case 'brokerage':
+      return Math.max(0, inputs.brkBal ?? 0)
+    case 'pretax':
+      return Math.max(
+        0,
+        (inputs.base401k ?? 0) + (inputs.baseSE401k ?? 0) + (inputs.baseTradIRA ?? 0),
+      )
+    case 'roth':
+      return Math.max(0, inputs.baseRoth ?? 0)
+    case 'hsa':
+      return Math.max(0, inputs.baseHsa ?? 0)
+  }
+}
+
+/**
+ * Project a lump account balance at retirement using bucket scenario → global market → slider.
+ * Used when growth is driven by account totals (manual entry), not per-import holdings.
+ */
+export function projectAccountBucketBalanceAtRetirement(
+  balance: number,
+  accountScenario: AccountReturnScenario | undefined,
+  blended: number,
+  yearsToRetirement: number,
+  retirementCalendarYear: number,
+  marketScenario?: MarketScenarioId,
+): number {
+  if (!(balance > 0)) return 0
+  const h = horizonClamp(yearsToRetirement)
+  const stub = defaultPositionReturns(
+    'manual-account-bucket',
+    { ticker: '', label: '', currentValue: balance, accountId: '' },
+    blended,
+    h,
+    retirementCalendarYear,
+  )
+  const projection = projectionModelForHolding(
+    stub,
+    accountScenario,
+    blended,
+    h,
+    marketScenario,
+  )
+  return projectPositionAtRetirement(projection, retirementCalendarYear, h)
 }
 
 export function getAccountReturnScenario(

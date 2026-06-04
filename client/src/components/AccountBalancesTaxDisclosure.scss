@@ -60,6 +60,7 @@
   // margin-bottom: var(--space-2);
   background: var(--surface);
   box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
+  
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,6 +98,12 @@
   > .portfolio-bucket-account-summary {
   display: block;
   padding: 0;
+}
+
+.tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static:has(
+    [data-balance-editing='true']
+  ) {
+  overflow: visible;
 }
 
 .tax-treatment-disclosure.portfolio-account-group
@@ -189,6 +196,15 @@
   border-top: 1px solid var(--border);
 }
 
+.tax-treatment-disclosure.portfolio-account-group
+  > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
+  box-shadow: inset 0 0 0 0 var(--sky-blue);
+  transition:
+    box-shadow 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
 .tax-treatment-disclosure.portfolio-account-group[open]
   > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
   position: relative;
@@ -196,6 +212,14 @@
   background: var(--surface);
   background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
   border-bottom: 1px dashed var(--border);
+  box-shadow: inset 0 5px 10px 0 var(--sky-blue);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tax-treatment-disclosure.portfolio-account-group
+    > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
+    transition: none;
+  }
 }
 
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__content {
@@ -253,6 +277,8 @@
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__right,
 .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__actions {
   padding: var(--portfolio-row-pad-y-start) var(--portfolio-row-pad-x) var(--portfolio-row-pad-y-end);
+  padding-top: var(--space-2);
+  padding: var(--space-4);
   box-sizing: border-box;
 }
 

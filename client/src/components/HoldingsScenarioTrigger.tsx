@@ -8,7 +8,7 @@ import {
   HoldingsScenarioBadgeContent,
   holdingsScenarioTriggerChoiceClass,
 } from './HoldingsScenarioBadge'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 
 export { holdingsScenarioTriggerChoiceClass } from './HoldingsScenarioBadge'
 

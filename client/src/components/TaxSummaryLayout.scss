@@ -6,6 +6,12 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   overflow: hidden;
 }
 
+.section--tax-summary > .portfolio-accounts-reveal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .section--tax-summary--income-harvest .section--tax-summary__income-layout {
   display: flex;
   flex-direction: column;
@@ -23,6 +29,9 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   order: 1;
   min-width: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .section--tax-summary--income-harvest .tax-summary-card {
@@ -58,7 +67,9 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     order: unset;
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     min-height: 0;
+    align-self: stretch;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card {
@@ -96,7 +107,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--income-harvest
     .account-balances-card-inner-wrap
     > .account-balances-section-footer {
-    // margin-top: auto;
     margin-bottom: 0;
   }
 
@@ -114,6 +124,9 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-md, 8px);
@@ -123,8 +136,11 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 .tax-summary-card__accounts {
   position: relative;
   min-width: 0;
-  // padding: 1.5rem;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .tax-summary-card__accounts .section {

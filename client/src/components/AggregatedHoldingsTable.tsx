@@ -2,16 +2,16 @@ import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import { useMemo } from "react";
 import type { CalculatorInputs } from "../lib/computeResults";
 import type {
-  AggregatedFidelitySymbolRow,
-  FidelityPositionRow,
-} from "../lib/fidelityCsv";
+  AggregatedSymbolRow,
+  ImportedPositionRow,
+} from "../lib/positionsCsv";
 import {
   aggregateRowHasAccountBreakdown,
   breakdownAggregateByAccount,
-  normalizeFidelityImportSymbol,
-} from "../lib/fidelityCsv";
-import { formatFidelityDescription } from "../lib/fidelityDisplay";
-import { truncateForHoldingsTable } from "../lib/fidelityHoldingDisplay";
+  normalizeImportSymbol,
+} from "../lib/positionsCsv";
+import { formatHoldingDescription } from "../lib/holdingsDisplay";
+import { truncateForHoldingsTable } from "../lib/holdingDisplay";
 import {
   accountScenarioBucketForPositionId,
   getAccountReturnScenario,
@@ -31,16 +31,16 @@ import {
   blendedRateForDashboardPositionId,
   computeMergedDashboardPositionModels,
   mergedDashboardModelsForTickerKeys,
-  tickerKeySetFromFidelityRows,
+  tickerKeySetFromImportedRows,
 } from "../lib/mergedDashboardPositionModels";
 import type { PositionReturnModel } from "../lib/positionReturnModel";
 import { fmt } from "../utils/format";
 import { BrokerMonogramPill } from "./ui/BrokerMonogramPill";
 import { HoldingsSymbolCard } from "./HoldingsSymbolCard";
 import { Tooltip } from "./Tooltip";
-import "./FidelityAggregatedSymbolTable.scss";
+import "./AggregatedHoldingsTable.scss";
 
-export type FidelityAggregatedScenarioBundle = {
+export type HoldingsScenarioBundle = {
   inputs: CalculatorInputs;
   setInputs: (p: Partial<CalculatorInputs>) => void;
   yearsToRetirement: number;
@@ -50,46 +50,46 @@ export type FidelityAggregatedScenarioBundle = {
 };
 
 type Props = {
-  rows: AggregatedFidelitySymbolRow[];
+  rows: AggregatedSymbolRow[];
   /** When true, same ticker appeared on more than one import line (e.g. multiple accounts). */
   combinedLines: boolean;
   /** Full merged import rows (for return model ids). */
-  fidelityAllRows: FidelityPositionRow[];
+  importedPositionRows: ImportedPositionRow[];
   /** Dashboard only: enables Scenario column + slide panel (parent hosts panel). */
-  scenarioBundle?: FidelityAggregatedScenarioBundle | null;
+  scenarioBundle?: HoldingsScenarioBundle | null;
   /** Tax bucket for account-level scenario inheritance in this table. */
   accountScenarioBucket?: AccountScenarioBucketId;
   /** Which ticker’s scenario sheet is open (symbol display key, matches row `symbol`). */
   activeScenarioSymbol?: string | null;
   onScenarioOpen?: (payload: {
     symbol: string;
-    contributingRows: FidelityPositionRow[];
+    contributingRows: ImportedPositionRow[];
   }) => void;
 };
 
 function modelsForAggregateRow(
-  row: AggregatedFidelitySymbolRow,
+  row: AggregatedSymbolRow,
   merged: PositionReturnModel[],
 ): PositionReturnModel[] {
-  const keys = tickerKeySetFromFidelityRows(row.contributingRows);
+  const keys = tickerKeySetFromImportedRows(row.contributingRows);
   return mergedDashboardModelsForTickerKeys(merged, keys);
 }
 
 type HoldingGroupProps = {
-  row: AggregatedFidelitySymbolRow;
-  scenarioBundle?: FidelityAggregatedScenarioBundle | null;
+  row: AggregatedSymbolRow;
+  scenarioBundle?: HoldingsScenarioBundle | null;
   accountScenarioBucket?: AccountScenarioBucketId;
   mergedModels: PositionReturnModel[];
   h: number;
   activeScenarioSymbol?: string | null;
   onScenarioOpen?: (payload: {
     symbol: string;
-    contributingRows: FidelityPositionRow[];
+    contributingRows: ImportedPositionRow[];
   }) => void;
   showMergedTickerNote: boolean;
 };
 
-function FidelityAggregatedHoldingGroup({
+function AggregatedHoldingGroup({
   row: r,
   scenarioBundle,
   accountScenarioBucket,
@@ -104,7 +104,7 @@ function FidelityAggregatedHoldingGroup({
     () => (hasBreakdown ? breakdownAggregateByAccount(r) : []),
     [hasBreakdown, r],
   );
-  const fullDesc = formatFidelityDescription(r.description);
+  const fullDesc = formatHoldingDescription(r.description);
   const shortDesc = truncateForHoldingsTable(fullDesc);
   const showTip = fullDesc.length > shortDesc.length;
   const modelsAll = scenarioBundle
@@ -162,8 +162,8 @@ function FidelityAggregatedHoldingGroup({
   const rowKey = r.symbol;
   const rowActive =
     activeScenarioSymbol != null &&
-    normalizeFidelityImportSymbol(activeScenarioSymbol).toUpperCase() ===
-      normalizeFidelityImportSymbol(rowKey).toUpperCase();
+    normalizeImportSymbol(activeScenarioSymbol).toUpperCase() ===
+      normalizeImportSymbol(rowKey).toUpperCase();
 
   const openScenario = () =>
     onScenarioOpen?.({
@@ -261,10 +261,10 @@ function FidelityAggregatedHoldingGroup({
 }
 
 /** Single table: one row per symbol (totals across accounts in the parent tax bucket). */
-export function FidelityAggregatedSymbolTable({
+export function AggregatedHoldingsTable({
   rows,
   combinedLines,
-  fidelityAllRows,
+  importedPositionRows,
   scenarioBundle,
   accountScenarioBucket,
   activeScenarioSymbol,
@@ -274,11 +274,11 @@ export function FidelityAggregatedSymbolTable({
     if (!scenarioBundle) return [] as PositionReturnModel[];
     return computeMergedDashboardPositionModels(
       scenarioBundle.inputs,
-      fidelityAllRows,
+      importedPositionRows,
       scenarioBundle.yearsToRetirement,
       scenarioBundle.retirementCalendarYear,
     );
-  }, [scenarioBundle, fidelityAllRows]);
+  }, [scenarioBundle, importedPositionRows]);
 
   const h = scenarioBundle
     ? Math.max(1, Math.min(50, Math.round(scenarioBundle.yearsToRetirement)))
@@ -305,7 +305,7 @@ export function FidelityAggregatedSymbolTable({
         aria-label="Holdings by symbol"
       >
         {rows.map((r) => (
-          <FidelityAggregatedHoldingGroup
+          <AggregatedHoldingGroup
             key={r.symbol}
             row={r}
             scenarioBundle={scenarioBundle}

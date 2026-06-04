@@ -32,7 +32,7 @@ import {
   type NavErosionRisk,
 } from '../lib/incomeSecurities'
 import { Tooltip } from './Tooltip'
-import './FidelityHoldingScenarioPopout.scss'
+import './HoldingScenarioPopout.scss'
 import './IncomeSecuritySelector.scss'
 import './MarketScenarioSelector.scss'
 

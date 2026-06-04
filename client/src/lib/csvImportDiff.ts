@@ -1,20 +1,20 @@
 import {
   fidelityAccountKey,
-  isFidelityPendingActivityRow,
+  isPendingActivityImportRow,
   mapRowToBucket,
-  normalizeFidelityImportSymbol,
-  type FidelityPositionRow,
-} from './fidelityCsv'
+  normalizeImportSymbol,
+  type ImportedPositionRow,
+} from './positionsCsv'
 import type { PositionsCsvCustodian } from './positionsCsvImport'
-import { flattenBatches, type FidelityImportBatch, type StoredFidelityImportV2 } from './fidelityStorage'
+import { flattenBatches, type PositionsImportBatch, type StoredPositionsImportV2 } from './positionsImportStorage'
 
 export type ImportIntent = 'update' | 'add' | 'replace'
 
 export type RemovedHoldingAction = 'keep' | 'remove'
 
 /** Stable key: symbol + tax bucket + account name (within a custodian update). */
-export function importPositionKey(row: FidelityPositionRow): string {
-  const sym = normalizeFidelityImportSymbol(row.symbol)
+export function importPositionKey(row: ImportedPositionRow): string {
+  const sym = normalizeImportSymbol(row.symbol)
   const bucket = mapRowToBucket(row)
   const acct = fidelityAccountKey(row.accountName)
   return `${sym}|${bucket}|${acct}`
@@ -22,15 +22,15 @@ export function importPositionKey(row: FidelityPositionRow): string {
 
 export type ImportDiffRemovedRow = {
   key: string
-  row: FidelityPositionRow
+  row: ImportedPositionRow
   /** e.g. "SPAXX — Fidelity Government Money Market" */
   displayLabel: string
 }
 
 export type CustodianImportDiff = {
-  updated: FidelityPositionRow[]
-  added: FidelityPositionRow[]
-  unchanged: FidelityPositionRow[]
+  updated: ImportedPositionRow[]
+  added: ImportedPositionRow[]
+  unchanged: ImportedPositionRow[]
   removed: ImportDiffRemovedRow[]
   counts: {
     updated: number
@@ -40,25 +40,25 @@ export type CustodianImportDiff = {
   }
 }
 
-function displayLabelForRow(row: FidelityPositionRow): string {
-  const sym = normalizeFidelityImportSymbol(row.symbol)
+function displayLabelForRow(row: ImportedPositionRow): string {
+  const sym = normalizeImportSymbol(row.symbol)
   const desc = row.description.trim()
   return desc ? `${sym} — ${desc}` : sym
 }
 
-function valuesEqual(a: FidelityPositionRow, b: FidelityPositionRow): boolean {
+function valuesEqual(a: ImportedPositionRow, b: ImportedPositionRow): boolean {
   return a.currentValue === b.currentValue
 }
 
 export function rowsForCustodian(
-  batches: FidelityImportBatch[],
+  batches: PositionsImportBatch[],
   custodian: PositionsCsvCustodian,
-): FidelityPositionRow[] {
-  const out: FidelityPositionRow[] = []
+): ImportedPositionRow[] {
+  const out: ImportedPositionRow[] = []
   for (const b of batches) {
     if ((b.custodian ?? 'fidelity') !== custodian) continue
     for (const r of b.rows) {
-      if (!isFidelityPendingActivityRow(r)) out.push(r)
+      if (!isPendingActivityImportRow(r)) out.push(r)
     }
   }
   return out
@@ -66,26 +66,26 @@ export function rowsForCustodian(
 
 /** Compare incoming rows against existing holdings for the same custodian (update intent). */
 export function computeCustodianImportDiff(
-  existing: StoredFidelityImportV2 | null,
-  incomingRows: FidelityPositionRow[],
+  existing: StoredPositionsImportV2 | null,
+  incomingRows: ImportedPositionRow[],
   custodian: PositionsCsvCustodian,
 ): CustodianImportDiff {
   const existingSameCust = rowsForCustodian(existing?.batches ?? [], custodian)
 
-  const incomingMap = new Map<string, FidelityPositionRow>()
+  const incomingMap = new Map<string, ImportedPositionRow>()
   for (const r of incomingRows) {
-    if (isFidelityPendingActivityRow(r)) continue
+    if (isPendingActivityImportRow(r)) continue
     incomingMap.set(importPositionKey(r), r)
   }
 
-  const existingMap = new Map<string, FidelityPositionRow>()
+  const existingMap = new Map<string, ImportedPositionRow>()
   for (const r of existingSameCust) {
     existingMap.set(importPositionKey(r), r)
   }
 
-  const updated: FidelityPositionRow[] = []
-  const added: FidelityPositionRow[] = []
-  const unchanged: FidelityPositionRow[] = []
+  const updated: ImportedPositionRow[] = []
+  const added: ImportedPositionRow[] = []
+  const unchanged: ImportedPositionRow[] = []
   const removed: ImportDiffRemovedRow[] = []
 
   for (const [key, inc] of incomingMap) {
@@ -119,9 +119,9 @@ export function computeCustodianImportDiff(
   }
 }
 
-export function hasStoredHoldings(existing: StoredFidelityImportV2 | null): boolean {
+export function hasStoredHoldings(existing: StoredPositionsImportV2 | null): boolean {
   if (!existing?.batches.length) return false
-  return flattenBatches(existing.batches).some((r) => !isFidelityPendingActivityRow(r))
+  return flattenBatches(existing.batches).some((r) => !isPendingActivityImportRow(r))
 }
 
 export function defaultRemovedActions(removed: ImportDiffRemovedRow[]): Record<string, RemovedHoldingAction> {

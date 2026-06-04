@@ -1,25 +1,25 @@
-import type { FidelityPositionRow } from './fidelityCsv'
-import { isFidelityPendingActivityRow, mapRowToBucket } from './fidelityCsv'
+import type { ImportedPositionRow } from './positionsCsv'
+import { isPendingActivityImportRow, mapRowToBucket } from './positionsCsv'
 import {
   computeBalancesFromBatches,
-  clearStoredFidelityImport,
-  loadStoredFidelityImport,
-  saveStoredFidelityImport,
-} from './fidelityStorage'
+  clearStoredPositionsImport,
+  loadStoredPositionsImport,
+  saveStoredPositionsImport,
+} from './positionsImportStorage'
 import type { PositionReturnModel } from './positionReturnModel'
 
 const RETIREMENT_FIDELITY_POSITION_ID = /^fid-(ret401k|se401k|roth|hsa)-/
 const ALL_FIDELITY_POSITION_ID = /^fid-/
 
-function isRetirementPositionRow(r: FidelityPositionRow): boolean {
-  if (isFidelityPendingActivityRow(r)) return false
+function isRetirementPositionRow(r: ImportedPositionRow): boolean {
+  if (isPendingActivityImportRow(r)) return false
   const bucket = mapRowToBucket(r)
   return bucket !== 'unknown' && bucket !== 'brokerage'
 }
 
 /** Drop retirement rows from stored CSV import; clear storage if nothing remains. */
-export function stripRetirementFromFidelityStorage(): void {
-  const existing = loadStoredFidelityImport()
+export function stripRetirementFromPositionsStorage(): void {
+  const existing = loadStoredPositionsImport()
   if (!existing) return
 
   const batches = existing.batches
@@ -27,11 +27,11 @@ export function stripRetirementFromFidelityStorage(): void {
     .filter((b) => b.rows.length > 0)
 
   if (!batches.length) {
-    clearStoredFidelityImport()
+    clearStoredPositionsImport()
     return
   }
 
-  saveStoredFidelityImport({
+  saveStoredPositionsImport({
     ...existing,
     savedAt: new Date().toISOString(),
     batches,
@@ -43,13 +43,13 @@ export function filterRetirementPositionReturnModels(models: PositionReturnModel
   return (models ?? []).filter((p) => !RETIREMENT_FIDELITY_POSITION_ID.test(p.id))
 }
 
-export function filterAllFidelityPositionReturnModels(models: PositionReturnModel[] | undefined): PositionReturnModel[] {
+export function filterImportedPositionReturnModels(models: PositionReturnModel[] | undefined): PositionReturnModel[] {
   return (models ?? []).filter((p) => !ALL_FIDELITY_POSITION_ID.test(p.id))
 }
 
 /** Clear stored CSV import (retirement and brokerage). */
-export function clearAllFidelityImportFromCard(): void {
-  clearStoredFidelityImport()
+export function clearAllPositionsImportFromCard(): void {
+  clearStoredPositionsImport()
 }
 
 export function clearRetirementAccountBalances(): {

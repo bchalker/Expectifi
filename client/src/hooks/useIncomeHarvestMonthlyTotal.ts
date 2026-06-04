@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import type { ComputedSnapshot } from '../lib/computeResults'
-import { monthlyPortfolioIncomeFromAccountStrategies } from '../lib/accountIncomeMonthly'
+import {
+  hasAnyAccountIncomeStrategySelected,
+  monthlyPortfolioIncomeFromAccountStrategies,
+} from '../lib/accountIncomeMonthly'
 import type { AccountIncomeStrategy } from '../lib/accountIncomeStrategy'
 import { loadStoredManualAccounts } from '../lib/manualAccountEntries'
 import { resolveOnboardingAccountLocale } from '../lib/onboardingAccountTypesByLocale'
@@ -19,6 +22,12 @@ type Args = {
   brkBal: number
 }
 
+export type IncomeHarvestMonthlyResult = {
+  /** Same total as income-mode account list footer (AccountBalances). */
+  monthlyTotal: number
+  hasStrategiesSelected: boolean
+}
+
 /** Same total as income-mode account list footer (AccountBalances). */
 export function useIncomeHarvestMonthlyTotal({
   enabled,
@@ -30,7 +39,7 @@ export function useIncomeHarvestMonthlyTotal({
   balanceMode,
   manualAccountsRev,
   brkBal,
-}: Args): number {
+}: Args): IncomeHarvestMonthlyResult {
   const locale = resolveOnboardingAccountLocale()
   const manualEntries = useMemo(() => {
     void manualAccountsRev
@@ -41,9 +50,8 @@ export function useIncomeHarvestMonthlyTotal({
 
   const retirementAge = inputs.targetRetirementAge ?? c.targetRetirementAge
 
-  return useMemo(() => {
-    if (!enabled || !c.hasPortfolioBalances) return 0
-    return monthlyPortfolioIncomeFromAccountStrategies({
+  return useMemo((): IncomeHarvestMonthlyResult => {
+    const ctx = {
       inputs,
       accountIncomeFunds,
       accountIncomeStrategies,
@@ -64,7 +72,14 @@ export function useIncomeHarvestMonthlyTotal({
       locale,
       manualEntries,
       retirementBalanceMode: balanceMode,
-    })
+    }
+    if (!enabled || !c.hasPortfolioBalances) {
+      return { monthlyTotal: 0, hasStrategiesSelected: false }
+    }
+    return {
+      monthlyTotal: monthlyPortfolioIncomeFromAccountStrategies(ctx),
+      hasStrategiesSelected: hasAnyAccountIncomeStrategySelected(ctx),
+    }
   }, [
     enabled,
     c,

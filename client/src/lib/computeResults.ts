@@ -20,14 +20,15 @@ import type { AccountIncomeStrategy } from './accountIncomeStrategy'
 import { retirementFvForAccountBucket } from './accountBucketRetirementBalance'
 import { resolveOnboardingAccountLocale } from './onboardingAccountTypesByLocale'
 import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
-import { flattenBatches, loadStoredFidelityImport } from './fidelityStorage'
-import { positionsForBrokerage, positionsForRetirementBucket, type FidelityPositionRow } from './fidelityCsv'
+import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
+import { positionsForBrokerage, positionsForRetirementBucket, type ImportedPositionRow } from './positionsCsv'
 import type { BrokerageBalanceMode } from './brokerageBalanceMode'
 import type { BalanceInputMode } from './retirementBalanceMode'
 import {
   accountScenarioBucketForPositionId,
   getAccountReturnScenario,
   holdingReturnRateSource,
+  projectAccountBucketBalanceAtRetirement,
   projectionModelForHolding,
 } from './accountReturnScenario'
 import {
@@ -174,38 +175,38 @@ const RETIREMENT_FIDELITY_BUCKET_DEFS = [
 export function hasPortfolioBalanceInputs(
   retBal: number,
   brkBal: number,
-  fidelityRows: FidelityPositionRow[],
+  importedPositionRows: ImportedPositionRow[],
 ): boolean {
   if (retBal > 0 || brkBal > 0) return true
   for (const bucket of ['trad401k', 'se401k', 'roth', 'hsa'] as const) {
-    if (positionsForRetirementBucket(fidelityRows, bucket).length > 0) return true
+    if (positionsForRetirementBucket(importedPositionRows, bucket).length > 0) return true
   }
-  return positionsForBrokerage(fidelityRows).length > 0
+  return positionsForBrokerage(importedPositionRows).length > 0
 }
 
 /** Balances that count toward projections — respects manual vs import mode (no phantom prototype totals). */
 export function activePortfolioBalances(
   inputs: CalculatorInputs,
   balanceModes: ComputeBalanceModes | undefined,
-  fidelityRows: FidelityPositionRow[],
+  importedPositionRows: ImportedPositionRow[],
 ): { retBal: number; brkBal: number } {
   const bal = accountDisplayBalances(inputs)
   let retBal = bal.bal401k + bal.balSE401k + bal.balTradIRA + bal.balRoth + bal.balHsa
   let brkBal = inputs.brkBal
-  const retirementMode = balanceModes?.retirement ?? 'fidelity'
-  const brokerageMode = balanceModes?.brokerage ?? 'fidelity'
-  const hasFidelityRetirement = ['trad401k', 'se401k', 'roth', 'hsa'].some(
-    (bucket) => positionsForRetirementBucket(fidelityRows, bucket as 'trad401k' | 'se401k' | 'roth' | 'hsa').length > 0,
+  const retirementMode = balanceModes?.retirement ?? 'imported'
+  const brokerageMode = balanceModes?.brokerage ?? 'imported'
+  const hasImportedRetirement = ['trad401k', 'se401k', 'roth', 'hsa'].some(
+    (bucket) => positionsForRetirementBucket(importedPositionRows, bucket as 'trad401k' | 'se401k' | 'roth' | 'hsa').length > 0,
   )
-  const hasFidelityBrokerage = positionsForBrokerage(fidelityRows).length > 0
-  if (retirementMode === 'fidelity' && !hasFidelityRetirement) retBal = 0
-  if (brokerageMode === 'fidelity' && !hasFidelityBrokerage) brkBal = 0
+  const hasImportedBrokerage = positionsForBrokerage(importedPositionRows).length > 0
+  if (retirementMode === 'imported' && !hasImportedRetirement) retBal = 0
+  if (brokerageMode === 'imported' && !hasImportedBrokerage) brkBal = 0
   return { retBal, brkBal }
 }
 
-export function mergeAllRetirementFidelityBuckets(
+export function mergeAllRetirementImportedBuckets(
   inputs: CalculatorInputs,
-  fidelityRows: FidelityPositionRow[],
+  importedPositionRows: ImportedPositionRow[],
   yearsToRetirement: number,
   retirementCalendarYear: number,
   retRate: number,
@@ -218,7 +219,7 @@ export function mergeAllRetirementFidelityBuckets(
   )
   const mergedInHoldings: PositionReturnModel[] = []
   for (const def of RETIREMENT_FIDELITY_BUCKET_DEFS) {
-    const pos = positionsForRetirementBucket(fidelityRows, def.bucket)
+    const pos = positionsForRetirementBucket(importedPositionRows, def.bucket)
     working = mergeBucketIntoAllModels(working, pos, def.keyPrefix, retRate, yearsToRetirement, retirementCalendarYear)
     if (pos.length === 0) continue
     const prefix = `fid-${def.keyPrefix}-`
@@ -234,8 +235,8 @@ export function computeResults(
   ui: CalculatorUi,
   balanceModes?: ComputeBalanceModes,
 ) {
-  const retirementInputMode = balanceModes?.retirement ?? 'fidelity'
-  const brokerageInputMode = balanceModes?.brokerage ?? 'fidelity'
+  const retirementInputMode = balanceModes?.retirement ?? 'imported'
+  const brokerageInputMode = balanceModes?.brokerage ?? 'imported'
   const {
     retRate,
     brkRate,
@@ -260,14 +261,15 @@ export function computeResults(
 
   const currentAge = clampedAgeFromDob(dateOfBirth)
   const yearsToRetirement = Math.max(1, Math.min(50, Math.round(targetRetirementAge - currentAge)))
+  const retirementCalendarYear = calendarRetirementYear(currentAge, targetRetirementAge)
 
   const bal = accountDisplayBalances(inputs)
 
-  let fidelityRows: FidelityPositionRow[] = []
-  const fidelityImp = loadStoredFidelityImport()
-  if (fidelityImp?.batches?.length) fidelityRows = flattenBatches(fidelityImp.batches)
+  let importedPositionRows: ImportedPositionRow[] = []
+  const fidelityImp = loadStoredPositionsImport()
+  if (fidelityImp?.batches?.length) importedPositionRows = flattenBatches(fidelityImp.batches)
 
-  const { retBal, brkBal } = activePortfolioBalances(inputs, balanceModes, fidelityRows)
+  const { retBal, brkBal } = activePortfolioBalances(inputs, balanceModes, importedPositionRows)
   const tradBal = retBal > 0 ? bal.bal401k + bal.balSE401k + bal.balTradIRA : 0
   const rothBal = retBal > 0 ? bal.balRoth : 0
   const hsaBal = retBal > 0 ? bal.balHsa : 0
@@ -280,9 +282,9 @@ export function computeResults(
   const useMarketScenario = !marketScenarioIsBase(marketScenario)
 
   const retirementBuckets = ['trad401k', 'se401k', 'roth', 'hsa'] as const
-  const hasFidelityRetirementModeling = retirementBuckets.some((b) => positionsForRetirementBucket(fidelityRows, b).length > 0)
-  const brokerageRows = positionsForBrokerage(fidelityRows)
-  const hasFidelityBrokerageModeling = brokerageRows.length > 0
+  const hasImportedRetirementModeling = retirementBuckets.some((b) => positionsForRetirementBucket(importedPositionRows, b).length > 0)
+  const brokerageRows = positionsForBrokerage(importedPositionRows)
+  const hasImportedBrokerageModeling = brokerageRows.length > 0
 
   const legacyGrowth = calcPortfolioAtRetirement({
     retBal,
@@ -300,15 +302,8 @@ export function computeResults(
   let brkFV = legacyGrowth.brkFV
   const growthRetFvLegacy = legacyGrowth.retFV
   let retFV = growthRetFvLegacy
-  if (useMarketScenario && !(retirementInputMode === 'fidelity' && hasFidelityRetirementModeling)) {
-    const retGlobalRates = resolveGlobalMarketScenarioRates(marketScenario, retRate, yearsToRetirement)
-    retFV = fvWithYearlyRates(retBal, retGlobalRates) + savingsFV
-  } else if (useMarketScenario) {
+  if (useMarketScenario) {
     retFV = growthRetFvLegacy - legacyGrowth.savingsFV + savingsFV
-  }
-  if (useMarketScenario && !(brokerageInputMode === 'fidelity' && hasFidelityBrokerageModeling)) {
-    const brkGlobalRates = resolveGlobalMarketScenarioRates(marketScenario, brkRate, yearsToRetirement)
-    brkFV = fvWithYearlyRates(brkBal, brkGlobalRates)
   }
   let growthRetFvCompareDelta = 0
   let customPositionReturnCount = 0
@@ -316,12 +311,15 @@ export function computeResults(
   let mergedRetirementPositionModels: PositionReturnModel[] = []
   let mergedBrokeragePositionModels: PositionReturnModel[] = []
 
-  const retirementCalendarYear = calendarRetirementYear(currentAge, targetRetirementAge)
+  const retirementUsesLumpBalances =
+    !(retirementInputMode === 'imported' && hasImportedRetirementModeling)
+  const brokerageUsesLumpBalance =
+    !(brokerageInputMode === 'imported' && hasImportedBrokerageModeling)
 
-  if (retirementInputMode === 'fidelity' && hasFidelityRetirementModeling) {
-    const { working, mergedInHoldings } = mergeAllRetirementFidelityBuckets(
+  if (retirementInputMode === 'imported' && hasImportedRetirementModeling) {
+    const { working, mergedInHoldings } = mergeAllRetirementImportedBuckets(
       inputs,
-      fidelityRows,
+      importedPositionRows,
       yearsToRetirement,
       retirementCalendarYear,
       retRate,
@@ -331,7 +329,7 @@ export function computeResults(
     let individualFvSum = 0
     let individualCv = 0
     for (const def of RETIREMENT_FIDELITY_BUCKET_DEFS) {
-      const pos = positionsForRetirementBucket(fidelityRows, def.bucket)
+      const pos = positionsForRetirementBucket(importedPositionRows, def.bucket)
       if (pos.length === 0) continue
       const prefix = `fid-${def.keyPrefix}-`
       const mergedBucket = working.filter((p) => p.id.startsWith(prefix))
@@ -372,7 +370,7 @@ export function computeResults(
     growthRetFvCompareDelta = retFV - growthRetFvLegacy
   }
 
-  if (brokerageInputMode === 'fidelity' && hasFidelityBrokerageModeling) {
+  if (brokerageInputMode === 'imported' && hasImportedBrokerageModeling) {
     let workingBrk = normalizePositionReturnModels(
       inputs.positionReturnModels ?? [],
       yearsToRetirement,
@@ -415,8 +413,47 @@ export function computeResults(
     brkFV = brkIndividualFv + brkLumpFv
   }
 
+  if (retirementUsesLumpBalances && retBal > 0) {
+    const retirementBucketBalances: { bucket: AccountScenarioBucketId; balance: number }[] = [
+      { bucket: 'pretax', balance: tradBal },
+      { bucket: 'roth', balance: rothBal },
+      { bucket: 'hsa', balance: hsaBal },
+    ]
+    let bucketFvSum = 0
+    let accountScenarioBucketCount = 0
+    for (const { bucket, balance } of retirementBucketBalances) {
+      if (!(balance > 0)) continue
+      const accountScenario = getAccountReturnScenario(inputs, bucket)
+      if (accountScenario) accountScenarioBucketCount += 1
+      bucketFvSum += projectAccountBucketBalanceAtRetirement(
+        balance,
+        accountScenario,
+        retRate,
+        yearsToRetirement,
+        retirementCalendarYear,
+        marketScenario,
+      )
+    }
+    retFV = bucketFvSum + savingsFV
+    if (accountScenarioBucketCount > 0) {
+      growthRetFvCompareDelta = retFV - growthRetFvLegacy
+      retirementGrowthSliderShowsFallback = true
+    }
+  }
+
+  if (brokerageUsesLumpBalance && brkBal > 0) {
+    brkFV = projectAccountBucketBalanceAtRetirement(
+      brkBal,
+      getAccountReturnScenario(inputs, 'brokerage'),
+      brkRate,
+      yearsToRetirement,
+      retirementCalendarYear,
+      marketScenario,
+    )
+  }
+
   let totalFV = retFV + brkFV
-  const hasPortfolioBalances = hasPortfolioBalanceInputs(retBal, brkBal, fidelityRows)
+  const hasPortfolioBalances = hasPortfolioBalanceInputs(retBal, brkBal, importedPositionRows)
   if (!hasPortfolioBalances) {
     retFV = 0
     brkFV = 0
@@ -708,7 +745,7 @@ export function computeResults(
     portfolioGuidance,
     growthRetFvLegacy,
     growthRetFvCompareDelta,
-    hasFidelityRetirementModeling,
+    hasImportedRetirementModeling,
     retirementCalendarYear,
     customPositionReturnCount,
     retirementGrowthSliderShowsFallback,

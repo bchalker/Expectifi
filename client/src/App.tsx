@@ -33,18 +33,19 @@ import { normalizeRetireRegions } from './lib/calc/retireRegions'
 import { buildLifeEventsProjectionData } from './lib/calc/lifeEvents'
 import { loadLifePlans, type LifePlans } from './lib/planStorage/life'
 import { clearStoredManualAccounts } from './lib/manualAccountEntries'
-import { inputsForPersistedCalculatorSession, loadStoredFidelityImport } from './lib/fidelityStorage'
+import { inputsForPersistedCalculatorSession, loadStoredPositionsImport } from './lib/positionsImportStorage'
 import {
   clearAllAccountBalancesFromCard,
-  clearAllFidelityImportFromCard,
-  filterAllFidelityPositionReturnModels,
+  clearAllPositionsImportFromCard,
+  filterImportedPositionReturnModels,
 } from './lib/removeRetirementAccounts'
 import { loadBalanceInputMode, saveBalanceInputMode, type BalanceInputMode } from './lib/retirementBalanceMode'
 import { getAccountsRevealDelayMs, getStripControlsRevealDelayMs } from './lib/portfolioWaveReveal'
 import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubheader'
 import {
-  applyFidelityBalanceOverrides,
+  applyImportedBalanceOverrides,
   portfolioBalancesFromImport,
+  resolvePortfolioBalanceMode,
 } from './lib/portfolioSourceExclusivity'
 import { findIncomeSecurity, navDriftFromErosionRisk } from './lib/incomeSecurities'
 import { isSsConfigured, clampClaimAge } from './lib/socialSecurity'
@@ -87,7 +88,7 @@ import { useAppHeaderStackHeight } from './hooks/useAppHeaderStackHeight'
 import { APP_DASHBOARD_PATH, APP_PATHS, navigateApp, replaceAppPath } from './lib/appPaths'
 import { isDrawerNavAvailable, isTaxSummaryPanelAvailable, type NavPanelContext } from './lib/appNavDrawers'
 import { aggregatedHoldingsForScenarioGuide } from './lib/holdingScenarioGuideExamples'
-import { flattenBatches } from './lib/fidelityStorage'
+import { flattenBatches } from './lib/positionsImportStorage'
 import { AppPrivacyTrust } from './components/AppPrivacyTrust'
 import { WhereToRetire } from './pages/WhereToRetire'
 
@@ -103,7 +104,7 @@ type InitialAppState = {
 
 function freshAppState(): InitialAppState {
   return {
-    inputs: applyFidelityBalanceOverrides({ ...defaultInputs }),
+    inputs: applyImportedBalanceOverrides({ ...defaultInputs }),
     ui: defaultUi,
     phase: 'growth',
     activePreset: 'p1',
@@ -128,7 +129,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const [drawer, setDrawer] = useState<DrawerName | null>(null)
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>('profile')
   const [activePreset, setActivePreset] = useState<string | null>(() => hydration.activePreset)
-  const [fidelityImportRev, setFidelityImportRev] = useState(0)
+  const [positionsImportRev, setPositionsImportRev] = useState(0)
   const [manualAccountsRev, setManualAccountsRev] = useState(0)
   const [balanceMode, setBalanceMode] = useState<BalanceInputMode>(() => loadBalanceInputMode())
   const [brokerageMode, setBrokerageMode] = useState<BrokerageBalanceMode>(() => loadBrokerageBalanceMode())
@@ -290,8 +291,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const onBrokerageModeChange = useCallback((m: BrokerageBalanceMode) => {
     saveBrokerageBalanceMode(m)
     setBrokerageMode(m)
-    if (m === 'fidelity') {
-      const imp = loadStoredFidelityImport()
+    if (m === 'imported') {
+      const imp = loadStoredPositionsImport()
       if (imp?.balances) setInputsState((s) => ({ ...s, brkBal: imp.balances.brkBal }))
     }
   }, [])
@@ -307,8 +308,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }
     setBalanceMode(loadBalanceInputMode())
     setBrokerageMode(loadBrokerageBalanceMode())
-    if (loadStoredFidelityImport()?.batches?.length) {
-      setFidelityImportRev((n) => n + 1)
+    if (loadStoredPositionsImport()?.batches?.length) {
+      setPositionsImportRev((n) => n + 1)
     }
   }, [isHydrated, authLoading, user?.id, user?.planPrefs])
 
@@ -374,14 +375,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
     })
   }, [user?.id, user?.planPrefs])
 
-  const onFidelityApplyBalances = useCallback(
+  const onImportedApplyBalances = useCallback(
     (b: Pick<CalculatorInputs, 'base401k' | 'baseSE401k' | 'baseRoth' | 'baseHsa' | 'brkBal'>) => {
       clearStoredManualAccounts()
       setManualAccountsRev((n) => n + 1)
-      saveBalanceInputMode('fidelity')
-      saveBrokerageBalanceMode('fidelity')
-      setBalanceMode('fidelity')
-      setBrokerageMode('fidelity')
+      saveBalanceInputMode('imported')
+      saveBrokerageBalanceMode('imported')
+      setBalanceMode('imported')
+      setBrokerageMode('imported')
       setPhase('growth')
       setInputsState((prev) => {
         const next = {
@@ -389,7 +390,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           ...portfolioBalancesFromImport(b),
         }
         persistCalculatorSession({
-          inputs: inputsForPersistedCalculatorSession(applyFidelityBalanceOverrides(next)),
+          inputs: inputsForPersistedCalculatorSession(applyImportedBalanceOverrides(next)),
           ui: sessionRef.current.ui,
           phase: 'growth',
           activePreset: sessionRef.current.activePreset,
@@ -400,14 +401,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [],
   )
 
-  const onFidelityImportAppliedRetirement = useCallback(() => {
-    setFidelityImportRev((n) => n + 1)
-    onBalanceModeChange('fidelity')
-    onBrokerageModeChange('fidelity')
-  }, [onBalanceModeChange, onBrokerageModeChange])
+  const onPositionsImportAppliedRetirement = useCallback(() => {
+    setPositionsImportRev((n) => n + 1)
+    const imp = loadStoredPositionsImport()
+    if (imp?.balances) {
+      onImportedApplyBalances(imp.balances)
+      return
+    }
+    onBalanceModeChange('imported')
+    onBrokerageModeChange('imported')
+  }, [onImportedApplyBalances, onBalanceModeChange, onBrokerageModeChange])
 
   const onRemoveRetirementAccounts = useCallback(() => {
-    clearAllFidelityImportFromCard()
+    clearAllPositionsImportFromCard()
     clearStoredManualAccounts()
     saveBalanceInputMode('manual')
     saveBrokerageBalanceMode('manual')
@@ -416,15 +422,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setInputsState((prev) => ({
       ...prev,
       ...clearAllAccountBalancesFromCard(),
-      positionReturnModels: filterAllFidelityPositionReturnModels(prev.positionReturnModels),
+      positionReturnModels: filterImportedPositionReturnModels(prev.positionReturnModels),
     }))
-    setFidelityImportRev((n) => n + 1)
+    setPositionsImportRev((n) => n + 1)
     setManualAccountsRev((n) => n + 1)
   }, [])
 
-  const onFidelityImportAppliedBrokerage = useCallback(() => {
-    setFidelityImportRev((n) => n + 1)
-    onBrokerageModeChange('fidelity')
+  const onPositionsImportAppliedBrokerage = useCallback(() => {
+    setPositionsImportRev((n) => n + 1)
+    onBrokerageModeChange('imported')
   }, [onBrokerageModeChange])
 
   const uiForCompute = useMemo(
@@ -514,11 +520,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
   /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
   const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded
   const showScenarioGuideTab = useMemo(() => {
-    if (phase !== 'growth' || balanceMode !== 'fidelity') return false
-    const imp = loadStoredFidelityImport()
+    if (phase !== 'growth' || balanceMode !== 'imported') return false
+    const imp = loadStoredPositionsImport()
     if (!imp?.batches?.length) return false
     return aggregatedHoldingsForScenarioGuide(flattenBatches(imp.batches)).length > 0
-  }, [phase, balanceMode, fidelityImportRev])
+  }, [phase, balanceMode, positionsImportRev])
   const dashboardHasPortfolio = welcomeDone && c.hasPortfolioBalances
   const navContext: NavPanelContext = useMemo(
     () => ({
@@ -530,14 +536,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const taxSummaryAvailable = isTaxSummaryPanelAvailable(navContext)
   const showIncomeHarvestPreview =
     phase === 'income' && c.hasPortfolioBalances && taxSummaryAvailable && welcomeDone
-  const incomeHarvestMonthly = useIncomeHarvestMonthlyTotal({
+  const displayBalanceMode = useMemo(
+    () => resolvePortfolioBalanceMode(balanceMode),
+    [balanceMode, positionsImportRev, manualAccountsRev],
+  )
+
+  const incomeHarvestPreview = useIncomeHarvestMonthlyTotal({
     enabled: showIncomeHarvestPreview,
     c: cDisplay,
     inputs,
     accountIncomeFunds: ui.accountIncomeFunds,
     accountIncomeStrategies: ui.accountIncomeStrategies,
     accountWithdrawRates: ui.accountWithdrawRates,
-    balanceMode,
+    balanceMode: displayBalanceMode,
     manualAccountsRev,
     brkBal: inputs.brkBal,
   })
@@ -869,7 +880,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                   setPhase('growth')
                   const merged = { ...sessionRef.current.inputs, ...plan }
                   persistCalculatorSession({
-                    inputs: applyFidelityBalanceOverrides(merged),
+                    inputs: applyImportedBalanceOverrides(merged),
                     ui: sessionRef.current.ui,
                     phase: 'growth',
                     activePreset: sessionRef.current.activePreset,
@@ -878,21 +889,21 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 onBases={(b) => setInputsState((prev) => ({ ...prev, ...b }))}
                 balanceMode={balanceMode}
                 onBalanceModeChange={onBalanceModeChange}
-                fidelityImportRev={fidelityImportRev}
+                positionsImportRev={positionsImportRev}
                 manualAccountsRev={manualAccountsRev}
-                onFidelityApplyBalances={onFidelityApplyBalances}
-                onFidelityImportApplied={onFidelityImportAppliedRetirement}
+                onImportedApplyBalances={onImportedApplyBalances}
+                onPositionsImportApplied={onPositionsImportAppliedRetirement}
                 onClearImportedForManual={() => {
-                  clearAllFidelityImportFromCard()
+                  clearAllPositionsImportFromCard()
                   saveBalanceInputMode('manual')
                   saveBrokerageBalanceMode('manual')
                   setInputsState((prev) => ({
                     ...prev,
-                    positionReturnModels: filterAllFidelityPositionReturnModels(
+                    positionReturnModels: filterImportedPositionReturnModels(
                       prev.positionReturnModels,
                     ),
                   }))
-                  setFidelityImportRev((n) => n + 1)
+                  setPositionsImportRev((n) => n + 1)
                 }}
                 onRemoveRetirementAccounts={onRemoveRetirementAccounts}
                 openReturnEditorRequest={returnEditorOpen}
@@ -939,7 +950,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
               </TaxSummaryCard>
             </div>
             {showIncomeHarvestPreview ? (
-              <IncomeHarvestPreviewPanel monthlyIncome={incomeHarvestMonthly} />
+              <IncomeHarvestPreviewPanel
+                monthlyIncome={incomeHarvestPreview.monthlyTotal}
+                hasStrategiesSelected={incomeHarvestPreview.hasStrategiesSelected}
+              />
             ) : null}
           </div>
         </div>
@@ -976,10 +990,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onBalanceModeChange={onBalanceModeChange}
         brokerageMode={brokerageMode}
         onBrokerageModeChange={onBrokerageModeChange}
-        fidelityImportRev={fidelityImportRev}
-        onFidelityApplyBalances={onFidelityApplyBalances}
-        onFidelityImportAppliedRetirement={onFidelityImportAppliedRetirement}
-        onFidelityImportAppliedBrokerage={onFidelityImportAppliedBrokerage}
+        positionsImportRev={positionsImportRev}
+        onImportedApplyBalances={onImportedApplyBalances}
+        onPositionsImportAppliedRetirement={onPositionsImportAppliedRetirement}
+        onPositionsImportAppliedBrokerage={onPositionsImportAppliedBrokerage}
         configInitialTab={configTab}
         ssIncluded={ui.ssIncluded}
         setUi={setUi}

@@ -12,8 +12,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { normalizeFidelityImportSymbol } from "../lib/fidelityCsv";
-import { formatFidelityDescription } from "../lib/fidelityDisplay";
+import { normalizeImportSymbol } from "../lib/positionsCsv";
+import { formatHoldingDescription } from "../lib/holdingsDisplay";
 import {
   inferScenarioUiChoice,
   scenarioColumnShortLabel,
@@ -28,7 +28,7 @@ import {
 } from "../lib/positionReturnModel";
 import { fmt } from "../utils/format";
 import { RangeInlineWithValuePinRow } from "./StripSliderValuePin";
-import "./FidelityHoldingScenarioPopout.scss";
+import "./HoldingScenarioPopout.scss";
 import "./GrowthSliderLabel.scss";
 
 function fmtSignedDeltaMoney(n: number): string {
@@ -85,13 +85,13 @@ export function GrowthSliderLabel({
     const ids: string[] = [];
     const seen = new Set<string>();
     for (const q of positions) {
-      if (normalizeFidelityImportSymbol(q.ticker).toUpperCase() !== k) continue;
+      if (normalizeImportSymbol(q.ticker).toUpperCase() !== k) continue;
       if (seen.has(q.id)) continue;
       seen.add(q.id);
       ids.push(q.id);
     }
     for (const q of brkList) {
-      if (normalizeFidelityImportSymbol(q.ticker).toUpperCase() !== k) continue;
+      if (normalizeImportSymbol(q.ticker).toUpperCase() !== k) continue;
       if (seen.has(q.id)) continue;
       seen.add(q.id);
       ids.push(q.id);
@@ -111,7 +111,7 @@ export function GrowthSliderLabel({
     const seen = new Set<string>();
     const out: PositionReturnModel[] = [];
     for (const p of customPositions) {
-      const k = normalizeFidelityImportSymbol(p.ticker).toUpperCase();
+      const k = normalizeImportSymbol(p.ticker).toUpperCase();
       const dedupeKey = k || p.id;
       if (seen.has(dedupeKey)) continue;
       seen.add(dedupeKey);
@@ -215,7 +215,7 @@ export function GrowthSliderLabel({
         <div className="growth-slider-hover-pop__head">
           <p className="growth-slider-hover-pop__symbol">{p.ticker || "—"}</p>
           <p className="growth-slider-hover-pop__desc" title={p.label}>
-            {formatFidelityDescription(p.label)}
+            {formatHoldingDescription(p.label)}
           </p>
         </div>
         <div className="growth-slider-hover-pop__rule" />
@@ -245,7 +245,7 @@ export function GrowthSliderLabel({
             className="growth-slider-hover-pop__remove"
             aria-label={`Remove custom return overrides for ${p.ticker || "this holding"} (all accounts)`}
             onClick={() => {
-              const tk = normalizeFidelityImportSymbol(p.ticker).toUpperCase();
+              const tk = normalizeImportSymbol(p.ticker).toUpperCase();
               const ids = tk ? positionIdsForTickerKey(tk) : [p.id];
               onRemovePositionReturn(ids.length ? ids : [p.id]);
               clearCloseTimer();

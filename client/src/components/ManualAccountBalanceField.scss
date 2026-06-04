@@ -1,0 +1,119 @@
+.manual-account-balance-field-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.manual-account-balance-field__sizer {
+  visibility: hidden;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.manual-account-balance-field {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  box-sizing: border-box;
+}
+
+.manual-account-balance-field--display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 var(--space-1);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+  background: transparent;
+}
+
+.manual-account-balance-field--display:hover {
+  color: var(--accent);
+  background: transparent;
+}
+
+.manual-account-balance-field--editing {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 8.5rem;
+  max-width: min(12rem, 42vw);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  box-shadow:
+    0 4px 6px color-mix(in srgb, var(--color-navy) 8%, transparent),
+    0 10px 24px color-mix(in srgb, var(--color-navy) 14%, transparent);
+}
+
+.manual-account-balance-field__prefix {
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.manual-account-balance-field__text-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.manual-account-balance-field__text-field [data-slot='input-wrapper'] {
+  min-height: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.manual-account-balance-field__input,
+.manual-account-balance-field__text-field input[data-slot='input'] {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: right;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.manual-account-balance-field__text-field input[data-slot='input']:focus {
+  outline: none;
+  box-shadow: none;
+}

@@ -126,6 +126,12 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 .onboarding-accounts-step__row {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.onboarding-accounts-step__allocation {
+  width: 100%;
   min-width: 0;
 }
 

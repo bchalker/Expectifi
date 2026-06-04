@@ -2,7 +2,7 @@
  * Fidelity exports often use ALL CAPS for security descriptions.
  * Normalize to sentence-friendly casing for UI (CSV value unchanged).
  */
-export function formatFidelityDescription(raw: string): string {
+export function formatHoldingDescription(raw: string): string {
   const t = raw.trim()
   if (!t) return t
   const letters = t.replace(/[^A-Za-z]/g, '')
