@@ -1226,6 +1226,14 @@ button.holdings-scenario-trigger--badge {
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   background: #fff;
   align-items: flex-start;
+  --holdings-scenario-badge-change-row-h: calc(var(--text-xs) * 1.35);
+  /* Match change row so one slide step fully reveals label + Change at constant viewport height. */
+  --holdings-scenario-badge-sublabel-row-h: var(--holdings-scenario-badge-change-row-h);
+  --holdings-scenario-badge-label-row-h: calc(var(--text-sm) * var(--leading-snug));
+  --holdings-scenario-badge-viewport-h: calc(
+    var(--holdings-scenario-badge-sublabel-row-h) + var(--holdings-scenario-badge-label-row-h)
+  );
+  --holdings-scenario-badge-change-icon-size: 1.625rem;
 }
 
 span.holdings-scenario-trigger--badge.holdings-scenario-badge--static {
@@ -1261,10 +1269,103 @@ span.holdings-scenario-trigger--badge.holdings-scenario-badge--static {
 }
 
 button.holdings-scenario-trigger--badge:hover {
-  background: var(--surface-u2);
+  background: #fff;
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__text:has(.holdings-scenario-trigger__change-row) {
+  position: relative;
+  overflow: hidden;
+  height: var(--holdings-scenario-badge-viewport-h);
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__slide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__slide {
+  transform: translateY(calc(-1 * var(--holdings-scenario-badge-sublabel-row-h)));
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__sublabel {
+  display: flex;
+  align-items: center;
+  min-height: var(--holdings-scenario-badge-sublabel-row-h);
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__label-row {
+  min-height: var(--holdings-scenario-badge-label-row-h);
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  min-height: var(--holdings-scenario-badge-change-row-h);
+  color: var(--accent-text);
+
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-label {
+  flex: 0 0 auto;
+  font-weight: 500;
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--holdings-scenario-badge-change-icon-size);
+  height: var(--holdings-scenario-badge-change-icon-size);
+  font-size: var(--text-lg);
+  line-height: 0;
+  color: var(--text-muted);
+  transform: translate(100%, -50%);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--green6);
+  pointer-events: none;
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-icon svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__change-icon {
+  transform: translate(0, -50%);
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot,
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__trail {
+  transition: opacity 0.16s ease;
+}
+
+button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__dot,
+button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__trail {
+  opacity: 0;
 }
 
 .holdings-scenario-trigger__text {
@@ -1326,6 +1427,36 @@ button.holdings-scenario-trigger--badge:hover {
 
 .holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__dot {
   background: #e8b86a;
+}
+
+button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot {
+  animation: holdings-scenario-trigger-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes holdings-scenario-trigger-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot {
+    animation: none;
+  }
+
+  button.holdings-scenario-trigger--badge .holdings-scenario-trigger__slide,
+  button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot,
+  button.holdings-scenario-trigger--badge .holdings-scenario-trigger__trail,
+  button.holdings-scenario-trigger--badge .holdings-scenario-trigger__change-icon {
+    transition-duration: 0.01ms;
+  }
 }
 
 .holdings-scenario-trigger__label {

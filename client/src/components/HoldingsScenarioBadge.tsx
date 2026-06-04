@@ -1,4 +1,4 @@
-import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
+import { IconTransfer, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import {
   SCENARIO_MIXED,
   type ScenarioUiChoice,
@@ -24,6 +24,8 @@ export type HoldingsScenarioBadgeContentProps = {
   choice: ScenarioUiChoice | typeof SCENARIO_MIXED
   /** Badge kicker — e.g. Account Scenario, This holding. */
   sublabel?: string
+  /** Badge buttons: hide Change row below fold; slide up on hover. */
+  showChangeHint?: boolean
 }
 
 /** Shared scenario label stack: sublabel, colored dot, name, trend icon. */
@@ -31,13 +33,14 @@ export function HoldingsScenarioBadgeContent({
   label,
   choice,
   sublabel,
+  showChangeHint = false,
 }: HoldingsScenarioBadgeContentProps) {
   const showDot =
     choice !== SCENARIO_MIXED && choice !== 'default'
   const TrailingIcon = scenarioTriggerTrailingIcon(choice)
 
-  return (
-    <span className="holdings-scenario-trigger__text">
+  const body = (
+    <>
       {sublabel ? (
         <span className="holdings-scenario-trigger__sublabel">{sublabel}</span>
       ) : null}
@@ -52,6 +55,26 @@ export function HoldingsScenarioBadgeContent({
           </span>
         ) : null}
       </span>
+      {showChangeHint ? (
+        <span className="holdings-scenario-trigger__change-row" aria-hidden>
+          <span className="font-xs holdings-scenario-trigger__change-label">Change</span>
+        </span>
+      ) : null}
+    </>
+  )
+
+  return (
+    <span className="holdings-scenario-trigger__text">
+      {showChangeHint ? (
+        <>
+          <span className="holdings-scenario-trigger__slide">{body}</span>
+          <span className="holdings-scenario-trigger__change-icon" aria-hidden>
+            <IconTransfer stroke={1.5} />
+          </span>
+        </>
+      ) : (
+        body
+      )}
     </span>
   )
 }

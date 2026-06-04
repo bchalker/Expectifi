@@ -75,6 +75,7 @@ export function HoldingsScenarioTrigger({
           label={label}
           choice={badgeChoice}
           sublabel={sublabel}
+          showChangeHint
         />
       ) : (
         <>

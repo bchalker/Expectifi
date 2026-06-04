@@ -195,9 +195,12 @@
   background: var(--sky-blue);
 }
 
-.portfolio-bucket-account-row .holdings-scenario-trigger--outline:hover,
-.portfolio-bucket-account-row .holdings-scenario-trigger--badge:hover {
+.portfolio-bucket-account-row .holdings-scenario-trigger--outline:hover {
   background: var(--surface-u2);
+}
+
+.portfolio-bucket-account-row .holdings-scenario-trigger--badge:hover {
+  background: #fff;
 }
 
 .portfolio-bucket-account-row__chevron.view-holdings-hint {
