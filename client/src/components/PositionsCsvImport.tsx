@@ -48,7 +48,10 @@ import {
   type RemovedHoldingAction,
 } from "../lib/csvImportDiff";
 import { buildImportIntentExamples } from "../lib/csvImportIntentExamples";
-import { custodianToBrokerSource, stampRowsWithBrokerSource } from "../lib/brokerMonogram";
+import {
+  custodianToBrokerSource,
+  stampRowsWithBrokerSource,
+} from "../lib/brokerMonogram";
 import "./SidePanelShell.scss";
 import "./PositionsCsvImport.scss";
 
@@ -566,8 +569,7 @@ export function PositionsCsvImport({
     manualReplaceAckOk &&
     duplicateAckOk;
 
-  const canProceedFromIntent =
-    canProceedFromReview && importIntent !== null;
+  const canProceedFromIntent = canProceedFromReview && importIntent !== null;
 
   function onPrimaryFooterPress() {
     if (!canProceedFromReview) return;
@@ -1160,7 +1162,7 @@ export function PositionsCsvImport({
             : postReviewStep === "diff"
               ? "Review what will change, then confirm. Removed holdings stay unless you choose Remove."
               : isPanel || hideImportSourceUi || stagedFile || pending
-                ? "Review each account and map it to the correct tax bucket, then confirm. Ballpark amounts are fine — you can refine them later."
+                ? "Review each account and map it to the correct tax bucket, then confirm."
                 : "Choose your custodian, then select a single positions export file."}
         </p>
       </header>
@@ -1267,7 +1269,9 @@ export function PositionsCsvImport({
                 size="sm"
                 variant="primary"
                 isDisabled={
-                  !primaryFooterEnabled || importBusy !== null || confirmBlocking
+                  !primaryFooterEnabled ||
+                  importBusy !== null ||
+                  confirmBlocking
                 }
                 onPress={() => onPrimaryFooterPress()}
               >

@@ -149,8 +149,8 @@ import { monthlyPortfolioIncomeFromAccountStrategies } from "../lib/accountIncom
 import { currentBalanceForAccountBucket } from "../lib/accountBucketRetirementBalance";
 import { ManualProjectionsCallout } from "./ManualProjectionsCallout";
 import { PlaidConnectionProvider } from "./PlaidConnectionHeader";
+import { AccountPlanBottomBanner } from "./AccountPlanBottomBanner";
 import { AppButton } from "./ui/AppButton";
-import { useUserTier } from "../hooks/useUserTier";
 import "./AccountBalancesTaxDisclosure.scss";
 import "./AccountBalancesCustomScenario.scss";
 
@@ -343,8 +343,6 @@ export function AccountBalances({
   accountWithdrawRates = {},
   onAccountWithdrawRateChange,
 }: Props) {
-  const { isPro, hasSessionCsvHoldings } = useUserTier();
-  const showCsvSessionBanner = hasSessionCsvHoldings && !isPro;
   const { locale, taxConfig } = useUserLocale();
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly;
 
@@ -643,6 +641,7 @@ export function AccountBalances({
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] =
     useState<PositionsCsvCustodian | null>(null);
   const [openManageRequest, setOpenManageRequest] = useState(0);
+  const [manageMenuOpen, setManageMenuOpen] = useState(false);
   const hadAccountCardDataRef = useRef(false);
   const reopenManageAfterBalanceEditCloseRef = useRef(false);
   const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
@@ -1656,13 +1655,18 @@ export function AccountBalances({
     return overlay;
   }
 
-  function renderRemoveAccountsConfirmOverlay() {
+  function renderRemoveAccountsConfirmOverlay(stackedOnManageMenu = false) {
     if (!onRemoveRetirementAccounts || !removeAccountsModalState.isOpen)
       return null;
 
     return (
       <div
-        className="account-balances-remove-overlay"
+        className={[
+          "account-balances-remove-overlay",
+          stackedOnManageMenu && "account-balances-remove-overlay--on-manage-menu",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="account-balances-remove-title"
@@ -1740,6 +1744,8 @@ export function AccountBalances({
     requiredEntry?: boolean;
   }) {
     if (!showBalanceEntryActions) return null;
+    const removeConfirmOpen =
+      Boolean(onRemoveRetirementAccounts) && removeAccountsModalState.isOpen;
     return (
       <>
         <AccountBalancesManageMenu
@@ -1759,6 +1765,14 @@ export function AccountBalances({
           onClearAccounts={() => removeAccountsModalState.open()}
           openRequest={openManageRequest}
           onOpenUpgrade={onOpenUpgradeCsv}
+          onManageOpenChange={setManageMenuOpen}
+          removeConfirmOpen={removeConfirmOpen}
+          onRemoveConfirmClose={() => removeAccountsModalState.close()}
+          stackedOverlay={
+            removeConfirmOpen
+              ? renderRemoveAccountsConfirmOverlay(true)
+              : null
+          }
           onImportApplied={() => {
             onBalanceModeChange?.("imported");
             onPositionsImportApplied?.();
@@ -2858,7 +2872,7 @@ export function AccountBalances({
         </aside>
       ) : null}
       {!csvImportModalOpen && renderReplaceSourceConfirmOverlay()}
-      {renderRemoveAccountsConfirmOverlay()}
+      {!manageMenuOpen && renderRemoveAccountsConfirmOverlay()}
     </div>
   );
 
@@ -2889,52 +2903,17 @@ export function AccountBalances({
     ) : null;
 
   const accountSectionFooter =
-    showCsvSessionBanner &&
     !configureInputsOnly &&
-    (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData) ? (
-      <div
-        className="account-balances-section-footer account-balances-section-footer--with-upgrade"
-        role="status"
-      >
-        <div className="account-balances-section-footer__upgrade-copy">
-          <p className="account-balances-section-footer__headline">
-            Your session is temporary — <strong>Pro</strong> keeps it safe.
-          </p>
-          <p className="account-balances-section-footer__subhead">
-            $9/mo. No contracts, no hassle. Cancel anytime.
-          </p>
-        </div>
-        <AppButton
-          type="button"
-          size="sm"
-          variant="primary"
-          className="account-balances-section-footer__cta"
-          aria-label="Upgrade to Pro"
-          onPress={() => (onOpenUpgradeCsv ?? onOpenSignIn)?.()}
-        >
-          Upgrade to Pro
-        </AppButton>
-        <div
-          className={[
-            "account-balances-section-footer__total",
-            incomeModeDashboard
-              ? "account-balances-section-footer__total--income"
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <span className="account-balances-section-footer__total-label">
-            {portfolioTotalLabel}
-          </span>
-          <span className="account-balances-section-footer__total-value">
-            {portfolioTotalDisplay}
-          </span>
-        </div>
-      </div>
-    ) : (
-      totalRetirementBar
-    );
+    (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData)
+      ? totalRetirementBar
+      : null;
+
+  const accountPlanBottomBanner =
+    mergedDashboard && !configureInputsOnly ? (
+      <AccountPlanBottomBanner
+        onOpenUpgrade={onOpenUpgradeCsv ?? onOpenSignIn}
+      />
+    ) : null;
 
   const headerManageMenu = renderAccountBalancesManageMenu();
 
@@ -3049,6 +3028,7 @@ export function AccountBalances({
                   })
                 : null}
               {renderMergedDashboardOrderedContent()}
+              {accountPlanBottomBanner}
               {accountSectionFooter}
             </div>
           </div>
@@ -3094,7 +3074,7 @@ export function AccountBalances({
             >
               {renderBalanceRows()}
               {renderReplaceSourceConfirmOverlay()}
-              {renderRemoveAccountsConfirmOverlay()}
+              {!manageMenuOpen && renderRemoveAccountsConfirmOverlay()}
             </div>
           </div>
           {accountSectionFooter}

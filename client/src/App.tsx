@@ -59,7 +59,6 @@ import {
 import { OnboardingOverlay } from './components/OnboardingOverlay'
 import { shouldSkipWelcome, shouldShowWelcomeOverlay, peekForceOnboardingSession, consumeForceOnboardingSession } from './lib/welcomeGate'
 import { useUserTier } from './hooks/useUserTier'
-import { SavePlanPromptBanner } from './components/SavePlanPromptBanner'
 import type { PlanPersistSnapshot } from './lib/planStorage'
 import { clearSessionOnboardingComplete } from './lib/sessionFlags'
 import {
@@ -1003,7 +1002,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
         onLifePlansChange={setLifePlans}
         currentYear={lifeEventsProjectionData.currentYear}
       />
-      <SavePlanPromptBanner />
       <AuthModal
         open={authModal}
         onClose={() => {

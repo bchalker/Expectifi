@@ -5,8 +5,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type MouseEvent,
   type AnimationEvent,
+  type MouseEvent,
+  type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -174,6 +175,12 @@ export type AccountBalancesManageMenuProps = {
   requiredEntry?: boolean;
   /** Opens Pro checkout / register flow from upgrade prompt. */
   onOpenUpgrade?: () => void;
+  /** Nested confirm (e.g. remove all accounts) rendered above the menu panel. */
+  stackedOverlay?: ReactNode | null;
+  /** When true, Escape closes the stacked overlay first. */
+  removeConfirmOpen?: boolean;
+  onRemoveConfirmClose?: () => void;
+  onManageOpenChange?: (open: boolean) => void;
 };
 
 export function AccountBalancesManageMenu({
@@ -191,6 +198,10 @@ export function AccountBalancesManageMenu({
   initialOpen = false,
   requiredEntry = false,
   onOpenUpgrade,
+  stackedOverlay = null,
+  removeConfirmOpen = false,
+  onRemoveConfirmClose,
+  onManageOpenChange,
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth();
   const { hasPaidSubscription } = usePlan();
@@ -253,6 +264,10 @@ export function AccountBalancesManageMenu({
     ctx?.setPanelOpen(true);
   }, [ctx, initialOpen]);
 
+  useEffect(() => {
+    onManageOpenChange?.(open);
+  }, [open, onManageOpenChange]);
+
   const lastOpenRequestRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (!openRequest || lastOpenRequestRef.current === openRequest) return;
@@ -263,13 +278,25 @@ export function AccountBalancesManageMenu({
   useEffect(() => {
     if (!open || closing || requiredEntry) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") dismiss();
+      if (e.key !== "Escape") return;
+      if (removeConfirmOpen) {
+        onRemoveConfirmClose?.();
+        return;
+      }
+      dismiss();
     }
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [dismiss, closing, open, requiredEntry]);
+  }, [
+    dismiss,
+    closing,
+    open,
+    requiredEntry,
+    removeConfirmOpen,
+    onRemoveConfirmClose,
+  ]);
 
   const handleBackdropAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLDivElement>) => {
@@ -284,11 +311,14 @@ export function AccountBalancesManageMenu({
   const handleBackdropMouseDown = useCallback(
     (e: MouseEvent) => {
       if (requiredEntry) return;
+      if (removeConfirmOpen) return;
       if ((e.target as HTMLElement).closest?.(".plaid-disconnect-popover"))
+        return;
+      if ((e.target as HTMLElement).closest?.(".account-balances-remove-overlay"))
         return;
       dismiss();
     },
-    [dismiss, requiredEntry],
+    [dismiss, requiredEntry, removeConfirmOpen],
   );
 
   const runAndClose = useCallback(
@@ -595,7 +625,7 @@ export function AccountBalancesManageMenu({
                         <button
                           type="button"
                           className="account-balances-manage__clear-btn"
-                          onClick={() => runAndClose(onClearAccounts)}
+                          onClick={() => onClearAccounts()}
                         >
                           Clear all accounts
                         </button>
@@ -610,6 +640,7 @@ export function AccountBalancesManageMenu({
                   </p>
                 ) : null}
               </div>
+              {stackedOverlay}
             </div>,
             document.body,
           )

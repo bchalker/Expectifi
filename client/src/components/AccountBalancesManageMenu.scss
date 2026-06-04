@@ -86,6 +86,9 @@
   cursor: not-allowed;
 }
 
+/* Reserve space for fixed .save-plan-prompt--visible at bottom */
+$account-balances-manage-save-prompt-offset: 5.5rem;
+
 .account-balances-manage__backdrop {
   position: fixed;
   inset: 0;
@@ -94,6 +97,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + #{$account-balances-manage-save-prompt-offset});
   box-sizing: border-box;
   background: transparent;
   animation: account-balances-manage-backdrop-in 0.24s ease forwards;
@@ -107,7 +111,9 @@
   position: relative;
   z-index: 1;
   width: min(100%, 560px);
-  max-height: calc(100dvh - 2 * var(--space-4));
+  max-height: calc(
+    100dvh - 2 * var(--space-4) - #{$account-balances-manage-save-prompt-offset}
+  );
   box-sizing: border-box;
   overflow: hidden auto;
   border-radius: var(--border-radius-lg);
@@ -188,7 +194,12 @@
   justify-content: flex-start;
 }
 
+.account-balances-manage__backdrop:not(.account-balances-manage__backdrop--required-entry) {
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+}
+
 .account-balances-manage__backdrop--required-entry {
+  background: transparent;
   cursor: default;
 }
 

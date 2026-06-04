@@ -1418,6 +1418,18 @@
   z-index: 410;
 }
 
+.account-balances-remove-overlay--on-manage-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1110;
+}
+
+.account-balances-remove-overlay--on-manage-menu
+  .account-balances-remove-overlay__backdrop {
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+  opacity: 1;
+}
+
 .account-balances-remove-overlay--on-import-modal
   .account-balances-remove-overlay__backdrop {
   background: rgba(28, 24, 18, 0.35);
