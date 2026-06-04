@@ -89,6 +89,7 @@ import { isDrawerNavAvailable, isTaxSummaryPanelAvailable, type NavPanelContext 
 import { aggregatedHoldingsForScenarioGuide } from './lib/holdingScenarioGuideExamples'
 import { flattenBatches } from './lib/positionsImportStorage'
 import { AppPrivacyTrust } from './components/AppPrivacyTrust'
+import { AccountPlanBottomBanner } from './components/AccountPlanBottomBanner'
 import { WhereToRetire } from './pages/WhereToRetire'
 
 const defaultInputs = defaultCalculatorInputs
@@ -977,6 +978,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
       ) : null}
         </div>
       </div>
+      <AccountPlanBottomBanner
+        onOpenUpgrade={openCsvUpgrade}
+      />
       <AppPrivacyTrust dividerAbove={isWhereToRetire} />
 
       <DrawerPanel

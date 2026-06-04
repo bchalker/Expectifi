@@ -75,7 +75,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
-  padding-bottom: calc(var(--app-privacy-trust-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--app-privacy-trust-h) + var(--app-plan-banner-h, 0px));
   box-sizing: border-box;
 }
 

@@ -152,7 +152,10 @@ function PlaidConnectionsSection({
 export type AccountBalancesManageMenuProps = {
   canClearAccounts: boolean;
   onManualAdd: () => void;
-  onPickCsvCustodian: (custodian: PositionsCsvCustodian) => void;
+  onPickCsvCustodian: (
+    custodian: PositionsCsvCustodian,
+    closeManage?: () => void,
+  ) => void;
   onClearAccounts: () => void;
   onImportApplied?: () => void;
   /** Shown above connect actions when manual balances would be replaced. */
@@ -180,6 +183,8 @@ export type AccountBalancesManageMenuProps = {
   /** When true, Escape closes the stacked overlay first. */
   removeConfirmOpen?: boolean;
   onRemoveConfirmClose?: () => void;
+  replaceConfirmOpen?: boolean;
+  onReplaceConfirmClose?: () => void;
   onManageOpenChange?: (open: boolean) => void;
 };
 
@@ -201,6 +206,8 @@ export function AccountBalancesManageMenu({
   stackedOverlay = null,
   removeConfirmOpen = false,
   onRemoveConfirmClose,
+  replaceConfirmOpen = false,
+  onReplaceConfirmClose,
   onManageOpenChange,
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth();
@@ -283,6 +290,10 @@ export function AccountBalancesManageMenu({
         onRemoveConfirmClose?.();
         return;
       }
+      if (replaceConfirmOpen) {
+        onReplaceConfirmClose?.();
+        return;
+      }
       dismiss();
     }
     document.addEventListener("keydown", onKeyDown);
@@ -296,6 +307,8 @@ export function AccountBalancesManageMenu({
     requiredEntry,
     removeConfirmOpen,
     onRemoveConfirmClose,
+    replaceConfirmOpen,
+    onReplaceConfirmClose,
   ]);
 
   const handleBackdropAnimationEnd = useCallback(
@@ -311,14 +324,14 @@ export function AccountBalancesManageMenu({
   const handleBackdropMouseDown = useCallback(
     (e: MouseEvent) => {
       if (requiredEntry) return;
-      if (removeConfirmOpen) return;
+      if (removeConfirmOpen || replaceConfirmOpen) return;
       if ((e.target as HTMLElement).closest?.(".plaid-disconnect-popover"))
         return;
       if ((e.target as HTMLElement).closest?.(".account-balances-remove-overlay"))
         return;
       dismiss();
     },
-    [dismiss, requiredEntry, removeConfirmOpen],
+    [dismiss, requiredEntry, removeConfirmOpen, replaceConfirmOpen],
   );
 
   const runAndClose = useCallback(
@@ -362,11 +375,11 @@ export function AccountBalancesManageMenu({
   const handleCsvPick = useCallback(
     (custodian: PositionsCsvCustodian) => {
       if (!isPositionsCsvCustodian(custodian)) return;
-      const run = () => runAndClose(() => onPickCsvCustodian(custodian));
+      const run = () => onPickCsvCustodian(custodian, close);
       if (onRequestReplaceManual) onRequestReplaceManual(run);
       else run();
     },
-    [onPickCsvCustodian, onRequestReplaceManual, runAndClose],
+    [close, onPickCsvCustodian, onRequestReplaceManual],
   );
 
   const handleManualAdd = useCallback(() => {
@@ -461,7 +474,13 @@ export function AccountBalancesManageMenu({
               <div
                 ref={menuRef}
                 id="account-balances-manage-menu"
-                className="account-balances-manage__menu"
+                className={[
+                  "account-balances-manage__menu",
+                  (removeConfirmOpen || replaceConfirmOpen) &&
+                    "account-balances-manage__menu--stacked-overlay",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
                 role="dialog"
                 aria-labelledby="account-balances-manage-panel-title"
                 onMouseDown={(e) => e.stopPropagation()}
@@ -639,8 +658,8 @@ export function AccountBalancesManageMenu({
                     {ctx.linkErr}
                   </p>
                 ) : null}
+                {stackedOverlay}
               </div>
-              {stackedOverlay}
             </div>,
             document.body,
           )

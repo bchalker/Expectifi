@@ -122,6 +122,10 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   animation: account-balances-manage-menu-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+.account-balances-manage__menu--stacked-overlay {
+  overflow: hidden;
+}
+
 .account-balances-manage__backdrop--closing .account-balances-manage__menu {
   animation: account-balances-manage-menu-out 0.22s ease forwards;
 }

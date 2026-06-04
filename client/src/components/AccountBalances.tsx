@@ -6,7 +6,7 @@ import type {
 } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button, useOverlayState } from "@heroui/react";
+import { useOverlayState } from "@heroui/react";
 import type { CalculatorInputs, ComputedSnapshot } from "../lib/computeResults";
 import {
   aggregatePositionsBySymbol,
@@ -149,7 +149,6 @@ import { monthlyPortfolioIncomeFromAccountStrategies } from "../lib/accountIncom
 import { currentBalanceForAccountBucket } from "../lib/accountBucketRetirementBalance";
 import { ManualProjectionsCallout } from "./ManualProjectionsCallout";
 import { PlaidConnectionProvider } from "./PlaidConnectionHeader";
-import { AccountPlanBottomBanner } from "./AccountPlanBottomBanner";
 import { AppButton } from "./ui/AppButton";
 import "./AccountBalancesTaxDisclosure.scss";
 import "./AccountBalancesCustomScenario.scss";
@@ -328,7 +327,6 @@ export function AccountBalances({
   brkBal,
   brkRate,
   brokerageMode,
-  onOpenSignIn,
   onOpenUpgradeCsv,
   openImportRequest,
   onImportOpenHandled,
@@ -652,6 +650,7 @@ export function AccountBalances({
   const financialsCsvPendingCustodianRef = useRef<PositionsCsvCustodian | null>(
     null,
   );
+  const closeManageAfterCsvRef = useRef<(() => void) | null>(null);
   const financialsCsvFileInputRef = useRef<HTMLInputElement>(null);
   const [manualDraft, setManualDraft] = useState<ManualBalancesDraft | null>(
     null,
@@ -680,6 +679,39 @@ export function AccountBalances({
     message: string;
     proceed: () => void;
   } | null>(null);
+  const [replaceSourceConfirmClosing, setReplaceSourceConfirmClosing] =
+    useState(false);
+
+  const finalizeReplaceSourceConfirmClose = useCallback(() => {
+    setReplaceSourceConfirm(null);
+    setReplaceSourceConfirmClosing(false);
+  }, []);
+
+  const requestReplaceSourceConfirmClose = useCallback(() => {
+    if (!replaceSourceConfirm || replaceSourceConfirmClosing) return;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      finalizeReplaceSourceConfirmClose();
+      return;
+    }
+    setReplaceSourceConfirmClosing(true);
+  }, [
+    finalizeReplaceSourceConfirmClose,
+    replaceSourceConfirm,
+    replaceSourceConfirmClosing,
+  ]);
+
+  const onReplaceSourceConfirmOverlayAnimationEnd = useCallback(
+    (e: AnimationEvent<HTMLDivElement>) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.animationName !== "account-balances-remove-overlay-out") return;
+      if (!replaceSourceConfirmClosing) return;
+      finalizeReplaceSourceConfirmClose();
+    },
+    [finalizeReplaceSourceConfirmClose, replaceSourceConfirmClosing],
+  );
 
   const portfolioModes = useMemo(
     () => ({ retirement: balanceMode, brokerage: brokerageMode ?? "imported" }),
@@ -702,6 +734,7 @@ export function AccountBalances({
         proceed();
         return;
       }
+      setReplaceSourceConfirmClosing(false);
       setReplaceSourceConfirm({
         message: MANUAL_REMOVED_ON_CONNECT_MSG,
         proceed,
@@ -716,6 +749,7 @@ export function AccountBalances({
         proceed();
         return;
       }
+      setReplaceSourceConfirmClosing(false);
       setReplaceSourceConfirm({
         message: IMPORT_REMOVED_ON_MANUAL_MSG,
         proceed,
@@ -1238,10 +1272,14 @@ export function AccountBalances({
     setCsvFileIngestRequest(null);
   }, []);
 
-  const onPickCsvCustodian = useCallback((custodian: PositionsCsvCustodian) => {
-    financialsCsvPendingCustodianRef.current = custodian;
-    financialsCsvFileInputRef.current?.click();
-  }, []);
+  const onPickCsvCustodian = useCallback(
+    (custodian: PositionsCsvCustodian, closeManage?: () => void) => {
+      financialsCsvPendingCustodianRef.current = custodian;
+      closeManageAfterCsvRef.current = closeManage ?? null;
+      financialsCsvFileInputRef.current?.click();
+    },
+    [],
+  );
 
   const finishCsvImportLaunch = useCallback(() => {
     clearCsvImportLaunchUi();
@@ -1258,9 +1296,8 @@ export function AccountBalances({
     (file: File, custodian: PositionsCsvCustodian) => {
       setCsvImportPrefillCustodian(custodian);
       setCsvFileIngestRequest({ id: Date.now(), file, custodian });
-      onBalanceModeChange?.("imported");
     },
-    [onBalanceModeChange],
+    [],
   );
 
   const onFinancialsCsvFileChange = useCallback(
@@ -1268,9 +1305,16 @@ export function AccountBalances({
       const f = e.target.files?.[0];
       e.target.value = "";
       const custodian = financialsCsvPendingCustodianRef.current;
+      if (!f) {
+        closeManageAfterCsvRef.current = null;
+        return;
+      }
+      if (!custodian) return;
       financialsCsvPendingCustodianRef.current = null;
-      if (!f || !custodian) return;
+      const closeManage = closeManageAfterCsvRef.current;
+      closeManageAfterCsvRef.current = null;
       launchCsvImportFromFile(f, custodian);
+      closeManage?.();
     },
     [launchCsvImportFromFile],
   );
@@ -1585,16 +1629,22 @@ export function AccountBalances({
     openBalanceEditPanel("manual");
   }, [finishCsvImportLaunch, openBalanceEditPanel]);
 
-  function renderReplaceSourceConfirmOverlay(stackedOnImportModal = false) {
+  function renderReplaceSourceConfirmOverlay(
+    stackedOnImportModal = false,
+    stackedOnManageMenu = false,
+  ) {
     if (!replaceSourceConfirm) return null;
 
     const overlay = (
       <div
         className={[
           "account-balances-remove-overlay",
-          stackedOnImportModal
-            ? "account-balances-remove-overlay--on-import-modal"
-            : "",
+          stackedOnImportModal &&
+            !stackedOnManageMenu &&
+            "account-balances-remove-overlay--on-import-modal",
+          stackedOnManageMenu && "account-balances-remove-overlay--on-manage-menu",
+          replaceSourceConfirmClosing &&
+            "account-balances-remove-overlay--closing",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -1602,12 +1652,14 @@ export function AccountBalances({
         aria-modal="true"
         aria-labelledby="account-balances-replace-source-title"
         aria-describedby="account-balances-replace-source-desc"
+        onAnimationEnd={onReplaceSourceConfirmOverlayAnimationEnd}
       >
         <button
           type="button"
           className="account-balances-remove-overlay__backdrop"
           aria-label="Cancel"
-          onClick={() => setReplaceSourceConfirm(null)}
+          disabled={replaceSourceConfirmClosing}
+          onClick={requestReplaceSourceConfirmClose}
         />
         <div className="account-balances-remove-overlay__panel">
           <h2
@@ -1623,32 +1675,39 @@ export function AccountBalances({
             {replaceSourceConfirm.message}
           </p>
           <div className="account-balances-remove-overlay__footer">
-            <Button
-              variant="outline"
+            <AppButton
+              variant="secondary"
               size="sm"
               className="account-balances-remove-overlay__btn"
-              onPress={() => setReplaceSourceConfirm(null)}
+              isDisabled={replaceSourceConfirmClosing}
+              onPress={requestReplaceSourceConfirmClose}
             >
               Cancel
-            </Button>
-            <Button
+            </AppButton>
+            <AppButton
               variant="primary"
               size="sm"
               className="account-balances-remove-overlay__btn"
+              isDisabled={replaceSourceConfirmClosing}
               onPress={() => {
                 const proceed = replaceSourceConfirm.proceed;
-                setReplaceSourceConfirm(null);
                 proceed();
+                setReplaceSourceConfirmClosing(false);
+                setReplaceSourceConfirm(null);
               }}
             >
               Continue
-            </Button>
+            </AppButton>
           </div>
         </div>
       </div>
     );
 
-    if (stackedOnImportModal && typeof document !== "undefined") {
+    if (
+      stackedOnImportModal &&
+      !stackedOnManageMenu &&
+      typeof document !== "undefined"
+    ) {
       return createPortal(overlay, document.body);
     }
 
@@ -1692,22 +1751,22 @@ export function AccountBalances({
             {REMOVE_ACCOUNTS_CONFIRM_BODY}
           </p>
           <div className="account-balances-remove-overlay__footer">
-            <Button
-              variant="outline"
+            <AppButton
+              variant="secondary"
               size="sm"
               className="account-balances-remove-overlay__btn"
               onPress={() => removeAccountsModalState.close()}
             >
               Cancel
-            </Button>
-            <Button
+            </AppButton>
+            <AppButton
               variant="primary"
               size="sm"
               className="account-balances-remove-modal-confirm account-balances-remove-overlay__btn"
               onPress={confirmRemoveAccounts}
             >
               Remove
-            </Button>
+            </AppButton>
           </div>
         </div>
       </div>
@@ -1746,6 +1805,18 @@ export function AccountBalances({
     if (!showBalanceEntryActions) return null;
     const removeConfirmOpen =
       Boolean(onRemoveRetirementAccounts) && removeAccountsModalState.isOpen;
+    const replaceConfirmOpen = Boolean(replaceSourceConfirm);
+    const stackedOverlay =
+      removeConfirmOpen || replaceConfirmOpen ? (
+        <>
+          {removeConfirmOpen
+            ? renderRemoveAccountsConfirmOverlay(true)
+            : null}
+          {replaceConfirmOpen
+            ? renderReplaceSourceConfirmOverlay(false, true)
+            : null}
+        </>
+      ) : null;
     return (
       <>
         <AccountBalancesManageMenu
@@ -1768,11 +1839,9 @@ export function AccountBalances({
           onManageOpenChange={setManageMenuOpen}
           removeConfirmOpen={removeConfirmOpen}
           onRemoveConfirmClose={() => removeAccountsModalState.close()}
-          stackedOverlay={
-            removeConfirmOpen
-              ? renderRemoveAccountsConfirmOverlay(true)
-              : null
-          }
+          replaceConfirmOpen={replaceConfirmOpen}
+          onReplaceConfirmClose={requestReplaceSourceConfirmClose}
+          stackedOverlay={stackedOverlay}
           onImportApplied={() => {
             onBalanceModeChange?.("imported");
             onPositionsImportApplied?.();
@@ -2871,7 +2940,9 @@ export function AccountBalances({
           </div>
         </aside>
       ) : null}
-      {!csvImportModalOpen && renderReplaceSourceConfirmOverlay()}
+      {!csvImportModalOpen &&
+        !manageMenuOpen &&
+        renderReplaceSourceConfirmOverlay()}
       {!manageMenuOpen && renderRemoveAccountsConfirmOverlay()}
     </div>
   );
@@ -2907,13 +2978,6 @@ export function AccountBalances({
     (mergedDashboard ? hasAnyAccountCardData : hasRetirementAccountData)
       ? totalRetirementBar
       : null;
-
-  const accountPlanBottomBanner =
-    mergedDashboard && !configureInputsOnly ? (
-      <AccountPlanBottomBanner
-        onOpenUpgrade={onOpenUpgradeCsv ?? onOpenSignIn}
-      />
-    ) : null;
 
   const headerManageMenu = renderAccountBalancesManageMenu();
 
@@ -3027,8 +3091,9 @@ export function AccountBalances({
                     requiredEntry: true,
                   })
                 : null}
-              {renderMergedDashboardOrderedContent()}
-              {accountPlanBottomBanner}
+              <div className="account-balances-card-scroll">
+                {renderMergedDashboardOrderedContent()}
+              </div>
               {accountSectionFooter}
             </div>
           </div>
@@ -3073,7 +3138,7 @@ export function AccountBalances({
               style={cardStyle}
             >
               {renderBalanceRows()}
-              {renderReplaceSourceConfirmOverlay()}
+              {!manageMenuOpen && renderReplaceSourceConfirmOverlay()}
               {!manageMenuOpen && renderRemoveAccountsConfirmOverlay()}
             </div>
           </div>

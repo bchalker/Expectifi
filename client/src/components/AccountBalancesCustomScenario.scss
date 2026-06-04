@@ -1377,6 +1377,14 @@
   gap: var(--space-2);
 }
 
+.account-balances-card-inner-wrap > .account-balances-card-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .account-balances-card-inner-wrap > .portfolio-account-list {
   flex: 0 1 auto;
   min-height: 0;
@@ -1385,7 +1393,7 @@
 .account-balances-card-inner-wrap > .account-balances-section-footer,
 .account-balances-card-inner-wrap > .account-balances-section-footer--with-upgrade,
 .account-balances-card-inner-wrap > .account-balances-total-retirement--merged {
-  margin-top: auto;
+  margin-top: 0;
   flex-shrink: 0;
 }
 
@@ -1409,19 +1417,53 @@
   justify-content: center;
   padding: var(--space-4);
   box-sizing: border-box;
+  animation: account-balances-remove-overlay-in 0.22s ease forwards;
+}
+
+.account-balances-remove-overlay--closing {
+  animation: account-balances-remove-overlay-out 0.22s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes account-balances-remove-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes account-balances-remove-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-balances-remove-overlay,
+  .account-balances-remove-overlay--closing {
+    animation: none;
+  }
 }
 
 /* Stacked on PositionsCsvImport modal (z-index 400) — keep import shell visible underneath */
 .account-balances-remove-overlay--on-import-modal {
   position: fixed;
   inset: 0;
-  z-index: 410;
+  z-index: 1210;
 }
 
 .account-balances-remove-overlay--on-manage-menu {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 1110;
+  z-index: 10;
+  border-radius: inherit;
 }
 
 .account-balances-remove-overlay--on-manage-menu
@@ -1455,7 +1497,7 @@
   max-width: 22rem;
   padding: var(--space-4) /* review: was 1.25rem */ var(--space-5) /* review: was 1.35rem */;
   background: var(--surface);
-  border: 1px solid var(--border);
+  // border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 12px 40px color-mix(in srgb, var(--text) 8%, transparent);
   box-sizing: border-box;

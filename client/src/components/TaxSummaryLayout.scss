@@ -110,6 +110,14 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     margin-bottom: 0;
   }
 
+  .section--tax-summary--income-harvest
+    .account-balances-card-inner-wrap
+    > .account-balances-card-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
   .section--tax-summary--income-harvest .where-to-retire-preview-panel {
     order: unset;
     width: 280px;

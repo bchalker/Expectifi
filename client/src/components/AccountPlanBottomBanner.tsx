@@ -1,26 +1,58 @@
-import { useEffect, useMemo, useState } from 'react'
-import { IconX } from '@tabler/icons-react'
-import { useAuth } from '../context/AuthContext'
-import { useUserTier } from '../hooks/useUserTier'
-import { loadCsvSession } from '../lib/planStorage/csvSession'
-import { dismissProNudge, isProNudgeDismissed } from '../lib/proNudgeDismissed'
-import { isSessionSavePlanDismissed } from '../lib/sessionFlags'
-import { AppButton } from './ui/AppButton'
-import './AccountPlanBottomBanner.scss'
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { IconX } from "@tabler/icons-react";
+import { useAuth } from "../context/AuthContext";
+import { useUserTier } from "../hooks/useUserTier";
+import { loadCsvSession } from "../lib/planStorage/csvSession";
+import { dismissProNudge, isProNudgeDismissed } from "../lib/proNudgeDismissed";
+import { isSessionSavePlanDismissed } from "../lib/sessionFlags";
+import { AppButton } from "./ui/AppButton";
+import "./AccountPlanBottomBanner.scss";
 
-const SHOW_DELAY_MS = 1500
-const EXIT_MS = 320
+const SHOW_DELAY_MS = 1500;
+const CONFIRMATION_MS = 4000;
+const PHASE_TRANSITION_MS = 250;
 
 type AccountPlanBottomBannerProps = {
-  onOpenUpgrade?: () => void
-}
+  onOpenUpgrade?: () => void;
+};
+
+type DisplayPanel = "phase1" | "confirmation" | "phase2";
 
 function hasSessionCsvImportData(): boolean {
-  return loadCsvSession() != null
+  return loadCsvSession() != null;
 }
 
-export function AccountPlanBottomBanner({ onOpenUpgrade }: AccountPlanBottomBannerProps) {
-  const { user } = useAuth()
+function phase2Eligible(
+  user: unknown,
+  isPro: boolean,
+  tier: string,
+  proNudgeDismissed: boolean,
+): boolean {
+  return (
+    !user &&
+    !isPro &&
+    (tier === "browser_saved" || isSessionSavePlanDismissed()) &&
+    !proNudgeDismissed
+  );
+}
+
+function syncBannerReserveHeight(heightPx: number) {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty(
+    "--app-plan-banner-h",
+    heightPx > 0 ? `${heightPx}px` : "0px",
+  );
+  document.documentElement.classList.toggle(
+    "app-has-plan-banner",
+    heightPx > 0,
+  );
+}
+
+export function AccountPlanBottomBanner({
+  onOpenUpgrade,
+}: AccountPlanBottomBannerProps) {
+  const { user } = useAuth();
   const {
     showSavePlanPrompt,
     acceptBrowserSave,
@@ -28,178 +60,272 @@ export function AccountPlanBottomBanner({ onOpenUpgrade }: AccountPlanBottomBann
     tier,
     isPro,
     hasSessionCsvHoldings,
-  } = useUserTier()
+  } = useUserTier();
 
-  const [proNudgeDismissed, setProNudgeDismissed] = useState(() => isProNudgeDismissed())
-  const [phase1Mounted, setPhase1Mounted] = useState(false)
-  const [phase1Revealed, setPhase1Revealed] = useState(false)
-  const [exiting, setExiting] = useState(false)
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const [proNudgeDismissed, setProNudgeDismissed] = useState(() =>
+    isProNudgeDismissed(),
+  );
+  const [confirmationHadCsv, setConfirmationHadCsv] = useState(false);
+  const [phase1Mounted, setPhase1Mounted] = useState(false);
+  const [displayPanel, setDisplayPanel] = useState<DisplayPanel | null>(null);
+  const [motion, setMotion] = useState<
+    "idle" | "enter-from" | "enter-active" | "exit"
+  >("idle");
+  const transitionTimerRef = useRef<number | null>(null);
+  const coldStartPhase2Ref = useRef(false);
 
   const hasCsvImport = useMemo(
     () => hasSessionCsvImportData() || hasSessionCsvHoldings,
     [hasSessionCsvHoldings],
-  )
+  );
 
-  const showPhase1 = showSavePlanPrompt
+  const showPhase1 = showSavePlanPrompt;
+  const showPhase2 = phase2Eligible(user, isPro, tier, proNudgeDismissed);
+  const bannerVisible = displayPanel != null;
 
-  const showPhase2 =
-    !showPhase1 &&
-    !user &&
-    !isPro &&
-    (tier === 'browser_saved' || isSessionSavePlanDismissed()) &&
-    !proNudgeDismissed
+  const clearTransitionTimer = useCallback(() => {
+    if (transitionTimerRef.current != null) {
+      window.clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
+  }, []);
+
+  const beginEnter = useCallback(() => {
+    setMotion("enter-from");
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setMotion("enter-active"));
+    });
+  }, []);
+
+  const runExitThen = useCallback(
+    (onComplete: () => void) => {
+      clearTransitionTimer();
+      setMotion("exit");
+      transitionTimerRef.current = window.setTimeout(() => {
+        transitionTimerRef.current = null;
+        onComplete();
+      }, PHASE_TRANSITION_MS);
+    },
+    [clearTransitionTimer],
+  );
+
+  useEffect(() => () => clearTransitionTimer(), [clearTransitionTimer]);
+
+  useEffect(
+    () => () => {
+      syncBannerReserveHeight(0);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!bannerVisible) {
+      syncBannerReserveHeight(0);
+      return;
+    }
+    const el = bannerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+
+    const measure = () => {
+      syncBannerReserveHeight(el.getBoundingClientRect().height);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [bannerVisible, displayPanel, motion]);
 
   useEffect(() => {
     if (!showPhase1) {
-      setPhase1Mounted(false)
-      setPhase1Revealed(false)
-      return
+      setPhase1Mounted(false);
+      return;
     }
-    const showId = window.setTimeout(() => setPhase1Mounted(true), SHOW_DELAY_MS)
-    return () => window.clearTimeout(showId)
-  }, [showPhase1])
+    const showId = window.setTimeout(
+      () => setPhase1Mounted(true),
+      SHOW_DELAY_MS,
+    );
+    return () => window.clearTimeout(showId);
+  }, [showPhase1]);
 
   useEffect(() => {
-    if (!phase1Mounted || exiting || !showPhase1) return
-    let cancelled = false
-    let raf2 = 0
-    const raf1 = window.requestAnimationFrame(() => {
-      raf2 = window.requestAnimationFrame(() => {
-        if (!cancelled) setPhase1Revealed(true)
-      })
-    })
-    return () => {
-      cancelled = true
-      window.cancelAnimationFrame(raf1)
-      if (raf2) window.cancelAnimationFrame(raf2)
-    }
-  }, [phase1Mounted, exiting, showPhase1])
+    if (!showPhase1 || !phase1Mounted || displayPanel != null) return;
+    setDisplayPanel("phase1");
+    beginEnter();
+  }, [showPhase1, phase1Mounted, displayPanel, beginEnter]);
 
-  function dismissWithAnimation(action: () => void) {
-    setPhase1Revealed(false)
-    setExiting(true)
-    window.setTimeout(() => {
-      action()
-      setPhase1Mounted(false)
-      setExiting(false)
-    }, EXIT_MS)
+  useEffect(() => {
+    if (!showPhase2 || showPhase1 || displayPanel != null) return;
+    if (coldStartPhase2Ref.current) return;
+    coldStartPhase2Ref.current = true;
+    setDisplayPanel("phase2");
+    setMotion("enter-active");
+  }, [showPhase2, showPhase1, displayPanel]);
+
+  useEffect(() => {
+    if (displayPanel !== "confirmation") return;
+    const confirmId = window.setTimeout(() => {
+      runExitThen(() => {
+        if (phase2Eligible(user, isPro, tier, proNudgeDismissed)) {
+          setDisplayPanel("phase2");
+          beginEnter();
+        } else {
+          setDisplayPanel(null);
+          setMotion("idle");
+        }
+      });
+    }, CONFIRMATION_MS);
+    return () => window.clearTimeout(confirmId);
+  }, [
+    displayPanel,
+    beginEnter,
+    runExitThen,
+    user,
+    isPro,
+    tier,
+    proNudgeDismissed,
+  ]);
+
+  function handleSave() {
+    if (displayPanel !== "phase1") return;
+    setConfirmationHadCsv(hasCsvImport);
+    acceptBrowserSave();
+    runExitThen(() => {
+      setDisplayPanel("confirmation");
+      beginEnter();
+    });
+  }
+
+  function handleNotNow() {
+    if (displayPanel !== "phase1") return;
+    dismissSavePlanPrompt();
+    runExitThen(() => {
+      const showNudge =
+        !user &&
+        !isPro &&
+        (tier === "browser_saved" || isSessionSavePlanDismissed()) &&
+        !proNudgeDismissed;
+      if (showNudge) {
+        setDisplayPanel("phase2");
+        beginEnter();
+      } else {
+        setDisplayPanel(null);
+        setMotion("idle");
+      }
+    });
   }
 
   function handleDismissProNudge() {
-    dismissProNudge()
-    setProNudgeDismissed(true)
+    dismissProNudge();
+    setProNudgeDismissed(true);
+    runExitThen(() => {
+      setDisplayPanel(null);
+      setMotion("idle");
+    });
   }
 
-  if (!showPhase1 && !showPhase2) return null
+  if (!bannerVisible || typeof document === "undefined") return null;
 
-  if (showPhase1 && (phase1Mounted || exiting)) {
-    return (
+  const panelMotionClass =
+    motion === "exit"
+      ? "account-plan-bottom-banner-fixed__panel--exit"
+      : motion === "enter-from"
+        ? "account-plan-bottom-banner-fixed__panel--enter-from"
+        : "account-plan-bottom-banner-fixed__panel--enter-active";
+
+  return createPortal(
+    <div ref={bannerRef} className="account-plan-bottom-banner-fixed">
       <div
         className={[
-          'account-plan-bottom-banner',
-          'account-plan-bottom-banner--phase1',
-          phase1Revealed && !exiting ? 'account-plan-bottom-banner--phase1-visible' : '',
-          exiting ? 'account-plan-bottom-banner--phase1-exiting' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        role="region"
-        aria-live="polite"
-        aria-label="Save your plan"
+          "account-plan-bottom-banner-fixed__panel",
+          panelMotionClass,
+        ].join(" ")}
       >
-        <div className="account-plan-bottom-banner__phase1-inner">
-          <p className="account-plan-bottom-banner__message">
-            {hasCsvImport ? (
-              <>
-                Your profile and settings will be saved to this browser. Imported positions
-                stay in this session only — to keep them, upgrade to Pro.
-              </>
-            ) : (
-              <>
-                Want this plan waiting for you next time? We&apos;ll save your profile and
-                settings to this browser.
-              </>
-            )}
-          </p>
-          <div className="account-plan-bottom-banner__phase1-actions">
-            <AppButton
-              type="button"
-              size="sm"
-              variant="primary"
-              className="account-plan-bottom-banner__save"
-              onPress={() => dismissWithAnimation(acceptBrowserSave)}
-            >
-              Save my plan
-            </AppButton>
-            {hasCsvImport && onOpenUpgrade ? (
+        {displayPanel === "phase1" ? (
+          <div
+            className="account-plan-bottom-banner-fixed__inner"
+            role="region"
+            aria-live="polite"
+            aria-label="Save your plan"
+          >
+            <p className="account-plan-bottom-banner__message">
+              {hasCsvImport
+                ? "Your profile and settings will be saved to this browser. Imported positions stay in this session only."
+                : "Your profile and settings will be saved to this browser."}
+            </p>
+            <div className="account-plan-bottom-banner__actions">
+              <button
+                type="button"
+                className="account-plan-bottom-banner__dismiss-link"
+                onClick={handleNotNow}
+              >
+                Not now
+              </button>
               <AppButton
                 type="button"
                 size="sm"
-                variant="secondary"
-                className="account-plan-bottom-banner__upgrade"
-                onPress={onOpenUpgrade}
+                variant="primary"
+                className="account-plan-bottom-banner__pill"
+                onPress={handleSave}
               >
-                Upgrade to Pro
+                Save my plan
               </AppButton>
-            ) : null}
-            <button
-              type="button"
-              className="account-plan-bottom-banner__dismiss-link"
-              onClick={() => dismissWithAnimation(dismissSavePlanPrompt)}
-            >
-              Not now
-            </button>
+            </div>
           </div>
-        </div>
-      </div>
-    )
-  }
+        ) : null}
 
-  if (showPhase2) {
-    return (
-      <div
-        className="account-plan-bottom-banner account-plan-bottom-banner--phase2"
-        role="region"
-        aria-live="polite"
-        aria-label="Upgrade to Pro"
-      >
-        <p className="account-plan-bottom-banner__phase2-message">
-          {hasCsvImport ? (
-            <>
-              Imported positions aren&apos;t saved locally. Upgrade to Pro to keep your full
-              plan across sessions, plus Plaid sync and advanced scenarios.
-            </>
-          ) : (
-            <>
-              Your plan is saved to this browser. Upgrade to Pro to access it anywhere, plus
-              Plaid sync and advanced scenarios.
-            </>
-          )}
-        </p>
-        <div className="account-plan-bottom-banner__phase2-actions">
-          {onOpenUpgrade ? (
-            <AppButton
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="account-plan-bottom-banner__phase2-upgrade"
-              onPress={onOpenUpgrade}
-            >
-              Upgrade to Pro
-            </AppButton>
-          ) : null}
-          <button
-            type="button"
-            className="account-plan-bottom-banner__phase2-close"
-            aria-label="Dismiss"
-            onClick={handleDismissProNudge}
+        {displayPanel === "confirmation" ? (
+          <div
+            className="account-plan-bottom-banner-fixed__inner"
+            role="status"
+            aria-live="polite"
+            aria-label="Plan saved"
           >
-            <IconX size={16} stroke={1.5} aria-hidden />
-          </button>
-        </div>
-      </div>
-    )
-  }
+            <p className="account-plan-bottom-banner__message account-plan-bottom-banner__message--solo">
+              {confirmationHadCsv
+                ? "Settings and goals saved. Your imported positions are only held in this session."
+                : "Settings and goals saved to this browser."}
+            </p>
+          </div>
+        ) : null}
 
-  return null
+        {displayPanel === "phase2" ? (
+          <div
+            className="account-plan-bottom-banner-fixed__inner"
+            role="region"
+            aria-live="polite"
+            aria-label="Upgrade to Pro"
+          >
+            <p className="account-plan-bottom-banner__message">
+              {hasCsvImport
+                ? "Imported positions don't survive a refresh. Pro keeps them."
+                : "Your plan lives in this browser. Upgrade to Pro to take it anywhere."}
+            </p>
+            <div className="account-plan-bottom-banner__actions">
+              {onOpenUpgrade ? (
+                <AppButton
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  className="account-plan-bottom-banner__pill"
+                  onPress={onOpenUpgrade}
+                >
+                  Upgrade to Pro
+                </AppButton>
+              ) : null}
+              <button
+                type="button"
+                className="account-plan-bottom-banner__dismiss-icon"
+                aria-label="Dismiss"
+                onClick={handleDismissProNudge}
+              >
+                <IconX size={14} stroke={1.5} aria-hidden />
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>,
+    document.body,
+  );
 }
