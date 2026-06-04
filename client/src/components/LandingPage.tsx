@@ -296,7 +296,7 @@ export function LandingPage({
                 className="landing-btn landing-btn--primary landing-btn--lg landing-pricing__cta"
                 onClick={onGetStarted}
               >
-                Start for free — no account needed
+                Start for free. No account needed
               </button>
               <p className="landing-pricing__cta-note">
                 No credit card. No signup. Just open and explore.
