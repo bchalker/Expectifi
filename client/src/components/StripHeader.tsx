@@ -1,6 +1,8 @@
-import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
-import type { ComputedSnapshot, PositionReturnModel } from "../lib/computeResults";
-import { GrowthSliderLabel } from "./GrowthSliderLabel";
+import type {
+  ComputedSnapshot,
+  PositionReturnModel,
+} from "../lib/computeResults";
+import { GlobalGrowthRateSlider } from "./GlobalGrowthRateSlider";
 import "./StripHeader.scss";
 
 type C = ComputedSnapshot;
@@ -33,6 +35,8 @@ type Props = {
   targetRetirementAge: number;
   incomeSecurityTicker: string | null;
   onIncomeSecuritySelect: (ticker: string | null) => void;
+  /** Global growth slider lives in the growth assumptions column instead of the strip. */
+  hideGrowthSlider?: boolean;
 };
 
 export function StripHeader({
@@ -62,17 +66,20 @@ export function StripHeader({
   targetRetirementAge,
   incomeSecurityTicker: _incomeSecurityTicker,
   onIncomeSecuritySelect: _onIncomeSecuritySelect,
+  hideGrowthSlider = false,
 }: Props) {
-  const retPctAnim = useAnimatedScalar(retRate * 100);
+  const showEquation =
+    c.hasPortfolioBalances && portfolioControlsRevealed && !hideGrowthSlider;
 
-  const showEquation = c.hasPortfolioBalances && portfolioControlsRevealed
+  if (!showEquation || phase !== "growth") {
+    return null;
+  }
 
   return (
     <div
       className={`results-strip${c.hasPortfolioBalances ? " results-strip--has-portfolio" : " results-strip--empty"}`}
     >
       <div className="results-strip-inner results-strip-inner--equation-first">
-        {showEquation && phase === "growth" ? (
         <div
           className={`strip-equation-row strip-equation-row--phase-${phase} portfolio-controls-reveal portfolio-controls-reveal--in`}
           style={{
@@ -84,45 +91,23 @@ export function StripHeader({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {phase === "growth" ? (
-              <div className="strip-growth-rail">
-                <div className="strip-growth-main">
-                  <GrowthSliderLabel
-                    rate={retRate}
-                    ratePctDisplay={retPctAnim}
-                    positions={mergedRetirementPositionModels}
-                    blendedRate={retRate}
-                    brokeragePositionModels={mergedBrokeragePositionModels}
-                    brkBlendedRate={brkRate}
-                    retirementYear={c.retirementCalendarYear}
-                    horizon={c.yearsToRetirement}
-                    retirementAge={targetRetirementAge}
-                    onEditPosition={onOpenPositionReturnEditor}
-                    onRemovePositionReturn={onRemovePositionReturn}
-                    sliderTrack={
-                      <input
-                        type="range"
-                        min={3}
-                        max={55}
-                        step={0.5}
-                        value={retRate * 100}
-                        onChange={(e) => onRetRate(Number(e.target.value) / 100)}
-                      />
-                    }
-                    sliderTicks={
-                      <div className="range-inline-ticks">
-                        <span className="range-inline-tick">3%</span>
-                        <span className="range-inline-tick range-inline-tick--end">55%</span>
-                      </div>
-                    }
-                  />
-                </div>
-              </div>
-          ) : (
-          null
-          )}
+          <div className="strip-growth-rail">
+            <div className="strip-growth-main">
+              <GlobalGrowthRateSlider
+                retRate={retRate}
+                onRetRate={onRetRate}
+                mergedRetirementPositionModels={mergedRetirementPositionModels}
+                mergedBrokeragePositionModels={mergedBrokeragePositionModels}
+                brkRate={brkRate}
+                retirementCalendarYear={c.retirementCalendarYear}
+                yearsToRetirement={c.yearsToRetirement}
+                targetRetirementAge={targetRetirementAge}
+                onOpenPositionReturnEditor={onOpenPositionReturnEditor}
+                onRemovePositionReturn={onRemovePositionReturn}
+              />
+            </div>
+          </div>
         </div>
-        ) : null}
       </div>
     </div>
   );

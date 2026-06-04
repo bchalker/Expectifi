@@ -1,7 +1,4 @@
-import {
-  IconTrendingDown,
-  IconTrendingUp,
-} from "@tabler/icons-react";
+import { IconArrowNarrowDownDashed, IconTrendingDown, IconTrendingUp, IconTransfer } from "@tabler/icons-react";
 import {
   useCallback,
   useEffect,
@@ -54,6 +51,10 @@ export type GrowthSliderLabelProps = {
   sliderTrack: ReactNode;
   /** Min/max tick labels for the range row. */
   sliderTicks: ReactNode;
+  /** Hide default helper copy below the track (Fine-tune guide supplies context). */
+  hideDefaultHelperText?: boolean;
+  /** Panel column: stack default label, arrow, and exception rows. */
+  suffixLayout?: "inline" | "panel";
 };
 
 export function GrowthSliderLabel({
@@ -66,9 +67,12 @@ export function GrowthSliderLabel({
   retirementYear,
   horizon,
   retirementAge,
+  onEditPosition,
   onRemovePositionReturn,
   sliderTrack,
   sliderTicks,
+  hideDefaultHelperText = false,
+  suffixLayout = "inline",
 }: GrowthSliderLabelProps) {
   const h = Math.max(1, Math.min(50, horizon));
 
@@ -260,6 +264,111 @@ export function GrowthSliderLabel({
     );
   }
 
+  function scenarioLabelFor(p: PositionReturnModel): string {
+    const b = blendedFor(p);
+    const scenarioChoice = inferScenarioUiChoice(p, b, h);
+    return scenarioColumnShortLabel(
+      scenarioChoice,
+      scenarioChoice === "custom" ? p.flatRate : undefined,
+    );
+  }
+
+  function renderInlineSuffix() {
+    if (suffixLayout === "panel") return null;
+
+    if (!hasCustom) {
+      if (hideDefaultHelperText) return null;
+      return (
+        <>
+          <p className="growth-slider-label__suffix-line">
+            Default rate for all holdings
+          </p>
+          <p className="growth-slider-label__suffix-note">
+            Applied to all holdings set to Global in their scenario.
+          </p>
+        </>
+      );
+    }
+
+    return (
+      <p className="growth-slider-label__suffix-line">
+        <span className="growth-slider-label__suffix">
+          {allCustom
+            ? "Default rate for non-position balances"
+            : "Default rate for all, except"}
+        </span>
+        {!allCustom ? (
+          <span className="growth-slider-label__tickers">
+            {customPositionsForSuffix.map((p, i) => (
+              <span key={p.id}>
+                {i > 0 ? ", " : " "}
+                <button
+                  type="button"
+                  data-growth-slider-ticker
+                  className="growth-slider-label__ticker"
+                  onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
+                  onMouseLeave={scheduleClose}
+                >
+                  {p.ticker || "—"}
+                </button>
+              </span>
+            ))}
+          </span>
+        ) : null}
+      </p>
+    );
+  }
+
+  function renderPanelSuffix() {
+    if (suffixLayout !== "panel" || !hasCustom) return null;
+
+    return (
+      <div className="growth-slider-label__panel-exceptions">
+        <p className="growth-slider-label__panel-default">
+          {allCustom
+            ? "Default rate for non-position balances"
+            : "Default rate for all, except"}
+        </p>
+        {!allCustom ? (
+          <>
+            <IconArrowNarrowDownDashed
+              className="growth-slider-label__panel-arrow"
+              size={16}
+              stroke={1.5}
+              aria-hidden
+            />
+            <ul className="growth-slider-label__exception-list">
+              {customPositionsForSuffix.map((p) => (
+                <li key={p.id} className="growth-slider-label__exception-row">
+                  <button
+                    type="button"
+                    data-growth-slider-ticker
+                    className="growth-slider-label__exception-symbol"
+                    onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
+                    onMouseLeave={scheduleClose}
+                  >
+                    {p.ticker || "—"}
+                  </button>
+                  <span className="growth-slider-label__exception-scenario">
+                    {scenarioLabelFor(p)}
+                  </span>
+                  <button
+                    type="button"
+                    className="growth-slider-label__exception-transfer"
+                    aria-label={`Open scenario for ${p.ticker || "holding"}`}
+                    onClick={() => onEditPosition(p.id)}
+                  >
+                    <IconTransfer size={14} stroke={1.5} aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="growth-slider-label">
       <div className="strip-equation-sliders-group">
@@ -270,41 +379,10 @@ export function GrowthSliderLabel({
           track={sliderTrack}
           ticks={sliderTicks}
         />
-        {!hasCustom ? (
-          <>
-            <p className="growth-slider-label__suffix-line">Default rate for all holdings</p>
-            <p className="growth-slider-label__suffix-note">
-              Applied to all holdings set to Global in their scenario.
-            </p>
-          </>
-        ) : (
-          <p className="growth-slider-label__suffix-line">
-            <span className="growth-slider-label__suffix">
-              {allCustom
-                ? "Default rate for non-position balances"
-                : "Default rate for all, except"}
-            </span>
-            {!allCustom ? (
-              <span className="growth-slider-label__tickers">
-                {customPositionsForSuffix.map((p, i) => (
-                  <span key={p.id}>
-                    {i > 0 ? ", " : " "}
-                    <button
-                      type="button"
-                      data-growth-slider-ticker
-                      className="growth-slider-label__ticker"
-                      onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
-                      onMouseLeave={scheduleClose}
-                    >
-                      {p.ticker || "—"}
-                    </button>
-                  </span>
-                ))}
-              </span>
-            ) : null}
-          </p>
-        )}
+        {renderInlineSuffix()}
       </div>
+
+      {renderPanelSuffix()}
 
       {hasCustom && hovered && anchor
         ? createPortal(

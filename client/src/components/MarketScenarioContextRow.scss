@@ -13,8 +13,9 @@
 
 .market-scenario-context-row-wrap--open {
   grid-template-rows: 1fr;
-  margin-top: var(--space-3) /* review: was 0.65rem */;
-  margin-bottom: var(--space-4) /* review: was 1.25rem */;
+  // margin-top: var(--space-3) /* review: was 0.65rem */;
+  // margin-bottom: var(--space-4) /* review: was 1.25rem */;
+  padding: var(--space-3);
   transition: grid-template-rows 200ms ease-out;
 }
 

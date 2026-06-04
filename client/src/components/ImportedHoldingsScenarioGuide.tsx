@@ -24,7 +24,7 @@ function GrowthLeadCopy({ dynamicHoldings }: { dynamicHoldings: string[] }) {
 
   return (
     <p className="imported-holdings-scenario-guide__lead">
-      The global rate above applies to everything as a starting point. Click
+      The global rate applies to everything as a starting point. Click
       Scenario next to any holding to set a custom rate, pick a market outlook,
       or dial in year-by-year projections
       {holding1 && holding2 ? (

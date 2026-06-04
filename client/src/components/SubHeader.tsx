@@ -8,7 +8,7 @@ import {
 import { IconChevronRight } from "@tabler/icons-react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
 import {
-  getMarketScenarioDefinition,
+  marketScenarioHeroBadgeLabel,
   marketScenarioIsBase,
   type MarketScenarioId,
 } from "../lib/marketScenario";
@@ -227,6 +227,9 @@ type Props = {
   marketScenarioId?: MarketScenarioId;
   /** When false, hide scenario pill and hero uses Base projections. */
   marketScenarioActive?: boolean;
+  /** Global slider rate — used to derive scenario modifier for the hero pill. */
+  marketScenarioRetRate?: number;
+  yearsToRetirement?: number;
 };
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -249,6 +252,8 @@ export function SubHeader({
   hasPortfolioBalances,
   marketScenarioId = "base",
   marketScenarioActive = false,
+  marketScenarioRetRate = 0,
+  yearsToRetirement = 1,
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon);
   const totalFvAnim = useAnimatedScalar(totalFV);
@@ -260,7 +265,11 @@ export function SubHeader({
     !marketScenarioIsBase(marketScenarioId) &&
     marketScenarioActive;
   const marketScenarioLabel = showMarketScenarioPill
-    ? getMarketScenarioDefinition(marketScenarioId).label
+    ? marketScenarioHeroBadgeLabel(
+        marketScenarioId,
+        marketScenarioRetRate,
+        yearsToRetirement,
+      )
     : "";
   const marketScenarioPillClass = showMarketScenarioPill
     ? subheaderMarketScenarioPillClass(marketScenarioId)

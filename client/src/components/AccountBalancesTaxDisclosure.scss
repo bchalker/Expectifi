@@ -26,6 +26,7 @@
   // border-bottom: 1px solid var(--border);
 
   background: var(--portfolio-account-row-bg-closed);
+  background: var(--surface);
   // background: linear-gradient(to bottom, var(--portfolio-account-row-bg-closed) 10%, #ffffff);
   box-shadow: 
   rgba(14, 63, 126, 0.0) 0px 0px 0px 1px,
@@ -48,10 +49,14 @@
   gap: var(--space-1);
   width: 100%;
   box-sizing: border-box;
-  border-radius: var(--space-2);
+  // border-radius: var(--space-2);
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   padding: var(--space-2) !important;
+
   background: var(--surface);
+  background: linear-gradient(to left bottom, var(--sky-blue-d2) 0%, var(--sky-blue) 100%);
+  // background: rgba(0,0,0,0.05);
+  // margin-top: var(--space-2);
   // overflow: hidden;
 }
 

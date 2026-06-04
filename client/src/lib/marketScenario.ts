@@ -191,6 +191,23 @@ export function marketScenarioModifierSummary(scenarioId: MarketScenarioId): str
   return 'Uses your global slider rate with no macro adjustment.'
 }
 
+/** Hero pill label, e.g. "Bull run +3%" — modifier from resolved global rates. */
+export function marketScenarioHeroBadgeLabel(
+  scenarioId: MarketScenarioId,
+  globalBlendedRate: number,
+  horizon: number,
+): string {
+  const def = getMarketScenarioDefinition(scenarioId)
+  const rates = resolveGlobalMarketScenarioRates(scenarioId, globalBlendedRate, horizon)
+  if (rates.length === 0) return def.label
+  const avgOffset =
+    rates.reduce((sum, rate) => sum + (rate - globalBlendedRate), 0) / rates.length
+  const roundedPct = Math.round(avgOffset * 100)
+  if (roundedPct === 0) return def.label
+  const sign = roundedPct > 0 ? '+' : '−'
+  return `${def.label} ${sign}${Math.abs(roundedPct)}%`
+}
+
 /** Compound a balance with a variable annual return path. */
 export function fvWithYearlyRates(principal: number, yearlyRates: number[]): number {
   return calcPositionFV(principal, yearlyRates)

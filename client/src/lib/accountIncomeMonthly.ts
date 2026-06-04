@@ -193,7 +193,7 @@ function snapshotFromContext(ctx: AccountIncomeMonthlyContext) {
   }
 }
 
-/** True when at least one account row has dividend, withdraw, or both enabled. */
+/** True when the user has explicitly enabled dividend, withdraw, or both on at least one account row. */
 export function hasAnyAccountIncomeStrategySelected(
   ctx: AccountIncomeMonthlyContext,
 ): boolean {
@@ -201,12 +201,6 @@ export function hasAnyAccountIncomeStrategySelected(
   for (const line of listAccountIncomeLines(ctx)) {
     const raw = ctx.accountIncomeStrategies[line.storageKey]
     if (raw === 'dividend' || raw === 'withdraw' || raw === 'both') return true
-    const strategy = resolveAccountIncomeStrategy(
-      line.storageKey,
-      line.bucket,
-      ctx.accountIncomeStrategies,
-    )
-    if (strategy !== 'none') return true
   }
   return false
 }

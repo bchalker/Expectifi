@@ -40,4 +40,5 @@
 /* Collapsed account row — slightly deeper blue than --portfolio-account-row-bg-closed */
 .tax-treatment-disclosure.portfolio-account-group:not([open]) .account-bucket-withdrawal-pill__amount {
   background: var(--sky-blue);
+
 }

@@ -7,6 +7,7 @@
   width: 100%;
   margin-bottom: 0;
   padding: var(--space-4);
+  padding: var(--space-4);
   margin-top: var(--space-6);
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   border-bottom: 1px solid var(--border);
@@ -228,8 +229,8 @@
 }
 
 .account-balances-total-retirement--merged {
-  width: calc(100% + 2 * var(--space-4));
-  margin-inline: calc(-1 * var(--space-4));
+  // width: calc(100% + 2 * var(--space-4));
+  // margin-inline: calc(-1 * var(--space-4));
   margin-block: 0;
   padding: var(--space-4);
   box-sizing: border-box;
@@ -1360,6 +1361,7 @@
 
 .account-balances-card-inner-wrap:not(.account-balances-card-inner-wrap--empty-state) {
   background: var(--sky-blue);
+  background: transparent;
 }
 
 .account-balances-card-inner-wrap {
@@ -1371,6 +1373,7 @@
   align-self: stretch;
   width: 100%;
   padding: var(--space-4);
+  padding: 0;
   padding-bottom: 0;
   border: none;
   border-radius: 0;

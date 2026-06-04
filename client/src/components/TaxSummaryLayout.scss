@@ -127,6 +127,127 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   }
 }
 
+/* Growth two-column layout — mirrors income harvest; mobile stacks assumptions above accounts. */
+.section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md, 8px);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.section--tax-summary--growth-assumptions
+  .section--tax-summary__growth-layout
+  > .portfolio-accounts-reveal {
+  order: 2;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.section--tax-summary--growth-assumptions .tax-summary-card {
+  position: relative;
+  z-index: auto;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.section--tax-summary--growth-assumptions .growth-assumptions-panel {
+  order: 1;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  flex: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
+}
+
+@media (min-width: 768px) {
+  .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: stretch;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .section--tax-summary__growth-layout
+    > .portfolio-accounts-reveal {
+    order: unset;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-self: stretch;
+  }
+
+  .section--tax-summary--growth-assumptions .tax-summary-card {
+    box-shadow: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--growth-assumptions .tax-summary-card__accounts {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .tax-summary-card__accounts
+    > .account-balances-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--growth-assumptions .account-balances-card-inner-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-card-inner-wrap
+    > .account-balances-total-retirement--merged,
+  .section--tax-summary--growth-assumptions
+    .account-balances-card-inner-wrap
+    > .account-balances-section-footer {
+    margin-bottom: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-card-inner-wrap
+    > .account-balances-card-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .section--tax-summary--growth-assumptions .growth-assumptions-panel {
+    order: unset;
+    width: 280px;
+    height: 100%;
+    box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
+  }
+}
+
 .tax-summary-card {
   position: relative;
   width: 100%;
@@ -138,6 +259,8 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-md, 8px);
+  border: none;
+  background: transparent;
   overflow: hidden;
 }
 

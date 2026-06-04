@@ -12,6 +12,7 @@ import {
   aggregatePositionsBySymbol,
   isPendingActivityImportRow,
   mapRowToBucket,
+  normalizeImportSymbol,
   positionsForBrokerage,
   positionsForTaxTreatment,
   type ImportedPositionRow,
@@ -320,8 +321,8 @@ export function AccountBalances({
   inputs,
   setInputs,
   onManualPortfolioPlanApplied,
-  openReturnEditorRequest: _openReturnEditorRequest,
-  onReturnEditorOpenHandled: _onReturnEditorOpenHandled,
+  openReturnEditorRequest,
+  onReturnEditorOpenHandled,
   configureInputsOnly = false,
   mergeBrokerageInRetirementCard = false,
   brkBal,
@@ -805,6 +806,37 @@ export function AccountBalances({
     },
     [],
   );
+
+  useEffect(() => {
+    const req = openReturnEditorRequest;
+    if (!req || !holdingsScenarioEditingEnabled) return;
+
+    const model = mergedPositionModels.find((m) => m.id === req.positionId);
+    if (!model?.ticker) return;
+
+    const symbolKey = normalizeImportSymbol(model.ticker).toUpperCase();
+    if (!symbolKey) return;
+
+    const contributingRows = importedPositionRows.filter(
+      (r) =>
+        !isPendingActivityImportRow(r) &&
+        normalizeImportSymbol(r.symbol).toUpperCase() === symbolKey,
+    );
+    if (contributingRows.length === 0) return;
+
+    onHoldingScenarioOpen({
+      symbol: normalizeImportSymbol(model.ticker) || model.ticker,
+      contributingRows,
+    });
+    onReturnEditorOpenHandled?.();
+  }, [
+    openReturnEditorRequest,
+    holdingsScenarioEditingEnabled,
+    mergedPositionModels,
+    importedPositionRows,
+    onHoldingScenarioOpen,
+    onReturnEditorOpenHandled,
+  ]);
 
   const finalizeAccountScenarioClose = useCallback(() => {
     setAccountScenarioPanel(null);
@@ -1642,7 +1674,8 @@ export function AccountBalances({
           stackedOnImportModal &&
             !stackedOnManageMenu &&
             "account-balances-remove-overlay--on-import-modal",
-          stackedOnManageMenu && "account-balances-remove-overlay--on-manage-menu",
+          stackedOnManageMenu &&
+            "account-balances-remove-overlay--on-manage-menu",
           replaceSourceConfirmClosing &&
             "account-balances-remove-overlay--closing",
         ]
@@ -1722,7 +1755,8 @@ export function AccountBalances({
       <div
         className={[
           "account-balances-remove-overlay",
-          stackedOnManageMenu && "account-balances-remove-overlay--on-manage-menu",
+          stackedOnManageMenu &&
+            "account-balances-remove-overlay--on-manage-menu",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -1809,9 +1843,7 @@ export function AccountBalances({
     const stackedOverlay =
       removeConfirmOpen || replaceConfirmOpen ? (
         <>
-          {removeConfirmOpen
-            ? renderRemoveAccountsConfirmOverlay(true)
-            : null}
+          {removeConfirmOpen ? renderRemoveAccountsConfirmOverlay(true) : null}
           {replaceConfirmOpen
             ? renderReplaceSourceConfirmOverlay(false, true)
             : null}
@@ -1830,7 +1862,9 @@ export function AccountBalances({
           onRequestReplaceManual={guardReplaceManual}
           onRequestReplaceImport={guardReplaceImport}
           onManualAdd={() =>
-            mergedDashboard ? openManualAfterReplaceConfirm() : setMode("manual")
+            mergedDashboard
+              ? openManualAfterReplaceConfirm()
+              : setMode("manual")
           }
           onPickCsvCustodian={onPickCsvCustodian}
           onClearAccounts={() => removeAccountsModalState.open()}
@@ -3071,7 +3105,8 @@ export function AccountBalances({
           <div
             className={[
               "account-balances-stack",
-              !hasAnyAccountCardData && "account-balances-stack--awaiting-accounts",
+              !hasAnyAccountCardData &&
+                "account-balances-stack--awaiting-accounts",
             ]
               .filter(Boolean)
               .join(" ")}
