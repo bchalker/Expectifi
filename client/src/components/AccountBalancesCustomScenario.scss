@@ -152,16 +152,17 @@
   box-sizing: border-box;
 }
 
-/* Empty portfolio: dashed drop zone (matches onboarding accounts empty) */
-.account-balances-card-inner-wrap--empty-state {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: stretch;
-  min-height: min(16rem, 48vh);
-  padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) /* review: was 1.25rem */;
-  box-sizing: border-box;
-  border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
+/* Empty portfolio: no in-card CTA — Add accounts overlay opens automatically */
+.account-balances-card-inner-wrap.account-balances-card-inner-wrap--empty-state {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.account-balances-stack--awaiting-accounts {
+  flex: 0 0 auto;
+  min-height: 0;
 }
 
 .account-balances-card-inner-wrap--empty-state > .account-balances-empty {
@@ -1104,39 +1105,19 @@
 
 .account-balances-edit-sheet__foot--manual-confirm {
   justify-content: stretch;
-  padding: var(--space-3) /* review: was 0.85rem */ var(--space-4) var(--space-4);
+  padding: 0;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
 }
 
-.account-balances-manual-sheet__confirm-btn {
+.account-balances-manual-sheet__footer-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
   width: 100%;
-  min-height: 2.75rem;
-  margin: 0;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-primary);
-  border-radius: 8px;
   box-sizing: border-box;
-  background: var(--color-primary);
-  color: var(--color-primary-on);
-  font-family: var(--body);
-  font-size: var(--text-base);
-  font-weight: 600;
-  line-height: 1.25;
-  cursor: pointer;
-  transition: filter 0.12s ease;
-}
-
-.account-balances-manual-sheet__confirm-btn:hover:not(:disabled) {
-  filter: brightness(0.95);
-}
-
-.account-balances-manual-sheet__confirm-btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.account-balances-manual-sheet__confirm-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .account-balances-edit-sheet--manual .edit-row--manual-balance,
@@ -1377,6 +1358,10 @@
   outline: none;
 }
 
+.account-balances-card-inner-wrap:not(.account-balances-card-inner-wrap--empty-state) {
+  background: var(--sky-blue);
+}
+
 .account-balances-card-inner-wrap {
   position: relative;
   flex: 1 1 auto;
@@ -1389,7 +1374,6 @@
   padding-bottom: 0;
   border: none;
   border-radius: 0;
-  background: var(--sky-blue);
   gap: var(--space-2);
 }
 
@@ -1425,6 +1409,19 @@
   justify-content: center;
   padding: var(--space-4);
   box-sizing: border-box;
+}
+
+/* Stacked on PositionsCsvImport modal (z-index 400) — keep import shell visible underneath */
+.account-balances-remove-overlay--on-import-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 410;
+}
+
+.account-balances-remove-overlay--on-import-modal
+  .account-balances-remove-overlay__backdrop {
+  background: rgba(28, 24, 18, 0.35);
+  opacity: 1;
 }
 
 .account-balances-remove-overlay__backdrop {

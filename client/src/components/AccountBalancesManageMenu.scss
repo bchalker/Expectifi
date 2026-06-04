@@ -95,7 +95,7 @@
   justify-content: center;
   padding: var(--space-4);
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--blue1) 35%, transparent);
+  background: transparent;
   animation: account-balances-manage-backdrop-in 0.24s ease forwards;
 }
 
@@ -182,6 +182,14 @@
   gap: var(--space-2);
   padding: 14px 16px;
   border-bottom: 0.5px solid var(--border);
+}
+
+.account-balances-manage__header--required-entry {
+  justify-content: flex-start;
+}
+
+.account-balances-manage__backdrop--required-entry {
+  cursor: default;
 }
 
 .account-balances-manage__title {

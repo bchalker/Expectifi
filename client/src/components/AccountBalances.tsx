@@ -5,7 +5,7 @@ import type {
   ReactNode,
 } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconChevronDown, IconPencil } from "@tabler/icons-react";
+import { createPortal } from "react-dom";
 import { Button, useOverlayState } from "@heroui/react";
 import type { CalculatorInputs, ComputedSnapshot } from "../lib/computeResults";
 import {
@@ -95,7 +95,6 @@ import {
   computeMergedDashboardPositionModels,
   blendedRateForDashboardPositionId,
 } from "../lib/mergedDashboardPositionModels";
-import { FinancialsEntryCsvDropdown } from "./FinancialsEntryCsvDropdown";
 import {
   ManualBalancesPlanStep,
   type ManualPlanDraft,
@@ -150,7 +149,6 @@ import { monthlyPortfolioIncomeFromAccountStrategies } from "../lib/accountIncom
 import { currentBalanceForAccountBucket } from "../lib/accountBucketRetirementBalance";
 import { ManualProjectionsCallout } from "./ManualProjectionsCallout";
 import { PlaidConnectionProvider } from "./PlaidConnectionHeader";
-import { PlaidLinkButton } from "./PlaidLinkButton";
 import { AppButton } from "./ui/AppButton";
 import { useUserTier } from "../hooks/useUserTier";
 import "./AccountBalancesTaxDisclosure.scss";
@@ -645,6 +643,8 @@ export function AccountBalances({
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] =
     useState<PositionsCsvCustodian | null>(null);
   const [openManageRequest, setOpenManageRequest] = useState(0);
+  const hadAccountCardDataRef = useRef(false);
+  const reopenManageAfterBalanceEditCloseRef = useRef(false);
   const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
     id: number;
     file: File;
@@ -982,6 +982,12 @@ export function AccountBalances({
     ],
   );
 
+  const reopenManageAfterDismiss = useCallback(() => {
+    if (!hasAnyAccountCardData) {
+      setOpenManageRequest((n) => n + 1);
+    }
+  }, [hasAnyAccountCardData]);
+
   const finalizeBalanceEditClose = useCallback(() => {
     setBalanceEditPanel(null);
     setBalanceEditClosing(false);
@@ -991,7 +997,11 @@ export function AccountBalances({
     manualConfirmPendingRef.current = false;
     manualConfirmRunRef.current = false;
     pendingManualCommitRef.current = null;
-  }, []);
+    if (reopenManageAfterBalanceEditCloseRef.current) {
+      reopenManageAfterBalanceEditCloseRef.current = false;
+      reopenManageAfterDismiss();
+    }
+  }, [reopenManageAfterDismiss]);
 
   const commitPendingManualPortfolio = useCallback(() => {
     const pending = pendingManualCommitRef.current;
@@ -1042,6 +1052,13 @@ export function AccountBalances({
     commitPendingManualPortfolio,
     finalizeBalanceEditClose,
   ]);
+
+  const handleManualBalanceCancel = useCallback(() => {
+    if (!hasAnyAccountCardData) {
+      reopenManageAfterBalanceEditCloseRef.current = true;
+    }
+    requestBalanceEditClose();
+  }, [hasAnyAccountCardData, requestBalanceEditClose]);
 
   const onBalanceEditSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
@@ -1217,22 +1234,6 @@ export function AccountBalances({
     runManualConfirmSequence,
   ]);
 
-  const toggleBalanceEditPanel = useCallback(
-    (panel: "manual" | "import") => {
-      if (balanceEditPanel === panel && !balanceEditClosing) {
-        requestBalanceEditClose();
-        return;
-      }
-      openBalanceEditPanel(panel);
-    },
-    [
-      balanceEditPanel,
-      balanceEditClosing,
-      openBalanceEditPanel,
-      requestBalanceEditClose,
-    ],
-  );
-
   const clearCsvImportLaunchUi = useCallback(() => {
     setCsvImportPrefillCustodian(null);
     setCsvFileIngestRequest(null);
@@ -1248,6 +1249,11 @@ export function AccountBalances({
     setBalanceEditPanel((panel) => (panel === "import" ? null : panel));
     setBalanceEditClosing(false);
   }, [clearCsvImportLaunchUi]);
+
+  const handleCsvImportDismissed = useCallback(() => {
+    finishCsvImportLaunch();
+    reopenManageAfterDismiss();
+  }, [finishCsvImportLaunch, reopenManageAfterDismiss]);
 
   const launchCsvImportFromFile = useCallback(
     (file: File, custodian: PositionsCsvCustodian) => {
@@ -1571,12 +1577,28 @@ export function AccountBalances({
     onBalanceModeChange?.(m);
   }
 
-  function renderReplaceSourceConfirmOverlay() {
+  const csvImportModalOpen = Boolean(
+    mergedDashboard && csvFileIngestRequest && onImportedApplyBalances,
+  );
+
+  const openManualAfterReplaceConfirm = useCallback(() => {
+    finishCsvImportLaunch();
+    openBalanceEditPanel("manual");
+  }, [finishCsvImportLaunch, openBalanceEditPanel]);
+
+  function renderReplaceSourceConfirmOverlay(stackedOnImportModal = false) {
     if (!replaceSourceConfirm) return null;
 
-    return (
+    const overlay = (
       <div
-        className="account-balances-remove-overlay"
+        className={[
+          "account-balances-remove-overlay",
+          stackedOnImportModal
+            ? "account-balances-remove-overlay--on-import-modal"
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="account-balances-replace-source-title"
@@ -1626,6 +1648,12 @@ export function AccountBalances({
         </div>
       </div>
     );
+
+    if (stackedOnImportModal && typeof document !== "undefined") {
+      return createPortal(overlay, document.body);
+    }
+
+    return overlay;
   }
 
   function renderRemoveAccountsConfirmOverlay() {
@@ -1697,11 +1725,27 @@ export function AccountBalances({
     );
   }
 
-  function renderAccountBalancesManageMenu() {
+  useEffect(() => {
+    if (!mergedDashboard || !canEditBalances) return;
+    const hadData = hadAccountCardDataRef.current;
+    hadAccountCardDataRef.current = hasAnyAccountCardData;
+    if (hadData && !hasAnyAccountCardData) {
+      setOpenManageRequest((n) => n + 1);
+    }
+  }, [mergedDashboard, canEditBalances, hasAnyAccountCardData]);
+
+  function renderAccountBalancesManageMenu(options?: {
+    hideTrigger?: boolean;
+    initialOpen?: boolean;
+    requiredEntry?: boolean;
+  }) {
     if (!showBalanceEntryActions) return null;
     return (
       <>
         <AccountBalancesManageMenu
+          hideTrigger={options?.hideTrigger}
+          initialOpen={options?.initialOpen}
+          requiredEntry={options?.requiredEntry}
           canClearAccounts={Boolean(
             hasAnyAccountCardData && onRemoveRetirementAccounts,
           )}
@@ -1709,9 +1753,7 @@ export function AccountBalances({
           onRequestReplaceManual={guardReplaceManual}
           onRequestReplaceImport={guardReplaceImport}
           onManualAdd={() =>
-            mergedDashboard
-              ? toggleBalanceEditPanel("manual")
-              : setMode("manual")
+            mergedDashboard ? openManualAfterReplaceConfirm() : setMode("manual")
           }
           onPickCsvCustodian={onPickCsvCustodian}
           onClearAccounts={() => removeAccountsModalState.open()}
@@ -2111,70 +2153,6 @@ export function AccountBalances({
           />
         </div>
       </details>
-    );
-  }
-
-  function renderFinancialsEntry() {
-    if (!canEditBalances) return null;
-    return (
-      <div
-        className="account-balances-empty account-balances-financials-entry account-balances-financials-entry--reveal"
-        role="region"
-        aria-labelledby="account-balances-financials-entry-title"
-      >
-        <p className="account-balances-financials-entry__intro">
-          Let&apos;s add your account balances
-        </p>
-        <div className="account-balances-financials-entry__divider" aria-hidden>
-          <IconChevronDown
-            size={18}
-            stroke={1.5}
-            className="account-balances-financials-entry__divider-chevron"
-          />
-        </div>
-        <h3
-          className="account-balances-financials-entry__title"
-          id="account-balances-financials-entry-title"
-        >
-          How would you like to enter them?
-        </h3>
-        <div className="account-balances-financials-entry__actions account-balances-empty__actions account-balances-empty__actions--financials-entry">
-          <div
-            className="account-balances-financials-entry__choices account-balances-financials-entry__choices--primary"
-            role="list"
-          >
-            <button
-              type="button"
-              role="listitem"
-              className="financials-entry-choice"
-              onClick={() =>
-                guardReplaceImport(() => toggleBalanceEditPanel("manual"))
-              }
-            >
-              <IconPencil size={18} stroke={1.5} aria-hidden />
-              Enter manually
-            </button>
-            <FinancialsEntryCsvDropdown
-              onPickCustodian={onPickCsvCustodian}
-              onRequestReplaceManual={guardReplaceManual}
-            />
-          </div>
-          {onImportedApplyBalances ? (
-            <div
-              className="account-balances-financials-entry__choices account-balances-financials-entry__choices--secondary"
-              role="list"
-            >
-              <PlaidLinkButton
-                variant="choice"
-                residenceCountry={inputs?.residenceCountry}
-                onApplyBalances={onImportedApplyBalances}
-                onImportApplied={onPositionsImportApplied}
-                onOpenUpgrade={onOpenUpgradeCsv}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
     );
   }
 
@@ -2802,16 +2780,6 @@ export function AccountBalances({
                   </p>
                 ) : null}
               </div>
-              {manualConfirmPhase === false ? (
-                <button
-                  type="button"
-                  className="account-balances-edit-sheet__close"
-                  disabled={balanceEditClosing}
-                  onClick={requestBalanceEditClose}
-                >
-                  Close
-                </button>
-              ) : null}
             </header>
             <div className="account-balances-edit-sheet__body">
               {manualConfirmPhase === "progress" ? (
@@ -2865,20 +2833,31 @@ export function AccountBalances({
             </div>
             {manualConfirmPhase === false ? (
               <footer className="account-balances-edit-sheet__foot account-balances-edit-sheet__foot--manual-confirm">
-                <button
-                  type="button"
-                  className="account-balances-manual-sheet__confirm-btn"
-                  disabled={balanceEditClosing}
-                  onClick={confirmManualBalances}
-                >
-                  Confirm and show me the details
-                </button>
+                <div className="account-balances-manual-sheet__footer-row">
+                  <AppButton
+                    size="sm"
+                    variant="ghost"
+                    isDisabled={balanceEditClosing}
+                    onPress={handleManualBalanceCancel}
+                  >
+                    Cancel
+                  </AppButton>
+                  <span aria-hidden />
+                  <AppButton
+                    size="sm"
+                    variant="primary"
+                    isDisabled={balanceEditClosing}
+                    onPress={confirmManualBalances}
+                  >
+                    Confirm
+                  </AppButton>
+                </div>
               </footer>
             ) : null}
           </div>
         </aside>
       ) : null}
-      {renderReplaceSourceConfirmOverlay()}
+      {!csvImportModalOpen && renderReplaceSourceConfirmOverlay()}
       {renderRemoveAccountsConfirmOverlay()}
     </div>
   );
@@ -3046,7 +3025,14 @@ export function AccountBalances({
               ) : null}
             </div>
           </div>
-          <div className="account-balances-stack">
+          <div
+            className={[
+              "account-balances-stack",
+              !hasAnyAccountCardData && "account-balances-stack--awaiting-accounts",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
             <div
               className={`account-balances-card-inner-wrap${
                 balanceEditPanelOpen
@@ -3055,7 +3041,13 @@ export function AccountBalances({
               }${!hasAnyAccountCardData ? " account-balances-card-inner-wrap--empty-state" : ""}`}
               style={hasAnyAccountCardData ? cardStyle : undefined}
             >
-              {!hasAnyAccountCardData ? renderFinancialsEntry() : null}
+              {!hasAnyAccountCardData && canEditBalances
+                ? renderAccountBalancesManageMenu({
+                    hideTrigger: true,
+                    initialOpen: true,
+                    requiredEntry: true,
+                  })
+                : null}
               {renderMergedDashboardOrderedContent()}
               {accountSectionFooter}
             </div>
@@ -3119,7 +3111,7 @@ export function AccountBalances({
         hideTrigger
         initialCustodian={csvImportPrefillCustodian}
         fileIngestRequest={csvFileIngestRequest}
-        onImportFlowClose={finishCsvImportLaunch}
+        onImportFlowClose={handleCsvImportDismissed}
         onApplyBalances={onImportedApplyBalances}
         onImportApplied={() => {
           onPositionsImportApplied?.();
@@ -3138,6 +3130,7 @@ export function AccountBalances({
       >
         {accountBalancesBody}
         {csvImportModal}
+        {csvImportModalOpen && renderReplaceSourceConfirmOverlay(true)}
       </PlaidConnectionProvider>
     );
   }

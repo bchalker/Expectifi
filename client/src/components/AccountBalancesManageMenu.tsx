@@ -163,6 +163,15 @@ export type AccountBalancesManageMenuProps = {
   className?: string;
   /** Increment to open the Manage menu programmatically. */
   openRequest?: number;
+  /** Hide the header trigger; use with `initialOpen` for empty-state auto-open. */
+  hideTrigger?: boolean;
+  /** Open the overlay on first mount (empty portfolio). */
+  initialOpen?: boolean;
+  /**
+   * Empty portfolio: financial entry is required — hide dismiss controls
+   * (not used when opened from the header Manage Financials trigger).
+   */
+  requiredEntry?: boolean;
   /** Opens Pro checkout / register flow from upgrade prompt. */
   onOpenUpgrade?: () => void;
 };
@@ -178,6 +187,9 @@ export function AccountBalancesManageMenu({
   onRequestReplaceImport,
   className,
   openRequest,
+  hideTrigger = false,
+  initialOpen = false,
+  requiredEntry = false,
   onOpenUpgrade,
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth();
@@ -185,7 +197,7 @@ export function AccountBalancesManageMenu({
   const ctx = useContext(PlaidConnectionContext);
   const showPlanBadges = !user;
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [closing, setClosing] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -220,6 +232,11 @@ export function AccountBalancesManageMenu({
     setClosing(true);
   }, [closing, completeClose, open]);
 
+  const dismiss = useCallback(() => {
+    if (requiredEntry) return;
+    close();
+  }, [close, requiredEntry]);
+
   const openMenu = useCallback(() => {
     setClosing(false);
     setOpen(true);
@@ -227,9 +244,14 @@ export function AccountBalancesManageMenu({
   }, [ctx]);
 
   const toggleMenu = useCallback(() => {
-    if (open) close();
+    if (open) dismiss();
     else openMenu();
-  }, [close, open, openMenu]);
+  }, [dismiss, open, openMenu]);
+
+  useEffect(() => {
+    if (!initialOpen) return;
+    ctx?.setPanelOpen(true);
+  }, [ctx, initialOpen]);
 
   const lastOpenRequestRef = useRef<number | undefined>(undefined);
   useEffect(() => {
@@ -239,15 +261,15 @@ export function AccountBalancesManageMenu({
   }, [openRequest, openMenu]);
 
   useEffect(() => {
-    if (!open || closing) return;
+    if (!open || closing || requiredEntry) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") dismiss();
     }
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [close, closing, open]);
+  }, [dismiss, closing, open, requiredEntry]);
 
   const handleBackdropAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLDivElement>) => {
@@ -261,11 +283,12 @@ export function AccountBalancesManageMenu({
 
   const handleBackdropMouseDown = useCallback(
     (e: MouseEvent) => {
+      if (requiredEntry) return;
       if ((e.target as HTMLElement).closest?.(".plaid-disconnect-popover"))
         return;
-      close();
+      dismiss();
     },
-    [close],
+    [dismiss, requiredEntry],
   );
 
   const runAndClose = useCallback(
@@ -278,7 +301,7 @@ export function AccountBalancesManageMenu({
 
   const handlePlaidConnect = useCallback(() => {
     if (!hasPaidSubscription) {
-      close();
+      if (!requiredEntry) close();
       setUpgradeOpen(true);
       return;
     }
@@ -302,6 +325,7 @@ export function AccountBalancesManageMenu({
     hasPaidSubscription,
     onImportApplied,
     onRequestReplaceManual,
+    requiredEntry,
     showPlaidConnect,
   ]);
 
@@ -345,7 +369,7 @@ export function AccountBalancesManageMenu({
         .filter(Boolean)
         .join(" ")}
     >
-      {hasHealthyPlaid ? (
+      {!hideTrigger && hasHealthyPlaid ? (
         <Tooltip content={syncTooltip} placement="bottom">
           <span
             className="account-balances-manage__sync-dot"
@@ -353,46 +377,49 @@ export function AccountBalancesManageMenu({
           />
         </Tooltip>
       ) : null}
-      <button
-        ref={triggerRef}
-        type="button"
-        className={[
-          "holdings-scenario-trigger",
-          "holdings-scenario-trigger--badge",
-          "account-balances-manage__trigger",
-          open && "account-balances-manage__trigger--open",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-controls="account-balances-manage-menu"
-        aria-labelledby="account-balances-manage-label"
-        disabled={ctx?.linkBusy}
-        onClick={toggleMenu}
-      >
-        <span className="holdings-scenario-trigger__text">
-          <span
-            className="holdings-scenario-trigger__sublabel"
-            id="account-balances-manage-label"
-          >
-            {MANAGE_SUBLABEL}
-          </span>
-          <span className="holdings-scenario-trigger__label-row">
-            <span className="holdings-scenario-trigger__label">
-              {MANAGE_VALUE_LABEL}
+      {!hideTrigger ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          className={[
+            "holdings-scenario-trigger",
+            "holdings-scenario-trigger--badge",
+            "account-balances-manage__trigger",
+            open && "account-balances-manage__trigger--open",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-controls="account-balances-manage-menu"
+          aria-labelledby="account-balances-manage-label"
+          disabled={ctx?.linkBusy}
+          onClick={toggleMenu}
+        >
+          <span className="holdings-scenario-trigger__text">
+            <span
+              className="holdings-scenario-trigger__sublabel"
+              id="account-balances-manage-label"
+            >
+              {MANAGE_SUBLABEL}
             </span>
-            <span className="holdings-scenario-trigger__trail" aria-hidden>
-              <IconChevronDown size={14} stroke={1.5} />
+            <span className="holdings-scenario-trigger__label-row">
+              <span className="holdings-scenario-trigger__label">
+                {MANAGE_VALUE_LABEL}
+              </span>
+              <span className="holdings-scenario-trigger__trail" aria-hidden>
+                <IconChevronDown size={14} stroke={1.5} />
+              </span>
             </span>
           </span>
-        </span>
-      </button>
+        </button>
+      ) : null}
       {open
         ? createPortal(
             <div
               className={[
                 "account-balances-manage__backdrop",
+                requiredEntry && "account-balances-manage__backdrop--required-entry",
                 closing && "account-balances-manage__backdrop--closing",
               ]
                 .filter(Boolean)
@@ -409,21 +436,30 @@ export function AccountBalancesManageMenu({
                 aria-labelledby="account-balances-manage-panel-title"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <header className="account-balances-manage__header">
+                <header
+                  className={[
+                    "account-balances-manage__header",
+                    requiredEntry && "account-balances-manage__header--required-entry",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
                   <h2
                     id="account-balances-manage-panel-title"
                     className="account-balances-manage__title"
                   >
                     Add accounts
                   </h2>
-                  <button
-                    type="button"
-                    className="account-balances-manage__close"
-                    aria-label="Close"
-                    onClick={close}
-                  >
-                    <IconX size={16} stroke={1.5} aria-hidden />
-                  </button>
+                  {!requiredEntry ? (
+                    <button
+                      type="button"
+                      className="account-balances-manage__close"
+                      aria-label="Close"
+                      onClick={dismiss}
+                    >
+                      <IconX size={16} stroke={1.5} aria-hidden />
+                    </button>
+                  ) : null}
                 </header>
 
                 {ctx?.linkInfo ? (
