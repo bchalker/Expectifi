@@ -320,10 +320,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
     heartbeatEphemeralGuestTab()
     const heartbeatId = window.setInterval(() => heartbeatEphemeralGuestTab(), 20_000)
     const onPageHide = () => teardownEphemeralGuestTab()
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') heartbeatEphemeralGuestTab()
+    }
     window.addEventListener('pagehide', onPageHide)
+    document.addEventListener('visibilitychange', onVisibility)
     return () => {
       window.clearInterval(heartbeatId)
       window.removeEventListener('pagehide', onPageHide)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [isHydrated, authLoading, user, tier])
 

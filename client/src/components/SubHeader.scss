@@ -22,9 +22,9 @@ html:not([data-no-portfolio-subheader]) .subheader {
 }
 
 .subheader.subheader--phase-income .subheader-bubble__front-path {
-  fill: var(--amber1);
+  fill: var(--blue2);
   filter: drop-shadow(0px 4px 8px rgba(255,255,255, 0.4));
-  // fill: radial-gradient(ellipse at 50% 30%, var(--amber4), #7A420A);
+  // fill: radial-gradient(ellipse at 50% 30%, var(--blue2), var(--blue1));
 }
 
 // .subheader.subheader--phase-income::before {
@@ -42,7 +42,7 @@ html:not([data-no-portfolio-subheader]) .subheader {
 }
 
 .subheader-bubble__front-path {
-  fill: var(--blue2);
+  fill: var(--amber1);
 }
 
 /* Fills the band above the wave art only — full subheader nav-bg hid waves (same fill as SVG paths). */
@@ -149,7 +149,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 
 /* Post-commit: hero amount and SS row rise in after the wave (staggered). */
 html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
-html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
   opacity: 0;
 }
 
@@ -158,7 +158,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     var(--portfolio-subheader-hero-delay) both;
 }
 
-html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
   animation: portfolio-reveal-fade var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
     var(--portfolio-subheader-bottom-delay) both;
 }
@@ -211,7 +211,6 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 .subheader-content .subheader-estimate .subheader-ss-toggle__switch,
 .subheader-content .subheader-estimate .subheader-ss-block,
 .subheader-content .subheader-estimate .subheader-estimate__top,
-.subheader-content .subheader-estimate .subheader-estimate__bottom,
 .subheader-content .subheader-estimate .subheader-claim-age-picker,
 .subheader-content .subheader-estimate .subheader-claim-age-picker__trigger-text,
 .subheader-content .subheader-estimate .subheader-claim-age-picker__chevron,
@@ -228,80 +227,39 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 
 .subheader-estimate {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: auto;
+  align-content: start;
+  justify-items: center;
+  gap: var(--space-4);
   width: 100%;
   height: 100%;
   min-height: 100%;
   min-width: 0;
   max-width: min(100%, 30rem);
   margin: 0 auto;
+  padding-block: var(--space-4);
   text-align: center;
   box-sizing: border-box;
 }
 
-/* Growth/Income toggle — half over chrome above, half in hero */
 .subheader-estimate__top {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translate(-50%, -50%);
+  width: 100%;
   pointer-events: auto;
 }
 
-/* Dollar amount + chart — sit just under overlapping Growth/Income toggle */
 .subheader-estimate__center {
-  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  min-height: 0;
+  min-width: 0;
   box-sizing: border-box;
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-2);
-}
-
-.subheader--ss-claim-slot .subheader-estimate {
-  justify-content: flex-start;
-}
-
-.subheader--ss-claim-slot .subheader-estimate__center {
-  flex: 0 0 auto;
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-1);
-}
-
-/* Claim age sits in document flow — tight under SS toggle (not pinned to wave bottom). */
-.subheader--ss-claim-slot .subheader-estimate__bottom {
-  position: relative;
-  bottom: auto;
-  left: auto;
-  flex: 0 0 auto;
-  align-self: center;
-  margin-top: var(--space-1) /* review: was 0.125rem */;
-  padding-bottom: var(--space-1) /* review: was 0.35rem */;
-  transform: none;
-}
-
-/* 62/67/70 — half over bottom wave (growth / income without SS claim slot) */
-.subheader-estimate__bottom {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  z-index: 5;
-  display: flex;
-  justify-content: center;
-  transform: translate(-50%, 50%);
-  pointer-events: auto;
 }
 
 .subheader-estimate__claim-reveal {
@@ -401,7 +359,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: var(--space-2);
   width: 100%;
   max-width: min(100%, 22rem);
 }
@@ -851,7 +809,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
-  gap: var(--space-1) /* review: was 0.15rem */ var(--space-1) /* review: was 0.35rem */;
+  // gap: var(--space-1) /* review: was 0.15rem */ var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   box-sizing: border-box;
 }
@@ -950,9 +908,9 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     height: 120px;
   }
 
-  .subheader-estimate__center,
-  .subheader--ss-claim-slot .subheader-estimate__center {
-    padding-top: var(--space-7) /* review: was 2.4rem */;
+  .subheader-estimate {
+    padding-block: var(--space-1);
+    gap: var(--space-1);
   }
 
   .subheader-estimate__value {
@@ -1007,7 +965,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   }
 
   html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
-  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
     opacity: 1;
   }
 
@@ -1017,7 +975,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     transform: none;
   }
 
-  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__bottom {
+  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
     animation: none;
     opacity: 1;
   }

@@ -8,6 +8,16 @@ import { syncNoPortfolioSubheaderDocumentAttr } from './lib/syncNoPortfolioSubhe
 
 syncNoPortfolioSubheaderDocumentAttr()
 
+function syncDocumentHiddenAttr() {
+  document.documentElement.toggleAttribute(
+    'data-doc-hidden',
+    document.visibilityState === 'hidden',
+  )
+}
+
+syncDocumentHiddenAttr()
+document.addEventListener('visibilitychange', syncDocumentHiddenAttr)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>

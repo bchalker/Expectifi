@@ -386,24 +386,22 @@ export function SubHeader({
                           </button>
                         )}
                       </div>
+                      {reserveSsClaimSlot ? (
+                        <div
+                          className={`subheader-estimate__claim-reveal${showSsClaimPicker ? " subheader-estimate__claim-reveal--visible" : ""}`}
+                          aria-hidden={!showSsClaimPicker}
+                        >
+                          <SubheaderClaimAgePicker
+                            value={ssClaimAge}
+                            onChange={onSsClaimAgeChange}
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}
               </div>
             </div>
-            {reserveSsClaimSlot ? (
-              <div className="subheader-estimate__bottom">
-                <div
-                  className={`subheader-estimate__claim-reveal${showSsClaimPicker ? " subheader-estimate__claim-reveal--visible" : ""}`}
-                  aria-hidden={!showSsClaimPicker}
-                >
-                  <SubheaderClaimAgePicker
-                    value={ssClaimAge}
-                    onChange={onSsClaimAgeChange}
-                  />
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
       ) : null}

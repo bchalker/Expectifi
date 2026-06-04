@@ -1,5 +1,4 @@
 import {
-  IconEdit,
   IconTrendingDown,
   IconTrendingUp,
 } from "@tabler/icons-react";
@@ -18,12 +17,11 @@ import { formatFidelityDescription } from "../lib/fidelityDisplay";
 import {
   inferScenarioUiChoice,
   scenarioColumnShortLabel,
-  type ScenarioUiChoice,
+  HOLDING_ROW_SCENARIO_SUBLABEL,
 } from "../lib/holdingScenarioApply";
+import { HoldingsScenarioBadge } from "./HoldingsScenarioBadge";
 import {
   blendedBaselineFV,
-  modelingCalendarYears,
-  padYearlyReturns,
   positionUsesCustomReturnMode,
   projectPositionAtRetirement,
   type PositionReturnModel,
@@ -32,17 +30,6 @@ import { fmt } from "../utils/format";
 import { RangeInlineWithValuePinRow } from "./StripSliderValuePin";
 import "./FidelityHoldingScenarioPopout.scss";
 import "./GrowthSliderLabel.scss";
-
-function scenarioBadgeClass(choice: ScenarioUiChoice): string {
-  if (choice === "default") return "";
-  if (choice === "base") return "holdings-scenario-trigger--normal";
-  return `holdings-scenario-trigger--${choice}`;
-}
-
-function fmtSignedYearPct(dec: number): string {
-  const p = dec * 100;
-  return (p >= 0 ? "+" : "") + p.toFixed(1) + "%";
-}
 
 function fmtSignedDeltaMoney(n: number): string {
   return (n >= 0 ? "+" : "") + fmt(n);
@@ -79,13 +66,11 @@ export function GrowthSliderLabel({
   retirementYear,
   horizon,
   retirementAge,
-  onEditPosition,
   onRemovePositionReturn,
   sliderTrack,
   sliderTicks,
 }: GrowthSliderLabelProps) {
   const h = Math.max(1, Math.min(50, horizon));
-  const years = modelingCalendarYears(retirementYear, h);
 
   const brkList = brokeragePositionModels ?? [];
   const brkBlend = brkBlendedRate ?? blendedRate;
@@ -215,14 +200,11 @@ export function GrowthSliderLabel({
 
   function popoverInner(p: PositionReturnModel) {
     const b = blendedFor(p);
-    const padded = padYearlyReturns(p.yearlyReturns, h, b);
     const scenarioChoice = inferScenarioUiChoice(p, b, h);
     const scenarioLabel = scenarioColumnShortLabel(
       scenarioChoice,
       scenarioChoice === "custom" ? p.flatRate : undefined,
     );
-    const showYearGrid =
-      p.returnMode === "peryear" || p.returnMode === "scenario";
     const projected = projectPositionAtRetirement(p, retirementYear, h);
     const baseline = blendedBaselineFV(p.currentValue, b, h);
     const delta = projected - baseline;
@@ -237,40 +219,12 @@ export function GrowthSliderLabel({
           </p>
         </div>
         <div className="growth-slider-hover-pop__rule" />
-        <div className="growth-slider-hover-pop__scenario-row">
-          <span className="growth-slider-hover-pop__scenario-kicker">
-            Scenario
-          </span>
-          {scenarioChoice === "default" ? (
-            <span className="growth-slider-hover-pop__scenario-plain">
-              {scenarioLabel}
-            </span>
-          ) : (
-            <span
-              className={`holdings-scenario-trigger ${scenarioBadgeClass(scenarioChoice)}`}
-            >
-              {scenarioLabel}
-            </span>
-          )}
-        </div>
-        {p.returnMode === "flat" && scenarioChoice === "custom" ? (
-          <p className="growth-slider-hover-pop__mode-note">
-            Applied all years
-          </p>
-        ) : null}
-        {showYearGrid ? (
-          <div className="growth-slider-hover-pop__rows">
-            {years.map((y, i) => (
-              <div
-                key={`${p.id}-y-${y}`}
-                className="growth-slider-hover-pop__row"
-              >
-                <span>{y}</span>
-                <span>{fmtSignedYearPct(padded[i] ?? b)}</span>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <HoldingsScenarioBadge
+          className="growth-slider-hover-pop__scenario-badge"
+          label={scenarioLabel}
+          choice={scenarioChoice}
+          sublabel={HOLDING_ROW_SCENARIO_SUBLABEL}
+        />
         <div className="growth-slider-hover-pop__rule" />
         <div className="growth-slider-hover-pop__footer">
           Projected at {retirementAge}: {fmt(projected)}
@@ -286,19 +240,6 @@ export function GrowthSliderLabel({
           )}
         </div>
         <div className="growth-slider-hover-pop__actions">
-          <button
-            type="button"
-            className="growth-slider-hover-pop__edit"
-            onClick={() => {
-              onEditPosition(p.id);
-              clearCloseTimer();
-              setHoverId(null);
-              setAnchor(null);
-            }}
-          >
-            <IconEdit size={14} stroke={1.75} aria-hidden />
-            Edit returns
-          </button>
           <button
             type="button"
             className="growth-slider-hover-pop__remove"

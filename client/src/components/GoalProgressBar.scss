@@ -9,11 +9,13 @@
 }
 
 .goal-progress-bar--phase-growth {
-  background: var(--nav-bg);
+  background: var(--amber-d1);
+  background: linear-gradient(to bottom, var(--amber4) 0%, var(--amber-d1) 10%);
 }
 
 .goal-progress-bar--phase-income {
-  background: var(--amber-d1);
+  background: var(--nav-bg);
+  background: linear-gradient(to bottom, var(--nav-bg) 0%, var(--nav-bg) 10%);
 }
 
 .goal-progress-bar--phase-income .goal-progress-bar__fill {

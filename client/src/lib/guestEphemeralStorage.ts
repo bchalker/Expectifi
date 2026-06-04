@@ -14,7 +14,7 @@ const GUEST_TABS_KEY = 'expectifi_guest_open_tabs'
 const LEGACY_GUEST_TAB_ID_KEY = 'headwayplanner_guest_tab_id'
 const LEGACY_GUEST_TABS_KEY = 'headwayplanner_guest_open_tabs'
 /** Tabs not heartbeated within this window are treated as closed (crash-safe). */
-const GUEST_TAB_STALE_MS = 45_000
+const GUEST_TAB_STALE_MS = 180_000
 
 type GuestTabRecord = {
   id: string

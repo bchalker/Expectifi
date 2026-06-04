@@ -1,24 +1,16 @@
-import { IconLibraryPlus, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
+import { IconLibraryPlus } from '@tabler/icons-react'
 import {
   ACCOUNT_SCENARIO_SUBLABEL,
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
+import {
+  HoldingsScenarioBadgeContent,
+  holdingsScenarioTriggerChoiceClass,
+} from './HoldingsScenarioBadge'
 import './FidelityHoldingScenarioPopout.scss'
 
-function scenarioTriggerTrailingIcon(choice: ScenarioUiChoice | typeof SCENARIO_MIXED) {
-  if (choice === 'bull' || choice === 'very_bull') return IconTrendingUp
-  if (choice === 'bear' || choice === 'very_bear') return IconTrendingDown
-  return null
-}
-
-export function holdingsScenarioTriggerChoiceClass(
-  choice: ScenarioUiChoice | typeof SCENARIO_MIXED,
-): string {
-  if (choice === 'default' || choice === SCENARIO_MIXED) return ''
-  if (choice === 'base') return 'holdings-scenario-trigger--normal'
-  return `holdings-scenario-trigger--${choice}`
-}
+export { holdingsScenarioTriggerChoiceClass } from './HoldingsScenarioBadge'
 
 function holdingsScenarioInheritShellClass(choice: ScenarioUiChoice): string {
   if (choice === 'base') return 'holdings-scenario-trigger-shell--normal'
@@ -58,13 +50,6 @@ export function HoldingsScenarioTrigger({
   const badgeChoice = variant === 'badge' ? common : null
   const choiceClass = badgeChoice ? holdingsScenarioTriggerChoiceClass(badgeChoice) : ''
   const shellClass = accentChoice ? holdingsScenarioInheritShellClass(accentChoice) : ''
-  const TrailingIcon =
-    variant === 'badge' && badgeChoice ? scenarioTriggerTrailingIcon(badgeChoice) : null
-  const showDot =
-    variant === 'badge' &&
-    badgeChoice != null &&
-    badgeChoice !== SCENARIO_MIXED &&
-    badgeChoice !== 'default'
 
   const button = (
     <button
@@ -85,21 +70,12 @@ export function HoldingsScenarioTrigger({
         onOpen()
       }}
     >
-      {variant === 'badge' ? (
-        <span className="holdings-scenario-trigger__text">
-          <span className="holdings-scenario-trigger__sublabel">{sublabel}</span>
-          <span className="holdings-scenario-trigger__label-row">
-            {showDot ? (
-              <span className="holdings-scenario-trigger__dot" aria-hidden />
-            ) : null}
-            <span className="holdings-scenario-trigger__label">{label}</span>
-            {TrailingIcon ? (
-              <span className="holdings-scenario-trigger__trail" aria-hidden>
-                <TrailingIcon size={14} stroke={1.5} />
-              </span>
-            ) : null}
-          </span>
-        </span>
+      {variant === 'badge' && badgeChoice ? (
+        <HoldingsScenarioBadgeContent
+          label={label}
+          choice={badgeChoice}
+          sublabel={sublabel}
+        />
       ) : (
         <>
           <span className="holdings-scenario-trigger__label">{label}</span>

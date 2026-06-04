@@ -248,7 +248,7 @@
   --subheader-label-fg: rgba(255, 255, 255, 0.82);
   --subheader-phase-muted-fg: rgba(255, 255, 255, 0.78);
   /* Income-phase front wave + band (matches goal progress bar) */
-  --subheader-income-wave: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
+  --subheader-income-wave: var(--blue2);
   --mono: var(--ds-font-mono); --sans: var(--font-sans); --serif: var(--font-serif);
   --body: var(--ds-font-body);
   --heading: var(--font-heading);

@@ -1228,22 +1228,36 @@ button.holdings-scenario-trigger--badge {
   align-items: flex-start;
 }
 
+span.holdings-scenario-trigger--badge.holdings-scenario-badge--static {
+  display: inline-flex;
+  width: 100%;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+  pointer-events: none;
+  cursor: default;
+}
+
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear,
-span.holdings-scenario-trigger.holdings-scenario-trigger--very_bear,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear,
-span.holdings-scenario-trigger.holdings-scenario-trigger--bear,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull,
-span.holdings-scenario-trigger.holdings-scenario-trigger--very_bull,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull,
-span.holdings-scenario-trigger.holdings-scenario-trigger--bull,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--normal,
-span.holdings-scenario-trigger.holdings-scenario-trigger--normal,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--normal,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--custom,
-span.holdings-scenario-trigger.holdings-scenario-trigger--custom,
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--custom,
 button.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear,
-span.holdings-scenario-trigger.holdings-scenario-trigger--peryear {
+span.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear {
   color: var(--text);
   background: #fff;
+}
+
+span.holdings-scenario-trigger--badge.holdings-scenario-badge--static {
+  background: transparent;
 }
 
 button.holdings-scenario-trigger--badge:hover {
@@ -1286,31 +1300,31 @@ button.holdings-scenario-trigger--badge:hover {
   background: color-mix(in srgb, var(--text-muted) 55%, var(--border));
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__dot {
   background: #ef4444;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear .holdings-scenario-trigger__dot {
   background: #e8a5a5;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull .holdings-scenario-trigger__dot {
   background: #6bc9a8;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull .holdings-scenario-trigger__dot {
   background: #16a34a;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--normal .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--normal .holdings-scenario-trigger__dot {
   background: color-mix(in srgb, var(--text-muted) 55%, var(--border));
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--custom .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--custom .holdings-scenario-trigger__dot {
   background: #60a5fa;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__dot {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__dot {
   background: #e8b86a;
 }
 
@@ -1344,19 +1358,19 @@ button.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .hold
   margin-left: auto;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull .holdings-scenario-trigger__trail {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull .holdings-scenario-trigger__trail {
   color: #6bc9a8;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull .holdings-scenario-trigger__trail {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull .holdings-scenario-trigger__trail {
   color: #16a34a;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear .holdings-scenario-trigger__trail {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear .holdings-scenario-trigger__trail {
   color: #e8a5a5;
 }
 
-button.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__trail {
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__trail {
   color: #ef4444;
 }
 

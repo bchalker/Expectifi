@@ -40,6 +40,11 @@
   }
 }
 
+html[data-doc-hidden] .income-harvest-preview-map__drift,
+html[data-doc-hidden] .income-harvest-preview-map--skeleton {
+  animation-play-state: paused;
+}
+
 @keyframes income-harvest-preview-map-drift {
   0%,
   100% {
