@@ -38,7 +38,8 @@ border: 1px solid rgba(255,255,255,0.5);
   // box-shadow: none;
   overflow: hidden;
   padding: 0;
-
+  border-radius: var(--space-2);
+  overflow: hidden;
   transition:
     all .3s ease;
 }
@@ -46,12 +47,14 @@ border: 1px solid rgba(255,255,255,0.5);
 .portfolio-account-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
   width: 100%;
   box-sizing: border-box;
+  border-radius: var(--space-2);
+
   // border-radius: var(--space-2);
   // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  padding: var(--space-1);
+  padding: var(--space-2);
 
   // background: var(--surface);
 
