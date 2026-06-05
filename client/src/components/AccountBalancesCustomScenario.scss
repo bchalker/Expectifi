@@ -1389,11 +1389,19 @@
 }
 
 .account-balances-card-inner-wrap > .account-balances-card-scroll {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
+}
+
+.section--tax-summary--income-harvest
+  .account-balances-card-inner-wrap
+  > .account-balances-card-scroll,
+.section--tax-summary--growth-assumptions
+  .account-balances-card-inner-wrap
+  > .account-balances-card-scroll {
+  flex: 0 0 auto;
+  overflow: visible;
 }
 
 .account-balances-card-inner-wrap > .portfolio-account-list {

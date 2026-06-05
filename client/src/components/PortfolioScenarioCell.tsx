@@ -44,7 +44,7 @@ export function PortfolioScenarioCell({
 }: PortfolioScenarioCellProps) {
   const inheritsAccountScenario =
     layout === 'holding' && rateSource === 'account' && variant === 'outline'
-  const holdingScenarioActive = layout === 'holding' && variant === 'badge'
+  const holdingScenarioActive = layout === 'holding' && rowActive
 
   return (
     <div

@@ -22,7 +22,7 @@ export function holdingsScenarioTriggerChoiceClass(
 export type HoldingsScenarioBadgeContentProps = {
   label: string
   choice: ScenarioUiChoice | typeof SCENARIO_MIXED
-  /** Badge kicker — e.g. Account Scenario, This holding. */
+  /** Badge kicker — e.g. This account, This holding. */
   sublabel?: string
   /** Badge buttons: hide Change row below fold; slide up on hover. */
   showChangeHint?: boolean

@@ -105,14 +105,16 @@ function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
     <div className="growth-scenario-range-card__wing-item">
       <div className="growth-scenario-range-card__wing-label-row">
         <span className="growth-scenario-range-card__label">{row.label}</span>
-        <WingTrendIcon id={row.id} />
       </div>
       <span className="growth-scenario-range-card__wing-value tabular-nums">
         {fmt(Math.round(row.projectedFv))}
       </span>
       <WingRateRange row={row} />
       {row.deltaFromExpected != null ? (
-        <DeltaAmount delta={row.deltaFromExpected} />
+        <div className="growth-scenario-range-card__wing-delta-row">
+          <DeltaAmount delta={row.deltaFromExpected} />
+          <WingTrendIcon id={row.id} />
+        </div>
       ) : null}
     </div>
   );
@@ -151,34 +153,19 @@ export function GrowthScenarioRangeCard({
 
   return (
     <>
-      <div
-        className="growth-scenario-range-card__header"
-        aria-label="Outcome range at current global rate"
-      >
-        <h4 className="growth-scenario-range-card__heading">
-          Outcome range at current rate
-        </h4>
-        <p className="growth-scenario-range-card__intro">
-          Based on global rate only. Account and market scenario settings may
-          shift your actual projection.
-        </p>
-      </div>
-
       {expected ? (
         <div className="growth-scenario-range-card__expected">
-          <div className="growth-scenario-range-card__expected-copy">
-            <span className="growth-scenario-range-card__label">
-              {expected.label}
-            </span>
-            {expected.subtext ? (
-              <span className="growth-scenario-range-card__subtext">
-                {expected.subtext}
-              </span>
-            ) : null}
-          </div>
+          <span className="growth-scenario-range-card__label">
+            {expected.label}
+          </span>
           <span className="growth-scenario-range-card__expected-value tabular-nums">
             {fmt(Math.round(expected.projectedFv))}
           </span>
+          {expected.subtext ? (
+            <span className="growth-scenario-range-card__subtext">
+              {expected.subtext}
+            </span>
+          ) : null}
         </div>
       ) : null}
 

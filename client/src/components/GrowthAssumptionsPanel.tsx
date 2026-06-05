@@ -34,10 +34,6 @@ export function GrowthAssumptionsPanel({
       className="growth-assumptions-panel"
       aria-label="I expect to grow at"
     >
-      <header className="growth-assumptions-panel__header">
-        <h3 className="growth-assumptions-panel__title">I expect to grow at</h3>
-      </header>
-
       <div className="growth-assumptions-panel__main">
         <GlobalGrowthRateSlider
           className="growth-assumptions-panel__slider"
@@ -59,12 +55,14 @@ export function GrowthAssumptionsPanel({
           Accounts/Holding scenarios override this rate.
         </p>
 
-        <GrowthScenarioRangeCard
-          c={c}
-          retRate={retRate}
-          brkRate={brkRate}
-          inputs={inputs}
-        />
+        <div className="growth-assumptions-panel__scenario">
+          <GrowthScenarioRangeCard
+            c={c}
+            retRate={retRate}
+            brkRate={brkRate}
+            inputs={inputs}
+          />
+        </div>
       </div>
     </aside>
   );

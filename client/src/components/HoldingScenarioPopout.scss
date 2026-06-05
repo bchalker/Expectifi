@@ -1229,6 +1229,18 @@ button.holdings-scenario-trigger--outline:hover {
   box-shadow: var(--shadow-button-hover);
 }
 
+button.holdings-scenario-trigger--open.holdings-scenario-trigger--outline,
+button.holdings-scenario-trigger--open.holdings-scenario-trigger--badge {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+}
+
+button.holdings-scenario-trigger--open.holdings-scenario-trigger--outline:hover,
+button.holdings-scenario-trigger--open.holdings-scenario-trigger--badge:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+}
+
 button.holdings-scenario-trigger--outline .holdings-scenario-trigger__label {
   font-size: var(--text-sm);
   font-weight: 500;
@@ -1442,6 +1454,34 @@ button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__trail 
 
 .holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__dot {
   background: #e8b86a;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__label {
+  color: #b91c1c;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bear .holdings-scenario-trigger__label {
+  color: #dc2626;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--bull .holdings-scenario-trigger__label {
+  color: #059669;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bull .holdings-scenario-trigger__label {
+  color: #15803d;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--normal .holdings-scenario-trigger__label {
+  color: color-mix(in srgb, var(--text-muted) 55%, var(--border));
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--custom .holdings-scenario-trigger__label {
+  color: #60a5fa;
+}
+
+.holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__label {
+  color: #e8b86a;
 }
 
 button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot {

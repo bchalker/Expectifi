@@ -1,4 +1,9 @@
-import { IconArrowNarrowDownDashed, IconTrendingDown, IconTrendingUp, IconTransfer } from "@tabler/icons-react";
+import {
+  IconArrowNarrowDownDashed,
+  IconTrendingDown,
+  IconTrendingUp,
+  IconTransfer,
+} from "@tabler/icons-react";
 import {
   useCallback,
   useEffect,
@@ -372,13 +377,35 @@ export function GrowthSliderLabel({
   return (
     <div className="growth-slider-label">
       <div className="strip-equation-sliders-group">
-        <RangeInlineWithValuePinRow
-          pinPct={`${headlinePct}%`}
-          pinCaption="annual return"
-          pinPctClassName="strip-equation-main-val--tween"
-          track={sliderTrack}
-          ticks={sliderTicks}
-        />
+        {suffixLayout === "panel" ? (
+          <>
+            <div className="growth-slider-label__panel-heading">
+              <p className="growth-slider-label__panel-rate-lead">
+                I expect to grow at
+              </p>
+              <div className="growth-slider-label__panel-rate" aria-live="polite">
+                <span className="growth-slider-label__panel-rate-pct strip-equation-main-val--tween">
+                  {headlinePct}%
+                </span>
+                <span className="growth-slider-label__panel-rate-caption">
+                  annual return
+                </span>
+              </div>
+            </div>
+            <div className="range-inline-row growth-slider-label__panel-track">
+              <div className="range-inline-track-wrap">{sliderTrack}</div>
+              {sliderTicks}
+            </div>
+          </>
+        ) : (
+          <RangeInlineWithValuePinRow
+            pinPct={`${headlinePct}%`}
+            pinCaption="annual return"
+            pinPctClassName="strip-equation-main-val--tween"
+            track={sliderTrack}
+            ticks={sliderTicks}
+          />
+        )}
         {renderInlineSuffix()}
       </div>
 

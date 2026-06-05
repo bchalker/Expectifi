@@ -1197,6 +1197,26 @@ export function AccountBalances({
     ],
   );
 
+  const isAccountScenarioRowActive = useCallback(
+    (bucket: AccountScenarioBucketId) =>
+      accountScenarioPanel === bucket && !accountScenarioClosing,
+    [accountScenarioPanel, accountScenarioClosing],
+  );
+
+  const portfolioAccountGroupClassName = useCallback(
+    (bucket: AccountScenarioBucketId, extra?: string) =>
+      [
+        "tax-treatment-disclosure",
+        "portfolio-account-group",
+        extra,
+        isAccountScenarioRowActive(bucket) &&
+          "portfolio-account-group--scenario-active",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    [isAccountScenarioRowActive],
+  );
+
   const reopenManageAfterDismiss = useCallback(() => {
     if (!hasAnyAccountCardData) {
       setOpenManageRequest((n) => n + 1);
@@ -2478,7 +2498,10 @@ export function AccountBalances({
     return (
       <div
         key={key}
-        className="tax-treatment-disclosure portfolio-account-group portfolio-account-group--static"
+        className={portfolioAccountGroupClassName(
+          bucket,
+          "portfolio-account-group--static",
+        )}
         data-manual-account-entry={entryForAllocation?.id}
       >
         <div className="portfolio-bucket-account-summary">
@@ -2529,7 +2552,7 @@ export function AccountBalances({
     return (
       <details
         key={tax}
-        className="tax-treatment-disclosure portfolio-account-group"
+        className={portfolioAccountGroupClassName(accountBucket)}
       >
         <summary className="tax-treatment-disclosure__summary portfolio-bucket-account-summary">
           {summaryInner}
@@ -2781,7 +2804,7 @@ export function AccountBalances({
     return (
       <details
         key="brokerage"
-        className="tax-treatment-disclosure portfolio-account-group"
+        className={portfolioAccountGroupClassName("brokerage")}
       >
         <summary className="tax-treatment-disclosure__summary portfolio-bucket-account-summary">
           {summaryInner}

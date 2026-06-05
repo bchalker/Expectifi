@@ -320,8 +320,8 @@ export const HOLDING_SCENARIO_PLACEHOLDER_LABEL = 'Holding Scenario'
 /** Outline trigger when an account has no return scenario. */
 export const ACCOUNT_SCENARIO_PLACEHOLDER_LABEL = 'Account Scenario'
 
-/** Badge sublabel on account summary rows. */
-export const ACCOUNT_SCENARIO_SUBLABEL = 'Account Scenario'
+/** Badge sublabel on account summary rows when a scenario is set. */
+export const ACCOUNT_SCENARIO_SUBLABEL = 'This account'
 
 /** Badge sublabel on per-holding scenario controls. */
 export const HOLDING_ROW_SCENARIO_SUBLABEL = 'This holding'

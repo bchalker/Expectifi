@@ -568,8 +568,14 @@ $account-balances-manage-menu-max-height: min(
 }
 
 .account-balances-manage__backdrop--required-entry {
+  z-index: 201;
   background: transparent;
   cursor: default;
+  pointer-events: none;
+}
+
+.account-balances-manage__backdrop--required-entry .account-balances-manage__menu {
+  pointer-events: auto;
 }
 
 .account-balances-manage__title {

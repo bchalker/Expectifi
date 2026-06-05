@@ -60,42 +60,42 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--income-harvest .section--tax-summary__income-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;
-    align-items: stretch;
+    align-items: start;
   }
 
   .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
     order: unset;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    align-self: stretch;
+    align-self: start;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card {
     box-shadow: none;
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card__accounts {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card__accounts > .account-balances-stack {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
   .section--tax-summary--income-harvest .account-balances-card-inner-wrap {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -113,15 +113,16 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--income-harvest
     .account-balances-card-inner-wrap
     > .account-balances-card-scroll {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow: visible;
   }
 
   .section--tax-summary--income-harvest .where-to-retire-preview-panel {
     order: unset;
     width: 280px;
-    height: 100%;
+    height: auto;
+    align-self: stretch;
     /* Mirror the old tax-card divider; must sit above accounts (z-index: 1). */
     box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
@@ -179,7 +180,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;
-    align-items: stretch;
+    align-items: start;
   }
 
   .section--tax-summary--growth-assumptions
@@ -188,21 +189,21 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     order: unset;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    align-self: stretch;
+    align-self: start;
   }
 
   .section--tax-summary--growth-assumptions .tax-summary-card {
     box-shadow: none;
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
   .section--tax-summary--growth-assumptions .tax-summary-card__accounts {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -211,14 +212,14 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--growth-assumptions
     .tax-summary-card__accounts
     > .account-balances-stack {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
   .section--tax-summary--growth-assumptions .account-balances-card-inner-wrap {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -236,15 +237,16 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   .section--tax-summary--growth-assumptions
     .account-balances-card-inner-wrap
     > .account-balances-card-scroll {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow: visible;
   }
 
   .section--tax-summary--growth-assumptions .growth-assumptions-panel {
     order: unset;
     width: 280px;
-    height: 100%;
+    height: auto;
+    align-self: stretch;
     box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
 }

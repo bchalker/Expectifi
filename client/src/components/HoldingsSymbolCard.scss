@@ -464,12 +464,8 @@
 }
 
 .holdings-symbol-card__actions--inherits-account {
-  background: #f9f9f9;
-  box-shadow: inset -8px 0 14px -8px rgba(0, 0, 0, 0.1);
-}
-
-.holdings-symbol-card__actions--inherits-account .holdings-scenario-trigger--outline {
   background: transparent;
+  box-shadow: none;
 }
 
 .holdings-symbol-card__scenario {
@@ -489,6 +485,10 @@
   min-height: 0;
 }
 
+.holdings-symbol-card .holdings-scenario-trigger--badge {
+  background: #fff;
+}
+
 .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {
   width: 100%;
   min-width: 100%;
@@ -503,22 +503,6 @@
   min-height: 0;
   align-self: auto;
   width: 100%;
-}
-
-.holdings-symbol-card .holdings-scenario-trigger--outline {
-  background: #fff;
-  background: rgba(0,0,0, .05);
-  opacity: 1;
-  border-color: var(--border);
-}
-
-.holdings-symbol-card .holdings-scenario-trigger--outline:hover {
-  background: var(--surface-u2);
-  opacity: 1;
-}
-
-.holdings-symbol-card .holdings-scenario-trigger--badge {
-  background: #fff;
 }
 
 .holdings-symbol-table--no-scenario .holdings-symbol-card__actions {
@@ -569,7 +553,8 @@
     min-height: 0;
     align-self: auto;
     align-items: stretch;
-    padding: var(--portfolio-scenario-stack-pad-top, 0.75rem) var(--portfolio-row-pad-x, 1rem) var(--space-2);
+    // padding: var(--portfolio-scenario-stack-pad-top, 0.75rem) var(--portfolio-row-pad-x, 1rem) var(--space-2);
+
   }
 
   .holdings-symbol-card__scenario {
@@ -595,7 +580,7 @@
 
   .holdings-symbol-card__actions--inherits-account {
     background: transparent;
-    box-shadow: inset -8px 0 14px -8px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
   }
 }
 

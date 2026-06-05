@@ -9,6 +9,8 @@
   gap: var(--space-1) /* review: was 1px */;
   --holdings-stagger-base: 0.04s;
   --holdings-stagger-step: 0.045s;
+    border-top: 1px dashed var(--border);
+  // padding: var(--space-2);
 }
 
 .holdings-symbol-list__header-row {

@@ -57,6 +57,7 @@ export function HoldingsScenarioTrigger({
       className={[
         'holdings-scenario-trigger',
         variant === 'outline' ? 'holdings-scenario-trigger--outline' : 'holdings-scenario-trigger--badge',
+        rowActive && 'holdings-scenario-trigger--open',
         choiceClass,
         className,
       ]

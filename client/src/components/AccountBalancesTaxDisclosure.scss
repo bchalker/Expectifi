@@ -22,7 +22,7 @@
   );
   margin: 0;
   border-bottom: none;
-  border-radius: var(--space-2);
+  // border-radius: var(--space-2);
   // border-bottom: 1px solid var(--border);
 border: 1px solid rgba(255,255,255,0.5);
   background: var(--portfolio-account-row-bg-closed);
@@ -51,7 +51,7 @@ border: 1px solid rgba(255,255,255,0.5);
   box-sizing: border-box;
   // border-radius: var(--space-2);
   // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  padding: var(--space-4);
+  padding: var(--space-1);
 
   // background: var(--surface);
 
@@ -65,7 +65,7 @@ border: 1px solid rgba(255,255,255,0.5);
   // margin-bottom: var(--space-2);
   background: var(--surface);
   box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
-  border: 1px solid rgba(255,255,255,0.2);
+  // border: 1px solid rgba(255,255,255,0.2);
   
 }
 
@@ -87,12 +87,48 @@ border: 1px solid rgba(255,255,255,0.5);
 }
 
 .tax-treatment-disclosure.portfolio-account-group > summary {
-  background: var(--sky-blue-u2);
+  background: var(--surface);
   box-shadow: none;
 }
 
 .tax-treatment-disclosure.portfolio-account-group[open] > summary {
   background: var(--surface);
+}
+
+.tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__name {
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.25s ease-out;
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 0;
+    height: 6px;
+    margin-right: 0;
+    border-radius: 999px;
+    background: var(--green1);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      width 0.22s ease,
+      margin-right 0.22s ease,
+      opacity 0.18s ease,
+      transform 0.22s ease;
+  }
+}
+
+.tax-treatment-disclosure.portfolio-account-group--scenario-active
+  .portfolio-bucket-account-row__name {
+  color: var(--green1);
+}
+
+.tax-treatment-disclosure.portfolio-account-group--scenario-active
+  .portfolio-bucket-account-row__name::before {
+  width: 6px;
+  margin-right: var(--space-2);
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .tax-treatment-disclosure > summary.edit-row {
@@ -104,6 +140,30 @@ border: 1px solid rgba(255,255,255,0.5);
   > .portfolio-bucket-account-summary {
   display: block;
   padding: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--green1);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.28s ease-out;
+    pointer-events: none;
+    z-index: 2;
+  }
+}
+
+.tax-treatment-disclosure.portfolio-account-group--scenario-active
+  > summary.portfolio-bucket-account-summary::after,
+.tax-treatment-disclosure.portfolio-account-group--scenario-active.portfolio-account-group--static
+  > .portfolio-bucket-account-summary::after {
+  transform: scaleX(1);
 }
 
 .tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static:has(
@@ -205,26 +265,41 @@ border: 1px solid rgba(255,255,255,0.5);
 .tax-treatment-disclosure.portfolio-account-group
   > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
   box-shadow: inset 0 0 0 0 var(--sky-blue);
-  transition:
-    box-shadow 0.3s ease,
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: all .2s ease;
 }
 
 .tax-treatment-disclosure.portfolio-account-group[open]
   > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
   position: relative;
   z-index: 1;
+  padding-top: var(--space-2);
   background: var(--surface);
-  background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
-  border-bottom: 1px dashed var(--border);
-  box-shadow: inset 0 5px 10px 0 var(--sky-blue);
+  // background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
+
+  box-shadow: inset 0 5px 0px 0 var(--sky-blue-d2);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tax-treatment-disclosure.portfolio-account-group
     > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
     transition: none;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__name::before {
+    transition: none;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group > summary.portfolio-bucket-account-summary::after,
+  .tax-treatment-disclosure.portfolio-account-group.portfolio-account-group--static
+    > .portfolio-bucket-account-summary::after {
+    transition: none;
+  }
+
+  .tax-treatment-disclosure.portfolio-account-group--scenario-active
+    > summary.portfolio-bucket-account-summary::after,
+  .tax-treatment-disclosure.portfolio-account-group--scenario-active.portfolio-account-group--static
+    > .portfolio-bucket-account-summary::after {
+    transform: scaleX(1);
   }
 }
 

@@ -227,7 +227,7 @@
   min-width: 100%;
   height: auto;
   min-height: 0;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline,
@@ -236,16 +236,15 @@
   height: auto;
   min-height: 0;
   align-self: auto;
+}
+
+.portfolio-bucket-account-row .holdings-scenario-trigger--outline {
   background: #fff;
-  background: var(--sky-blue);
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
 }
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline:hover {
-  background: var(--surface-u2);
-}
-
-.portfolio-bucket-account-row .holdings-scenario-trigger--badge:hover {
-  background: #fff;
+  background: var(--surface);
 }
 
 .portfolio-bucket-account-row__chevron.view-holdings-hint {
