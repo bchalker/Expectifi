@@ -99,7 +99,7 @@ export function AnchoredHoverCell({
     if (!open) return
     const viewportRoot = cellRef.current?.closest('.wtr-grid__viewport')
     const viewport =
-      viewportRoot?.querySelector<HTMLElement>('.simplebar-content-wrapper') ?? viewportRoot
+      viewportRoot?.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') ?? viewportRoot
     let attached = false
 
     const onScroll = () => {

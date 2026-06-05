@@ -109,6 +109,64 @@ export function allocationProfileDisplayAtPosition(position: number): {
   }
 }
 
+/** Mix line from a stored equity % (no snap to preset stops). */
+export function allocationProfileDisplayAtEquityPct(equityPct: number): {
+  label: string
+  mixHint: string
+  tone: AllocationProfileTone
+} {
+  const eq = Math.max(0, Math.min(100, Math.round(equityPct)))
+  const bonds = 100 - eq
+  return {
+    label: allocationProfileLabelAtEquityPct(eq),
+    mixHint: bonds <= 0 ? `${eq}% equities` : `${eq}% equities/${bonds}% bonds`,
+    tone: allocationProfileToneAtEquityPct(eq),
+  }
+}
+
+/** Inverse of {@link interpolatedEquityPct} — restores continuous slider position. */
+export function sliderPositionForEquityPct(equityPct: number): number {
+  const eq = Math.max(0, Math.min(100, Math.round(equityPct)))
+  if (eq <= SLIDER_EQUITY_PCT_BY_STOP[0]!) return ALLOCATION_PROFILE_SLIDER_MIN
+  if (eq >= SLIDER_EQUITY_PCT_BY_STOP[SLIDER_EQUITY_PCT_BY_STOP.length - 1]!) {
+    return ALLOCATION_PROFILE_SLIDER_MAX
+  }
+  for (let i = 0; i < SLIDER_EQUITY_PCT_BY_STOP.length - 1; i++) {
+    const low = SLIDER_EQUITY_PCT_BY_STOP[i]!
+    const high = SLIDER_EQUITY_PCT_BY_STOP[i + 1]!
+    if (eq < low || eq > high) continue
+    if (high === low) return i
+    return i + (eq - low) / (high - low)
+  }
+  return ALLOCATION_PROFILE_SLIDER_DEFAULT_STOP
+}
+
+export function allocationProfileForEquityPct(equityPct: number): AllocationProfile {
+  return allocationProfileToneAtEquityPct(equityPct)
+}
+
+/** Slider thumb + trigger display from stored profile and/or equity %. */
+export function resolveAllocationSliderState(
+  profile: AllocationProfile | null | undefined,
+  equityPct?: number | null,
+): { position: number; equityPct: number; profile: AllocationProfile } {
+  if (equityPct != null && Number.isFinite(equityPct)) {
+    const eq = Math.max(0, Math.min(100, Math.round(equityPct)))
+    return {
+      position: sliderPositionForEquityPct(eq),
+      equityPct: eq,
+      profile: allocationProfileForEquityPct(eq),
+    }
+  }
+  const position = sliderStopForAllocationProfile(profile)
+  const eq = interpolatedEquityPct(position)
+  return {
+    position,
+    equityPct: eq,
+    profile: profile ?? allocationProfileForEquityPct(eq),
+  }
+}
+
 export function snapAllocationSliderStop(position: number): number {
   return Math.max(
     ALLOCATION_PROFILE_SLIDER_MIN,

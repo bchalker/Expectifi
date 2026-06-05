@@ -79,6 +79,16 @@ export const NAV_EROSION_RISK_PCT: Record<NavErosionRisk, number> = {
   'Very High': 7.0,
 }
 
+/** Short copy for NAV erosion tooltips (aligned with strip income popover). */
+export const NAV_EROSION_EXPLAIN_SHORT =
+  'Some high-yield funds pay distributions that are not fully covered by underlying income. Part of that cash flow can slowly reduce net asset value (NAV)—the price per share—even when the dividend looks steady.'
+
+export function formatNavErosionRiskSummary(risk: NavErosionRisk): string {
+  const pct = NAV_EROSION_RISK_PCT[risk]
+  const pctLabel = Number.isInteger(pct) ? `${pct}%` : `${pct.toFixed(1)}%`
+  return `${risk} risk (~${pctLabel} expected erosion per year)`
+}
+
 export const INCOME_SECURITIES: IncomeSecurity[] = (
   incomeSecuritiesData as { securities: IncomeSecurity[] }
 ).securities

@@ -5,8 +5,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
+import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import { Label, ListBox, Select } from "@heroui/react";
 import {
   IconBarbell,
@@ -513,7 +512,7 @@ function DestinationPanelCityView({
           </div>
         )}
 
-        <SimpleBar className="wtr-dest-panel__tab-content" autoHide={false}>
+        <AppOverlayScrollbars className="wtr-dest-panel__tab-content" defer={false}>
           <div className="wtr-dest-panel__body">
             <div
               key={`${city.id}-${activeTab}`}
@@ -611,7 +610,7 @@ function DestinationPanelCityView({
               )}
             </div>
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
       </div>
 
       <footer className="wtr-dest-panel__footer">

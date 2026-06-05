@@ -29,11 +29,11 @@ export function useClickOutside<T extends HTMLElement>(
       if (!el || el.contains(t as Node) || isIgnored(t)) return
       onOutside()
     }
-    document.addEventListener('mousedown', onPointerDown)
-    document.addEventListener('touchstart', onPointerDown)
+    document.addEventListener('mousedown', onPointerDown, true)
+    document.addEventListener('touchstart', onPointerDown, true)
     return () => {
-      document.removeEventListener('mousedown', onPointerDown)
-      document.removeEventListener('touchstart', onPointerDown)
+      document.removeEventListener('mousedown', onPointerDown, true)
+      document.removeEventListener('touchstart', onPointerDown, true)
     }
   }, [ref, onOutside, active, ignoreRefs, options?.ignoreClosest])
 }

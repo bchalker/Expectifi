@@ -33,9 +33,9 @@ function renderPart(part: IncomeAccordionPart, index: number) {
 
 function RichParagraph({ parts }: { parts: IncomeAccordionPart[] }) {
   return (
-    <p className="income-account-row-detail__p">
+    <div className="income-account-row-detail__p">
       {parts.map((part, index) => renderPart(part, index))}
-    </p>
+    </div>
   )
 }
 

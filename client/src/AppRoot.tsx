@@ -5,8 +5,6 @@ import { APP_PATHS } from './lib/appPaths'
 import { guestHasCompletedOnboarding } from './lib/welcomeGate'
 import App from './App'
 import { CalculatorShell } from './components/CalculatorShell'
-import { loadPlanProfile } from './lib/planStorage'
-import { isSessionOnboardingComplete } from './lib/sessionFlags'
 import { markForceOnboardingSession } from './lib/welcomeGate'
 import { AuthModal, type AuthModalMode } from './components/AuthModal'
 import { ContactModal } from './components/ContactModal'
@@ -95,10 +93,7 @@ export default function AppRoot() {
   useEffect(() => {
     if (authLoading || user) return
     if (path !== APP_PATHS.onboarding) return
-    const profileComplete = loadPlanProfile()?.onboardingComplete === true
-    if (!profileComplete && !isSessionOnboardingComplete()) {
-      markForceOnboardingSession()
-    }
+    markForceOnboardingSession()
   }, [authLoading, user, path])
 
   const openContact = useCallback(() => {

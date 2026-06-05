@@ -17,10 +17,30 @@ type Props = {
   inputs?: GrowthScenarioRangePreviewInputs;
 };
 
-function rowDotClass(id: string): string {
-  if (id === "very_bear") return "growth-scenario-range-card__dot--very_bear";
-  if (id === "very_bull") return "growth-scenario-range-card__dot--very_bull";
-  return "growth-scenario-range-card__dot--normal";
+function WingTrendIcon({ id }: { id: GrowthScenarioRangeRow["id"] }) {
+  if (id === "very_bear") {
+    return (
+      <span
+        className="growth-scenario-range-card__trend-icon growth-scenario-range-card__trend-icon--down"
+        aria-hidden
+      >
+        <IconTrendingDown size={16} strokeWidth={1.5} />
+      </span>
+    );
+  }
+
+  if (id === "very_bull") {
+    return (
+      <span
+        className="growth-scenario-range-card__trend-icon growth-scenario-range-card__trend-icon--up"
+        aria-hidden
+      >
+        <IconTrendingUp size={16} strokeWidth={1.5} />
+      </span>
+    );
+  }
+
+  return null;
 }
 
 function formatDeltaAmount(delta: number): string {
@@ -61,61 +81,41 @@ function DeltaAmount({ delta }: { delta: number }) {
   );
 }
 
-function RowDetail({ row }: { row: GrowthScenarioRangeRow }) {
-  if (row.id === "normal") {
-    return (
-      <span className="growth-scenario-range-card__subtext">{row.subtext}</span>
-    );
-  }
-
+function WingRateRange({ row }: { row: GrowthScenarioRangeRow }) {
   const min = row.rangeMinPct ?? 0;
   const max = row.rangeMaxPct ?? min;
   const singleRate = Math.abs(max - min) < 0.05;
 
   return (
-    <span className="growth-scenario-range-card__subtext">
-      <span className="growth-scenario-range-card__range">
-        <RatePct pct={min} />
-        {!singleRate ? (
-          <>
-            {" "}
-            to <RatePct pct={max} />
-          </>
-        ) : null}
-      </span>
-      <span className="growth-scenario-range-card__range-suffix"> annual</span>
-      {row.deltaFromExpected != null ? (
+    <span className="growth-scenario-range-card__range tabular-nums">
+      <RatePct pct={min} />
+      {!singleRate ? (
         <>
-          <span className="growth-scenario-range-card__sep"> / </span>
-          <DeltaAmount delta={row.deltaFromExpected} />
+          {" "}
+          to <RatePct pct={max} />
         </>
       ) : null}
+      /yr
     </span>
   );
 }
 
-function rowTrendIcon(id: string) {
-  if (id === "very_bear") {
-    return (
-      <IconTrendingDown
-        className="growth-scenario-range-card__trend-icon growth-scenario-range-card__trend-icon--bear"
-        size={14}
-        stroke={1.5}
-        aria-hidden
-      />
-    );
-  }
-  if (id === "very_bull") {
-    return (
-      <IconTrendingUp
-        className="growth-scenario-range-card__trend-icon growth-scenario-range-card__trend-icon--bull"
-        size={14}
-        stroke={1.5}
-        aria-hidden
-      />
-    );
-  }
-  return null;
+function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
+  return (
+    <div className="growth-scenario-range-card__wing-item">
+      <div className="growth-scenario-range-card__wing-label-row">
+        <span className="growth-scenario-range-card__label">{row.label}</span>
+        <WingTrendIcon id={row.id} />
+      </div>
+      <span className="growth-scenario-range-card__wing-value tabular-nums">
+        {fmt(Math.round(row.projectedFv))}
+      </span>
+      <WingRateRange row={row} />
+      {row.deltaFromExpected != null ? (
+        <DeltaAmount delta={row.deltaFromExpected} />
+      ) : null}
+    </div>
+  );
 }
 
 /** Display-only global-tier sensitivity band at the current slider rate. */
@@ -145,45 +145,49 @@ export function GrowthScenarioRangeCard({
 
   if (!c.hasPortfolioBalances) return null;
 
+  const expected = rows.find((row) => row.id === "normal");
+  const pessimistic = rows.find((row) => row.id === "very_bear");
+  const optimistic = rows.find((row) => row.id === "very_bull");
+
   return (
-    <section
-      className="growth-scenario-range-card"
-      aria-label="Outcome range at current global rate"
-    >
-      <h4 className="growth-scenario-range-card__heading">
-        Outcome range at current rate
-      </h4>
-      <p className="growth-scenario-range-card__intro">
-        Based on global rate only. Account and market scenario settings may shift
-        your actual projection.
-      </p>
-      <ul className="growth-scenario-range-card__list">
-        {rows.map((row) => (
-          <li key={row.id} className="growth-scenario-range-card__row">
-            <div className="growth-scenario-range-card__row-head">
-              <span className="growth-scenario-range-card__label-row">
-                <span
-                  className={[
-                    "growth-scenario-range-card__dot",
-                    rowDotClass(row.id),
-                  ].join(" ")}
-                  aria-hidden
-                />
-                <span className="growth-scenario-range-card__label">
-                  {row.label}
-                </span>
-                {rowTrendIcon(row.id)}
+    <>
+      <div
+        className="growth-scenario-range-card__header"
+        aria-label="Outcome range at current global rate"
+      >
+        <h4 className="growth-scenario-range-card__heading">
+          Outcome range at current rate
+        </h4>
+        <p className="growth-scenario-range-card__intro">
+          Based on global rate only. Account and market scenario settings may
+          shift your actual projection.
+        </p>
+      </div>
+
+      {expected ? (
+        <div className="growth-scenario-range-card__expected">
+          <div className="growth-scenario-range-card__expected-copy">
+            <span className="growth-scenario-range-card__label">
+              {expected.label}
+            </span>
+            {expected.subtext ? (
+              <span className="growth-scenario-range-card__subtext">
+                {expected.subtext}
               </span>
-              <span className="growth-scenario-range-card__value tabular-nums">
-                {fmt(Math.round(row.projectedFv))}
-              </span>
-            </div>
-            <div className="growth-scenario-range-card__row-detail">
-              <RowDetail row={row} />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
+            ) : null}
+          </div>
+          <span className="growth-scenario-range-card__expected-value tabular-nums">
+            {fmt(Math.round(expected.projectedFv))}
+          </span>
+        </div>
+      ) : null}
+
+      {pessimistic && optimistic ? (
+        <div className="growth-scenario-range-card__wings">
+          <WingTile row={pessimistic} />
+          <WingTile row={optimistic} />
+        </div>
+      ) : null}
+    </>
   );
 }

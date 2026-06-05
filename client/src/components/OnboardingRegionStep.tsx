@@ -11,7 +11,7 @@ type Props = {
   onSelect: (regionId: OnboardingRegionId) => void
   /** When set, highlights the chosen country (profile step). */
   selectedRegionId?: OnboardingRegionId | null
-  /** Hide standalone title/intro — use inside "Let's start with you". */
+  /** Hide standalone title/intro — use inside profile step. */
   embedded?: boolean
   className?: string
 }
@@ -52,14 +52,9 @@ export function OnboardingRegionStep({
         .join(' ')}
     >
       {!embedded ? (
-        <>
-          <h2 id="onboarding-region-title" className="onboarding-region-step__heading">
-            Where are you based?
-          </h2>
-          <p className="onboarding-region-step__intro">
-            Expectifi is built for savers in the United States and Canada.
-          </p>
-        </>
+        <h2 id="onboarding-region-title" className="onboarding-region-step__heading">
+          Where are you based?
+        </h2>
       ) : null}
 
       <ul className="onboarding-region-step__grid">

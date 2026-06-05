@@ -346,7 +346,7 @@
   border: 0;
 }
 
-/* Native overflow scroll (SimpleBar unreliable in this flex panel) */
+/* Native overflow scroll (custom scrollbar unreliable in this flex panel) */
 .wtr-explorer__list-scroll {
   flex: 1 1 0;
   min-height: 0;

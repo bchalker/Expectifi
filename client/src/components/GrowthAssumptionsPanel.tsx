@@ -56,7 +56,7 @@ export function GrowthAssumptionsPanel({
         />
 
         <p className="growth-assumptions-panel__context">
-          Accounts without their own scenario inherit this rate.
+          Accounts/Holding scenarios override this rate.
         </p>
 
         <GrowthScenarioRangeCard

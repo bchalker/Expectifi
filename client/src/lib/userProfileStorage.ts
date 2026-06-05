@@ -112,6 +112,11 @@ export function hasStoredProfileStep1(profile: StoredUserProfile | null | undefi
   return true
 }
 
+export function hasStoredProfileRetireAge(profile: StoredUserProfile | null | undefined): boolean {
+  const age = profile?.target_retirement_age
+  return age != null && age >= 55 && age <= 75
+}
+
 export function saveRegionToProfile(regionId: OnboardingRegionId): StoredUserProfile {
   const region = findOnboardingRegion(regionId)
   if (!region) return saveUserProfile({})
@@ -237,7 +242,7 @@ export function saveResidenceCountryToProfile(country: string): StoredUserProfil
 
 export function saveProfileFromFormSlice(
   form: OnboardingFormProfileSlice,
-  step: 'profile' | 'social-security' | 'income-goal',
+  step: 'profile' | 'social-security' | 'income-goal' | 'goals',
 ): StoredUserProfile {
   const dobPartsVal = dobParts(form.dob)
   const spouseParts = dobParts(form.spouseDob)
@@ -256,8 +261,16 @@ export function saveProfileFromFormSlice(
       dob: form.dob,
       birth_month: dobPartsVal.birth_month,
       birth_year: dobPartsVal.birth_year,
-      household_income: Math.max(0, Math.round(form.householdIncome)),
+      target_retirement_age: Math.round(form.retireAge),
+    })
+  }
+
+  if (step === 'goals') {
+    return saveUserProfile({
+      ...base,
       monthly_contribution: Math.max(0, Math.round(form.monthlyContribution)),
+      target_retirement_age: Math.round(form.retireAge),
+      monthly_income_goal: Math.max(0, Math.round(form.monthlyGoal)),
     })
   }
 
@@ -401,9 +414,15 @@ export function mergeProfileWithDbPrefs(
 export function resolveOnboardingStartStep(
   profile: StoredUserProfile | null,
   _opts?: { forceRegion?: boolean },
-): 'profile' | 'accounts' {
-  if (!hasStoredProfileStep0(profile) || !hasStoredProfileStep1(profile)) return 'profile'
-  return 'accounts'
+): 'profile' | 'goals' {
+  if (
+    !hasStoredProfileStep0(profile) ||
+    !hasStoredProfileStep1(profile) ||
+    !hasStoredProfileRetireAge(profile)
+  ) {
+    return 'profile'
+  }
+  return 'goals'
 }
 
 export {

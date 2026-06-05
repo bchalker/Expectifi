@@ -37,7 +37,7 @@
     box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Shared layout: fixed header, scrollable center (SimpleBar), optional footer */
+/* Shared layout: fixed header, scrollable center (OverlayScrollbars), optional footer */
 .drawer-shell.side-panel-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

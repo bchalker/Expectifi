@@ -4,9 +4,9 @@ import type { ComputedSnapshot } from '../lib/computeResults'
 import {
   hasAnyAccountIncomeStrategySelected,
   monthlyPortfolioIncomeFromAccountStrategies,
+  resolveIncomeManualAccountEntries,
 } from '../lib/accountIncomeMonthly'
 import type { AccountIncomeStrategy } from '../lib/accountIncomeStrategy'
-import { loadStoredManualAccounts } from '../lib/manualAccountEntries'
 import { resolveOnboardingAccountLocale } from '../lib/onboardingAccountTypesByLocale'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 
@@ -43,10 +43,17 @@ export function useIncomeHarvestMonthlyTotal({
   const locale = resolveOnboardingAccountLocale()
   const manualEntries = useMemo(() => {
     void manualAccountsRev
-    const stored = loadStoredManualAccounts()
-    if (!stored?.onboardingCompleted) return []
-    return stored.entries.filter((e) => e.balance > 0)
-  }, [manualAccountsRev])
+    return resolveIncomeManualAccountEntries(balanceMode, inputs, brkBal)
+  }, [
+    manualAccountsRev,
+    balanceMode,
+    inputs.base401k,
+    inputs.baseSE401k,
+    inputs.baseTradIRA,
+    inputs.baseRoth,
+    inputs.baseHsa,
+    brkBal,
+  ])
 
   const retirementAge = inputs.targetRetirementAge ?? c.targetRetirementAge
 

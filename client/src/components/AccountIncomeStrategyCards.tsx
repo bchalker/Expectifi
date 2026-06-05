@@ -1,4 +1,4 @@
-import { useCallback, useId, useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { IncomeSecuritySelector } from './IncomeSecuritySelector'
 import { Toggle } from './ui/Toggle'
 import {
@@ -47,6 +47,7 @@ export function AccountIncomeStrategyCards({
 
   const dividendStrip = (
     <StrategyStrip
+      variant="dividend"
       active={dividendOn}
       title="Dividend payout"
       income={breakdown.monthlyDividend}
@@ -69,6 +70,7 @@ export function AccountIncomeStrategyCards({
 
   const withdrawStrip = (
     <StrategyStrip
+      variant="withdraw"
       active={withdrawOn}
       title="Withdraw from principal"
       income={breakdown.monthlyWithdraw}
@@ -115,6 +117,7 @@ function StrategyStrip({
   income,
   onToggle,
   toggleLabel,
+  variant,
   wrapControlsPanel = true,
   children,
 }: {
@@ -123,6 +126,7 @@ function StrategyStrip({
   income: number
   onToggle: (on: boolean) => void
   toggleLabel: string
+  variant?: 'dividend' | 'withdraw'
   wrapControlsPanel?: boolean
   children: ReactNode
 }) {
@@ -130,8 +134,12 @@ function StrategyStrip({
     <div
       className={[
         'income-strategy-strip',
+        variant === 'dividend' ? 'income-strategy-strip--dividend' : '',
+        variant === 'withdraw' ? 'income-strategy-strip--withdraw' : '',
         active ? 'income-strategy-strip--on' : 'income-strategy-strip--off',
-      ].join(' ')}
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <div className="income-strategy-strip__inner">
         <Toggle
@@ -186,7 +194,6 @@ function WithdrawRatePercentInput({
   onRateChange: (rate: number) => void
 }) {
   const pct = rate * 100
-  const labelId = useId()
   const [draft, setDraft] = useState<string | null>(null)
 
   const displayValue = draft ?? formatPercentDisplay(pct)
@@ -205,31 +212,26 @@ function WithdrawRatePercentInput({
 
   return (
     <div className="income-strategy-strip__rate-field">
-      <span className="holdings-scenario-trigger__text">
-        <span className="holdings-scenario-trigger__sublabel" id={labelId}>
-          Withdraw Rate
-        </span>
-        <span className="holdings-scenario-trigger__label-row">
-          <input
-            type="text"
-            inputMode="decimal"
-            className="income-strategy-strip__rate-input tabular-nums"
-            value={displayValue}
-            aria-labelledby={labelId}
-            onFocus={() => setDraft(formatPercentDisplay(pct))}
-            onBlur={() => {
-              if (draft != null) commitPct(draft)
-              setDraft(null)
-            }}
-            onChange={(e) => {
-              const next = sanitizePercentDraft(e.target.value)
-              setDraft(next)
-              if (next && next !== '.') commitPct(next)
-            }}
-          />
-          <span className="income-strategy-strip__rate-suffix" aria-hidden>
-            %
-          </span>
+      <span className="income-strategy-strip__rate-value-row">
+        <input
+          type="text"
+          inputMode="decimal"
+          className="income-strategy-strip__rate-input tabular-nums"
+          value={displayValue}
+          aria-label="Withdraw rate"
+          onFocus={() => setDraft(formatPercentDisplay(pct))}
+          onBlur={() => {
+            if (draft != null) commitPct(draft)
+            setDraft(null)
+          }}
+          onChange={(e) => {
+            const next = sanitizePercentDraft(e.target.value)
+            setDraft(next)
+            if (next && next !== '.') commitPct(next)
+          }}
+        />
+        <span className="income-strategy-strip__rate-suffix" aria-hidden>
+          %
         </span>
       </span>
     </div>

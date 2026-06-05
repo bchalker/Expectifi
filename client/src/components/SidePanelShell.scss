@@ -1,13 +1,11 @@
-/* Scroll region fills grid row; SimpleBar needs a bounded height */
+/* Scroll region fills grid row; OverlayScrollbars needs a bounded height */
 .side-panel-shell__scroll {
   min-height: 0;
   height: 100%;
   max-height: 100%;
 }
 
-.side-panel-shell__scroll .simplebar-wrapper,
-.side-panel-shell__scroll .simplebar-mask,
-.side-panel-shell__scroll .simplebar-content-wrapper {
+.side-panel-shell__scroll [data-overlayscrollbars-viewport] {
   min-height: 0;
 }
 

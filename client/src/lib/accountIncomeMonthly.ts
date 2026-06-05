@@ -16,6 +16,8 @@ import type { CalculatorInputs } from './computeResults'
 import { localeSupportsWithdrawalBucket } from '../config/taxConfig'
 import {
   getAccountTypeMeta,
+  activeManualAccountEntries,
+  deriveManualAccountEntriesFromBalances,
   loadStoredManualAccounts,
   type ManualAccountEntry,
 } from './manualAccountEntries'
@@ -59,6 +61,31 @@ function pretaxCurrentTotal(inputs: CalculatorInputs): number {
   return inputs.base401k + inputs.baseSE401k + inputs.baseTradIRA
 }
 
+/** Same manual rows as income-mode AccountBalances (stored or derived from balances). */
+export function resolveIncomeManualAccountEntries(
+  retirementBalanceMode: 'manual' | 'imported',
+  inputs: CalculatorInputs,
+  brkBal: number,
+  manualEntries?: ManualAccountEntry[],
+): ManualAccountEntry[] {
+  if (manualEntries !== undefined) {
+    return manualEntries.filter((entry) => entry.type != null && entry.balance > 0)
+  }
+  const storedActive = activeManualAccountEntries(loadStoredManualAccounts())
+  if (storedActive.length > 0) return storedActive
+  if (retirementBalanceMode !== 'manual') return []
+  return deriveManualAccountEntriesFromBalances(
+    {
+      bal401k: inputs.base401k,
+      balSE401k: inputs.baseSE401k,
+      balTradIRA: inputs.baseTradIRA,
+      balRoth: inputs.baseRoth,
+      balHsa: inputs.baseHsa,
+    },
+    brkBal,
+  ).filter((entry) => entry.type != null && entry.balance > 0)
+}
+
 function manualEntryBucketTotals(entries: ManualAccountEntry[]): Partial<Record<AccountScenarioBucketId, number>> {
   const totals: Partial<Record<AccountScenarioBucketId, number>> = {}
   for (const entry of entries) {
@@ -86,13 +113,12 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
   const seq = withdrawalBucketOrder(retirementAge, true, locale)
   const pretaxTotal = pretaxCurrentTotal(inputs)
 
-  const entries =
-    manualEntries ??
-    (() => {
-      const stored = loadStoredManualAccounts()
-      if (!stored?.onboardingCompleted) return [] as ManualAccountEntry[]
-      return stored.entries.filter((e) => e.balance > 0)
-    })()
+  const entries = resolveIncomeManualAccountEntries(
+    retirementBalanceMode,
+    inputs,
+    ctx.brkBal,
+    manualEntries,
+  )
 
   if (retirementBalanceMode === 'manual' && entries.length > 0) {
     const bucketTotals = manualEntryBucketTotals(entries)

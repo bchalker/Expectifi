@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { Checkbox, Label, ListBox, Select } from "@heroui/react";
 import { AppButton } from "./ui/AppButton";
 import { IconBuildingBank, IconCheck } from "@tabler/icons-react";
+import { DetailsAccordion } from "./ui/DetailsAccordion";
 import { ViewHoldingsHint } from "./ui/ViewHoldingsHint";
 import { fmt } from "../utils/format";
 import { AccountPositionsTable } from "./AccountPositionsBreakdown";
@@ -32,8 +33,7 @@ import {
   type OtherColumnMap,
   type PositionsCsvCustodian,
 } from "../lib/positionsCsvImport";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
+import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import {
   markPortfolioBalancesFlush,
   triggerPortfolioWaveReveal,
@@ -85,6 +85,18 @@ type Props = {
   onFileIngestConsumed?: () => void;
   /** When true, show that confirming will clear manual balance entry. */
   showManualReplaceNotice?: boolean;
+  /** Hide the footer Cancel control (e.g. embedded in multi-state manage overlay). */
+  hideCancelButton?: boolean;
+  /** Hide the in-panel header; parent renders title in the manage overlay shell. */
+  hidePanelHeader?: boolean;
+  /** Reports header copy when `hidePanelHeader` is true. */
+  onPanelHeaderChange?: (header: {
+    title: string;
+    subtitle?: string;
+    extra?: string;
+  }) => void;
+  /** Fired after a picked file has been read and parsed (or failed) and review UI is ready. */
+  onImportReviewReady?: () => void;
 };
 
 type PendingImport = {
@@ -213,6 +225,10 @@ export function PositionsCsvImport({
   fileIngestRequest = null,
   onFileIngestConsumed,
   showManualReplaceNotice = false,
+  hideCancelButton = false,
+  hidePanelHeader = false,
+  onPanelHeaderChange,
+  onImportReviewReady,
 }: Props) {
   const isPanel = presentation === "panel";
   const pickInputRef = useRef<HTMLInputElement>(null);
@@ -473,7 +489,10 @@ export function PositionsCsvImport({
           );
         }
       } finally {
-        if (!cancelled) setImportBusy(null);
+        if (!cancelled) {
+          setImportBusy(null);
+          onImportReviewReady?.();
+        }
       }
     })();
 
@@ -489,6 +508,7 @@ export function PositionsCsvImport({
     otherMap.name,
     otherMap.currentValue,
     otherMap.costBasis,
+    onImportReviewReady,
   ]);
 
   const incomingBatches = useMemo(
@@ -884,75 +904,77 @@ export function PositionsCsvImport({
                           !isPendingActivityImportRow(r),
                       );
                       return (
-                        <details
+                        <DetailsAccordion
                           key={row.key}
                           className={`imported-account-disclosure csv-import-review-acct${unknown ? " csv-import-review-acct--attention" : ""}`}
                           style={{ animationDelay: `${index * 0.055}s` }}
-                        >
-                          <summary>
-                            <div className="csv-import-review-acct__identity">
-                              <span className="imported-account-name csv-import-review-acct__name">
-                                {row.label}
-                              </span>
-                            </div>
-                            <div
-                              className="csv-import-review-acct__bucket"
-                              onClick={(e) => e.stopPropagation()}
-                              onKeyDown={(e) => e.stopPropagation()}
-                            >
-                              <Select
-                                className="csv-import-review-bucket-select app-select--compact"
-                                variant="secondary"
-                                aria-label={`Tax bucket for ${row.label}`}
-                                placeholder="Unmapped — choose…"
-                                selectedKey={unknown ? null : sel}
-                                isDisabled={confirmBlocking}
-                                onSelectionChange={(keys) => {
-                                  const id = firstKeyFromSelectSelection(keys);
-                                  if (!id || !isImportBucketValue(id)) return;
-                                  setReviewAssignments((m) => ({
-                                    ...m,
-                                    [row.key]: id,
-                                  }));
-                                }}
-                              >
-                                <Select.Trigger>
-                                  <Select.Value />
-                                  <Select.Indicator />
-                                </Select.Trigger>
-                                <Select.Popover className="app-select-import-menu__popover">
-                                  <ListBox className="app-select-import-menu__list">
-                                    {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
-                                      (o) => (
-                                        <ListBox.Item
-                                          key={o.value}
-                                          id={o.value}
-                                          textValue={o.label}
-                                        >
-                                          {o.label}
-                                        </ListBox.Item>
-                                      ),
-                                    )}
-                                  </ListBox>
-                                </Select.Popover>
-                              </Select>
-                            </div>
-                            <span className="csv-import-review-acct__summary-end">
-                              <div className="csv-import-review-acct__values">
-                                <div className="csv-import-review-acct__amount-row">
-                                  <span className="imported-account-summary-total">
-                                    {fmt(row.total)}
-                                  </span>
-                                  <ViewHoldingsHint />
-                                </div>
+                          summary={
+                            <>
+                              <div className="csv-import-review-acct__identity">
+                                <span className="imported-account-name csv-import-review-acct__name">
+                                  {row.label}
+                                </span>
                               </div>
-                            </span>
-                          </summary>
+                              <div
+                                className="csv-import-review-acct__bucket"
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => e.stopPropagation()}
+                              >
+                                <Select
+                                  className="csv-import-review-bucket-select app-select--compact"
+                                  variant="secondary"
+                                  aria-label={`Tax bucket for ${row.label}`}
+                                  placeholder="Unmapped — choose…"
+                                  selectedKey={unknown ? null : sel}
+                                  isDisabled={confirmBlocking}
+                                  onSelectionChange={(keys) => {
+                                    const id = firstKeyFromSelectSelection(keys);
+                                    if (!id || !isImportBucketValue(id)) return;
+                                    setReviewAssignments((m) => ({
+                                      ...m,
+                                      [row.key]: id,
+                                    }));
+                                  }}
+                                >
+                                  <Select.Trigger>
+                                    <Select.Value />
+                                    <Select.Indicator />
+                                  </Select.Trigger>
+                                  <Select.Popover className="app-select-import-menu__popover">
+                                    <ListBox className="app-select-import-menu__list">
+                                      {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
+                                        (o) => (
+                                          <ListBox.Item
+                                            key={o.value}
+                                            id={o.value}
+                                            textValue={o.label}
+                                          >
+                                            {o.label}
+                                          </ListBox.Item>
+                                        ),
+                                      )}
+                                    </ListBox>
+                                  </Select.Popover>
+                                </Select>
+                              </div>
+                              <span className="csv-import-review-acct__summary-end">
+                                <div className="csv-import-review-acct__values">
+                                  <div className="csv-import-review-acct__amount-row">
+                                    <span className="imported-account-summary-total">
+                                      {fmt(row.total)}
+                                    </span>
+                                    <ViewHoldingsHint />
+                                  </div>
+                                </div>
+                              </span>
+                            </>
+                          }
+                        >
                           <AccountPositionsTable
                             rows={accountRows}
                             showScenarioColumn={false}
                           />
-                        </details>
+                        </DetailsAccordion>
                       );
                     })}
                   </div>
@@ -1144,34 +1166,70 @@ export function PositionsCsvImport({
   };
 
   const importFlowExiting = confirmOverlay.mode === "exiting";
+  const holdingsRowCount = pending?.parsed.rows.length ?? 0;
+  const isAccountMappingStep =
+    postReviewStep === "review" && holdingsRowCount > 0 && !parseError;
+  const holdingsCountLabel =
+    holdingsRowCount === 1 ? "1 holding" : `${holdingsRowCount} holdings`;
+  const showFooterHoldingsSummary = holdingsRowCount > 0 && !parseError;
+  const panelHeaderTitle = isAccountMappingStep
+    ? "Map your imported accounts"
+    : "Import positions CSV";
+  const panelHeaderSubtitle =
+    postReviewStep === "intent"
+      ? "Choose how this import should merge with your existing holdings."
+      : postReviewStep === "diff"
+        ? "Review what will change, then confirm. Removed holdings stay unless you choose Remove."
+        : isAccountMappingStep
+          ? "Adjust tax buckets as needed."
+          : isPanel || hideImportSourceUi || stagedFile || pending
+            ? "Review each account and map it to the correct tax bucket, then confirm."
+            : "Choose your custodian, then select a single positions export file.";
+
+  useEffect(() => {
+    if (!hidePanelHeader || !onPanelHeaderChange) return;
+    onPanelHeaderChange({
+      title: panelHeaderTitle,
+      subtitle: panelHeaderSubtitle,
+    });
+  }, [
+    hidePanelHeader,
+    onPanelHeaderChange,
+    panelHeaderSubtitle,
+    panelHeaderTitle,
+  ]);
 
   const flowShell = (
     <div
-      className={`${isPanel ? "csv-import-panel-shell" : "csv-import-modal-shell"}${importFlowExiting ? " csv-import-flow-shell--exiting" : ""}`}
+      className={[
+        isPanel ? "csv-import-panel-shell" : "csv-import-modal-shell",
+        hidePanelHeader && isPanel && "csv-import-panel-shell--no-header",
+        importFlowExiting && "csv-import-flow-shell--exiting",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       role="dialog"
       aria-modal={isPanel ? undefined : true}
-      aria-labelledby="csv-import-modal-title"
+      aria-labelledby={
+        hidePanelHeader && isPanel
+          ? "account-balances-manage-panel-title"
+          : "csv-import-modal-title"
+      }
     >
-      <header className="csv-import-modal-header">
-        <h2 id="csv-import-modal-title" className="csv-import-modal__title">
-          Import positions CSV
-        </h2>
-        <p className="csv-import-modal__lead">
-          {postReviewStep === "intent"
-            ? "Choose how this import should merge with your existing holdings."
-            : postReviewStep === "diff"
-              ? "Review what will change, then confirm. Removed holdings stay unless you choose Remove."
-              : isPanel || hideImportSourceUi || stagedFile || pending
-                ? "Review each account and map it to the correct tax bucket, then confirm."
-                : "Choose your custodian, then select a single positions export file."}
-        </p>
-      </header>
-      <SimpleBar
+      {hidePanelHeader ? null : (
+        <header className="csv-import-modal-header">
+          <h2 id="csv-import-modal-title" className="csv-import-modal__title">
+            {panelHeaderTitle}
+          </h2>
+          <p className="csv-import-modal__lead">{panelHeaderSubtitle}</p>
+        </header>
+      )}
+      <AppOverlayScrollbars
         className="side-panel-shell__scroll csv-import-modal-scroll"
-        autoHide={false}
+        defer={false}
       >
         <div className="csv-import-modal-body">{renderImportBody()}</div>
-      </SimpleBar>
+      </AppOverlayScrollbars>
       {showManualReplaceNotice &&
       pending &&
       pending.parsed.rows.length > 0 &&
@@ -1223,22 +1281,37 @@ export function PositionsCsvImport({
         </div>
       ) : null}
       <footer className="csv-import-modal-footer">
-        <div className="csv-import-modal-footer__row">
-          <AppButton
-            size="sm"
-            variant="ghost"
-            isDisabled={importBusy !== null || confirmBlocking}
-            onPress={() => closeFlow()}
-          >
-            Cancel
-          </AppButton>
-          {pending && pending.parsed.rows.length > 0 && !parseError ? (
+        <div
+          className={[
+            "csv-import-modal-footer__row",
+            hideCancelButton && "csv-import-modal-footer__row--no-cancel",
+            isAccountMappingStep &&
+              hideCancelButton &&
+              !showFooterHoldingsSummary &&
+              "csv-import-modal-footer__row--confirm-only",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {hideCancelButton ? null : (
+            <AppButton
+              size="sm"
+              variant="ghost"
+              isDisabled={importBusy !== null || confirmBlocking}
+              onPress={() => closeFlow()}
+            >
+              Cancel
+            </AppButton>
+          )}
+          {showFooterHoldingsSummary ? (
             <span className="csv-import-summary csv-import-summary--footer">
               {postReviewStep === "diff" && importDiff
                 ? `${importDiff.counts.updated} updated · ${importDiff.counts.added} added · ${importDiff.counts.unchanged} unchanged`
-                : `${pending.parsed.rows.length} holdings found`}
+                : isAccountMappingStep
+                  ? holdingsCountLabel
+                  : `${holdingsRowCount} holdings found`}
             </span>
-          ) : (
+          ) : hideCancelButton ? null : (
             <span />
           )}
           <div className="csv-import-modal__footer-actions">

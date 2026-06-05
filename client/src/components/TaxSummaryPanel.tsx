@@ -1,8 +1,7 @@
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { IconX } from "@tabler/icons-react";
 import { useState } from "react";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
+import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import {
   accountLabelForWithdrawalBucket,
   formatMarginalRatesSummary,
@@ -290,9 +289,9 @@ function ExpectifinsightsPanelTabs({
         hidden={activeTab !== "tax-breakdown"}
         className="tax-summary-slide-panel__tab-panel"
       >
-        <SimpleBar
+        <AppOverlayScrollbars
           className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
-          autoHide={false}
+          defer={false}
         >
           <div className="tax-summary-slide-panel__scroll-inner">
             <FilingStatusField
@@ -304,7 +303,7 @@ function ExpectifinsightsPanelTabs({
             />
             <TaxSummaryContent c={c} />
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
       </div>
       {variant === "income" ? (
         <>
@@ -315,14 +314,14 @@ function ExpectifinsightsPanelTabs({
             hidden={activeTab !== "strategies"}
             className="tax-summary-slide-panel__tab-panel"
           >
-            <SimpleBar
+            <AppOverlayScrollbars
               className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
-              autoHide={false}
+              defer={false}
             >
               <div className="tax-summary-slide-panel__scroll-inner">
                 <AccountIncomeStrategiesPanel />
               </div>
-            </SimpleBar>
+            </AppOverlayScrollbars>
           </div>
           <div
             id="expectifinsights-panel-portfolio-guidance"
@@ -331,14 +330,14 @@ function ExpectifinsightsPanelTabs({
             hidden={activeTab !== "portfolio-guidance"}
             className="tax-summary-slide-panel__tab-panel"
           >
-            <SimpleBar
+            <AppOverlayScrollbars
               className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
-              autoHide={false}
+              defer={false}
             >
               <div className="tax-summary-slide-panel__scroll-inner">
                 <PortfolioGuidancePanel c={c} />
               </div>
-            </SimpleBar>
+            </AppOverlayScrollbars>
           </div>
         </>
       ) : (
@@ -349,14 +348,14 @@ function ExpectifinsightsPanelTabs({
           hidden={activeTab !== "scenario-guide"}
           className="tax-summary-slide-panel__tab-panel"
         >
-          <SimpleBar
+          <AppOverlayScrollbars
             className="tax-summary-slide-panel__scroll tax-summary-slide-panel__scroll--tabbed"
-            autoHide={false}
+            defer={false}
           >
             <div className="tax-summary-slide-panel__scroll-inner">
               <HoldingScenarioGuidePanel />
             </div>
-          </SimpleBar>
+          </AppOverlayScrollbars>
         </div>
       )}
     </div>
@@ -423,7 +422,7 @@ export function TaxSummarySlidePanel({
           panelTitle={panelTitle}
         />
       ) : (
-        <SimpleBar className="tax-summary-slide-panel__scroll" autoHide={false}>
+        <AppOverlayScrollbars className="tax-summary-slide-panel__scroll" defer={false}>
           <div className="tax-summary-slide-panel__scroll-inner">
             <FilingStatusField
               id="tax-summary-slide-filing-status"
@@ -434,7 +433,7 @@ export function TaxSummarySlidePanel({
             />
             <TaxSummaryContent c={c} />
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
       )}
       <TaxSummaryPanelFooter />
     </aside>

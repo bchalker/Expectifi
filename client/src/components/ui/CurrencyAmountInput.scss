@@ -20,6 +20,23 @@
   color: var(--text-muted);
 }
 
+.currency-amount-input__label-muted {
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.currency-amount-input__suffix-inside {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-faint);
+  pointer-events: none;
+  user-select: none;
+}
+
 .currency-amount-input__label--error {
   color: var(--danger, #b42318);
 }
@@ -139,6 +156,17 @@
   font-weight: 400;
   line-height: 1.45;
   color: var(--text-muted);
+}
+
+.currency-amount-input__hint-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.currency-amount-input__hint-link:hover,
+.currency-amount-input__hint-link:focus-visible {
+  color: var(--text);
 }
 
 .currency-amount-input__error {

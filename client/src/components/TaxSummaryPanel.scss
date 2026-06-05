@@ -147,13 +147,11 @@
   padding: var(--space-4);
 }
 
-.tax-summary-slide-panel__scroll .simplebar-content {
+.tax-summary-slide-panel__scroll [data-overlayscrollbars-contents] {
   padding: 0;
 }
 
-.tax-summary-slide-panel__scroll .simplebar-wrapper,
-.tax-summary-slide-panel__scroll .simplebar-mask,
-.tax-summary-slide-panel__scroll .simplebar-content-wrapper {
+.tax-summary-slide-panel__scroll [data-overlayscrollbars-viewport] {
   min-height: 0;
 }
 

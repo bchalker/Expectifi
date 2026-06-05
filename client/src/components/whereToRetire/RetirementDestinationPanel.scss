@@ -252,9 +252,7 @@
   max-height: 100%;
 }
 
-.wtr-dest-panel__tab-content .simplebar-wrapper,
-.wtr-dest-panel__tab-content .simplebar-mask,
-.wtr-dest-panel__tab-content .simplebar-content-wrapper {
+.wtr-dest-panel__tab-content [data-overlayscrollbars-viewport] {
   min-height: 0;
 }
 
@@ -476,7 +474,7 @@
   min-height: 100%;
 }
 
-.wtr-dest-panel__tab-content .simplebar-content:has(.wtr-qol-tab) {
+.wtr-dest-panel__tab-content [data-overlayscrollbars-contents]:has(.wtr-qol-tab) {
   display: flex;
   flex-direction: column;
   min-height: 100%;

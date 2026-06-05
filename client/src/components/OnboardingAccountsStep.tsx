@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { IconPlus, IconWallet, IconX } from "@tabler/icons-react";
-import { AppButton } from "./ui/AppButton";
+import { IconPlus, IconX } from "@tabler/icons-react";
 import { ListBox, Select } from "@heroui/react";
 import { fmtInput, parseNum } from "../utils/format";
 import { currencySymbol } from "../lib/displayCurrency";
@@ -15,9 +14,10 @@ import {
 import type { OnboardingRegionId } from "../lib/onboardingRegions";
 import { resolveOnboardingAccountLocale } from "../lib/onboardingAccountTypesByLocale";
 import { firstKeyFromSelectSelection } from "../lib/dateOfBirthSelect";
-import { AllocationProfilePicker } from "./AllocationProfilePicker";
+import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
 import "./OnboardingAccountsStep.scss";
 import "./OnboardingFieldShell.scss";
+import "./ManualAccountAllocationSlider.scss";
 
 type Props = {
   /** Region from step 1 — drives account type labels in the dropdown. */
@@ -44,6 +44,10 @@ export function OnboardingAccountsStep({
   }
 
   function removeEntry(id: string) {
+    if (entries.length <= 1) {
+      onChange([newManualAccountEntry(null)]);
+      return;
+    }
     onChange(entries.filter((e) => e.id !== id));
   }
 
@@ -52,204 +56,179 @@ export function OnboardingAccountsStep({
     onChange([...entries, newManualAccountEntry(null)]);
   }
 
-  const isEmpty = entries.length === 0;
-
   return (
     <div className="onboarding-accounts-step">
-      {!isEmpty ? (
-        <div className="onboarding-accounts-step__header-row">
+      <div className="onboarding-accounts-step__header-row">
+        <span
+          className="onboarding-accounts-step__column-label"
+          id="onboarding-acct-type-header"
+        >
+          Account type
+        </span>
+        <div className="onboarding-accounts-step__balance-header">
+          <span
+            className="onboarding-accounts-step__balance-prefix onboarding-accounts-step__balance-prefix--spacer"
+            aria-hidden
+          >
+            {currencySymbol()}
+          </span>
           <span
             className="onboarding-accounts-step__column-label"
-            id="onboarding-acct-type-header"
+            id="onboarding-acct-balance-header"
           >
-            Account type
+            Balance
           </span>
-          <div className="onboarding-accounts-step__balance-header">
+          {entries.length > 1 ? (
             <span
-              className="onboarding-accounts-step__balance-prefix onboarding-accounts-step__balance-prefix--spacer"
+              className="onboarding-accounts-step__remove-spacer"
               aria-hidden
-            >
-              {currencySymbol()}
-            </span>
-            <span
-              className="onboarding-accounts-step__column-label"
-              id="onboarding-acct-balance-header"
-            >
-              Balance
-            </span>
-            {entries.length > 1 ? (
-              <span
-                className="onboarding-accounts-step__remove-spacer"
-                aria-hidden
-              />
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {isEmpty ? (
-        <div className="onboarding-accounts-step__empty">
-          <span className="onboarding-accounts-step__empty-icon" aria-hidden>
-            <IconWallet size={24} stroke={1.5} />
-          </span>
-          <p className="onboarding-accounts-step__empty-title">
-            No accounts added yet
-          </p>
-          <p className="onboarding-accounts-step__empty-lead">
-            Enter at least one account type and balance to continue.
-          </p>
-          {canAddAnother ? (
-            <AppButton
-              type="button"
-              size="sm"
-              variant="primary"
-              className="onboarding-accounts-step__empty-cta"
-              onPress={addEntry}
-            >
-              <IconPlus size={16} stroke={1.5} aria-hidden />
-              Add account
-            </AppButton>
+            />
           ) : null}
         </div>
-      ) : (
-        <div className="onboarding-accounts-step__rows">
-          {entries.map((entry) => {
-            const typeSelected = entry.type != null;
-            const meta =
-              entry.type != null ? getAccountTypeMeta(entry.type, accountLocale) : null;
-            const filled = entry.balance > 0;
-            const typeOptions = getOnboardingAccountTypeOptionsForEntry(
-              entries,
-              entry.id,
-              accountLocale,
-            );
-            return (
-              <div key={entry.id} className="onboarding-accounts-step__row">
-                <div className="onboarding-accounts-step__row-fields">
-                  <div className="onboarding-accounts-step__type-field">
-                    <Select
+      </div>
+
+      <div className="onboarding-accounts-step__rows">
+        {entries.map((entry) => {
+          const typeSelected = entry.type != null;
+          const meta =
+            entry.type != null ? getAccountTypeMeta(entry.type, accountLocale) : null;
+          const filled = entry.balance > 0;
+          const typeOptions = getOnboardingAccountTypeOptionsForEntry(
+            entries,
+            entry.id,
+            accountLocale,
+          );
+          return (
+            <div key={entry.id} className="onboarding-accounts-step__row">
+              <div className="onboarding-accounts-step__row-fields">
+                <div className="onboarding-accounts-step__type-field">
+                  <Select
+                    className={[
+                      "onboarding-accounts-step__type-select",
+                      typeSelected
+                        ? "onboarding-accounts-step__type-select--filled"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    variant="secondary"
+                    placeholder="Select account type"
+                    aria-labelledby="onboarding-acct-type-header"
+                    selectedKey={entry.type}
+                    onSelectionChange={(keys) => {
+                      const id = firstKeyFromSelectSelection(keys);
+                      if (!id) return;
+                      updateEntry(entry.id, {
+                        type: id as OnboardingAccountType,
+                      });
+                    }}
+                  >
+                    <Select.Trigger>
+                      <Select.Value>
+                        {meta ? (
+                          <span className="onboarding-accounts-step__type-trigger-label">
+                            {meta.label}
+                          </span>
+                        ) : null}
+                      </Select.Value>
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover
+                      placement="bottom start"
+                      className="app-select-import-menu__popover onboarding-accounts-step__type-popover"
+                    >
+                      <ListBox className="app-select-import-menu__list onboarding-accounts-step__type-list">
+                        {typeOptions.map((opt) => (
+                          <ListBox.Item
+                            key={opt.id}
+                            id={opt.id}
+                            textValue={opt.label}
+                          >
+                            {opt.label}
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
+
+                <div className="onboarding-accounts-step__balance-field">
+                  <div className="onboarding-accounts-step__balance-row">
+                    <span className="onboarding-accounts-step__balance-prefix">
+                      {currencySymbol()}
+                    </span>
+                    <div
                       className={[
-                        "onboarding-accounts-step__type-select",
-                        typeSelected
-                          ? "onboarding-accounts-step__type-select--filled"
-                          : "",
+                        "onboarding-field-shell",
+                        "onboarding-accounts-step__balance-wrap",
+                        filled ? "onboarding-field-shell--filled" : "",
                       ]
                         .filter(Boolean)
                         .join(" ")}
-                      variant="secondary"
-                      placeholder="Select account type"
-                      aria-labelledby="onboarding-acct-type-header"
-                      selectedKey={entry.type}
-                      onSelectionChange={(keys) => {
-                        const id = firstKeyFromSelectSelection(keys);
-                        if (!id) return;
-                        updateEntry(entry.id, {
-                          type: id as OnboardingAccountType,
-                        });
-                      }}
                     >
-                      <Select.Trigger>
-                        <Select.Value>
-                          {meta ? (
-                            <span className="onboarding-accounts-step__type-trigger-label">
-                              {meta.label}
-                            </span>
-                          ) : null}
-                        </Select.Value>
-                        <Select.Indicator />
-                      </Select.Trigger>
-                      <Select.Popover
-                        placement="bottom start"
-                        className="app-select-import-menu__popover onboarding-accounts-step__type-popover"
-                      >
-                        <ListBox className="app-select-import-menu__list onboarding-accounts-step__type-list">
-                          {typeOptions.map((opt) => (
-                            <ListBox.Item
-                              key={opt.id}
-                              id={opt.id}
-                              textValue={opt.label}
-                            >
-                              {opt.label}
-                            </ListBox.Item>
-                          ))}
-                        </ListBox>
-                      </Select.Popover>
-                    </Select>
-                  </div>
-
-                  <div className="onboarding-accounts-step__balance-field">
-                    <div className="onboarding-accounts-step__balance-row">
-                      <span className="onboarding-accounts-step__balance-prefix">
-                        {currencySymbol()}
-                      </span>
-                      <div
-                        className={[
-                          "onboarding-field-shell",
-                          "onboarding-accounts-step__balance-wrap",
-                          filled ? "onboarding-field-shell--filled" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        <input
-                          id={`acct-balance-${entry.id}`}
-                          type="text"
-                          inputMode="decimal"
-                          aria-labelledby="onboarding-acct-balance-header"
-                          className="onboarding-field-shell__input onboarding-accounts-step__balance-input"
-                          value={
-                            entry.balance > 0 ? fmtInput(entry.balance) : ""
-                          }
-                          placeholder="0"
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^\d,]/g, "");
-                            updateEntry(entry.id, {
-                              balance: Math.max(0, Math.round(parseNum(raw))),
-                            });
-                          }}
-                          onBlur={(e) => {
-                            updateEntry(entry.id, {
-                              balance: Math.max(
-                                0,
-                                Math.round(parseNum(e.target.value)),
-                              ),
-                            });
-                          }}
-                        />
-                      </div>
-                      {entries.length > 1 ? (
-                        <button
-                          type="button"
-                          className="onboarding-accounts-step__remove"
-                          aria-label={
-                            meta
-                              ? `Remove ${meta.label} account`
-                              : "Remove account row"
-                          }
-                          onClick={() => removeEntry(entry.id)}
-                        >
-                          <IconX size={16} stroke={1.5} aria-hidden />
-                        </button>
-                      ) : null}
+                      <input
+                        id={`acct-balance-${entry.id}`}
+                        type="text"
+                        inputMode="decimal"
+                        aria-labelledby="onboarding-acct-balance-header"
+                        className="onboarding-field-shell__input onboarding-accounts-step__balance-input"
+                        value={
+                          entry.balance > 0 ? fmtInput(entry.balance) : ""
+                        }
+                        placeholder="0"
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^\d,]/g, "");
+                          updateEntry(entry.id, {
+                            balance: Math.max(0, Math.round(parseNum(raw))),
+                          });
+                        }}
+                        onBlur={(e) => {
+                          updateEntry(entry.id, {
+                            balance: Math.max(
+                              0,
+                              Math.round(parseNum(e.target.value)),
+                            ),
+                          });
+                        }}
+                      />
                     </div>
+                    {entries.length > 1 ? (
+                      <button
+                        type="button"
+                        className="onboarding-accounts-step__remove"
+                        aria-label={
+                          meta
+                            ? `Remove ${meta.label} account`
+                            : "Remove account row"
+                        }
+                        onClick={() => removeEntry(entry.id)}
+                      >
+                        <IconX size={16} stroke={1.5} aria-hidden />
+                      </button>
+                    ) : null}
                   </div>
                 </div>
-                {typeSelected ? (
-                  <AllocationProfilePicker
-                    className="onboarding-accounts-step__allocation"
-                    value={entry.allocation_profile}
-                    onChange={(allocation_profile) =>
-                      updateEntry(entry.id, { allocation_profile })
-                    }
-                  />
-                ) : null}
               </div>
-            );
-          })}
-        </div>
-      )}
+              {typeSelected ? (
+                <ManualAccountAllocationSlider
+                  entryId={entry.id}
+                  className="onboarding-accounts-step__allocation"
+                  value={entry.allocation_profile}
+                  equityPct={entry.allocation_equity_pct}
+                  onChange={(allocation_profile, allocation_equity_pct) =>
+                    updateEntry(entry.id, {
+                      allocation_profile,
+                      allocation_equity_pct,
+                    })
+                  }
+                />
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
 
-      {!isEmpty && canAddAnother ? (
+      {canAddAnother ? (
         <button
           type="button"
           className="onboarding-accounts-step__add"

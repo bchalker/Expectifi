@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { ClaimAgeSlider } from "./ClaimAgeSlider";
 import { DateOfBirthSelects } from "./DateOfBirthSelects";
 import {
@@ -62,6 +62,30 @@ type Props = {
   claimAgeMilestoneTicks?: readonly number[];
   className?: string;
 };
+
+function pensionBenefitHint(
+  hint: string,
+  linkUrl: string | null,
+  linkLabel = "ssa.gov",
+): ReactNode {
+  if (!linkUrl) return hint;
+  const parts = hint.split(linkLabel);
+  if (parts.length !== 2) return hint;
+  return (
+    <>
+      {parts[0]}
+      <a
+        href={linkUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="currency-amount-input__hint-link"
+      >
+        {linkLabel}
+      </a>
+      {parts[1]}
+    </>
+  );
+}
 
 export function SocialSecuritySetupFields({
   locale,
@@ -172,7 +196,7 @@ export function SocialSecuritySetupFields({
                 monthlyAt67FromBenefitAtClaimAge(amount, ssAgeClamped),
               )
             }
-            hint={hints.benefitHint}
+            hint={pensionBenefitHint(hints.benefitHint, base.benefitHintLinkUrl)}
             averageBadge={hints.averageBadge}
             disabled={!includeSs}
             externalPrefix

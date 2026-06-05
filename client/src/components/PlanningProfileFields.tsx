@@ -111,6 +111,7 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           onDateOfBirth={onDateOfBirth}
           householdIncome={props.householdIncome}
           onHouseholdIncome={props.onHouseholdIncome}
+          showHouseholdIncome
           monthlyContribution={props.monthlyContribution}
           onMonthlyContribution={props.onMonthlyContribution}
         />

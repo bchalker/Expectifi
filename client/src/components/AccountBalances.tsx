@@ -28,16 +28,19 @@ import {
   getAccountTypeMeta,
   loadStoredManualAccounts,
   manualAccountEntryForBucket,
+  manualEntryIdForAccountType,
   saveCompletedManualAccounts,
   saveManualAccountsFromBucketBases,
   type AllocationProfile,
   type ManualAccountEntry,
+  type OnboardingAccountType,
 } from "../lib/manualAccountEntries";
 import {
   accountScenarioContextForBucket,
   manualEntryIdForScenarioBucket,
 } from "../lib/allocationProfile";
 import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
+import "./ManualAccountAllocationSlider.scss";
 import { ManualAccountBalanceField } from "./ManualAccountBalanceField";
 import type { BrokerageBalanceMode } from "../lib/brokerageBalanceMode";
 import type { BalanceInputMode } from "../lib/retirementBalanceMode";
@@ -46,7 +49,6 @@ import {
   localeSupportsWithdrawalBucket,
 } from "../config/taxConfig";
 import { resolveBucketRowHint } from "../hints/buildHintContext";
-import type { OnboardingAccountType } from "../lib/manualAccountEntries";
 import type { ScenarioIntentTabId } from "./HoldingScenarioIntentTabs";
 import { annualWithdrawalForAccountBucket } from "../lib/accountBucketWithdrawal";
 import { AccountBucketHint } from "./AccountBucketHint";
@@ -118,11 +120,16 @@ import {
   type PortfolioBucketAccountScenarioProps,
 } from "./PortfolioBucketAccountRow";
 import { PositionsCsvImport } from "./PositionsCsvImport";
+import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { HoldingScenarioPanel } from "./HoldingScenarioPopout";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
 import { TaxBreakdownHeaderButton } from "./TaxBreakdownHeaderButton";
-import { AccountBalancesManageMenu } from "./AccountBalancesManageMenu";
+import {
+  AccountBalancesManageMenu,
+  type ManageOverlayPhase,
+  type ManageOverlayPhaseHeader,
+} from "./AccountBalancesManageMenu";
 import {
   marketScenarioIsBase,
   normalizeMarketScenarioId,
@@ -218,7 +225,132 @@ type ManualBalancesDraft = {
   baseRoth: number;
   baseHsa: number;
   brkBal: number;
+  allocations: Partial<Record<BucketKey, AllocationProfile>>;
+  allocationEquityPct: Partial<Record<BucketKey, number>>;
 };
+
+const BUCKET_ACCOUNT_TYPE: Record<BucketKey, OnboardingAccountType> = {
+  ret401k: "trad_401k",
+  se401k: "sep_ira",
+  tradIra: "trad_ira",
+  roth: "roth_ira",
+  hsa: "hsa",
+  brokerage: "brokerage",
+};
+
+const BUCKET_BASE_FIELD: Record<
+  BucketKey,
+  Exclude<keyof ManualBalancesDraft, "allocations" | "allocationEquityPct">
+> = {
+  ret401k: "base401k",
+  se401k: "baseSE401k",
+  tradIra: "baseTradIRA",
+  roth: "baseRoth",
+  hsa: "baseHsa",
+  brokerage: "brkBal",
+};
+
+function manualAllocationsFromEntries(
+  entries: ManualAccountEntry[],
+): Partial<Record<BucketKey, AllocationProfile>> {
+  const typeToBucket = Object.fromEntries(
+    Object.entries(BUCKET_ACCOUNT_TYPE).map(([bucket, type]) => [
+      type,
+      bucket as BucketKey,
+    ]),
+  ) as Partial<Record<OnboardingAccountType, BucketKey>>;
+  const out: Partial<Record<BucketKey, AllocationProfile>> = {};
+  for (const entry of entries) {
+    if (!entry.type || entry.allocation_profile == null) continue;
+    const bucket = typeToBucket[entry.type];
+    if (bucket) out[bucket] = entry.allocation_profile;
+  }
+  return out;
+}
+
+function manualEquityPctFromEntries(
+  entries: ManualAccountEntry[],
+): Partial<Record<BucketKey, number>> {
+  const typeToBucket = Object.fromEntries(
+    Object.entries(BUCKET_ACCOUNT_TYPE).map(([bucket, type]) => [
+      type,
+      bucket as BucketKey,
+    ]),
+  ) as Partial<Record<OnboardingAccountType, BucketKey>>;
+  const out: Partial<Record<BucketKey, number>> = {};
+  for (const entry of entries) {
+    if (!entry.type || entry.allocation_equity_pct == null) continue;
+    const bucket = typeToBucket[entry.type];
+    if (bucket) out[bucket] = entry.allocation_equity_pct;
+  }
+  return out;
+}
+
+function manualBucketAllocationsFromDraft(
+  draft: ManualBalancesDraft,
+): Partial<
+  Record<
+    | "base401k"
+    | "baseSE401k"
+    | "baseTradIRA"
+    | "baseRoth"
+    | "baseHsa"
+    | "brkBal",
+    AllocationProfile
+  >
+> {
+  const out: Partial<
+    Record<
+      | "base401k"
+      | "baseSE401k"
+      | "baseTradIRA"
+      | "baseRoth"
+      | "baseHsa"
+      | "brkBal",
+      AllocationProfile
+    >
+  > = {};
+  const allocations = draft.allocations ?? {};
+  for (const bucket of Object.keys(BUCKET_ACCOUNT_TYPE) as BucketKey[]) {
+    const profile = allocations[bucket];
+    if (profile == null) continue;
+    out[BUCKET_BASE_FIELD[bucket]] = profile;
+  }
+  return out;
+}
+
+function manualBucketEquityPctFromDraft(
+  draft: ManualBalancesDraft,
+): Partial<
+  Record<
+    | "base401k"
+    | "baseSE401k"
+    | "baseTradIRA"
+    | "baseRoth"
+    | "baseHsa"
+    | "brkBal",
+    number
+  >
+> {
+  const out: Partial<
+    Record<
+      | "base401k"
+      | "baseSE401k"
+      | "baseTradIRA"
+      | "baseRoth"
+      | "baseHsa"
+      | "brkBal",
+      number
+    >
+  > = {};
+  const equityPct = draft.allocationEquityPct ?? {};
+  for (const bucket of Object.keys(BUCKET_ACCOUNT_TYPE) as BucketKey[]) {
+    const pct = equityPct[bucket];
+    if (pct == null) continue;
+    out[BUCKET_BASE_FIELD[bucket]] = pct;
+  }
+  return out;
+}
 
 type Props = {
   c: ComputedSnapshot;
@@ -640,7 +772,19 @@ export function AccountBalances({
   const [csvImportPrefillCustodian, setCsvImportPrefillCustodian] =
     useState<PositionsCsvCustodian | null>(null);
   const [openManageRequest, setOpenManageRequest] = useState(0);
+  const [closeManageRequest, setCloseManageRequest] = useState(0);
   const [manageMenuOpen, setManageMenuOpen] = useState(false);
+  const [manageOverlayPhase, setManageOverlayPhase] =
+    useState<ManageOverlayPhase>("method");
+  const [manageOverlayLeavingPhase, setManageOverlayLeavingPhase] = useState<
+    Exclude<ManageOverlayPhase, "method"> | null
+  >(null);
+  const [manageCsvPhaseHeader, setManageCsvPhaseHeader] =
+    useState<ManageOverlayPhaseHeader | null>(null);
+  const manageOverlayLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const manageMenuOpenRef = useRef(false);
   const hadAccountCardDataRef = useRef(false);
   const reopenManageAfterBalanceEditCloseRef = useRef(false);
   const [csvFileIngestRequest, setCsvFileIngestRequest] = useState<{
@@ -651,8 +795,8 @@ export function AccountBalances({
   const financialsCsvPendingCustodianRef = useRef<PositionsCsvCustodian | null>(
     null,
   );
-  const closeManageAfterCsvRef = useRef<(() => void) | null>(null);
   const financialsCsvFileInputRef = useRef<HTMLInputElement>(null);
+  const lastCsvReviewReadyIdRef = useRef<number | null>(null);
   const [manualDraft, setManualDraft] = useState<ManualBalancesDraft | null>(
     null,
   );
@@ -861,7 +1005,11 @@ export function AccountBalances({
   );
 
   const patchManualEntryAllocation = useCallback(
-    (entryId: string, profile: AllocationProfile | null) => {
+    (
+      entryId: string,
+      profile: AllocationProfile | null,
+      equityPct?: number | null,
+    ) => {
       const stored = loadStoredManualAccounts();
       const base =
         allocationEntriesPatch ??
@@ -873,6 +1021,7 @@ export function AccountBalances({
               ...entry,
               source: entry.source ?? "manual",
               allocation_profile: profile,
+              allocation_equity_pct: equityPct ?? null,
             }
           : entry,
       );
@@ -918,8 +1067,9 @@ export function AccountBalances({
           <ManualAccountAllocationSlider
             entryId={entry.id}
             value={entry.allocation_profile}
-            onChange={(profile) =>
-              patchManualEntryAllocation(entry.id, profile)
+            equityPct={entry.allocation_equity_pct}
+            onChange={(profile, nextEquityPct) =>
+              patchManualEntryAllocation(entry.id, profile, nextEquityPct)
             }
           />
         ),
@@ -1053,29 +1203,49 @@ export function AccountBalances({
     }
   }, [hasAnyAccountCardData]);
 
-  const finalizeBalanceEditClose = useCallback(() => {
-    setBalanceEditPanel(null);
-    setBalanceEditClosing(false);
-    setManualDraft(null);
-    setManualConfirmPhase(false);
-    setManualConfirmProgress(0);
-    manualConfirmPendingRef.current = false;
-    manualConfirmRunRef.current = false;
-    pendingManualCommitRef.current = null;
-    if (reopenManageAfterBalanceEditCloseRef.current) {
-      reopenManageAfterBalanceEditCloseRef.current = false;
-      reopenManageAfterDismiss();
-    }
-  }, [reopenManageAfterDismiss]);
+  const finalizeBalanceEditClose = useCallback(
+    (options?: { closeManageMenu?: boolean }) => {
+      setBalanceEditPanel(null);
+      setBalanceEditClosing(false);
+      setManualDraft(null);
+      setManualConfirmPhase(false);
+      setManualConfirmProgress(0);
+      manualConfirmPendingRef.current = false;
+      manualConfirmRunRef.current = false;
+      pendingManualCommitRef.current = null;
+      if (reopenManageAfterBalanceEditCloseRef.current) {
+        reopenManageAfterBalanceEditCloseRef.current = false;
+        reopenManageAfterDismiss();
+      }
+      if (options?.closeManageMenu && manageMenuOpenRef.current) {
+        setManageOverlayPhase("method");
+        setCloseManageRequest((n) => n + 1);
+      }
+    },
+    [reopenManageAfterDismiss],
+  );
+
+  useEffect(() => {
+    manageMenuOpenRef.current = manageMenuOpen;
+  }, [manageMenuOpen]);
 
   const commitPendingManualPortfolio = useCallback(() => {
     const pending = pendingManualCommitRef.current;
     if (!pending || !onBases) return;
-    saveManualAccountsFromBucketBases(pending.balances);
+    const {
+      allocations: _allocations,
+      allocationEquityPct: _allocationEquityPct,
+      ...bases
+    } = pending.balances;
+    saveManualAccountsFromBucketBases(
+      bases,
+      manualBucketAllocationsFromDraft(pending.balances),
+      manualBucketEquityPctFromDraft(pending.balances),
+    );
     onManualAccountsCommitted?.();
     onClearImportedForManual?.();
     onManualPortfolioPlanApplied?.(pending.plan);
-    onBases(pending.balances);
+    onBases(bases);
     onBalanceModeChange?.("manual");
     pendingManualCommitRef.current = null;
   }, [
@@ -1105,7 +1275,10 @@ export function AccountBalances({
         manualConfirmPendingRef.current = false;
         schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS);
       }
-      finalizeBalanceEditClose();
+      finalizeBalanceEditClose({
+        closeManageMenu:
+          balanceEditPanel === "manual" && manualConfirmPendingRef.current,
+      });
       return;
     }
     setBalanceEditClosing(true);
@@ -1118,13 +1291,6 @@ export function AccountBalances({
     finalizeBalanceEditClose,
   ]);
 
-  const handleManualBalanceCancel = useCallback(() => {
-    if (!hasAnyAccountCardData) {
-      reopenManageAfterBalanceEditCloseRef.current = true;
-    }
-    requestBalanceEditClose();
-  }, [hasAnyAccountCardData, requestBalanceEditClose]);
-
   const onBalanceEditSheetAnimationEnd = useCallback(
     (e: AnimationEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return;
@@ -1134,13 +1300,13 @@ export function AccountBalances({
           commitPendingManualPortfolio();
           markPortfolioBalancesFlush({ afterManualPlanModal: true });
           manualConfirmPendingRef.current = false;
-          finalizeBalanceEditClose();
+          finalizeBalanceEditClose({ closeManageMenu: true });
           schedulePortfolioWaveReveal(
             MANUAL_PLAN_POST_FADE_PAUSE_MS + PORTFOLIO_REVEAL_START_DELAY_MS,
           );
           return;
         }
-        finalizeBalanceEditClose();
+        finalizeBalanceEditClose({ closeManageMenu: true });
         return;
       }
       if (
@@ -1150,7 +1316,7 @@ export function AccountBalances({
         return;
       }
       if (!balanceEditClosing) return;
-      finalizeBalanceEditClose();
+      finalizeBalanceEditClose({ closeManageMenu: true });
     },
     [
       balanceEditClosing,
@@ -1172,13 +1338,35 @@ export function AccountBalances({
       manualConfirmRunRef.current = false;
       pendingManualCommitRef.current = null;
       if (panel === "manual") {
+        const base401k = inputs?.base401k ?? c.bal.bal401k;
+        const baseSE401k = inputs?.baseSE401k ?? c.bal.balSE401k;
+        const baseTradIRA = inputs?.baseTradIRA ?? c.bal.balTradIRA;
+        const baseRoth = inputs?.baseRoth ?? c.bal.balRoth;
+        const baseHsa = inputs?.baseHsa ?? c.bal.balHsa;
+        const draftBrkBal = inputs?.brkBal ?? brkBal ?? 0;
+        const storedEntries = loadStoredManualAccounts()?.entries;
+        const allocSource =
+          storedEntries && storedEntries.length > 0
+            ? storedEntries
+            : deriveManualAccountEntriesFromBalances(
+                {
+                  bal401k: base401k,
+                  balSE401k: baseSE401k,
+                  balTradIRA: baseTradIRA,
+                  balRoth: baseRoth,
+                  balHsa: baseHsa,
+                },
+                draftBrkBal,
+              );
         setManualDraft({
-          base401k: inputs?.base401k ?? c.bal.bal401k,
-          baseSE401k: inputs?.baseSE401k ?? c.bal.balSE401k,
-          baseTradIRA: inputs?.baseTradIRA ?? c.bal.balTradIRA,
-          baseRoth: inputs?.baseRoth ?? c.bal.balRoth,
-          baseHsa: inputs?.baseHsa ?? c.bal.balHsa,
-          brkBal: inputs?.brkBal ?? brkBal ?? 0,
+          base401k,
+          baseSE401k,
+          baseTradIRA,
+          baseRoth,
+          baseHsa,
+          brkBal: draftBrkBal,
+          allocations: manualAllocationsFromEntries(allocSource),
+          allocationEquityPct: manualEquityPctFromEntries(allocSource),
         });
       } else {
         setManualDraft(null);
@@ -1228,7 +1416,7 @@ export function AccountBalances({
         commitPendingManualPortfolio();
         markPortfolioBalancesFlush({ afterManualPlanModal: true });
         manualConfirmPendingRef.current = false;
-        finalizeBalanceEditClose();
+        finalizeBalanceEditClose({ closeManageMenu: true });
         schedulePortfolioWaveReveal(MANUAL_PLAN_POST_FADE_PAUSE_MS);
         return;
       }
@@ -1302,27 +1490,117 @@ export function AccountBalances({
   const clearCsvImportLaunchUi = useCallback(() => {
     setCsvImportPrefillCustodian(null);
     setCsvFileIngestRequest(null);
+    lastCsvReviewReadyIdRef.current = null;
   }, []);
-
-  const onPickCsvCustodian = useCallback(
-    (custodian: PositionsCsvCustodian, closeManage?: () => void) => {
-      financialsCsvPendingCustodianRef.current = custodian;
-      closeManageAfterCsvRef.current = closeManage ?? null;
-      financialsCsvFileInputRef.current?.click();
-    },
-    [],
-  );
 
   const finishCsvImportLaunch = useCallback(() => {
     clearCsvImportLaunchUi();
+    setManageCsvPhaseHeader(null);
     setBalanceEditPanel((panel) => (panel === "import" ? null : panel));
     setBalanceEditClosing(false);
   }, [clearCsvImportLaunchUi]);
 
-  const handleCsvImportDismissed = useCallback(() => {
-    finishCsvImportLaunch();
-    reopenManageAfterDismiss();
-  }, [finishCsvImportLaunch, reopenManageAfterDismiss]);
+  const handleManageCsvPanelHeaderChange = useCallback(
+    (header: { title: string; subtitle?: string; extra?: string }) => {
+      setManageCsvPhaseHeader({
+        title: header.title,
+        subtitle: header.subtitle,
+        extra: header.extra,
+      });
+    },
+    [],
+  );
+
+  const onPickCsvCustodian = useCallback(
+    (custodian: PositionsCsvCustodian) => {
+      finishCsvImportLaunch();
+      setManageOverlayPhase("method");
+      financialsCsvPendingCustodianRef.current = custodian;
+      financialsCsvFileInputRef.current?.click();
+    },
+    [finishCsvImportLaunch],
+  );
+
+  const handleCsvImportReviewReady = useCallback(() => {
+    const id = csvFileIngestRequest?.id ?? null;
+    if (id == null || lastCsvReviewReadyIdRef.current === id) return;
+    lastCsvReviewReadyIdRef.current = id;
+    setManageOverlayPhase("csv");
+  }, [csvFileIngestRequest?.id]);
+
+  const clearManageOverlayLeaveTimer = useCallback(() => {
+    if (manageOverlayLeaveTimerRef.current != null) {
+      clearTimeout(manageOverlayLeaveTimerRef.current);
+      manageOverlayLeaveTimerRef.current = null;
+    }
+  }, []);
+
+  const handleManageBackToMethod = useCallback(() => {
+    clearManageOverlayLeaveTimer();
+    const leaving =
+      manageOverlayPhase === "method" ? null : manageOverlayPhase;
+    if (leaving === "csv") {
+      setManageOverlayLeavingPhase("csv");
+    } else if (leaving === "manual") {
+      setManageOverlayLeavingPhase("manual");
+      setBalanceEditPanel(null);
+      setBalanceEditClosing(false);
+      setManualConfirmPhase(false);
+      manualConfirmRunRef.current = false;
+    }
+    setManageOverlayPhase("method");
+    if (leaving) {
+      manageOverlayLeaveTimerRef.current = setTimeout(() => {
+        if (leaving === "csv") finishCsvImportLaunch();
+        setManageOverlayLeavingPhase(null);
+        manageOverlayLeaveTimerRef.current = null;
+      }, 250);
+    }
+  }, [
+    clearManageOverlayLeaveTimer,
+    finishCsvImportLaunch,
+    manageOverlayPhase,
+  ]);
+
+  const manageOverlayLeavingPhaseRef = useRef(manageOverlayLeavingPhase);
+  manageOverlayLeavingPhaseRef.current = manageOverlayLeavingPhase;
+
+  useEffect(() => {
+    if (manageOverlayPhase === "method") return;
+    clearManageOverlayLeaveTimer();
+    if (manageOverlayLeavingPhaseRef.current === "csv") {
+      finishCsvImportLaunch();
+    }
+    setManageOverlayLeavingPhase(null);
+  }, [
+    clearManageOverlayLeaveTimer,
+    finishCsvImportLaunch,
+    manageOverlayPhase,
+  ]);
+
+  const manageMenuWasOpenRef = useRef(false);
+  const handleManageOpenChange = useCallback(
+    (open: boolean) => {
+      const wasOpen = manageMenuWasOpenRef.current;
+      manageMenuWasOpenRef.current = open;
+      setManageMenuOpen(open);
+      if (open && !wasOpen) {
+        setManageOverlayPhase("method");
+        return;
+      }
+      if (!open) {
+        setManageOverlayPhase("method");
+        if (csvFileIngestRequest) finishCsvImportLaunch();
+        if (balanceEditPanel === "manual") finalizeBalanceEditClose();
+      }
+    },
+    [
+      balanceEditPanel,
+      csvFileIngestRequest,
+      finalizeBalanceEditClose,
+      finishCsvImportLaunch,
+    ],
+  );
 
   const launchCsvImportFromFile = useCallback(
     (file: File, custodian: PositionsCsvCustodian) => {
@@ -1337,16 +1615,9 @@ export function AccountBalances({
       const f = e.target.files?.[0];
       e.target.value = "";
       const custodian = financialsCsvPendingCustodianRef.current;
-      if (!f) {
-        closeManageAfterCsvRef.current = null;
-        return;
-      }
-      if (!custodian) return;
+      if (!f || !custodian) return;
       financialsCsvPendingCustodianRef.current = null;
-      const closeManage = closeManageAfterCsvRef.current;
-      closeManageAfterCsvRef.current = null;
       launchCsvImportFromFile(f, custodian);
-      closeManage?.();
     },
     [launchCsvImportFromFile],
   );
@@ -1361,6 +1632,7 @@ export function AccountBalances({
       return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      if (manageMenuOpen) return;
       if (removeAccountsModalState.isOpen) removeAccountsModalState.close();
       else if (balanceEditPanel) requestBalanceEditClose();
       else if (accountScenarioPanel) requestAccountScenarioClose();
@@ -1377,6 +1649,7 @@ export function AccountBalances({
     requestHoldingScenarioClose,
     requestAccountScenarioClose,
     requestBalanceEditClose,
+    manageMenuOpen,
   ]);
 
   const accountScenarioBundle = useMemo((): HoldingsScenarioBundle | null => {
@@ -1537,21 +1810,10 @@ export function AccountBalances({
     ? canEditBalances
     : !readOnly && Boolean(onBalanceModeChange);
 
-  function bucketBaseKey(key: BucketKey): keyof ManualBalancesDraft {
-    switch (key) {
-      case "ret401k":
-        return "base401k";
-      case "se401k":
-        return "baseSE401k";
-      case "tradIra":
-        return "baseTradIRA";
-      case "roth":
-        return "baseRoth";
-      case "hsa":
-        return "baseHsa";
-      case "brokerage":
-        return "brkBal";
-    }
+  function bucketBaseKey(
+    key: BucketKey,
+  ): Exclude<keyof ManualBalancesDraft, "allocations" | "allocationEquityPct"> {
+    return BUCKET_BASE_FIELD[key];
   }
 
   function setBase(key: BucketKey, displayVal: string) {
@@ -1568,10 +1830,40 @@ export function AccountBalances({
     setManualDraft((prev) => (prev ? { ...prev, [baseKey]: v } : prev));
   }
 
+  function setManualDraftAllocation(
+    key: BucketKey,
+    profile: AllocationProfile,
+    equityPct: number,
+  ) {
+    setManualDraft((prev) =>
+      prev
+        ? {
+            ...prev,
+            allocations: { ...prev.allocations, [key]: profile },
+            allocationEquityPct: {
+              ...prev.allocationEquityPct,
+              [key]: equityPct,
+            },
+          }
+        : prev,
+    );
+  }
+
+  function displayManualDraftAllocation(
+    key: BucketKey,
+  ): AllocationProfile | null | undefined {
+    return manualDraft?.allocations?.[key];
+  }
+
+  function displayManualDraftEquityPct(
+    key: BucketKey,
+  ): number | null | undefined {
+    return manualDraft?.allocationEquityPct?.[key];
+  }
+
   function displayManualDraft(key: BucketKey): number {
     if (!manualDraft) return display(key);
-    const baseKey = bucketBaseKey(key);
-    return manualDraft[baseKey];
+    return manualDraft[bucketBaseKey(key)];
   }
 
   const manualBalanceRows: ManualBalanceRow[] = [
@@ -1656,10 +1948,21 @@ export function AccountBalances({
     mergedDashboard && csvFileIngestRequest && onImportedApplyBalances,
   );
 
-  const openManualAfterReplaceConfirm = useCallback(() => {
+  const enterManageManualPhase = useCallback(() => {
     finishCsvImportLaunch();
-    openBalanceEditPanel("manual");
-  }, [finishCsvImportLaunch, openBalanceEditPanel]);
+    if (!manualDraft) {
+      openBalanceEditPanel("manual");
+    } else {
+      setBalanceEditPanel("manual");
+      setBalanceEditClosing(false);
+      setManualConfirmPhase(false);
+      setManualConfirmProgress(0);
+      manualConfirmPendingRef.current = false;
+      manualConfirmRunRef.current = false;
+      pendingManualCommitRef.current = null;
+    }
+    setManageOverlayPhase("manual");
+  }, [finishCsvImportLaunch, manualDraft, openBalanceEditPanel]);
 
   function renderReplaceSourceConfirmOverlay(
     stackedOnImportModal = false,
@@ -1831,6 +2134,189 @@ export function AccountBalances({
     }
   }, [mergedDashboard, canEditBalances, hasAnyAccountCardData]);
 
+  function renderManageCsvPanel() {
+    if (!csvFileIngestRequest || !onImportedApplyBalances) return null;
+    return (
+      <PositionsCsvImport
+        presentation="panel"
+        open
+        hideTrigger
+        hideCancelButton
+        hidePanelHeader
+        onPanelHeaderChange={handleManageCsvPanelHeaderChange}
+        initialCustodian={csvImportPrefillCustodian}
+        fileIngestRequest={csvFileIngestRequest}
+        onImportReviewReady={handleCsvImportReviewReady}
+        onImportFlowClose={handleManageBackToMethod}
+        onApplyBalances={onImportedApplyBalances}
+        onImportApplied={() => {
+          onBalanceModeChange?.("imported");
+          onPositionsImportApplied?.();
+          finishCsvImportLaunch();
+          setManageOverlayPhase("method");
+          setCloseManageRequest((n) => n + 1);
+        }}
+        showManualReplaceNotice={willRemoveManualOnConnect}
+      />
+    );
+  }
+
+  function resolveManagePhaseHeader(): ManageOverlayPhaseHeader | null {
+    if (
+      manageOverlayPhase === "manual" ||
+      manageOverlayLeavingPhase === "manual"
+    ) {
+      if (manualConfirmPhase === "plan") {
+        return {
+          title: "Your Plans",
+          subtitle:
+            "We need a few details to project growth and monthly income from your balances.",
+        };
+      }
+      if (manualConfirmPhase === "progress") {
+        return { title: "Saving balances" };
+      }
+      return {
+        title: "Manual balances",
+        subtitle: "Ballpark amounts are fine, since you can refine them later.",
+      };
+    }
+    if (manageOverlayPhase === "csv" || manageOverlayLeavingPhase === "csv") {
+      return manageCsvPhaseHeader;
+    }
+    return null;
+  }
+
+  function renderManualBalancesBodyContent() {
+    return (
+      <div className="account-balances-edit-sheet__body">
+        {manualConfirmPhase === "progress" ? (
+          <div
+            className="account-balances-manual-confirm-progress"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <p className="account-balances-manual-confirm-progress__label">
+              Saving your balances…
+            </p>
+            <div
+              className="account-balances-manual-confirm-progress__track"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={manualConfirmProgress}
+            >
+              <div
+                className="account-balances-manual-confirm-progress__fill"
+                style={{ width: `${manualConfirmProgress}%` }}
+              />
+            </div>
+          </div>
+        ) : manualConfirmPhase === "plan" && inputs ? (
+          <ManualBalancesPlanStep
+            key={inputsHavePlanningProfileFields(inputs) ? "captured" : "empty"}
+            initialDateOfBirth={planningDisplayFromInputs(inputs).dateOfBirth}
+            initialTargetRetirementAge={
+              planningDisplayFromInputs(inputs).targetRetirementAge
+            }
+            initialSave={planningDisplayFromInputs(inputs).save}
+            onContinue={completeManualPlanStep}
+            onCancel={() => setManualConfirmPhase(false)}
+          />
+        ) : (
+          manualBalanceRows.map((row, idx) =>
+            renderManualBalanceEditRow(row, idx, {
+              useDraft: true,
+              omitLastBorder: true,
+            }),
+          )
+        )}
+      </div>
+    );
+  }
+
+  function renderManualBalancesPanelContent(options: { embedded: boolean }) {
+    const { embedded } = options;
+    const panelHost = (
+      <div
+        className={[
+          "account-balances-manual-panel-host",
+          embedded && "account-balances-manual-panel-host--embedded",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {!embedded ? (
+          <header className="account-balances-edit-sheet__head">
+            <div className="account-balances-edit-sheet__head-text">
+              <h2
+                className="account-balances-edit-sheet__title"
+                id="account-balances-manual-title"
+              >
+                {manualConfirmPhase === "plan"
+                  ? "Your Plans"
+                  : manualConfirmPhase === "progress"
+                    ? "Saving balances"
+                    : "Manual balances"}
+              </h2>
+              {manualConfirmPhase === "plan" ? (
+                <p className="account-balances-edit-sheet__subtitle">
+                  We need a few details to project growth and monthly income from
+                  your balances.
+                </p>
+              ) : manualConfirmPhase === false ? (
+                <p className="account-balances-edit-sheet__hint">
+                  Ballpark amounts are fine, since you can refine them later.
+                </p>
+              ) : null}
+            </div>
+          </header>
+        ) : null}
+        {embedded ? (
+          <AppOverlayScrollbars
+            className="account-balances-manage__phase-scroll side-panel-shell__scroll"
+            defer={false}
+          >
+            {renderManualBalancesBodyContent()}
+          </AppOverlayScrollbars>
+        ) : (
+          renderManualBalancesBodyContent()
+        )}
+        {manualConfirmPhase === false ? (
+          <footer className="account-balances-edit-sheet__foot account-balances-edit-sheet__foot--manual-confirm">
+            <div className="account-balances-manual-sheet__footer-row account-balances-manual-sheet__footer-row--confirm-only">
+              <AppButton
+                size="sm"
+                variant="primary"
+                isDisabled={balanceEditClosing}
+                onPress={confirmManualBalances}
+              >
+                Confirm
+              </AppButton>
+            </div>
+          </footer>
+        ) : null}
+      </div>
+    );
+
+    if (!embedded) return panelHost;
+
+    return (
+      <div
+        className={[
+          "account-balances-manage__manual-embedded",
+          balanceEditClosing && "account-balances-manual-sheet--closing",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        onAnimationEnd={onBalanceEditSheetAnimationEnd}
+      >
+        {panelHost}
+      </div>
+    );
+  }
+
   function renderAccountBalancesManageMenu(options?: {
     hideTrigger?: boolean;
     initialOpen?: boolean;
@@ -1862,15 +2348,38 @@ export function AccountBalances({
           onRequestReplaceManual={guardReplaceManual}
           onRequestReplaceImport={guardReplaceImport}
           onManualAdd={() =>
-            mergedDashboard
-              ? openManualAfterReplaceConfirm()
-              : setMode("manual")
+            mergedDashboard ? enterManageManualPhase() : setMode("manual")
           }
           onPickCsvCustodian={onPickCsvCustodian}
           onClearAccounts={() => removeAccountsModalState.open()}
           openRequest={openManageRequest}
+          closeRequest={closeManageRequest}
+          overlayPhase={mergedDashboard ? manageOverlayPhase : "method"}
+          exitingOverlayPhase={
+            mergedDashboard ? manageOverlayLeavingPhase : null
+          }
+          onBackToMethod={handleManageBackToMethod}
+          phaseHeader={resolveManagePhaseHeader()}
+          manualPanel={
+            mergedDashboard &&
+            (manageOverlayPhase === "manual" ||
+              manageOverlayLeavingPhase === "manual")
+              ? renderManualBalancesPanelContent({ embedded: true })
+              : null
+          }
+          csvIngestActive={Boolean(mergedDashboard && csvFileIngestRequest)}
+          csvPanel={
+            mergedDashboard &&
+            csvFileIngestRequest &&
+            (manageOverlayPhase === "csv" ||
+              manageOverlayLeavingPhase === "csv" ||
+              (manageOverlayPhase === "method" && !manageOverlayLeavingPhase))
+              ? renderManageCsvPanel()
+              : null
+          }
+          csvFileInput={mergedDashboard ? renderHiddenCsvFileInput() : null}
           onOpenUpgrade={onOpenUpgradeCsv}
-          onManageOpenChange={setManageMenuOpen}
+          onManageOpenChange={handleManageOpenChange}
           removeConfirmOpen={removeConfirmOpen}
           onRemoveConfirmClose={() => removeAccountsModalState.close()}
           replaceConfirmOpen={replaceConfirmOpen}
@@ -2096,50 +2605,69 @@ export function AccountBalances({
       opts.omitLastBorder && idx === manualBalanceRows.length - 1;
     const amount = opts.useDraft ? displayManualDraft(key) : display(key);
 
+    const stackedOverlayDraft = Boolean(opts.useDraft && mergedDashboard);
+
     return (
       <div
         key={key}
         className={[
           "edit-row",
           "edit-row--manual-balance",
+          stackedOverlayDraft ? "edit-row--manual-balance--stacked" : "",
           omitDivider ? "edit-row--no-divider" : "",
         ]
           .filter(Boolean)
           .join(" ")}
+        data-manual-account-entry={manualEntryIdForAccountType(
+          BUCKET_ACCOUNT_TYPE[key],
+        )}
       >
-        <ManualBalanceRowLabel
-          label={label}
-          taxKind={taxKind}
-          taxDesc={taxDesc}
-          tone={tone}
-        />
-        <div className="edit-row-right">
-          {opts.readOnly ? (
-            <span
-              style={{
-                fontFamily: "var(--heading)",
-                fontSize: "var(--text-base)",
-                fontWeight: 500,
-              }}
-            >
-              {fmt(amount)}
-            </span>
-          ) : (
-            <div className="num-input-wrap">
-              <span className="num-input-prefix">{currencySymbol()}</span>
-              <input
-                type="text"
-                className="num-input"
-                value={fmtInput(amount)}
-                onChange={(e) =>
-                  opts.useDraft
-                    ? setManualDraftBase(key, e.target.value)
-                    : setBase(key, e.target.value)
-                }
-              />
-            </div>
-          )}
+        <div className="manual-balance-row__head">
+          <ManualBalanceRowLabel
+            label={label}
+            taxKind={taxKind}
+            taxDesc={taxDesc}
+            tone={tone}
+          />
+          <div className="edit-row-right">
+            {opts.readOnly ? (
+              <span
+                style={{
+                  fontFamily: "var(--heading)",
+                  fontSize: "var(--text-base)",
+                  fontWeight: 500,
+                }}
+              >
+                {fmt(amount)}
+              </span>
+            ) : (
+              <div className="num-input-wrap">
+                <span className="num-input-prefix">{currencySymbol()}</span>
+                <input
+                  type="text"
+                  className="num-input"
+                  value={fmtInput(amount)}
+                  onChange={(e) =>
+                    opts.useDraft
+                      ? setManualDraftBase(key, e.target.value)
+                      : setBase(key, e.target.value)
+                  }
+                />
+              </div>
+            )}
+          </div>
         </div>
+        {stackedOverlayDraft ? (
+          <ManualAccountAllocationSlider
+            entryId={manualEntryIdForAccountType(BUCKET_ACCOUNT_TYPE[key])}
+            className="account-balances-manual-overlay__allocation"
+            value={displayManualDraftAllocation(key)}
+            equityPct={displayManualDraftEquityPct(key)}
+            onChange={(profile, nextEquityPct) =>
+              setManualDraftAllocation(key, profile, nextEquityPct)
+            }
+          />
+        ) : null}
       </div>
     );
   }
@@ -2310,7 +2838,6 @@ export function AccountBalances({
       currentBalance: number,
       bucketCurrentTotal?: number,
       badgeOrder: number | null = null,
-      manualEntry?: ManualAccountEntry,
     ) => {
       const ticker = resolveAccountIncomeFundTicker(
         storageKey,
@@ -2376,18 +2903,6 @@ export function AccountBalances({
           bucket={bucket}
           selectedTicker={ticker}
           strategy={strategy}
-          allocationSlot={
-            renderManualRowValuesControls(
-              manualEntry ??
-                (displayBalanceMode === "manual"
-                  ? manualAccountEntryForBucket(
-                      manualAccountEntries,
-                      bucket,
-                      locale,
-                    )
-                  : undefined),
-            ).allocation
-          }
           accordionContent={accordionContent}
           onStrategyChange={(next) => {
             onAccountIncomeStrategyChange?.(storageKey, next);
@@ -2425,10 +2940,6 @@ export function AccountBalances({
       onAccountWithdrawRateChange,
       resolveIncomeRowRetirementBalance,
       retirementAge,
-      renderManualRowValuesControls,
-      displayBalanceMode,
-      manualAccountEntries,
-      locale,
     ],
   );
 
@@ -2462,7 +2973,6 @@ export function AccountBalances({
               entry.balance,
               manualEntryBucketTotals[meta.withdrawalBucket],
               withdrawalUi ? order : null,
-              entry,
             ),
           );
         }
@@ -2515,11 +3025,6 @@ export function AccountBalances({
                 display(row.key),
                 pretaxTotal,
                 withdrawalUi ? pretaxOrder : null,
-                manualAccountEntryForBucket(
-                  manualAccountEntries,
-                  "pretax",
-                  locale,
-                ),
               ),
             );
           }
@@ -2558,11 +3063,6 @@ export function AccountBalances({
                 display(rothRow.key),
                 c.bal.balRoth,
                 withdrawalUi ? rothOrder : null,
-                manualAccountEntryForBucket(
-                  manualAccountEntries,
-                  "roth",
-                  locale,
-                ),
               ),
             );
           }
@@ -2601,11 +3101,6 @@ export function AccountBalances({
                 display(hsaRow.key),
                 c.bal.balHsa,
                 withdrawalUi ? hsaOrder : null,
-                manualAccountEntryForBucket(
-                  manualAccountEntries,
-                  "hsa",
-                  locale,
-                ),
               ),
             );
           }
@@ -2865,7 +3360,7 @@ export function AccountBalances({
           />
         </aside>
       ) : null}
-      {balanceEditPanel === "manual" ? (
+      {balanceEditPanel === "manual" && !manageMenuOpen ? (
         <aside
           className={`account-balances-manual-sheet account-balances-edit-sheet account-balances-edit-sheet--manual${balanceEditClosing ? " account-balances-manual-sheet--closing" : ""}`}
           role="dialog"
@@ -2873,105 +3368,7 @@ export function AccountBalances({
           aria-labelledby="account-balances-manual-title"
           onAnimationEnd={onBalanceEditSheetAnimationEnd}
         >
-          <div className="account-balances-manual-panel-host">
-            <header className="account-balances-edit-sheet__head">
-              <div className="account-balances-edit-sheet__head-text">
-                <h2
-                  className="account-balances-edit-sheet__title"
-                  id="account-balances-manual-title"
-                >
-                  {manualConfirmPhase === "plan"
-                    ? "Your Plans"
-                    : manualConfirmPhase === "progress"
-                      ? "Saving balances"
-                      : "Manual balances"}
-                </h2>
-                {manualConfirmPhase === "plan" ? (
-                  <p className="account-balances-edit-sheet__subtitle">
-                    We need a few details to project growth and monthly income
-                    from your balances.
-                  </p>
-                ) : manualConfirmPhase === false ? (
-                  <p className="account-balances-edit-sheet__hint">
-                    Ballpark amounts are fine — you can refine them later.
-                  </p>
-                ) : null}
-              </div>
-            </header>
-            <div className="account-balances-edit-sheet__body">
-              {manualConfirmPhase === "progress" ? (
-                <div
-                  className="account-balances-manual-confirm-progress"
-                  role="status"
-                  aria-live="polite"
-                  aria-busy="true"
-                >
-                  <p className="account-balances-manual-confirm-progress__label">
-                    Saving your balances…
-                  </p>
-                  <div
-                    className="account-balances-manual-confirm-progress__track"
-                    role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={manualConfirmProgress}
-                  >
-                    <div
-                      className="account-balances-manual-confirm-progress__fill"
-                      style={{ width: `${manualConfirmProgress}%` }}
-                    />
-                  </div>
-                </div>
-              ) : manualConfirmPhase === "plan" && inputs ? (
-                <ManualBalancesPlanStep
-                  key={
-                    inputsHavePlanningProfileFields(inputs)
-                      ? "captured"
-                      : "empty"
-                  }
-                  initialDateOfBirth={
-                    planningDisplayFromInputs(inputs).dateOfBirth
-                  }
-                  initialTargetRetirementAge={
-                    planningDisplayFromInputs(inputs).targetRetirementAge
-                  }
-                  initialSave={planningDisplayFromInputs(inputs).save}
-                  onContinue={completeManualPlanStep}
-                  onCancel={() => setManualConfirmPhase(false)}
-                />
-              ) : (
-                manualBalanceRows.map((row, idx) =>
-                  renderManualBalanceEditRow(row, idx, {
-                    useDraft: true,
-                    omitLastBorder: true,
-                  }),
-                )
-              )}
-            </div>
-            {manualConfirmPhase === false ? (
-              <footer className="account-balances-edit-sheet__foot account-balances-edit-sheet__foot--manual-confirm">
-                <div className="account-balances-manual-sheet__footer-row">
-                  <AppButton
-                    size="sm"
-                    variant="ghost"
-                    isDisabled={balanceEditClosing}
-                    onPress={handleManualBalanceCancel}
-                  >
-                    Cancel
-                  </AppButton>
-                  <span aria-hidden />
-                  <AppButton
-                    size="sm"
-                    variant="primary"
-                    isDisabled={balanceEditClosing}
-                    onPress={confirmManualBalances}
-                  >
-                    Confirm
-                  </AppButton>
-                </div>
-              </footer>
-            ) : null}
-          </div>
+          {renderManualBalancesPanelContent({ embedded: false })}
         </aside>
       ) : null}
       {!csvImportModalOpen &&
@@ -3019,7 +3416,6 @@ export function AccountBalances({
     <>
       {mergedDashboard ? (
         <>
-          {renderHiddenCsvFileInput()}
           <ManualProjectionsCallout
             hasPortfolioBalances={c.hasPortfolioBalances}
             positionsImportRev={positionsImportRev}
@@ -3185,13 +3581,16 @@ export function AccountBalances({
   );
 
   const csvImportModal =
-    mergedDashboard && csvFileIngestRequest && onImportedApplyBalances ? (
+    mergedDashboard &&
+    csvFileIngestRequest &&
+    onImportedApplyBalances &&
+    !manageMenuOpen ? (
       <PositionsCsvImport
         presentation="modal"
         hideTrigger
         initialCustodian={csvImportPrefillCustodian}
         fileIngestRequest={csvFileIngestRequest}
-        onImportFlowClose={handleCsvImportDismissed}
+        onImportFlowClose={handleManageBackToMethod}
         onApplyBalances={onImportedApplyBalances}
         onImportApplied={() => {
           onPositionsImportApplied?.();

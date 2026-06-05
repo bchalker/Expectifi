@@ -5,11 +5,12 @@ import { useClickOutside } from '../hooks/useClickOutside'
 import {
   ALLOCATION_PROFILE_SLIDER_MAX,
   ALLOCATION_PROFILE_SLIDER_MIN,
+  allocationProfileDisplayAtEquityPct,
   allocationProfileDisplayAtPosition,
-  allocationProfileForSliderStop,
+  allocationProfileForEquityPct,
   clampAllocationSliderPosition,
-  snapAllocationSliderStop,
-  sliderStopForAllocationProfile,
+  interpolatedEquityPct,
+  resolveAllocationSliderState,
   type AllocationProfile,
 } from '../lib/allocationProfile'
 import './ManualAccountAllocationSlider.scss'
@@ -17,7 +18,8 @@ import './ManualAccountAllocationSlider.scss'
 type Props = {
   entryId: string
   value: AllocationProfile | null | undefined
-  onChange: (profile: AllocationProfile) => void
+  equityPct?: number | null
+  onChange: (profile: AllocationProfile, equityPct: number) => void
   className?: string
 }
 
@@ -46,10 +48,10 @@ function AllocationSliderPanel({
 
   const commitPosition = useCallback(
     (position: number) => {
-      const snapped = snapAllocationSliderStop(position)
-      setDraftPosition(snapped)
-      onPositionPreview(snapped)
-      onStopChange(snapped)
+      const clamped = clampAllocationSliderPosition(position)
+      setDraftPosition(clamped)
+      onPositionPreview(clamped)
+      onStopChange(clamped)
     },
     [onPositionPreview, onStopChange],
   )
@@ -109,30 +111,52 @@ function AllocationSliderPanel({
 }
 
 /** Row control: compact trigger opens portaled popover with continuous mix slider. */
-export function ManualAccountAllocationSlider({ entryId, value, onChange, className }: Props) {
+export function ManualAccountAllocationSlider({
+  entryId,
+  value,
+  equityPct,
+  onChange,
+  className,
+}: Props) {
   const [open, setOpen] = useState(false)
-  const displayStop = sliderStopForAllocationProfile(value)
-  const [draftStop, setDraftStop] = useState(displayStop)
-  const [previewPosition, setPreviewPosition] = useState(displayStop)
+  const savedState = resolveAllocationSliderState(value, equityPct)
+  const [draftStop, setDraftStop] = useState(savedState.position)
+  const [previewPosition, setPreviewPosition] = useState(savedState.position)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const [popoverStyle, setPopoverStyle] = useState<CSSProperties>({})
 
-  const close = useCallback(() => setOpen(false), [])
-  useClickOutside(popoverRef, close, open, [triggerRef, rootRef])
+  const commitPosition = useCallback(
+    (position: number) => {
+      const clamped = clampAllocationSliderPosition(position)
+      const nextEquityPct = interpolatedEquityPct(clamped)
+      const profile = allocationProfileForEquityPct(nextEquityPct)
+      setDraftStop(clamped)
+      setPreviewPosition(clamped)
+      onChange(profile, nextEquityPct)
+    },
+    [onChange],
+  )
 
-  const closedDisplay = allocationProfileDisplayAtPosition(displayStop)
+  const acceptAndClose = useCallback(() => {
+    commitPosition(previewPosition)
+    setOpen(false)
+  }, [commitPosition, previewPosition])
+
+  useClickOutside(popoverRef, acceptAndClose, open, [triggerRef, rootRef])
+
+  const closedDisplay = allocationProfileDisplayAtEquityPct(savedState.equityPct)
   const liveDisplay = open
     ? allocationProfileDisplayAtPosition(previewPosition)
     : closedDisplay
 
   useEffect(() => {
     if (!open) {
-      setDraftStop(displayStop)
-      setPreviewPosition(displayStop)
+      setDraftStop(savedState.position)
+      setPreviewPosition(savedState.position)
     }
-  }, [displayStop, open])
+  }, [open, savedState.equityPct, savedState.position])
 
   const updatePopoverPosition = useCallback(() => {
     const trigger = triggerRef.current
@@ -172,16 +196,6 @@ export function ManualAccountAllocationSlider({ entryId, value, onChange, classN
     }
   }, [open, updatePopoverPosition, liveDisplay.label, liveDisplay.mixHint])
 
-  const commitStop = useCallback(
-    (stop: number) => {
-      const snapped = snapAllocationSliderStop(stop)
-      setDraftStop(snapped)
-      setPreviewPosition(snapped)
-      onChange(allocationProfileForSliderStop(snapped))
-    },
-    [onChange],
-  )
-
   const rootClass = ['manual-account-allocation', className].filter(Boolean).join(' ')
 
   const popover =
@@ -201,7 +215,7 @@ export function ManualAccountAllocationSlider({ entryId, value, onChange, classN
             <AllocationSliderPanel
               stop={draftStop}
               onPositionPreview={setPreviewPosition}
-              onStopChange={commitStop}
+              onStopChange={commitPosition}
             />
           </div>,
           document.body,
@@ -237,7 +251,11 @@ export function ManualAccountAllocationSlider({ entryId, value, onChange, classN
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            setOpen((prev) => !prev)
+            if (open) {
+              acceptAndClose()
+            } else {
+              setOpen(true)
+            }
           }}
         >
           {open ? (

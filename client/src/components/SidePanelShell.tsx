@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
+import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import { CloseButton } from '@heroui/react'
 import './SidePanelShell.scss'
 
@@ -94,13 +93,13 @@ export function SidePanelShell({
       {hasBelowHeader ? (
         <div className="side-panel-shell__below-header">{belowHeader}</div>
       ) : null}
-      <SimpleBar
+      <AppOverlayScrollbars
         key={String(latchedScrollKey)}
         className="side-panel-shell__scroll"
-        autoHide={false}
+        defer={false}
       >
         <div className={`side-panel-shell__body-anim ${bodyClassName}`.trim()}>{children}</div>
-      </SimpleBar>
+      </AppOverlayScrollbars>
       {hasFooter ? (
         <footer className="side-panel-shell__footer">{footer}</footer>
       ) : null}

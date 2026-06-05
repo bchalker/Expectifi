@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { IconCheck } from '@tabler/icons-react'
 import { currencySymbol } from '../../lib/displayCurrency'
 import { fmt, fmtInput, parseNum } from '../../utils/format'
@@ -15,7 +15,7 @@ type Props = {
   /** When true, value is already annual — hint shows $X/year without multiplying. */
   valueIsAnnual?: boolean
   /** Warm helper copy beneath the field. */
-  hint?: string
+  hint?: ReactNode
   className?: string
   disabled?: boolean
   /** When true, show value as read-only text instead of an input. */
@@ -24,6 +24,10 @@ type Props = {
   externalPrefix?: boolean
   /** Optional suffix outside the input box (e.g. "/mo"). */
   externalSuffix?: string
+  /** Optional suffix inside the onboarding field shell (e.g. "/mo"). */
+  internalSuffix?: string
+  /** Muted suffix appended to the visible label (e.g. "— optional"). */
+  labelMutedSuffix?: string
   /** Example-scale copy shown when value is 0 (field stays empty until the user types). */
   placeholder?: string
   /** Welcome/onboarding: grey when empty, white + checkmark when value > 0. */
@@ -51,6 +55,8 @@ export function CurrencyAmountInput({
   readOnly = false,
   externalPrefix = false,
   externalSuffix,
+  internalSuffix,
+  labelMutedSuffix,
   placeholder,
   showFillState = false,
   error,
@@ -190,6 +196,9 @@ export function CurrencyAmountInput({
           }}
           onChange={(e) => onChange(Math.round(parseNum(e.target.value)))}
         />
+        {internalSuffix ? (
+          <span className="currency-amount-input__suffix-inside">{internalSuffix}</span>
+        ) : null}
         {showFillState && filled ? (
           <span className="onboarding-field-shell__check" aria-hidden>
             <IconCheck size={14} strokeWidth={2} />
@@ -214,6 +223,9 @@ export function CurrencyAmountInput({
         htmlFor={id}
       >
         {label}
+        {labelMutedSuffix ? (
+          <span className="currency-amount-input__label-muted"> {labelMutedSuffix}</span>
+        ) : null}
       </label>
       {averageBadge ? (
         <span className="currency-amount-input__average-badge">{averageBadge}</span>

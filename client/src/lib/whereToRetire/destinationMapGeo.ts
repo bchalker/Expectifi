@@ -38,14 +38,14 @@ export function buildWorldPaths(topology: Topology, width: number, height: numbe
   const projection = geoNaturalEarth1().fitSize([width, height], collection)
   const pathGen = geoPath(projection)
 
-  return collection.features.map((f) => {
+  return collection.features.map((f, index) => {
     const numericId = String(f.id ?? '')
     const catalogKey = catalogKeyFromCountryNumeric(numericId)
     const alpha = catalogKey?.slice('country:'.length) ?? ''
     const inCatalog = alpha !== '' && CATALOG_COUNTRY_CODES.has(alpha)
 
     return {
-      id: `world-${numericId}`,
+      id: numericId ? `world-${numericId}` : `world-idx-${index}`,
       d: pathGen(f) ?? '',
       catalogKey: inCatalog ? catalogKey : null,
       name: typeof f.properties?.name === 'string' ? f.properties.name : numericId,

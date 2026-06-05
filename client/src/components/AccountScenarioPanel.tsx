@@ -1,6 +1,5 @@
 import { IconAlertSquareRounded, IconX } from '@tabler/icons-react'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
+import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   blendedRateForAccountBucket,
@@ -368,7 +367,7 @@ export function AccountScenarioPanel({
         </div>
       </header>
       <div className="holding-scenario-popout__body">
-        <SimpleBar className="holding-scenario-popout__scroll" autoHide={false}>
+        <AppOverlayScrollbars className="holding-scenario-popout__scroll" defer={false}>
           <div className="holding-scenario-popout__scroll-inner">
             {overrideConflict ? (
               <div className="holding-scenario-override-conflict" role="status">
@@ -437,7 +436,7 @@ export function AccountScenarioPanel({
               />
             </div>
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
       </div>
       <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
     </div>

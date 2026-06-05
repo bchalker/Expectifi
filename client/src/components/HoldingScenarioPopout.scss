@@ -161,7 +161,7 @@
   overflow: hidden;
 }
 
-/* SimpleBar fills body; padding on overscrolling content */
+/* OverlayScrollbars fills body; padding on overscrolling content */
 .holding-scenario-popout__scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -170,20 +170,18 @@
   max-height: 100%;
 }
 
-/* Inset all scrollable body content (SimpleBar measures .simplebar-content; pad inner wrapper). */
+/* Inset all scrollable body content (pad inner wrapper). */
 .holding-scenario-popout__scroll-inner {
   box-sizing: border-box;
   min-width: 0;
   padding: var(--space-3) var(--space-4) /* review: was 18px */ var(--space-4) /* review: was 18px */;
 }
 
-.holding-scenario-popout__scroll .simplebar-content {
+.holding-scenario-popout__scroll [data-overlayscrollbars-contents] {
   padding: 0;
 }
 
-.holding-scenario-popout__scroll .simplebar-wrapper,
-.holding-scenario-popout__scroll .simplebar-mask,
-.holding-scenario-popout__scroll .simplebar-content-wrapper {
+.holding-scenario-popout__scroll [data-overlayscrollbars-viewport] {
   min-height: 0;
 }
 

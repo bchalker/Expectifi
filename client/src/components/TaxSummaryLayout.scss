@@ -139,6 +139,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;
   background: #ffffff;
+  min-height: 28rem;
 }
 
 .section--tax-summary--growth-assumptions

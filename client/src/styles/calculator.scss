@@ -67,7 +67,7 @@
   width: var(--layout-app-boundary);
   max-width: 100%;
   margin-inline: auto;
-  padding: var(--space-6) var(--layout-app-inner-pad) var(--space-6);
+  padding: var(--space-2) var(--layout-app-inner-pad) var(--space-6);
   box-sizing: border-box;
 }
 .app-scroll-stack {
@@ -1070,7 +1070,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   margin-bottom: var(--space-2);
   background: var(--surface);
 }
-.imported-account-disclosure > summary {
+.imported-account-disclosure > summary,
+.imported-account-disclosure .details-accordion__summary {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1082,7 +1083,10 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   font-size: 13px;
   color: var(--text);
 }
-.imported-account-disclosure > summary::-webkit-details-marker { display: none; }
+.imported-account-disclosure > summary::-webkit-details-marker,
+.imported-account-disclosure .details-accordion__summary::-webkit-details-marker {
+  display: none;
+}
 .imported-account-summary-main {
   display: flex;
   flex-direction: column;
@@ -1116,6 +1120,9 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   color: var(--text-muted);
   padding: var(--space-3) var(--space-3) var(--space-2) /* review: was 10px */;
   padding: 0;
+  background-color: #f9f9f9;
+  border-radius: var(--space-2);
+  margin-bottom: var(--space-4);
 
 }
 .holdings-positions-table table { width: 100%; border-collapse: collapse; }
@@ -1125,6 +1132,9 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--border);
+}
+.holdings-positions-table tbody tr:last-child td {
+  border-bottom: none;
 }
 .holdings-positions-table th:first-child,
 .holdings-positions-table td:first-child {

@@ -86,10 +86,8 @@ import {
 } from "./lib/guestEphemeralStorage";
 import { OnboardingOverlay } from "./components/OnboardingOverlay";
 import {
-  shouldSkipWelcome,
   shouldShowWelcomeOverlay,
   peekForceOnboardingSession,
-  consumeForceOnboardingSession,
 } from "./lib/welcomeGate";
 import { useUserTier } from "./hooks/useUserTier";
 import type { PlanPersistSnapshot } from "./lib/planStorage";
@@ -206,7 +204,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   } = useAuth();
 
   const path = useAppPath();
-  const headerStackHeight = useAppHeaderStackHeight();
+  useAppHeaderStackHeight();
   const welcomeCtx = useMemo(
     () => ({
       onboardingComplete: hydration.onboardingComplete,
@@ -218,6 +216,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const welcomeBlockedRef = useRef(peekForceOnboardingSession());
 
   const [showWelcome, setShowWelcome] = useState(true);
+  const [onboardingMountKey, setOnboardingMountKey] = useState(0);
 
   useEffect(() => {
     const country = inputs.residenceCountry?.trim() ?? "";
@@ -228,25 +227,27 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   useEffect(() => {
     if (!isHydrated) return;
-    if (!consumeForceOnboardingSession()) return;
-    if (shouldSkipWelcome(welcomeCtx)) return;
+    if (path === APP_PATHS.onboarding) return;
+    if (!peekForceOnboardingSession()) return;
     welcomeBlockedRef.current = true;
     setShowWelcome(true);
-  }, [isHydrated, welcomeCtx]);
+  }, [isHydrated, path]);
 
   useEffect(() => {
     if (!isHydrated) return;
     if (path !== APP_PATHS.onboarding) return;
-    if (shouldSkipWelcome(welcomeCtx)) {
-      welcomeBlockedRef.current = false;
-      setShowWelcome(false);
-      return;
-    }
     welcomeBlockedRef.current = true;
     setShowWelcome(true);
-  }, [isHydrated, path, welcomeCtx]);
+    setOnboardingMountKey((key) => key + 1);
+  }, [isHydrated, path]);
 
-  const welcomeDone = !showWelcome;
+  useEffect(() => {
+    if (!isHydrated || authLoading) return;
+    if (path === APP_PATHS.onboarding) return;
+    if (welcomeBlockedRef.current) return;
+    if (peekForceOnboardingSession()) return;
+    setShowWelcome(shouldShowWelcomeOverlay(welcomeCtx));
+  }, [isHydrated, authLoading, path, welcomeCtx, hydration.onboardingComplete]);
 
   const sessionRef = useRef({ inputs, ui, phase, activePreset });
 
@@ -329,6 +330,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setPhase(fresh.phase);
     setActivePreset(fresh.activePreset);
     setShowWelcome(true);
+    setOnboardingMountKey((key) => key + 1);
   }, []);
 
   const onReturnEditorOpenHandled = useCallback(
@@ -432,10 +434,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
   /** After tier hydration, sync welcome overlay to hydration (anonymous = session-only). */
   useEffect(() => {
     if (!isHydrated || authLoading) return;
+    if (path === APP_PATHS.onboarding) return;
     if (welcomeBlockedRef.current) return;
     if (peekForceOnboardingSession()) return;
     setShowWelcome(shouldShowWelcomeOverlay(welcomeCtx));
-  }, [isHydrated, authLoading, welcomeCtx, hydration.onboardingComplete]);
+  }, [isHydrated, authLoading, path, welcomeCtx, hydration.onboardingComplete]);
+
+  const welcomeDone = !showWelcome;
 
   useEffect(() => {
     if (!welcomeDone || typeof sessionStorage === "undefined") return;
@@ -873,8 +878,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         </div>
         {!welcomeDone ? (
           <OnboardingOverlay
-            key={user?.id ?? "guest-onboarding"}
-            headerStackHeight={headerStackHeight}
+            key={`${user?.id ?? "guest-onboarding"}-${onboardingMountKey}`}
             inputs={inputs}
             setInputs={setInputs}
             setUi={setUi}

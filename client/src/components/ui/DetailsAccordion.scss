@@ -1,0 +1,25 @@
+.details-accordion__summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.details-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+
+.details-accordion--open .details-accordion__panel {
+  grid-template-rows: 1fr;
+}
+
+.details-accordion__panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .details-accordion__panel {
+    transition-duration: 0.01ms;
+  }
+}

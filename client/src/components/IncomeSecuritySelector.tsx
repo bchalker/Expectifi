@@ -10,8 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import type { Selection } from 'react-aria-components'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
+import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import {
   IconChevronDown,
 } from '@tabler/icons-react'
@@ -25,8 +24,10 @@ import {
   INCOME_SECURITY_FILTER_DESCRIPTIONS,
   INCOME_SECURITY_FILTERS,
   findIncomeSecurity,
+  formatNavErosionRiskSummary,
   navErosionRiskBarLevel,
   navErosionRiskTextClass,
+  NAV_EROSION_EXPLAIN_SHORT,
   securityRowSubtext,
   type IncomeSecurityFilterId,
   type NavErosionRisk,
@@ -52,37 +53,50 @@ const ANTENNA_BARS_5_PATHS = [
 function NavErosionRiskIcon({ risk }: { risk: NavErosionRisk }) {
   const activeBars = navErosionRiskBarLevel(risk) - 1
   const colorClass = navErosionRiskTextClass(risk)
+  const riskSummary = formatNavErosionRiskSummary(risk)
 
   return (
-    <span
-      className="income-security-selector__risk-icon"
-      title={`NAV erosion risk: ${risk}`}
-      aria-label={`NAV erosion risk: ${risk}`}
+    <Tooltip
+      content={
+        <span className="income-security-selector__risk-tooltip">
+          <span className="income-security-selector__risk-tooltip-lead">{NAV_EROSION_EXPLAIN_SHORT}</span>
+          <span className="income-security-selector__risk-tooltip-risk">{riskSummary}</span>
+        </span>
+      }
+      contentClassName="income-security-selector__risk-tooltip-content"
+      placement="top"
+      delay={200}
+      closeDelay={60}
     >
-      <svg
-        className="income-security-selector__risk-bars"
-        xmlns="http://www.w3.org/2000/svg"
-        width={22}
-        height={22}
-        viewBox="0 0 24 24"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
+      <span
+        className="income-security-selector__risk-icon"
+        aria-label={`${NAV_EROSION_EXPLAIN_SHORT} ${riskSummary}`}
       >
-        {ANTENNA_BARS_5_PATHS.map((d, index) => (
-          <path
-            key={d}
-            d={d}
-            strokeWidth={1.5}
-            className={[
-              'income-security-selector__risk-bar',
-              index < activeBars ? colorClass : 'income-security-selector__risk-bar--inactive',
-            ].join(' ')}
-          />
-        ))}
-      </svg>
-    </span>
+        <svg
+          className="income-security-selector__risk-bars"
+          xmlns="http://www.w3.org/2000/svg"
+          width={26}
+          height={26}
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          {ANTENNA_BARS_5_PATHS.map((d, index) => (
+            <path
+              key={d}
+              d={d}
+              strokeWidth={2}
+              className={[
+                'income-security-selector__risk-bar',
+                index < activeBars ? colorClass : 'income-security-selector__risk-bar--inactive',
+              ].join(' ')}
+            />
+          ))}
+        </svg>
+      </span>
+    </Tooltip>
   )
 }
 
@@ -290,7 +304,10 @@ export function IncomeSecuritySelector({
       onClick={(e) => e.stopPropagation()}
     >
       <CategoryFilterTags filterId={filterId} onFilterId={setFilterId} />
-      <SimpleBar className="income-security-selector__scroll" autoHide={false} forceVisible="y">
+      <AppOverlayScrollbars
+        className="income-security-selector__scroll"
+        defer={false}
+      >
         <ul className="income-security-selector__list">
           {allowCustom ? (
             <li>
@@ -349,7 +366,7 @@ export function IncomeSecuritySelector({
             </li>
           ))}
         </ul>
-      </SimpleBar>
+      </AppOverlayScrollbars>
       {mobileLayout ? (
         <footer className="income-security-selector__footer">
           <AppButton

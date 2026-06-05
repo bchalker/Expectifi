@@ -282,18 +282,22 @@ button[data-slot='select-trigger'][data-disabled='true'] {
 }
 
 .app-select-menu-scroll {
+  display: block;
+  box-sizing: border-box;
   max-height: min(14rem, 45vh);
+  overflow: hidden;
 }
 
-.app-select-menu-scroll .simplebar-wrapper,
-.app-select-menu-scroll .simplebar-mask,
-.app-select-menu-scroll .simplebar-content-wrapper {
+.app-select-menu-scroll [data-overlayscrollbars-viewport] {
+  max-height: min(14rem, 45vh);
   min-height: 0;
 }
 
-.app-select-menu-scroll .app-select-import-menu__list[data-slot='list-box'] {
-  max-height: none;
-  overflow: visible;
+.app-select-menu-scroll .app-select-import-menu__list[data-slot='list-box'],
+.app-select-menu-scroll [data-slot='list-box'] {
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
 }
 
 .app-select-import-menu__popover [data-slot='list-box'] {

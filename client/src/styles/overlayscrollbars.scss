@@ -1,0 +1,21 @@
+/* Default thin OverlayScrollbars theme — translucent handles like os-theme-dark examples.
+   --os-size must exceed 2× --os-padding-perpendicular or the track collapses to 0 width */
+.os-scrollbar.os-theme-app-thin {
+  --os-size: 6px;
+  --os-padding-perpendicular: 1px;
+  --os-padding-axis: 2px;
+  --os-handle-perpendicular-size: 3px;
+  --os-handle-bg: rgba(0, 0, 0, 0.36);
+  --os-handle-bg-hover: rgba(0, 0, 0, 0.48);
+  --os-handle-bg-active: rgba(0, 0, 0, 0.58);
+  --os-handle-border-radius: 99px;
+  --os-track-bg: transparent;
+}
+
+.os-scrollbar.os-theme-app-thin.os-scrollbar-horizontal {
+  --os-size: 6px;
+  --os-handle-perpendicular-size: 2px;
+  --os-handle-bg: rgba(0, 0, 0, 0.28);
+  --os-handle-bg-hover: rgba(0, 0, 0, 0.4);
+  --os-handle-bg-active: rgba(0, 0, 0, 0.5);
+}

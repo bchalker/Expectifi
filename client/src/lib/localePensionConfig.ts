@@ -13,6 +13,8 @@ export type LocalePensionConfig = {
   spouseClaimQuestionLabel: string
   spouseClaimModeQuestionLabel: string
   benefitHint: string
+  /** When set, the hint renders this URL as a tappable link (matched in benefitHint copy). */
+  benefitHintLinkUrl: string | null
   claimAgeHint: string
   includeSpouseHint: string
   spouseClaimModeTooltip: string
@@ -34,6 +36,7 @@ const US_CONFIG: LocalePensionConfig = {
   spouseClaimModeQuestionLabel: 'How will your spouse claim Social Security?',
   benefitHint:
     'Your estimated monthly benefit at your chosen claiming age. The average at 67 is around $1,800 — ssa.gov has a free estimator if you want your exact number.',
+  benefitHintLinkUrl: 'https://www.ssa.gov/',
   claimAgeHint:
     'Claiming earlier means a smaller monthly check; waiting until 70 increases it. There is no single right answer — pick what fits your plan.',
   includeSpouseHint: 'Include your spouse to factor in their Social Security alongside yours.',
@@ -56,6 +59,7 @@ const CA_CONFIG: LocalePensionConfig = {
   spouseClaimModeQuestionLabel: 'How will your spouse claim CPP?',
   benefitHint:
     'Estimate your CPP at canada.ca/en/services/benefits/publicpensions. Your amount depends on contributions and when you start.',
+  benefitHintLinkUrl: null,
   claimAgeHint:
     'CPP can be claimed as early as 60 or as late as 70. Starting earlier means a smaller monthly payment.',
   includeSpouseHint: 'Include your spouse to factor in their CPP alongside yours.',

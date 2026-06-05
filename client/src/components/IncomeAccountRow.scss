@@ -1,64 +1,29 @@
-/* Income account list — same card chrome as growth .portfolio-account-list rows. */
+/* Income list — same wrapper + card chrome as growth; only layout/content deltas below. */
 .portfolio-account-list--income {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  overflow: visible;
-  margin: 0;
-  padding: 0;
-  border-radius: var(--space-2);
-  border-radius: 0;
-  box-sizing: border-box;
   /* Chevron-only actions column (no scenario trigger in income rows). */
   --income-row-actions-width: calc(16px + var(--space-2) + var(--space-4));
+  overflow: visible;
 }
 
 .portfolio-account-list--income .income-account-row.tax-treatment-disclosure.portfolio-account-group {
-  --portfolio-account-row-bg-closed: color-mix(in srgb, var(--sky-blue) 20%, transparent);
-  --portfolio-account-order-badge-bg: var(--sky-blue-d2);
-  --portfolio-row-pad-x: var(--space-5);
-  --portfolio-row-pad-y-start: var(--space-4);
-  --portfolio-row-pad-y-end: var(--space-4);
   --portfolio-scenario-trigger-min: 0;
   --portfolio-scenario-col-pad-x: 0;
   --portfolio-account-chevron-gap: var(--space-2);
   --portfolio-account-actions-width: var(--income-row-actions-width);
+  background: var(--surface);
 }
 
 .portfolio-account-list--income
   .income-account-row.tax-treatment-disclosure.portfolio-account-group
   > summary {
-  background: var(--portfolio-account-row-bg-closed);
+  background: var(--surface);
 }
 
 .portfolio-account-list--income
   .income-account-row.tax-treatment-disclosure.portfolio-account-group[open]
   > summary.tax-treatment-disclosure__summary.portfolio-bucket-account-summary {
-  position: relative;
-  z-index: 1;
-  background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
-  border-bottom: 1px dashed var(--border);
-}
-
-.portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__order-badge {
-  background: var(--portfolio-account-order-badge-bg);
-  color: white;
-}
-
-.portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__main {
-  align-items: center;
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-4);
-}
-
-.portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__identity {
-  gap: var(--space-1);
-}
-
-.portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__values {
-  align-items: flex-end;
-  gap: var(--space-1);
-  padding-right: var(--space-2);
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .portfolio-account-list--income
@@ -72,8 +37,14 @@
   justify-content: flex-end;
 }
 
-.portfolio-account-list--income .income-account-row .portfolio-bucket-account-row__content {
-  gap: 0;
+@container portfolio-bucket-account-row (max-width: 420px) {
+  .portfolio-account-list--income
+    .income-account-row.tax-treatment-disclosure.portfolio-account-group
+    .portfolio-bucket-account-row__actions {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 .income-account-row .portfolio-bucket-account-row__total {
@@ -196,30 +167,30 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4);
   box-sizing: border-box;
 }
 
 .income-account-row__recommendation-section {
-  padding: 0 var(--space-5) var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
   box-sizing: border-box;
 }
 
 .income-account-row__divider {
-  margin: 0 var(--space-5);
+  margin: 0 var(--space-4);
   border: 0;
   border-top: 1px solid var(--border);
 }
 
 .income-account-row__detail-section {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4);
   box-sizing: border-box;
 }
 
 .portfolio-account-list--income
   .income-account-row__controls-section
   .income-strategy-strip-row {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
 }
 

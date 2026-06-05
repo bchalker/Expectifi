@@ -1,5 +1,10 @@
 import type { AccountScenarioBucketId } from './accountReturnScenario'
-import type { AccountDataSource, AllocationProfile } from './allocationProfile'
+import {
+  interpolatedEquityPct,
+  sliderStopForAllocationProfile,
+  type AccountDataSource,
+  type AllocationProfile,
+} from './allocationProfile'
 
 export type { AllocationProfile } from './allocationProfile'
 import type { WithdrawalDisplayBucket } from './withdrawalDisplayOrder'
@@ -74,6 +79,8 @@ export type ManualAccountEntry = {
   /** How this account was added — manual entry only uses allocation_profile. */
   source?: AccountDataSource
   allocation_profile?: AllocationProfile | null
+  /** Continuous mix from the allocation slider (0–100 equities %). */
+  allocation_equity_pct?: number | null
 }
 
 export type StoredManualAccounts = {
@@ -262,9 +269,9 @@ export function canAddOnboardingAccountEntry(
   return getNextOnboardingAccountType(entries, locale) !== null
 }
 
-/** Welcome accounts step: no pre-filled types or balances. */
+/** Welcome accounts step: one empty row so the form is visible immediately. */
 export function emptyOnboardingAccountEntries(): ManualAccountEntry[] {
-  return []
+  return [newManualAccountEntry(null)]
 }
 
 /** @deprecated Use emptyOnboardingAccountEntries for welcome; kept for tests/tools. */
@@ -377,11 +384,17 @@ export function updateManualAccountEntryBalance(
 export function updateManualAccountAllocationProfile(
   entryId: string,
   allocationProfile: AllocationProfile | null,
+  allocationEquityPct?: number | null,
 ): ManualAccountEntry[] | null {
   const stored = storedManualAccountsOrEmpty()
   const entries = stored.entries.map((entry) =>
     entry.id === entryId
-      ? { ...entry, source: entry.source ?? 'manual', allocation_profile: allocationProfile }
+      ? {
+          ...entry,
+          source: entry.source ?? 'manual',
+          allocation_profile: allocationProfile,
+          allocation_equity_pct: allocationEquityPct ?? null,
+        }
       : entry,
   )
   saveStoredManualAccounts({ ...stored, entries })
@@ -432,23 +445,43 @@ export function deriveManualAccountEntriesFromBalances(
   })
 }
 
-export function manualEntriesFromBucketBases(bases: ManualBucketBases): ManualAccountEntry[] {
+export type ManualBucketAllocations = Partial<
+  Record<keyof ManualBucketBases, AllocationProfile>
+>
+
+export type ManualBucketEquityPct = Partial<Record<keyof ManualBucketBases, number>>
+
+export function manualEntriesFromBucketBases(
+  bases: ManualBucketBases,
+  allocations?: ManualBucketAllocations,
+  equityPcts?: ManualBucketEquityPct,
+): ManualAccountEntry[] {
   const entries: ManualAccountEntry[] = []
   for (const { field, type } of DASHBOARD_BUCKET_ACCOUNT_TYPES) {
     const balance = Math.max(0, Math.round(bases[field]))
     if (balance <= 0) continue
+    const profile = allocations?.[field] ?? 'moderate'
     entries.push({
       ...newManualAccountEntry(type),
       id: manualEntryIdForAccountType(type),
       balance,
+      source: 'manual',
+      allocation_profile: profile,
+      allocation_equity_pct:
+        equityPcts?.[field] ??
+        interpolatedEquityPct(sliderStopForAllocationProfile(profile)),
     })
   }
   return entries
 }
 
 /** Persist manual bucket totals to expectifi/accounts-v1 (browser_saved guests). */
-export function saveManualAccountsFromBucketBases(bases: ManualBucketBases): void {
-  saveCompletedManualAccounts(manualEntriesFromBucketBases(bases))
+export function saveManualAccountsFromBucketBases(
+  bases: ManualBucketBases,
+  allocations?: ManualBucketAllocations,
+  equityPcts?: ManualBucketEquityPct,
+): void {
+  saveCompletedManualAccounts(manualEntriesFromBucketBases(bases, allocations, equityPcts))
 }
 
 function parseSessionOnboardingAccountEntries(): ManualAccountEntry[] | null {

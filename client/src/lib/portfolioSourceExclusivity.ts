@@ -10,7 +10,7 @@ export const MANUAL_REMOVED_ON_CONNECT_MSG =
 
 /** Shown on CSV import preview; user must check before confirming. */
 export const CSV_IMPORT_MANUAL_ACK_MSG =
-  'I understand the manual amounts I have added previously will be removed when I import this.'
+  'I understand the manual accounts I have added will clear when I import this.'
 
 export const IMPORT_REMOVED_ON_MANUAL_MSG =
   'Your imported and linked account data will be removed when you save manual amounts.'

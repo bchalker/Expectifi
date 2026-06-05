@@ -1,6 +1,5 @@
 import { IconX } from '@tabler/icons-react'
-import SimpleBar from 'simplebar-react'
-import 'simplebar-react/dist/simplebar.min.css'
+import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import { isMoneyMarketImportRow, normalizeImportSymbol, type ImportedPositionRow } from '../lib/positionsCsv'
@@ -350,7 +349,7 @@ export function HoldingScenarioPanel({
         </div>
       </header>
       <div className="holding-scenario-popout__body">
-        <SimpleBar className="holding-scenario-popout__scroll" autoHide={false}>
+        <AppOverlayScrollbars className="holding-scenario-popout__scroll" defer={false}>
           <div className="holding-scenario-popout__scroll-inner">
             <div className="holding-scenario-popout__intent-stack">
               <HoldingScenarioIntentTabs
@@ -377,7 +376,7 @@ export function HoldingScenarioPanel({
               />
             </div>
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
       </div>
       <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
     </div>

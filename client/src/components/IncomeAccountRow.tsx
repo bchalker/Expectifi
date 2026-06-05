@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { IconArrowNarrowRightDashed } from "@tabler/icons-react";
 import { AccountBucketMonthlyIncomePill } from "./AccountBucketMonthlyIncomePill";
 import { AccountIncomeStrategyCards } from "./AccountIncomeStrategyCards";
@@ -30,7 +29,6 @@ type Props = {
   accordionContent?: IncomeAccordionContent | null;
   badgeOrder?: number | null;
   onFundSelect: (ticker: string) => void;
-  allocationSlot?: ReactNode | null;
 };
 
 export function IncomeAccountRow({
@@ -46,7 +44,6 @@ export function IncomeAccountRow({
   accordionContent = null,
   badgeOrder = null,
   onFundSelect,
-  allocationSlot = null,
 }: Props) {
   const strategySubtext = (
     <span className="income-account-row__strategy-line">
@@ -80,7 +77,6 @@ export function IncomeAccountRow({
           badgeOrder={badgeOrder}
           label={label}
           subtext={strategySubtext}
-          allocationSlot={allocationSlot}
           total={
             <AccountBucketMonthlyIncomePill
               monthlyIncome={breakdown.monthlyTotal}

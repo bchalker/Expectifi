@@ -86,8 +86,11 @@
   cursor: not-allowed;
 }
 
-/* Reserve space for fixed .save-plan-prompt--visible at bottom */
+/* Reserve viewport inset for fixed .save-plan-prompt--visible (symmetric top + bottom). */
 $account-balances-manage-save-prompt-offset: 5.5rem;
+$account-balances-manage-viewport-inset: calc(
+  var(--space-4) + #{$account-balances-manage-save-prompt-offset}
+);
 
 .account-balances-manage__backdrop {
   position: fixed;
@@ -96,8 +99,8 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
-  padding-bottom: calc(var(--space-4) + #{$account-balances-manage-save-prompt-offset});
+  padding-inline: var(--space-4);
+  padding-block: $account-balances-manage-viewport-inset;
   box-sizing: border-box;
   background: transparent;
   animation: account-balances-manage-backdrop-in 0.24s ease forwards;
@@ -107,22 +110,125 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   animation: account-balances-manage-backdrop-out 0.22s ease forwards;
 }
 
+$account-balances-manage-menu-max-height: min(
+  90vh,
+  calc(100dvh - 2 * var(--space-4) - 2 * #{$account-balances-manage-save-prompt-offset})
+);
+
 .account-balances-manage__menu {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
   width: min(100%, 560px);
-  max-height: calc(
-    100dvh - 2 * var(--space-4) - #{$account-balances-manage-save-prompt-offset}
-  );
+  max-height: $account-balances-manage-menu-max-height;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
-  overflow: hidden auto;
+  overflow: hidden;
   border-radius: var(--border-radius-lg);
   background: var(--color-background-primary, var(--surface));
   box-shadow: 0 10px 32px color-mix(in srgb, var(--text) 12%, transparent);
   animation: account-balances-manage-menu-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.account-balances-manage__menu--stacked-overlay {
+.account-balances-manage__menu--method {
+  max-height: 32rem;
+}
+
+.account-balances-manage__menu--manual {
+  max-height: 70vh;
+}
+
+.account-balances-manage__menu--csv {
+  max-height: 70vh;
+}
+
+.account-balances-manage__menu--manual .account-balances-manage__header,
+.account-balances-manage__menu--csv .account-balances-manage__header {
+  flex-shrink: 0;
+}
+
+.account-balances-manage__menu--manual
+  .account-balances-manage__phase-panel--phase-body,
+.account-balances-manage__menu--csv
+  .account-balances-manage__phase-panel--phase-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.account-balances-manage__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.account-balances-manage__menu--method .account-balances-manage__body {
+  flex: 0 0 auto;
+}
+
+.account-balances-manage__phase-stage {
+  grid-row: 1;
+  grid-column: 1;
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+  pointer-events: none;
+}
+
+.account-balances-manage__phase-stage--active {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0s linear 0s;
+  pointer-events: auto;
+}
+
+.account-balances-manage__phase-stage--active.account-balances-manage__phase-stage--fading-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.account-balances-manage__phase-stage-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-balances-manage__phase-stage {
+    transition: none;
+  }
+}
+
+.account-balances-manage__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+
+.account-balances-manage__scroll[data-overlayscrollbars-viewport],
+.account-balances-manage__scroll [data-overlayscrollbars-viewport],
+.account-balances-manage__phase-panel
+  .account-balances-manage__phase-scroll[data-overlayscrollbars-viewport],
+.account-balances-manage__phase-panel
+  .account-balances-manage__phase-scroll
+  [data-overlayscrollbars-viewport] {
+  min-height: 0;
+  max-height: 100%;
+}
+
+.account-balances-manage__scroll--stacked-overlay,
+.account-balances-manage__phase-panel--stacked-overlay {
   overflow: hidden;
 }
 
@@ -185,13 +291,272 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   }
 }
 
+.account-balances-manage__csv-preparing {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.account-balances-manage__header--phase {
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+}
+
+.account-balances-manage__header-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.account-balances-manage__header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-balances-manage__phase-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.account-balances-manage__phase-title {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.account-balances-manage__phase-extra {
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--color-text-secondary, var(--text-muted));
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.account-balances-manage__phase-subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.account-balances-manage__header-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 0;
+  height: 100%;
+  padding: var(--space-4) var(--space-2);
+  padding-left: 0;
+  box-shadow: 6px 0 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.account-balances-manage__header-back:hover,
+.account-balances-manage__header-back:focus-visible {
+  color: var(--color-text-primary, var(--text));
+  background: none;
+}
+
+.account-balances-manage__header-back:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.account-balances-manage__phase-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.account-balances-manage__phase-panel .account-balances-manage__manual-embedded,
+.account-balances-manage__phase-panel .csv-import-panel-host {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.account-balances-manage__phase-panel .account-balances-manage__manual-embedded {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.account-balances-manage__phase-panel .account-balances-manual-panel-host--embedded {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.account-balances-manage__phase-panel
+  .account-balances-manual-panel-host--embedded
+  .account-balances-edit-sheet__foot,
+.account-balances-manage__phase-panel .csv-import-modal-footer {
+  flex-shrink: 0;
+  background: var(--sky-blue-u2);
+}
+
+.account-balances-manage__phase-panel
+  .account-balances-manual-panel-host--embedded
+  .account-balances-manage__phase-scroll {
+  grid-row: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.account-balances-manage__phase-panel
+  .account-balances-manual-panel-host--embedded
+  .account-balances-edit-sheet__body {
+  flex: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+.account-balances-manage__phase-panel .csv-import-panel-host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  margin: 0;
+  overflow: hidden;
+  max-height: 100%;
+}
+
+.account-balances-manage__phase-panel .csv-import-panel-shell {
+  flex: 1 1 auto;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.account-balances-manage__phase-panel .csv-import-panel-shell--no-header {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.account-balances-manage__phase-panel .csv-import-panel-shell .csv-import-modal-scroll {
+  grid-row: 2;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.account-balances-manage__phase-panel
+  .csv-import-panel-shell--no-header
+  .csv-import-modal-scroll {
+  grid-row: 1;
+}
+
+.account-balances-manage__phase-panel
+  .csv-import-panel-shell
+  .csv-import-modal-scroll[data-overlayscrollbars-viewport],
+.account-balances-manage__phase-panel
+  .csv-import-panel-shell
+  .csv-import-modal-scroll
+  [data-overlayscrollbars-viewport] {
+  min-height: 0;
+  max-height: 100%;
+}
+
+.account-balances-manage__phase-panel .csv-import-manual-replace-notice,
+.account-balances-manage__phase-panel .csv-import-duplicate-notice {
+  flex-shrink: 0;
+}
+
+.account-balances-manage__phase-panel .edit-row--manual-balance--stacked {
+  padding-block: var(--space-4);
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+
+.account-balances-manage__phase-panel .account-balances-manual-overlay__allocation {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+}
+
+.account-balances-manage__phase-panel
+  .edit-row--manual-balance--stacked
+  .manual-balance-row__head {
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+}
+
+.account-balances-manage__manual-embedded.account-balances-manual-sheet--closing {
+  animation: account-balances-manual-sheet-out 0.48s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards !important;
+  pointer-events: none;
+}
+
+.account-balances-manage__manual-embedded.account-balances-manual-sheet--closing
+  .account-balances-manual-panel-host {
+  animation: account-balances-manual-panel-out 0.48s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-balances-manage__manual-embedded.account-balances-manual-sheet--closing {
+    animation: none;
+    opacity: 0;
+  }
+
+  .account-balances-manage__manual-embedded.account-balances-manual-sheet--closing
+    .account-balances-manual-panel-host {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+}
+
 .account-balances-manage__header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   padding: 14px 16px;
   border-bottom: 0.5px solid var(--border);
+  // background: var(--sky-blue-u2);
 }
 
 .account-balances-manage__header--required-entry {
@@ -249,6 +614,17 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   flex-direction: column;
   min-height: 300px;
   border-right: 0.5px solid var(--border);
+}
+
+.account-balances-manage__scroll
+  .account-balances-manage__panel-col--plaid
+  .account-balances-manage__plaid-navy {
+  border-bottom-left-radius: var(--border-radius-lg);
+}
+
+.account-balances-manage__scroll .account-balances-manage__panel-col--import {
+  border-bottom-right-radius: var(--border-radius-lg);
+  overflow: hidden;
 }
 
 .account-balances-manage__plaid-navy {
@@ -483,7 +859,7 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   margin-top: 6px;
   padding: 12px 0;
   border-top: 0.5px solid var(--border);
-  border-bottom: 0.5px solid var(--border);
+  // border-bottom: 0.5px solid var(--border);
 }
 
 .account-balances-manage__manual-row {
@@ -492,12 +868,12 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   gap: 10px;
   width: 100%;
   margin: 0;
-  padding: 0 10px;
+  padding: var(--space-3);
   border: none;
   border-radius: var(--border-radius-md, 8px);
   background: transparent;
   font-family: var(--body);
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text);
   text-align: left;
@@ -629,8 +1005,8 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
 
   .account-balances-manage__menu {
     width: 100%;
-    max-height: none;
-    height: 100dvh;
+    max-height: 100dvh;
+    height: auto;
     border-radius: 0;
     box-shadow: none;
   }
@@ -642,6 +1018,16 @@ $account-balances-manage-save-prompt-offset: 5.5rem;
   .account-balances-manage__panel-col--plaid {
     border-right: none;
     border-bottom: 0.5px solid var(--border);
+  }
+
+  .account-balances-manage__scroll
+    .account-balances-manage__panel-col--plaid
+    .account-balances-manage__plaid-navy {
+    border-bottom-left-radius: 0;
+  }
+
+  .account-balances-manage__scroll .account-balances-manage__panel-col--import {
+    border-bottom-right-radius: var(--border-radius-lg);
   }
 }
 

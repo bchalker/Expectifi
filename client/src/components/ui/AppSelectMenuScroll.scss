@@ -1,0 +1,4 @@
+/* Portaled menus — keep scrollbar above list content when it fades in */
+.app-select-menu-scroll > .os-scrollbar.os-scrollbar-vertical.os-theme-app-thin {
+  z-index: 1;
+}

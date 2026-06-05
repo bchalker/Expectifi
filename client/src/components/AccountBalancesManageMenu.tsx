@@ -12,12 +12,14 @@ import {
 import { createPortal } from "react-dom";
 import {
   IconAlertTriangle,
+  IconArrowLeft,
   IconChevronDown,
   IconLink,
   IconPencil,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
+import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { useAuth } from "../context/AuthContext";
 import { usePlan } from "../hooks/usePlan";
 import {
@@ -35,9 +37,18 @@ import {
   formatPlaidSyncTime,
 } from "./PlaidConnectionHeader";
 import "./HoldingScenarioPopout.scss";
+import "./SidePanelShell.scss";
 import "./AccountBalancesManageMenu.scss";
 
 const MANAGE_SUBLABEL = "Manage";
+
+export type ManageOverlayPhase = "method" | "manual" | "csv";
+
+export type ManageOverlayPhaseHeader = {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  extra?: ReactNode;
+};
 const MANAGE_VALUE_LABEL = "Financial Accounts";
 
 const CSV_IMPORT_OPTIONS = CSV_CUSTODIAN_OPTIONS.filter(
@@ -152,10 +163,20 @@ function PlaidConnectionsSection({
 export type AccountBalancesManageMenuProps = {
   canClearAccounts: boolean;
   onManualAdd: () => void;
-  onPickCsvCustodian: (
-    custodian: PositionsCsvCustodian,
-    closeManage?: () => void,
-  ) => void;
+  onPickCsvCustodian: (custodian: PositionsCsvCustodian) => void;
+  /** Internal navigation within the add-accounts overlay. */
+  overlayPhase?: ManageOverlayPhase;
+  /** Phase still mounted while collapsing back to the method selector. */
+  exitingOverlayPhase?: Exclude<ManageOverlayPhase, "method"> | null;
+  /** Title/subtitle for manual and CSV phases in the shared shell header. */
+  phaseHeader?: ManageOverlayPhaseHeader | null;
+  onBackToMethod?: () => void;
+  manualPanel?: ReactNode | null;
+  csvPanel?: ReactNode | null;
+  /** True while a CSV file is staged/parsing before the csv phase is shown. */
+  csvIngestActive?: boolean;
+  /** Hidden file input rendered inside the overlay portal for broker CSV picks. */
+  csvFileInput?: ReactNode | null;
   onClearAccounts: () => void;
   onImportApplied?: () => void;
   /** Shown above connect actions when manual balances would be replaced. */
@@ -167,6 +188,8 @@ export type AccountBalancesManageMenuProps = {
   className?: string;
   /** Increment to open the Manage menu programmatically. */
   openRequest?: number;
+  /** Increment to close the Manage menu programmatically. */
+  closeRequest?: number;
   /** Hide the header trigger; use with `initialOpen` for empty-state auto-open. */
   hideTrigger?: boolean;
   /** Open the overlay on first mount (empty portfolio). */
@@ -199,6 +222,7 @@ export function AccountBalancesManageMenu({
   onRequestReplaceImport,
   className,
   openRequest,
+  closeRequest,
   hideTrigger = false,
   initialOpen = false,
   requiredEntry = false,
@@ -209,6 +233,14 @@ export function AccountBalancesManageMenu({
   replaceConfirmOpen = false,
   onReplaceConfirmClose,
   onManageOpenChange,
+  overlayPhase = "method",
+  exitingOverlayPhase = null,
+  phaseHeader = null,
+  onBackToMethod,
+  manualPanel = null,
+  csvPanel = null,
+  csvIngestActive = false,
+  csvFileInput = null,
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth();
   const { hasPaidSubscription } = usePlan();
@@ -220,6 +252,11 @@ export function AccountBalancesManageMenu({
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const phaseTransitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const [displayPhase, setDisplayPhase] =
+    useState<ManageOverlayPhase>(overlayPhase);
 
   const items = ctx?.items ?? [];
   const hasConnections = items.length > 0;
@@ -271,7 +308,10 @@ export function AccountBalancesManageMenu({
     ctx?.setPanelOpen(true);
   }, [ctx, initialOpen]);
 
+  const prevOpenRef = useRef<boolean | null>(null);
   useEffect(() => {
+    if (prevOpenRef.current === open) return;
+    prevOpenRef.current = open;
     onManageOpenChange?.(open);
   }, [open, onManageOpenChange]);
 
@@ -281,6 +321,42 @@ export function AccountBalancesManageMenu({
     lastOpenRequestRef.current = openRequest;
     openMenu();
   }, [openRequest, openMenu]);
+
+  const lastCloseRequestRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!closeRequest || lastCloseRequestRef.current === closeRequest) return;
+    lastCloseRequestRef.current = closeRequest;
+    if (open && !closing) close();
+  }, [closeRequest, close, closing, open]);
+
+  useEffect(() => {
+    if (!open) {
+      setDisplayPhase(overlayPhase);
+      return;
+    }
+    if (overlayPhase === displayPhase) return;
+    if (phaseTransitionTimerRef.current) {
+      clearTimeout(phaseTransitionTimerRef.current);
+    }
+    phaseTransitionTimerRef.current = setTimeout(() => {
+      setDisplayPhase(overlayPhase);
+      phaseTransitionTimerRef.current = null;
+    }, 200);
+    return () => {
+      if (phaseTransitionTimerRef.current) {
+        clearTimeout(phaseTransitionTimerRef.current);
+        phaseTransitionTimerRef.current = null;
+      }
+    };
+  }, [displayPhase, open, overlayPhase]);
+
+  useEffect(() => {
+    if (overlayPhase !== "manual" && overlayPhase !== "csv") return;
+    const viewport = menuRef.current?.querySelector(
+      ".account-balances-manage__phase-scroll [data-overlayscrollbars-viewport]",
+    );
+    (viewport as HTMLElement | null)?.scrollTo({ top: 0 });
+  }, [overlayPhase]);
 
   useEffect(() => {
     if (!open || closing || requiredEntry) return;
@@ -334,14 +410,6 @@ export function AccountBalancesManageMenu({
     [dismiss, requiredEntry, removeConfirmOpen, replaceConfirmOpen],
   );
 
-  const runAndClose = useCallback(
-    (action: () => void) => {
-      action();
-      close();
-    },
-    [close],
-  );
-
   const handlePlaidConnect = useCallback(() => {
     if (!hasPaidSubscription) {
       if (!requiredEntry) close();
@@ -375,18 +443,32 @@ export function AccountBalancesManageMenu({
   const handleCsvPick = useCallback(
     (custodian: PositionsCsvCustodian) => {
       if (!isPositionsCsvCustodian(custodian)) return;
-      const run = () => onPickCsvCustodian(custodian, close);
+      const run = () => onPickCsvCustodian(custodian);
       if (onRequestReplaceManual) onRequestReplaceManual(run);
       else run();
     },
-    [close, onPickCsvCustodian, onRequestReplaceManual],
+    [onPickCsvCustodian, onRequestReplaceManual],
   );
 
   const handleManualAdd = useCallback(() => {
-    const run = () => runAndClose(onManualAdd);
+    const run = () => onManualAdd();
     if (onRequestReplaceImport) onRequestReplaceImport(run);
     else run();
-  }, [onManualAdd, onRequestReplaceImport, runAndClose]);
+  }, [onManualAdd, onRequestReplaceImport]);
+
+  const phaseTransitioning = overlayPhase !== displayPhase;
+  const methodStageLayoutOpen = displayPhase === "method";
+  const phasePanelLayoutOpen = displayPhase !== "method";
+  const methodStageFadingOut =
+    phaseTransitioning &&
+    displayPhase === "method" &&
+    overlayPhase !== "method";
+  const phasePanelFadingOut =
+    phaseTransitioning &&
+    displayPhase !== "method" &&
+    overlayPhase === "method";
+  const menuLayoutPhase = displayPhase;
+  const showMethodSelector = displayPhase === "method" && !methodStageFadingOut;
 
   const connectLabel = hasConnections
     ? (ctx?.connectButtonLabel ?? "Connect another account")
@@ -476,8 +558,12 @@ export function AccountBalancesManageMenu({
                 id="account-balances-manage-menu"
                 className={[
                   "account-balances-manage__menu",
-                  (removeConfirmOpen || replaceConfirmOpen) &&
-                    "account-balances-manage__menu--stacked-overlay",
+                  menuLayoutPhase === "method" &&
+                    "account-balances-manage__menu--method",
+                  menuLayoutPhase === "manual" &&
+                    "account-balances-manage__menu--manual",
+                  menuLayoutPhase === "csv" &&
+                    "account-balances-manage__menu--csv",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -488,17 +574,53 @@ export function AccountBalancesManageMenu({
                 <header
                   className={[
                     "account-balances-manage__header",
-                    requiredEntry && "account-balances-manage__header--required-entry",
+                    requiredEntry &&
+                      "account-balances-manage__header--required-entry",
+                    !showMethodSelector &&
+                      "account-balances-manage__header--phase",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                 >
-                  <h2
-                    id="account-balances-manage-panel-title"
-                    className="account-balances-manage__title"
-                  >
-                    Add accounts
-                  </h2>
+                  {showMethodSelector ? (
+                    <h2
+                      id="account-balances-manage-panel-title"
+                      className="account-balances-manage__title"
+                    >
+                      Add accounts
+                    </h2>
+                  ) : (
+                    <div className="account-balances-manage__header-main">
+                      <button
+                        type="button"
+                        className="account-balances-manage__header-back"
+                        aria-label="Back to Add accounts"
+                        onClick={() => onBackToMethod?.()}
+                      >
+                        <IconArrowLeft size={14} stroke={1.5} aria-hidden />
+                      </button>
+                      <div className="account-balances-manage__header-text">
+                        <div className="account-balances-manage__phase-title-row">
+                          <h2
+                            id="account-balances-manage-panel-title"
+                            className="account-balances-manage__phase-title"
+                          >
+                            {phaseHeader?.title ?? "Add accounts"}
+                          </h2>
+                          {phaseHeader?.extra ? (
+                            <div className="account-balances-manage__phase-extra">
+                              {phaseHeader.extra}
+                            </div>
+                          ) : null}
+                        </div>
+                        {phaseHeader?.subtitle ? (
+                          <p className="account-balances-manage__phase-subtitle">
+                            {phaseHeader.subtitle}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
                   {!requiredEntry ? (
                     <button
                       type="button"
@@ -511,34 +633,73 @@ export function AccountBalancesManageMenu({
                   ) : null}
                 </header>
 
-                {ctx?.linkInfo ? (
-                  <p className="account-balances-manage__info" role="status">
-                    {ctx.linkInfo}
-                  </p>
-                ) : null}
-
-                {manualReplaceNotice ? (
-                  <p
-                    className="account-balances-manage__replace-notice"
-                    role="note"
+                <div className="account-balances-manage__body">
+                  <div
+                    className={[
+                      "account-balances-manage__phase-stage",
+                      methodStageLayoutOpen &&
+                        "account-balances-manage__phase-stage--active",
+                      methodStageFadingOut &&
+                        "account-balances-manage__phase-stage--fading-out",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-hidden={
+                      !methodStageLayoutOpen || methodStageFadingOut
+                    }
                   >
-                    {manualReplaceNotice}
-                  </p>
-                ) : null}
+                    <div className="account-balances-manage__phase-stage-inner">
+                      <AppOverlayScrollbars
+                        className={[
+                          "account-balances-manage__scroll",
+                          "side-panel-shell__scroll",
+                          (removeConfirmOpen || replaceConfirmOpen) &&
+                            "account-balances-manage__scroll--stacked-overlay",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        defer={false}
+                      >
+                        {ctx?.linkInfo ? (
+                          <p
+                            className="account-balances-manage__info"
+                            role="status"
+                          >
+                            {ctx.linkInfo}
+                          </p>
+                        ) : null}
 
-                {hasConnections && ctx ? (
-                  <PlaidConnectionsSection
-                    items={items}
-                    linkBusy={ctx.linkBusy}
-                    onReconnect={(id) => {
-                      close();
-                      ctx.reconnectItem(id);
-                    }}
-                    onDisconnect={ctx.disconnectItem}
-                  />
-                ) : null}
+                        {manualReplaceNotice ? (
+                          <p
+                            className="account-balances-manage__replace-notice"
+                            role="note"
+                          >
+                            {manualReplaceNotice}
+                          </p>
+                        ) : null}
 
-                <div className="account-balances-manage__panel-grid">
+                        {hasConnections && ctx ? (
+                          <PlaidConnectionsSection
+                            items={items}
+                            linkBusy={ctx.linkBusy}
+                            onReconnect={(id) => {
+                              close();
+                              ctx.reconnectItem(id);
+                            }}
+                            onDisconnect={ctx.disconnectItem}
+                          />
+                        ) : null}
+
+                        {csvIngestActive && !exitingOverlayPhase ? (
+                          <div
+                            className="account-balances-manage__csv-preparing"
+                            aria-hidden
+                          >
+                            {csvPanel}
+                          </div>
+                        ) : null}
+
+                        <div className="account-balances-manage__panel-grid">
                   <div className="account-balances-manage__panel-col account-balances-manage__panel-col--plaid">
                     <div className="account-balances-manage__plaid-navy">
                       {showPlanBadges ? (
@@ -651,14 +812,61 @@ export function AccountBalancesManageMenu({
                       </div>
                     ) : null}
                   </div>
-                </div>
+                        </div>
 
-                {ctx?.linkErr ? (
-                  <p className="account-balances-manage__err" role="alert">
-                    {ctx.linkErr}
-                  </p>
-                ) : null}
+                        {ctx?.linkErr ? (
+                          <p
+                            className="account-balances-manage__err"
+                            role="alert"
+                          >
+                            {ctx.linkErr}
+                          </p>
+                        ) : null}
+                      </AppOverlayScrollbars>
+                    </div>
+                  </div>
+
+                  <div
+                    className={[
+                      "account-balances-manage__phase-stage",
+                      phasePanelLayoutOpen &&
+                        "account-balances-manage__phase-stage--active",
+                      phasePanelFadingOut &&
+                        "account-balances-manage__phase-stage--fading-out",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-hidden={
+                      !phasePanelLayoutOpen || phasePanelFadingOut
+                    }
+                  >
+                    <div className="account-balances-manage__phase-stage-inner">
+                      <div
+                        className={[
+                          "account-balances-manage__phase-panel",
+                          (menuLayoutPhase === "manual" ||
+                            menuLayoutPhase === "csv" ||
+                            exitingOverlayPhase) &&
+                            "account-balances-manage__phase-panel--phase-body",
+                          (removeConfirmOpen || replaceConfirmOpen) &&
+                            "account-balances-manage__phase-panel--stacked-overlay",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {overlayPhase === "manual" ||
+                        exitingOverlayPhase === "manual"
+                          ? manualPanel
+                          : null}
+                        {overlayPhase === "csv" || exitingOverlayPhase === "csv"
+                          ? csvPanel
+                          : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 {stackedOverlay}
+                {csvFileInput}
               </div>
             </div>,
             document.body,

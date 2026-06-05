@@ -1,12 +1,5 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import type { CalculatorInputs, CalculatorUi } from "../lib/computeResults";
 import { ageFromIsoDateString, isValidIsoDateString } from "../lib/ageFromDob";
 import {
@@ -23,6 +16,7 @@ import {
 import {
   clearForceOnboardingSession,
   consumeOnboardingFromSignup,
+  peekForceOnboardingSession,
   peekOnboardingFromSignup,
 } from "../lib/welcomeGate";
 import { useAuth } from "../context/AuthContext";
@@ -41,52 +35,35 @@ import {
   saveRegionToProfile,
   type OnboardingFormProfileSlice,
 } from "../lib/userProfileStorage";
-import { buildWelcomeSampleAccountEntries } from "../lib/welcomeSampleAccounts";
-import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
 import { pensionConfigForLocale } from "../lib/localePensionConfig";
-import { estimateSsMonthlyAt67FromAnnualIncome } from "../lib/onboardingSsCompare";
+import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
 import { OnboardingProgressSteps } from "./OnboardingProgressSteps";
-import { OnboardingSavingsComparisonBar } from "./OnboardingSavingsComparisonBar";
+import { normalizedManualAccountEntries } from "./OnboardingAccountsStep";
 import { type SpouseClaimMode } from "./SpouseClaimModeSegment";
-import { SocialSecuritySetupFields } from "./SocialSecuritySetupFields";
-import { WelcomeGoalStepFields } from "./WelcomeGoalStepFields";
-import { WelcomeProfileStepFields } from "./WelcomeProfileStepFields";
-import { welcomeAccumulationFooterCopy } from "../lib/welcomePlanningFieldCopy";
 import {
-  hasValidManualAccountEntries,
-  normalizedManualAccountEntries,
-  OnboardingAccountsStep,
-} from "./OnboardingAccountsStep";
+  ONBOARDING_RETIRE_AGE_MAX,
+  ONBOARDING_RETIRE_AGE_MIN,
+  WelcomeProfileStepFields,
+} from "./WelcomeProfileStepFields";
+import { WelcomeGoalStepFields } from "./WelcomeGoalStepFields";
 import {
   aggregateManualAccountsToBases,
   loadStoredManualAccounts,
   emptyOnboardingAccountEntries,
-  saveCompletedManualAccounts,
 } from "../lib/manualAccountEntries";
 import "./ConfigDrawerBody.scss";
 import "./PlanningProfileFields.scss";
 import "./SidePanelShell.scss";
-import "./SocialSecuritySetupFields.scss";
 import "./WelcomeProfileStepFields.scss";
 import "./WelcomeGoalStepFields.scss";
-import "./OnboardingAccountsStep.scss";
 import "./OnboardingOverlay.scss";
 import "./OnboardingFieldShell.scss";
 import "./OnboardingProgressSteps.scss";
 const BODY_CLASS = "onboarding-overlay--open";
-const RETIRE_AGE_MAX = 80;
 
-const ACCOUNTS_REQUIRED_MSG =
-  "Enter at least one account type and balance to continue.";
-
-import "./OnboardingSavingsComparisonBar.scss";
-
-type WizardStep = "profile" | "accounts" | "social-security" | "income-goal";
-type ProgressStep = WizardStep;
+type WizardStep = "profile" | "goals";
 
 type Props = {
-  /** Live header stack height (px) — positions welcome sheet flush below chrome. */
-  headerStackHeight?: number | null;
   inputs: CalculatorInputs;
   setInputs: (p: Partial<CalculatorInputs>) => void;
   setUi?: (p: Partial<CalculatorUi>) => void;
@@ -100,8 +77,11 @@ type Props = {
   onAccountsSaved?: () => void;
 };
 
-function initialFormFromInputs(inputs: CalculatorInputs) {
-  const storedProfile = loadUserProfile();
+function initialFormFromInputs(
+  inputs: CalculatorInputs,
+  profile: ReturnType<typeof loadUserProfile> = loadUserProfile(),
+) {
+  const storedProfile = profile;
   const profileDefaults = profileToFormDefaults(storedProfile);
   const dob = profileDefaults.dob || inputs.dateOfBirth || "";
   const storedAccounts = loadStoredManualAccounts();
@@ -209,7 +189,6 @@ function formToCalculatorPatch(
 }
 
 export function OnboardingOverlay({
-  headerStackHeight,
   inputs,
   setInputs,
   setUi,
@@ -219,19 +198,19 @@ export function OnboardingOverlay({
   onAccountsSaved,
 }: Props) {
   const { user } = useAuth();
-  const storedProfile = loadUserProfile();
+  const forceFreshOnboarding = peekForceOnboardingSession();
+  const storedProfile = forceFreshOnboarding ? null : loadUserProfile();
   const [step, setStep] = useState<WizardStep>(() =>
-    resolveOnboardingStartStep(storedProfile, {
-      forceRegion: peekOnboardingFromSignup(),
-    }),
+    forceFreshOnboarding
+      ? "profile"
+      : resolveOnboardingStartStep(storedProfile, {
+          forceRegion: peekOnboardingFromSignup(),
+        }),
   );
-  const [form, setForm] = useState(() => initialFormFromInputs(inputs));
+  const [form, setForm] = useState(() => initialFormFromInputs(inputs, storedProfile));
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [exiting, setExiting] = useState(false);
-  const [accountsValidationShown, setAccountsValidationShown] = useState(false);
-  const ssBenefitUserEdited = useRef(false);
-  const spouseSsBenefitUserEdited = useRef(false);
 
   useLayoutEffect(() => {
     document.body.classList.add(BODY_CLASS);
@@ -251,48 +230,16 @@ export function OnboardingOverlay({
     syncDisplayCurrencyFromResidence(form.currentResidence);
   }, [form.currentResidence]);
 
-  useEffect(() => {
-    if (step !== "social-security") {
-      ssBenefitUserEdited.current = false;
-      spouseSsBenefitUserEdited.current = false;
-      return;
-    }
-    if (ssBenefitUserEdited.current) return;
-    const est = estimateSsMonthlyAt67FromAnnualIncome(
-      form.householdIncome,
-      form.locale,
-    );
-    setForm((f) => {
-      if (f.ssBenefitMonthly === est) return f;
-      const next = { ...f, ssBenefitMonthly: est };
-      if (
-        !spouseSsBenefitUserEdited.current &&
-        f.includeSpouse &&
-        f.spouseClaimMode === "own"
-      ) {
-        next.spouseSsBenefitMonthly = Math.round(est * 0.5);
-      }
-      return next;
-    });
-  }, [
-    step,
-    form.householdIncome,
-    form.includeSpouse,
-    form.spouseClaimMode,
-    form.locale,
-  ]);
-
   const dobOk = isValidIsoDateString(form.dob);
   const ageToday = dobOk ? ageFromIsoDateString(form.dob) : null;
   const ageOk = ageToday !== null && ageToday >= 18 && ageToday <= 100;
-  const retireLo = dobOk && ageToday !== null ? Math.max(50, ageToday + 1) : 50;
   const retireOk =
     Number.isFinite(form.retireAge) &&
-    form.retireAge >= retireLo &&
-    form.retireAge <= RETIRE_AGE_MAX;
+    form.retireAge >= ONBOARDING_RETIRE_AGE_MIN &&
+    form.retireAge <= ONBOARDING_RETIRE_AGE_MAX;
   const regionOk = Boolean(normalizeOnboardingRegionId(form.locale));
-  const profileFieldsOk = dobOk && ageOk && regionOk;
-  const profileValid = profileFieldsOk;
+  const profileFieldsOk = dobOk && ageOk && regionOk && retireOk;
+  const goalsValid = form.monthlyGoal > 0;
 
   function formProfileSlice(): OnboardingFormProfileSlice {
     return {
@@ -332,17 +279,6 @@ export function OnboardingOverlay({
       ssBenefitMonthly: pension.defaultBenefitMonthlyAt67,
     }));
   }
-  const accountsValid = hasValidManualAccountEntries(form.accountEntries);
-  const spouseDobOk =
-    !form.includeSpouse || isValidIsoDateString(form.spouseDob);
-  const spouseBenefitOk =
-    !form.includeSpouse ||
-    form.spouseClaimMode === "spousal" ||
-    form.spouseSsBenefitMonthly > 0;
-  const ssValid =
-    !form.includeSs ||
-    (form.ssBenefitMonthly > 0 && spouseDobOk && spouseBenefitOk);
-
   async function persistAndFinish(
     formState: ReturnType<typeof initialFormFromInputs>,
     options?: { openConnect?: boolean; fadeOut?: boolean },
@@ -351,13 +287,9 @@ export function OnboardingOverlay({
     if (busy) return;
     setBusy(true);
     const patch = formToCalculatorPatch(formState);
-    const snapshotAge = isValidIsoDateString(formState.dob)
-      ? ageFromIsoDateString(formState.dob)
-      : null;
-    const lo = Math.max(50, (snapshotAge ?? 50) + 1);
     const targetRetirementAge = Math.min(
-      RETIRE_AGE_MAX,
-      Math.max(lo, Math.round(formState.retireAge)),
+      ONBOARDING_RETIRE_AGE_MAX,
+      Math.max(ONBOARDING_RETIRE_AGE_MIN, Math.round(formState.retireAge)),
     );
     const finalPatch = { ...patch, targetRetirementAge };
     setInputs(finalPatch);
@@ -387,7 +319,7 @@ export function OnboardingOverlay({
     } else {
       saveLocalUserPrefs(prefs);
     }
-    saveProfileFromFormSlice(formProfileSlice(), "income-goal");
+    saveProfileFromFormSlice(formProfileSlice(), "goals");
     const finishedEntries = normalizedManualAccountEntries(formState.accountEntries);
     setSessionOnboardingAccounts(JSON.stringify(finishedEntries));
     setSessionOnboardingComplete(true);
@@ -420,143 +352,45 @@ export function OnboardingOverlay({
       setErr("Enter a valid date of birth (you must be between 18 and 100).");
       return;
     }
-    saveProfileFromFormSlice(formProfileSlice(), "profile");
-    setForm((f) => ({ ...f, accountEntries: emptyOnboardingAccountEntries() }));
-    setStep("accounts");
-  }
-
-  function onProfileSkipWithSample() {
-    if (busy || exiting) return;
-    setErr(null);
-    if (!profileFieldsOk) return;
-    const entries = buildWelcomeSampleAccountEntries();
-    saveCompletedManualAccounts(entries);
-    const skipForm = {
-      ...form,
-      accountEntries: entries,
-      accountsStepCompleted: true,
-      accountsStepSkipped: false,
-      includeSs: false,
-      ssBenefitMonthly: 0,
-      includeSpouse: false,
-      spouseDob: "",
-      spouseSsBenefitMonthly: 0,
-      householdIncome:
-        form.householdIncome || WELCOME_BENCHMARK.householdIncomeAnnual,
-      monthlyContribution:
-        form.monthlyContribution || WELCOME_BENCHMARK.monthlyContribution,
-      retireAge: form.retireAge || WELCOME_BENCHMARK.targetRetirementAge,
-      monthlyGoal: form.monthlyGoal || WELCOME_BENCHMARK.monthlyIncomeGoal,
-    };
-    void persistAndFinish(skipForm, { fadeOut: true });
-  }
-
-  function onAccountsBack() {
-    setErr(null);
-    setAccountsValidationShown(false);
-    setStep("profile");
-  }
-
-  function onAccountsContinue() {
-    setErr(null);
-    if (!accountsValid) {
-      setAccountsValidationShown(true);
-      return;
-    }
-    const entries = normalizedManualAccountEntries(form.accountEntries);
-    saveCompletedManualAccounts(entries);
-    setSessionOnboardingAccounts(JSON.stringify(entries));
-    setForm((f) => ({
-      ...f,
-      accountEntries: entries,
-      accountsStepCompleted: true,
-      accountsStepSkipped: false,
-    }));
-    setAccountsValidationShown(false);
-    setStep("social-security");
-  }
-
-  function onSsContinue() {
-    setErr(null);
-    if (!ssValid) {
-      if (form.includeSs && form.ssBenefitMonthly <= 0) {
-        setErr("Enter your expected Social Security benefit.");
-        return;
-      }
-      if (form.includeSs && !spouseDobOk) {
-        setErr("Enter a valid date of birth for your spouse.");
-        return;
-      }
-      if (form.includeSs) {
-        setErr("Complete all Social Security fields before continuing.");
-      }
-      return;
-    }
-    saveProfileFromFormSlice(formProfileSlice(), "social-security");
-    setStep("income-goal");
-  }
-
-  function onFinishWelcome() {
-    setErr(null);
-    if (!profileValid || !ssValid) {
-      setErr("Complete all fields before continuing.");
-      return;
-    }
     if (!retireOk) {
       setErr(
-        `Retirement age must be between ${retireLo} and ${RETIRE_AGE_MAX}.`,
+        `Retirement age must be between ${ONBOARDING_RETIRE_AGE_MIN} and ${ONBOARDING_RETIRE_AGE_MAX}.`,
       );
       return;
     }
-    void persistAndFinish(form);
+    saveProfileFromFormSlice(formProfileSlice(), "profile");
+    setStep("goals");
+  }
+
+  function onFinishWithAddAccounts() {
+    setErr(null);
+    if (!goalsValid) {
+      setErr("Enter your monthly income goal before continuing.");
+      return;
+    }
+    saveProfileFromFormSlice(formProfileSlice(), "goals");
+    void persistAndFinish(form, { openConnect: true, fadeOut: true });
   }
 
   const headerTitle =
-    step === "profile"
-      ? "Let's start with you"
-      : step === "accounts"
-        ? "Let's see what you're working with"
-        : step === "social-security"
-          ? pensionConfigForLocale(form.locale).stepTitle
-          : "Almost there.";
+    step === "profile" ? "First, a little about you." : "Now, your goals.";
 
   const headerSubtitle =
     step === "profile"
-      ? "We'll use industry benchmarks to fill in smart defaults."
-      : step === "accounts"
-        ? null
-        : step === "social-security"
-          ? pensionConfigForLocale(form.locale).stepSubtitle
-          : null;
-
-  const progressStep: ProgressStep = step;
-
-  const accountsTotal = form.accountEntries.reduce(
-    (sum, entry) => sum + Math.max(0, Math.round(entry.balance)),
-    0,
-  );
-
-  const stackTopStyle =
-    headerStackHeight != null && headerStackHeight > 0
-      ? ({
-          top: `${headerStackHeight}px`,
-          height: `calc(100dvh - ${headerStackHeight}px)`,
-          bottom: "auto",
-        } as CSSProperties)
-      : undefined;
+      ? "Takes about 2 minutes, but it builds your starting point."
+      : "Ballpark is fine. You can refine these anytime.";
 
   return (
     <div
       className={[
         "onboarding-overlay",
         "onboarding-overlay--in-app",
-        step === "income-goal" ? " onboarding-overlay--income-goal" : "",
-        step === "accounts" ? " onboarding-overlay--accounts" : "",
+        step === "profile" ? " onboarding-overlay--profile" : "",
+        step === "goals" ? " onboarding-overlay--goals" : "",
         exiting ? " onboarding-overlay--exit" : "",
       ]
         .filter(Boolean)
         .join("")}
-      style={stackTopStyle}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-overlay-title"
@@ -564,7 +398,7 @@ export function OnboardingOverlay({
       <div className="onboarding-overlay__panel">
         <header className="onboarding-overlay__header">
           <OnboardingProgressSteps
-            activeStep={progressStep}
+            activeStep={step}
             className="onboarding-overlay__progress"
           />
           {headerTitle ? (
@@ -578,90 +412,35 @@ export function OnboardingOverlay({
               {headerSubtitle ? (
                 <p className="onboarding-overlay__subtitle">{headerSubtitle}</p>
               ) : null}
-              {step === "accounts" ? (
-                <p className="onboarding-overlay__accounts-import-note">
-                  Add each account type and balance. You can easily connect
-                  accounts (via csv import or auto-connection) after setup.
-                </p>
-              ) : null}
             </div>
           ) : null}
         </header>
 
-        <SimpleBar
+        <AppOverlayScrollbars
           className="side-panel-shell__scroll onboarding-overlay__scroll"
-          autoHide={false}
+          defer={false}
         >
           <div className="onboarding-overlay__body">
             {step === "profile" ? (
               <WelcomeProfileStepFields
+                onboardingLayout
                 regionId={form.locale}
                 onRegionSelect={applyRegionSelection}
                 dateOfBirth={form.dob}
                 onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
-                householdIncome={form.householdIncome}
-                onHouseholdIncome={(householdIncome) =>
-                  setForm((f) => ({ ...f, householdIncome }))
+                retireAge={form.retireAge}
+                onRetireAgeChange={(retireAge) =>
+                  setForm((f) => ({ ...f, retireAge }))
                 }
-                monthlyContribution={form.monthlyContribution}
-                onMonthlyContribution={(monthlyContribution) =>
-                  setForm((f) => ({ ...f, monthlyContribution }))
-                }
-                showFillState
-              />
-            ) : step === "accounts" ? (
-              <OnboardingAccountsStep
-                accountLocale={form.locale}
-                entries={form.accountEntries}
-                onChange={(accountEntries) =>
-                  setForm((f) => ({ ...f, accountEntries }))
-                }
-                validationError={
-                  accountsValidationShown && !accountsValid
-                    ? ACCOUNTS_REQUIRED_MSG
-                    : null
-                }
-              />
-            ) : step === "social-security" ? (
-              <SocialSecuritySetupFields
-                includeSs={form.includeSs}
-                onIncludeSsChange={(includeSs) =>
-                  setForm((f) => ({ ...f, includeSs }))
-                }
-                ssAge={form.ssAge}
-                onSsAgeChange={(ssAge) => setForm((f) => ({ ...f, ssAge }))}
-                ssBenefitMonthly={form.ssBenefitMonthly}
-                onSsBenefitMonthlyChange={(ssBenefitMonthly) => {
-                  ssBenefitUserEdited.current = true;
-                  setForm((f) => ({ ...f, ssBenefitMonthly }));
-                }}
-                dateOfBirth={form.dob}
-                includeSpouse={form.includeSpouse}
-                onIncludeSpouseChange={(includeSpouse) =>
-                  setForm((f) => ({ ...f, includeSpouse }))
-                }
-                spouseClaimMode={form.spouseClaimMode}
-                onSpouseClaimModeChange={(spouseClaimMode) =>
-                  setForm((f) => ({ ...f, spouseClaimMode }))
-                }
-                spouseDob={form.spouseDob}
-                onSpouseDobChange={(spouseDob) =>
-                  setForm((f) => ({ ...f, spouseDob }))
-                }
-                spouseSsAge={form.spouseSsAge}
-                onSpouseSsAgeChange={(spouseSsAge) =>
-                  setForm((f) => ({ ...f, spouseSsAge }))
-                }
-                spouseBenefitMonthly={form.spouseSsBenefitMonthly}
-                onSpouseBenefitMonthlyChange={(spouseSsBenefitMonthly) => {
-                  spouseSsBenefitUserEdited.current = true;
-                  setForm((f) => ({ ...f, spouseSsBenefitMonthly }));
-                }}
-                locale={form.locale}
                 showFillState
               />
             ) : (
               <WelcomeGoalStepFields
+                step2Layout
+                monthlyContribution={form.monthlyContribution}
+                onMonthlyContributionChange={(monthlyContribution) =>
+                  setForm((f) => ({ ...f, monthlyContribution }))
+                }
                 monthlyGoal={form.monthlyGoal}
                 onMonthlyGoalChange={(monthlyGoal) =>
                   setForm((f) => ({ ...f, monthlyGoal }))
@@ -670,17 +449,11 @@ export function OnboardingOverlay({
                 onGrowthGoalChange={(growthGoal) =>
                   setForm((f) => ({ ...f, growthGoal }))
                 }
-                retireAge={form.retireAge}
-                onRetireAgeChange={(retireAge) =>
-                  setForm((f) => ({ ...f, retireAge }))
-                }
-                dateOfBirth={form.dob}
-                centered
                 showFillState
               />
             )}
           </div>
-        </SimpleBar>
+        </AppOverlayScrollbars>
 
         <footer className="onboarding-overlay__footer">
           {err ? (
@@ -689,100 +462,36 @@ export function OnboardingOverlay({
             </p>
           ) : null}
           {step === "profile" ? (
-            <div className="onboarding-overlay__footer-profile">
-              {ageToday != null ? (
-                <p className="onboarding-overlay__profile-callout" aria-live="polite">
-                  {welcomeAccumulationFooterCopy(ageToday)}
-                </p>
-              ) : null}
-              <div className="onboarding-overlay__footer-actions">
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={!profileFieldsOk || busy}
-                  onClick={onProfileContinue}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          ) : step === "accounts" ? (
-            <>
-              <OnboardingSavingsComparisonBar
-                totalSavings={accountsTotal}
-                age={ageToday}
-              />
-              <div className="onboarding-overlay__footer-actions onboarding-overlay__footer-actions--accounts">
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                  disabled={busy}
-                  onClick={onAccountsBack}
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={busy || !accountsValid}
-                  onClick={onAccountsContinue}
-                >
-                  Continue
-                </button>
-              </div>
-              <div className="onboarding-overlay__skip-wrap onboarding-overlay__skip-wrap--visible">
-                <button
-                  type="button"
-                  className="onboarding-overlay__skip-link"
-                  disabled={busy || exiting || !profileFieldsOk}
-                  onClick={onProfileSkipWithSample}
-                >
-                  Skip this show the dashboard with sample data.
-                </button>
-              </div>
-            </>
-          ) : step === "social-security" ? (
             <div className="onboarding-overlay__footer-actions">
               <button
                 type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                disabled={busy}
-                onClick={() => {
-                  setErr(null);
-                  setStep("accounts");
-                }}
-              >
-                Back
-              </button>
-              <button
-                type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!ssValid || busy}
-                onClick={onSsContinue}
+                disabled={!profileFieldsOk || busy}
+                onClick={onProfileContinue}
               >
                 Continue
               </button>
             </div>
           ) : (
-            <div className="onboarding-overlay__footer-actions">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--muted"
-                disabled={busy}
-                onClick={() => {
-                  setErr(null);
-                  setStep("social-security");
-                }}
-              >
-                Back
-              </button>
+            <div className="onboarding-overlay__footer-goals">
               <button
                 type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!retireOk || busy}
-                onClick={onFinishWelcome}
+                disabled={!goalsValid || busy || exiting}
+                onClick={onFinishWithAddAccounts}
               >
-                {busy ? "Saving…" : "Continue to dashboard"}
+                {busy ? "Saving…" : "Add your accounts →"}
+              </button>
+              <button
+                type="button"
+                className="onboarding-overlay__back-link"
+                disabled={busy || exiting}
+                onClick={() => {
+                  setErr(null);
+                  setStep("profile");
+                }}
+              >
+                ← Back
               </button>
             </div>
           )}

@@ -13,20 +13,24 @@
 }
 
 /* Closed: medium gray, chevron up */
-details:not([open]) > summary .view-holdings-hint {
+details:not([open]) > summary .view-holdings-hint,
+.details-accordion:not(.details-accordion--open) .details-accordion__summary .view-holdings-hint {
   color: var(--text-muted);
 }
 
-details:not([open]) > summary .view-holdings-hint__icon {
+details:not([open]) > summary .view-holdings-hint__icon,
+.details-accordion:not(.details-accordion--open) .details-accordion__summary .view-holdings-hint__icon {
   transform: rotate(180deg);
 }
 
 /* Open: darker amber, chevron down */
-details[open] > summary .view-holdings-hint {
+details[open] > summary .view-holdings-hint,
+.details-accordion--open .details-accordion__summary .view-holdings-hint {
   color: var(--color-amber-dark);
 }
 
-details[open] > summary .view-holdings-hint__icon {
+details[open] > summary .view-holdings-hint__icon,
+.details-accordion--open .details-accordion__summary .view-holdings-hint__icon {
   transform: rotate(0deg);
 }
 
