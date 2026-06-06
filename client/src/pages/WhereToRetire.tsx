@@ -139,12 +139,6 @@ export function WhereToRetire({ c }: Props) {
           .filter(Boolean)
           .join(" ")}
       >
-        <BudgetExplorationHero
-          section="intro"
-          planMonthlyIncome={grossMonthlyIncome}
-          explorationIncome={explorationIncome}
-          onExplorationIncomeChange={setExplorationIncome}
-        />
         <button
           type="button"
           className="app-page-back where-to-retire__panel-back"
@@ -198,6 +192,17 @@ export function WhereToRetire({ c }: Props) {
               />
             </div>
           </div>
+          <section
+            className="where-to-retire__income-intro"
+            aria-labelledby="wtr-budget-hero-title"
+          >
+            <BudgetExplorationHero
+              section="intro"
+              planMonthlyIncome={grossMonthlyIncome}
+              explorationIncome={explorationIncome}
+              onExplorationIncomeChange={setExplorationIncome}
+            />
+          </section>
           <div className="where-to-retire__main-panel-map">
             <div className="where-to-retire__map-stage">
               <RetirementMapExplorer
@@ -254,35 +259,28 @@ export function WhereToRetire({ c }: Props) {
               onRemoveFavorite={storage.removeFavoriteCity}
             />
           </div>
+          <footer className="where-to-retire__main-panel-footer" role="note">
+            All figures are educational estimates only — not tax, legal,
+            financial, or immigration advice. Consult qualified professionals
+            before relocating. Sources:{" "}
+            <a
+              href="https://www.irs.gov/individuals/international-taxpayers"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              IRS
+            </a>
+            {" · "}
+            <a
+              href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Tax Foundation
+            </a>
+          </footer>
         </div>
       </div>
-
-      <footer className="where-to-retire__footer">
-        <p className="where-to-retire__catalog-note">
-          {visibilityCounts.totalCities.toLocaleString()} cities in our
-          worldwide catalog.
-        </p>
-        <p className="where-to-retire__disclaimer" role="note">
-          All figures are educational estimates only — not tax, legal,
-          financial, or immigration advice. Consult qualified professionals
-          before relocating. Sources:{" "}
-          <a
-            href="https://www.irs.gov/individuals/international-taxpayers"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            IRS
-          </a>
-          {" · "}
-          <a
-            href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Tax Foundation
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }

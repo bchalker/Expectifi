@@ -48,7 +48,6 @@
 
 .where-to-retire__body > .where-to-retire__panel-back,
 .where-to-retire__body > .wtr-budget-hero,
-.where-to-retire__body > .wtr-budget-hero--intro,
 .where-to-retire__body > .where-to-retire__discover,
 
 .where-to-retire__body > .wtr-grid--empty {
@@ -124,8 +123,10 @@
   width: 100%;
   padding: var(--space-5);
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   box-sizing: border-box;
   overflow: visible;
+  // background: var(--sky-blue-u2);
 }
 
 @media (min-width: 681px) {
@@ -176,6 +177,17 @@
   border-left: 1px solid var(--border);
   background: transparent;
   box-sizing: border-box;
+}
+
+.where-to-retire__income-intro {
+  flex-shrink: 0;
+  padding: var(--space-6);
+  box-sizing: border-box;
+  padding-bottom: 0;
+}
+
+.where-to-retire__income-intro .wtr-budget-hero--intro {
+  margin-bottom: 0;
 }
 
 .where-to-retire__income-fit-panel {
@@ -265,10 +277,6 @@
   .where-to-retire__main-panel-map {
     flex: 1 1 auto;
     min-height: 0;
-  }
-
-  .where-to-retire__footer {
-    flex-shrink: 0;
   }
 
   .where-to-retire__body.main,

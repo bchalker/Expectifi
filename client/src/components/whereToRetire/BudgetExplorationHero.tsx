@@ -52,12 +52,6 @@ export function BudgetExplorationHero({
 
   const introBlock = section === 'intro' ? (
     <>
-      <p className="wtr-budget-hero__note">
-        <span className="wtr-budget-hero__note-pill">
-          Based on your projected retirement income
-        </span>
-      </p>
-
       <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
         Where can you retire on{' '}
         <span className="wtr-budget-hero__title-income">
@@ -68,6 +62,9 @@ export function BudgetExplorationHero({
         </span>
         ?
       </h1>
+      <p className="wtr-budget-hero__sub font-xs">
+        Based on your projected retirement income
+      </p>
     </>
   ) : null
 

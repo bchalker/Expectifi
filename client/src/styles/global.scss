@@ -284,12 +284,9 @@
     var(--layout-app-max),
     calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
   );
-  /* Where to Retire: header inner, page column, map panel — change --wtr-content-max only */
-  --wtr-content-max: 1400px;
-  --wtr-content-boundary: min(
-    var(--wtr-content-max),
-    calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
-  );
+  /* Where to Retire: same centered column as dashboard (.main / .main--has-hero) */
+  --wtr-content-max: var(--layout-app-max);
+  --wtr-content-boundary: var(--layout-app-boundary);
   --layout-marketing-boundary: min(
     var(--layout-marketing-max),
     100vw
