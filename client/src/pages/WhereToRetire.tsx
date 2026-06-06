@@ -139,14 +139,6 @@ export function WhereToRetire({ c }: Props) {
           .filter(Boolean)
           .join(" ")}
       >
-        <button
-          type="button"
-          className="app-page-back where-to-retire__panel-back"
-          onClick={() => navigateApp(APP_DASHBOARD_PATH)}
-        >
-          <IconArrowLeft size={16} stroke={1.5} aria-hidden />
-          Back to dashboard
-        </button>
         <div
           className={[
             "where-to-retire__main-panel",
@@ -156,41 +148,15 @@ export function WhereToRetire({ c }: Props) {
             .filter(Boolean)
             .join(" ")}
         >
-          <div className="where-to-retire__income-toolbar">
-            <div className="where-to-retire__showing-count" aria-live="polite">
-              <p className="where-to-retire__showing-count-primary">
-                <AnimatedCount
-                  value={visibilityCounts.visibleCount}
-                  className="where-to-retire__showing-count-num"
-                />{" "}
-                cities
-              </p>
-              <p className="where-to-retire__showing-count-sub">
-                from{" "}
-                <AnimatedCount
-                  value={visibilityCounts.visibleCountryCount}
-                  className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
-                />{" "}
-                countries
-              </p>
-            </div>
-            <div className="where-to-retire__income-toolbar-slider">
-              <BudgetExplorationHero
-                section="slider"
-                planMonthlyIncome={grossMonthlyIncome}
-                explorationIncome={explorationIncome}
-                onExplorationIncomeChange={setExplorationIncome}
-              />
-            </div>
-            <div className="where-to-retire__income-toolbar-actions">
-              <WtrMapFilterButton
-                ref={filterButtonRef}
-                active={activeFilterCount > 0}
-                activeFilterCount={activeFilterCount}
-                filtersOpen={filtersOpen}
-                onToggle={toggleFiltersPanel}
-              />
-            </div>
+          <div className="where-to-retire__main-panel-back">
+            <button
+              type="button"
+              className="app-page-back where-to-retire__panel-back"
+              onClick={() => navigateApp(APP_DASHBOARD_PATH)}
+            >
+              <IconArrowLeft size={16} stroke={1.5} aria-hidden />
+              Back to dashboard
+            </button>
           </div>
           <section
             className="where-to-retire__income-intro"
@@ -209,6 +175,44 @@ export function WhereToRetire({ c }: Props) {
                 explorationIncome={mapExplorationIncome}
                 filters={mapFilters}
                 onFiltersChange={setMapFilters}
+                chromeFooterSlot={
+                  <div className="where-to-retire__income-toolbar">
+                    <div className="where-to-retire__showing-count" aria-live="polite">
+                      <p className="where-to-retire__showing-count-primary">
+                        <AnimatedCount
+                          value={visibilityCounts.visibleCount}
+                          className="where-to-retire__showing-count-num"
+                        />{" "}
+                        cities
+                      </p>
+                      <p className="where-to-retire__showing-count-sub">
+                        from{" "}
+                        <AnimatedCount
+                          value={visibilityCounts.visibleCountryCount}
+                          className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
+                        />{" "}
+                        countries
+                      </p>
+                    </div>
+                    <div className="where-to-retire__income-toolbar-slider">
+                      <BudgetExplorationHero
+                        section="slider"
+                        planMonthlyIncome={grossMonthlyIncome}
+                        explorationIncome={explorationIncome}
+                        onExplorationIncomeChange={setExplorationIncome}
+                      />
+                    </div>
+                    <div className="where-to-retire__income-toolbar-actions">
+                      <WtrMapFilterButton
+                        ref={filterButtonRef}
+                        active={activeFilterCount > 0}
+                        activeFilterCount={activeFilterCount}
+                        filtersOpen={filtersOpen}
+                        onToggle={toggleFiltersPanel}
+                      />
+                    </div>
+                  </div>
+                }
                 excludedCountries={storage.excludedCountries}
                 onAddExcludedCountry={storage.addExcludedCountry}
                 isFavoritedCity={storage.isFavoritedCity}

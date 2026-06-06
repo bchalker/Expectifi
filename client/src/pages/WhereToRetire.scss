@@ -46,7 +46,6 @@
   max-width: 100%;
 }
 
-.where-to-retire__body > .where-to-retire__panel-back,
 .where-to-retire__body > .wtr-budget-hero,
 .where-to-retire__body > .where-to-retire__discover,
 
@@ -82,9 +81,15 @@
   overflow: hidden;
 }
 
-.where-to-retire__body > .where-to-retire__panel-back {
-  align-self: flex-start;
-  margin: 0 0 var(--space-2) /* review: was 0.4rem */;
+.where-to-retire__main-panel-back {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-5);
+  background: var(--sky-blue);
+  box-sizing: border-box;
 }
 
 .where-to-retire__compare-overlay {

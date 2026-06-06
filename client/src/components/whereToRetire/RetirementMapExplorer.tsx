@@ -45,6 +45,8 @@ type Props = {
     next: MapFilters | ((prev: MapFilters) => MapFilters),
   ) => void;
   headerSlot?: ReactNode;
+  /** Rendered directly under `.wtr-explorer__chrome`, above the map row. */
+  chromeFooterSlot?: ReactNode;
   filtersOpen: boolean;
   onFiltersOpenChange: (open: boolean) => void;
   compareIds: string[];
@@ -146,6 +148,7 @@ export function RetirementMapExplorer({
   filters,
   onFiltersChange,
   headerSlot,
+  chromeFooterSlot,
   filtersOpen,
   onFiltersOpenChange,
   compareIds,
@@ -501,6 +504,10 @@ export function RetirementMapExplorer({
           onFiltersChange={onFiltersChange}
         />
       </div>
+
+      {chromeFooterSlot ? (
+        <div className="wtr-explorer__chrome-footer">{chromeFooterSlot}</div>
+      ) : null}
 
       <div
         className={[
