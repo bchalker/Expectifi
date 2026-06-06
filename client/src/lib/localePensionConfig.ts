@@ -12,6 +12,8 @@ export type LocalePensionConfig = {
   claimQuestionLabel: string
   spouseClaimQuestionLabel: string
   spouseClaimModeQuestionLabel: string
+  benefitFieldLabel: string
+  spouseBenefitFieldLabel: string
   benefitHint: string
   /** When set, the hint renders this URL as a tappable link (matched in benefitHint copy). */
   benefitHintLinkUrl: string | null
@@ -28,20 +30,22 @@ export type LocalePensionConfig = {
 }
 
 const US_CONFIG: LocalePensionConfig = {
-  stepTitle: 'Social Security',
+  stepTitle: 'Guaranteed Income',
   stepSubtitle: 'Help us estimate your benefits in retirement',
-  includeToggleLabel: 'Include Social Security',
-  claimQuestionLabel: 'When are you going to claim?',
-  spouseClaimQuestionLabel: 'When will your spouse claim Social Security?',
-  spouseClaimModeQuestionLabel: 'How will your spouse claim Social Security?',
+  includeToggleLabel: 'Include guaranteed income',
+  claimQuestionLabel: 'Claim at age',
+  spouseClaimQuestionLabel: 'Claim at age',
+  spouseClaimModeQuestionLabel: 'How will your spouse claim?',
+  benefitFieldLabel: 'Expected monthly benefit',
+  spouseBenefitFieldLabel: 'Expected monthly benefit',
   benefitHint:
-    'Your estimated monthly benefit at your chosen claiming age. The average at 67 is around $1,800 — ssa.gov has a free estimator if you want your exact number.',
+    'Average at 67 is ~$1,800. ssa.gov has a free estimator.',
   benefitHintLinkUrl: 'https://www.ssa.gov/',
   claimAgeHint:
-    'Claiming earlier means a smaller monthly check; waiting until 70 increases it. There is no single right answer — pick what fits your plan.',
-  includeSpouseHint: 'Include your spouse to factor in their Social Security alongside yours.',
+    'Claiming before 67 reduces your monthly check. Waiting until 70 increases it.',
+  includeSpouseHint: 'Factor in their Social Security alongside yours.',
   spouseClaimModeTooltip:
-    "Social Security pays whichever is higher — your spouse's own earned benefit or 50% of yours. Choose spousal benefit if your spouse had lower lifetime earnings.",
+    "SS pays whichever is higher — your spouse's own earned benefit or 50% of yours. Choose spousal if your spouse had lower lifetime earnings.",
   averageBadge: null,
   defaultBenefitMonthlyAt67: 1_800,
   claimAgeMin: 62,
@@ -50,19 +54,54 @@ const US_CONFIG: LocalePensionConfig = {
   claimMilestoneTicks: [62, 64, 67, 70],
 }
 
-const CA_CONFIG: LocalePensionConfig = {
-  stepTitle: 'Canada Pension Plan (CPP) / OAS',
-  stepSubtitle: 'Help us estimate your public pension benefits in retirement',
-  includeToggleLabel: 'Include Canada Pension Plan (CPP) / OAS',
-  claimQuestionLabel: 'When do you plan to start CPP?',
-  spouseClaimQuestionLabel: 'When will your spouse start CPP?',
-  spouseClaimModeQuestionLabel: 'How will your spouse claim CPP?',
+const CA_CPP_CONFIG: Partial<LocalePensionConfig> = {
+  claimQuestionLabel: 'Claim at age',
+  spouseClaimQuestionLabel: 'Claim at age',
+  spouseClaimModeQuestionLabel: 'How will your spouse claim?',
+  benefitFieldLabel: 'Estimated monthly CPP benefit',
+  spouseBenefitFieldLabel: 'Expected monthly benefit',
   benefitHint:
-    'Estimate your CPP at canada.ca/en/services/benefits/publicpensions. Your amount depends on contributions and when you start.',
-  benefitHintLinkUrl: null,
+    'Your estimated monthly CPP benefit. Service Canada has a free estimator if you want your exact number.',
+  benefitHintLinkUrl: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-benefit/amount.html',
   claimAgeHint:
-    'CPP can be claimed as early as 60 or as late as 70. Starting earlier means a smaller monthly payment.',
-  includeSpouseHint: 'Include your spouse to factor in their CPP alongside yours.',
+    'Taking CPP before 65 reduces your monthly amount by 0.6% per month. Delaying past 65 increases it by 0.7% per month up to age 70.',
+  includeSpouseHint: "Factor in their CPP alongside yours.",
+}
+
+export type OasPensionConfig = {
+  startAgeHint: string
+  benefitLabel: string
+  benefitHint: string
+  clawbackNote: string
+  startAgeMin: number
+  startAgeMax: number
+  defaultStartAge: number
+}
+
+export const OAS_CONFIG: OasPensionConfig = {
+  startAgeHint:
+    'OAS begins at 65 but can be deferred up to age 70 for a 0.6% monthly increase per month.',
+  benefitLabel: 'Estimated monthly OAS benefit',
+  benefitHint: 'Your estimated monthly OAS benefit at your chosen start age.',
+  clawbackNote: 'OAS may be clawed back if retirement income exceeds ~$90,000/yr.',
+  startAgeMin: 65,
+  startAgeMax: 70,
+  defaultStartAge: 65,
+}
+
+const CA_CONFIG: LocalePensionConfig = {
+  stepTitle: 'Guaranteed Income',
+  stepSubtitle: 'Help us estimate your public pension benefits in retirement',
+  includeToggleLabel: 'Include guaranteed income',
+  claimQuestionLabel: CA_CPP_CONFIG.claimQuestionLabel!,
+  spouseClaimQuestionLabel: CA_CPP_CONFIG.spouseClaimQuestionLabel!,
+  spouseClaimModeQuestionLabel: CA_CPP_CONFIG.spouseClaimModeQuestionLabel!,
+  benefitFieldLabel: CA_CPP_CONFIG.benefitFieldLabel!,
+  spouseBenefitFieldLabel: CA_CPP_CONFIG.spouseBenefitFieldLabel!,
+  benefitHint: CA_CPP_CONFIG.benefitHint!,
+  benefitHintLinkUrl: CA_CPP_CONFIG.benefitHintLinkUrl!,
+  claimAgeHint: CA_CPP_CONFIG.claimAgeHint!,
+  includeSpouseHint: CA_CPP_CONFIG.includeSpouseHint!,
   spouseClaimModeTooltip:
     'Use your spouse’s own CPP estimate, or a simplified spousal share based on your benefit.',
   averageBadge: null,

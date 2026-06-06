@@ -1,5 +1,91 @@
-.ss-setup-fields__section--ss-toggle {
-  padding-bottom: var(--space-4) /* review: was 1.1rem */;
+.ss-setup-fields {
+  width: 100%;
+  min-width: 0;
+}
+
+.ss-setup-fields .config-plan-field:has(.claim-age-slider),
+.ss-setup-fields__claim-field,
+.ss-setup-fields__spouse-dob {
+  gap: var(--space-2);
+}
+
+.ss-setup-fields .config-plan-label,
+.ss-setup-fields .currency-amount-input__label {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.ss-setup-fields__claim-label {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.ss-setup-fields .currency-amount-input {
+  gap: var(--space-2);
+}
+
+.ss-setup-fields .currency-amount-input__value-group {
+  width: 100%;
+  max-width: 100%;
+  align-items: stretch;
+}
+
+.ss-setup-fields .currency-amount-input__amount-row--external-affixes,
+.ss-setup-fields .currency-amount-input__amount-row--external-prefix {
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.ss-setup-fields .currency-amount-input__amount-row--external-affixes .onboarding-field-shell,
+.ss-setup-fields .currency-amount-input__amount-row--external-affixes .currency-amount-input__wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.ss-setup-fields .currency-amount-input__amount-row--external-affixes .currency-amount-input__text-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.ss-setup-fields .currency-amount-input__field,
+.ss-setup-fields .onboarding-field-shell__input,
+.ss-setup-fields .currency-amount-input__text-field input[data-slot='input'] {
+  font-size: var(--text-base);
+}
+
+.ss-setup-fields .currency-amount-input__prefix-outside {
+  font-size: var(--text-base);
+}
+
+.ss-setup-fields .onboarding-field-shell__readonly-value {
+  font-family: var(--mono);
+  font-size: var(--text-base);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: normal;
+}
+
+.ss-setup-fields__benefit-field {
+  min-width: 0;
+}
+
+.ss-setup-fields .claim-age-slider {
+  gap: var(--space-2);
+}
+
+.ss-setup-fields .claim-age-slider__value {
+  display: none;
+}
+
+.ss-setup-fields__section--spouse {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+  margin-top: var(--space-4);
 }
 
 .ss-setup-fields__toggle-row {
@@ -9,16 +95,33 @@
   gap: var(--space-3);
 }
 
-.ss-setup-fields__toggle-row .config-plan-label {
+.ss-setup-fields__toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ss-setup-fields__toggle-copy .config-plan-label {
   margin: 0;
+}
+
+.ss-setup-fields__toggle-sub {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .ss-setup-fields__toggle {
   position: relative;
   flex: 0 0 auto;
-  width: 28px;
-  height: 16px;
-  margin: 0;
+  width: 1.75rem;
+  height: 1rem;
+  margin: 0.125rem 0 0;
   padding: 0;
   border: none;
   border-radius: 999px;
@@ -53,8 +156,8 @@
   position: absolute;
   top: 50%;
   left: 2px;
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: 50%;
   background: #fff;
   box-shadow:
@@ -65,44 +168,111 @@
 }
 
 .ss-setup-fields__toggle--on .ss-setup-fields__toggle-track {
-  background: var(--accent-green, var(--success, #15803d));
+  background: var(--green3);
 }
 
 .ss-setup-fields__toggle--on .ss-setup-fields__toggle-track::after {
-  transform: translate(12px, -50%);
-}
-
-.ss-setup-fields__fields {
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-4) /* review: was 1.1rem */;
-}
-
-.ss-setup-fields__fields--disabled {
-  opacity: 0.48;
-  pointer-events: none;
-  user-select: none;
+  transform: translate(0.75rem, -50%);
 }
 
 .ss-setup-fields__claim-row {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3) /* review: was 0.85rem */;
+  gap: var(--space-4);
   margin-bottom: 0;
 }
 
-.ss-setup-fields__fields > .ss-setup-fields__section {
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-4) /* review: was 1.1rem */;
-  margin-top: var(--space-4) /* review: was 1.1rem */;
+.ss-setup-fields__hint {
+  margin: var(--space-1) 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
-.ss-setup-fields__hint {
-  margin: var(--space-1) /* review: was 0.35rem */ 0 0;
+.ss-setup-fields__spouse-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: 10px;
+  background: #f9f9f9;
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.ss-setup-fields__spouse-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-dob {
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-dob-prompt,
+.ss-setup-fields__spouse-scenario-note {
+  margin: 0;
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 400;
   line-height: 1.45;
   color: var(--text-muted);
+}
+
+.ss-setup-fields__spouse-manual-benefit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-benefit-display {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-benefit-value-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-benefit-prefix {
+  flex: 0 0 auto;
+  align-self: center;
+  font-family: var(--mono);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.ss-setup-fields__spouse-benefit-value-row .onboarding-field-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ss-setup-fields__spouse-benefit-readonly {
+  background: #f3f3f3;
+  border: none;
+  box-shadow: none;
+}
+
+.ss-setup-fields__spouse-claim-guardrail {
+  margin: var(--space-1) 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
 }
 
 .ss-setup-fields__compare {
@@ -111,7 +281,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1) /* review: was 0.35rem */;
+  gap: var(--space-1);
 }
 
 .ss-setup-fields__compare-row {
@@ -119,7 +289,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
+  padding: var(--space-2) var(--space-2);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface2);
@@ -147,59 +317,23 @@
   white-space: nowrap;
 }
 
-.ss-setup-fields__spouse-fields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3) /* review: was 0.85rem */;
-  margin-top: var(--space-3) /* review: was 0.85rem */;
-  padding-top: var(--space-3) /* review: was 0.85rem */;
-  border-top: 1px solid var(--border);
-}
-
-.ss-setup-fields__spouse-fields > * {
-  animation: ss-setup-spouse-fields-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.ss-setup-fields__spouse-fields > *:nth-child(1) {
-  animation-delay: 0.04s;
-}
-
-.ss-setup-fields__spouse-fields > *:nth-child(2) {
-  animation-delay: 0.08s;
-}
-
-.ss-setup-fields__spouse-fields > *:nth-child(3) {
-  animation-delay: 0.12s;
-}
-
-.ss-setup-fields__spouse-fields > *:nth-child(4) {
-  animation-delay: 0.16s;
-}
-
-@keyframes ss-setup-spouse-fields-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.35rem);
+@media (min-width: 480px) {
+  .ss-setup-fields__claim-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--space-4);
+    align-items: start;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .ss-setup-fields__claim-row > .ss-setup-fields__benefit-field,
+  .ss-setup-fields__claim-row > .currency-amount-input {
+    min-width: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ss-setup-fields__spouse-fields,
-  .ss-setup-fields__spouse-fields > * {
-    animation: none;
-  }
-}
-
-@media (min-width: 680px) {
-  .ss-setup-fields__claim-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    gap: var(--space-4) var(--space-4) /* review: was 1.15rem */;
-    align-items: start;
+  .ss-setup-fields__toggle-track,
+  .ss-setup-fields__toggle-track::after {
+    transition: none;
   }
 }

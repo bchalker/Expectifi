@@ -150,6 +150,7 @@ export function calcIncomePhase({
   totalSSMonthly,
   ssIncluded,
   retirementStartAge = 62,
+  guaranteedSources = [],
 }) {
   const yield_ = incYield;
   const nav_ = incGrowth;
@@ -158,10 +159,37 @@ export function calcIncomePhase({
 
   const reinvestRate = yield_ + nav_;
 
+  function guaranteedMonthlyAtAge(age) {
+    if (!ssIncluded) return 0;
+    if (guaranteedSources.length > 0) {
+      return guaranteedSources
+        .filter((source) => source.startAge <= age)
+        .reduce((sum, source) => sum + source.monthlyAmount, 0);
+    }
+    return totalSS;
+  }
+
+  function phasedSsAccumAtAge(age) {
+    const endYears = Math.max(0, age - retirementStartAge);
+    if (endYears <= 0) return 0;
+    let accum = 0;
+    for (let t = 1; t <= endYears; t++) {
+      const atAge = retirementStartAge + t - 1;
+      const payment = guaranteedMonthlyAtAge(atAge) * 12;
+      const yearsToGrow = endYears - t;
+      accum += payment * Math.pow(1 + reinvestRate, yearsToGrow);
+    }
+    return accum;
+  }
+
   function portAtAge(age) {
     const yrs = Math.max(0, age - retirementStartAge);
     const navDrift = totalFV * Math.pow(1 + nav_, yrs);
-    const ssAccum = ssIncluded ? fvAnnuity(ssAnnual, reinvestRate, yrs) : 0;
+    const ssAccum = ssIncluded
+      ? guaranteedSources.length > 0
+        ? phasedSsAccumAtAge(age)
+        : fvAnnuity(ssAnnual, reinvestRate, yrs)
+      : 0;
     return navDrift + ssAccum;
   }
 

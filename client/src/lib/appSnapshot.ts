@@ -5,6 +5,7 @@ import type { AccountIncomeStrategy } from './accountIncomeStrategy'
 import { normalizeRetireRegions } from './calc/retireRegions'
 import { findIncomeSecurity } from './incomeSecurities'
 import { normalizeSocialSecurityFields } from './socialSecurity'
+import { normalizeGuaranteedIncomeEntries } from './guaranteedIncome'
 
 export type AppSnapshotV1 = {
   version: 1
@@ -92,6 +93,9 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
         base.filingStatus ?? defaultInputs.filingStatus,
       ),
       ...normalizeSocialSecurityFields(base, defaultInputs),
+      guaranteedIncomeEntries: normalizeGuaranteedIncomeEntries(
+        (base as CalculatorInputs).guaranteedIncomeEntries,
+      ),
     },
     ui: {
       incomeMode: uiRest.incomeMode !== false,

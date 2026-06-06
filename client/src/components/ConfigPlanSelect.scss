@@ -1,0 +1,10 @@
+.config-plan-select__control {
+  width: 100%;
+  min-width: 0;
+}
+
+.config-plan-select__control button[data-slot='select-trigger'] {
+  width: 100%;
+  min-height: 2.75rem;
+  font-size: var(--text-sm);
+}

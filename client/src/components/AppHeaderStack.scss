@@ -41,6 +41,17 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --subheader-h: 0px;
 }
 
+/* Dashboard hero in .main — fixed stack is nav chrome only */
+.app-header-shell--hero-in-main {
+  --goal-bar-h: 0px;
+  --subheader-h: 0px;
+  --app-header-stack-h: var(--app-top-chrome-h);
+}
+
+.app-header-shell--hero-in-main .subheader-spacer {
+  height: calc(var(--app-top-chrome-h) + var(--space-4));
+}
+
 @media (max-width: 520px) {
   .app-header-shell--has-goal {
     --goal-bar-row-h: 3.35rem;

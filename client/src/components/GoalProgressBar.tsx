@@ -11,6 +11,7 @@ type Props = {
   monthlyIncomeGoal: number
   incomeGoalProgressPct: number | null
   hasPortfolioBalances: boolean
+  className?: string
 }
 
 /** Shown above the wave subheader when the active phase has a goal set in Configure. */
@@ -21,6 +22,7 @@ export function GoalProgressBar({
   monthlyIncomeGoal,
   incomeGoalProgressPct,
   hasPortfolioBalances,
+  className,
 }: Props) {
   if (!hasPortfolioBalances) return null
 
@@ -46,7 +48,10 @@ export function GoalProgressBar({
       className={[
         'goal-progress-bar',
         showGrowth ? 'goal-progress-bar--phase-growth' : 'goal-progress-bar--phase-income',
-      ].join(' ')}
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       role="region"
       aria-label={regionLabel}
     >

@@ -51,6 +51,7 @@ export const defaultCalculatorInputs: CalculatorInputs = {
   marketScenarioActive: false,
   residenceCountry: '',
   filingStatus: DEFAULT_CALCULATOR_FILING_STATUS,
+  guaranteedIncomeEntries: [],
 }
 
 export const defaultCalculatorUi: CalculatorUi = {

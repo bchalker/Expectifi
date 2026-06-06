@@ -38,24 +38,28 @@ border: 1px solid rgba(255,255,255,0.5);
   // box-shadow: none;
   overflow: hidden;
   padding: 0;
+  // border: 1px solid var(--sky-blue-d1);
   border-radius: var(--space-2);
-  overflow: hidden;
+  // overflow: hidden;
   transition:
     all .3s ease;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 }
 
 .portfolio-account-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
   box-sizing: border-box;
-  border-radius: var(--space-2);
+
 
   // border-radius: var(--space-2);
   // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   padding: var(--space-2);
-
+  border-radius: var(--space-2) var(--space-2) 0 var(--space-2);
+  background: linear-gradient(to left bottom, var(--sky-blue-d2) 0%, var(--sky-blue) 100%);
+  background: var(--sky-blue-u1);
   // background: var(--surface);
 
   // background: rgba(0,0,0,0.05);

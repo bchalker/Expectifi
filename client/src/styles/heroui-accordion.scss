@@ -1,0 +1,121 @@
+/* HeroUI Accordion — plain CSS fallback when Tailwind @apply in @heroui/styles does not expand. */
+
+[data-slot='accordion'] {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+[data-slot='accordion-item'] {
+  position: relative;
+  min-width: 0;
+}
+
+[data-slot='accordion-item']::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--space-3);
+  right: var(--space-3);
+  height: 1px;
+  background: var(--border);
+}
+
+[data-slot='accordion-item']:last-child::after {
+  content: none;
+}
+
+[data-slot='accordion-heading'] {
+  display: flex;
+  min-width: 0;
+}
+
+button[data-slot='accordion-trigger'] {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: var(--space-3);
+  border: none;
+  background: transparent;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+}
+
+button[data-slot='accordion-trigger']:hover:not([aria-expanded='true']) {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+button[data-slot='accordion-trigger']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+[data-slot='accordion-indicator'] {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.guaranteed-income-setup__accordion [data-slot='accordion-indicator'] {
+  transition: transform 0.2s ease;
+}
+
+.guaranteed-income-setup__accordion [data-slot='accordion-indicator'][data-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+[data-slot='accordion-panel'] {
+  overflow: clip;
+  opacity: 0;
+  transition:
+    height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease;
+}
+
+[data-slot='accordion-panel'][data-expanded='true'] {
+  opacity: 1;
+}
+
+[data-slot='accordion-body'] {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+[data-slot='accordion-body'] > div {
+  padding: 0 var(--space-3) var(--space-4);
+}
+
+/* Surface variant in config drawer */
+.guaranteed-income-setup__accordion[data-slot='accordion'] {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.guaranteed-income-setup__accordion [data-slot='accordion-item']::after {
+  left: var(--space-3);
+  right: var(--space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='accordion-panel'],
+  [data-slot='accordion-indicator'] {
+    transition-duration: 0.01ms;
+  }
+}

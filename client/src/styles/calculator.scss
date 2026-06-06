@@ -70,6 +70,104 @@
   padding: var(--space-2) var(--layout-app-inner-pad) var(--space-6);
   box-sizing: border-box;
 }
+
+.main--has-hero {
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md, 8px);
+  overflow: visible;
+}
+
+.main--has-hero.main--hero-stuck,
+html[data-main-hero-stuck='true'] .main--has-hero {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Wave + goal bar — goal bar scrolls; subheader sticks under app chrome */
+.goal-progress-bar--in-main {
+  --goal-bar-row-h: 2.5rem;
+  border-radius: var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0 0;
+}
+
+@media (max-width: 520px) {
+  .goal-progress-bar--in-main {
+    --goal-bar-row-h: 3.35rem;
+  }
+}
+
+.goal-progress-bar--in-main + .main__hero {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+@property --main-hero-subheader-max-h-active {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 9.5rem;
+}
+
+.main__hero {
+  /* Tweak main hero subheader height — default and sticky max caps */
+  --main-hero-subheader-max-h: 9rem;
+  --main-hero-subheader-max-h-stuck: 8.5rem;
+  --main-hero-subheader-max-h-active: var(--main-hero-subheader-max-h);
+  transition: --main-hero-subheader-max-h-active 0.48s cubic-bezier(0.33, 1, 0.68, 1);
+  --subheader-h: max(
+    var(--subheader-bubble-h),
+    clamp(6.35rem, min(38vw, 34vh), var(--main-hero-subheader-max-h-active))
+  );
+  position: sticky;
+  top: var(--app-sticky-hero-top, var(--app-measured-header-h, var(--app-top-chrome-h)));
+  z-index: 201;
+  width: 100%;
+  margin-inline: 0;
+  margin-bottom: 0;
+  background: transparent;
+  box-sizing: border-box;
+  border-radius: var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0 0;
+  overflow: hidden;
+
+  .subheader--in-main::before {
+    background: transparent;
+  }
+
+  .subheader {
+    width: 100%;
+    transition:
+      height 0.48s cubic-bezier(0.33, 1, 0.68, 1),
+      min-height 0.48s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  &.main__hero--stuck,
+  &--stuck,
+  &:stuck {
+    --main-hero-subheader-max-h-active: var(--main-hero-subheader-max-h-stuck);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    .subheader-estimate {
+      gap: var(--space-2);
+    }
+
+  }
+}
+
+html[data-main-hero-stuck='true'] .main__hero {
+  --main-hero-subheader-max-h-active: var(--main-hero-subheader-max-h-stuck);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+
+  .subheader-estimate {
+    gap: var(--space-2);
+  }
+}
+
+html[data-no-portfolio-subheader='true'] .main__hero {
+  --subheader-h: var(--subheader-bubble-h);
+}
+
 .app-scroll-stack {
   position: relative;
   display: flex;
@@ -77,6 +175,14 @@
   min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
   padding-bottom: calc(var(--app-privacy-trust-h) + var(--app-plan-banner-h, 0px));
   box-sizing: border-box;
+}
+
+.app-scroll-stack--hero-in-main {
+  min-height: calc(100dvh - var(--app-top-chrome-h) - var(--space-4));
+}
+
+.app-scroll-stack--hero-in-main .app-scroll-stack__main {
+  overflow: visible;
 }
 
 .app-scroll-stack__main {
@@ -618,6 +724,9 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   .inputs-grid { grid-template-columns: 1fr; }
   .results-strip-inner { padding: 0 1rem; }
   .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
+  .main.main--has-hero {
+    padding-top: 0;
+  }
   .subheader { padding-left: var(--layout-app-inner-pad); padding-right: var(--layout-app-inner-pad); }
   .strip-totals { gap: 1rem; }
   .strip-total-val,
@@ -629,6 +738,10 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 @media (max-width: 760px) {
   .main {
     padding: var(--space-5) 0 var(--space-8);
+  }
+
+  .main.main--has-hero {
+    padding-top: 0;
   }
 }
 

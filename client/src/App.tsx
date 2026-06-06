@@ -29,6 +29,7 @@ import { AppLeftNav } from "./components/AppLeftNav";
 import { StripHeader } from "./components/StripHeader";
 import { GoalProgressBar } from "./components/GoalProgressBar";
 import { SubHeader } from "./components/SubHeader";
+import { DashboardMainHero } from "./components/DashboardMainHero";
 import "./components/AppHeaderStack.scss";
 import { persistCalculatorSession } from "./lib/appStateStorage";
 import {
@@ -76,7 +77,8 @@ import {
   findIncomeSecurity,
   navDriftFromErosionRisk,
 } from "./lib/incomeSecurities";
-import { isSsConfigured, clampClaimAge } from "./lib/socialSecurity";
+import { isGuaranteedIncomeConfigured } from "./lib/guaranteedIncome";
+import { isSsConfigured } from "./lib/socialSecurity";
 import {
   clearGuestProfileAndSession,
   heartbeatEphemeralGuestTab,
@@ -204,7 +206,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   } = useAuth();
 
   const path = useAppPath();
-  useAppHeaderStackHeight();
+  const appHeaderHeight = useAppHeaderStackHeight();
   const welcomeCtx = useMemo(
     () => ({
       onboardingComplete: hydration.onboardingComplete,
@@ -616,8 +618,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   );
 
   const ssBenefitsConfigured = isSsConfigured(inputs);
-  /** Wave SS toggle: benefit triple entered, or user opted in via Configure / wave. */
-  const ssTimingConfigured = ssBenefitsConfigured || ui.ssIncluded;
+  const guaranteedIncomeConfigured = isGuaranteedIncomeConfigured(inputs);
   const showScenarioGuideTab = useMemo(() => {
     if (phase !== "growth" || balanceMode !== "imported") return false;
     const imp = loadStoredPositionsImport();
@@ -632,7 +633,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       hasPortfolioBalances: dashboardHasPortfolio,
       ssConfigured: welcomeDone && ssBenefitsConfigured,
     }),
-    [dashboardHasPortfolio, welcomeDone, ssTimingConfigured],
+    [dashboardHasPortfolio, welcomeDone, ssBenefitsConfigured],
   );
   const taxSummaryAvailable = isTaxSummaryPanelAvailable(navContext);
   const showIncomeHarvestPreview =
@@ -766,17 +767,83 @@ export default function App({ initialAuthModal = null }: AppProps) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  const showDashboardSubHeader = welcomeDone && !isWhereToRetire;
+  /** Temporarily: wave/values live only in .main__hero — hide fixed header copy + collapse spacer. */
+  const fixedHeaderHeroHidden = showDashboardSubHeader;
+  const [mainHeroStuck, setMainHeroStuck] = useState(false);
+
+  useLayoutEffect(() => {
+    if (fixedHeaderHeroHidden) {
+      document.documentElement.setAttribute("data-app-hero-in-main", "true");
+    } else {
+      document.documentElement.removeAttribute("data-app-hero-in-main");
+    }
+  }, [fixedHeaderHeroHidden]);
+
+  const dashboardSubHeaderProps = {
+    phase,
+    onPhase: setPhase,
+    grossMon: cDisplay.grossMon,
+    totalFV: cDisplay.totalFV,
+    targetRetirementAge: inputs.targetRetirementAge,
+    ssIncluded: ui.ssIncluded,
+    onSsIncluded: (v: boolean) => setUi({ ssIncluded: v }),
+    guaranteedIncomeConfigured,
+    guaranteedIncomeTooltip: cDisplay.guaranteedIncomeTooltip,
+    onOpenGuaranteedIncomeConfig: () => {
+      setMobileNavOpen(false);
+      setConfigTab("guaranteed-income");
+      setDrawer("config");
+    },
+    hasPortfolioBalances: dashboardHasPortfolio,
+    marketScenarioId: normalizeMarketScenarioId(inputs.marketScenario),
+    marketScenarioActive: resolveMarketScenarioActive(inputs),
+    marketScenarioRetRate: inputs.retRate,
+    yearsToRetirement: cDisplay.yearsToRetirement,
+  } as const;
+
+  const dashboardGoalBar = hasGoalBar ? (
+    <GoalProgressBar
+      phase={phase}
+      growthGoal={inputs.growthGoal}
+      growthGoalProgressPct={cDisplay.growthGoalProgressPct}
+      monthlyIncomeGoal={inputs.monthlyIncomeGoal}
+      incomeGoalProgressPct={cDisplay.incomeGoalProgressPct}
+      hasPortfolioBalances={dashboardHasPortfolio}
+    />
+  ) : null;
+
+  const dashboardSubHeader = showDashboardSubHeader ? (
+    <SubHeader {...dashboardSubHeaderProps} />
+  ) : null;
+
+  const dashboardMainHero = showDashboardSubHeader ? (
+    <DashboardMainHero
+      stickyTopPx={appHeaderHeight}
+      hasGoalBar={hasGoalBar}
+      goalBarProps={{
+        phase,
+        growthGoal: inputs.growthGoal,
+        growthGoalProgressPct: cDisplay.growthGoalProgressPct,
+        monthlyIncomeGoal: inputs.monthlyIncomeGoal,
+        incomeGoalProgressPct: cDisplay.incomeGoalProgressPct,
+        hasPortfolioBalances: dashboardHasPortfolio,
+      }}
+      subHeaderProps={dashboardSubHeaderProps}
+      onStuckChange={setMainHeroStuck}
+    />
+  ) : null;
+
   return (
     <UserLocaleProvider residenceCountry={inputs.residenceCountry}>
       <>
         <div
           className={[
             "app-header-shell",
-            hasGoalBar && "app-header-shell--has-goal",
-            phase === "income" &&
-              welcomeDone &&
-              ssTimingConfigured &&
-              "app-header-shell--ss-claim",
+            !fixedHeaderHeroHidden &&
+              hasGoalBar &&
+              "app-header-shell--has-goal",
+            fixedHeaderHeroHidden && "app-header-shell--hero-in-main",
             welcomeDone &&
               isWhereToRetire &&
               "app-header-shell--where-to-retire",
@@ -835,44 +902,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
               navContext={navContext}
               welcomeDone={welcomeDone}
             />
-            {hasGoalBar ? (
-              <GoalProgressBar
-                phase={phase}
-                growthGoal={inputs.growthGoal}
-                growthGoalProgressPct={cDisplay.growthGoalProgressPct}
-                monthlyIncomeGoal={inputs.monthlyIncomeGoal}
-                incomeGoalProgressPct={cDisplay.incomeGoalProgressPct}
-                hasPortfolioBalances={dashboardHasPortfolio}
-              />
-            ) : null}
-            {welcomeDone && !isWhereToRetire ? (
-              <SubHeader
-                phase={phase}
-                onPhase={setPhase}
-                grossMon={cDisplay.grossMon}
-                totalFV={cDisplay.totalFV}
-                targetRetirementAge={inputs.targetRetirementAge}
-                ssIncluded={ui.ssIncluded}
-                onSsIncluded={(v) => setUi({ ssIncluded: v })}
-                ssClaimAge={clampClaimAge(inputs.ssAge)}
-                onSsClaimAgeChange={(age) =>
-                  setInputs({ ssAge: clampClaimAge(age) })
-                }
-                ssTimingConfigured={welcomeDone && ssTimingConfigured}
-                onOpenSsConfig={() => {
-                  setMobileNavOpen(false);
-                  setConfigTab("social-security");
-                  setDrawer("config");
-                }}
-                hasPortfolioBalances={dashboardHasPortfolio}
-                marketScenarioId={normalizeMarketScenarioId(
-                  inputs.marketScenario,
-                )}
-                marketScenarioActive={resolveMarketScenarioActive(inputs)}
-                marketScenarioRetRate={inputs.retRate}
-                yearsToRetirement={cDisplay.yearsToRetirement}
-              />
-            ) : null}
+            {!fixedHeaderHeroHidden ? dashboardGoalBar : null}
+            {!fixedHeaderHeroHidden ? dashboardSubHeader : null}
           </div>
           <div className="subheader-spacer" aria-hidden="true" />
         </div>
@@ -903,6 +934,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               welcomeDone &&
               "app-scroll-stack--where-to-retire",
             !welcomeDone && "app-scroll-stack--onboarding",
+            fixedHeaderHeroHidden && "app-scroll-stack--hero-in-main",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -911,7 +943,16 @@ export default function App({ initialAuthModal = null }: AppProps) {
             {welcomeDone && isWhereToRetire ? (
               <WhereToRetire c={cDisplay} />
             ) : welcomeDone ? (
-              <>
+              <div
+                className={[
+                  "main",
+                  showDashboardSubHeader && "main--has-hero",
+                  mainHeroStuck && "main--hero-stuck",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {dashboardMainHero}
                 <StripHeader
                   phase={phase}
                   c={cDisplay}
@@ -977,8 +1018,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
                   }}
                   hideGrowthSlider={showGrowthAssumptionsPanel}
                 />
-
-                <div className="main">
                   <div
                     className={[
                       "section",
@@ -1000,7 +1039,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
                           : undefined
                       }
                       style={
-                        useTaxSummarySplitLayout ? undefined : { display: "contents" }
+                        useTaxSummarySplitLayout
+                          ? undefined
+                          : { display: "contents" }
                       }
                     >
                       <div
@@ -1029,7 +1070,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             uiSsIncluded={ui.ssIncluded}
                             onOpenSocialSecurity={() => {
                               setMobileNavOpen(false);
-                              setConfigTab("social-security");
+                              setConfigTab("guaranteed-income");
                               setDrawer("config");
                             }}
                             inputs={inputs}
@@ -1188,8 +1229,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                       />
                     </div>
                   ) : null}
-                </div>
-              </>
+              </div>
             ) : null}
           </div>
         </div>

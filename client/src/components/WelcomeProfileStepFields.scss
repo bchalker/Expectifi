@@ -107,9 +107,19 @@
 }
 
 .welcome-profile-fields__stack {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-profile-fields__stack > .currency-amount-input {
+  min-width: 0;
+}
+
+.welcome-profile-fields__stack > .currency-amount-input:only-child {
+  grid-column: 1 / -1;
 }
 
 .welcome-profile-fields__bridge {
@@ -243,5 +253,13 @@
 
   .welcome-profile-fields__retire-col {
     flex: 1 1 100%;
+  }
+
+  .welcome-profile-fields__stack {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-profile-fields__stack > .currency-amount-input:only-child {
+    grid-column: auto;
   }
 }

@@ -48,8 +48,27 @@
   width: 100%;
 }
 
-.claim-age-slider__ticks--milestones {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.claim-age-slider__ticks--positioned {
+  position: relative;
+  display: block;
+  height: 1.25rem;
+  margin-top: var(--space-1);
+}
+
+.claim-age-slider__ticks--positioned .claim-age-slider__tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.claim-age-slider__ticks--positioned .claim-age-slider__tick--start {
+  transform: translateX(0);
+  text-align: left;
+}
+
+.claim-age-slider__ticks--positioned .claim-age-slider__tick--end {
+  transform: translateX(-100%);
+  text-align: right;
 }
 
 .claim-age-slider__tick {

@@ -57,13 +57,30 @@
   width: 100%;
 }
 
+.currency-amount-input__text-field {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.currency-amount-input__text-field input {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.currency-amount-input__text-field--onboarding {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .currency-amount-input__amount-row {
   width: 100%;
 }
 
 .currency-amount-input__amount-row--external-prefix,
 .currency-amount-input__amount-row--external-affixes {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: var(--space-1) /* review: was 0.35rem */;
@@ -76,7 +93,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1) /* review: was 0.35rem */;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   margin-inline: auto;
 }

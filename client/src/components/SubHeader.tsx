@@ -1,20 +1,20 @@
 import {
   useCallback,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import { IconChevronRight } from "@tabler/icons-react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
 import {
   marketScenarioHeroBadgeLabel,
   marketScenarioIsBase,
   type MarketScenarioId,
 } from "../lib/marketScenario";
-import { SS_CLAIM_AGE_OPTIONS, clampClaimAge } from "../lib/socialSecurity";
 import { fmt } from "../utils/format";
+import type { GuaranteedIncomeTooltipModel } from "../lib/guaranteedIncome";
+import { Tooltip } from "./Tooltip";
 import "./SubHeader.scss";
+import "./Tooltip.scss";
 
 type Phase = "growth" | "income";
 
@@ -25,11 +25,14 @@ function PhaseSegmentTabs({
   phase,
   onPhase,
   targetRetirementAge,
+  instanceId,
 }: {
   phase: Phase;
   onPhase: (p: Phase) => void;
   targetRetirementAge: number;
+  instanceId?: string;
 }) {
+  const idSuffix = instanceId ? `-${instanceId}` : "";
   const trackRef = useRef<HTMLDivElement>(null);
   const growthRef = useRef<HTMLButtonElement>(null);
   const incomeRef = useRef<HTMLButtonElement>(null);
@@ -76,9 +79,9 @@ function PhaseSegmentTabs({
         ref={growthRef}
         type="button"
         role="tab"
-        id="subheader-phase-growth"
+        id={`subheader-phase-growth${idSuffix}`}
         aria-selected={phase === "growth"}
-        aria-controls="subheader-phase-growth-panel"
+        aria-controls={`subheader-phase-growth-panel${idSuffix}`}
         tabIndex={phase === "growth" ? 0 : -1}
         className="subheader-phase-segment__tab"
         onClick={() => onPhase("growth")}
@@ -89,9 +92,9 @@ function PhaseSegmentTabs({
         ref={incomeRef}
         type="button"
         role="tab"
-        id="subheader-phase-income"
+        id={`subheader-phase-income${idSuffix}`}
         aria-selected={phase === "income"}
-        aria-controls="subheader-phase-income-panel"
+        aria-controls={`subheader-phase-income-panel${idSuffix}`}
         tabIndex={phase === "income" ? 0 : -1}
         className="subheader-phase-segment__tab subheader-phase-segment__tab--income"
         onClick={() => onPhase("income")}
@@ -115,100 +118,6 @@ function subheaderMarketScenarioPillClass(id: MarketScenarioId): string {
   return "";
 }
 
-/** Claim age — trigger opens panel with 62 / 67 / 70 button group. */
-function SubheaderClaimAgePicker({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (age: number) => void;
-}) {
-  const claimAge = clampClaimAge(value);
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
-      if (rootRef.current?.contains(event.target as Node)) return;
-      setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="subheader-claim-age-picker">
-      <button
-        type="button"
-        className="subheader-claim-age-picker__trigger"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-controls="subheader-claim-age-panel"
-        aria-label={`Social Security claiming age ${claimAge}. Change claiming age.`}
-        onClick={() => setOpen((prev) => !prev)}
-      >
-        <span className="subheader-claim-age-picker__trigger-text">
-          At age{" "}
-          <span className="subheader-claim-age-picker__trigger-age">
-            {claimAge}
-          </span>
-        </span>
-        <IconChevronRight
-          className="subheader-claim-age-picker__chevron"
-          size={14}
-          stroke={1.5}
-          aria-hidden
-        />
-      </button>
-      {open ? (
-        <div
-          id="subheader-claim-age-panel"
-          className="subheader-claim-age-picker__panel"
-          role="dialog"
-          aria-label="Your Social Security claiming age"
-        >
-          <div
-            className="subheader-claim-age-picker__group"
-            role="group"
-            aria-label="Select claiming age"
-          >
-            {SS_CLAIM_AGE_OPTIONS.map((age) => {
-              const selected = claimAge === age;
-              return (
-                <button
-                  key={age}
-                  type="button"
-                  className={[
-                    "subheader-claim-age-picker__btn",
-                    selected && "subheader-claim-age-picker__btn--on",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  aria-pressed={selected}
-                  onClick={() => {
-                    onChange(age);
-                    setOpen(false);
-                  }}
-                >
-                  {age}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 type Props = {
   phase: Phase;
   onPhase: (p: Phase) => void;
@@ -217,11 +126,10 @@ type Props = {
   targetRetirementAge: number;
   ssIncluded: boolean;
   onSsIncluded: (v: boolean) => void;
-  ssClaimAge: number;
-  onSsClaimAgeChange: (age: number) => void;
-  /** When false, show Add Social Security instead of the toggle. */
-  ssTimingConfigured: boolean;
-  onOpenSsConfig: () => void;
+  /** When false, show Add guaranteed income until sources are saved. */
+  guaranteedIncomeConfigured: boolean;
+  onOpenGuaranteedIncomeConfig: () => void;
+  guaranteedIncomeTooltip?: GuaranteedIncomeTooltipModel;
   /** When false, header shows $0 — no manual balances or imported positions to project from. */
   hasPortfolioBalances: boolean;
   marketScenarioId?: MarketScenarioId;
@@ -230,6 +138,9 @@ type Props = {
   /** Global slider rate — used to derive scenario modifier for the hero pill. */
   marketScenarioRetRate?: number;
   yearsToRetirement?: number;
+  className?: string;
+  /** Suffix for tab/panel ids when rendering a second instance (e.g. in .main). */
+  instanceId?: string;
 };
 
 /** Back wave (1000×100); fill uses theme token via inline SVG */
@@ -245,20 +156,27 @@ export function SubHeader({
   targetRetirementAge,
   ssIncluded,
   onSsIncluded,
-  ssClaimAge,
-  onSsClaimAgeChange,
-  ssTimingConfigured,
-  onOpenSsConfig,
+  guaranteedIncomeConfigured,
+  onOpenGuaranteedIncomeConfig,
+  guaranteedIncomeTooltip,
   hasPortfolioBalances,
   marketScenarioId = "base",
   marketScenarioActive = false,
   marketScenarioRetRate = 0,
   yearsToRetirement = 1,
+  className,
+  instanceId,
 }: Props) {
   const grossAnim = useAnimatedScalar(grossMon);
   const totalFvAnim = useAnimatedScalar(totalFV);
 
   const incomePhase = phase === "income";
+  const showGuaranteedIncomeRetirementNote =
+    (guaranteedIncomeTooltip?.rows.some(
+      (row) => row.startAge > targetRetirementAge,
+    ) ??
+      false) &&
+    (guaranteedIncomeTooltip?.rows.length ?? 0) > 0;
   const showMarketScenarioPill =
     !incomePhase &&
     hasPortfolioBalances &&
@@ -275,13 +193,19 @@ export function SubHeader({
     ? subheaderMarketScenarioPillClass(marketScenarioId)
     : "";
 
-  const showSsClaimPicker = incomePhase && ssTimingConfigured && ssIncluded;
-  /** Reserve hero height/padding when SS is configured so toggling include does not shift the amount. */
-  const reserveSsClaimSlot = incomePhase && ssTimingConfigured;
+
+  const idSuffix = instanceId ? `-${instanceId}` : "";
 
   return (
     <header
-      className={`subheader${incomePhase ? " subheader--phase-income" : ""}${reserveSsClaimSlot ? " subheader--ss-claim-slot" : ""}${!hasPortfolioBalances ? " subheader--no-balances" : ""}`}
+      className={[
+        "subheader",
+        incomePhase ? "subheader--phase-income" : "",
+        !hasPortfolioBalances ? "subheader--no-balances" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <div className="subheader-waves">
         <div className="subheader-waves__bubbles" aria-hidden>
@@ -314,9 +238,10 @@ export function SubHeader({
                 phase={phase}
                 onPhase={onPhase}
                 targetRetirementAge={targetRetirementAge}
+                instanceId={instanceId}
               />
               <div
-                id="subheader-phase-growth-panel"
+                id={`subheader-phase-growth-panel${idSuffix}`}
                 className="subheader-phase-segment__sr"
                 role="tabpanel"
                 hidden={phase !== "growth"}
@@ -324,7 +249,7 @@ export function SubHeader({
                 Growth phase
               </div>
               <div
-                id="subheader-phase-income-panel"
+                id={`subheader-phase-income-panel${idSuffix}`}
                 className="subheader-phase-segment__sr"
                 role="tabpanel"
                 hidden={phase !== "income"}
@@ -360,52 +285,96 @@ export function SubHeader({
                 ) : null}
                 {incomePhase ? (
                   <div className="subheader-estimate__meta">
-                    <div className="subheader-ss-block">
-                      <div
-                        className="subheader-estimate__note subheader-estimate__note--ss-row"
-                        role="group"
-                        aria-label="Include Social Security in expected monthly income"
-                      >
-                        {ssTimingConfigured ? (
-                          <>
-                            <span className="font-xs subheader-ss-toggle__text">
-                              Include Social Security
-                            </span>
-                            <button
-                              type="button"
-                              role="switch"
-                              aria-checked={ssIncluded}
-                              aria-label="Include Social Security in expected monthly income"
-                              className={`subheader-ss-toggle__switch${ssIncluded ? " subheader-ss-toggle__switch--on" : ""}`}
-                              onClick={() => onSsIncluded(!ssIncluded)}
+                    <div
+                      className="subheader-estimate__note subheader-estimate__note--ss-row subheader-estimate__note--guaranteed-income"
+                      role="group"
+                      aria-label="Include guaranteed income in expected monthly income"
+                    >
+                      {guaranteedIncomeConfigured ? (
+                        <div className="subheader-guaranteed-income-toggle">
+                          <span className="font-xs subheader-ss-toggle__text subheader-guaranteed-income-toggle__label">
+                            Include{" "}
+                            <Tooltip
+                              nativeTrigger
+                              placement="top"
+                              showArrow
+                              delay={250}
+                              closeDelay={80}
+                              contentClassName="subheader-guaranteed-income-tooltip__content"
+                              content={
+                                <div className="subheader-guaranteed-income-tooltip">
+                                  {guaranteedIncomeTooltip?.rows.length ? (
+                                    <>
+                                      <ul className="subheader-guaranteed-income-tooltip__list">
+                                        {guaranteedIncomeTooltip.rows.map((row) => (
+                                          <li
+                                            key={row.id}
+                                            className="subheader-guaranteed-income-tooltip__row"
+                                          >
+                                            <span className="subheader-guaranteed-income-tooltip__name">
+                                              {row.label}
+                                            </span>
+                                            <span className="subheader-guaranteed-income-tooltip__detail">
+                                              <span className="subheader-guaranteed-income-tooltip__amount">
+                                                +{fmt(row.monthlyAmount)}/mo
+                                              </span>
+                                              <span className="subheader-guaranteed-income-tooltip__age">
+                                                at {row.startAge}
+                                              </span>
+                                            </span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                      {showGuaranteedIncomeRetirementNote ? (
+                                        <p className="subheader-guaranteed-income-tooltip__context font-xs">
+                                          You retire at {targetRetirementAge} -- these
+                                          kick in a few years later.
+                                        </p>
+                                      ) : null}
+                                    </>
+                                  ) : (
+                                    <p className="subheader-guaranteed-income-tooltip__empty">
+                                      No guaranteed income configured yet.
+                                    </p>
+                                  )}
+                                </div>
+                              }
                             >
-                              <span
-                                className="subheader-ss-toggle__track"
-                                aria-hidden
-                              />
-                            </button>
-                          </>
-                        ) : (
+                              <button
+                                type="button"
+                                className="subheader-guaranteed-income-toggle__link"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onOpenGuaranteedIncomeConfig();
+                                }}
+                              >
+                                guaranteed income
+                              </button>
+                            </Tooltip>
+                          </span>
                           <button
                             type="button"
-                            className="font-xs subheader-ss-add-btn"
-                            onClick={onOpenSsConfig}
+                            role="switch"
+                            aria-checked={ssIncluded}
+                            aria-label="Include guaranteed income in expected monthly income"
+                            className={`subheader-ss-toggle__switch${ssIncluded ? " subheader-ss-toggle__switch--on" : ""}`}
+                            onClick={() => onSsIncluded(!ssIncluded)}
                           >
-                            Add Social Security
+                            <span
+                              className="subheader-ss-toggle__track"
+                              aria-hidden
+                            />
                           </button>
-                        )}
-                      </div>
-                      {reserveSsClaimSlot ? (
-                        <div
-                          className={`subheader-estimate__claim-reveal${showSsClaimPicker ? " subheader-estimate__claim-reveal--visible" : ""}`}
-                          aria-hidden={!showSsClaimPicker}
-                        >
-                          <SubheaderClaimAgePicker
-                            value={ssClaimAge}
-                            onChange={onSsClaimAgeChange}
-                          />
                         </div>
-                      ) : null}
+                      ) : (
+                        <button
+                          type="button"
+                          className="font-xs subheader-ss-add-btn"
+                          onClick={onOpenGuaranteedIncomeConfig}
+                        >
+                          Add guaranteed income
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : null}

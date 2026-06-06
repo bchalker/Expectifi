@@ -4,6 +4,8 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 .section--tax-summary {
   position: relative;
   overflow: hidden;
+  padding: var(--space-4);
+  padding-top: 0;
 }
 
 .section--tax-summary > .portfolio-accounts-reveal {
@@ -19,7 +21,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   gap: 0;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--border);
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;
   background: #ffffff;
@@ -136,7 +137,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   gap: 0;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--border);
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;
   background: #ffffff;
@@ -275,6 +275,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  padding: var(--space-4);
 }
 
 .tax-summary-card__accounts .section {

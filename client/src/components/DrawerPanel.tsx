@@ -101,8 +101,8 @@ export function DrawerPanel({
   }
 
   const onConfigConfirm = () => {
-    if (ssIncluded && inputs.ssBenefit67 <= 0) {
-      setSsBenefitError('Enter your expected Social Security benefit.')
+    if (ssIncluded && inputs.ssBenefit67 <= 0 && !(inputs.guaranteedIncomeEntries?.some((e) => e.monthlyAmount > 0))) {
+      setSsBenefitError('Enter your expected guaranteed income benefit.')
       return
     }
     setSsBenefitError(null)

@@ -87,6 +87,8 @@ export type IncomePhaseParams = {
   ssIncluded: boolean;
   /** Age when the growth model reaches `totalFV` (default 62). */
   retirementStartAge?: number;
+  /** When set, SS reinvestment phases in each source at its start age. */
+  guaranteedSources?: ReadonlyArray<{ startAge: number; monthlyAmount: number }>;
 };
 
 export type IncomePhaseResult = {

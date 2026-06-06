@@ -56,7 +56,7 @@ export function Tooltip({
   if (nativeTrigger) {
     return (
       <HeroTooltip.Root delay={delay} closeDelay={closeDelay}>
-        {children}
+        <HeroTooltip.Trigger className={triggerClass}>{children}</HeroTooltip.Trigger>
         {tooltipContent}
       </HeroTooltip.Root>
     )

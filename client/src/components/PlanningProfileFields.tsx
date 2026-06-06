@@ -147,6 +147,7 @@ export function PlanningProfileFields(props: PlanningProfileFieldsProps) {
           value={dateOfBirth}
           onChange={onDateOfBirth}
           includeDay={false}
+          segmented
         />
         {dobOk ? (
           <DobAgeHint

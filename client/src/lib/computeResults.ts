@@ -20,6 +20,12 @@ import type { AccountIncomeStrategy } from './accountIncomeStrategy'
 import { retirementFvForAccountBucket } from './accountBucketRetirementBalance'
 import { resolveOnboardingAccountLocale } from './onboardingAccountTypesByLocale'
 import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
+import {
+  guaranteedIncomeFutureHeroNote,
+  guaranteedIncomeMonthlyAtAge,
+  guaranteedIncomeSourcesFromInputs,
+  guaranteedIncomeTooltipModel,
+} from './guaranteedIncome'
 import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
 import { positionsForBrokerage, positionsForRetirementBucket, type ImportedPositionRow } from './positionsCsv'
 import type { BrokerageBalanceMode } from './brokerageBalanceMode'
@@ -45,6 +51,14 @@ import {
   normalizeRetireRegions,
   type RetireRegionPick,
 } from './calc/retireRegions'
+import type { GuaranteedIncomeEntry } from './guaranteedIncome'
+
+export type { GuaranteedIncomeEntry } from './guaranteedIncome'
+export type {
+  FutureGuaranteedIncomeNote,
+  GuaranteedIncomeTooltipModel,
+  GuaranteedIncomeTooltipRow,
+} from './guaranteedIncome'
 
 export type { RetireRegionComparison, RetireRegionPick } from './calc/retireRegions'
 export { MAX_RETIRE_REGIONS, listRetireRegions, getRetireRegion, isRetireRegionId } from './calc/retireRegions'
@@ -126,6 +140,8 @@ export type CalculatorInputs = {
   residenceCountry: string
   /** US federal filing status for tax, SS provisional income, and Roth conversion room. */
   filingStatus: FilingStatusId
+  /** Supplemental guaranteed income sources (pension, annuity, OAS, etc.). SS/CPP primary syncs via ssBenefit* fields. */
+  guaranteedIncomeEntries?: GuaranteedIncomeEntry[]
 }
 
 export type { FilingStatusId } from 'shared'
@@ -509,7 +525,17 @@ export function computeResults(
   const spouseAge = spouseEligible ? ssBreakdown.spouseClaimAge : 0
   const survivorCallout = buildSurvivorCallout(monPort, ssBreakdown)
 
-  const totalSS = ui.ssIncluded ? ssBreakdown.totalMonthly : 0
+  const guaranteedSources = guaranteedIncomeSourcesFromInputs(inputs).map((source) => ({
+    startAge: source.startAge,
+    monthlyAmount: source.monthlyAmount,
+  }))
+  const totalSS = ui.ssIncluded
+    ? guaranteedIncomeMonthlyAtAge(inputs, targetRetirementAge)
+    : 0
+  const futureGuaranteedIncomeNote = ui.ssIncluded
+    ? guaranteedIncomeFutureHeroNote(inputs, targetRetirementAge)
+    : null
+  const guaranteedIncomeTooltip = guaranteedIncomeTooltipModel(inputs)
   const grossMon = monPort + totalSS
 
   const portSum = retFV + brkFV
@@ -596,6 +622,7 @@ export function computeResults(
         totalSSMonthly: totalSS,
         ssIncluded: ui.ssIncluded,
         retirementStartAge: targetRetirementAge,
+        guaranteedSources,
       })
     : null
 
@@ -716,6 +743,7 @@ export function computeResults(
     monPort,
     totalSS,
     grossMon,
+    guaranteedSources,
     taxDetail,
     annTax,
     afterTaxMon,
@@ -740,6 +768,8 @@ export function computeResults(
     ssTiming,
     ssBreakdown,
     survivorCallout,
+    futureGuaranteedIncomeNote,
+    guaranteedIncomeTooltip,
     ssConfigured: isSsConfigured(inputs),
     strategy,
     portfolioGuidance,
@@ -942,6 +972,7 @@ export function applyPortfolioDeltaAtRetirement(
         totalSSMonthly: totalSS,
         ssIncluded,
         retirementStartAge: targetRetirementAge,
+        guaranteedSources: snapshot.guaranteedSources,
       })
     : snapshot.incomePhase
 

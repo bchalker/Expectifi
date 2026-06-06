@@ -11,7 +11,7 @@ type Props = {
 
 const OPTIONS: { id: SpouseClaimMode; label: string }[] = [
   { id: 'own', label: 'Their own benefit' },
-  { id: 'spousal', label: 'Spousal benefit (50% of yours)' },
+  { id: 'spousal', label: 'Spousal (50% of yours)' },
 ]
 
 export function SpouseClaimModeSegment({ value, onChange, spousalHint, disabled = false }: Props) {

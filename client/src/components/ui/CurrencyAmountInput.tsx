@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { Input, TextField } from '@heroui/react'
 import { IconCheck } from '@tabler/icons-react'
 import { currencySymbol } from '../../lib/displayCurrency'
 import { fmt, fmtInput, parseNum } from '../../utils/format'
@@ -166,45 +167,107 @@ export function CurrencyAmountInput({
         .join(' ')}
     >
       {externalPrefix ? <span className="currency-amount-input__prefix-outside">{prefix}</span> : null}
-      <div
-        className={[
-          showFillState ? 'onboarding-field-shell' : 'num-input-wrap',
-          'currency-amount-input__wrap',
-          showFillState && filled ? 'onboarding-field-shell--filled' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {!externalPrefix ? <span className="num-input-prefix">{prefix}</span> : null}
-        <input
-          id={id}
-          type="text"
-          inputMode="decimal"
-          className={
-            showFillState
-              ? 'onboarding-field-shell__input currency-amount-input__field'
-              : 'num-input currency-amount-input__field'
-          }
+      {showFillState ? (
+        <div
+          className={[
+            'onboarding-field-shell',
+            'currency-amount-input__wrap',
+            filled ? 'onboarding-field-shell--filled' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {!externalPrefix ? <span className="num-input-prefix">{prefix}</span> : null}
+          <TextField
+            className={[
+              'currency-amount-input__text-field',
+              'currency-amount-input__text-field--onboarding',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            variant="secondary"
+            aria-label={hideLabel ? label : undefined}
+            value={display}
+            onChange={(v) => onChange(Math.round(parseNum(v)))}
+            isDisabled={disabled}
+            isInvalid={invalid}
+          >
+            <Input
+              id={id}
+              type="text"
+              inputMode="decimal"
+              className="onboarding-field-shell__input currency-amount-input__field"
+              placeholder={placeholder}
+              onFocus={() => setFocused(true)}
+              onBlur={() => {
+                setFocused(false)
+                onChange(Math.round(parseNum(display)))
+              }}
+            />
+          </TextField>
+          {internalSuffix ? (
+            <span className="currency-amount-input__suffix-inside">{internalSuffix}</span>
+          ) : null}
+          {filled ? (
+            <span className="onboarding-field-shell__check" aria-hidden>
+              <IconCheck size={14} strokeWidth={2} />
+            </span>
+          ) : null}
+        </div>
+      ) : externalPrefix ? (
+        <TextField
+          className="currency-amount-input__text-field"
+          variant="secondary"
+          fullWidth
+          aria-label={hideLabel ? label : undefined}
           value={display}
-          placeholder={placeholder}
-          disabled={disabled}
-          aria-invalid={invalid || undefined}
-          onFocus={() => setFocused(true)}
-          onBlur={() => {
-            setFocused(false)
-            onChange(Math.round(parseNum(display)))
-          }}
-          onChange={(e) => onChange(Math.round(parseNum(e.target.value)))}
-        />
-        {internalSuffix ? (
-          <span className="currency-amount-input__suffix-inside">{internalSuffix}</span>
-        ) : null}
-        {showFillState && filled ? (
-          <span className="onboarding-field-shell__check" aria-hidden>
-            <IconCheck size={14} strokeWidth={2} />
-          </span>
-        ) : null}
-      </div>
+          onChange={(v) => onChange(Math.round(parseNum(v)))}
+          isDisabled={disabled}
+          isInvalid={invalid}
+        >
+          <Input
+            id={id}
+            type="text"
+            inputMode="decimal"
+            className="currency-amount-input__field"
+            placeholder={placeholder}
+            onFocus={() => setFocused(true)}
+            onBlur={() => {
+              setFocused(false)
+              onChange(Math.round(parseNum(display)))
+            }}
+          />
+        </TextField>
+      ) : (
+        <div className="num-input-wrap currency-amount-input__wrap">
+          <span className="num-input-prefix">{prefix}</span>
+          <TextField
+            className="currency-amount-input__text-field"
+            variant="secondary"
+            aria-label={hideLabel ? label : undefined}
+            value={display}
+            onChange={(v) => onChange(Math.round(parseNum(v)))}
+            isDisabled={disabled}
+            isInvalid={invalid}
+          >
+            <Input
+              id={id}
+              type="text"
+              inputMode="decimal"
+              className="num-input currency-amount-input__field"
+              placeholder={placeholder}
+              onFocus={() => setFocused(true)}
+              onBlur={() => {
+                setFocused(false)
+                onChange(Math.round(parseNum(display)))
+              }}
+            />
+          </TextField>
+          {internalSuffix ? (
+            <span className="currency-amount-input__suffix-inside">{internalSuffix}</span>
+          ) : null}
+        </div>
+      )}
       {externalSuffix ? (
         <span className="currency-amount-input__suffix-outside">{externalSuffix}</span>
       ) : null}

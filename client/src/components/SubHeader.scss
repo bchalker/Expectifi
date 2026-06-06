@@ -13,6 +13,7 @@
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
+
 }
 
 html:not([data-no-portfolio-subheader]) .subheader {
@@ -30,16 +31,6 @@ html:not([data-no-portfolio-subheader]) .subheader {
 // .subheader.subheader--phase-income::before {
 //   background: rgba(0,0,0,0.05);
 // }
-
-.subheader.subheader--phase-income.subheader--ss-claim-slot {
-  height: var(--subheader-h);
-  min-height: var(--subheader-h);
-}
-
-.subheader.subheader--no-balances.subheader--phase-income.subheader--ss-claim-slot {
-  height: var(--subheader-h);
-  min-height: var(--subheader-h);
-}
 
 .subheader-bubble__front-path {
   fill: var(--amber1);
@@ -69,6 +60,10 @@ html:not([data-no-portfolio-subheader]) .subheader::before {
   z-index: 0;
   box-sizing: border-box;
   pointer-events: none;
+  transition: all 250ms ease;
+  // .main__hero--stuck & {
+  //   height: 120px;
+  // }
 }
 
 .subheader-waves__bubbles {
@@ -148,29 +143,13 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 }
 
 /* Post-commit: hero amount and SS row rise in after the wave (staggered). */
-html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
-html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
+html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
   opacity: 0;
 }
 
 html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
   animation: portfolio-reveal-rise var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
     var(--portfolio-subheader-hero-delay) both;
-}
-
-html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
-  animation: portfolio-reveal-fade var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
-    var(--portfolio-subheader-bottom-delay) both;
-}
-
-@keyframes portfolio-reveal-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes portfolio-reveal-rise {
@@ -209,11 +188,9 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 .subheader-content .subheader-estimate button,
 .subheader-content .subheader-estimate .subheader-ss-add-btn,
 .subheader-content .subheader-estimate .subheader-ss-toggle__switch,
-.subheader-content .subheader-estimate .subheader-ss-block,
 .subheader-content .subheader-estimate .subheader-estimate__top,
 .subheader-content .subheader-estimate .subheader-claim-age-picker,
-.subheader-content .subheader-estimate .subheader-claim-age-picker__trigger-text,
-.subheader-content .subheader-estimate .subheader-claim-age-picker__chevron,
+.subheader-content .subheader-estimate .subheader-claim-age-picker__age-trigger,
 .subheader-content .subheader-estimate .subheader-claim-age-picker__btn,
 .subheader-content .subheader-estimate .subheader-phase-segment,
 .subheader-content .subheader-estimate .subheader-phase-segment__tab {
@@ -240,6 +217,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   max-width: min(100%, 30rem);
   margin: 0 auto;
   padding-block: var(--space-4);
+  transition: gap 0.48s cubic-bezier(0.33, 1, 0.68, 1);
   text-align: center;
   box-sizing: border-box;
 }
@@ -262,22 +240,6 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   box-sizing: border-box;
 }
 
-.subheader-estimate__claim-reveal {
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition:
-    opacity 0.26s cubic-bezier(0.33, 1, 0.68, 1),
-    transform 0.32s cubic-bezier(0.33, 1, 0.68, 1);
-  will-change: opacity, transform;
-}
-
-.subheader-estimate__claim-reveal--visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
 /* Fixed vertical rhythm so Growth ↔ Income does not jump; inner swap remounts for motion. */
 .subheader-estimate__swap {
   display: flex;
@@ -297,7 +259,12 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   gap: var(--space-1) /* review: was 6px */;
   width: 100%;
   min-width: 0;
+  transition: all 250ms ease;
   margin-top: var(--space-3);
+  .main__hero--stuck & {
+
+    margin-top: var(--space-1);
+  }
 }
 
 @keyframes subheader-value-fade-slide {
@@ -355,15 +322,6 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   max-width: min(100%, 22rem);
 }
 
-.subheader-ss-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: min(100%, 22rem);
-}
-
 .subheader-estimate__note--ss-row {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -378,70 +336,44 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 
 .subheader-claim-age-picker {
   position: relative;
+  display: inline;
+  vertical-align: baseline;
   z-index: 5;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
   pointer-events: auto;
 }
 
-.subheader-claim-age-picker__trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1) /* review: was 0.2rem */;
-  box-sizing: border-box;
+.subheader-claim-age-picker__age-trigger {
+  display: inline;
   margin: 0;
-  min-height: 1.75rem;
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-3) /* review: was 0.85rem */;
+  padding: 0;
   border: none;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.12),
-    0 0 0 1px rgb(0 0 0 / 0.06);
-  font-family: var(--body);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--nav-bg);
-  white-space: nowrap;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: inherit;
+  color: var(--amber4);
+  text-decoration: underline dashed;
+  text-decoration-color: color-mix(in srgb, var(--amber4) 72%, transparent);
+  text-underline-offset: 0.14em;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    background-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
 }
 
-.subheader-claim-age-picker__trigger-text {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
+.subheader-claim-age-picker__age-trigger:hover {
+  color: var(--amber3);
+  text-decoration-color: var(--amber3);
 }
 
-.subheader-claim-age-picker__trigger-age {
-  font-weight: 700;
-}
-
-.subheader-claim-age-picker__chevron {
-  flex: 0 0 auto;
-  opacity: 0.55;
-}
-
-.subheader-claim-age-picker__trigger:hover {
-  background: #fff;
-  box-shadow:
-    0 2px 6px rgb(0 0 0 / 0.14),
-    0 0 0 1px rgb(0 0 0 / 0.08);
-}
-
-.subheader-claim-age-picker__trigger:active {
-  transform: scale(0.98);
-}
-
-.subheader-claim-age-picker__trigger:focus-visible {
+.subheader-claim-age-picker__age-trigger:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .subheader-claim-age-picker__panel {
@@ -449,6 +381,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   bottom: calc(100% + 0.45rem);
   left: 50%;
   z-index: 10;
+  display: block;
   min-width: 9.5rem;
   padding: var(--space-1) /* review: was 0.35rem */;
   border: 1px solid var(--border);
@@ -602,6 +535,154 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   color: var(--subheader-label-fg);
   text-align: center;
   max-width: min(100%, 20rem);
+}
+
+.subheader-guaranteed-income-toggle {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: min(100%, 22rem);
+}
+
+.subheader-guaranteed-income-toggle__label {
+  min-width: 0;
+  text-align: center;
+}
+
+.subheader-guaranteed-income-toggle__link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: var(--amber4);
+  text-decoration: underline dashed;
+  text-decoration-color: color-mix(in srgb, var(--amber4) 72%, transparent);
+  text-underline-offset: 0.14em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
+}
+
+.app-tooltip__trigger.subheader-guaranteed-income-toggle__link {
+  display: inline;
+}
+
+.subheader-guaranteed-income-toggle__link:hover {
+  color: var(--amber3);
+  text-decoration-color: var(--amber3);
+}
+
+.subheader-guaranteed-income-toggle__link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.subheader--phase-income .subheader-guaranteed-income-toggle__link:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.45);
+}
+
+.subheader-guaranteed-income-tooltip__content.app-tooltip__content {
+  background: var(--color-background-primary, #fff);
+  border: 0.5px solid var(--color-border-tertiary, var(--border));
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  padding: var(--space-2);
+  min-width: 220px;
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-primary, var(--text));
+  line-height: 1.5;
+}
+
+.subheader-guaranteed-income-tooltip__content.app-tooltip__content [data-slot='overlay-arrow'] path,
+.subheader-guaranteed-income-tooltip__content.app-tooltip__content [data-slot='overlay-arrow'] svg {
+  fill: var(--color-background-primary, #fff);
+  stroke: var(--color-border-tertiary, var(--border));
+  stroke-width: 0.5px;
+}
+
+.subheader-guaranteed-income-tooltip {
+  min-width: 0;
+}
+
+.subheader-guaranteed-income-tooltip__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.subheader-guaranteed-income-tooltip__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 3px 0;
+  min-width: 0;
+}
+
+.subheader-guaranteed-income-tooltip__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-text-primary, var(--text));
+}
+
+.subheader-guaranteed-income-tooltip__detail {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35em;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.subheader-guaranteed-income-tooltip__amount {
+  color: #3b6d11;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.subheader-guaranteed-income-tooltip__age {
+  color: var(--color-text-secondary, var(--text-muted));
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.subheader-guaranteed-income-tooltip__context {
+  margin: 7px 0 0;
+  padding-top: 7px;
+  border-top: 0.5px solid var(--color-border-tertiary, var(--border));
+  color: var(--color-text-info, var(--blue3));
+}
+
+.subheader-guaranteed-income-tooltip__empty {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-text-secondary, var(--text-muted));
+}
+
+.subheader-estimate__note--guaranteed-income {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .subheader-ss-add-btn {
@@ -812,7 +893,16 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
   // gap: var(--space-1) /* review: was 0.15rem */ var(--space-1) /* review: was 0.35rem */;
   width: 100%;
   box-sizing: border-box;
+  transform: scale(1);
+  transform-origin: center left;
+  transition:
+  all 250ms ease;
+//   .main__hero--stuck & {
+//     // transform: scale(0.82);
+//     font-size: var(--text-2xl);
+// }
 }
+
 
 .subheader-estimate__value-num {
   font-variant-numeric: tabular-nums;
@@ -897,9 +987,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
 }
 
 @media (max-width: 620px) {
-  .subheader,
-  .subheader.subheader--phase-income.subheader--ss-claim-slot,
-  .subheader.subheader--no-balances.subheader--phase-income.subheader--ss-claim-slot {
+  .subheader {
     height: 120px;
     min-height: 120px;
   }
@@ -959,13 +1047,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     animation: none;
   }
 
-  .subheader-estimate__claim-reveal {
-    transition-duration: 0.01ms;
-    will-change: auto;
-  }
-
-  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap,
-  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
     opacity: 1;
   }
 
@@ -973,10 +1055,5 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     animation: none;
     opacity: 1;
     transform: none;
-  }
-
-  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__claim-reveal {
-    animation: none;
-    opacity: 1;
   }
 }

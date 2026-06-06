@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
-import { ConfigSocialSecurityTab } from './ConfigSocialSecurityTab'
+import { ConfigGuaranteedIncomeTab } from './ConfigGuaranteedIncomeTab'
 import { PlanningProfileFields } from './PlanningProfileFields'
 import { planningDisplayFromInputs } from '../lib/userPrefs'
 import { findOnboardingRegion } from '../lib/onboardingRegions'
@@ -15,12 +15,12 @@ import { ConfigLifeTab } from './ConfigLifeTab'
 import './ConfigLifeTab.scss'
 import type { LifePlans } from '../lib/planStorage/life'
 
-export type ConfigDrawerTab = 'profile' | 'plan' | 'social-security' | 'life'
+export type ConfigDrawerTab = 'profile' | 'plan' | 'guaranteed-income' | 'life'
 
 const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
-  { id: 'social-security', label: 'Social Security' },
+  { id: 'guaranteed-income', label: 'Guaranteed Income' },
   { id: 'life', label: 'Life' },
 ]
 
@@ -173,15 +173,15 @@ export function ConfigDrawerTabPanels({
         </div>
       ) : null}
 
-      {tab === 'social-security' ? (
+      {tab === 'guaranteed-income' ? (
         <div
           className="config-drawer-tabpanel"
           role="tabpanel"
-          id="config-panel-social-security"
-          aria-labelledby="config-tab-social-security"
+          id="config-panel-guaranteed-income"
+          aria-labelledby="config-tab-guaranteed-income"
         >
           <section className="config-drawer-section">
-            <ConfigSocialSecurityTab
+            <ConfigGuaranteedIncomeTab
               inputs={inputs}
               setInputs={setInputs}
               ssIncluded={ssIncluded}

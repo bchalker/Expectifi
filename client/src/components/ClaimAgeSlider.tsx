@@ -38,6 +38,9 @@ export function ClaimAgeSlider({
   const tickAges =
     milestoneAges ??
     Array.from({ length: max - min + 1 }, (_, i) => min + i)
+  const usePositionedTicks = tickAges.length > 0 && max > min
+  const tickPosition = (tickAge: number) =>
+    ((tickAge - min) / (max - min)) * 100
   const valueLabel =
     dateOfBirth && isValidIsoDateString(dateOfBirth)
       ? formatSsAgeLabel(dateOfBirth, age)
@@ -68,28 +71,35 @@ export function ClaimAgeSlider({
       <div
         className={[
           'claim-age-slider__ticks',
-          milestoneAges ? 'claim-age-slider__ticks--milestones' : '',
+          usePositionedTicks ? 'claim-age-slider__ticks--positioned' : '',
         ]
           .filter(Boolean)
           .join(' ')}
         aria-hidden
       >
-        {tickAges.map((tickAge) => (
-          <span
-            key={tickAge}
-            className={[
-              'claim-age-slider__tick',
-              age === tickAge ? ' claim-age-slider__tick--on' : '',
-              milestoneAges || tickAge === 62 || tickAge === 67 || tickAge === 70
-                ? ' claim-age-slider__tick--milestone'
-                : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {tickAge}
-          </span>
-        ))}
+        {tickAges.map((tickAge) => {
+          const pct = tickPosition(tickAge)
+          const edge =
+            tickAge === min ? 'start' : tickAge === max ? 'end' : 'center'
+          return (
+            <span
+              key={tickAge}
+              className={[
+                'claim-age-slider__tick',
+                age === tickAge ? ' claim-age-slider__tick--on' : '',
+                milestoneAges || tickAge === 62 || tickAge === 67 || tickAge === 70
+                  ? ' claim-age-slider__tick--milestone'
+                  : '',
+                edge !== 'center' ? ` claim-age-slider__tick--${edge}` : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={usePositionedTicks ? { left: `${pct}%` } : undefined}
+            >
+              {tickAge}
+            </span>
+          )
+        })}
       </div>
     </div>
   )

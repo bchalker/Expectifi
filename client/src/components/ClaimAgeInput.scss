@@ -1,0 +1,25 @@
+.claim-age-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.claim-age-input__shell {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 2.75rem;
+  padding-inline: var(--onboarding-field-inset, 0.65rem);
+}
+
+.claim-age-input__field {
+  flex: 0 0 auto;
+  width: 2.5ch;
+  min-width: 2.5ch;
+  max-width: 3ch;
+  font-size: var(--text-base);
+  text-align: left;
+}
+
+.claim-age-input--disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
