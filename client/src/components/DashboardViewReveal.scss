@@ -1,0 +1,254 @@
+/* Top-down dashboard enter stagger (growth / income / where to retire). */
+
+@keyframes dashboard-view-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dashboard-view-wave-in {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes dashboard-view-fill-in {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@mixin dashboard-view-rise($step) {
+  animation: dashboard-view-rise-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--dashboard-stagger-step) * #{$step});
+}
+
+@mixin dashboard-view-wave($step) {
+  animation: dashboard-view-wave-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--dashboard-stagger-step) * #{$step});
+  transform-origin: top center;
+}
+
+/* Pre-reveal: hide targets while import modal fades or tab switch resets. */
+html[data-portfolio-import-flush],
+html[data-dashboard-view-flush] {
+  .goal-progress-bar--in-main {
+    opacity: 0;
+  }
+
+  .goal-progress-bar--in-main .goal-progress-bar__fill {
+    transform: scaleX(0);
+    transition: none;
+  }
+
+  .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
+    transform: scaleY(0);
+    transition: none;
+  }
+
+  .subheader:not(.subheader--no-balances) .subheader-content {
+    opacity: 0;
+  }
+
+  .main .results-strip,
+  .growth-assumptions-panel__slider,
+  .growth-assumptions-panel__scenario,
+  .account-balances-header-row,
+  .where-to-retire-preview-panel,
+  .account-balances-stack,
+  .main > .section--life-events,
+  .where-to-retire__main-panel-back,
+  .where-to-retire__income-intro,
+  .where-to-retire__income-toolbar-slider,
+  .where-to-retire__map-stage,
+  .where-to-retire__main-panel-footer {
+    opacity: 0;
+  }
+}
+
+/* Shared hero stack (growth + income dashboard). */
+html[data-dashboard-view-enter='growth'],
+html[data-dashboard-view-enter='income'] {
+  .goal-progress-bar--in-main {
+    @include dashboard-view-rise(0);
+  }
+
+  .goal-progress-bar--in-main .goal-progress-bar__fill {
+    animation: dashboard-view-fill-in var(--dashboard-reveal-duration)
+      cubic-bezier(0.16, 1, 0.3, 1)
+      calc(var(--dashboard-stagger-step) * 0 + 0.08s) both;
+  }
+
+  .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
+    @include dashboard-view-wave(1);
+  }
+
+  .subheader:not(.subheader--no-balances) .subheader-content {
+    @include dashboard-view-rise(2);
+  }
+}
+
+/* Growth: fine-tune slider → scenario card → accounts → life events. */
+html[data-dashboard-view-enter='growth'] {
+  .main .results-strip {
+    @include dashboard-view-rise(3);
+  }
+
+  .growth-assumptions-panel__slider {
+    @include dashboard-view-rise(3);
+  }
+
+  .growth-assumptions-panel__scenario {
+    @include dashboard-view-rise(4);
+  }
+
+  .account-balances-stack {
+    @include dashboard-view-rise(5);
+  }
+
+  .main > .section--life-events {
+    @include dashboard-view-rise(6);
+  }
+}
+
+/* Income: account toolbar → WTR preview panel → accounts. */
+html[data-dashboard-view-enter='income'] {
+  .account-balances-header-row {
+    @include dashboard-view-rise(3);
+  }
+
+  .where-to-retire-preview-panel {
+    @include dashboard-view-rise(4);
+  }
+
+  .account-balances-stack {
+    @include dashboard-view-rise(5);
+  }
+}
+
+/* Where to retire page — same top-down rhythm. */
+html[data-dashboard-view-enter='where-to-retire'] {
+  .where-to-retire__main-panel-back {
+    @include dashboard-view-rise(0);
+  }
+
+  .where-to-retire__income-intro {
+    @include dashboard-view-rise(2);
+  }
+
+  .where-to-retire__income-toolbar-slider {
+    @include dashboard-view-rise(3);
+  }
+
+  .where-to-retire__map-stage {
+    @include dashboard-view-rise(4);
+  }
+
+  .where-to-retire__main-panel-footer {
+    @include dashboard-view-rise(6);
+  }
+}
+
+/* Account rows: extra per-row stagger after the stack slot. */
+html[data-dashboard-view-enter='growth'] .account-balances-stack .portfolio-account-list > *,
+html[data-dashboard-view-enter='growth']
+  .account-balances-stack
+  .account-balances-card-inner-wrap
+  > *:not(.account-balances-manage__backdrop):not(.account-balances-manage) {
+  opacity: 0;
+  animation: dashboard-view-rise-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(
+    var(--dashboard-stagger-step) * 5 + var(--portfolio-stagger-step) * var(--portfolio-row-i, 0)
+  );
+}
+
+@for $i from 1 through 12 {
+  html[data-dashboard-view-enter='growth']
+    .account-balances-stack
+    .portfolio-account-list
+    > *:nth-child(#{$i}),
+  html[data-dashboard-view-enter='growth']
+    .account-balances-stack
+    .account-balances-card-inner-wrap
+    > *:nth-child(#{$i}) {
+    --portfolio-row-i: #{$i - 1};
+  }
+}
+
+/* Income account rows: per-row stagger after stack slot. */
+html[data-dashboard-view-enter='income'] .account-balances-stack .portfolio-account-list > *,
+html[data-dashboard-view-enter='income']
+  .account-balances-stack
+  .account-balances-card-inner-wrap
+  > *:not(.account-balances-manage__backdrop):not(.account-balances-manage) {
+  opacity: 0;
+  animation: dashboard-view-rise-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(
+    var(--dashboard-stagger-step) * 5 + var(--portfolio-stagger-step) * var(--portfolio-row-i, 0)
+  );
+}
+
+@for $i from 1 through 12 {
+  html[data-dashboard-view-enter='income']
+    .account-balances-stack
+    .portfolio-account-list
+    > *:nth-child(#{$i}),
+  html[data-dashboard-view-enter='income']
+    .account-balances-stack
+    .account-balances-card-inner-wrap
+    > *:nth-child(#{$i}) {
+    --portfolio-row-i: #{$i - 1};
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-dashboard-view-enter] .goal-progress-bar--in-main,
+  html[data-dashboard-view-enter] .goal-progress-bar--in-main .goal-progress-bar__fill,
+  html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale,
+  html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-content,
+  html[data-dashboard-view-enter='growth'] .main .results-strip,
+  html[data-dashboard-view-enter='growth'] .growth-assumptions-panel__slider,
+  html[data-dashboard-view-enter='growth'] .growth-assumptions-panel__scenario,
+  html[data-dashboard-view-enter='growth'] .account-balances-stack,
+  html[data-dashboard-view-enter='growth'] .main > .section--life-events,
+  html[data-dashboard-view-enter='income'] .account-balances-header-row,
+  html[data-dashboard-view-enter='income'] .where-to-retire-preview-panel,
+  html[data-dashboard-view-enter='income'] .account-balances-stack,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__main-panel-back,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__income-intro,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__income-toolbar-slider,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__map-stage,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__main-panel-footer,
+  html[data-dashboard-view-enter='growth'] .account-balances-stack .portfolio-account-list > *,
+  html[data-dashboard-view-enter='growth']
+    .account-balances-stack
+    .account-balances-card-inner-wrap
+    > *,
+  html[data-dashboard-view-enter='income'] .account-balances-stack .portfolio-account-list > *,
+  html[data-dashboard-view-enter='income']
+    .account-balances-stack
+    .account-balances-card-inner-wrap
+    > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

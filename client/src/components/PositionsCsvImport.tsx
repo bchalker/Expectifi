@@ -34,6 +34,7 @@ import {
   type PositionsCsvCustodian,
 } from "../lib/positionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
+import { clearDashboardViewEnterAttrs } from "../lib/dashboardViewReveal";
 import {
   markPortfolioBalancesFlush,
   triggerPortfolioWaveReveal,
@@ -253,8 +254,7 @@ export function PositionsCsvImport({
 
   useEffect(() => {
     return () => {
-      document.documentElement.removeAttribute("data-portfolio-wave-reveal");
-      document.documentElement.removeAttribute("data-portfolio-import-flush");
+      clearDashboardViewEnterAttrs();
     };
   }, []);
   const [replaceDuplicateImports, setReplaceDuplicateImports] = useState(false);

@@ -63,10 +63,7 @@ import {
   saveBalanceInputMode,
   type BalanceInputMode,
 } from "./lib/retirementBalanceMode";
-import {
-  getAccountsRevealDelayMs,
-  getStripControlsRevealDelayMs,
-} from "./lib/portfolioWaveReveal";
+import { replayDashboardViewEnter } from "./lib/dashboardViewReveal";
 import { syncNoPortfolioSubheaderDocumentAttr } from "./lib/syncNoPortfolioSubheader";
 import {
   applyImportedBalanceOverrides,
@@ -682,11 +679,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const showGoalBarRow =
     welcomeDone && !isWhereToRetire && c.hasPortfolioBalances;
-  const [portfolioControlsRevealed, setPortfolioControlsRevealed] =
-    useState(false);
-  const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] =
-    useState(false);
   const [openImportRequest, setOpenImportRequest] = useState(0);
+  const dashboardViewBootstrappedRef = useRef(false);
 
   useLayoutEffect(() => {
     if (!welcomeDone) {
@@ -725,33 +719,25 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }
   }, [welcomeDone, c.hasPortfolioBalances]);
 
-  /** Yield / return strip: headline after wave; slider row staggers in CSS (see StripHeader.scss). */
+  /** Replay top-down stagger when switching growth / income / where to retire. */
   useEffect(() => {
     if (!welcomeDone || !c.hasPortfolioBalances) {
-      setPortfolioControlsRevealed(false);
+      dashboardViewBootstrappedRef.current = false;
       return;
     }
-    const delayMs = getStripControlsRevealDelayMs();
-    const id = window.setTimeout(
-      () => setPortfolioControlsRevealed(true),
-      delayMs,
-    );
-    return () => window.clearTimeout(id);
-  }, [welcomeDone, c.hasPortfolioBalances]);
 
-  /** Retirement account card: stagger after strip yield/return sliders (see calculator.scss). */
-  useEffect(() => {
-    if (!welcomeDone || !c.hasPortfolioBalances) {
-      setPortfolioAccountsRevealed(false);
+    if (!dashboardViewBootstrappedRef.current) {
+      dashboardViewBootstrappedRef.current = true;
       return;
     }
-    const delayMs = getAccountsRevealDelayMs();
-    const id = window.setTimeout(
-      () => setPortfolioAccountsRevealed(true),
-      delayMs,
-    );
-    return () => window.clearTimeout(id);
-  }, [welcomeDone, c.hasPortfolioBalances]);
+
+    if (isWhereToRetire) {
+      replayDashboardViewEnter("where-to-retire");
+      return;
+    }
+
+    replayDashboardViewEnter(phase);
+  }, [phase, isWhereToRetire, welcomeDone, c.hasPortfolioBalances]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
@@ -954,7 +940,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 <StripHeader
                   phase={phase}
                   c={cDisplay}
-                  portfolioControlsRevealed={portfolioControlsRevealed}
                   incomeMode={ui.incomeMode}
                   onIncomeMode={(incomeMode) => {
                     setUi({ incomeMode });
@@ -1045,9 +1030,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                       <div
                         className={
                           c.hasPortfolioBalances
-                            ? portfolioAccountsRevealed
-                              ? "portfolio-accounts-reveal portfolio-accounts-reveal--in"
-                              : "portfolio-accounts-reveal portfolio-accounts-reveal--pending"
+                            ? "portfolio-accounts-reveal portfolio-accounts-reveal--in"
                             : undefined
                         }
                       >

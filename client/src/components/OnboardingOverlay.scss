@@ -634,11 +634,10 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay
-  .dob-select-row:not(.dob-select-row--segmented)
-  .dob-typeahead__input {
+  .dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap {
   min-height: 2.75rem;
   padding: var(--onboarding-field-inset);
-  padding-right: calc(var(--onboarding-field-inset) + var(--space-5));
   line-height: 1.25;
   background: var(--surface2);
   border-color: var(--border-medium-dark);
@@ -648,15 +647,21 @@ body.onboarding-overlay--open {
     border-color 0.15s ease;
 }
 
-.onboarding-overlay .dob-select-row .dob-select--filled .dob-typeahead__input {
+.onboarding-overlay
+  .dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap--filled {
   background: #fff;
 }
 
-.onboarding-overlay .dob-select-row .dob-select--filled .dob-typeahead__input:hover:not(:disabled) {
+.onboarding-overlay
+  .dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap--filled:hover:not(:focus-within) {
   background: #fff;
 }
 
-.onboarding-overlay .dob-select-row .dob-typeahead__input:focus {
+.onboarding-overlay
+  .dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap:focus-within {
   border-color: var(--border-medium-dark);
   box-shadow: none;
   outline: none;

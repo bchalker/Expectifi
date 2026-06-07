@@ -126,43 +126,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   transition: none;
 }
 
-/* Post-import: explicit 0 → 1 reveal (PositionsCsvImport sets data attribute during overlay fade) */
-html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
-  transition: none;
-  animation: subheader-front-wave-reveal var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes subheader-front-wave-reveal {
-  from {
-    transform: scaleY(0);
-  }
-
-  to {
-    transform: scaleY(1);
-  }
-}
-
-/* Post-commit: hero amount and SS row rise in after the wave (staggered). */
-html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
-  opacity: 0;
-}
-
-html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
-  animation: portfolio-reveal-rise var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1)
-    var(--portfolio-subheader-hero-delay) both;
-}
-
-@keyframes portfolio-reveal-rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Post-commit wave + subheader stagger: DashboardViewReveal.scss */
 
 .subheader-waves__front-scale .subheader-bubble--front {
   position: static;
@@ -1024,7 +988,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     animation: none !important;
   }
 
-  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
     transform: scaleY(1);
   }
 
@@ -1047,13 +1011,7 @@ html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) 
     animation: none;
   }
 
-  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
+  html[data-portfolio-import-flush] .subheader:not(.subheader--no-balances) .subheader-content {
     opacity: 1;
-  }
-
-  html[data-portfolio-wave-reveal='true'] .subheader:not(.subheader--no-balances) .subheader-estimate__swap {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 }

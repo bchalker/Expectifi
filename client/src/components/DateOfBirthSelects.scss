@@ -74,6 +74,38 @@
   background: var(--surface);
 }
 
+.dob-select-row--year-input:not(.dob-select-row--segmented) .dob-select-row__year-input-wrap {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-medium-dark);
+  border-radius: 6px;
+  background: var(--surface2);
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap:hover:not(:focus-within) {
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-medium-dark));
+  background: var(--surface);
+}
+
+.dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  background: var(--surface);
+}
+
+.dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap--filled {
+  background: var(--surface);
+}
+
 .dob-select-row__year-input {
   width: 100%;
   min-width: 0;

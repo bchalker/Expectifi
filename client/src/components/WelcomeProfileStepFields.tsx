@@ -198,6 +198,7 @@ export function WelcomeProfileStepFields({
               value={dateOfBirth}
               onChange={handleDateOfBirth}
               includeDay={false}
+              yearInput
             />
           </div>
 

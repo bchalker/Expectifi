@@ -10,8 +10,6 @@ type C = ComputedSnapshot;
 type Props = {
   phase: "growth" | "income";
   c: C;
-  /** Fade in yield / growth strip after subheader monthly hero (see App portfolioControlsRevealed). */
-  portfolioControlsRevealed: boolean;
   incomeMode: boolean;
   onIncomeMode: (incomeMode: boolean) => void;
   ssIncluded: boolean;
@@ -42,7 +40,6 @@ type Props = {
 export function StripHeader({
   phase,
   c,
-  portfolioControlsRevealed,
   incomeMode: _incomeMode,
   onIncomeMode: _onIncomeMode,
   ssIncluded: _ssIncluded,
@@ -68,8 +65,7 @@ export function StripHeader({
   onIncomeSecuritySelect: _onIncomeSecuritySelect,
   hideGrowthSlider = false,
 }: Props) {
-  const showEquation =
-    c.hasPortfolioBalances && portfolioControlsRevealed && !hideGrowthSlider;
+  const showEquation = c.hasPortfolioBalances && !hideGrowthSlider;
 
   if (!showEquation || phase !== "growth") {
     return null;
@@ -81,7 +77,7 @@ export function StripHeader({
     >
       <div className="results-strip-inner results-strip-inner--equation-first">
         <div
-          className={`strip-equation-row strip-equation-row--phase-${phase} portfolio-controls-reveal portfolio-controls-reveal--in`}
+          className={`strip-equation-row strip-equation-row--phase-${phase}`}
           style={{
             display: "flex",
             alignItems: "center",

@@ -1382,70 +1382,15 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   display: block;
 }
 
-/* Account card: reveal after strip yield/return sliders (see portfolioWaveReveal.ts). */
+/* Account card reveal wrapper — motion in DashboardViewReveal.scss */
 .portfolio-accounts-reveal--pending .account-balances-stack {
   opacity: 0;
   pointer-events: none;
-}
-
-.portfolio-accounts-reveal--in .account-balances-stack {
-  animation: portfolio-account-stack-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.portfolio-accounts-reveal--in .account-balances-stack .portfolio-account-list > *,
-.portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
-  opacity: 0;
-  animation: portfolio-account-row-fade-in var(--portfolio-reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@for $i from 1 through 12 {
-  .portfolio-accounts-reveal--in
-    .account-balances-stack
-    .portfolio-account-list
-    > *:nth-child(#{$i}),
-  .portfolio-accounts-reveal--in
-    .account-balances-stack
-    .account-balances-card-inner-wrap
-    > *:nth-child(#{$i}) {
-    animation-delay: calc(var(--portfolio-row-stagger-base) + var(--portfolio-stagger-step) * #{$i - 1});
-  }
-}
-
-@keyframes portfolio-account-stack-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes portfolio-account-row-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .portfolio-accounts-reveal--pending .account-balances-stack {
     opacity: 1;
     pointer-events: auto;
-  }
-
-  .portfolio-accounts-reveal--in .account-balances-stack {
-    animation: none;
-    opacity: 1;
-  }
-
-  .portfolio-accounts-reveal--in .account-balances-stack .portfolio-account-list > *,
-  .portfolio-accounts-reveal--in .account-balances-stack .account-balances-card-inner-wrap > * {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 }

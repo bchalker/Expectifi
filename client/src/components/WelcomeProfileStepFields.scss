@@ -31,8 +31,7 @@
   color: var(--text);
 }
 
-.welcome-profile-fields--onboarding .dob-select-row [data-slot='select-trigger'],
-.welcome-profile-fields--onboarding .dob-select-row .dob-typeahead__input {
+.welcome-profile-fields--onboarding .dob-select-row [data-slot='select-trigger'] {
   min-height: var(--onboarding-birth-field-h);
 }
 
@@ -182,7 +181,10 @@
   min-width: 0;
 }
 
-.welcome-profile-fields--onboarding .dob-select-row--no-day .dob-typeahead__input {
+.welcome-profile-fields--onboarding .dob-select-row--no-day [data-slot='select-trigger'],
+.welcome-profile-fields--onboarding
+  .dob-select-row--year-input:not(.dob-select-row--segmented)
+  .dob-select-row__year-input-wrap {
   min-height: var(--onboarding-birth-field-h);
   border-radius: 8px;
 }

@@ -293,15 +293,17 @@
     var(--layout-marketing-max),
     100vw
   );
-  /* Portfolio post-import reveal (keep in sync with portfolioWaveReveal.ts) */
-  --portfolio-reveal-duration: 0.5s;
+  /* Portfolio post-import reveal (keep in sync with dashboardViewReveal.ts) */
+  --dashboard-reveal-duration: 0.5s;
+  --dashboard-stagger-step: 0.12s;
+  --portfolio-reveal-duration: var(--dashboard-reveal-duration);
   --portfolio-stagger-step: 0.018s;
   --portfolio-row-stagger-base: 0s;
-  --portfolio-strip-slider-delay: 0.09s;
-  --portfolio-strip-slider-delay-income: 0.1s;
-  --portfolio-strip-slider-delay-growth: 0.07s;
-  --portfolio-subheader-hero-delay: 0.04s;
-  --portfolio-subheader-bottom-delay: 0.08s;
+  --portfolio-strip-slider-delay: calc(var(--dashboard-stagger-step) * 3);
+  --portfolio-strip-slider-delay-income: calc(var(--dashboard-stagger-step) * 3);
+  --portfolio-strip-slider-delay-growth: calc(var(--dashboard-stagger-step) * 3);
+  --portfolio-subheader-hero-delay: calc(var(--dashboard-stagger-step) * 2);
+  --portfolio-subheader-bottom-delay: calc(var(--dashboard-stagger-step) * 2 + 0.04s);
   /* Stacking: chrome above dimmed panels; curve SVG transparency shows backdrop/shell, not page */
   --z-panel-backdrop: 350;
   --z-drawer-shell: 360;
