@@ -590,12 +590,35 @@ body.onboarding-overlay--open {
   opacity: 0.55;
 }
 
+.onboarding-overlay .dob-select-row--segmented .dob-select-row__segment {
+  display: flex;
+  align-items: stretch;
+  width: fit-content;
+  max-width: 100%;
+  border: 0.5px solid var(--color-border-tertiary, var(--border));
+  border-radius: 8px;
+  background: var(--surface2);
+  overflow: hidden;
+}
+
+.onboarding-overlay .dob-select-row--segmented .dob-select-row__month {
+  flex: 0 0 auto;
+  min-width: 0;
+  border-right: 0.5px solid var(--color-border-tertiary, var(--border));
+}
+
+.onboarding-overlay .dob-select-row--segmented .dob-select-row__divider {
+  display: none;
+}
+
 .onboarding-overlay .dob-select-row [data-slot='select-trigger'],
 .onboarding-overlay [data-slot='select-trigger'] {
   font-size: 1rem;
 }
 
-.onboarding-overlay .dob-select-row [data-slot='select-trigger'] {
+.onboarding-overlay
+  .dob-select-row:not(.dob-select-row--segmented)
+  [data-slot='select-trigger'] {
   display: flex;
   align-items: center;
   min-height: 2.75rem;
@@ -608,6 +631,49 @@ body.onboarding-overlay--open {
   transition:
     background-color 0.22s ease,
     border-color 0.15s ease;
+}
+
+.onboarding-overlay
+  .dob-select-row:not(.dob-select-row--segmented)
+  .dob-typeahead__input {
+  min-height: 2.75rem;
+  padding: var(--onboarding-field-inset);
+  padding-right: calc(var(--onboarding-field-inset) + var(--space-5));
+  line-height: 1.25;
+  background: var(--surface2);
+  border-color: var(--border-medium-dark);
+  box-shadow: none;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.15s ease;
+}
+
+.onboarding-overlay .dob-select-row .dob-select--filled .dob-typeahead__input {
+  background: #fff;
+}
+
+.onboarding-overlay .dob-select-row .dob-select--filled .dob-typeahead__input:hover:not(:disabled) {
+  background: #fff;
+}
+
+.onboarding-overlay .dob-select-row .dob-typeahead__input:focus {
+  border-color: var(--border-medium-dark);
+  box-shadow: none;
+  outline: none;
+}
+
+.onboarding-overlay .dob-select-row--segmented [data-slot='select-trigger'] {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: 0;
+  padding: var(--onboarding-field-inset);
+  padding-right: calc(var(--onboarding-field-inset) + var(--space-5));
+  line-height: 1.25;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .onboarding-overlay .dob-select-row [data-slot='select-trigger']:focus,
@@ -663,7 +729,15 @@ body.onboarding-overlay--open {
   background: #fff;
 }
 
+.onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger'] {
+  background: #fff;
+}
+
 .onboarding-overlay .dob-select-row .dob-select--filled [data-slot='select-trigger']:hover:not(:disabled) {
+  background: #fff;
+}
+
+.onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger']:hover:not(:disabled) {
   background: #fff;
 }
 

@@ -12,7 +12,7 @@ export const WELCOME_BENCHMARK = {
   currentSavings: 320_000,
   householdIncomeAnnual: 85_000,
   monthlyContribution: 1_500,
-  targetRetirementAge: 67,
+  targetRetirementAge: 62,
   ssBenefitMonthlyAt67: 1_800,
   /** Retirement spending target — ~70% of household income, rounded. */
   monthlyIncomeGoal: 5_000,

@@ -31,7 +31,8 @@
   color: var(--text);
 }
 
-.welcome-profile-fields--onboarding .dob-select-row [data-slot='select-trigger'] {
+.welcome-profile-fields--onboarding .dob-select-row [data-slot='select-trigger'],
+.welcome-profile-fields--onboarding .dob-select-row .dob-typeahead__input {
   min-height: var(--onboarding-birth-field-h);
 }
 
@@ -159,89 +160,229 @@
   margin-top: var(--space-1);
 }
 
-.welcome-profile-fields__birth-retire-row {
+.welcome-profile-fields__section--birth-retire {
   display: flex;
-  flex-direction: row;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-profile-fields__dob-block {
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-profile-fields--onboarding
+  .dob-select-row--no-day {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(5.75rem, 1fr);
   gap: var(--space-2);
   width: 100%;
   min-width: 0;
 }
 
-.welcome-profile-fields__dob-col {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.welcome-profile-fields__retire-col {
-  flex: 0 0 auto;
-  min-width: 0;
-}
-
-.welcome-profile-fields__retire-shell {
-  width: auto;
-  height: var(--onboarding-birth-field-h, 2.75rem);
-  min-height: var(--onboarding-birth-field-h, 2.75rem);
-  max-height: var(--onboarding-birth-field-h, 2.75rem);
-  padding: 0 var(--onboarding-field-inset, 0.65rem);
+.welcome-profile-fields--onboarding .dob-select-row--no-day .dob-typeahead__input {
+  min-height: var(--onboarding-birth-field-h);
   border-radius: 8px;
-  justify-content: space-between;
-  gap: var(--space-2);
+}
+
+.welcome-profile-fields--onboarding .dob-select-row--no-day .dob-select-row__month,
+.welcome-profile-fields--onboarding .dob-select-row--no-day .dob-select-row__year {
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-profile-fields__retire-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-radius: 12px;
+  background: var(--surface-u2, var(--surface1));
   box-sizing: border-box;
+  animation: welcome-profile-retire-card-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.welcome-profile-fields__retire-shell.onboarding-field-shell--filled {
-  padding-right: var(--onboarding-field-inset, 0.65rem);
+@keyframes welcome-profile-retire-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.625rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-profile-fields__retire-card-label {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.welcome-profile-fields__retire-card-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.welcome-profile-fields__retire-card-age {
+  font-family: var(--heading);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.welcome-profile-fields__retire-card-year {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.welcome-profile-fields__retire-card-year--invalid {
+  color: var(--amber-d1);
+}
+
+.welcome-profile-fields__retire-card-slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome-profile-fields__retire-card-range {
+  --onboarding-retire-range-thumb: 1.125rem;
+  width: 100%;
+  min-width: 0;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.welcome-profile-fields__retire-card-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
+}
+
+.welcome-profile-fields__retire-card-range::-moz-range-track {
+  height: 4px;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
+}
+
+.welcome-profile-fields__retire-card-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: var(--onboarding-retire-range-thumb);
+  height: var(--onboarding-retire-range-thumb);
+  margin-top: calc((4px - var(--onboarding-retire-range-thumb)) / 2);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
   background: var(--surface);
+  box-shadow: 0 1px 4px rgb(28 43 58 / 0.12);
+  cursor: pointer;
 }
 
-.welcome-profile-fields__retire-shell:focus-within {
-  border-color: color-mix(in srgb, var(--text) 18%, var(--border-medium-dark));
+.welcome-profile-fields__retire-card-range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--onboarding-retire-range-thumb);
+  height: var(--onboarding-retire-range-thumb);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 4px rgb(28 43 58 / 0.12);
+  cursor: pointer;
+}
+
+.welcome-profile-fields__retire-card-range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   box-shadow: none;
 }
 
-.welcome-profile-fields__retire-input {
-  flex: 0 0 auto;
-  width: 3ch;
-  min-width: 3ch;
-  max-width: 3ch;
-  text-align: left;
+.welcome-profile-fields__retire-card-range:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
-.welcome-profile-fields__retire-year {
-  flex: 0 0 auto;
-  margin-left: auto;
+.welcome-profile-fields__retire-card-ticks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   font-family: var(--mono);
-  font-size: 1rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.25;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  white-space: nowrap;
-  pointer-events: none;
-  user-select: none;
+}
+
+.welcome-profile-fields__retire-card-footnote {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-text-secondary, var(--text-muted));
+  text-align: center;
+}
+
+.welcome-profile-fields__retire-card-footnote strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.welcome-profile-fields__retire-age-error {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--color-text-danger);
+  text-align: center;
 }
 
 @media (max-width: 479px) {
-  .welcome-profile-fields__birth-retire-row {
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-
-  .welcome-profile-fields__dob-col {
-    flex: 1 1 100%;
-  }
-
-  .welcome-profile-fields__retire-col {
-    flex: 1 1 100%;
-  }
-
   .welcome-profile-fields__stack {
     grid-template-columns: 1fr;
   }
 
   .welcome-profile-fields__stack > .currency-amount-input:only-child {
     grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-profile-fields__retire-card {
+    animation: none;
   }
 }

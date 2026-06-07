@@ -1,0 +1,90 @@
+.dob-typeahead {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dob-typeahead__input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: var(--space-1) calc(var(--space-6) + var(--space-1)) var(--space-1)
+    var(--space-2);
+  box-sizing: border-box;
+  border: 1px solid var(--border-medium-dark);
+  border-radius: 6px;
+  background: var(--surface2);
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text);
+  text-align: left;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.dob-typeahead__input--tabular {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.dob-typeahead__input::placeholder,
+.dob-typeahead__input--placeholder:not(:focus) {
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.dob-typeahead__input:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border-medium-dark));
+  background: var(--surface);
+}
+
+.dob-typeahead__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  background: var(--surface);
+}
+
+.dob-select--filled .dob-typeahead__input {
+  background: var(--surface);
+}
+
+.dob-select--filled .dob-typeahead__input:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.dob-typeahead__indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.dob-typeahead__menu {
+  overflow: hidden;
+  border: 1px solid var(--border-medium-dark);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(28 43 58 / 0.12);
+}
+
+.dob-typeahead__menu--portaled {
+  position: fixed;
+}
+
+.dob-typeahead__list[data-slot='list-box'] {
+  max-height: 16rem;
+}

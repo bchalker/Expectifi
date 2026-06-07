@@ -211,6 +211,7 @@ export function OnboardingOverlay({
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [exiting, setExiting] = useState(false);
+  const [retireAgePastInvalid, setRetireAgePastInvalid] = useState(false);
 
   useLayoutEffect(() => {
     document.body.classList.add(BODY_CLASS);
@@ -238,7 +239,8 @@ export function OnboardingOverlay({
     form.retireAge >= ONBOARDING_RETIRE_AGE_MIN &&
     form.retireAge <= ONBOARDING_RETIRE_AGE_MAX;
   const regionOk = Boolean(normalizeOnboardingRegionId(form.locale));
-  const profileFieldsOk = dobOk && ageOk && regionOk && retireOk;
+  const profileFieldsOk =
+    dobOk && ageOk && regionOk && retireOk && !retireAgePastInvalid;
   const goalsValid = form.monthlyGoal > 0;
 
   function formProfileSlice(): OnboardingFormProfileSlice {
@@ -352,9 +354,11 @@ export function OnboardingOverlay({
       setErr("Enter a valid date of birth (you must be between 18 and 100).");
       return;
     }
-    if (!retireOk) {
+    if (!retireOk || retireAgePastInvalid) {
       setErr(
-        `Retirement age must be between ${ONBOARDING_RETIRE_AGE_MIN} and ${ONBOARDING_RETIRE_AGE_MAX}.`,
+        retireAgePastInvalid
+          ? "Choose a retirement age that falls in a future year."
+          : `Retirement age must be between ${ONBOARDING_RETIRE_AGE_MIN} and ${ONBOARDING_RETIRE_AGE_MAX}.`,
       );
       return;
     }
@@ -432,6 +436,7 @@ export function OnboardingOverlay({
                 onRetireAgeChange={(retireAge) =>
                   setForm((f) => ({ ...f, retireAge }))
                 }
+                onRetireAgePastInvalidChange={setRetireAgePastInvalid}
                 showFillState
               />
             ) : (
