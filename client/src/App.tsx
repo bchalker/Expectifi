@@ -680,12 +680,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
     updateSavePlanPromptSignals,
   ]);
 
-  const hasGoalBar =
-    welcomeDone &&
-    !isWhereToRetire &&
-    c.hasPortfolioBalances &&
-    ((phase === "growth" && inputs.growthGoal > 0) ||
-      (phase === "income" && inputs.monthlyIncomeGoal > 0));
+  const showGoalBarRow =
+    welcomeDone && !isWhereToRetire && c.hasPortfolioBalances;
   const [portfolioControlsRevealed, setPortfolioControlsRevealed] =
     useState(false);
   const [portfolioAccountsRevealed, setPortfolioAccountsRevealed] =
@@ -802,15 +798,24 @@ export default function App({ initialAuthModal = null }: AppProps) {
     yearsToRetirement: cDisplay.yearsToRetirement,
   } as const;
 
-  const dashboardGoalBar = hasGoalBar ? (
-    <GoalProgressBar
-      phase={phase}
-      growthGoal={inputs.growthGoal}
-      growthGoalProgressPct={cDisplay.growthGoalProgressPct}
-      monthlyIncomeGoal={inputs.monthlyIncomeGoal}
-      incomeGoalProgressPct={cDisplay.incomeGoalProgressPct}
-      hasPortfolioBalances={dashboardHasPortfolio}
-    />
+  const openPlanningGoals = useCallback(() => {
+    setMobileNavOpen(false);
+    setConfigTab("plan");
+    setDrawer("config");
+  }, []);
+
+  const goalBarProps = {
+    phase,
+    growthGoal: inputs.growthGoal,
+    growthGoalProgressPct: cDisplay.growthGoalProgressPct,
+    monthlyIncomeGoal: inputs.monthlyIncomeGoal,
+    incomeGoalProgressPct: cDisplay.incomeGoalProgressPct,
+    hasPortfolioBalances: dashboardHasPortfolio,
+    onAddGoal: openPlanningGoals,
+  } as const;
+
+  const dashboardGoalBar = showGoalBarRow ? (
+    <GoalProgressBar {...goalBarProps} />
   ) : null;
 
   const dashboardSubHeader = showDashboardSubHeader ? (
@@ -820,15 +825,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const dashboardMainHero = showDashboardSubHeader ? (
     <DashboardMainHero
       stickyTopPx={appHeaderHeight}
-      hasGoalBar={hasGoalBar}
-      goalBarProps={{
-        phase,
-        growthGoal: inputs.growthGoal,
-        growthGoalProgressPct: cDisplay.growthGoalProgressPct,
-        monthlyIncomeGoal: inputs.monthlyIncomeGoal,
-        incomeGoalProgressPct: cDisplay.incomeGoalProgressPct,
-        hasPortfolioBalances: dashboardHasPortfolio,
-      }}
+      showGoalBarRow={showGoalBarRow}
+      goalBarProps={goalBarProps}
       subHeaderProps={dashboardSubHeaderProps}
       onStuckChange={setMainHeroStuck}
     />
@@ -841,7 +839,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           className={[
             "app-header-shell",
             !fixedHeaderHeroHidden &&
-              hasGoalBar &&
+              showGoalBarRow &&
               "app-header-shell--has-goal",
             fixedHeaderHeroHidden && "app-header-shell--hero-in-main",
             welcomeDone &&

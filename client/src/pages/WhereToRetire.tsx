@@ -263,7 +263,10 @@ export function WhereToRetire({ c }: Props) {
               onRemoveFavorite={storage.removeFavoriteCity}
             />
           </div>
-          <footer className="where-to-retire__main-panel-footer" role="note">
+          <footer
+            className="where-to-retire__main-panel-footer font-xs"
+            role="note"
+          >
             All figures are educational estimates only — not tax, legal,
             financial, or immigration advice. Consult qualified professionals
             before relocating. Sources:{" "}

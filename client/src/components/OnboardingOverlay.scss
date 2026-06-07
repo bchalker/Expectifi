@@ -590,29 +590,6 @@ body.onboarding-overlay--open {
   opacity: 0.55;
 }
 
-.onboarding-overlay .dob-select-row--segmented .dob-select-row__segment {
-  background: var(--surface2);
-  border-color: var(--border-medium-dark);
-}
-
-.onboarding-overlay .dob-select-row--segmented [data-slot='select-trigger'] {
-  height: 100%;
-  min-height: 0;
-  padding: var(--onboarding-field-inset);
-  padding-right: calc(var(--onboarding-field-inset) + var(--space-5));
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-.onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger'] {
-  background: #fff;
-}
-
-.onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger']:hover:not(:disabled) {
-  background: #fff;
-}
-
 .onboarding-overlay .dob-select-row [data-slot='select-trigger'],
 .onboarding-overlay [data-slot='select-trigger'] {
   font-size: 1rem;

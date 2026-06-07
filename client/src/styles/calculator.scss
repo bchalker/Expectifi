@@ -172,8 +172,10 @@ html[data-no-portfolio-subheader='true'] .main__hero {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
-  padding-bottom: calc(var(--app-privacy-trust-h) + var(--app-plan-banner-h, 0px));
+  min-height: calc(100dvh - var(--app-header-stack-h) - var(--app-chrome-gap));
+  padding-bottom: calc(
+    var(--app-privacy-trust-h) + var(--app-plan-banner-h, 0px) + var(--app-chrome-gap)
+  );
   box-sizing: border-box;
 }
 
@@ -194,7 +196,7 @@ html[data-no-portfolio-subheader='true'] .main__hero {
 }
 
 .app-scroll-stack--onboarding {
-  min-height: calc(100dvh - var(--app-header-stack-h) - 1.5rem);
+  min-height: calc(100dvh - var(--app-header-stack-h) - var(--app-chrome-gap));
 }
 
 .app-scroll-stack--onboarding .app-scroll-stack__main {

@@ -11,10 +11,11 @@ type Props = {
   monthlyIncomeGoal: number
   incomeGoalProgressPct: number | null
   hasPortfolioBalances: boolean
+  onAddGoal?: () => void
   className?: string
 }
 
-/** Shown above the wave subheader when the active phase has a goal set in Configure. */
+/** Shown above the wave subheader when the user has portfolio balances. */
 export function GoalProgressBar({
   phase,
   growthGoal,
@@ -22,15 +23,60 @@ export function GoalProgressBar({
   monthlyIncomeGoal,
   incomeGoalProgressPct,
   hasPortfolioBalances,
+  onAddGoal,
   className,
 }: Props) {
   if (!hasPortfolioBalances) return null
 
   const isGrowth = phase === 'growth'
-  const showGrowth = isGrowth && growthGoal > 0 && growthGoalProgressPct != null
-  const showIncome = !isGrowth && monthlyIncomeGoal > 0 && incomeGoalProgressPct != null
+  const hasActiveGoal = isGrowth ? growthGoal > 0 : monthlyIncomeGoal > 0
+  const showGrowth =
+    isGrowth && hasActiveGoal && growthGoalProgressPct != null
+  const showIncome =
+    !isGrowth && hasActiveGoal && incomeGoalProgressPct != null
 
-  if (!showGrowth && !showIncome) return null
+  const phaseClass = isGrowth
+    ? 'goal-progress-bar--phase-growth'
+    : 'goal-progress-bar--phase-income'
+
+  if (!showGrowth && !showIncome) {
+    const label = isGrowth ? 'Growth goal' : 'Income goal'
+
+    return (
+      <div
+        className={['goal-progress-bar', 'goal-progress-bar--empty', phaseClass, className]
+          .filter(Boolean)
+          .join(' ')}
+        role="region"
+        aria-label={label}
+      >
+        <div className="goal-progress-bar__row">
+          <p className="goal-progress-bar__copy">
+            <span className="goal-progress-bar__label">{label}</span>
+          </p>
+          <div className="goal-progress-bar__meter">
+            <div
+              className="goal-progress-bar__track"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={0}
+              aria-label={`${label} not set`}
+            />
+            {onAddGoal ? (
+              <button
+                type="button"
+                className="goal-progress-bar__add-goal"
+                onClick={onAddGoal}
+              >
+                Add your goal
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const label = showGrowth ? 'Growth goal' : 'Income goal'
   const target = showGrowth ? growthGoal : monthlyIncomeGoal

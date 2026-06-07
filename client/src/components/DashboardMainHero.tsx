@@ -8,7 +8,7 @@ type SubHeaderProps = ComponentProps<typeof SubHeader>
 
 type Props = {
   stickyTopPx: number | null
-  hasGoalBar: boolean
+  showGoalBarRow: boolean
   goalBarProps: ComponentProps<typeof GoalProgressBar>
   subHeaderProps: SubHeaderProps
   onStuckChange?: (stuck: boolean) => void
@@ -16,7 +16,7 @@ type Props = {
 
 export function DashboardMainHero({
   stickyTopPx,
-  hasGoalBar,
+  showGoalBarRow,
   goalBarProps,
   subHeaderProps,
   onStuckChange,
@@ -34,7 +34,7 @@ export function DashboardMainHero({
 
   return (
     <>
-      {hasGoalBar ? (
+      {showGoalBarRow ? (
         <GoalProgressBar
           {...goalBarProps}
           className="goal-progress-bar--in-main"

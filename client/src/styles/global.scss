@@ -265,6 +265,8 @@
   --app-measured-header-h: var(--app-top-chrome-h);
   --goal-bar-h: 0px;
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
+  /* Gap between fixed app chrome and scrollable main (matches subheader-spacer tail) */
+  --app-chrome-gap: 1.5rem;
   /* Mobile slide-over width */
   --app-left-nav-w: 178px;
   --app-left-nav-edge: 14px;

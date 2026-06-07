@@ -35,8 +35,38 @@
   max-width: 100%;
   margin-inline: auto;
   padding-inline: var(--layout-app-inner-pad);
+  padding-inline: var(--space-4);
   min-width: 0;
   box-sizing: border-box;
+}
+
+.goal-progress-bar__add-goal {
+  flex-shrink: 0;
+  display: inline;
+  margin: 0;
+  padding: 0 0 1px;
+  border: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.55);
+  background: transparent;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.goal-progress-bar__add-goal:hover {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+.goal-progress-bar__add-goal:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .goal-progress-bar__copy {

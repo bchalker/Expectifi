@@ -117,8 +117,6 @@ export function WelcomeProfileStepFields({
                 value={dateOfBirth}
                 onChange={onDateOfBirth}
                 includeDay={false}
-                segmented
-                yearInput
               />
             </div>
 
@@ -174,7 +172,6 @@ export function WelcomeProfileStepFields({
                 value={dateOfBirth}
                 onChange={onDateOfBirth}
                 includeDay={false}
-                segmented
                 showAgeHint
               />
             </div>

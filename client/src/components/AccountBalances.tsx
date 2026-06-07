@@ -705,9 +705,8 @@ export function AccountBalances({
     displayBalanceMode,
   ]);
 
-  const portfolioTotalLabel = incomeModeDashboard
-    ? "Total monthly income"
-    : mergedDashboard && hasBrokerageAccountData
+  const portfolioTotalLabel =
+    mergedDashboard && hasBrokerageAccountData
       ? "Total balances"
       : "Total retirement";
 
@@ -3418,9 +3417,11 @@ export function AccountBalances({
           .filter(Boolean)
           .join(" ")}
       >
-        <span className="account-balances-total-retirement__label">
-          {portfolioTotalLabel}
-        </span>
+        {!incomeModeDashboard ? (
+          <span className="account-balances-total-retirement__label">
+            {portfolioTotalLabel}
+          </span>
+        ) : null}
         <span className="account-balances-total-retirement__value">
           {portfolioTotalDisplay}
         </span>

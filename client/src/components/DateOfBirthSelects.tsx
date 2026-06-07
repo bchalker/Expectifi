@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { ListBox, Select } from "@heroui/react";
 import type { OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 import { ageFromIsoDateString, isValidIsoDateString } from "../lib/ageFromDob";
-import { parseNum } from "../utils/format";
 import {
   clampDobParts,
   dayOptionsForParts,
@@ -59,16 +58,8 @@ type Props = {
   className?: string;
   /** When false, only month and year are shown; day defaults to the 1st. */
   includeDay?: boolean;
-  /** Single bordered field — month hugged, year flexes (onboarding profile step). */
-  segmented?: boolean;
   /** Show age helper under the field once month and year are selected. */
   showAgeHint?: boolean;
-  /** Segmented row: year column hugs 4-digit width instead of flexing. */
-  yearHugWidth?: boolean;
-  /** Segmented row: show abbreviated month in the trigger (e.g. Mar). */
-  shortMonthTrigger?: boolean;
-  /** Segmented row: year as text input instead of dropdown. */
-  yearInput?: boolean;
 };
 
 export function DateOfBirthSelects({
@@ -76,15 +67,9 @@ export function DateOfBirthSelects({
   onChange,
   className,
   includeDay = true,
-  segmented = false,
   showAgeHint = false,
-  yearHugWidth = false,
-  shortMonthTrigger = false,
-  yearInput = false,
 }: Props) {
   const [parts, setParts] = useState<DobParts>(() => partsFromIsoValue(value));
-  const [yearFocused, setYearFocused] = useState(false);
-  const [yearDraft, setYearDraft] = useState("");
   const defaultYearItemRef = useRef<HTMLDivElement>(null);
   const monthMenuScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
   const dayMenuScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
@@ -109,11 +94,6 @@ export function DateOfBirthSelects({
     });
   }, [value]);
 
-  useEffect(() => {
-    if (yearFocused) return;
-    setYearDraft(parts.year || "");
-  }, [parts.year, yearFocused]);
-
   const days = useMemo(
     () => dayOptionsForParts(parts),
     [parts.year, parts.month],
@@ -137,43 +117,9 @@ export function DateOfBirthSelects({
     if (value) onChange("");
   };
 
-  const commitYearDraft = () => {
-    const raw = yearDraft.trim();
-    if (!raw) {
-      setYearDraft(parts.year || "");
-      return;
-    }
-    const parsed = Math.round(parseNum(raw));
-    if (!Number.isFinite(parsed) || raw.length < 4) {
-      setYearDraft(parts.year || "");
-      return;
-    }
-    const valid = validBirthYears({
-      month: parts.month,
-      day: includeDay ? parts.day : "01",
-    });
-    if (valid.includes(parsed)) {
-      applyParts({ year: String(parsed) });
-      setYearDraft(String(parsed));
-      return;
-    }
-    if (valid.length > 0) {
-      const nearest = valid.reduce((best, cur) =>
-        Math.abs(cur - parsed) < Math.abs(best - parsed) ? cur : best,
-      );
-      applyParts({ year: String(nearest) });
-      setYearDraft(String(nearest));
-      return;
-    }
-    setYearDraft(parts.year || "");
-  };
-
   const rowClass = [
     "dob-select-row",
     !includeDay && "dob-select-row--no-day",
-    segmented && "dob-select-row--segmented",
-    yearHugWidth && "dob-select-row--year-hug",
-    yearInput && "dob-select-row--year-input",
     className,
   ]
     .filter(Boolean)
@@ -228,13 +174,7 @@ export function DateOfBirthSelects({
       }}
     >
       <Select.Trigger>
-        {shortMonthTrigger && parts.month ? (
-          <span className="dob-select-row__month-trigger">
-            {DOB_MONTHS.find((mo) => mo.id === parts.month)?.short ?? parts.month}
-          </span>
-        ) : (
-          <Select.Value />
-        )}
+        <Select.Value />
         <Select.Indicator />
       </Select.Trigger>
       <Select.Popover className="app-select-import-menu__popover dob-select-menu__popover">
@@ -299,88 +239,48 @@ export function DateOfBirthSelects({
     </Select>
   );
 
-  const yearInputField = (
-    <div
-      className={[
-        "dob-select-row__year-input-wrap",
-        parts.year ? "dob-select-row__year-input-wrap--filled" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <input
-        type="text"
-        inputMode="numeric"
-        className="dob-select-row__year-input"
-        aria-label="Birth year"
-        placeholder="Year"
-        value={yearFocused ? yearDraft : parts.year}
-        maxLength={4}
-        onFocus={() => {
-          setYearFocused(true);
-          setYearDraft(parts.year || "");
-        }}
-        onChange={(e) => setYearDraft(e.target.value.replace(/[^\d]/g, "").slice(0, 4))}
-        onBlur={() => {
-          setYearFocused(false);
-          commitYearDraft();
-        }}
-      />
-    </div>
-  );
-
   return (
     <div className={rowClass}>
-      {segmented ? (
-        <div className="dob-select-row__segment">
-          {monthSelect}
-          <span className="dob-select-row__divider" aria-hidden />
-          {yearInput ? yearInputField : yearSelect}
-        </div>
-      ) : (
-        <>
-          {monthSelect}
-          {includeDay ? (
-            <Select
-              className={[
-                "dob-select-row__day",
-                parts.day ? "dob-select--filled" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              variant="secondary"
-              aria-label="Birth day"
-              placeholder="Day"
-              selectedKey={parts.day || null}
-              onOpenChange={(isOpen) => {
-                if (isOpen) refreshMenuScroll(dayMenuScrollRef);
-              }}
-              onSelectionChange={(keys) => {
-                const id = firstKeyFromSelectSelection(keys);
-                if (!id) return;
-                applyParts({ day: id });
-              }}
-            >
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover className="app-select-import-menu__popover dob-select-menu__popover">
-                <AppSelectMenuScroll ref={dayMenuScrollRef}>
-                  <ListBox className="app-select-import-menu__list">
-                    {days.map((d) => (
-                      <ListBox.Item key={d} id={d} textValue={d}>
-                        {Number(d)}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </AppSelectMenuScroll>
-              </Select.Popover>
-            </Select>
-          ) : null}
-          {yearSelect}
-        </>
-      )}
+      {monthSelect}
+      {includeDay ? (
+        <Select
+          className={[
+            "dob-select-row__day",
+            parts.day ? "dob-select--filled" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          variant="secondary"
+          aria-label="Birth day"
+          placeholder="Day"
+          selectedKey={parts.day || null}
+          onOpenChange={(isOpen) => {
+            if (isOpen) refreshMenuScroll(dayMenuScrollRef);
+          }}
+          onSelectionChange={(keys) => {
+            const id = firstKeyFromSelectSelection(keys);
+            if (!id) return;
+            applyParts({ day: id });
+          }}
+        >
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="app-select-import-menu__popover dob-select-menu__popover">
+            <AppSelectMenuScroll ref={dayMenuScrollRef}>
+              <ListBox className="app-select-import-menu__list">
+                {days.map((d) => (
+                  <ListBox.Item key={d} id={d} textValue={d}>
+                    {Number(d)}
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </AppSelectMenuScroll>
+          </Select.Popover>
+        </Select>
+      ) : null}
+      {yearSelect}
       {showAgeHint && hintAge != null ? (
         <p className="dob-age-hint" aria-live="polite">
           We use your age (

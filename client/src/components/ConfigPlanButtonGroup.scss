@@ -58,13 +58,13 @@
 }
 
 .config-plan-button-group button.config-plan-button-group__btn--active {
-  background: var(--strip-drawer-strong) !important;
+  background: var(--accent-text) !important;
   color: #fff !important;
   border-color: var(--border) !important;
 }
 
 .config-plan-button-group button.config-plan-button-group__btn--active:hover {
-  background: var(--strip-drawer) !important;
+  background: var(--green-d1) !important;
   color: #fff !important;
 }
 

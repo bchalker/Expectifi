@@ -70,6 +70,14 @@ button[data-slot='accordion-trigger']:focus-visible {
   color: var(--text-muted);
 }
 
+.config-life-tab__accordion [data-slot='accordion-indicator'] {
+  transition: transform 0.2s ease;
+}
+
+.config-life-tab__accordion [data-slot='accordion-indicator'][data-expanded='true'] {
+  transform: rotate(180deg);
+}
+
 .guaranteed-income-setup__accordion [data-slot='accordion-indicator'] {
   transition: transform 0.2s ease;
 }
@@ -100,7 +108,6 @@ button[data-slot='accordion-trigger']:focus-visible {
   padding: 0 var(--space-3) var(--space-4);
 }
 
-/* Surface variant in config drawer */
 .guaranteed-income-setup__accordion[data-slot='accordion'] {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -108,7 +115,15 @@ button[data-slot='accordion-trigger']:focus-visible {
   overflow: hidden;
 }
 
-.guaranteed-income-setup__accordion [data-slot='accordion-item']::after {
+.config-life-tab__accordion[data-slot='accordion'] {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.guaranteed-income-setup__accordion [data-slot='accordion-item']::after,
+.config-life-tab__accordion [data-slot='accordion-item']::after {
   left: var(--space-3);
   right: var(--space-3);
 }

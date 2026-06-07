@@ -382,7 +382,6 @@ export function SocialSecuritySetupFields({
                 value={spouseDob}
                 onChange={onSpouseDobChange}
                 includeDay={false}
-                segmented
               />
               {!spouseDobComplete ? (
                 <p className="ss-setup-fields__spouse-dob-prompt">
