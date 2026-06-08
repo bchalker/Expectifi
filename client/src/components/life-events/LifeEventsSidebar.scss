@@ -9,9 +9,11 @@
   padding: var(--space-5);
   // background: #ffffff;
   position: relative;
+  box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   z-index: 1;
   border: none;
-  box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
+  // background: linear-gradient(to left, hsla(120, 25%, 45%, 0.15), transparent);
+  
 }
 
 .life-events-sidebar__section {
@@ -73,7 +75,7 @@
 .life-events-sidebar__total {
   padding: var(--space-3);
   border-radius: var(--border-radius-md, 8px);
-  background: #f9f9f9;
+  // background: #f9f9f9;
   // border: 0.5px solid var(--color-border-tertiary, var(--border));
 }
 
@@ -113,6 +115,6 @@
   .life-events-sidebar {
     align-self: stretch;
     min-height: 100%;
-    box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
+    // box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
 }

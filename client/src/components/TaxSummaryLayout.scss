@@ -4,7 +4,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 .section--tax-summary {
   position: relative;
   overflow: hidden;
-  padding: var(--space-4);
+  padding: var(--space-7);
   padding-top: 0;
 }
 
@@ -150,6 +150,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   min-width: 0;
   width: 100%;
   display: flex;
+  gap: var(--space-5);
   flex-direction: column;
   min-height: 0;
 }
@@ -172,8 +173,9 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   min-height: 0;
   flex: none;
   border: none;
-  border-radius: 0;
-  box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
+  border-radius: var(--space-2);
+  background: linear-gradient(to left, hsla(120, 25%, 65%, 0.15), transparent);
+  // box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
 }
 
 @media (max-width: 680px) {
@@ -273,7 +275,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     width: 280px;
     height: auto;
     align-self: stretch;
-    box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
+    // box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
 
   .section--tax-summary--growth-assumptions .growth-assumptions-panel__main {
@@ -306,7 +308,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  padding: var(--space-4);
+  // padding: var(--space-4);
 }
 
 .tax-summary-card__accounts .section {
