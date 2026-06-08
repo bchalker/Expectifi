@@ -9,13 +9,13 @@
   height: 100%;
   min-height: 0;
   box-sizing: border-box;
-  background: #ffffff;
+  background: transparent;
   overflow: hidden;
 }
 
 .where-to-retire-preview-panel__header {
   padding: var(--space-4) var(--space-5) var(--space-3);
-  background: #ffffff;
+  background: transparent;
   text-align: center;
 }
 
@@ -41,7 +41,7 @@
   padding: 0 var(--space-5) var(--space-4);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: #ffffff;
+  background: transparent;
 }
 
 .where-to-retire-preview-panel__main .income-harvest-preview-map {

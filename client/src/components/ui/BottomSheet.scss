@@ -38,7 +38,7 @@
   min-height: 100vh;
   transition: transform 0.3s ease, border-radius 0.3s ease;
   transform-origin: top center;
-  background: var(--color-background-primary, var(--bg, var(--surface)));
+  background: transparent;
 }
 
 @media (max-width: 768px) {

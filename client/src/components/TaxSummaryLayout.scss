@@ -23,7 +23,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   box-sizing: border-box;
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;
-  background: #ffffff;
+  background: transparent;
 }
 
 .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
@@ -139,7 +139,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   box-sizing: border-box;
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;
-  background: #ffffff;
+  background: transparent;
   min-height: 28rem;
 }
 

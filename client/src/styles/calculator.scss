@@ -63,17 +63,24 @@
 .strip-card.warn .strip-card-val { color: var(--warn); }
 
 /* ── LAYOUT ── */
-.main {
+/* Centered app column — growth, income (.main), where to retire (.where-to-retire__body.main) */
+.main,
+.where-to-retire__body.main,
+.app-page--where-to-retire.main {
   width: var(--layout-app-boundary);
   max-width: 100%;
   margin-inline: auto;
-  padding: var(--space-2) var(--layout-app-inner-pad) var(--space-6);
   box-sizing: border-box;
+}
+
+.main {
+  padding: var(--space-2) var(--layout-app-inner-pad) var(--space-6);
 }
 
 .main--has-hero {
   padding: 0;
   background: #ffffff;
+  background-color: rgba(255,255,255,0.75);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-md, 8px);
   overflow: visible;
@@ -767,10 +774,15 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
     padding: var(--space-5) 0 var(--space-8);
   }
 
-  .main.main--has-hero {
+  .main.main--has-hero,
+  .where-to-retire__body.main,
+  .app-page--where-to-retire.main {
     width: 100%;
     max-width: none;
     padding-top: 0;
+  }
+
+  .main.main--has-hero {
     border: none;
     border-radius: 0;
   }

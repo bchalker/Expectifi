@@ -1017,7 +1017,7 @@ html:has(
 
 @media (max-width: 680px) {
   body:has(.account-balances-manage__backdrop:not(.account-balances-manage__backdrop--closing)) {
-    background: var(--surface);
+    background-color: var(--surface);
   }
 
   body:has(.account-balances-manage__backdrop:not(.account-balances-manage__backdrop--closing))

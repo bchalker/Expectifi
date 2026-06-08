@@ -14,12 +14,47 @@
 @import './styles/calculator.scss';
 @import './components/DashboardViewReveal.scss';
 
+html {
+  min-height: 100%;
+  /* Pattern visibility — lower = fainter (no need to re-export the PNG). */
+  --page-bg-pattern-opacity: 0.15;
+  --page-bg-pattern-image: url('/images/leaves-pattern.png');
+}
+
+html[data-app-phase='income'] {
+  --page-bg-pattern-image: url('/images/feathers-pattern.png');
+}
+
+html[data-app-phase='where-to-retire'] {
+  --page-bg-pattern-image: url('/images/travel-pattern.png');
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--color-background-primary, var(--bg, var(--surface)));
+  background-color: var(--color-background-primary, var(--bg, var(--surface)));
+  background-image:
+    linear-gradient(
+      color-mix(
+        in srgb,
+        var(--color-background-primary, var(--bg, var(--surface)))
+          calc((1 - var(--page-bg-pattern-opacity)) * 100%),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--color-background-primary, var(--bg, var(--surface)))
+          calc((1 - var(--page-bg-pattern-opacity)) * 100%),
+        transparent
+      )
+    ),
+    var(--page-bg-pattern-image);
+  background-position: 0 0;
+  background-repeat: repeat;
 }
 
-#root {
+#root,
+.app-scale-surface {
   min-height: 100vh;
+  background: transparent;
 }

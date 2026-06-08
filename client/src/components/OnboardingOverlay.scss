@@ -8,7 +8,7 @@ html:has(.app-header-shell--onboarding) {
 body.onboarding-overlay--open {
   overflow: hidden;
   touch-action: none;
-  background: var(--surface);
+  background-color: var(--surface);
   --goal-bar-h: 0px;
   --subheader-h: 0px;
   --app-header-stack-h: var(--app-top-chrome-h);

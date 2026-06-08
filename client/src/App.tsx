@@ -798,6 +798,17 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }
   }, [fixedHeaderHeroHidden]);
 
+  useLayoutEffect(() => {
+    if (!welcomeDone) {
+      document.documentElement.removeAttribute("data-app-phase");
+      return;
+    }
+    document.documentElement.setAttribute(
+      "data-app-phase",
+      isWhereToRetire ? "where-to-retire" : phase,
+    );
+  }, [welcomeDone, isWhereToRetire, phase]);
+
   const dashboardSubHeaderProps = {
     phase,
     onPhase: setPhase,

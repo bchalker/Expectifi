@@ -43,10 +43,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  width: 100%;
-  max-width: 100%;
   min-height: 0;
-  margin-inline: 0;
   padding-top: 0;
   padding-bottom: calc(
     var(--app-privacy-trust-h) + var(--app-chrome-gap) + env(safe-area-inset-bottom, 0px)
@@ -54,11 +51,14 @@
   box-sizing: border-box;
 }
 
-/* Full-width layout — WTR map/list uses the full app column. */
+/* Match growth/income .main.main--has-hero column width */
 .app-page--where-to-retire.main,
 .where-to-retire__body.main {
-  width: 100%;
+  width: var(--layout-app-boundary);
   max-width: 100%;
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
 }
 
 .where-to-retire__body > .wtr-budget-hero,
