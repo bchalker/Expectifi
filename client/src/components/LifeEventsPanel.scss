@@ -8,6 +8,7 @@
   background: var(--surface);
   // background: var(--sky-blue);
   border-radius: 0 0 var(--space-2) var(--space-2);
+  box-shadow: hsl(120, 25%, 65%, 20%) 0px -10px 40px -10px;
 }
 
 .section--life-events .life-events-panel {

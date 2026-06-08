@@ -1,6 +1,6 @@
 /* Shared top chrome — marketing landing + app calculator */
 .header {
-  --header-brand-green: #4ecb8d;
+  --header-brand-green: #8fbc8f;
   /* Matches subheader income-phase wave gradient stop (SubHeader.tsx) */
   --header-income-orange: #c4610a;
 
@@ -245,7 +245,7 @@
   // border-left: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--nav-account-strip-bg);
   background: rgba(0,0,0, .15);
-  color: var(--nav-accent);
+  color: var(--header-brand-green);
   text-align: right;
   transition:
     background 0.15s ease,
@@ -264,7 +264,7 @@
 .header__settings--signed-in {
   padding: 0 var(--space-3) 0 var(--space-2);
   border-right: 1px solid rgba(255, 255, 255, 0.16);
-  color: var(--nav-accent);
+  color: var(--header-brand-green);
 }
 
 .header__settings--signed-in:hover {
@@ -531,7 +531,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--nav-text-muted);
+  color: var(--header-brand-green);
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
@@ -550,7 +550,7 @@
   border: none;
   border-radius: 0;
   background: transparent;
-  color: var(--nav-text-muted);
+  color: var(--header-brand-green);
   cursor: pointer;
   flex-shrink: 0;
   box-sizing: border-box;
