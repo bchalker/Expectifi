@@ -60,7 +60,6 @@ export function ImportedHoldingsScenarioGuide({
 }: Props) {
   const leadTickers = pickScenarioGuideLeadTickers(holdings);
   const dynamicHoldings = leadTickers.slice(0, 2);
-  if (variant === "growth" && holdings.length === 0) return null;
 
   if (variant === "income") {
     return (

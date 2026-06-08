@@ -65,6 +65,7 @@ import {
 } from "./lib/retirementBalanceMode";
 import {
   clearDashboardViewEnterAttrs,
+  dashboardViewEnterClearMs,
   replayDashboardViewEnter,
 } from "./lib/dashboardViewReveal";
 import { syncNoPortfolioSubheaderDocumentAttr } from "./lib/syncNoPortfolioSubheader";
@@ -704,6 +705,16 @@ export default function App({ initialAuthModal = null }: AppProps) {
       clearDashboardViewEnterAttrs();
     }
   }, [welcomeDone, c.hasPortfolioBalances]);
+
+  /** Safety net: never leave dashboard reveal attrs stuck after the stagger finishes. */
+  useEffect(() => {
+    if (!welcomeDone || !c.hasPortfolioBalances) return;
+    const timer = window.setTimeout(
+      () => clearDashboardViewEnterAttrs(),
+      dashboardViewEnterClearMs() + 200,
+    );
+    return () => window.clearTimeout(timer);
+  }, [welcomeDone, c.hasPortfolioBalances, phase]);
 
   useEffect(() => {
     if (

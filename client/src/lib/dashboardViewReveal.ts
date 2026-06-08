@@ -7,8 +7,9 @@ export const DASHBOARD_STAGGER = {
   subheaderContent: 2,
   fineTune: 3,
   sidePanel: 4,
-  accounts: 5,
-  lifeEvents: 6,
+  sidePanelScenario: 5,
+  accounts: 6,
+  lifeEvents: 7,
 } as const
 
 /** Match --dashboard-stagger-step in global.scss. */

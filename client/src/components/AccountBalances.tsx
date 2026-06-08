@@ -544,9 +544,7 @@ export function AccountBalances({
   const showImportedHoldingsScenarioGuide =
     phase === "growth" &&
     mergedDashboard &&
-    holdingsScenarioEditingEnabled &&
-    displayBalanceMode === "imported" &&
-    aggregatedHoldingsForGuide.length > 0;
+    holdingsScenarioEditingEnabled;
 
   const [allocationEntriesPatch, setAllocationEntriesPatch] = useState<
     ManualAccountEntry[] | null
