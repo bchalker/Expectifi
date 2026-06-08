@@ -1206,7 +1206,7 @@
 }
 
 .holdings-scenario-trigger-shell--peryear .holdings-scenario-trigger-shell__accent {
-  background: #e8b86a;
+  background: var(--color-amber-dark);
 }
 
 button.holdings-scenario-trigger--outline {
@@ -1453,7 +1453,7 @@ button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__trail 
 }
 
 .holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__dot {
-  background: #e8b86a;
+  background: var(--color-amber-dark);
 }
 
 .holdings-scenario-trigger--badge.holdings-scenario-trigger--very_bear .holdings-scenario-trigger__label {
@@ -1481,7 +1481,7 @@ button.holdings-scenario-trigger--badge:hover .holdings-scenario-trigger__trail 
 }
 
 .holdings-scenario-trigger--badge.holdings-scenario-trigger--peryear .holdings-scenario-trigger__label {
-  color: #e8b86a;
+  color: var(--color-amber-dark);
 }
 
 button.holdings-scenario-trigger--badge .holdings-scenario-trigger__dot {

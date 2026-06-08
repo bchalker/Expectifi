@@ -137,7 +137,13 @@ export function AccountScenarioPanel({
 
   const resolvedChoice = stored ? inferAccountScenarioUiChoice(stored, blended, h) : 'default'
 
-  const [draftPct, setDraftPct] = useState(() => String(decimalToPct(blended)))
+  const [draftPct, setDraftPct] = useState(() => {
+    if (stored) {
+      const ch = inferAccountScenarioUiChoice(stored, blended, h)
+      if (ch === 'custom') return String(decimalToPct(stored.flatRate))
+    }
+    return String(decimalToPct(blended))
+  })
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
   const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('outlook')
 
@@ -151,11 +157,10 @@ export function AccountScenarioPanel({
   }, [initialTab, bucket])
 
   useEffect(() => {
-    if (stored) {
-      const ch = inferAccountScenarioUiChoice(stored, blended, h)
-      setDraftPct(String(decimalToPct(ch === 'custom' ? stored.flatRate : blended)))
-    } else {
-      setDraftPct(String(decimalToPct(blended)))
+    if (!stored) return
+    const ch = inferAccountScenarioUiChoice(stored, blended, h)
+    if (ch === 'custom') {
+      setDraftPct(String(decimalToPct(stored.flatRate)))
     }
   }, [stored, blended, h])
 
@@ -253,15 +258,6 @@ export function AccountScenarioPanel({
     [stored, targets],
   )
 
-  const applyCustomWithSeed = useCallback(() => {
-    const seed = stored && inferAccountScenarioUiChoice(stored, blended, h) === 'custom'
-      ? decimalToPct(stored.flatRate)
-      : decimalToPct(blended)
-    const seedStr = String(seed)
-    setDraftPct(seedStr)
-    tryPatchAccount('custom', parseScenarioPct(seedStr))
-  }, [blended, h, stored, tryPatchAccount])
-
   const onSelectOutlookTile = useCallback(
     (choice: OutlookScenarioChoice) => {
       setUiChoice(choice)
@@ -277,13 +273,13 @@ export function AccountScenarioPanel({
         return
       } else if (tab === 'custom') {
         setUiChoice('custom')
-        applyCustomWithSeed()
+        tryPatchAccount('custom', parseScenarioPct(draftPct))
       } else if (tab === 'peryear') {
         setUiChoice('peryear')
         tryPatchAccount('peryear', 0)
       }
     },
-    [applyCustomWithSeed, tryPatchAccount, uiChoice],
+    [draftPct, tryPatchAccount],
   )
 
   const patchYearRates = useCallback(
@@ -419,7 +415,7 @@ export function AccountScenarioPanel({
                 outlookHorizon={h}
                 outlookPreviewCurrentValue={outlookPreviewValue}
                 accountName={accountName}
-                accountRetirementYear={calY}
+                targetRetirementAge={inputs.targetRetirementAge}
                 accountCurrentBalance={outlookPreviewValue > 0 ? outlookPreviewValue : undefined}
                 draftPct={draftPct}
                 onDraftPctChange={(s) => {

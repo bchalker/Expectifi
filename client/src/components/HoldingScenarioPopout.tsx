@@ -194,7 +194,16 @@ export function HoldingScenarioPanel({
 
   const resolvedChoice = commonChoice === SCENARIO_MIXED ? 'default' : commonChoice
 
-  const [draftPct, setDraftPct] = useState(String(decimalToPct(retRate)))
+  const [draftPct, setDraftPct] = useState(() => {
+    const first = targets[0]
+    if (first) {
+      const pmBlend = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
+      const ch = inferScenarioUiChoice(first, pmBlend, h)
+      if (ch === 'custom') return String(decimalToPct(first.flatRate))
+      return String(decimalToPct(pmBlend))
+    }
+    return String(decimalToPct(retRate))
+  })
   const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
   const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('outlook')
 
@@ -205,10 +214,11 @@ export function HoldingScenarioPanel({
 
   useEffect(() => {
     const first = targets[0]
-    if (first) {
-      const blended = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
-      const ch = inferScenarioUiChoice(first, blended, h)
-      setDraftPct(String(decimalToPct(ch === 'custom' ? first.flatRate : blended)))
+    if (!first) return
+    const blended = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
+    const ch = inferScenarioUiChoice(first, blended, h)
+    if (ch === 'custom') {
+      setDraftPct(String(decimalToPct(first.flatRate)))
     }
   }, [targets, h, retRate, brkRate])
 
@@ -224,18 +234,6 @@ export function HoldingScenarioPanel({
   )
 
   const primaryModel = targets[0]
-
-  const applyCustomWithSeed = useCallback(() => {
-    const pm = targets[0]
-    const pmBlend = pm ? blendedRateForDashboardPositionId(pm.id, retRate, brkRate) : retRate
-    const seed =
-      pm && inferScenarioUiChoice(pm, pmBlend, h) === 'custom'
-        ? decimalToPct(pm.flatRate)
-        : decimalToPct(pmBlend)
-    const seedStr = String(seed)
-    setDraftPct(seedStr)
-    patchAll('custom', parsePct(seedStr))
-  }, [h, patchAll, retRate, brkRate, targets])
 
   const clearToGlobalRate = useCallback(() => {
     setUiChoice('default')
@@ -262,13 +260,13 @@ export function HoldingScenarioPanel({
         return
       } else if (tab === 'custom') {
         setUiChoice('custom')
-        applyCustomWithSeed()
+        patchAll('custom', parsePct(draftPct))
       } else if (tab === 'peryear') {
         setUiChoice('peryear')
         patchAll('peryear', 0)
       }
     },
-    [applyCustomWithSeed, patchAll, uiChoice],
+    [draftPct, patchAll],
   )
 
   const patchYearRates = useCallback(

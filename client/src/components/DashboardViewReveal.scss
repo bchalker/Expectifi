@@ -12,6 +12,17 @@
   }
 }
 
+/* Side panel: opacity only — translateY trips overflow scrollbars on stretch columns. */
+@keyframes dashboard-view-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes dashboard-view-wave-in {
   from {
     transform: scaleY(0);
@@ -127,11 +138,15 @@ html[data-dashboard-view-enter='growth'] {
   }
 
   .growth-assumptions-panel__slider {
-    @include dashboard-view-rise(3);
+    animation: dashboard-view-fade-in var(--dashboard-reveal-duration)
+      cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--dashboard-stagger-step) * 3);
   }
 
   .growth-assumptions-panel__scenario {
-    @include dashboard-view-rise(4);
+    animation: dashboard-view-fade-in var(--dashboard-reveal-duration)
+      cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--dashboard-stagger-step) * 4);
   }
 
   .account-balances-stack {

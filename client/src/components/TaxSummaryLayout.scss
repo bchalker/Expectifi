@@ -275,6 +275,11 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     align-self: stretch;
     box-shadow: rgba(33, 35, 38, 0.12) -6px 0 12px -6px;
   }
+
+  .section--tax-summary--growth-assumptions .growth-assumptions-panel__main {
+    overflow: visible;
+    flex: 0 0 auto;
+  }
 }
 
 .tax-summary-card {

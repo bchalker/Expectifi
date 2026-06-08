@@ -142,7 +142,7 @@ export type HoldingScenarioIntentTabsProps = {
   yearGrid: ReactNode
   variant?: 'holding' | 'account'
   accountName?: string
-  accountRetirementYear?: number
+  targetRetirementAge?: number
   accountCurrentBalance?: number
   /** Soft note when manual allocation profile conflicts with outlook preset. */
   scenarioMismatchNote?: string | null
@@ -170,7 +170,7 @@ export function HoldingScenarioIntentTabs({
   yearGrid,
   variant = 'holding',
   accountName,
-  accountRetirementYear,
+  targetRetirementAge,
   accountCurrentBalance,
   scenarioMismatchNote = null,
   className = '',
@@ -244,7 +244,7 @@ export function HoldingScenarioIntentTabs({
             .filter(Boolean)
             .join(' ')}
         >
-          {isAccount && accountName && accountRetirementYear != null && accountCurrentBalance != null ? (
+          {isAccount && accountName && targetRetirementAge != null && accountCurrentBalance != null ? (
             <AccountCustomRateTab
               accountName={accountName}
               draftPct={draftPct}
@@ -253,7 +253,7 @@ export function HoldingScenarioIntentTabs({
               globalBlended={globalBlended}
               currentBalance={accountCurrentBalance}
               horizon={outlookHorizon}
-              retirementYear={accountRetirementYear}
+              targetRetirementAge={targetRetirementAge}
             />
           ) : (
             <>

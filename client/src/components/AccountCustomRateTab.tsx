@@ -7,7 +7,7 @@ import { useAnimatedScalar } from '../hooks/useAnimatedScalar'
 import { fmtK } from '../utils/format'
 import './AccountCustomRateTab.scss'
 
-const CUSTOM_RATE_STEP = 0.5
+const CUSTOM_RATE_STEP = 0.25
 
 const BENCHMARKS: { label: string; display: string; valuePct: number }[] = [
   { label: 'S&P 500', display: '~10%', valuePct: 10 },
@@ -17,7 +17,12 @@ const BENCHMARKS: { label: string; display: string; valuePct: number }[] = [
 ]
 
 function clampPct(n: number): number {
-  return Math.max(-100, Math.min(100, Math.round(n * 10) / 10))
+  return Math.max(-100, Math.min(100, Math.round(n * 100) / 100))
+}
+
+function formatGlobalRatePct(rate: number): string {
+  const pct = rate * 100
+  return Number.isInteger(pct) ? String(pct) : pct.toFixed(1)
 }
 
 function AnimatedProjectionAmount({ value }: { value: number }) {
@@ -40,7 +45,7 @@ type Props = {
   globalBlended: number
   currentBalance: number
   horizon: number
-  retirementYear: number
+  targetRetirementAge: number
 }
 
 export function AccountCustomRateTab({
@@ -51,7 +56,7 @@ export function AccountCustomRateTab({
   globalBlended,
   currentBalance,
   horizon,
-  retirementYear,
+  targetRetirementAge,
 }: Props) {
   void _accountName
   const h = horizonClamp(horizon)
@@ -85,7 +90,7 @@ export function AccountCustomRateTab({
         <button
           type="button"
           className="account-custom-rate-tab__step-btn"
-          aria-label="Decrease annual return by 0.5%"
+          aria-label="Decrease annual return by 0.25%"
           onClick={() => stepRate(-1)}
         >
           <IconMinus size={16} stroke={1.5} aria-hidden />
@@ -117,7 +122,7 @@ export function AccountCustomRateTab({
         <button
           type="button"
           className="account-custom-rate-tab__step-btn"
-          aria-label="Increase annual return by 0.5%"
+          aria-label="Increase annual return by 0.25%"
           onClick={() => stepRate(1)}
         >
           <IconPlus size={16} stroke={1.5} aria-hidden />
@@ -127,7 +132,7 @@ export function AccountCustomRateTab({
       <div className="account-custom-rate-tab__preview" role="status">
         <p className="account-custom-rate-tab__preview-line account-custom-rate-tab__preview-line--headline">
           <AnimatedProjectionAmount value={projected} />
-          <span className="account-custom-rate-tab__preview-year"> by {retirementYear}</span>
+          <span className="account-custom-rate-tab__preview-age"> at {targetRetirementAge}</span>
         </p>
         {showDelta ? (
           <p className="account-custom-rate-tab__preview-line account-custom-rate-tab__preview-line--delta">
@@ -140,13 +145,21 @@ export function AccountCustomRateTab({
               ].join(' ')}
             >
               {deltaMore ? (
-                <IconArrowUp size={14} stroke={1.5} aria-hidden />
+                <IconArrowUp
+                  className="account-custom-rate-tab__delta-icon"
+                  stroke={1.5}
+                  aria-hidden
+                />
               ) : (
-                <IconArrowDown size={14} stroke={1.5} aria-hidden />
+                <IconArrowDown
+                  className="account-custom-rate-tab__delta-icon"
+                  stroke={1.5}
+                  aria-hidden
+                />
               )}
               <AnimatedDeltaAmount value={delta} />
             </span>
-            {deltaMore ? ' more' : ' less'} than global rate
+            {deltaMore ? ' more' : ' less'} than global rate ({formatGlobalRatePct(globalBlended)}%)
           </p>
         ) : null}
       </div>
