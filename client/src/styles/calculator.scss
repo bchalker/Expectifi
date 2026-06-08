@@ -750,7 +750,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 @media (max-width: 900px) {
   .inputs-grid { grid-template-columns: 1fr; }
   .results-strip-inner { padding: 0 1rem; }
-  .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
+  // .main { padding: 1.5rem var(--layout-app-inner-pad) 3rem; }
   .main.main--has-hero {
     padding-top: 0;
   }

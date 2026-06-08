@@ -81,6 +81,14 @@
   margin-left: auto;
 }
 
+.account-balances-header-row__actions-primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .account-balances-header-row__entry {
   display: flex;
   flex-wrap: wrap;
@@ -131,6 +139,47 @@
   min-height: 1.5rem;
   margin: 0 var(--space-1) /* review: was 0.1rem */;
   background: var(--border);
+}
+
+/* Tablet — title full width; dropdowns row below; tax icon flush right */
+@media (min-width: 681px) and (max-width: 1279px) {
+  .account-balances-header-row {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: var(--space-3);
+  }
+
+  .account-balances-header-row__title-block {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .account-balances-header-row__actions {
+    flex: 1 1 100%;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-3);
+    margin-left: 0;
+  }
+
+  .account-balances-header-row__actions-primary {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .account-balances-header-row__actions-primary > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .account-balances-header-row__actions .tax-breakdown-header-btn-wrap {
+    flex: 0 0 auto;
+    margin-left: auto;
+    align-self: center;
+  }
 }
 
 @media (max-width: 680px) {

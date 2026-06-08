@@ -324,11 +324,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   display: none;
 }
 
-.tax-summary-card--has-panel .tax-summary-card__accordion {
-  display: block;
-  border-top: 1px solid var(--border);
-}
-
 .tax-summary-card__accordion .accordion-section__panel-inner {
   padding: 0 var(--layout-app-inner-pad, 1.25rem) var(--space-4);
 }
@@ -341,13 +336,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   display: none;
 }
 
-@media (max-width: #{$layout-snapshot-split-min}) and (min-width: 681px) {
-  .tax-summary-card--has-panel .tax-summary-card__accordion {
-    display: block;
-  }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 680px) {
   .tax-breakdown-header-btn-wrap {
     display: flex;
     flex-direction: column;
@@ -454,7 +443,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   }
 }
 
-@media (min-width: #{$layout-snapshot-split-min + 1px}) {
+@media (min-width: 681px) {
   .tax-breakdown-header-btn-wrap {
     display: inline-flex;
     align-items: center;
