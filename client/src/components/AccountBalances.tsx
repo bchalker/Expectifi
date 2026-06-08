@@ -529,10 +529,12 @@ export function AccountBalances({
 
   const importedPositionRows = useMemo(() => {
     void positionsImportRev;
+    void balanceMode;
+    void manualAccountsRev;
     const imp = loadStoredPositionsImport();
     if (!imp?.batches?.length) return [] as ImportedPositionRow[];
     return flattenBatches(imp.batches);
-  }, [positionsImportRev]);
+  }, [positionsImportRev, balanceMode, manualAccountsRev]);
 
   const aggregatedHoldingsForGuide = useMemo(
     () => aggregatedHoldingsForScenarioGuide(importedPositionRows),

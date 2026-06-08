@@ -45,6 +45,22 @@
   transform-origin: top center;
 }
 
+/* Default visible — flush/enter animations override temporarily. */
+.main .results-strip,
+.growth-assumptions-panel__slider,
+.growth-assumptions-panel__scenario,
+.account-balances-header-row,
+.where-to-retire-preview-panel,
+.account-balances-stack,
+.main > .section--life-events,
+.where-to-retire__main-panel-back,
+.where-to-retire__income-intro,
+.where-to-retire__income-toolbar-slider,
+.where-to-retire__map-stage,
+.where-to-retire__main-panel-footer {
+  opacity: 1;
+}
+
 /* Pre-reveal: hide targets while import modal fades or tab switch resets. */
 html[data-portfolio-import-flush],
 html[data-dashboard-view-flush] {

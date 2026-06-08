@@ -14,13 +14,11 @@ import {
 } from './utils'
 import { fmtInput, parseNum } from '../../utils/format'
 import ImpactRatingBadge from './ImpactRatingBadge'
-import ProjectionChart from './ProjectionChart'
 import '../LifeEventsPanel.scss'
 
 export interface GrowthEventCardProps {
   config: LifeEventConfig
   state: LifeEventState
-  basePortfolio: number
   retirementYear: number
   retirementPortfolio: number
   currentYear: number
@@ -29,28 +27,6 @@ export interface GrowthEventCardProps {
   hsaBalance: number
   onStateChange: (id: string, updates: Partial<LifeEventState>) => void
   onActiveChange: (id: string, isActive: boolean, futureValue: number) => void
-}
-
-function enrichNarrative(
-  text: string,
-  amount: number,
-  futureValue: number,
-): ReactNode {
-  const amountStr = formatCurrency(amount)
-  const futureValueStr = formatCurrency(futureValue)
-  const amountIdx = text.indexOf(amountStr)
-  const futureValueIdx = text.indexOf(futureValueStr)
-  if (amountIdx === -1 || futureValueIdx === -1) return text
-
-  return (
-    <>
-      {text.slice(0, amountIdx)}
-      <span className="life-events-event__amount-highlight">{amountStr}</span>
-      {text.slice(amountIdx + amountStr.length, futureValueIdx)}
-      <strong>{futureValueStr}</strong>
-      {text.slice(futureValueIdx + futureValueStr.length)}
-    </>
-  )
 }
 
 function clampNumber(value: number, min: number, max: number): number {
@@ -235,7 +211,6 @@ function HsaAnalysisBlock({ hsaResult, hsaBalance, hsaSavings }: HsaAnalysisBloc
 export default function GrowthEventCard({
   config,
   state,
-  basePortfolio,
   retirementYear,
   retirementPortfolio,
   currentYear,
@@ -265,7 +240,6 @@ export default function GrowthEventCard({
   const hsaResult = showHsaAnalysis ? calcHsaOffset(state.amount, hsaBalance) : null
   const lumpImpactAmount = hsaResult ? hsaResult.netExpense : state.amount
   const calcAmount = config.isRecurring ? state.amount : lumpImpactAmount
-  const chartAmount = config.isRecurring ? state.amount : lumpImpactAmount
   const headerAmount = config.isRecurring
     ? state.amount
     : hsaResult && hsaResult.hsaOffset > 0
@@ -309,12 +283,43 @@ export default function GrowthEventCard({
   const cardClassName = [
     'life-events-panel__card',
     state.isActive && 'life-events-panel__card--active',
+    state.isExpanded && 'life-events-panel__card--expanded',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const headerClassName = [
+    'life-events-event__card-header',
+    state.isExpanded && 'life-events-event__card-header--expanded',
   ]
     .filter(Boolean)
     .join(' ')
 
   const toggleExpanded = () => {
     onStateChange(state.id, { isExpanded: !state.isExpanded })
+  }
+
+  const renderEventLabel = () => {
+    if (config.isRecurring) {
+      return (
+        <>
+          {config.headerTitlePrefix}
+          <span className="life-events-event__amount-highlight">
+            {formatCurrency(headerAmount)}/mo
+          </span>
+          {config.headerTitleSuffix}
+        </>
+      )
+    }
+    return (
+      <>
+        {config.headerTitlePrefix}
+        <span className="life-events-event__amount-highlight">
+          {config.formatHeaderAmount(headerAmount)}
+        </span>
+        {config.headerTitleSuffix}
+      </>
+    )
   }
 
   const handleToggleActive = (checked: boolean) => {
@@ -344,8 +349,8 @@ export default function GrowthEventCard({
 
   return (
     <div className={cardClassName}>
-      <div className="life-events-event__head">
-        <span className="life-events-event__head-left">
+      <div className={headerClassName}>
+        <div className="life-events-event__card-header-left">
           <label
             className={[
               'life-events-event__toggle',
@@ -365,52 +370,23 @@ export default function GrowthEventCard({
             <span className="life-events-event__toggle-track" aria-hidden />
             <span className="life-events-event__toggle-thumb" aria-hidden />
           </label>
-          <span className="life-events-event__title-block">
-            <span className="life-events-event__title">
-              {config.isRecurring ? (
-                <>
-                  {config.headerTitlePrefix}
-                  <button
-                    type="button"
-                    className="life-events-event__amount-link life-events-event__amount-highlight"
-                    onClick={toggleExpanded}
-                    aria-expanded={state.isExpanded}
-                  >
-                    {formatCurrency(headerAmount)}/mo
-                  </button>
-                  {config.headerTitleSuffix}
-                </>
-              ) : (
-                <>
-                  {config.headerTitlePrefix}
-                  <button
-                    type="button"
-                    className="life-events-event__amount-link life-events-event__amount-highlight"
-                    onClick={toggleExpanded}
-                    aria-expanded={state.isExpanded}
-                  >
-                    {config.formatHeaderAmount(headerAmount)}
-                  </button>
-                  {config.headerTitleSuffix}
-                </>
-              )}
-              {state.label?.includes('(') ? (
-                <span className="life-events-event__title-suffix">
-                  {' '}
-                  ({state.label.split('(').pop()?.replace(')', '')})
-                </span>
-              ) : null}
-            </span>
-            {showHsaSubtext ? (
-              <span className="life-events-event__hsa-subtext">
-                {formatStripPortfolioValue(hsaResult!.grossExpense)} gross,{' '}
-                {formatStripPortfolioValue(hsaResult!.hsaOffset)} covered by HSA
-              </span>
-            ) : null}
-          </span>
-        </span>
-        <span className="life-events-event__head-right">
           <ImpactRatingBadge rating={rating} isOutflow />
+        </div>
+        <div className="life-events-event__card-header-right">
+          <span
+            className={[
+              'life-events-event__card-header-impact',
+              state.isActive
+                ? 'life-events-event__card-header-impact--active'
+                : 'life-events-event__card-header-impact--idle',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {futureValue > 0
+              ? `−${formatCurrencyCompact(futureValue)}`
+              : formatCurrency(0)}
+          </span>
           <button
             type="button"
             className={[
@@ -421,28 +397,45 @@ export default function GrowthEventCard({
               .join(' ')}
             onClick={toggleExpanded}
             aria-expanded={state.isExpanded}
-            aria-label={state.isExpanded ? 'Collapse event details' : 'Expand event details'}
+            aria-label={
+              state.isExpanded ? 'Collapse event details' : 'Expand event details'
+            }
           >
             <IconChevronDown size={16} stroke={1.5} aria-hidden />
           </button>
-        </span>
+        </div>
       </div>
 
-      <div className="life-events-event__content">
-        {state.isActive ? (
-          <>
-            <div className="life-events-event__impact-row">
-              <span className="life-events-event__impact-group">
-                <span className="life-events-event__impact-label">Current</span>
-                <span className="life-events-event__impact-value">
-                  {formatCurrency(displayCurrent)}
-                </span>
+      <div className="life-events-event__card-body">
+        <p className="life-events-event__label">
+          {renderEventLabel()}
+          {state.label?.includes('(') ? (
+            <span className="life-events-event__label-suffix">
+              {' '}
+              ({state.label.split('(').pop()?.replace(')', '')})
+            </span>
+          ) : null}
+        </p>
+        {showHsaSubtext ? (
+          <p className="life-events-event__sub-label">
+            {formatStripPortfolioValue(hsaResult!.grossExpense)} gross,{' '}
+            {formatStripPortfolioValue(hsaResult!.hsaOffset)} covered by HSA
+          </p>
+        ) : null}
+      </div>
+
+      {state.isExpanded ? (
+        <div className="life-events-event__detail-drawer">
+          <div className="life-events-event__impact-row">
+            <div className="life-events-event__impact-group">
+              <span className="life-events-event__impact-label">Current</span>
+              <span className="life-events-event__impact-value">
+                {formatCurrency(displayCurrent)}
               </span>
-              <span className="life-events-event__impact-arrow" aria-hidden>
-                · · → · ·
-              </span>
-              <span className="life-events-event__impact-group">
-                <span className="life-events-event__impact-label">After</span>
+            </div>
+            <div className="life-events-event__impact-group">
+              <span className="life-events-event__impact-label">After</span>
+              <span className="life-events-event__impact-values">
                 <span className="life-events-event__impact-value">
                   {formatCurrency(displayAfter)}
                 </span>
@@ -453,16 +446,14 @@ export default function GrowthEventCard({
                 ) : null}
               </span>
             </div>
-            {config.isRecurring && totalOutflow != null && totalOutflow > 0 ? (
-              <p className="life-events-event__impact-subline">
-                {formatCurrency(state.amount)}/mo for {durationValue}{' '}
-                {durationValue === 1 ? 'year' : 'years'} ({formatCurrency(totalOutflow)} total)
-              </p>
-            ) : null}
-          </>
-        ) : null}
+          </div>
+          {config.isRecurring && totalOutflow != null && totalOutflow > 0 ? (
+            <p className="life-events-event__impact-subline">
+              {formatCurrency(state.amount)}/mo for {durationValue}{' '}
+              {durationValue === 1 ? 'year' : 'years'} ({formatCurrency(totalOutflow)} total)
+            </p>
+          ) : null}
 
-        {state.isExpanded ? (
           <div className="life-events-event__expand">
             <div
               className={[
@@ -472,18 +463,6 @@ export default function GrowthEventCard({
                 .filter(Boolean)
                 .join(' ')}
             >
-              <ProjectionChart
-                basePortfolio={basePortfolio}
-                amount={chartAmount}
-                eventYear={yearValue}
-                retirementYear={retirementYear}
-                currentYear={currentYear}
-                growthRate={growthRate}
-                eventColor={config.color}
-                isRecurring={config.isRecurring}
-                duration={config.isRecurring ? durationValue : 0}
-              />
-
               <div className="life-events-slider-group">
                 <div className="life-events-field">
                   <div className="life-events-field__row">
@@ -754,23 +733,7 @@ export default function GrowthEventCard({
               ) : null}
             </div>
           </div>
-        ) : null}
-      </div>
-
-      {state.isActive ? (
-        <p className="life-events-event__narrative">
-          {enrichNarrative(
-            config.narrativeTemplate(
-              state.amount,
-              yearValue,
-              futureValue,
-              retirementYear,
-              state.duration ?? config.defaultDuration,
-            ),
-            state.amount,
-            futureValue,
-          )}
-        </p>
+        </div>
       ) : null}
     </div>
   )

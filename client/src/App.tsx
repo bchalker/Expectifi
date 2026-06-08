@@ -63,7 +63,10 @@ import {
   saveBalanceInputMode,
   type BalanceInputMode,
 } from "./lib/retirementBalanceMode";
-import { replayDashboardViewEnter } from "./lib/dashboardViewReveal";
+import {
+  clearDashboardViewEnterAttrs,
+  replayDashboardViewEnter,
+} from "./lib/dashboardViewReveal";
 import { syncNoPortfolioSubheaderDocumentAttr } from "./lib/syncNoPortfolioSubheader";
 import {
   applyImportedBalanceOverrides,
@@ -616,14 +619,18 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const ssBenefitsConfigured = isSsConfigured(inputs);
   const guaranteedIncomeConfigured = isGuaranteedIncomeConfigured(inputs);
+  const displayBalanceMode = useMemo(
+    () => resolvePortfolioBalanceMode(balanceMode),
+    [balanceMode, positionsImportRev, manualAccountsRev],
+  );
   const showScenarioGuideTab = useMemo(() => {
-    if (phase !== "growth" || balanceMode !== "imported") return false;
+    if (phase !== "growth" || displayBalanceMode !== "imported") return false;
     const imp = loadStoredPositionsImport();
     if (!imp?.batches?.length) return false;
     return (
       aggregatedHoldingsForScenarioGuide(flattenBatches(imp.batches)).length > 0
     );
-  }, [phase, balanceMode, positionsImportRev]);
+  }, [phase, displayBalanceMode, positionsImportRev]);
   const dashboardHasPortfolio = welcomeDone && c.hasPortfolioBalances;
   const navContext: NavPanelContext = useMemo(
     () => ({
@@ -645,10 +652,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     welcomeDone;
   const useTaxSummarySplitLayout =
     showIncomeHarvestPreview || showGrowthAssumptionsPanel;
-  const displayBalanceMode = useMemo(
-    () => resolvePortfolioBalanceMode(balanceMode),
-    [balanceMode, positionsImportRev, manualAccountsRev],
-  );
 
   const incomeHarvestPreview = useIncomeHarvestMonthlyTotal({
     enabled: showIncomeHarvestPreview,
@@ -688,6 +691,18 @@ export default function App({ initialAuthModal = null }: AppProps) {
       return;
     }
     syncNoPortfolioSubheaderDocumentAttr(c.hasPortfolioBalances);
+  }, [welcomeDone, c.hasPortfolioBalances]);
+
+  /** Clear stale import-flush attrs that can leave the growth panel invisible. */
+  useLayoutEffect(() => {
+    if (!welcomeDone || !c.hasPortfolioBalances) return;
+    const root = document.documentElement;
+    if (
+      root.hasAttribute("data-portfolio-import-flush") &&
+      !root.hasAttribute("data-dashboard-view-enter")
+    ) {
+      clearDashboardViewEnterAttrs();
+    }
   }, [welcomeDone, c.hasPortfolioBalances]);
 
   useEffect(() => {
