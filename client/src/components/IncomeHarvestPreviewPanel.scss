@@ -245,6 +245,16 @@
   width: 55%;
 }
 
+@media (max-width: 680px) {
+  .where-to-retire-preview-panel__header {
+    padding-inline: var(--space-4);
+  }
+
+  .where-to-retire-preview-panel__main {
+    padding-inline: var(--space-4);
+  }
+}
+
 @media (max-width: 767px) {
   .where-to-retire-preview-panel__city-row--mobile-hide {
     display: none;

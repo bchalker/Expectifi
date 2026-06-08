@@ -10,6 +10,7 @@ import {
   ONBOARDING_REGION_OPTIONS,
 } from './onboardingRegions'
 import type { UserPrefs } from './userPrefs'
+import { RETIRE_AGE_MIN, RETIRE_AGE_MAX } from './userPrefs'
 import { pensionConfigForLocale } from './localePensionConfig'
 import { normalizeCalculatorFilingStatus } from './filingStatus'
 import { clampClaimAgeInRange } from './socialSecurity'
@@ -17,6 +18,12 @@ import { canWritePlanLocalStorage } from './planStorage/writeContext'
 import { loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage/profile'
 import type { StoredPlanProfile } from './planStorage/types'
 import { parseStoredUserProfile, type StoredUserProfile } from './storedUserProfile'
+import {
+  parseStoredContributions,
+  serializeContributions,
+  totalContributionsMonthly,
+  type OnboardingContributionsState,
+} from './onboardingContributions'
 
 export type { StoredUserProfile } from './storedUserProfile'
 export { parseStoredUserProfile } from './storedUserProfile'
@@ -44,6 +51,7 @@ export type OnboardingFormProfileSlice = {
   spouseSsBenefitMonthly: number
   retireAge: number
   monthlyGoal: number
+  contributions?: OnboardingContributionsState
 }
 
 function dobParts(iso: string): { birth_month?: number; birth_year?: number } {
@@ -114,7 +122,7 @@ export function hasStoredProfileStep1(profile: StoredUserProfile | null | undefi
 
 export function hasStoredProfileRetireAge(profile: StoredUserProfile | null | undefined): boolean {
   const age = profile?.target_retirement_age
-  return age != null && age >= 55 && age <= 75
+  return age != null && age >= RETIRE_AGE_MIN && age <= RETIRE_AGE_MAX
 }
 
 export function saveRegionToProfile(regionId: OnboardingRegionId): StoredUserProfile {
@@ -240,9 +248,19 @@ export function saveResidenceCountryToProfile(country: string): StoredUserProfil
   return saveUserProfile({ country: trimmed })
 }
 
+export function hasStoredContributionsStep(
+  profile: StoredUserProfile | null | undefined,
+): boolean {
+  if (!profile) return false
+  if (profile.onboarding_contributions && typeof profile.onboarding_contributions === 'object') {
+    return true
+  }
+  return (profile.monthly_contribution ?? 0) > 0
+}
+
 export function saveProfileFromFormSlice(
   form: OnboardingFormProfileSlice,
-  step: 'profile' | 'social-security' | 'income-goal' | 'goals',
+  step: 'profile' | 'contributions' | 'social-security' | 'income-goal' | 'goals',
 ): StoredUserProfile {
   const dobPartsVal = dobParts(form.dob)
   const spouseParts = dobParts(form.spouseDob)
@@ -265,10 +283,31 @@ export function saveProfileFromFormSlice(
     })
   }
 
-  if (step === 'goals') {
+  if (step === 'contributions') {
+    const monthlyContribution =
+      form.contributions != null
+        ? totalContributionsMonthly(form.contributions)
+        : Math.max(0, Math.round(form.monthlyContribution))
     return saveUserProfile({
       ...base,
-      monthly_contribution: Math.max(0, Math.round(form.monthlyContribution)),
+      monthly_contribution: monthlyContribution,
+      onboarding_contributions: form.contributions
+        ? serializeContributions(form.contributions)
+        : undefined,
+    })
+  }
+
+  if (step === 'goals') {
+    const monthlyContribution =
+      form.contributions != null
+        ? totalContributionsMonthly(form.contributions)
+        : Math.max(0, Math.round(form.monthlyContribution))
+    return saveUserProfile({
+      ...base,
+      monthly_contribution: monthlyContribution,
+      onboarding_contributions: form.contributions
+        ? serializeContributions(form.contributions)
+        : undefined,
       target_retirement_age: Math.round(form.retireAge),
       monthly_income_goal: Math.max(0, Math.round(form.monthlyGoal)),
     })
@@ -302,6 +341,7 @@ export function profileToFormDefaults(profile: StoredUserProfile | null): Partia
   if (!profile) return {}
   const spouseClaimMode = profile.spouse_claim_type === 'spousal' ? 'spousal' : 'own'
   const locale = normalizeOnboardingRegionId(profile.locale) ?? undefined
+  const contributionRegion: 'us' | 'ca' = locale === 'ca' ? 'ca' : 'us'
   return {
     currentResidence: profile.country ?? '',
     locale,
@@ -309,6 +349,9 @@ export function profileToFormDefaults(profile: StoredUserProfile | null): Partia
     dob: profile.dob ?? '',
     householdIncome: profile.household_income ?? 0,
     monthlyContribution: profile.monthly_contribution ?? 0,
+    contributions: profile.onboarding_contributions
+      ? parseStoredContributions(profile.onboarding_contributions, contributionRegion)
+      : undefined,
     includeSs: profile.include_social_security ?? false,
     ssAge: profile.ss_claim_age
       ? clampClaimAgeInRange(
@@ -414,13 +457,16 @@ export function mergeProfileWithDbPrefs(
 export function resolveOnboardingStartStep(
   profile: StoredUserProfile | null,
   _opts?: { forceRegion?: boolean },
-): 'profile' | 'goals' {
+): 'profile' | 'contributions' | 'goals' {
   if (
     !hasStoredProfileStep0(profile) ||
     !hasStoredProfileStep1(profile) ||
     !hasStoredProfileRetireAge(profile)
   ) {
     return 'profile'
+  }
+  if (!hasStoredContributionsStep(profile)) {
+    return 'contributions'
   }
   return 'goals'
 }

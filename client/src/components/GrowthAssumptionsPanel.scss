@@ -7,7 +7,7 @@
   min-height: 0;
   box-sizing: border-box;
   background: #ffffff;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .growth-assumptions-panel__main {
@@ -39,4 +39,51 @@
 
 .growth-assumptions-panel__scenario {
   padding: 0 var(--space-5) var(--space-4);
+}
+
+.growth-assumptions-panel__return-expectations[data-slot='accordion'] {
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.growth-assumptions-panel__return-expectations-item[data-slot='accordion-item']::after {
+  content: none;
+}
+
+.growth-assumptions-panel__return-expectations-trigger[data-slot='accordion-trigger'] {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.growth-assumptions-panel__return-expectations-indicator[data-slot='accordion-indicator'] {
+  transition: transform 0.2s ease;
+}
+
+.growth-assumptions-panel__return-expectations-indicator[data-slot='accordion-indicator'][data-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.growth-assumptions-panel__return-expectations-body[data-slot='accordion-body'] > div {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+@media (max-width: 680px) {
+  .growth-assumptions-panel__scenario {
+    padding: 0 var(--space-4) var(--space-3);
+  }
+
+  .growth-assumptions-panel__return-expectations .growth-scenario-range-card__expected {
+    margin-top: var(--space-2);
+    padding: var(--space-2) 0;
+  }
+
+  .growth-assumptions-panel__return-expectations .growth-scenario-range-card__wing-item {
+    padding-block: var(--space-2);
+  }
 }

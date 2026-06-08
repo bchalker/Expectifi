@@ -1,36 +1,48 @@
 .impact-rating-badge {
   display: inline-flex;
-  flex-direction: row;
   align-items: center;
-  gap: var(--space-1) /* review: was 5px */;
-}
-
-.impact-rating-badge__bars {
-  display: inline-flex;
-  align-items: flex-end;
-}
-
-.impact-rating-badge__bar {
-  width: 3px;
-  border-radius: 2px;
-  display: inline-block;
-  margin-right: var(--space-1) /* review: was 2px */;
-  vertical-align: bottom;
-}
-
-.impact-rating-badge__bar:last-child {
-  margin-right: 0;
+  flex-shrink: 0;
 }
 
 .impact-rating-badge__label {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-xs);
-  line-height: 1.2;
+  font-weight: 500;
+  line-height: 1.3;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .impact-rating-badge__label {
-    display: none;
-  }
+.impact-rating-badge--inflow .impact-rating-badge__label {
+  background: #eaf3de;
+  color: #27500a;
+}
+
+.impact-rating-badge--minimal:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text-muted);
+}
+
+.impact-rating-badge--light:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-muted);
+}
+
+.impact-rating-badge--moderate:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
+  background: #faeeda;
+  color: #633806;
+}
+
+.impact-rating-badge--heavy:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
+  background: #faeeda;
+  color: #854f0b;
+}
+
+.impact-rating-badge--significant:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
+  background: #fde8e8;
+  color: #a32d2d;
 }

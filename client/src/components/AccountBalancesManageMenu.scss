@@ -168,7 +168,8 @@ $account-balances-manage-menu-max-height: min(
 }
 
 .account-balances-manage__menu--method .account-balances-manage__body {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .account-balances-manage__phase-stage {
@@ -1014,18 +1015,54 @@ html:has(
   color: var(--danger);
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .account-balances-manage__backdrop {
+    z-index: 999;
+    align-items: flex-end;
+    justify-content: stretch;
     padding: 0;
-    align-items: stretch;
+    background: rgba(0, 0, 0, 0.4);
+    animation: account-balances-manage-backdrop-in 0.3s ease forwards;
+  }
+
+  .account-balances-manage__backdrop--closing {
+    animation: account-balances-manage-backdrop-out 0.3s ease forwards;
   }
 
   .account-balances-manage__menu {
+    z-index: 1000;
     width: 100%;
-    max-height: 100dvh;
-    height: auto;
-    border-radius: 0;
-    box-shadow: none;
+    max-width: none;
+    max-height: 90vh;
+    height: 90vh;
+    min-height: 0;
+    border-radius: 16px 16px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -12px 40px color-mix(in srgb, var(--text) 18%, transparent);
+    animation: account-balances-manage-menu-sheet-in 0.3s ease forwards;
+  }
+
+  .account-balances-manage__backdrop--closing .account-balances-manage__menu {
+    animation: account-balances-manage-menu-sheet-out 0.3s ease forwards;
+  }
+
+  .account-balances-manage__menu--method,
+  .account-balances-manage__menu--manual,
+  .account-balances-manage__menu--csv {
+    max-height: 90vh;
+    height: 90vh;
+  }
+
+  .account-balances-manage__menu--method .account-balances-manage__body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .account-balances-manage__scroll[data-overlayscrollbars-viewport],
+  .account-balances-manage__scroll [data-overlayscrollbars-viewport] {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .account-balances-manage__panel-grid {
@@ -1045,6 +1082,26 @@ html:has(
 
   .account-balances-manage__scroll .account-balances-manage__panel-col--import {
     border-bottom-right-radius: var(--border-radius-lg);
+  }
+}
+
+@keyframes account-balances-manage-menu-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes account-balances-manage-menu-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
   }
 }
 

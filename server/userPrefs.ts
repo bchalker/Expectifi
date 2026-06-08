@@ -51,7 +51,7 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
   const goal = Math.round(monthlyGoal)
   const ss = normalizeSsClaimAge(ssClaimingAge)
   if (!Number.isFinite(age) || age < RETIRE_AGE_MIN || age > RETIRE_AGE_MAX) return null
-  if (!Number.isFinite(goal) || goal <= 0) return null
+  if (!Number.isFinite(goal) || goal < 0) return null
   const residenceCountry =
     typeof o.residenceCountry === 'string' ? o.residenceCountry.trim() : undefined
   return {

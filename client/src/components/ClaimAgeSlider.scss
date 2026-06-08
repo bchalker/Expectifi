@@ -29,8 +29,64 @@
   width: 100%;
   min-width: 0;
   margin: 0;
+  --claim-age-range-track-h: 4px;
+  --claim-age-range-thumb: 1.125rem;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  background: transparent;
   accent-color: var(--accent-text);
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.claim-age-slider__input::-webkit-slider-runnable-track {
+  height: var(--claim-age-range-track-h);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
+}
+
+.claim-age-slider__input::-moz-range-track {
+  height: var(--claim-age-range-track-h);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
+}
+
+.claim-age-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: var(--claim-age-range-thumb);
+  height: var(--claim-age-range-thumb);
+  margin-top: calc((var(--claim-age-range-track-h) - var(--claim-age-range-thumb)) / 2);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 4px rgb(28 43 58 / 0.12);
+  cursor: pointer;
+}
+
+.claim-age-slider__input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--claim-age-range-thumb);
+  height: var(--claim-age-range-thumb);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 4px rgb(28 43 58 / 0.12);
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .claim-age-slider__row {
+    padding: calc((var(--range-thumb-size) - var(--claim-age-range-track-h)) / 2) 0;
+  }
+
+  .claim-age-slider__input {
+    --claim-age-range-thumb: var(--range-thumb-size);
+    height: var(--claim-age-range-track-h);
+  }
 }
 
 .claim-age-slider--disabled {

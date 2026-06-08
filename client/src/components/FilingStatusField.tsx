@@ -1,5 +1,4 @@
-import { ListBox, Select } from '@heroui/react'
-import { firstKeyFromSelectSelection } from '../lib/dateOfBirthSelect'
+import { AppSelect } from './ui/AppSelect'
 import {
   FILING_STATUS_OPTIONS,
   normalizeCalculatorFilingStatus,
@@ -50,32 +49,20 @@ export function FilingStatusField({
           Filing status
         </span>
       ) : null}
-      <Select
+      <AppSelect
         className={selectClass}
-        variant="secondary"
-        aria-labelledby={showLabel ? labelId : undefined}
-        aria-label={showLabel ? undefined : 'Filing status'}
-        selectedKey={normalized}
-        onSelectionChange={(keys) => {
-          const next = firstKeyFromSelectSelection(keys)
-          if (!next) return
-          onChange(normalizeCalculatorFilingStatus(next))
-        }}
-      >
-        <Select.Trigger id={id}>
-          <Select.Value />
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover className="app-select-import-menu__popover">
-          <ListBox className="app-select-import-menu__list filing-status-field__list">
-            {FILING_STATUS_OPTIONS.map((opt) => (
-              <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-                {opt.label}
-              </ListBox.Item>
-            ))}
-          </ListBox>
-        </Select.Popover>
-      </Select>
+        triggerId={id}
+        ariaLabel={showLabel ? undefined : 'Filing status'}
+        ariaLabelledBy={showLabel ? labelId : undefined}
+        value={normalized}
+        options={FILING_STATUS_OPTIONS.map((opt) => ({
+          id: opt.id,
+          label: opt.label,
+        }))}
+        onChange={(next) => onChange(normalizeCalculatorFilingStatus(next))}
+        popoverClassName="app-select-import-menu__popover"
+        listClassName="app-select-import-menu__list filing-status-field__list"
+      />
       {hintVisible ? (
         <p className="filing-status-field__hint">
           Used for federal tax estimates, Social Security taxation, and Roth conversion room on your

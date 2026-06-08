@@ -28,6 +28,7 @@ export function isOnboardingComplete(ctx: WelcomeSkipContext): boolean {
 /** Show welcome overlay unless onboarding is fully complete. */
 export function shouldShowWelcomeOverlay(ctx: WelcomeSkipContext): boolean {
   if (isOnboardingComplete(ctx)) return false
+  if (!ctx.onboardingDone && guestHasCompletedOnboarding()) return false
   return true
 }
 

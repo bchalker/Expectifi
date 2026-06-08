@@ -3,6 +3,8 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { AnimatedCount } from "../components/ui/AnimatedCount";
 import { BudgetExplorationHero } from "../components/whereToRetire/BudgetExplorationHero";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
+import { WtrIncomeToolbarMapSelects } from "../components/whereToRetire/WtrIncomeToolbarMapSelects";
+import { WtrMapWaveDivider } from "../components/whereToRetire/WtrMapWaveDivider";
 import { WtrMapFilterButton } from "../components/whereToRetire/WtrMapFilterButton";
 import { RetirementMapFilters } from "../components/whereToRetire/RetirementMapFilters";
 import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
@@ -23,10 +25,10 @@ import {
 } from "../lib/whereToRetire/budgetExplorationStats";
 import { readStashedWtrExplorationIncome } from "../lib/whereToRetire/wtrPreviewIncome";
 import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
+import { useStickySentinel } from "../hooks/useStickySentinel";
+import { useWtrMapPinColorView } from "../hooks/useWtrMapPinColorView";
 import type { MapCity } from "../utils/costOfLiving";
 import "./WhereToRetire.scss";
-
-const MAX_COMPARE_CITIES = 5;
 
 type WtrViewMode = "map" | "compare";
 
@@ -53,8 +55,21 @@ export function WhereToRetire({ c }: Props) {
     ...DEFAULT_MAP_FILTERS,
     regions: [...ALL_DESTINATION_REGIONS],
   }));
+  const { pinColorView, handlePinColorViewChange } = useWtrMapPinColorView(
+    mapFilters,
+    setMapFilters,
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const [toolbarStickyEnabled, setToolbarStickyEnabled] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(min-width: 681px)").matches
+      : false,
+  );
+  const { heroRef: toolbarRowRef, stuck: toolbarRowStuck } = useStickySentinel(
+    null,
+    toolbarStickyEnabled,
+  );
 
   useEffect(() => {
     setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
@@ -109,12 +124,12 @@ export function WhereToRetire({ c }: Props) {
     return () => window.clearTimeout(id);
   }, [filtersOpen]);
 
-  const toggleCompare = useCallback((cityId: string) => {
-    setCompareIds((prev) => {
-      if (prev.includes(cityId)) return prev.filter((id) => id !== cityId);
-      if (prev.length >= MAX_COMPARE_CITIES) return prev;
-      return [...prev, cityId];
-    });
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 681px)");
+    const sync = () => setToolbarStickyEnabled(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
   const clearCompare = useCallback(() => {
@@ -169,52 +184,83 @@ export function WhereToRetire({ c }: Props) {
               onExplorationIncomeChange={setExplorationIncome}
             />
           </section>
+          <div className="where-to-retire__income-toolbar">
+            <WtrMapWaveDivider />
+          </div>
+          <div
+            ref={toolbarRowRef}
+            className={[
+              "where-to-retire__income-toolbar-row",
+              toolbarRowStuck && "where-to-retire__income-toolbar-row--stuck",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            <div className="where-to-retire__showing-count" aria-live="polite">
+              <p className="where-to-retire__showing-count-primary">
+                <AnimatedCount
+                  value={visibilityCounts.visibleCount}
+                  className="where-to-retire__showing-count-num"
+                />{" "}
+                cities
+              </p>
+              <p className="where-to-retire__showing-count-sub">
+                from{" "}
+                <AnimatedCount
+                  value={visibilityCounts.visibleCountryCount}
+                  className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
+                />{" "}
+                countries
+              </p>
+            </div>
+            <WtrIncomeToolbarMapSelects
+              pinColorView={pinColorView}
+              onPinColorViewChange={handlePinColorViewChange}
+              filters={mapFilters}
+              onFiltersChange={setMapFilters}
+            />
+            <div className="where-to-retire__income-toolbar-label">
+              <BudgetExplorationHero
+                section="slider-label"
+                planMonthlyIncome={grossMonthlyIncome}
+                explorationIncome={explorationIncome}
+                onExplorationIncomeChange={setExplorationIncome}
+              />
+            </div>
+            <div className="where-to-retire__income-toolbar-slider where-to-retire__income-toolbar-slider--mobile">
+              <BudgetExplorationHero
+                section="slider-rail"
+                planMonthlyIncome={grossMonthlyIncome}
+                explorationIncome={explorationIncome}
+                onExplorationIncomeChange={setExplorationIncome}
+              />
+            </div>
+            <div className="where-to-retire__income-toolbar-slider where-to-retire__income-toolbar-slider--desktop">
+              <BudgetExplorationHero
+                section="slider"
+                planMonthlyIncome={grossMonthlyIncome}
+                explorationIncome={explorationIncome}
+                onExplorationIncomeChange={setExplorationIncome}
+              />
+            </div>
+            <div className="where-to-retire__income-toolbar-actions">
+              <WtrMapFilterButton
+                ref={filterButtonRef}
+                active={activeFilterCount > 0}
+                activeFilterCount={activeFilterCount}
+                filtersOpen={filtersOpen}
+                onToggle={toggleFiltersPanel}
+              />
+            </div>
+          </div>
           <div className="where-to-retire__main-panel-map">
             <div className="where-to-retire__map-stage">
               <RetirementMapExplorer
                 explorationIncome={mapExplorationIncome}
                 filters={mapFilters}
                 onFiltersChange={setMapFilters}
-                chromeFooterSlot={
-                  <div className="where-to-retire__income-toolbar">
-                    <div className="where-to-retire__showing-count" aria-live="polite">
-                      <p className="where-to-retire__showing-count-primary">
-                        <AnimatedCount
-                          value={visibilityCounts.visibleCount}
-                          className="where-to-retire__showing-count-num"
-                        />{" "}
-                        cities
-                      </p>
-                      <p className="where-to-retire__showing-count-sub">
-                        from{" "}
-                        <AnimatedCount
-                          value={visibilityCounts.visibleCountryCount}
-                          className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
-                        />{" "}
-                        countries
-                      </p>
-                    </div>
-                    <div className="where-to-retire__income-toolbar-slider">
-                      <BudgetExplorationHero
-                        section="slider"
-                        planMonthlyIncome={grossMonthlyIncome}
-                        explorationIncome={explorationIncome}
-                        onExplorationIncomeChange={setExplorationIncome}
-                      />
-                    </div>
-                    <div className="where-to-retire__income-toolbar-actions">
-                      <WtrMapFilterButton
-                        ref={filterButtonRef}
-                        active={activeFilterCount > 0}
-                        activeFilterCount={activeFilterCount}
-                        filtersOpen={filtersOpen}
-                        onToggle={toggleFiltersPanel}
-                      />
-                    </div>
-                  </div>
-                }
+                pinColorView={pinColorView}
                 excludedCountries={storage.excludedCountries}
-                onAddExcludedCountry={storage.addExcludedCountry}
                 isFavoritedCity={storage.isFavoritedCity}
                 onToggleFavoriteCity={storage.toggleFavoriteCity}
                 favoriteCities={storage.favoriteCities}
@@ -226,7 +272,6 @@ export function WhereToRetire({ c }: Props) {
                 onExplorerViewModeChange={(mode) =>
                   setViewMode(mode === "compare" ? "compare" : "map")
                 }
-                onToggleCompare={toggleCompare}
                 onClearCompare={clearCompare}
                 onViewComparison={() => setViewMode("compare")}
               />

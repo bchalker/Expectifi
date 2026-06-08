@@ -121,6 +121,7 @@ import {
 } from "./PortfolioBucketAccountRow";
 import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
+import { BottomSheetAside } from "./ui/BottomSheetAside";
 import { HoldingScenarioPanel } from "./HoldingScenarioPopout";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
@@ -775,14 +776,13 @@ export function AccountBalances({
   const [manageMenuOpen, setManageMenuOpen] = useState(false);
   const [manageOverlayPhase, setManageOverlayPhase] =
     useState<ManageOverlayPhase>("method");
-  const [manageOverlayLeavingPhase, setManageOverlayLeavingPhase] = useState<
-    Exclude<ManageOverlayPhase, "method"> | null
-  >(null);
+  const [manageOverlayLeavingPhase, setManageOverlayLeavingPhase] =
+    useState<Exclude<ManageOverlayPhase, "method"> | null>(null);
   const [manageCsvPhaseHeader, setManageCsvPhaseHeader] =
     useState<ManageOverlayPhaseHeader | null>(null);
-  const manageOverlayLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const manageOverlayLeaveTimerRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const manageMenuOpenRef = useRef(false);
   const hadAccountCardDataRef = useRef(false);
   const reopenManageAfterBalanceEditCloseRef = useRef(false);
@@ -1556,8 +1556,7 @@ export function AccountBalances({
 
   const handleManageBackToMethod = useCallback(() => {
     clearManageOverlayLeaveTimer();
-    const leaving =
-      manageOverlayPhase === "method" ? null : manageOverlayPhase;
+    const leaving = manageOverlayPhase === "method" ? null : manageOverlayPhase;
     if (leaving === "csv") {
       setManageOverlayLeavingPhase("csv");
     } else if (leaving === "manual") {
@@ -1575,11 +1574,7 @@ export function AccountBalances({
         manageOverlayLeaveTimerRef.current = null;
       }, 250);
     }
-  }, [
-    clearManageOverlayLeaveTimer,
-    finishCsvImportLaunch,
-    manageOverlayPhase,
-  ]);
+  }, [clearManageOverlayLeaveTimer, finishCsvImportLaunch, manageOverlayPhase]);
 
   const manageOverlayLeavingPhaseRef = useRef(manageOverlayLeavingPhase);
   manageOverlayLeavingPhaseRef.current = manageOverlayLeavingPhase;
@@ -1591,11 +1586,7 @@ export function AccountBalances({
       finishCsvImportLaunch();
     }
     setManageOverlayLeavingPhase(null);
-  }, [
-    clearManageOverlayLeaveTimer,
-    finishCsvImportLaunch,
-    manageOverlayPhase,
-  ]);
+  }, [clearManageOverlayLeaveTimer, finishCsvImportLaunch, manageOverlayPhase]);
 
   const manageMenuWasOpenRef = useRef(false);
   const handleManageOpenChange = useCallback(
@@ -2197,7 +2188,7 @@ export function AccountBalances({
       }
       return {
         title: "Manual balances",
-        subtitle: "Ballpark amounts are fine, since you can refine them later.",
+        subtitle: "You can can refine these later.",
       };
     }
     if (manageOverlayPhase === "csv" || manageOverlayLeavingPhase === "csv") {
@@ -2281,8 +2272,8 @@ export function AccountBalances({
               </h2>
               {manualConfirmPhase === "plan" ? (
                 <p className="account-balances-edit-sheet__subtitle">
-                  We need a few details to project growth and monthly income from
-                  your balances.
+                  We need a few details to project growth and monthly income
+                  from your balances.
                 </p>
               ) : manualConfirmPhase === false ? (
                 <p className="account-balances-edit-sheet__hint">
@@ -3327,7 +3318,9 @@ export function AccountBalances({
   const renderMergedDashboardOverlays = () => (
     <div className="account-balances-dashboard-overlays">
       {holdingScenarioPanel && holdingsScenarioBundle ? (
-        <aside
+        <BottomSheetAside
+          open={!holdingScenarioClosing}
+          onClose={requestHoldingScenarioClose}
           className={`holding-scenario-slide__sheet${holdingScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
           role="dialog"
           aria-modal="true"
@@ -3347,10 +3340,12 @@ export function AccountBalances({
             brkRate={holdingsScenarioBundle.brkRate}
             onClose={requestHoldingScenarioClose}
           />
-        </aside>
+        </BottomSheetAside>
       ) : null}
       {accountScenarioPanel && accountScenarioBundle ? (
-        <aside
+        <BottomSheetAside
+          open={!accountScenarioClosing}
+          onClose={requestAccountScenarioClose}
           className={`holding-scenario-slide__sheet${accountScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
           role="dialog"
           aria-modal="true"
@@ -3380,7 +3375,7 @@ export function AccountBalances({
             }
             onClose={requestAccountScenarioClose}
           />
-        </aside>
+        </BottomSheetAside>
       ) : null}
       {balanceEditPanel === "manual" && !manageMenuOpen ? (
         <aside
@@ -3475,20 +3470,28 @@ export function AccountBalances({
                   : null}
               </div>
               <div className="account-balances-header-row__actions">
-                {phase === "growth" && inputs && setInputs ? (
-                  <MarketScenarioSelector
-                    value={normalizeMarketScenarioId(inputs.marketScenario)}
-                    onChange={(marketScenario) => {
-                      const id = normalizeMarketScenarioId(marketScenario);
-                      setInputs({
-                        marketScenario: id,
-                        marketScenarioActive: false,
-                      });
-                    }}
-                  />
-                ) : null}
-                {headerManageMenu}
-                <TaxBreakdownHeaderButton />
+                <div className="account-balances-header-row__actions-primary">
+                  {phase === "growth" && inputs && setInputs ? (
+                    <MarketScenarioSelector
+                      value={normalizeMarketScenarioId(inputs.marketScenario)}
+                      onChange={(marketScenario) => {
+                        const id = normalizeMarketScenarioId(marketScenario);
+                        setInputs({
+                          marketScenario: id,
+                          marketScenarioActive: false,
+                        });
+                      }}
+                    />
+                  ) : null}
+                  {headerManageMenu}
+                </div>
+                <TaxBreakdownHeaderButton
+                  mobileLabel={
+                    phase === "income"
+                      ? "Taxes: The Harvest"
+                      : "Taxes: The Forecast"
+                  }
+                />
               </div>
             </div>
           ) : null}

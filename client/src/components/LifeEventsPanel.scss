@@ -1029,11 +1029,59 @@
 }
 
 @media (max-width: 680px) {
+  .section--life-events {
+    padding: var(--space-5);
+  }
+
   .life-events-event__head {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+
+  .life-events-event__head-left {
+    width: 100%;
   }
 
   .life-events-event__head-right {
-    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-left: 0;
+    margin-top: var(--space-3);
+    gap: var(--space-4);
+  }
+
+  .life-events-event__chevron {
+    margin: 0;
+  }
+
+  .life-events-slider-group .life-events-field {
+    gap: var(--space-3);
+  }
+
+  .life-events-field__range {
+    height: 4px;
+  }
+
+  .life-events-field__range::-webkit-slider-runnable-track {
+    height: 4px;
+  }
+
+  .life-events-field__range::-moz-range-track {
+    height: 4px;
+  }
+
+  .life-events-field__range::-webkit-slider-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    margin-top: calc((4px - var(--range-thumb-size)) / 2);
+  }
+
+  .life-events-field__range::-moz-range-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
   }
 }

@@ -43,15 +43,6 @@ export function WtrCityListPagination({
         .join(' ')}
       aria-label="City list pages"
     >
-      {!compact && showRange ? (
-        <p className="wtr-list-pagination__range">
-          <span className="wtr-list-pagination__range-nums">
-            {rangeStart}–{rangeEnd}
-          </span>{' '}
-          of{' '}
-          <span className="wtr-list-pagination__range-total">{totalCount}</span>
-        </p>
-      ) : null}
       <div
         className={[
           'wtr-list-pagination__controls',
@@ -72,9 +63,20 @@ export function WtrCityListPagination({
         {compact ? (
           <p className="wtr-list-pagination__center-note">{centerNote}</p>
         ) : (
-          <span className="wtr-list-pagination__page-label">
-            Page {safePage + 1} of {pageCount}
-          </span>
+          <div className="wtr-list-pagination__center">
+            <span className="wtr-list-pagination__page-label">
+              Page {safePage + 1} of {pageCount}
+            </span>
+            {showRange ? (
+              <p className="wtr-list-pagination__range">
+                <span className="wtr-list-pagination__range-nums">
+                  {rangeStart}–{rangeEnd}
+                </span>{' '}
+                of{' '}
+                <span className="wtr-list-pagination__range-total">{totalCount}</span>
+              </p>
+            ) : null}
+          </div>
         )}
         <button
           type="button"

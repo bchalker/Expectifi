@@ -136,6 +136,16 @@
   flex-shrink: 0;
 }
 
+.yield-mode-dropdown__native {
+  min-height: 2rem;
+  min-width: 6.5rem;
+  padding-inline: var(--space-2) var(--space-5);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .yield-mode-dropdown__menu {
   position: absolute;
   top: calc(100% + 0.35rem);

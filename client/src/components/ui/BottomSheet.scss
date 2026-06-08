@@ -1,0 +1,53 @@
+.bottom-sheet-handle-wrap {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border-secondary, var(--border));
+  pointer-events: none;
+}
+
+.mobile-bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  border: none;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-bottom-sheet-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-sheet-panel--dragging {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .panel-close-btn,
+  .drawer-close,
+  .modal-close {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-bottom-sheet-backdrop {
+    transition: none;
+  }
+}

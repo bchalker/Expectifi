@@ -288,6 +288,31 @@ input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 
 input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--range-track-bg); }
 input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.28); }
 
+@media (max-width: 680px) {
+  input[type=range] {
+    height: 4px;
+  }
+
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px;
+  }
+
+  input[type=range]::-moz-range-track {
+    height: 4px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    margin-top: calc((4px - var(--range-thumb-size)) / 2);
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+  }
+}
+
 /* account balance rows */
 .acct-row-group { display: flex; flex-direction: column; gap: 4px; }
 .acct-row-label {
@@ -743,7 +768,48 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   }
 
   .main.main--has-hero {
+    width: 100%;
+    max-width: none;
     padding-top: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .goal-progress-bar--in-main {
+    border-radius: 0;
+  }
+
+  .main__hero {
+    border-radius: 0;
+  }
+
+  .main__hero.main__hero--stuck,
+  html[data-main-hero-stuck='true'] .main__hero {
+    overflow: visible;
+  }
+
+  .main__hero .subheader {
+    --subheader-h: auto;
+  }
+
+  .app-scroll-stack {
+    padding-bottom: 0;
+  }
+
+  html {
+    --app-plan-banner-h: 0px;
+  }
+
+  html[data-app-hero-in-main='true'] .app-header-shell--hero-in-main .subheader-spacer {
+    display: none;
+  }
+
+  html[data-app-hero-in-main='true'] .app-scroll-stack--hero-in-main {
+    padding-top: var(
+      --app-measured-header-h,
+      calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px))
+    );
+    min-height: 0;
   }
 }
 

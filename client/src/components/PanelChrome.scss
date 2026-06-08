@@ -199,3 +199,74 @@
 .drawer-config-footer__signout[data-slot='button'] {
   min-height: 2.75rem;
 }
+
+@media (max-width: 768px) {
+  .panel-backdrop {
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.4);
+    transition: opacity 0.3s ease;
+  }
+
+  .drawer-shell {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    height: 90vh;
+    max-height: 90vh;
+    min-height: 0;
+    padding-top: 0;
+    border-radius: 16px 16px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .drawer-shell--right,
+  .drawer-shell--left {
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    transform: translateY(100%);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+  }
+
+  .drawer-shell--right.drawer-shell--open,
+  .drawer-shell--left.drawer-shell--open {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .drawer-shell--dragging {
+    transition: none;
+  }
+
+  .drawer-shell.side-panel-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .drawer-shell.side-panel-shell .side-panel-shell__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+  }
+
+  .drawer-shell.drawer-shell--right.drawer-shell--config,
+  .drawer-shell.drawer-shell--right.drawer-shell--snapshot {
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .side-panel-shell__footer {
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+}

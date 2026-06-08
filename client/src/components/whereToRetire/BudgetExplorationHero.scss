@@ -67,26 +67,63 @@
   min-width: 0;
 }
 
-.where-to-retire__income-toolbar .wtr-budget-hero__slider-card {
+.where-to-retire__income-toolbar-row .wtr-budget-hero__slider-card {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
 }
 
-.where-to-retire__income-toolbar .wtr-budget-hero__slider-row {
+.where-to-retire__income-toolbar-row .where-to-retire__income-toolbar-slider .wtr-budget-hero--slider-only.wtr-budget-hero--embedded {
   flex: 1 1 auto;
+  flex-shrink: 1;
+  align-self: stretch;
   width: 100%;
   min-width: 0;
-  gap: var(--space-4);
 }
 
-.where-to-retire__income-toolbar .wtr-budget-hero__slider-main {
-  flex: 1 1 auto;
+.where-to-retire__income-toolbar-row .wtr-budget-hero__slider-rail {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 681px) {
+  .where-to-retire__income-toolbar-row .wtr-budget-hero__slider-row {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: var(--space-4);
+  }
+
+  .where-to-retire__income-toolbar-row .wtr-budget-hero__slider-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+.wtr-budget-hero--slider-label,
+.wtr-budget-hero--slider-rail {
+  margin-bottom: 0;
+  padding: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.wtr-budget-hero--slider-rail .wtr-budget-hero__slider-main {
+  width: 100%;
   min-width: 0;
 }
 
 @media (max-width: 680px) {
-  .where-to-retire__income-toolbar .wtr-budget-hero__slider-label-block {
+  .where-to-retire__income-toolbar-row .wtr-budget-hero__slider-label-block {
     min-width: 0;
+  }
+
+  .wtr-budget-hero {
+    --wtr-hero-range-thumb: var(--range-thumb-size);
   }
 }
 
@@ -125,11 +162,11 @@
   white-space: nowrap;
 }
 
-.where-to-retire__income-toolbar .wtr-budget-hero__slider-heading-value {
+.where-to-retire__income-toolbar-row .wtr-budget-hero__slider-heading-value {
   font-size: var(--text-md);
 }
 
-.where-to-retire__income-toolbar .wtr-budget-hero__tick-edge {
+.where-to-retire__income-toolbar-row .wtr-budget-hero__tick-edge {
   font-size: var(--text-sm);
 }
 

@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import type { CalculatorInputs, CalculatorUi } from "../lib/computeResults";
 import { ageFromIsoDateString, isValidIsoDateString } from "../lib/ageFromDob";
@@ -37,6 +38,7 @@ import {
 } from "../lib/userProfileStorage";
 import { pensionConfigForLocale } from "../lib/localePensionConfig";
 import { WELCOME_BENCHMARK } from "../lib/welcomeBenchmarkDefaults";
+import { fmtInput } from "../utils/format";
 import { OnboardingProgressSteps } from "./OnboardingProgressSteps";
 import { normalizedManualAccountEntries } from "./OnboardingAccountsStep";
 import { type SpouseClaimMode } from "./SpouseClaimModeSegment";
@@ -46,6 +48,13 @@ import {
   WelcomeProfileStepFields,
 } from "./WelcomeProfileStepFields";
 import { WelcomeGoalStepFields } from "./WelcomeGoalStepFields";
+import { WelcomeContributionsStepFields } from "./WelcomeContributionsStepFields";
+import {
+  emptyContributionsForRegion,
+  parseStoredContributions,
+  totalContributionsMonthly,
+  type OnboardingContributionsState,
+} from "../lib/onboardingContributions";
 import {
   aggregateManualAccountsToBases,
   loadStoredManualAccounts,
@@ -56,12 +65,51 @@ import "./PlanningProfileFields.scss";
 import "./SidePanelShell.scss";
 import "./WelcomeProfileStepFields.scss";
 import "./WelcomeGoalStepFields.scss";
+import "./WelcomeContributionsStepFields.scss";
 import "./OnboardingOverlay.scss";
 import "./OnboardingFieldShell.scss";
 import "./OnboardingProgressSteps.scss";
 const BODY_CLASS = "onboarding-overlay--open";
 
-type WizardStep = "profile" | "goals";
+type OnboardingBackButtonProps = {
+  disabled?: boolean;
+  onClick: () => void;
+};
+
+function OnboardingBackButton({ disabled, onClick }: OnboardingBackButtonProps) {
+  return (
+    <button
+      type="button"
+      className="onboarding-overlay__back-link"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label="Back"
+    >
+      <IconChevronLeft
+        className="onboarding-overlay__back-icon"
+        size={20}
+        strokeWidth={1.5}
+        aria-hidden
+      />
+      <span className="onboarding-overlay__back-label">← Back</span>
+    </button>
+  );
+}
+
+function syncOnboardingChromeInsets() {
+  if (typeof document === "undefined") return;
+  const stack = document.querySelector(".app-header-stack");
+  if (!stack) return;
+  const top = Math.ceil(stack.getBoundingClientRect().bottom);
+  if (top > 0) {
+    document.documentElement.style.setProperty(
+      "--app-onboarding-inset-top",
+      `${top}px`,
+    );
+  }
+}
+
+type WizardStep = "profile" | "contributions" | "goals";
 
 type Props = {
   inputs: CalculatorInputs;
@@ -84,6 +132,15 @@ function initialFormFromInputs(
   const storedProfile = profile;
   const profileDefaults = profileToFormDefaults(storedProfile);
   const dob = profileDefaults.dob || inputs.dateOfBirth || "";
+  const contributionRegion =
+    normalizeOnboardingRegionId(profileDefaults.locale) === "ca" ? "ca" : "us";
+  const contributions: OnboardingContributionsState =
+    profileDefaults.contributions ??
+    parseStoredContributions(
+      storedProfile?.onboarding_contributions,
+      contributionRegion,
+    );
+  const contributionTotal = totalContributionsMonthly(contributions);
   const storedAccounts = loadStoredManualAccounts();
   return {
     dob,
@@ -93,15 +150,17 @@ function initialFormFromInputs(
     currency: profileDefaults.currency,
     householdIncome:
       profileDefaults.householdIncome ?? (inputs.other > 0 ? inputs.other : 0),
+    contributions,
     monthlyContribution:
-      profileDefaults.monthlyContribution ??
-      (inputs.save > 0 ? Math.round(inputs.save / 12) : 0),
+      contributionTotal > 0
+        ? contributionTotal
+        : (profileDefaults.monthlyContribution ??
+          (inputs.save > 0 ? Math.round(inputs.save / 12) : 0)),
     retireAge:
       profileDefaults.retireAge ||
       inputs.targetRetirementAge ||
       WELCOME_BENCHMARK.targetRetirementAge,
-    growthGoal:
-      inputs.growthGoal > 0 ? inputs.growthGoal : 0,
+    growthGoal: inputs.growthGoal > 0 ? inputs.growthGoal : 0,
     monthlyGoal:
       profileDefaults.monthlyGoal ??
       (inputs.monthlyIncomeGoal > 0 ? inputs.monthlyIncomeGoal : 0),
@@ -207,7 +266,9 @@ export function OnboardingOverlay({
           forceRegion: peekOnboardingFromSignup(),
         }),
   );
-  const [form, setForm] = useState(() => initialFormFromInputs(inputs, storedProfile));
+  const [form, setForm] = useState(() =>
+    initialFormFromInputs(inputs, storedProfile),
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [exiting, setExiting] = useState(false);
@@ -217,6 +278,32 @@ export function OnboardingOverlay({
     document.body.classList.add(BODY_CLASS);
     return () => {
       document.body.classList.remove(BODY_CLASS);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    syncOnboardingChromeInsets();
+    const stack = document.querySelector(".app-header-stack");
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(syncOnboardingChromeInsets)
+        : null;
+    stack && ro?.observe(stack);
+    window.addEventListener("resize", syncOnboardingChromeInsets);
+    window.visualViewport?.addEventListener(
+      "resize",
+      syncOnboardingChromeInsets,
+    );
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", syncOnboardingChromeInsets);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        syncOnboardingChromeInsets,
+      );
+      document.documentElement.style.removeProperty(
+        "--app-onboarding-inset-top",
+      );
     };
   }, []);
 
@@ -231,6 +318,18 @@ export function OnboardingOverlay({
     syncDisplayCurrencyFromResidence(form.currentResidence);
   }, [form.currentResidence]);
 
+  useEffect(() => {
+    if (step !== "contributions") return;
+    const region =
+      normalizeOnboardingRegionId(form.locale) === "ca" ? "ca" : "us";
+    if (form.contributions.region === region) return;
+    setForm((f) => ({
+      ...f,
+      contributions: emptyContributionsForRegion(region),
+      monthlyContribution: 0,
+    }));
+  }, [step, form.locale, form.contributions.region]);
+
   const dobOk = isValidIsoDateString(form.dob);
   const ageToday = dobOk ? ageFromIsoDateString(form.dob) : null;
   const ageOk = ageToday !== null && ageToday >= 18 && ageToday <= 100;
@@ -241,16 +340,17 @@ export function OnboardingOverlay({
   const regionOk = Boolean(normalizeOnboardingRegionId(form.locale));
   const profileFieldsOk =
     dobOk && ageOk && regionOk && retireOk && !retireAgePastInvalid;
-  const goalsValid = form.monthlyGoal > 0;
 
   function formProfileSlice(): OnboardingFormProfileSlice {
+    const monthlyContribution = totalContributionsMonthly(form.contributions);
     return {
       currentResidence: form.currentResidence,
       locale: form.locale,
       currency: form.currency,
       dob: form.dob,
       householdIncome: form.householdIncome,
-      monthlyContribution: form.monthlyContribution,
+      monthlyContribution,
+      contributions: form.contributions,
       includeSs: form.includeSs,
       ssAge: form.ssAge,
       ssBenefitMonthly: form.ssBenefitMonthly,
@@ -267,6 +367,7 @@ export function OnboardingOverlay({
   function applyRegionSelection(regionId: OnboardingRegionId) {
     const region = findOnboardingRegion(regionId);
     if (!region) return;
+    const contributionRegion = regionId === "ca" ? "ca" : "us";
     saveRegionToProfile(regionId);
     syncDisplayCurrencyFromResidence(region.country);
     const pension = pensionConfigForLocale(region.locale);
@@ -275,6 +376,8 @@ export function OnboardingOverlay({
       currentResidence: region.country,
       locale: region.locale,
       currency: region.currency,
+      contributions: emptyContributionsForRegion(contributionRegion),
+      monthlyContribution: 0,
       accountEntries: emptyOnboardingAccountEntries(),
       ssAge: pension.defaultClaimAge,
       spouseSsAge: pension.defaultClaimAge,
@@ -322,7 +425,9 @@ export function OnboardingOverlay({
       saveLocalUserPrefs(prefs);
     }
     saveProfileFromFormSlice(formProfileSlice(), "goals");
-    const finishedEntries = normalizedManualAccountEntries(formState.accountEntries);
+    const finishedEntries = normalizedManualAccountEntries(
+      formState.accountEntries,
+    );
     setSessionOnboardingAccounts(JSON.stringify(finishedEntries));
     setSessionOnboardingComplete(true);
     if (canWritePlanLocalStorage()) {
@@ -363,38 +468,54 @@ export function OnboardingOverlay({
       return;
     }
     saveProfileFromFormSlice(formProfileSlice(), "profile");
+    setStep("contributions");
+  }
+
+  function onContributionsContinue() {
+    setErr(null);
+    saveProfileFromFormSlice(formProfileSlice(), "contributions");
     setStep("goals");
   }
 
   function onFinishWithAddAccounts() {
     setErr(null);
-    if (!goalsValid) {
-      setErr("Enter your monthly income goal before continuing.");
-      return;
-    }
     saveProfileFromFormSlice(formProfileSlice(), "goals");
     void persistAndFinish(form, { openConnect: true, fadeOut: true });
   }
 
   const headerTitle =
-    step === "profile" ? "First, a little about you." : "Now, your goals.";
+    step === "profile"
+      ? "First, a little about you."
+      : step === "contributions"
+        ? "What are you putting in?"
+        : "Now, your goals.";
 
   const headerSubtitle =
     step === "profile"
-      ? "Takes about 2 minutes, but it builds your starting point."
-      : "Ballpark is fine. You can refine these anytime.";
+      ? "Takes about 2 minutes."
+      : step === "contributions"
+        ? "Skip if you want -- you can always add this after."
+        : "Optional — ballpark is fine. You can set or refine these anytime.";
+
+  const contributionRegion =
+    normalizeOnboardingRegionId(form.locale) === "ca" ? "ca" : "us";
+  const contributionsTotal = useMemo(
+    () => totalContributionsMonthly(form.contributions),
+    [form.contributions],
+  );
 
   return (
     <div
       className={[
         "onboarding-overlay",
         "onboarding-overlay--in-app",
-        step === "profile" ? " onboarding-overlay--profile" : "",
-        step === "goals" ? " onboarding-overlay--goals" : "",
-        exiting ? " onboarding-overlay--exit" : "",
+        step === "profile" && "onboarding-overlay--profile",
+        step === "contributions" && "onboarding-overlay--contributions",
+        step === "goals" && "onboarding-overlay--goals",
+        exiting && "onboarding-overlay--exit",
       ]
         .filter(Boolean)
-        .join("")}
+        .join(" ")}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-overlay-title"
@@ -420,45 +541,61 @@ export function OnboardingOverlay({
           ) : null}
         </header>
 
-        <AppOverlayScrollbars
-          className="side-panel-shell__scroll onboarding-overlay__scroll"
-          defer={false}
-        >
-          <div className="onboarding-overlay__body">
-            {step === "profile" ? (
-              <WelcomeProfileStepFields
-                onboardingLayout
-                regionId={form.locale}
-                onRegionSelect={applyRegionSelection}
+        {step === "contributions" ? (
+          <div className="onboarding-overlay__scroll onboarding-overlay__scroll--native">
+            <div className="onboarding-overlay__body">
+              <WelcomeContributionsStepFields
                 dateOfBirth={form.dob}
-                onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
-                retireAge={form.retireAge}
-                onRetireAgeChange={(retireAge) =>
-                  setForm((f) => ({ ...f, retireAge }))
+                region={contributionRegion}
+                contributions={form.contributions}
+                onChange={(contributions) =>
+                  setForm((f) => ({
+                    ...f,
+                    contributions,
+                    monthlyContribution:
+                      totalContributionsMonthly(contributions),
+                  }))
                 }
-                onRetireAgePastInvalidChange={setRetireAgePastInvalid}
-                showFillState
               />
-            ) : (
-              <WelcomeGoalStepFields
-                step2Layout
-                monthlyContribution={form.monthlyContribution}
-                onMonthlyContributionChange={(monthlyContribution) =>
-                  setForm((f) => ({ ...f, monthlyContribution }))
-                }
-                monthlyGoal={form.monthlyGoal}
-                onMonthlyGoalChange={(monthlyGoal) =>
-                  setForm((f) => ({ ...f, monthlyGoal }))
-                }
-                growthGoal={form.growthGoal}
-                onGrowthGoalChange={(growthGoal) =>
-                  setForm((f) => ({ ...f, growthGoal }))
-                }
-                showFillState
-              />
-            )}
+            </div>
           </div>
-        </AppOverlayScrollbars>
+        ) : (
+          <AppOverlayScrollbars
+            className="side-panel-shell__scroll onboarding-overlay__scroll"
+            defer={false}
+          >
+            <div className="onboarding-overlay__body">
+              {step === "profile" ? (
+                <WelcomeProfileStepFields
+                  onboardingLayout
+                  regionId={form.locale}
+                  onRegionSelect={applyRegionSelection}
+                  dateOfBirth={form.dob}
+                  onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
+                  retireAge={form.retireAge}
+                  onRetireAgeChange={(retireAge) =>
+                    setForm((f) => ({ ...f, retireAge }))
+                  }
+                  onRetireAgePastInvalidChange={setRetireAgePastInvalid}
+                  showFillState
+                />
+              ) : (
+                <WelcomeGoalStepFields
+                  step3Layout
+                  monthlyGoal={form.monthlyGoal}
+                  onMonthlyGoalChange={(monthlyGoal) =>
+                    setForm((f) => ({ ...f, monthlyGoal }))
+                  }
+                  growthGoal={form.growthGoal}
+                  onGrowthGoalChange={(growthGoal) =>
+                    setForm((f) => ({ ...f, growthGoal }))
+                  }
+                  showFillState
+                />
+              )}
+            </div>
+          </AppOverlayScrollbars>
+        )}
 
         <footer className="onboarding-overlay__footer">
           {err ? (
@@ -477,26 +614,50 @@ export function OnboardingOverlay({
                 Continue
               </button>
             </div>
+          ) : step === "contributions" ? (
+            <>
+              <div className="onboarding-overlay__contributions-total">
+                <span className="onboarding-overlay__contributions-total-label">
+                  Total monthly
+                </span>
+                <span className="onboarding-overlay__contributions-total-value tabular-nums">
+                  ${fmtInput(contributionsTotal)}/mo
+                </span>
+              </div>
+              <div className="onboarding-overlay__footer-goals">
+                <OnboardingBackButton
+                  disabled={busy}
+                  onClick={() => {
+                    setErr(null);
+                    setStep("profile");
+                  }}
+                />
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={busy}
+                  onClick={onContributionsContinue}
+                >
+                  Continue →
+                </button>
+              </div>
+            </>
           ) : (
             <div className="onboarding-overlay__footer-goals">
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={!goalsValid || busy || exiting}
-                onClick={onFinishWithAddAccounts}
-              >
-                {busy ? "Saving…" : "Add your accounts →"}
-              </button>
-              <button
-                type="button"
-                className="onboarding-overlay__back-link"
+              <OnboardingBackButton
                 disabled={busy || exiting}
                 onClick={() => {
                   setErr(null);
-                  setStep("profile");
+                  setStep("contributions");
                 }}
+              />
+              <button
+                type="button"
+                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                disabled={busy || exiting}
+                onClick={onFinishWithAddAccounts}
               >
-                ← Back
+                {busy ? "Saving…" : "Add your accounts →"}
               </button>
             </div>
           )}

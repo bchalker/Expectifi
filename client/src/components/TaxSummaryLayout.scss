@@ -176,6 +176,32 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
 }
 
+@media (max-width: 680px) {
+  .section--tax-summary.section--tax-summary--growth-assumptions,
+  .section--tax-summary.section--tax-summary--income-harvest {
+    padding: 0;
+  }
+
+  .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout,
+  .section--tax-summary--income-harvest .section--tax-summary__income-layout {
+    border-radius: 0;
+  }
+
+  .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
+    min-height: 0;
+  }
+
+  .account-balances-total-retirement--merged:not(
+      .account-balances-total-retirement--income
+    ) {
+    display: none;
+  }
+
+  .tax-summary-card__accounts {
+    padding: var(--space-3);
+  }
+}
+
 @media (min-width: 768px) {
   .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
     display: grid;
@@ -315,9 +341,116 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   display: none;
 }
 
-@media (max-width: #{$layout-snapshot-split-min}) {
+@media (max-width: #{$layout-snapshot-split-min}) and (min-width: 681px) {
   .tax-summary-card--has-panel .tax-summary-card__accordion {
     display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .tax-breakdown-header-btn-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tax-breakdown-header-btn-wrap__divider {
+    display: none;
+  }
+
+  .tax-breakdown-header-btn--icon {
+    display: none;
+  }
+
+  .tax-breakdown-header-btn--text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 6px);
+    background: var(--surface);
+    font-family: var(--body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .tax-breakdown-header-btn--text:hover {
+    background: var(--surface2);
+    border-color: color-mix(in srgb, var(--border) 70%, var(--text));
+  }
+
+  .tax-breakdown-header-btn--text:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .tax-breakdown-header-btn--text.tax-breakdown-header-btn--active {
+    border-color: var(--accent-text);
+    color: var(--accent-text);
+    background: color-mix(in srgb, var(--accent-light) 40%, var(--surface));
+  }
+
+  .tax-summary-card--has-panel .tax-summary-card__accordion {
+    display: none;
+  }
+
+  .tax-summary-slide-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    max-width: 100%;
+    height: 90vh;
+    max-height: 90vh;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--surface);
+    border: none;
+    border-radius: 16px 16px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  .tax-summary-slide-panel--open {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .tax-summary-slide-panel--mobile-sheet .tax-summary-slide-panel__head {
+    flex-shrink: 0;
+  }
+
+  .tax-summary-slide-panel--mobile-sheet .tax-summary-slide-panel__scroll,
+  .tax-summary-slide-panel--mobile-sheet .tax-summary-slide-panel__tabs {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 }
 
@@ -355,6 +488,14 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     color: var(--text-muted);
     cursor: pointer;
     transition: color 150ms ease;
+  }
+
+  .tax-breakdown-header-btn--text {
+    display: none;
+  }
+
+  .tax-breakdown-header-btn--icon {
+    display: inline-flex;
   }
 
   .tax-breakdown-header-btn:hover {

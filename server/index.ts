@@ -41,13 +41,29 @@ import { installDevRoutes } from './devRoutes.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
-const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+const clientOriginRaw = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+const clientOrigins = clientOriginRaw
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+const clientOrigin = clientOrigins[0] ?? 'http://localhost:5173'
 
 app.set('trust proxy', 1)
 
 installStripeWebhook(app)
 
-app.use(cors({ origin: clientOrigin, credentials: true }))
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || clientOrigins.includes(origin)) {
+        callback(null, true)
+        return
+      }
+      callback(null, false)
+    },
+    credentials: true,
+  }),
+)
 app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)

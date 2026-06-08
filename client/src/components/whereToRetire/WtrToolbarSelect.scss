@@ -8,7 +8,8 @@
   gap: 0;
 }
 
-.wtr-toolbar-select [data-slot='select-trigger'] {
+.wtr-toolbar-select [data-slot='select-trigger'],
+.wtr-toolbar-select .app-select__native {
   display: inline-flex;
   align-items: center;
   width: 100%;
@@ -25,12 +26,14 @@
   box-shadow: none;
 }
 
-.wtr-toolbar-select [data-slot='select-trigger']:hover:not(:disabled) {
+.wtr-toolbar-select [data-slot='select-trigger']:hover:not(:disabled),
+.wtr-toolbar-select .app-select__native:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border-strong));
   background: var(--surface2);
 }
 
-.wtr-toolbar-select [data-slot='select-value'] {
+.wtr-toolbar-select [data-slot='select-value'],
+.wtr-toolbar-select .app-select__native {
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;

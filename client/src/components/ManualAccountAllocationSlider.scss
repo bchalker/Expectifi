@@ -286,3 +286,14 @@
     0 0 0 1px var(--border-strong),
     0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
 }
+
+@media (max-width: 680px) {
+  .manual-account-allocation-slider-panel__track-wrap {
+    padding-block: calc((var(--range-thumb-size) - var(--allocation-range-track-h)) / 2);
+  }
+
+  .manual-account-allocation-slider-panel__range {
+    --allocation-range-thumb: var(--range-thumb-size);
+    height: var(--allocation-range-track-h);
+  }
+}

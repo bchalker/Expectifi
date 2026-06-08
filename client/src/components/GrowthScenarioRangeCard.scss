@@ -153,3 +153,20 @@
     border-left: none;
   }
 }
+
+@media (max-width: 680px) {
+  .growth-scenario-range-card__expected {
+    margin-top: 0;
+    padding: var(--space-3) 0;
+    border-top: none;
+  }
+
+  .growth-scenario-range-card__wing-item {
+    padding: var(--space-3) 0;
+  }
+
+  .growth-scenario-range-card__wing-item + .growth-scenario-range-card__wing-item {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+}

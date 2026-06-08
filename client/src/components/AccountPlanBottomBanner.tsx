@@ -12,6 +12,25 @@ import "./AccountPlanBottomBanner.scss";
 const SHOW_DELAY_MS = 1500;
 const CONFIRMATION_MS = 4000;
 const PHASE_TRANSITION_MS = 250;
+const HIDE_BANNER_MQ = "(max-width: 760px)";
+
+function useHidePlanBannerOnMobile() {
+  const [hide, setHide] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(HIDE_BANNER_MQ).matches,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia(HIDE_BANNER_MQ);
+    const onChange = () => setHide(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  return hide;
+}
 
 type AccountPlanBottomBannerProps = {
   onOpenUpgrade?: () => void;
@@ -62,6 +81,7 @@ export function AccountPlanBottomBanner({
     hasSessionCsvHoldings,
   } = useUserTier();
 
+  const hideOnMobile = useHidePlanBannerOnMobile();
   const bannerRef = useRef<HTMLDivElement>(null);
   const [proNudgeDismissed, setProNudgeDismissed] = useState(() =>
     isProNudgeDismissed(),
@@ -120,7 +140,13 @@ export function AccountPlanBottomBanner({
   );
 
   useEffect(() => {
-    if (!bannerVisible) {
+    if (hideOnMobile) {
+      syncBannerReserveHeight(0);
+    }
+  }, [hideOnMobile]);
+
+  useEffect(() => {
+    if (hideOnMobile || !bannerVisible) {
       syncBannerReserveHeight(0);
       return;
     }
@@ -134,7 +160,7 @@ export function AccountPlanBottomBanner({
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [bannerVisible, displayPanel, motion]);
+  }, [bannerVisible, displayPanel, motion, hideOnMobile]);
 
   useEffect(() => {
     if (!showPhase1) {
@@ -224,7 +250,13 @@ export function AccountPlanBottomBanner({
     });
   }
 
-  if (!bannerVisible || typeof document === "undefined") return null;
+  if (
+    hideOnMobile ||
+    !bannerVisible ||
+    typeof document === "undefined"
+  ) {
+    return null;
+  }
 
   const panelMotionClass =
     motion === "exit"

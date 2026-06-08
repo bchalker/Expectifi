@@ -73,6 +73,7 @@ export function OnboardingRegionStep({
                   .join(' ')}
                 onClick={() => onSelect(region.id)}
                 aria-pressed={isSelected}
+                aria-label={region.label}
               >
                 <span className="onboarding-region-step__cell-main">
                   <RegionFlag flag={region.flag} />

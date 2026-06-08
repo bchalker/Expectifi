@@ -1,7 +1,8 @@
 import type { AnimationEvent } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Checkbox, Label, ListBox, Select } from "@heroui/react";
+import { Checkbox, Label } from "@heroui/react";
+import { AppSelect } from "./ui/AppSelect";
 import { AppButton } from "./ui/AppButton";
 import { IconBuildingBank, IconCheck } from "@tabler/icons-react";
 import { DetailsAccordion } from "./ui/DetailsAccordion";
@@ -193,19 +194,6 @@ const EMPTY_OTHER: OtherColumnMap = {
 const IMPORT_BUCKET_VALUES = new Set(
   IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map((o) => o.value),
 );
-
-function firstKeyFromSelectSelection(keys: unknown): string | null {
-  if (keys == null || keys === "all") return null;
-  if (
-    typeof keys === "object" &&
-    "values" in keys &&
-    typeof (keys as { values: () => Iterator<unknown> }).values === "function"
-  ) {
-    const it = (keys as Set<unknown>).values().next();
-    return it.done || it.value == null ? null : String(it.value);
-  }
-  return String(keys);
-}
 
 function isImportBucketValue(
   v: string,
@@ -920,42 +908,25 @@ export function PositionsCsvImport({
                                 onClick={(e) => e.stopPropagation()}
                                 onKeyDown={(e) => e.stopPropagation()}
                               >
-                                <Select
+                                <AppSelect
                                   className="csv-import-review-bucket-select app-select--compact"
-                                  variant="secondary"
-                                  aria-label={`Tax bucket for ${row.label}`}
+                                  ariaLabel={`Tax bucket for ${row.label}`}
                                   placeholder="Unmapped — choose…"
-                                  selectedKey={unknown ? null : sel}
-                                  isDisabled={confirmBlocking}
-                                  onSelectionChange={(keys) => {
-                                    const id = firstKeyFromSelectSelection(keys);
-                                    if (!id || !isImportBucketValue(id)) return;
+                                  value={unknown ? null : sel}
+                                  disabled={confirmBlocking}
+                                  options={IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
+                                    (o) => ({ id: o.value, label: o.label }),
+                                  )}
+                                  onChange={(id) => {
+                                    if (!isImportBucketValue(id)) return;
                                     setReviewAssignments((m) => ({
                                       ...m,
                                       [row.key]: id,
                                     }));
                                   }}
-                                >
-                                  <Select.Trigger>
-                                    <Select.Value />
-                                    <Select.Indicator />
-                                  </Select.Trigger>
-                                  <Select.Popover className="app-select-import-menu__popover">
-                                    <ListBox className="app-select-import-menu__list">
-                                      {IMPORT_ACCOUNT_BUCKET_SELECT_OPTIONS.map(
-                                        (o) => (
-                                          <ListBox.Item
-                                            key={o.value}
-                                            id={o.value}
-                                            textValue={o.label}
-                                          >
-                                            {o.label}
-                                          </ListBox.Item>
-                                        ),
-                                      )}
-                                    </ListBox>
-                                  </Select.Popover>
-                                </Select>
+                                  popoverClassName="app-select-import-menu__popover"
+                                  listClassName="app-select-import-menu__list"
+                                />
                               </div>
                               <span className="csv-import-review-acct__summary-end">
                                 <div className="csv-import-review-acct__values">

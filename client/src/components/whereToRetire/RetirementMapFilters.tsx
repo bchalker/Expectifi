@@ -1,12 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Button,
   CloseButton,
-  Label,
-  ListBox,
-  Select,
 } from "@heroui/react";
-import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
+import { AppSelect } from "../ui/AppSelect";
+import { BottomSheetHandle } from "../ui/BottomSheetHandle";
+import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
+import { useIsMobileBottomSheet } from "../../hooks/useMobileBottomSheet";
 import {
   ALL_DESTINATION_REGIONS,
   countActiveMapFilters,
@@ -124,7 +124,7 @@ export function WtrMapSortSelect({
   className,
 }: SortSelectProps) {
   return (
-    <Select
+    <AppSelect
       className={[
         "wtr-map-filters__field",
         "wtr-map-filters__sort-select",
@@ -132,95 +132,57 @@ export function WtrMapSortSelect({
       ]
         .filter(Boolean)
         .join(" ")}
-      variant="secondary"
-      aria-label="Sort by"
-      selectedKey={filters.sortBy}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, sortBy: id as MapSortBy });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Sort by</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {SORT_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+      ariaLabel="Sort by"
+      label="Sort by"
+      labelClassName="wtr-map-filters__field-label"
+      value={filters.sortBy}
+      options={SORT_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
+      onChange={(id) => onChange({ ...filters, sortBy: id as MapSortBy })}
+      popoverClassName="wtr-map-filters__select-popover"
+      listClassName="wtr-map-filters__select-list"
+    />
   );
 }
 
 function EnglishProficiencySelect({ filters, onChange }: FilterChangeProps) {
   return (
-    <Select
+    <AppSelect
       className={filterSelectFieldClass(filters.englishProficiency !== "any")}
-      variant="secondary"
-      aria-label="English proficiency"
-      selectedKey={filters.englishProficiency}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
+      ariaLabel="English proficiency"
+      label="English proficiency"
+      labelClassName="wtr-map-filters__field-label"
+      value={filters.englishProficiency}
+      options={ENGLISH_PROFICIENCY_OPTIONS.map((opt) => ({
+        id: opt.id,
+        label: opt.label,
+      }))}
+      onChange={(id) =>
         onChange({
           ...filters,
           englishProficiency: id as EnglishProficiencyFilter,
-        });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">English proficiency</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {ENGLISH_PROFICIENCY_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+        })
+      }
+      popoverClassName="wtr-map-filters__select-popover"
+      listClassName="wtr-map-filters__select-list"
+    />
   );
 }
 
 function ClimateSelect({ filters, onChange }: FilterChangeProps) {
   return (
-    <Select
+    <AppSelect
       className={filterSelectFieldClass(filters.climate !== "any")}
-      variant="secondary"
-      aria-label="Climate"
-      selectedKey={filters.climate}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange({ ...filters, climate: id as ClimateFilter });
-      }}
-    >
-      <Label className="wtr-map-filters__field-label">Climate</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-map-filters__select-popover">
-        <ListBox className="wtr-map-filters__select-list">
-          {CLIMATE_OPTIONS.map((opt) => (
-            <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+      ariaLabel="Climate"
+      label="Climate"
+      labelClassName="wtr-map-filters__field-label"
+      value={filters.climate}
+      options={CLIMATE_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
+      onChange={(id) =>
+        onChange({ ...filters, climate: id as ClimateFilter })
+      }
+      popoverClassName="wtr-map-filters__select-popover"
+      listClassName="wtr-map-filters__select-list"
+    />
   );
 }
 
@@ -228,34 +190,23 @@ function DirectFlightOriginEmbedded({ filters, onChange }: FilterChangeProps) {
   return (
     <>
       <span className="wtr-map-filters__toggle-field-label">From</span>
-      <Select
+      <AppSelect
         className="wtr-map-filters__toggle-embedded-select"
-        variant="secondary"
-        aria-label="Direct flights from"
-        selectedKey={filters.directFlightOrigin}
-        onSelectionChange={(keys) => {
-          const id = firstKeyFromSelectSelection(keys);
-          if (!id) return;
+        ariaLabel="Direct flights from"
+        value={filters.directFlightOrigin}
+        options={DIRECT_FLIGHT_ORIGIN_OPTIONS.map((opt) => ({
+          id: opt.id,
+          label: opt.label,
+        }))}
+        onChange={(id) =>
           onChange({
             ...filters,
             directFlightOrigin: id as DirectFlightOrigin,
-          });
-        }}
-      >
-        <Select.Trigger>
-          <Select.Value />
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover className="wtr-map-filters__select-popover">
-          <ListBox className="wtr-map-filters__select-list">
-            {DIRECT_FLIGHT_ORIGIN_OPTIONS.map((opt) => (
-              <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-                {opt.label}
-              </ListBox.Item>
-            ))}
-          </ListBox>
-        </Select.Popover>
-      </Select>
+          })
+        }
+        popoverClassName="wtr-map-filters__select-popover"
+        listClassName="wtr-map-filters__select-list"
+      />
     </>
   );
 }
@@ -484,10 +435,25 @@ export function RetirementMapFilters({
   onClearExcludedCountries,
   onRemoveFavorite,
 }: PanelProps) {
+  const isMobileSheet = useIsMobileBottomSheet();
+  const panelRef = useRef<HTMLElement>(null);
   const [activeTab, setActiveTab] = useState<FilterPanelTab>("filters");
   const activeCount = countActiveMapFilters(filters);
   const showClear = hasNonDefaultMapFilters(filters);
   const excludeTabActive = excludedCountries.length > 0;
+
+  const {
+    isDragging,
+    panelStyle,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useBottomSheetDrag({
+    enabled: isMobileSheet,
+    open,
+    panelRef,
+    onDismiss: onClose,
+  });
 
   const clearFilters = () => {
     onChange({
@@ -497,19 +463,38 @@ export function RetirementMapFilters({
   };
 
   return (
-    <aside
-      id="wtr-map-filters-panel"
-      className={[
-        "wtr-map-filters",
-        "wtr-map-filters--panel",
-        "wtr-map-filters--side",
-        open && "wtr-map-filters--open",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      aria-label="Map filters"
-      aria-hidden={!open}
-    >
+    <>
+      {isMobileSheet && open ? (
+        <div
+          className="mobile-bottom-sheet-backdrop mobile-bottom-sheet-backdrop--open"
+          onClick={onClose}
+          aria-hidden
+        />
+      ) : null}
+      <aside
+        ref={panelRef}
+        id="wtr-map-filters-panel"
+        style={isMobileSheet ? panelStyle : undefined}
+        className={[
+          "wtr-map-filters",
+          "wtr-map-filters--panel",
+          "wtr-map-filters--side",
+          isMobileSheet && "wtr-map-filters--mobile-sheet",
+          isDragging && "mobile-bottom-sheet-panel--dragging",
+          open && "wtr-map-filters--open",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-label="Map filters"
+        aria-hidden={!open}
+      >
+        {isMobileSheet ? (
+          <BottomSheetHandle
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        ) : null}
       <div className="wtr-map-filters__inner">
       <header className="wtr-map-filters__head">
         <div className="wtr-map-filters__head-copy">
@@ -528,7 +513,7 @@ export function RetirementMapFilters({
             </p>
           ) : null}
         </div>
-        <CloseButton aria-label="Close filters" onPress={onClose} />
+        <CloseButton className="panel-close-btn" aria-label="Close filters" onPress={onClose} />
       </header>
 
       <div
@@ -601,5 +586,6 @@ export function RetirementMapFilters({
       ) : null}
       </div>
     </aside>
+    </>
   );
 }

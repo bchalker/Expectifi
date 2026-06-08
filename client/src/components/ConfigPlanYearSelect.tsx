@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
-import { ListBox, Select } from '@heroui/react'
-import { firstKeyFromSelectSelection } from '../lib/dateOfBirthSelect'
+import { AppSelect } from './ui/AppSelect'
 import './ConfigPlanYearSelect.scss'
 
 type Props = {
@@ -21,6 +20,11 @@ export function ConfigPlanYearSelect({ id, label, value, from, to, onChange, cla
     return list
   }, [from, to])
 
+  const options = useMemo(
+    () => years.map((y) => ({ id: String(y), label: String(y) })),
+    [years],
+  )
+
   const rootClass = ['config-plan-field', 'config-plan-year-select', className].filter(Boolean).join(' ')
 
   return (
@@ -28,32 +32,19 @@ export function ConfigPlanYearSelect({ id, label, value, from, to, onChange, cla
       <label className="config-plan-label" id={labelId} htmlFor={id}>
         {label}
       </label>
-      <Select
+      <AppSelect
         className="config-plan-year-select__control"
-        variant="secondary"
-        aria-labelledby={labelId}
-        selectedKey={String(value)}
-        onSelectionChange={(keys) => {
-          const key = firstKeyFromSelectSelection(keys)
-          if (!key) return
+        triggerId={id}
+        ariaLabelledBy={labelId}
+        value={String(value)}
+        options={options}
+        onChange={(key) => {
           const year = Number(key)
           if (Number.isFinite(year)) onChange(year)
         }}
-      >
-        <Select.Trigger id={id}>
-          <Select.Value />
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover className="app-select-import-menu__popover">
-          <ListBox className="app-select-import-menu__list config-plan-year-select__list">
-            {years.map((y) => (
-              <ListBox.Item key={String(y)} id={String(y)} textValue={String(y)}>
-                {y}
-              </ListBox.Item>
-            ))}
-          </ListBox>
-        </Select.Popover>
-      </Select>
+        popoverClassName="app-select-import-menu__popover"
+        listClassName="app-select-import-menu__list config-plan-year-select__list"
+      />
     </div>
   )
 }

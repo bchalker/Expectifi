@@ -55,6 +55,7 @@ export function PortfolioBucketAccountRow({
   const showScenario = Boolean(scenario)
   const showActionSlot = Boolean(actionSlot)
   const showActionsColumn = showScenario || showActionSlot || showViewHoldings
+  const showHintStack = Boolean(subtext || withdrawalPill)
 
   return (
     <div className="portfolio-bucket-account-row">
@@ -62,38 +63,49 @@ export function PortfolioBucketAccountRow({
         <div className="portfolio-bucket-account-row__header-row">
           <div className="portfolio-bucket-account-row__content">
             <div className="portfolio-bucket-account-row__main">
-              {badgeOrder != null ? (
-                <span className="portfolio-bucket-account-row__order-badge-wrap">
-                  <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
-                </span>
-              ) : null}
               <div className="portfolio-bucket-account-row__identity">
-                <span className="portfolio-bucket-account-row__name">{label}</span>
-                {subtext || withdrawalPill ? (
-                  <div className="portfolio-bucket-account-row__hint-stack">
-                    {subtext ? (
-                      typeof subtext === 'string' ? (
-                        <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
-                      ) : (
-                        subtext
-                      )
+                <div
+                  className={[
+                    'portfolio-bucket-account-row__title-row',
+                    showHintStack && 'portfolio-bucket-account-row__title-row--stacked-hint',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <div className="portfolio-bucket-account-row__name-group">
+                    {badgeOrder != null ? (
+                      <span className="portfolio-bucket-account-row__order-badge-wrap">
+                        <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
+                      </span>
                     ) : null}
-                    {withdrawalPill}
+                    <span className="portfolio-bucket-account-row__name">{label}</span>
                   </div>
-                ) : null}
+                  <div className="portfolio-bucket-account-row__values">
+                    <div className="portfolio-bucket-account-row__values-row">
+                      <div className="portfolio-bucket-account-row__total">{total}</div>
+                    </div>
+                    {valuesExtra ? (
+                      <div className="portfolio-bucket-account-row__values-extra">{valuesExtra}</div>
+                    ) : null}
+                  </div>
+                  {showHintStack ? (
+                    <div className="portfolio-bucket-account-row__hint-stack">
+                      {subtext ? (
+                        typeof subtext === 'string' ? (
+                          <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
+                        ) : (
+                          subtext
+                        )
+                      ) : null}
+                      {withdrawalPill}
+                    </div>
+                  ) : null}
+                </div>
                 {identityExtra ? (
                   <div className="portfolio-bucket-account-row__identity-extra">{identityExtra}</div>
                 ) : null}
                 <BucketTotalTrend trend={trend} className="portfolio-bucket-account-row__trend" />
               </div>
-            </div>
-            <div className="portfolio-bucket-account-row__values">
-              <div className="portfolio-bucket-account-row__values-row">
-                <div className="portfolio-bucket-account-row__total">{total}</div>
-              </div>
-              {valuesExtra ? (
-                <div className="portfolio-bucket-account-row__values-extra">{valuesExtra}</div>
-              ) : null}
             </div>
           </div>
           {showActionsColumn ? (

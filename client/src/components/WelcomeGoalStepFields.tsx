@@ -24,7 +24,9 @@ type Props = {
   centered?: boolean
   compactGoals?: boolean
   embeddedInProfile?: boolean
-  /** Onboarding step 2 — contribution + grouped goals. */
+  /** Onboarding step 3 — goals only. */
+  step3Layout?: boolean
+  /** @deprecated Use step3Layout; kept for legacy two-field onboarding layouts. */
   step2Layout?: boolean
   showFillState?: boolean
   className?: string
@@ -43,6 +45,7 @@ export function WelcomeGoalStepFields({
   centered = false,
   compactGoals = false,
   embeddedInProfile = false,
+  step3Layout = false,
   step2Layout = false,
   showFillState = false,
   className,
@@ -73,14 +76,19 @@ export function WelcomeGoalStepFields({
     setAgeDraft(String(next))
   }
 
-  if (step2Layout) {
+  if (step3Layout || step2Layout) {
+    const goalsOnly = step3Layout || !onMonthlyContributionChange
     return (
       <div
-        className={['welcome-goal-fields', 'welcome-goal-fields--step2', className]
+        className={[
+          'welcome-goal-fields',
+          goalsOnly ? 'welcome-goal-fields--step3' : 'welcome-goal-fields--step2',
+          className,
+        ]
           .filter(Boolean)
           .join(' ')}
       >
-        {onMonthlyContributionChange ? (
+        {!goalsOnly && onMonthlyContributionChange ? (
           <CurrencyAmountInput
             id="welcome-planning-monthly-contribution"
             className="welcome-goal-fields__step2-contribution"
@@ -95,16 +103,12 @@ export function WelcomeGoalStepFields({
         ) : null}
 
         <div className="welcome-goal-fields__aiming-group">
-          <div className="welcome-goal-fields__aiming-divider">
-            <span className="welcome-goal-fields__aiming-divider-line" aria-hidden />
-            <p className="welcome-goal-fields__aiming-divider-label">What are you aiming for?</p>
-            <span className="welcome-goal-fields__aiming-divider-line" aria-hidden />
-          </div>
           <div className="welcome-goal-fields__aiming-row">
             <CurrencyAmountInput
               id="welcome-planning-monthly-goal"
               className="welcome-goal-fields__aiming-income"
               label="Monthly income"
+              labelMutedSuffix="— optional"
               value={monthlyGoal}
               onChange={onMonthlyGoalChange}
               placeholder="5,000"

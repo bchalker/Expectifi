@@ -9,7 +9,7 @@
 .landing-hero-headline__title {
   margin: 0;
   font-family: var(--heading);
-  font-size: clamp(2rem, 5.5vw, 3.15rem);
+  font-size: clamp(1.35rem, 5.5vw, 3.15rem);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.02em;
@@ -23,7 +23,7 @@
 }
 
 .landing-hero-headline__title-line:first-of-type {
-  white-space: nowrap;
+  max-width: 100%;
 }
 
 .landing-hero-headline__title-line:last-of-type {
@@ -113,6 +113,12 @@
 
 .landing-hero-headline__location--in {
   animation: landing-hero-location-in 400ms ease forwards;
+}
+
+@media (min-width: 480px) {
+  .landing-hero-headline__title-line:first-of-type {
+    white-space: nowrap;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

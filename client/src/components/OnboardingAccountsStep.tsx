@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { ListBox, Select } from "@heroui/react";
+import { AppSelect } from "./ui/AppSelect";
 import { fmtInput, parseNum } from "../utils/format";
 import { currencySymbol } from "../lib/displayCurrency";
 import {
@@ -13,7 +13,6 @@ import {
 } from "../lib/manualAccountEntries";
 import type { OnboardingRegionId } from "../lib/onboardingRegions";
 import { resolveOnboardingAccountLocale } from "../lib/onboardingAccountTypesByLocale";
-import { firstKeyFromSelectSelection } from "../lib/dateOfBirthSelect";
 import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
 import "./OnboardingAccountsStep.scss";
 import "./OnboardingFieldShell.scss";
@@ -102,7 +101,7 @@ export function OnboardingAccountsStep({
             <div key={entry.id} className="onboarding-accounts-step__row">
               <div className="onboarding-accounts-step__row-fields">
                 <div className="onboarding-accounts-step__type-field">
-                  <Select
+                  <AppSelect
                     className={[
                       "onboarding-accounts-step__type-select",
                       typeSelected
@@ -111,45 +110,22 @@ export function OnboardingAccountsStep({
                     ]
                       .filter(Boolean)
                       .join(" ")}
-                    variant="secondary"
                     placeholder="Select account type"
-                    aria-labelledby="onboarding-acct-type-header"
-                    selectedKey={entry.type}
-                    onSelectionChange={(keys) => {
-                      const id = firstKeyFromSelectSelection(keys);
-                      if (!id) return;
+                    ariaLabelledBy="onboarding-acct-type-header"
+                    value={entry.type}
+                    options={typeOptions.map((opt) => ({
+                      id: opt.id,
+                      label: opt.label,
+                    }))}
+                    onChange={(id) => {
                       updateEntry(entry.id, {
                         type: id as OnboardingAccountType,
                       });
                     }}
-                  >
-                    <Select.Trigger>
-                      <Select.Value>
-                        {meta ? (
-                          <span className="onboarding-accounts-step__type-trigger-label">
-                            {meta.label}
-                          </span>
-                        ) : null}
-                      </Select.Value>
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover
-                      placement="bottom start"
-                      className="app-select-import-menu__popover onboarding-accounts-step__type-popover"
-                    >
-                      <ListBox className="app-select-import-menu__list onboarding-accounts-step__type-list">
-                        {typeOptions.map((opt) => (
-                          <ListBox.Item
-                            key={opt.id}
-                            id={opt.id}
-                            textValue={opt.label}
-                          >
-                            {opt.label}
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+                    popoverPlacement="bottom start"
+                    popoverClassName="app-select-import-menu__popover onboarding-accounts-step__type-popover"
+                    listClassName="app-select-import-menu__list onboarding-accounts-step__type-list"
+                  />
                 </div>
 
                 <div className="onboarding-accounts-step__balance-field">

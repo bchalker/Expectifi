@@ -335,7 +335,7 @@ export function AccountScenarioPanel({
             <h2 className="holding-scenario-popout__title" id="account-scenario-panel-title">
               Account scenario — {accountName}
             </h2>
-            <button type="button" className="holding-scenario-popout__close" onClick={onClose} aria-label="Close">
+            <button type="button" className="holding-scenario-popout__close panel-close-btn" onClick={onClose} aria-label="Close">
               <IconX size={14} stroke={1.5} aria-hidden />
             </button>
           </div>

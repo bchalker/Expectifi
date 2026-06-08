@@ -9,10 +9,7 @@ import {
 import { IconChevronLeft, IconChevronRight, IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
 import {
-  applyWhereToLook,
-  resolveWhereToLook,
   scoreAndFilterMapCities,
-  EXPAT_LEGEND_TIER_IDS,
   type MapFilters,
   type ScoredMapCity,
 } from "../../lib/whereToRetire/cityMapScoring";
@@ -28,12 +25,9 @@ import {
   monthlyOutflowForMapCity,
 } from "../../lib/whereToRetire/mapIncomeFit";
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
-import { useMapPinColorView } from "../../hooks/useMapPinColorView";
 import { RetirementLeafletMap } from "./RetirementLeafletMap";
-import { WtrMapPinColorChrome } from "./WtrMapPinColorChrome";
 import { WtrCityListPagination } from "./WtrCityListPagination";
 import "./RetirementMapExplorer.scss";
-import "./WtrMapPinColorChrome.scss";
 
 export type WtrExplorerViewMode = "map" | "compare";
 
@@ -44,6 +38,7 @@ type Props = {
   onFiltersChange: (
     next: MapFilters | ((prev: MapFilters) => MapFilters),
   ) => void;
+  pinColorView: MapPinColorView;
   headerSlot?: ReactNode;
   /** Rendered directly under `.wtr-explorer__chrome`, above the map row. */
   chromeFooterSlot?: ReactNode;
@@ -53,11 +48,9 @@ type Props = {
   compareOverlayOpen?: boolean;
   explorerViewMode: WtrExplorerViewMode;
   onExplorerViewModeChange: (mode: WtrExplorerViewMode) => void;
-  onToggleCompare: (cityId: string) => void;
   onClearCompare: () => void;
   onViewComparison: () => void;
   excludedCountries: string[];
-  onAddExcludedCountry: (country: string) => void;
   favoriteCities: { city: string; country: string }[];
   isFavoritedCity: (city: string, country: string) => boolean;
   onToggleFavoriteCity: (entry: {
@@ -92,8 +85,6 @@ function notifyMapResize() {
   requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
 }
-
-const MAX_COMPARE_CITIES = 5;
 
 function sortCitiesForPinView(
   cities: ScoredMapCity[],
@@ -147,6 +138,7 @@ export function RetirementMapExplorer({
   explorationIncome,
   filters,
   onFiltersChange,
+  pinColorView,
   headerSlot,
   chromeFooterSlot,
   filtersOpen,
@@ -155,17 +147,13 @@ export function RetirementMapExplorer({
   compareOverlayOpen = false,
   explorerViewMode,
   onExplorerViewModeChange,
-  onToggleCompare,
   onClearCompare,
   onViewComparison,
   excludedCountries,
-  onAddExcludedCountry,
   favoriteCities,
   isFavoritedCity,
   onToggleFavoriteCity,
 }: Props) {
-  const { pinColorView, onPinColorViewChange } = useMapPinColorView();
-
   const favoritedKeySet = useMemo(
     () =>
       new Set(
@@ -173,51 +161,6 @@ export function RetirementMapExplorer({
       ),
     [favoriteCities],
   );
-
-  const handlePinColorViewChange = useCallback(
-    (view: MapPinColorView) => {
-      onPinColorViewChange(view);
-      if (view === "expat") {
-        onFiltersChange((prev) => {
-          const base =
-            resolveWhereToLook(prev) === "us"
-              ? applyWhereToLook(prev, "all")
-              : prev;
-          return base.regionScope === "both"
-            ? { ...base, regionScope: "international-only" }
-            : base;
-        });
-      }
-      if (view === "budget" && filters.sortBy !== "lowest-budget") {
-        onFiltersChange((prev) => ({ ...prev, sortBy: "lowest-budget" }));
-      }
-      if (view !== "expat") {
-        onFiltersChange((prev) => ({
-          ...prev,
-          expatCommunityTiers: [...EXPAT_LEGEND_TIER_IDS],
-        }));
-      }
-    },
-    [onPinColorViewChange, onFiltersChange, filters.sortBy],
-  );
-
-  useEffect(() => {
-    if (pinColorView !== "expat" || filters.regionScope !== "both") return;
-    onFiltersChange((prev) => {
-      const base =
-        resolveWhereToLook(prev) === "us"
-          ? applyWhereToLook(prev, "all")
-          : prev;
-      return base.regionScope === "both"
-        ? { ...base, regionScope: "international-only" }
-        : base;
-    });
-  }, [pinColorView, filters.regionScope, onFiltersChange]);
-
-  useEffect(() => {
-    if (filters.whereToLook !== "us" || pinColorView !== "expat") return;
-    onPinColorViewChange("score");
-  }, [filters.whereToLook, pinColorView, onPinColorViewChange]);
 
   const chromeRef = useRef<HTMLDivElement>(null);
   const mobileListOnly = useWtrMobileListOnly();
@@ -385,17 +328,6 @@ export function RetirementMapExplorer({
     [filteredCities, selectedId],
   );
 
-  const handleExcludeCountry = useCallback(
-    (country: string) => {
-      onAddExcludedCountry(country);
-      if (selectedScored?.city.country === country) {
-        setSelectedId(null);
-        setPanelOpen(false);
-      }
-    },
-    [onAddExcludedCountry, selectedScored?.city.country],
-  );
-
   const scrollListToTop = useCallback(() => {
     listScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, []);
@@ -497,12 +429,6 @@ export function RetirementMapExplorer({
         {headerSlot ? (
           <div className="wtr-explorer__chrome-slot">{headerSlot}</div>
         ) : null}
-        <WtrMapPinColorChrome
-          pinColorView={pinColorView}
-          onPinColorViewChange={handlePinColorViewChange}
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-        />
       </div>
 
       {chromeFooterSlot ? (
@@ -766,20 +692,6 @@ export function RetirementMapExplorer({
         mapFilters={filters}
         open={panelOpen && selectedScored != null}
         onClose={closePanel}
-        compareSelected={
-          selectedScored != null && compareIds.includes(selectedScored.city.id)
-        }
-        compareAtMax={compareIds.length >= MAX_COMPARE_CITIES}
-        onToggleCompare={() => {
-          if (selectedScored) onToggleCompare(selectedScored.city.id);
-        }}
-        isCountryExcluded={
-          selectedScored != null &&
-          excludedCountries.includes(selectedScored.city.country)
-        }
-        onExcludeCountry={() => {
-          if (selectedScored) handleExcludeCountry(selectedScored.city.country);
-        }}
         listPageNav={destinationListPageNav}
       />
 

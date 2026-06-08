@@ -23,6 +23,8 @@ export type StoredUserProfile = {
   spouse_benefit_estimate?: number
   target_retirement_age?: number
   monthly_income_goal?: number
+  /** Serialized onboarding contribution breakdown (US or CA). */
+  onboarding_contributions?: Record<string, unknown>
   /** US federal filing status id (see FilingStatusId). */
   filing_status?: string
   retirement_destination?: string
@@ -70,6 +72,9 @@ export function parseStoredUserProfile(raw: unknown): StoredUserProfile | null {
   profile.spouse_benefit_estimate = num('spouse_benefit_estimate')
   profile.target_retirement_age = num('target_retirement_age')
   profile.monthly_income_goal = num('monthly_income_goal')
+  if (o.onboarding_contributions && typeof o.onboarding_contributions === 'object') {
+    profile.onboarding_contributions = o.onboarding_contributions as Record<string, unknown>
+  }
   profile.filing_status = str('filing_status')
   profile.retirement_destination = str('retirement_destination')
   profile.welcome_banner_dismissed = bool('welcome_banner_dismissed')

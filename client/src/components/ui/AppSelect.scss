@@ -1,0 +1,66 @@
+.app-select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.app-select__label {
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.app-select__hero-control {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Native OS picker — keep menulist appearance; match HeroUI trigger sizing. */
+.app-select__native {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: var(--space-1) var(--space-6) var(--space-1) var(--space-2);
+  border: 1px solid var(--border-medium-dark);
+  border-radius: 6px;
+  background: var(--surface2);
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+  box-sizing: border-box;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.app-select__native:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.app-select__native:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  outline: none;
+}
+
+.app-select--placeholder .app-select__native {
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+@media (max-width: 680px) {
+  .app-select__native {
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

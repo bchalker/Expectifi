@@ -899,7 +899,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
             setUi={setUi}
             saveUserPrefs={user ? saveUserPrefs : undefined}
             onComplete={() => {
-              welcomeBlockedRef.current = false;
               setShowWelcome(false);
               replaceAppPath(APP_DASHBOARD_PATH);
             }}

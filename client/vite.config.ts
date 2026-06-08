@@ -20,6 +20,10 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    /** Listen on all interfaces so phones on the same Wi‑Fi can hit the dev server. */
+    host: true,
+    /** Allow ngrok / Cloudflare tunnel hostnames when testing OAuth on a phone. */
+    allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io', '.trycloudflare.com'],
     watch: {
       ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
     },

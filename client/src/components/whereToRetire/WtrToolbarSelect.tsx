@@ -1,5 +1,4 @@
-import { ListBox, Select } from '@heroui/react'
-import { firstKeyFromSelectSelection } from '../../lib/dateOfBirthSelect'
+import { AppSelect } from '../ui/AppSelect'
 import './WtrToolbarSelect.scss'
 
 export type WtrToolbarSelectOption<T extends string> = {
@@ -11,9 +10,11 @@ export type WtrToolbarSelectOption<T extends string> = {
 type Props<T extends string> = {
   ariaLabel: string
   value: T
-  options: readonly WtrToolbarSelectOption<T>[]
+  options: WtrToolbarSelectOption<T>[]
   onChange: (id: T) => void
   className?: string
+  /** `auto` = HeroUI on desktop, native OS picker on mobile. */
+  layout?: 'auto' | 'native' | 'hero'
 }
 
 export function WtrToolbarSelect<T extends string>({
@@ -22,42 +23,22 @@ export function WtrToolbarSelect<T extends string>({
   options,
   onChange,
   className,
+  layout = 'auto',
 }: Props<T>) {
   return (
-    <Select
+    <AppSelect
       className={['wtr-toolbar-select', className].filter(Boolean).join(' ')}
-      variant="secondary"
-      aria-label={ariaLabel}
-      selectedKey={value}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys)
-        if (!id) return
+      ariaLabel={ariaLabel}
+      value={value}
+      options={options}
+      layout={layout}
+      onChange={(id) => {
         const opt = options.find((o) => o.id === id)
         if (opt?.disabled) return
         onChange(id as T)
       }}
-    >
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover
-        placement="bottom start"
-        className="wtr-toolbar-select__popover app-select-import-menu__popover"
-      >
-        <ListBox className="wtr-toolbar-select__list app-select-import-menu__list">
-          {options.map((opt) => (
-            <ListBox.Item
-              key={opt.id}
-              id={opt.id}
-              textValue={opt.label}
-              isDisabled={opt.disabled}
-            >
-              {opt.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+      popoverClassName="wtr-toolbar-select__popover app-select-import-menu__popover"
+      listClassName="wtr-toolbar-select__list app-select-import-menu__list"
+    />
   )
 }

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { IconAdjustments, IconMenu2, IconX } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext'
 import { useWelcomeSettingsReveal } from '../hooks/useWelcomeSettingsReveal'
@@ -19,6 +20,9 @@ const MARKETING_SECTIONS = [
   { id: 'pricing' as const, label: 'Pricing' },
   { id: 'faq' as const, label: 'FAQ' },
 ]
+
+const MARKETING_MOBILE_NAV_BODY_CLASS = 'app-left-nav--mobile-open-body'
+const MARKETING_MOBILE_NAV_MQ = '(min-width: 761px)'
 
 type HeaderAuthProps = {
   onSignIn: () => void
@@ -240,6 +244,85 @@ function HeaderMarketingNav({
   )
 }
 
+function HeaderMarketingMobileNav({
+  open,
+  onClose,
+  onMarketingAnchor,
+  onSignIn,
+  onCreateAccount,
+}: {
+  open: boolean
+  onClose: () => void
+  onMarketingAnchor: (sectionId: (typeof MARKETING_SECTIONS)[number]['id']) => void
+  onSignIn: () => void
+  onCreateAccount: () => void
+}) {
+  const handleAnchor = (sectionId: (typeof MARKETING_SECTIONS)[number]['id']) => {
+    onMarketingAnchor(sectionId)
+    onClose()
+  }
+
+  const handleSignIn = () => {
+    onSignIn()
+    onClose()
+  }
+
+  const handleCreateAccount = () => {
+    onCreateAccount()
+    onClose()
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className={[
+          'header__marketing-nav-backdrop',
+          open ? 'header__marketing-nav-backdrop--open' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-hidden={!open}
+        tabIndex={open ? 0 : -1}
+        aria-label="Close menu"
+        onClick={onClose}
+      />
+      <nav
+        id="header-marketing-mobile-nav"
+        className={[
+          'header__marketing-nav',
+          open ? 'header__marketing-nav--open' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-label="Site menu"
+        aria-hidden={!open}
+      >
+        <div className="header__marketing-nav-links">
+          {MARKETING_SECTIONS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className="header__marketing-nav-link"
+              onClick={() => handleAnchor(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="header__marketing-nav-auth" aria-label="Account">
+          <button type="button" className="header__marketing-nav-auth-link" onClick={handleSignIn}>
+            Sign in
+          </button>
+          <button type="button" className="header__marketing-nav-auth-cta" onClick={handleCreateAccount}>
+            Create account
+          </button>
+        </div>
+      </nav>
+    </>
+  )
+}
+
 function headerAppDrawerNavVisible(navContext: NavPanelContext): boolean {
   return APP_NAV_DRAWER_ITEMS.some(({ requires }) => navRequirementsMet(requires, navContext))
 }
@@ -311,7 +394,37 @@ function HeaderAppNav({
 
 export function Header(props: HeaderProps) {
   const { variant, className = '', onSignIn, onCreateAccount } = props
+  const [marketingMobileOpen, setMarketingMobileOpen] = useState(false)
   const onboardingChrome = variant === 'app' && props.welcomeDone === false
+  const closeMarketingMobile = useCallback(() => setMarketingMobileOpen(false), [])
+
+  useEffect(() => {
+    if (variant !== 'marketing' || !marketingMobileOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMarketingMobile()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [variant, marketingMobileOpen, closeMarketingMobile])
+
+  useEffect(() => {
+    if (variant !== 'marketing') return
+    if (marketingMobileOpen) document.body.classList.add(MARKETING_MOBILE_NAV_BODY_CLASS)
+    else document.body.classList.remove(MARKETING_MOBILE_NAV_BODY_CLASS)
+    return () => document.body.classList.remove(MARKETING_MOBILE_NAV_BODY_CLASS)
+  }, [variant, marketingMobileOpen])
+
+  useEffect(() => {
+    if (variant !== 'marketing') return
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mq = window.matchMedia(MARKETING_MOBILE_NAV_MQ)
+    const onChange = () => {
+      if (mq.matches) closeMarketingMobile()
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [variant, closeMarketingMobile])
+
   const rootClass = [
     'header',
     `header--${variant}`,
@@ -358,6 +471,23 @@ export function Header(props: HeaderProps) {
           </button>
         ) : null}
 
+        {!onboardingChrome && variant === 'marketing' ? (
+          <button
+            type="button"
+            className="header__menu-btn header__menu-btn--marketing"
+            aria-label={marketingMobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={marketingMobileOpen}
+            aria-controls="header-marketing-mobile-nav"
+            onClick={() => setMarketingMobileOpen((open) => !open)}
+          >
+            {marketingMobileOpen ? (
+              <IconX size={22} stroke={1.75} aria-hidden />
+            ) : (
+              <IconMenu2 size={22} stroke={1.75} aria-hidden />
+            )}
+          </button>
+        ) : null}
+
         {!onboardingChrome ? (
           <div className="header__tail">
             {variant === 'app' ? <HeaderAppRouteLinks navContext={props.navContext} /> : null}
@@ -374,6 +504,16 @@ export function Header(props: HeaderProps) {
           </div>
         ) : null}
       </div>
+
+      {variant === 'marketing' ? (
+        <HeaderMarketingMobileNav
+          open={marketingMobileOpen}
+          onClose={closeMarketingMobile}
+          onMarketingAnchor={props.onMarketingAnchor}
+          onSignIn={onSignIn}
+          onCreateAccount={onCreateAccount}
+        />
+      ) : null}
     </header>
   )
 }

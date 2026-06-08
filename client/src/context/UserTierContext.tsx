@@ -83,6 +83,10 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     const onOnboardingSessionComplete = () => {
       setSavePlanSuppressed(false)
       setSavePlanPromptRev((n) => n + 1)
+      setHydration((current) => ({
+        ...current,
+        onboardingComplete: true,
+      }))
     }
     window.addEventListener(ONBOARDING_SESSION_COMPLETE_EVENT, onOnboardingSessionComplete)
     return () => {

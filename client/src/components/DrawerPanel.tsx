@@ -24,6 +24,7 @@ import {
 import type { LifePlans } from '../lib/planStorage/life'
 import { SidePanelShell } from './SidePanelShell'
 import { AppButton } from './ui/AppButton'
+import { useIsMobileBottomSheet } from '../hooks/useMobileBottomSheet'
 import './PanelChrome.scss'
 
 const TITLES: Record<DrawerName, string> = {
@@ -82,6 +83,7 @@ export function DrawerPanel({
   currentYear,
 }: Props) {
   const open = drawer != null
+  const isMobileSheet = useIsMobileBottomSheet()
   const lastDrawerRef = useRef<DrawerName | null>(null)
   if (drawer) lastDrawerRef.current = drawer
   const panelDrawer = drawer ?? lastDrawerRef.current
@@ -188,7 +190,7 @@ export function DrawerPanel({
 
   return (
     <>
-      {!isConfigDrawer ? (
+      {open && (!isConfigDrawer || isMobileSheet) ? (
         <div
           className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
           onClick={onClose}

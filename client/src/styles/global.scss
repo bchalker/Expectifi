@@ -291,7 +291,7 @@
   --wtr-content-boundary: var(--layout-app-boundary);
   --layout-marketing-boundary: min(
     var(--layout-marketing-max),
-    100vw
+    calc(100vw - var(--layout-marketing-gutter) - var(--layout-marketing-gutter-end))
   );
   /* Portfolio post-import reveal (keep in sync with dashboardViewReveal.ts) */
   --dashboard-reveal-duration: 0.5s;
@@ -384,6 +384,11 @@ body.app-left-nav--mobile-open-body {
   touch-action: none;
 }
 
+body.tax-summary-panel-open-body {
+  overflow: hidden;
+  touch-action: none;
+}
+
 .font-xs {
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -400,8 +405,9 @@ body.app-left-nav--mobile-open-body {
 
 @media (max-width: 680px) {
   :root {
-    --drawer-panel-inset: 1rem;
+    --drawer-panel-inset: 0;
     --app-privacy-trust-h: 5.5rem;
+    --range-thumb-size: 1.625rem;
   }
 }
 

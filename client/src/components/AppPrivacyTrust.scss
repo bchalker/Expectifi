@@ -34,3 +34,10 @@
   font-weight: 700;
   color: var(--nav-text);
 }
+
+@media (max-width: 680px) {
+  .app-privacy-trust {
+    position: static;
+    box-shadow: none;
+  }
+}

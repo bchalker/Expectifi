@@ -3,7 +3,8 @@
   min-width: 0;
 }
 
-.config-plan-select__control button[data-slot='select-trigger'] {
+.config-plan-select__control button[data-slot='select-trigger'],
+.config-plan-select__control .app-select__native {
   width: 100%;
   min-height: 2.75rem;
   font-size: var(--text-sm);

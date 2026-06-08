@@ -6,17 +6,15 @@ import {
   Form,
   Input,
   Label,
-  ListBox,
-  Select,
   TextField,
 } from "@heroui/react";
+import { AppSelect } from "./ui/AppSelect";
 import { useAuth } from "../context/AuthContext";
 import {
   CONTACT_SUBJECTS,
   type ContactSubjectValue,
   submitContactForm,
 } from "../lib/api/contact";
-import { firstKeyFromSelectSelection } from "../lib/dateOfBirthSelect";
 import "./AuthModal.scss";
 import "./ContactModal.scss";
 
@@ -296,19 +294,23 @@ export function ContactModal({ open, onClose }: Props) {
                 </p>
               ) : null}
 
-              <Select
+              <AppSelect
                 className={[
                   "auth-modal__stack-field",
                   subject ? "auth-modal__subject-select--chosen" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                variant="secondary"
                 placeholder="Select a topic..."
-                aria-label="Subject"
-                selectedKey={subject || null}
-                onSelectionChange={(keys) => {
-                  const id = firstKeyFromSelectSelection(keys);
+                ariaLabel="Subject"
+                label="Subject"
+                labelClassName="auth-modal__stack-label"
+                value={subject || null}
+                options={CONTACT_SUBJECTS.map((opt) => ({
+                  id: opt.value,
+                  label: opt.label,
+                }))}
+                onChange={(id) => {
                   setSubject(id ?? "");
                   setFieldErrors((prev) => {
                     const next = { ...prev };
@@ -316,26 +318,9 @@ export function ContactModal({ open, onClose }: Props) {
                     return next;
                   });
                 }}
-              >
-                <Label className="auth-modal__stack-label">Subject</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover className="auth-modal--contact__select-popover">
-                  <ListBox className="app-select-import-menu__list">
-                    {CONTACT_SUBJECTS.map((opt) => (
-                      <ListBox.Item
-                        key={opt.value}
-                        id={opt.value}
-                        textValue={opt.label}
-                      >
-                        {opt.label}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
+                popoverClassName="auth-modal--contact__select-popover"
+                listClassName="app-select-import-menu__list"
+              />
               {fieldErrors.subject ? (
                 <p className="auth-modal--contact__field-error">
                   {fieldErrors.subject}

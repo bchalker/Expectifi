@@ -1,6 +1,6 @@
 import './OnboardingProgressSteps.scss'
 
-const STEPS = ['profile', 'goals'] as const
+const STEPS = ['profile', 'contributions', 'goals'] as const
 
 type StepId = (typeof STEPS)[number]
 

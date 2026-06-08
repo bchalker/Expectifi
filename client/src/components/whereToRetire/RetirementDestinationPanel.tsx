@@ -1,12 +1,14 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
 } from "react";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
-import { Label, ListBox, Select } from "@heroui/react";
+import { AppSelect } from "../ui/AppSelect";
+import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import {
   IconBarbell,
   IconBolt,
@@ -21,12 +23,10 @@ import {
   IconToolsKitchen2,
   IconUsers,
   IconUsersGroup,
-  IconX,
 } from "@tabler/icons-react";
-import { firstKeyFromSelectSelection } from "../../lib/dateOfBirthSelect";
-import { WtrCompareToggleButton } from "./WtrCompareToggleButton";
-import { WtrExcludeCountryIcon } from "./WtrExcludeCountryIcon";
 import { useCityClimate } from "../../hooks/useCityClimate";
+import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
+import { useWtrDestPanelMobileSheet } from "../../hooks/useWtrDestPanelMobileSheet";
 import type { ScoredMapCity, MapFilters } from "../../lib/whereToRetire/cityMapScoring";
 import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
 import { calculateRetirementScore } from "../../utils/retirementScore";
@@ -87,11 +87,6 @@ type Props = {
   mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   open: boolean;
   onClose: () => void;
-  compareSelected: boolean;
-  compareAtMax: boolean;
-  onToggleCompare: () => void;
-  isCountryExcluded?: boolean;
-  onExcludeCountry?: () => void;
   listPageNav: DestinationListPageNav | null;
 };
 
@@ -166,60 +161,56 @@ const PANEL_TABS: {
   },
 ];
 
-const PANEL_MOBILE_NAV_MQ = "(max-width: 680px)";
-
-function usePanelMobileNav(): boolean {
-  const [mobileNav, setMobileNav] = useState(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia(PANEL_MOBILE_NAV_MQ).matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia(PANEL_MOBILE_NAV_MQ);
-    const onChange = () => setMobileNav(mq.matches);
-    onChange();
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  return mobileNav;
-}
+const PANEL_ESTIMATES_NOTE =
+  "Estimates based on real prices reported by locals. Updated periodically. All amounts in USD.";
 
 function DestinationPanelTabSelect({
   activeTab,
   onChange,
+  variant = "default",
 }: {
   activeTab: PanelTab;
   onChange: (tab: PanelTab) => void;
+  /** Sheet header: native picker styled as underlined section label. */
+  variant?: "default" | "sheet";
 }) {
+  const activeLabel =
+    PANEL_TABS.find((tab) => tab.id === activeTab)?.label ?? "Section";
+
+  if (variant === "sheet") {
+    return (
+      <div className="wtr-dest-panel__tab-select wtr-dest-panel__tab-select--sheet">
+        <div className="wtr-dest-panel__tab-select-sheet-inner">
+          <span className="wtr-dest-panel__tab-select-display" aria-hidden>
+            {activeLabel}
+          </span>
+          <div className="wtr-dest-panel__tab-select-hit">
+            <AppSelect
+              className="wtr-dest-panel__tab-select-native"
+              ariaLabel="Destination section"
+              value={activeTab}
+              options={PANEL_TABS.map((tab) => ({ id: tab.id, label: tab.label }))}
+              onChange={(id) => onChange(id as PanelTab)}
+              layout="native"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Select
+    <AppSelect
       className="wtr-dest-panel__tab-select"
-      variant="secondary"
-      aria-label="Destination section"
-      selectedKey={activeTab}
-      onSelectionChange={(keys) => {
-        const id = firstKeyFromSelectSelection(keys);
-        if (!id) return;
-        onChange(id as PanelTab);
-      }}
-    >
-      <Label className="wtr-dest-panel__tab-select-label">Section</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover className="wtr-dest-panel__tab-select-popover">
-        <ListBox>
-          {PANEL_TABS.map((tab) => (
-            <ListBox.Item key={tab.id} id={tab.id} textValue={tab.label}>
-              {tab.label}
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+      ariaLabel="Destination section"
+      label="Section"
+      labelClassName="wtr-dest-panel__tab-select-label"
+      value={activeTab}
+      options={PANEL_TABS.map((tab) => ({ id: tab.id, label: tab.label }))}
+      onChange={(id) => onChange(id as PanelTab)}
+      popoverClassName="wtr-dest-panel__tab-select-popover"
+      layout="auto"
+    />
   );
 }
 
@@ -363,14 +354,56 @@ function buildColSupplementalItems(city: CityData): ColExtraLineItem[] {
   ];
 }
 
+type ColSectionHeroProps = {
+  panelMonthlyBudget: number;
+  monthlySurplus: number;
+  headerScore: ReturnType<typeof calculateRetirementScore>;
+};
+
+function ColSectionHero({
+  panelMonthlyBudget,
+  monthlySurplus,
+  headerScore,
+}: ColSectionHeroProps) {
+  return (
+    <section
+      className="wtr-dest-panel__col-hero wtr-dest-panel__stagger-item"
+      style={panelStaggerStyle(0)}
+      aria-label="Monthly budget and retirement score"
+    >
+      <div className="wtr-dest-panel__col-hero-budget">
+        <p className="wtr-dest-panel__col-hero-total tabular-nums">
+          {formatUsd(panelMonthlyBudget)}
+          <span className="wtr-dest-panel__summary-period">/mo</span>
+        </p>
+        {monthlySurplus > 0 ? (
+          <p className="wtr-dest-panel__col-hero-surplus tabular-nums">
+            + {formatUsd(monthlySurplus)}
+            <span className="wtr-dest-panel__summary-period">/mo</span>
+          </p>
+        ) : null}
+      </div>
+      <RetirementScoreHeader
+        className="wtr-dest-panel__col-hero-score"
+        displayScore={headerScore.displayScore}
+        incomeFitScore={headerScore.incomeFitScore}
+        qolNormalized={headerScore.qolNormalized}
+        warnings={headerScore.warnings}
+        band={headerScore.band}
+        bandColor={headerScore.bandColor}
+        bandLabel={headerScore.bandLabel}
+      />
+    </section>
+  );
+}
+
 type CityViewProps = {
   scored: ScoredMapCity;
   monthlyIncome: number;
   mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   budgetBreakdown: NonNullable<ReturnType<typeof buildBudgetBreakdownDisplay>>;
-  isCountryExcluded?: boolean;
-  onExcludeCountry?: () => void;
   listPageNav: DestinationListPageNav | null;
+  mobileSheet: boolean;
 };
 
 /** Remounts when city.id changes so scroll content never stacks on prev/next navigation. */
@@ -379,12 +412,10 @@ function DestinationPanelCityView({
   monthlyIncome,
   mapFilters,
   budgetBreakdown,
-  isCountryExcluded = false,
-  onExcludeCountry,
   listPageNav,
+  mobileSheet,
 }: CityViewProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>("col");
-  const mobileNav = usePanelMobileNav();
   const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab);
   const {
     climate,
@@ -424,68 +455,67 @@ function DestinationPanelCityView({
           style={panelStaggerStyle(0)}
         >
           <div className="wtr-dest-panel__title-row">
-            <span className="wtr-dest-panel__flag" aria-hidden>
-              {flagEmoji}
-            </span>
             <div className="wtr-dest-panel__titles">
+              <div className="wtr-dest-panel__country-line">
+                <span className="wtr-dest-panel__flag" aria-hidden>
+                  {flagEmoji}
+                </span>
+                <p className="wtr-dest-panel__country">{city.country}</p>
+              </div>
               <h2 id="wtr-dest-panel-title" className="wtr-dest-panel__name">
                 {city.city}
               </h2>
-              <div className="wtr-dest-panel__country-row">
-                <p className="wtr-dest-panel__country">{city.country}</p>
-                {onExcludeCountry && !isCountryExcluded ? (
-                  <WtrExcludeCountryIcon
-                    country={city.country}
-                    onExclude={onExcludeCountry}
-                  />
-                ) : null}
-              </div>
+              {mobileSheet ? (
+                <DestinationPanelTabSelect
+                  variant="sheet"
+                  activeTab={activeTab}
+                  onChange={setActiveTab}
+                />
+              ) : null}
             </div>
           </div>
         </div>
 
-        <section
-          className="wtr-dest-panel__summary"
-          aria-label="Monthly budget and retirement score"
-        >
-          <div className="wtr-dest-panel__summary-budget">
-            <p className="wtr-dest-panel__summary-total tabular-nums">
-              {formatUsd(panelMonthlyBudget)}
-            </p>
-            {monthlySurplus > 0 ? (
-              <>
-                <hr className="wtr-dest-panel__summary-divider" />
-                <p className="wtr-dest-panel__summary-surplus tabular-nums">
-                  + {formatUsd(monthlySurplus)}
-                </p>
-              </>
-            ) : null}
-          </div>
-          <RetirementScoreHeader
-            className="wtr-dest-panel__summary-score"
-            displayScore={headerScore.displayScore}
-            incomeFitScore={headerScore.incomeFitScore}
-            qolNormalized={headerScore.qolNormalized}
-            warnings={headerScore.warnings}
-            band={headerScore.band}
-            bandColor={headerScore.bandColor}
-            bandLabel={headerScore.bandLabel}
+        {mobileSheet ? (
+          <div
+            className="wtr-dest-panel__head-divider wtr-dest-panel__stagger-item"
+            style={panelStaggerStyle(1)}
+            aria-hidden
           />
-        </section>
+        ) : (
+          <section
+            className="wtr-dest-panel__summary"
+            aria-label="Monthly budget and retirement score"
+          >
+            <div className="wtr-dest-panel__summary-budget">
+              <p className="wtr-dest-panel__summary-total tabular-nums">
+                {formatUsd(panelMonthlyBudget)}
+              </p>
+              {monthlySurplus > 0 ? (
+                <>
+                  <hr className="wtr-dest-panel__summary-divider" />
+                  <p className="wtr-dest-panel__summary-surplus tabular-nums">
+                    + {formatUsd(monthlySurplus)}
+                  </p>
+                </>
+              ) : null}
+            </div>
+            <RetirementScoreHeader
+              className="wtr-dest-panel__summary-score"
+              displayScore={headerScore.displayScore}
+              incomeFitScore={headerScore.incomeFitScore}
+              qolNormalized={headerScore.qolNormalized}
+              warnings={headerScore.warnings}
+              band={headerScore.band}
+              bandColor={headerScore.bandColor}
+              bandLabel={headerScore.bandLabel}
+            />
+          </section>
+        )}
       </header>
 
       <div className="wtr-dest-panel__scroll">
-        {mobileNav ? (
-          <div
-            className="wtr-dest-panel__tab-nav wtr-dest-panel__stagger-item"
-            style={panelStaggerStyle(2)}
-          >
-            <DestinationPanelTabSelect
-              activeTab={activeTab}
-              onChange={setActiveTab}
-            />
-          </div>
-        ) : (
+        {!mobileSheet ? (
           <div
             className="wtr-dest-panel__tabs wtr-dest-panel__stagger-item"
             style={panelStaggerStyle(2)}
@@ -510,24 +540,46 @@ function DestinationPanelCityView({
               </button>
             ))}
           </div>
-        )}
+        ) : null}
 
         <AppOverlayScrollbars className="wtr-dest-panel__tab-content" defer={false}>
           <div className="wtr-dest-panel__body">
             <div
               key={`${city.id}-${activeTab}`}
               id={activeTabMeta?.panelId}
-              role={mobileNav ? "region" : "tabpanel"}
+              role={mobileSheet ? "region" : "tabpanel"}
               aria-label={
-                mobileNav
+                mobileSheet
                   ? `${activeTabMeta?.label ?? "Section"} details`
                   : undefined
               }
-              aria-labelledby={mobileNav ? undefined : activeTabMeta?.tabId}
+              aria-labelledby={mobileSheet ? undefined : activeTabMeta?.tabId}
               className="wtr-dest-panel__tabpanel wtr-dest-panel__tabpanel--enter"
             >
               {activeTab === "col" ? (
                 <>
+                  {mobileSheet ? (
+                    <>
+                      <ColSectionHero
+                        panelMonthlyBudget={panelMonthlyBudget}
+                        monthlySurplus={monthlySurplus}
+                        headerScore={headerScore}
+                      />
+                      {showTravelAdvisory ? (
+                        <div
+                          className="wtr-dest-panel__stagger-item"
+                          style={panelStaggerStyle(1)}
+                        >
+                          <TravelAdvisoryNotice />
+                        </div>
+                      ) : null}
+                      <div
+                        className="wtr-dest-panel__col-hero-divider wtr-dest-panel__stagger-item"
+                        style={panelStaggerStyle(showTravelAdvisory ? 2 : 1)}
+                        aria-hidden
+                      />
+                    </>
+                  ) : null}
                   <DestinationExchangeRate
                     city={city}
                     staggerClassName="wtr-dest-panel__stagger-item"
@@ -539,25 +591,34 @@ function DestinationPanelCityView({
                         <ColCategoryPanelSection
                           key={card.id}
                           card={card}
-                          staggerIndex={index}
+                          staggerIndex={
+                            index + (mobileSheet ? (showTravelAdvisory ? 4 : 3) : 0)
+                          }
                         />
                       ))}
                     </div>
                     <div className="wtr-dest-panel__col-extras">
                       <p
                         className="wtr-dest-panel__col-extras-note wtr-dest-panel__stagger-item"
-                        style={panelStaggerStyle(colBudgetCards.length)}
+                        style={panelStaggerStyle(
+                          colBudgetCards.length +
+                            (mobileSheet ? (showTravelAdvisory ? 4 : 3) : 0),
+                        )}
                       >
                         Optional lifestyle costs
                       </p>
                       <ColExtrasList
                         items={colSupplementalItems}
                         className="wtr-dest-panel__stagger-item"
-                        style={panelStaggerStyle(colBudgetCards.length + 1)}
+                        style={panelStaggerStyle(
+                          colBudgetCards.length +
+                            1 +
+                            (mobileSheet ? (showTravelAdvisory ? 4 : 3) : 0),
+                        )}
                       />
                     </div>
                   </div>
-                  {showTravelAdvisory ? (
+                  {!mobileSheet && showTravelAdvisory ? (
                     <div
                       className="wtr-dest-panel__stagger-item"
                       style={panelStaggerStyle(colBudgetCards.length + 2)}
@@ -609,15 +670,33 @@ function DestinationPanelCityView({
                 />
               )}
             </div>
+
+            {mobileSheet ? (
+              <div className="wtr-dest-panel__scroll-end">
+                {activeTab === "col" ? (
+                  <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
+                ) : null}
+                {activeTab === "peopleCulture" ? (
+                  <p className="wtr-dest-panel__scroll-end-source">
+                    {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
+                  </p>
+                ) : null}
+                {listPageNav ? (
+                  <p className="wtr-dest-panel__scroll-end-source">
+                    {PANEL_ESTIMATES_NOTE}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </AppOverlayScrollbars>
       </div>
 
       <footer className="wtr-dest-panel__footer">
-        {activeTab === "col" ? (
+        {activeTab === "col" && !mobileSheet ? (
           <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
         ) : null}
-        {activeTab === "peopleCulture" ? (
+        {activeTab === "peopleCulture" && !mobileSheet ? (
           <p className="wtr-dest-panel__footer-source">{DEMOGRAPHICS_TAB_SOURCE_FOOTER}</p>
         ) : null}
         {listPageNav ? (
@@ -627,7 +706,7 @@ function DestinationPanelCityView({
             pageSize={listPageNav.pageSize}
             totalCount={listPageNav.totalCount}
             onPageChange={listPageNav.onPageChange}
-            centerNote="Estimates based on real prices reported by locals. Updated periodically. All amounts in USD."
+            centerNote={mobileSheet ? undefined : PANEL_ESTIMATES_NOTE}
           />
         ) : null}
       </footer>
@@ -641,14 +720,24 @@ export function RetirementDestinationPanel({
   mapFilters,
   open,
   onClose,
-  compareSelected,
-  compareAtMax,
-  onToggleCompare,
-  isCountryExcluded = false,
-  onExcludeCountry,
   listPageNav,
 }: Props) {
+  const mobileSheet = useWtrDestPanelMobileSheet();
   const [slideOpen, setSlideOpen] = useState(false);
+  const sheetRef = useRef<HTMLElement>(null);
+
+  const {
+    isDragging,
+    panelStyle: dragPanelStyle,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useBottomSheetDrag({
+    enabled: mobileSheet,
+    open: open && slideOpen,
+    panelRef: sheetRef,
+    onDismiss: onClose,
+  });
 
   useEffect(() => {
     if (!open) {
@@ -681,41 +770,57 @@ export function RetirementDestinationPanel({
 
   if (!scored || !budgetBreakdown) return null;
 
+  const sheetStyle: CSSProperties | undefined = mobileSheet
+    ? dragPanelStyle
+    : undefined;
+
   return (
-    <aside
-      className={`wtr-dest-panel${slideOpen ? " wtr-dest-panel--open" : ""}`}
-      role="dialog"
-      aria-modal="false"
-      aria-hidden={!open}
-      aria-labelledby="wtr-dest-panel-title"
-    >
-      <div className="wtr-dest-panel__actions">
-        <WtrCompareToggleButton
-          className="wtr-compare-corner--panel"
-          selected={compareSelected}
-          atMax={compareAtMax}
-          cityName={scored.city.city}
-          onToggle={onToggleCompare}
-        />
-        <button
-          type="button"
-          className="wtr-dest-panel__close"
-          aria-label="Close destination details"
+    <>
+      {mobileSheet ? (
+        <div
+          className={[
+            "mobile-bottom-sheet-backdrop",
+            slideOpen && "mobile-bottom-sheet-backdrop--open",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           onClick={onClose}
-        >
-          <IconX size={18} stroke={1.5} aria-hidden />
-        </button>
-      </div>
-      <DestinationPanelCityView
-        key={scored.city.id}
-        scored={scored}
-        monthlyIncome={monthlyIncome}
-        mapFilters={mapFilters}
-        budgetBreakdown={budgetBreakdown}
-        isCountryExcluded={isCountryExcluded}
-        onExcludeCountry={onExcludeCountry}
-        listPageNav={listPageNav}
-      />
-    </aside>
+          aria-hidden
+        />
+      ) : null}
+      <aside
+        ref={sheetRef}
+        className={[
+          "wtr-dest-panel",
+          slideOpen && "wtr-dest-panel--open",
+          mobileSheet && "wtr-dest-panel--sheet",
+          isDragging && "mobile-bottom-sheet-panel--dragging",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={sheetStyle}
+        role="dialog"
+        aria-modal={mobileSheet}
+        aria-hidden={!open}
+        aria-labelledby="wtr-dest-panel-title"
+      >
+        {mobileSheet ? (
+          <BottomSheetHandle
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        ) : null}
+        <DestinationPanelCityView
+          key={scored.city.id}
+          scored={scored}
+          monthlyIncome={monthlyIncome}
+          mapFilters={mapFilters}
+          budgetBreakdown={budgetBreakdown}
+          listPageNav={listPageNav}
+          mobileSheet={mobileSheet}
+        />
+      </aside>
+    </>
   );
 }

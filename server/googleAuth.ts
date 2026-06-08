@@ -21,6 +21,7 @@ function googleSignupRequiresStripePayment(stripeCustomerId: string | null): boo
 import { isPlaidConfigured } from './plaidClient.js'
 
 const STATE_COOKIE = 'google_oauth_state'
+const RETURN_ORIGIN_COOKIE = 'google_oauth_return_origin'
 const STATE_MAX_AGE_MS = 10 * 60 * 1000
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 const CHECKOUT_MAX_AGE_MS = 30 * 60 * 1000
@@ -61,13 +62,34 @@ function normalizeEmail(raw: string): string {
 function googleConfig(port: number) {
   const clientId = process.env.GOOGLE_CLIENT_ID?.trim()
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim()
-  const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+  const clientOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean)
+  const clientOrigin = clientOrigins[0] ?? 'http://localhost:5173'
   const apiPublic = process.env.API_PUBLIC_URL?.trim() || `http://localhost:${port}`
   const redirectUri =
     process.env.GOOGLE_CALLBACK_URL?.trim() ||
     `${apiPublic.replace(/\/$/, '')}/api/auth/google/callback`
   if (!clientId || !clientSecret) return null
-  return { clientId, clientSecret, redirectUri, clientOrigin }
+  return { clientId, clientSecret, redirectUri, clientOrigin, clientOrigins }
+}
+
+function resolveOAuthReturnOrigin(req: Request, allowedOrigins: string[]): string | null {
+  const headerOrigin = typeof req.headers.origin === 'string' ? req.headers.origin.trim() : ''
+  if (headerOrigin && allowedOrigins.includes(headerOrigin)) return headerOrigin
+
+  const referer = typeof req.headers.referer === 'string' ? req.headers.referer.trim() : ''
+  if (referer) {
+    try {
+      const origin = new URL(referer).origin
+      if (allowedOrigins.includes(origin)) return origin
+    } catch {
+      /* ignore malformed referer */
+    }
+  }
+
+  return null
 }
 
 type GoogleTokenResponse = {
@@ -148,20 +170,24 @@ export function installGoogleAuth(app: Express, port: number): void {
     })
   })
 
-  app.get('/api/auth/google', (_req: Request, res: Response) => {
+  app.get('/api/auth/google', (req: Request, res: Response) => {
     const cfg = googleConfig(port)
     if (!cfg) {
       res.status(503).json({ ok: false, error: 'google_oauth_not_configured' })
       return
     }
     const state = randomBytes(32).toString('hex')
-    res.cookie(STATE_COOKIE, state, {
+    const returnOrigin =
+      resolveOAuthReturnOrigin(req, cfg.clientOrigins) ?? cfg.clientOrigin
+    const cookieOpts = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       maxAge: STATE_MAX_AGE_MS,
       path: '/',
-    })
+    }
+    res.cookie(STATE_COOKIE, state, cookieOpts)
+    res.cookie(RETURN_ORIGIN_COOKIE, returnOrigin, cookieOpts)
     const u = new URL('https://accounts.google.com/o/oauth2/v2/auth')
     u.searchParams.set('client_id', cfg.clientId)
     u.searchParams.set('redirect_uri', cfg.redirectUri)
@@ -180,28 +206,37 @@ export function installGoogleAuth(app: Express, port: number): void {
       return
     }
     const err = typeof req.query.error === 'string' ? req.query.error : ''
+    const cookieReturnOrigin =
+      typeof req.cookies?.[RETURN_ORIGIN_COOKIE] === 'string'
+        ? req.cookies[RETURN_ORIGIN_COOKIE].trim()
+        : ''
+    const returnOrigin = cfg.clientOrigins.includes(cookieReturnOrigin)
+      ? cookieReturnOrigin
+      : cfg.clientOrigin
     if (err) {
       res.clearCookie(STATE_COOKIE, { path: '/' })
-      res.redirect(302, `${cfg.clientOrigin}/?auth_error=${encodeURIComponent(err)}`)
+      res.clearCookie(RETURN_ORIGIN_COOKIE, { path: '/' })
+      res.redirect(302, `${returnOrigin}/?auth_error=${encodeURIComponent(err)}`)
       return
     }
     const code = typeof req.query.code === 'string' ? req.query.code : ''
     const state = typeof req.query.state === 'string' ? req.query.state : ''
     const cookieState = req.cookies?.[STATE_COOKIE]
     res.clearCookie(STATE_COOKIE, { path: '/', sameSite: 'lax' })
+    res.clearCookie(RETURN_ORIGIN_COOKIE, { path: '/', sameSite: 'lax' })
     if (!code || !state || !cookieState || state !== cookieState) {
-      res.redirect(302, `${cfg.clientOrigin}/?auth_error=invalid_state`)
+      res.redirect(302, `${returnOrigin}/?auth_error=invalid_state`)
       return
     }
 
     const exchanged = await exchangeCode(code, cfg.clientId, cfg.clientSecret, cfg.redirectUri)
     if ('error' in exchanged) {
-      res.redirect(302, `${cfg.clientOrigin}/?auth_error=oauth_token`)
+      res.redirect(302, `${returnOrigin}/?auth_error=oauth_token`)
       return
     }
     const info = await fetchUserInfo(exchanged.accessToken)
     if (!info?.sub || !info.email || !info.email_verified) {
-      res.redirect(302, `${cfg.clientOrigin}/?auth_error=unverified_email`)
+      res.redirect(302, `${returnOrigin}/?auth_error=unverified_email`)
       return
     }
     const email = normalizeEmail(info.email)
@@ -219,7 +254,7 @@ export function installGoogleAuth(app: Express, port: number): void {
         await upsertGoogleDisplayName(rowSub.id, info)
         await setSessionOrGoogleCheckoutCookie(
           res,
-          cfg.clientOrigin,
+          returnOrigin,
           rowSub.id,
           normalizeEmail(rowSub.email),
           rowSub.stripe_customer_id,
@@ -241,7 +276,7 @@ export function installGoogleAuth(app: Express, port: number): void {
 
       if (rowEmail) {
         if (rowEmail.google_sub && rowEmail.google_sub !== googleSub) {
-          res.redirect(302, `${cfg.clientOrigin}/?auth_error=account_conflict`)
+          res.redirect(302, `${returnOrigin}/?auth_error=account_conflict`)
           return
         }
         if (!rowEmail.google_sub) {
@@ -254,7 +289,7 @@ export function installGoogleAuth(app: Express, port: number): void {
         }
         await setSessionOrGoogleCheckoutCookie(
           res,
-          cfg.clientOrigin,
+          returnOrigin,
           rowEmail.id,
           email,
           rowEmail.stripe_customer_id,
@@ -270,14 +305,14 @@ export function installGoogleAuth(app: Express, port: number): void {
         )
       } catch (e: unknown) {
         if (isUniqueViolation(e)) {
-          res.redirect(302, `${cfg.clientOrigin}/?auth_error=email_in_use`)
+          res.redirect(302, `${returnOrigin}/?auth_error=email_in_use`)
           return
         }
         throw e
       }
-      await setSessionOrGoogleCheckoutCookie(res, cfg.clientOrigin, id, email, null)
+      await setSessionOrGoogleCheckoutCookie(res, returnOrigin, id, email, null)
     } catch {
-      res.redirect(302, `${cfg.clientOrigin}/?auth_error=server`)
+      res.redirect(302, `${returnOrigin}/?auth_error=server`)
     }
   })
 }

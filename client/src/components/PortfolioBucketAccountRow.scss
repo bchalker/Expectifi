@@ -94,6 +94,45 @@
   flex: 1 1 auto;
 }
 
+.portfolio-bucket-account-row__title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.portfolio-bucket-account-row__name-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.portfolio-bucket-account-row__title-row--stacked-hint {
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  row-gap: var(--space-1);
+  column-gap: var(--space-2);
+}
+
+.portfolio-bucket-account-row__title-row--stacked-hint
+  .portfolio-bucket-account-row__hint-stack {
+  flex: 1 1 100%;
+  margin: 0;
+  min-width: 0;
+}
+
+.portfolio-bucket-account-row__title-row .portfolio-bucket-account-row__values {
+  flex-shrink: 0;
+  align-self: auto;
+  padding: 0;
+}
+
 .portfolio-bucket-account-row__name {
   font-family: var(--heading);
   font-size: var(--text-sm);
@@ -148,11 +187,11 @@
   align-items: flex-end;
   align-self: center;
   justify-content: center;
-  padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4))
-    var(--portfolio-row-pad-y-end, 0.5rem);
+  padding: 0;
   text-align: right;
   box-sizing: border-box;
   overflow: visible;
+  gap: var(--space-2);
 }
 
 .portfolio-bucket-account-row__values:has([data-balance-editing='true']) {
@@ -269,8 +308,7 @@
     align-items: stretch;
   }
 
-  .portfolio-bucket-account-row__main,
-  .portfolio-bucket-account-row__values {
+  .portfolio-bucket-account-row__main {
     padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4)) var(--space-1) /* review: was 0.15rem */;
   }
 
@@ -284,6 +322,7 @@
     min-height: 0;
     padding: var(--portfolio-scenario-stack-pad-top, var(--space-3)) var(--portfolio-row-pad-x, var(--space-4)) var(--space-2);
     justify-content: flex-start;
+    gap: var(--space-4);
   }
 
   .portfolio-bucket-account-row__scenario {
@@ -296,7 +335,77 @@
 
   .portfolio-bucket-account-row__chevron.view-holdings-hint {
     align-self: center;
-    padding: var(--space-2) 0 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .portfolio-bucket-account-row__header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+  }
+
+  .portfolio-bucket-account-row__content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .portfolio-bucket-account-row__main {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4))
+      var(--space-2);
+  }
+
+  .portfolio-bucket-account-row__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .portfolio-bucket-account-row__title-row--stacked-hint {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    row-gap: var(--space-1);
+    column-gap: var(--space-2);
+  }
+
+  .portfolio-bucket-account-row__values {
+    align-self: flex-start;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .portfolio-bucket-account-row__values-row {
+    justify-content: flex-start;
+  }
+
+  .portfolio-bucket-account-row__values-extra {
+    justify-content: flex-start;
+  }
+
+  .portfolio-bucket-account-row__actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    align-self: stretch;
+    gap: var(--space-4);
+    padding: 0 var(--portfolio-row-pad-x, var(--space-4)) var(--portfolio-row-pad-y-end, var(--space-3));
+  }
+
+  .portfolio-bucket-account-row__scenario {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .portfolio-bucket-account-row__chevron.view-holdings-hint {
+    align-self: center;
   }
 }
 
@@ -335,5 +444,28 @@
 
   .portfolio-bucket-account-row__chevron.view-holdings-hint {
     align-self: center;
+  }
+}
+
+@media (max-width: 680px) {
+  @container portfolio-bucket-account-row (min-width: 421px) {
+    .portfolio-bucket-account-row__header-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .portfolio-bucket-account-row__content {
+      flex: unset;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .portfolio-bucket-account-row__actions {
+      flex-direction: column;
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      align-self: stretch;
+    }
   }
 }

@@ -132,6 +132,45 @@
   background: var(--border);
 }
 
+@media (max-width: 680px) {
+  .account-balances-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    padding-inline: 0;
+    margin-top: var(--space-4);
+  }
+
+  .account-balances-header-row__title-block {
+    width: 100%;
+  }
+
+  .account-balances-header-row__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .account-balances-header-row__actions-primary {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .account-balances-header-row__actions-primary > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
 .account-balances-reset-btn {
   flex-shrink: 0;
   color: var(--text-muted);
@@ -1217,6 +1256,84 @@
   padding-top: var(--space-1) /* review: was 0.15rem */;
 }
 
+@media (max-width: 680px) {
+  .account-balances-edit-sheet--manual .account-balances-edit-sheet__body,
+  .account-balances-manual-panel-host .account-balances-edit-sheet__body {
+    padding: 0;
+  }
+
+  .edit-row--manual-balance--stacked {
+    gap: var(--space-3);
+  }
+
+  .edit-row--manual-balance--stacked .manual-balance-row__head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .edit-row--manual-balance--stacked .edit-row-label-stack {
+    display: contents;
+  }
+
+  .edit-row--manual-balance--stacked .edit-row-label__name {
+    order: 1;
+    width: 100%;
+  }
+
+  .edit-row--manual-balance--stacked .edit-row-right {
+    order: 2;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .edit-row--manual-balance--stacked .edit-row-label__tax {
+    order: 3;
+    width: 100%;
+    margin: 0;
+  }
+
+  .edit-row--manual-balance--stacked .num-input-wrap {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .edit-row--manual-balance--stacked .num-input-wrap .num-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .edit-row--manual-balance--stacked .manual-account-allocation,
+  .edit-row--manual-balance--stacked .account-balances-manual-overlay__allocation {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+
+  .edit-row--manual-balance--stacked .manual-account-allocation__row {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: var(--space-1);
+  }
+
+  .edit-row--manual-balance--stacked .manual-account-allocation__lead-icon {
+    display: none;
+  }
+
+  .edit-row--manual-balance--stacked .manual-account-allocation__field-label {
+    width: 100%;
+  }
+
+  .edit-row--manual-balance--stacked .manual-account-allocation__trigger {
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+}
+
 .account-balances-import-sheet.account-balances-edit-sheet--import {
   left: 0;
   right: 0;
@@ -1806,24 +1923,35 @@
   min-height: 2.25rem;
 }
 
-/* Mobile: full-screen import CSV + related dashboard overlays (scenario panel) */
-@media (max-width: 760px) {
+/* Mobile: bottom-sheet scenario panels + import overlays */
+@media (max-width: 768px) {
   .account-balances-dashboard-overlays {
     padding: 0;
-    align-items: stretch;
+    align-items: flex-end;
     justify-content: stretch;
+    pointer-events: none;
+  }
+
+  .account-balances-dashboard-overlays > .mobile-bottom-sheet-backdrop {
+    pointer-events: auto;
   }
 
   .account-balances-dashboard-overlays .account-balances-import-sheet {
     position: fixed;
-    inset: 0;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
     max-width: none;
-    height: 100%;
-    max-height: none;
-    min-height: 100dvh;
+    height: 90vh;
+    max-height: 90vh;
+    min-height: 0;
     padding: 0;
     background: var(--surface);
+    border-radius: 16px 16px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   .account-balances-import-sheet {
@@ -1835,7 +1963,7 @@
     max-width: none;
     height: 100%;
     max-height: none;
-    min-height: 100dvh;
+    min-height: 0;
     margin: 0;
     align-self: stretch;
     border-radius: 0;
@@ -1845,63 +1973,62 @@
 
   .account-balances-edit-sheet--import .csv-import-panel-shell {
     height: 100%;
-    min-height: 100%;
+    min-height: 0;
   }
 
   .account-balances-dashboard-overlays .holding-scenario-slide__sheet {
     position: fixed;
-    inset: 0;
-    top: 0;
+    top: auto;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
     max-width: none;
+    height: 90vh;
+    max-height: 90vh;
     border-left: none;
-    box-shadow: none;
-    animation: holding-scenario-sheet-mobile-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    border-radius: 16px 16px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.14);
+    animation: holding-scenario-sheet-mobile-in 0.3s ease forwards;
   }
 
   .account-balances-dashboard-overlays
     .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
-    animation: holding-scenario-sheet-mobile-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+    animation: holding-scenario-sheet-mobile-out 0.3s ease forwards !important;
   }
 }
 
 @keyframes holding-scenario-sheet-mobile-in {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(100%);
   }
 
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
 
 @keyframes holding-scenario-sheet-mobile-out {
   from {
-    opacity: 1;
     transform: translateY(0);
   }
 
   to {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(100%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .account-balances-dashboard-overlays .holding-scenario-slide__sheet {
     animation: none;
-    transform: none;
+    transform: translateY(0);
   }
 
   .account-balances-dashboard-overlays
     .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
     animation: none;
-    opacity: 0;
-    transform: none;
+    transform: translateY(100%);
   }
 }

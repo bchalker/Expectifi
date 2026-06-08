@@ -5,6 +5,8 @@
 
 /* Brand landing — #1a2332 navy, #4ecb8d accent (screenshot reference) */
 .landing-page {
+  overflow-x: clip;
+  max-width: 100%;
   --landing-navy: #1a2332;
   --landing-navy-trust: #151d29;
   --landing-navy-footer: #121820;
@@ -32,6 +34,12 @@
   margin-inline: auto;
   padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
   box-sizing: border-box;
+  min-width: 0;
+}
+
+.landing-page > main {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Buttons ── */

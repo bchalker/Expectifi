@@ -135,3 +135,9 @@
     opacity: 1;
   }
 }
+
+@media (max-width: 760px) {
+  .account-plan-bottom-banner-fixed {
+    display: none !important;
+  }
+}

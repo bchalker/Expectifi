@@ -1,7 +1,10 @@
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { IconX } from "@tabler/icons-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
+import { BottomSheetHandle } from "./ui/BottomSheetHandle";
+import { useBottomSheetDrag } from "../hooks/useBottomSheetDrag";
+import { useIsMobileBottomSheet } from "../hooks/useMobileBottomSheet";
 import {
   accountLabelForWithdrawalBucket,
   formatMarginalRatesSummary,
@@ -384,20 +387,53 @@ export function TaxSummarySlidePanel({
   const panelTitle = incomeMode
     ? INSIGHTS_PANEL_TITLE_INCOME
     : INSIGHTS_PANEL_TITLE_GROWTH;
+  const isMobileSheet = useIsMobileBottomSheet();
+  const panelRef = useRef<HTMLElement>(null);
+  const {
+    isDragging,
+    panelStyle,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useBottomSheetDrag({
+    enabled: isMobileSheet,
+    open,
+    panelRef,
+    onDismiss: onClose,
+  });
 
   return (
-    <aside
-      id="tax-summary-panel"
-      className={[
-        "tax-summary-slide-panel",
-        open && "tax-summary-slide-panel--open",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      aria-labelledby="tax-summary-panel-title"
-      aria-hidden={!open}
-    >
+    <>
+      {isMobileSheet && open ? (
+        <div
+          className="mobile-bottom-sheet-backdrop mobile-bottom-sheet-backdrop--open"
+          onClick={onClose}
+          aria-hidden
+        />
+      ) : null}
+      <aside
+        ref={panelRef}
+        id="tax-summary-panel"
+        style={isMobileSheet ? panelStyle : undefined}
+        className={[
+          "tax-summary-slide-panel",
+          open && "tax-summary-slide-panel--open",
+          isMobileSheet && "tax-summary-slide-panel--mobile-sheet",
+          isDragging && "mobile-bottom-sheet-panel--dragging",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-labelledby="tax-summary-panel-title"
+        aria-hidden={!open}
+      >
+        {isMobileSheet ? (
+          <BottomSheetHandle
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        ) : null}
       <header className="tax-summary-slide-panel__head">
         <div className="tax-summary-slide-panel__head-row">
           <h2 id="tax-summary-panel-title" className="tax-summary-slide-panel__title">
@@ -405,7 +441,7 @@ export function TaxSummarySlidePanel({
           </h2>
           <button
             type="button"
-            className="tax-summary-slide-panel__close"
+            className="tax-summary-slide-panel__close panel-close-btn"
             onClick={onClose}
             aria-label={`Close ${panelTitle}`}
           >
@@ -437,5 +473,6 @@ export function TaxSummarySlidePanel({
       )}
       <TaxSummaryPanelFooter />
     </aside>
+    </>
   );
 }

@@ -270,6 +270,7 @@
 }
 
 .welcome-profile-fields__retire-card-range {
+  --onboarding-retire-range-track-h: 4px;
   --onboarding-retire-range-thumb: 1.125rem;
   width: 100%;
   min-width: 0;
@@ -284,14 +285,14 @@
 }
 
 .welcome-profile-fields__retire-card-range::-webkit-slider-runnable-track {
-  height: 4px;
+  height: var(--onboarding-retire-range-track-h);
   border: none;
   border-radius: 999px;
   background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
 }
 
 .welcome-profile-fields__retire-card-range::-moz-range-track {
-  height: 4px;
+  height: var(--onboarding-retire-range-track-h);
   border: none;
   border-radius: 999px;
   background: color-mix(in srgb, var(--text-muted) 28%, var(--surface));
@@ -303,7 +304,9 @@
   box-sizing: border-box;
   width: var(--onboarding-retire-range-thumb);
   height: var(--onboarding-retire-range-thumb);
-  margin-top: calc((4px - var(--onboarding-retire-range-thumb)) / 2);
+  margin-top: calc(
+    (var(--onboarding-retire-range-track-h) - var(--onboarding-retire-range-thumb)) / 2
+  );
   border: 2px solid var(--border-strong);
   border-radius: 50%;
   background: var(--surface);
@@ -380,6 +383,19 @@
 
   .welcome-profile-fields__stack > .currency-amount-input:only-child {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .welcome-profile-fields__retire-card-slider {
+    padding-block: calc(
+      (var(--range-thumb-size) - var(--onboarding-retire-range-track-h)) / 2
+    );
+  }
+
+  .welcome-profile-fields__retire-card-range {
+    --onboarding-retire-range-thumb: var(--range-thumb-size);
+    height: var(--onboarding-retire-range-track-h);
   }
 }
 

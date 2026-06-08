@@ -332,7 +332,7 @@ export function HoldingScenarioPanel({
               <span className="holding-scenario-popout__title-ticker">{scenarioTickerLabel || 'this ticker'}</span>{' '}
               growth?
             </h2>
-            <button type="button" className="holding-scenario-popout__close" onClick={onClose} aria-label="Close">
+            <button type="button" className="holding-scenario-popout__close panel-close-btn" onClick={onClose} aria-label="Close">
               <IconX size={14} stroke={1.5} aria-hidden />
             </button>
           </div>

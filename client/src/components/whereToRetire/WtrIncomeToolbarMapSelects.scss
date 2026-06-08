@@ -1,0 +1,45 @@
+.wtr-income-toolbar-map-selects {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: min(100%, 24rem);
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.wtr-income-toolbar-map-selects__view,
+.wtr-income-toolbar-map-selects__where {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  max-width: 11.5rem;
+}
+
+.wtr-income-toolbar-map-selects [data-slot='select'] {
+  width: 100%;
+  min-width: 0;
+}
+
+.wtr-income-toolbar-map-selects [data-slot='select-trigger'],
+.wtr-income-toolbar-map-selects .app-select__native {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 680px) {
+  .wtr-income-toolbar-map-selects {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    border-left: none;
+  }
+
+  .wtr-income-toolbar-map-selects__view,
+  .wtr-income-toolbar-map-selects__where {
+    max-width: none;
+  }
+}
