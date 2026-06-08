@@ -1,4 +1,4 @@
-<svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
   <rect width="80" height="80" rx="18" fill="#1a2332"/>
-  <text x="40" y="57" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="700" fill="white">E</text>
+  <path fill="#fff" d="M24 19h34c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2H36v9h16c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2H36v9h22c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2H24c-1.1 0-2-.9-2-2V21c0-1.1.9-2 2-2z"/>
 </svg>

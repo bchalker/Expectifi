@@ -826,6 +826,12 @@ function installProductionClient(app: express.Application) {
     return
   }
 
+  app.get('/favicon.svg', (_req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml')
+    res.setHeader('Cache-Control', 'public, max-age=3600')
+    res.sendFile(path.join(distDir, 'favicon.svg'))
+  })
+
   app.use(express.static(distDir, { index: false, maxAge: '7d' }))
   app.get('*', (req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next()

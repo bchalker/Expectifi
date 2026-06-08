@@ -541,11 +541,6 @@ export function AccountBalances({
     [importedPositionRows],
   );
 
-  const showImportedHoldingsScenarioGuide =
-    phase === "growth" &&
-    mergedDashboard &&
-    holdingsScenarioEditingEnabled;
-
   const [allocationEntriesPatch, setAllocationEntriesPatch] = useState<
     ManualAccountEntry[] | null
   >(null);
@@ -652,6 +647,13 @@ export function AccountBalances({
 
   const hasAnyAccountCardData =
     hasRetirementAccountData || Boolean(hasBrokerageAccountData);
+
+  const showImportedHoldingsScenarioGuide =
+    phase === "growth" &&
+    mergedDashboard &&
+    readOnly &&
+    !configureInputsOnly &&
+    hasAnyAccountCardData;
 
   const showImportedAccountsYieldGuide =
     phase === "income" &&
@@ -2496,6 +2498,7 @@ export function AccountBalances({
       >
         <div className="portfolio-bucket-account-summary">
           <PortfolioBucketAccountRow
+            amountBesideScenario
             badgeOrder={withdrawalUi ? order : null}
             label={label}
             subtext={subtext}
@@ -2529,6 +2532,7 @@ export function AccountBalances({
 
     const summaryInner = (
       <PortfolioBucketAccountRow
+        amountBesideScenario
         badgeOrder={withdrawalUi ? order : null}
         label={def.label}
         subtext={taxSubtext}
@@ -2778,6 +2782,7 @@ export function AccountBalances({
 
     const summaryInner = (
       <PortfolioBucketAccountRow
+        amountBesideScenario
         badgeOrder={withdrawalUi ? brkMeta.order : null}
         label="Brokerage"
         subtext={brokerageSubtext}

@@ -35,6 +35,11 @@ type Props = {
   actionSlot?: ReactNode | null
   /** Extra figures under the total in the values column (income yield / monthly). */
   valuesExtra?: ReactNode | null
+  /**
+   * Growth dashboard: name + desc in one column, amount beside scenario.
+   * Income rows leave this off (name + values share a row).
+   */
+  amountBesideScenario?: boolean
 }
 
 /** Portfolio account summary row: order count, name + tax subtext, total, scenario, chevron. */
@@ -51,14 +56,33 @@ export function PortfolioBucketAccountRow({
   scenario = null,
   actionSlot = null,
   valuesExtra = null,
+  amountBesideScenario = false,
 }: Props) {
   const showScenario = Boolean(scenario)
   const showActionSlot = Boolean(actionSlot)
   const showActionsColumn = showScenario || showActionSlot || showViewHoldings
   const showHintStack = Boolean(subtext || withdrawalPill)
 
+  const valuesColumn = (
+    <div className="portfolio-bucket-account-row__values">
+      <div className="portfolio-bucket-account-row__values-row">
+        <div className="portfolio-bucket-account-row__total">{total}</div>
+      </div>
+      {valuesExtra ? (
+        <div className="portfolio-bucket-account-row__values-extra">{valuesExtra}</div>
+      ) : null}
+    </div>
+  )
+
   return (
-    <div className="portfolio-bucket-account-row">
+    <div
+      className={[
+        'portfolio-bucket-account-row',
+        amountBesideScenario && 'portfolio-bucket-account-row--amount-beside-scenario',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="portfolio-bucket-account-row__summary-row">
         <div className="portfolio-bucket-account-row__header-row">
           <div className="portfolio-bucket-account-row__content">
@@ -80,14 +104,7 @@ export function PortfolioBucketAccountRow({
                     ) : null}
                     <span className="portfolio-bucket-account-row__name">{label}</span>
                   </div>
-                  <div className="portfolio-bucket-account-row__values">
-                    <div className="portfolio-bucket-account-row__values-row">
-                      <div className="portfolio-bucket-account-row__total">{total}</div>
-                    </div>
-                    {valuesExtra ? (
-                      <div className="portfolio-bucket-account-row__values-extra">{valuesExtra}</div>
-                    ) : null}
-                  </div>
+                  {!amountBesideScenario ? valuesColumn : null}
                   {showHintStack ? (
                     <div className="portfolio-bucket-account-row__hint-stack">
                       {subtext ? (
@@ -108,6 +125,7 @@ export function PortfolioBucketAccountRow({
               </div>
             </div>
           </div>
+          {amountBesideScenario ? valuesColumn : null}
           {showActionsColumn ? (
             <div className="portfolio-bucket-account-row__actions">
               {showActionSlot ? (

@@ -47,7 +47,6 @@
 
 /* Default visible — flush/enter animations override temporarily. */
 .main .results-strip,
-.imported-holdings-scenario-guide,
 .growth-assumptions-panel__slider,
 .growth-assumptions-panel__scenario,
 .account-balances-header-row,
@@ -84,7 +83,6 @@ html[data-dashboard-view-flush] {
   }
 
   .main .results-strip,
-  .imported-holdings-scenario-guide,
   .growth-assumptions-panel__slider,
   .growth-assumptions-panel__scenario,
   .account-balances-header-row,
@@ -124,28 +122,24 @@ html[data-dashboard-view-enter='income'] {
 
 /* Growth: fine-tune slider → scenario card → accounts → life events. */
 html[data-dashboard-view-enter='growth'] {
-  .imported-holdings-scenario-guide {
-    @include dashboard-view-rise(3);
-  }
-
   .main .results-strip {
     @include dashboard-view-rise(3);
   }
 
   .growth-assumptions-panel__slider {
-    @include dashboard-view-rise(4);
+    @include dashboard-view-rise(3);
   }
 
   .growth-assumptions-panel__scenario {
-    @include dashboard-view-rise(5);
+    @include dashboard-view-rise(4);
   }
 
   .account-balances-stack {
-    @include dashboard-view-rise(6);
+    @include dashboard-view-rise(5);
   }
 
   .main > .section--life-events {
-    @include dashboard-view-rise(7);
+    @include dashboard-view-rise(6);
   }
 }
 
@@ -246,7 +240,6 @@ html[data-dashboard-view-enter='income']
   html[data-dashboard-view-enter] .goal-progress-bar--in-main .goal-progress-bar__fill,
   html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale,
   html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-content,
-  html[data-dashboard-view-enter='growth'] .imported-holdings-scenario-guide,
   html[data-dashboard-view-enter='growth'] .main .results-strip,
   html[data-dashboard-view-enter='growth'] .growth-assumptions-panel__slider,
   html[data-dashboard-view-enter='growth'] .growth-assumptions-panel__scenario,

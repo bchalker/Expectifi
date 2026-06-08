@@ -417,7 +417,9 @@ border: 1px solid rgba(255,255,255,0.5);
     padding: 0;
   }
 
-  .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__title-row .portfolio-bucket-account-row__values {
+  .tax-treatment-disclosure.portfolio-account-group
+    .portfolio-bucket-account-row__title-row
+    .portfolio-bucket-account-row__values {
     align-items: flex-start;
     text-align: left;
   }

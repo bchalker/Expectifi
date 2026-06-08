@@ -43,7 +43,11 @@ export function hasManualPortfolioAmounts(
 
 export function hasImportedPortfolioData(): boolean {
   const imp = loadStoredPositionsImport()
-  return Boolean(imp?.batches?.some((b) => b.rows.length > 0))
+  if (!imp) return false
+  if (imp.batches?.some((b) => b.rows.length > 0)) return true
+  const b = imp.balances
+  if (!b) return false
+  return b.base401k + b.baseSE401k + b.baseRoth + b.baseHsa + b.brkBal > 0
 }
 
 /**
@@ -51,8 +55,8 @@ export function hasImportedPortfolioData(): boolean {
  * account rows were cleared (e.g. replace-manual import applied balances but mode lagged).
  */
 export function resolvePortfolioBalanceMode(mode: BalanceInputMode): BalanceInputMode {
+  if (hasImportedPortfolioData()) return 'imported'
   if (mode === 'imported') return 'imported'
-  if (hasImportedPortfolioData() && !storedManualAccountsHaveBalances()) return 'imported'
   return mode
 }
 

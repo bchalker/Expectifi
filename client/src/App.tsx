@@ -71,6 +71,7 @@ import {
 import { syncNoPortfolioSubheaderDocumentAttr } from "./lib/syncNoPortfolioSubheader";
 import {
   applyImportedBalanceOverrides,
+  hasImportedPortfolioData,
   portfolioBalancesFromImport,
   resolvePortfolioBalanceMode,
 } from "./lib/portfolioSourceExclusivity";
@@ -380,10 +381,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
     if (user?.planPrefs) {
       mergeProfileWithDbPrefs(loadUserProfile(), user.planPrefs);
     }
-    setBalanceMode(loadBalanceInputMode());
-    setBrokerageMode(loadBrokerageBalanceMode());
-    if (loadStoredPositionsImport()?.batches?.length) {
+    const storedMode = loadBalanceInputMode();
+    const storedBrokerageMode = loadBrokerageBalanceMode();
+    if (hasImportedPortfolioData()) {
+      if (storedMode !== "imported") saveBalanceInputMode("imported");
+      if (storedBrokerageMode !== "imported") {
+        saveBrokerageBalanceMode("imported");
+      }
+      setBalanceMode("imported");
+      setBrokerageMode("imported");
       setPositionsImportRev((n) => n + 1);
+    } else {
+      setBalanceMode(storedMode);
+      setBrokerageMode(storedBrokerageMode);
     }
   }, [isHydrated, authLoading, user?.id, user?.planPrefs]);
 

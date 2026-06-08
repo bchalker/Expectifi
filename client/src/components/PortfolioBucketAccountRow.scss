@@ -191,7 +191,7 @@
   text-align: right;
   box-sizing: border-box;
   overflow: visible;
-  gap: var(--space-2);
+  // gap: var(--space-2);
 }
 
 .portfolio-bucket-account-row__values:has([data-balance-editing='true']) {
@@ -208,6 +208,8 @@
   gap: var(--space-2);
   min-width: 0;
   overflow: visible;
+  padding: var(--space-4);
+  padding-bottom: var(--space-1);
 }
 
 .portfolio-bucket-account-row:has([data-balance-editing='true']) .portfolio-bucket-account-row__actions {
@@ -359,13 +361,10 @@
       var(--space-2);
   }
 
-  .portfolio-bucket-account-row__title-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-  }
-
-  .portfolio-bucket-account-row__title-row--stacked-hint {
+  /* Growth mobile: name + amount on one row; tax hint wraps below */
+  .portfolio-account-list:not(.portfolio-account-list--income)
+    .portfolio-bucket-account-row:not(.portfolio-bucket-account-row--amount-beside-scenario)
+    .portfolio-bucket-account-row__title-row {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: baseline;
@@ -374,18 +373,31 @@
     column-gap: var(--space-2);
   }
 
-  .portfolio-bucket-account-row__values {
-    align-self: flex-start;
-    align-items: flex-start;
-    text-align: left;
+  .portfolio-account-list:not(.portfolio-account-list--income)
+    .portfolio-bucket-account-row:not(.portfolio-bucket-account-row--amount-beside-scenario)
+    .portfolio-bucket-account-row__title-row--stacked-hint
+    .portfolio-bucket-account-row__hint-stack {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
-  .portfolio-bucket-account-row__values-row {
-    justify-content: flex-start;
+  .portfolio-account-list:not(.portfolio-account-list--income)
+    .portfolio-bucket-account-row:not(.portfolio-bucket-account-row--amount-beside-scenario)
+    .tax-treatment-disclosure.portfolio-account-group
+    .portfolio-bucket-account-row__title-row
+    .portfolio-bucket-account-row__values {
+    align-self: auto;
+    align-items: flex-end;
+    text-align: right;
   }
 
-  .portfolio-bucket-account-row__values-extra {
-    justify-content: flex-start;
+  .portfolio-account-list:not(.portfolio-account-list--income)
+    .portfolio-bucket-account-row:not(.portfolio-bucket-account-row--amount-beside-scenario)
+    .portfolio-bucket-account-row__values-row,
+  .portfolio-account-list:not(.portfolio-account-list--income)
+    .portfolio-bucket-account-row:not(.portfolio-bucket-account-row--amount-beside-scenario)
+    .portfolio-bucket-account-row__values-extra {
+    justify-content: flex-end;
   }
 
   .portfolio-bucket-account-row__actions {
@@ -467,5 +479,95 @@
       max-width: none;
       align-self: stretch;
     }
+  }
+}
+
+/* Growth only — name + desc column | amount | scenario on desktop */
+@container portfolio-bucket-account-row (min-width: 421px) {
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__header-row {
+    gap: var(--space-3);
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__title-row,
+  .portfolio-bucket-account-row--amount-beside-scenario
+    .portfolio-bucket-account-row__title-row--stacked-hint {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: var(--space-1);
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario
+    .portfolio-bucket-account-row__title-row--stacked-hint
+    .portfolio-bucket-account-row__hint-stack {
+    flex: none;
+    width: 100%;
+    max-width: none;
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario
+    .portfolio-bucket-account-row__header-row
+    > .portfolio-bucket-account-row__values {
+    flex: 0 0 auto;
+    align-self: center;
+    padding: var(--portfolio-row-pad-y-start, var(--space-2)) 0
+      var(--portfolio-row-pad-y-end, 0.5rem);
+  }
+}
+
+@media (max-width: 680px) {
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__header-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto;
+    column-gap: var(--space-2);
+    align-items: start;
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__content,
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__main,
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__identity,
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__title-row {
+    display: contents;
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__name-group {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    padding: var(--space-4);
+    padding-bottom: var(--space-1);
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario
+    .portfolio-bucket-account-row__header-row
+    > .portfolio-bucket-account-row__values {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4))
+      0 0;
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__hint-stack {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: var(--space-1) var(--portfolio-row-pad-x, var(--space-4)) var(--space-2);
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__identity-extra,
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__trend {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-inline: var(--portfolio-row-pad-x, var(--space-4));
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }
