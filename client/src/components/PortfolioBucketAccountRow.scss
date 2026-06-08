@@ -191,7 +191,7 @@
   text-align: right;
   box-sizing: border-box;
   overflow: visible;
-  // gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .portfolio-bucket-account-row__values:has([data-balance-editing='true']) {
@@ -208,8 +208,7 @@
   gap: var(--space-2);
   min-width: 0;
   overflow: visible;
-  padding: var(--space-4);
-  padding-bottom: var(--space-1);
+
 }
 
 .portfolio-bucket-account-row:has([data-balance-editing='true']) .portfolio-bucket-account-row__actions {
@@ -547,10 +546,14 @@
     grid-column: 2;
     grid-row: 1;
     align-self: center;
-    padding: var(--portfolio-row-pad-y-start, var(--space-2)) var(--portfolio-row-pad-x, var(--space-4))
-      0 0;
+    padding: 0;
     text-align: right;
     align-items: flex-end;
+  }
+
+  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__values-row {
+    padding: var(--space-4);
+    padding-bottom: var(--space-1);
   }
 
   .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__hint-stack {
