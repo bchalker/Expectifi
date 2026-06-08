@@ -11,6 +11,10 @@ type Props = {
   centerNote?: string
   /** Show "1–25 of N" above controls (default true). */
   showRange?: boolean
+  /** When set, prev/next advance one city row instead of a page. */
+  itemIndex?: number
+  onItemPrev?: () => void
+  onItemNext?: () => void
 }
 
 export function WtrCityListPagination({
@@ -21,14 +25,25 @@ export function WtrCityListPagination({
   className = '',
   centerNote,
   showRange = true,
+  itemIndex,
+  onItemPrev,
+  onItemNext,
 }: Props) {
+  const itemNav =
+    itemIndex != null && onItemPrev != null && onItemNext != null
   const pageCount = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1
   const safePage = Math.min(page, Math.max(0, pageCount - 1))
   const rangeStart = totalCount === 0 ? 0 : safePage * pageSize + 1
   const rangeEnd = Math.min(totalCount, (safePage + 1) * pageSize)
+  const safeItemIndex =
+    itemIndex == null ? 0 : Math.min(itemIndex, Math.max(0, totalCount - 1))
 
-  const prevDisabled = safePage <= 0
-  const nextDisabled = safePage >= pageCount - 1 || totalCount === 0
+  const prevDisabled = itemNav
+    ? safeItemIndex <= 0 || totalCount === 0
+    : safePage <= 0
+  const nextDisabled = itemNav
+    ? safeItemIndex >= totalCount - 1 || totalCount === 0
+    : safePage >= pageCount - 1 || totalCount === 0
 
   const compact = Boolean(centerNote)
 
@@ -41,7 +56,7 @@ export function WtrCityListPagination({
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label="City list pages"
+      aria-label={itemNav ? 'City list navigation' : 'City list pages'}
     >
       <div
         className={[
@@ -55,8 +70,10 @@ export function WtrCityListPagination({
           type="button"
           className="wtr-list-pagination__btn wtr-list-pagination__btn--prev"
           disabled={prevDisabled}
-          aria-label="Previous page"
-          onClick={() => onPageChange(safePage - 1)}
+          aria-label={itemNav ? 'Previous city' : 'Previous page'}
+          onClick={() =>
+            itemNav ? onItemPrev() : onPageChange(safePage - 1)
+          }
         >
           <IconChevronLeft size={18} stroke={1.5} aria-hidden />
         </button>
@@ -65,7 +82,9 @@ export function WtrCityListPagination({
         ) : (
           <div className="wtr-list-pagination__center">
             <span className="wtr-list-pagination__page-label">
-              Page {safePage + 1} of {pageCount}
+              {itemNav
+                ? `${safeItemIndex + 1} of ${totalCount}`
+                : `Page ${safePage + 1} of ${pageCount}`}
             </span>
             {showRange ? (
               <p className="wtr-list-pagination__range">
@@ -82,8 +101,10 @@ export function WtrCityListPagination({
           type="button"
           className="wtr-list-pagination__btn wtr-list-pagination__btn--next"
           disabled={nextDisabled}
-          aria-label="Next page"
-          onClick={() => onPageChange(safePage + 1)}
+          aria-label={itemNav ? 'Next city' : 'Next page'}
+          onClick={() =>
+            itemNav ? onItemNext() : onPageChange(safePage + 1)
+          }
         >
           <IconChevronRight size={18} stroke={1.5} aria-hidden />
         </button>

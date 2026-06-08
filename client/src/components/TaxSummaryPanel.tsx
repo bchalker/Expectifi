@@ -3,8 +3,10 @@ import { IconX } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { BottomSheetHandle } from "./ui/BottomSheetHandle";
+import { BottomSheetPortal } from "./ui/BottomSheetPortal";
 import { useBottomSheetDrag } from "../hooks/useBottomSheetDrag";
 import { useIsMobileBottomSheet } from "../hooks/useMobileBottomSheet";
+import { useBottomSheetStackRegistration } from "../context/BottomSheetStackContext";
 import {
   accountLabelForWithdrawalBucket,
   formatMarginalRatesSummary,
@@ -402,8 +404,10 @@ export function TaxSummarySlidePanel({
     onDismiss: onClose,
   });
 
+  useBottomSheetStackRegistration(open);
+
   return (
-    <>
+    <BottomSheetPortal enabled={isMobileSheet}>
       {isMobileSheet && open ? (
         <div
           className="mobile-bottom-sheet-backdrop mobile-bottom-sheet-backdrop--open"
@@ -473,6 +477,6 @@ export function TaxSummarySlidePanel({
       )}
       <TaxSummaryPanelFooter />
     </aside>
-    </>
+    </BottomSheetPortal>
   );
 }

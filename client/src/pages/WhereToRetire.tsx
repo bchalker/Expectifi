@@ -196,22 +196,34 @@ export function WhereToRetire({ c }: Props) {
               .filter(Boolean)
               .join(" ")}
           >
-            <div className="where-to-retire__showing-count" aria-live="polite">
-              <p className="where-to-retire__showing-count-primary">
-                <AnimatedCount
-                  value={visibilityCounts.visibleCount}
-                  className="where-to-retire__showing-count-num"
-                />{" "}
-                cities
-              </p>
-              <p className="where-to-retire__showing-count-sub">
-                from{" "}
-                <AnimatedCount
-                  value={visibilityCounts.visibleCountryCount}
-                  className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
-                />{" "}
-                countries
-              </p>
+            <div className="where-to-retire__income-toolbar-meta">
+              <div className="where-to-retire__income-toolbar-label">
+                <BudgetExplorationHero
+                  section="slider-label"
+                  planMonthlyIncome={grossMonthlyIncome}
+                  explorationIncome={explorationIncome}
+                  onExplorationIncomeChange={setExplorationIncome}
+                />
+              </div>
+              <div className="where-to-retire__showing-count" aria-live="polite">
+                <p className="where-to-retire__showing-count-line font-xs">
+                  <span className="where-to-retire__showing-count-primary">
+                    <AnimatedCount
+                      value={visibilityCounts.visibleCount}
+                      className="where-to-retire__showing-count-num"
+                    />{" "}
+                    cities
+                  </span>{" "}
+                  <span className="where-to-retire__showing-count-sub">
+                    from{" "}
+                    <AnimatedCount
+                      value={visibilityCounts.visibleCountryCount}
+                      className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
+                    />{" "}
+                    countries
+                  </span>
+                </p>
+              </div>
             </div>
             <WtrIncomeToolbarMapSelects
               pinColorView={pinColorView}
@@ -219,14 +231,6 @@ export function WhereToRetire({ c }: Props) {
               filters={mapFilters}
               onFiltersChange={setMapFilters}
             />
-            <div className="where-to-retire__income-toolbar-label">
-              <BudgetExplorationHero
-                section="slider-label"
-                planMonthlyIncome={grossMonthlyIncome}
-                explorationIncome={explorationIncome}
-                onExplorationIncomeChange={setExplorationIncome}
-              />
-            </div>
             <div className="where-to-retire__income-toolbar-slider where-to-retire__income-toolbar-slider--mobile">
               <BudgetExplorationHero
                 section="slider-rail"

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   Button,
   CloseButton,
@@ -462,7 +463,7 @@ export function RetirementMapFilters({
     });
   };
 
-  return (
+  const panel = (
     <>
       {isMobileSheet && open ? (
         <div
@@ -588,4 +589,10 @@ export function RetirementMapFilters({
     </aside>
     </>
   );
+
+  if (isMobileSheet && typeof document !== "undefined") {
+    return createPortal(panel, document.body);
+  }
+
+  return panel;
 }

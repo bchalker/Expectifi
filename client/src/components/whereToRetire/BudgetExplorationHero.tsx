@@ -1,9 +1,7 @@
 import { useMemo } from 'react'
-import { IconArrowBackUp } from '@tabler/icons-react'
 import { Tooltip } from '../Tooltip'
 import {
   clampExplorationIncome,
-  defaultExplorationIncome,
   explorationIncomeMax,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
@@ -44,7 +42,6 @@ export function BudgetExplorationHero({
   const overFillWidth = Math.max(0, fillWidth - planMarkerPct)
   const showOverFill = overFillWidth > 0
   const planMarkTooltip = `${fmtMon(planMonthlyIncome)} projected income`
-  const resetTooltip = `Reset to ${fmtMon(planMonthlyIncome)} income`
   const atProjected = isAtProjectedExplorationIncome(
     planMonthlyIncome,
     explorationIncome,
@@ -86,25 +83,6 @@ export function BudgetExplorationHero({
           {fmtMon(atProjected ? planMonthlyIncome : mapIncome)}
         </span>
       </div>
-      {!atProjected ? (
-        <Tooltip
-          content={resetTooltip}
-          placement="top"
-          showArrow
-          contentClassName="wtr-budget-hero__plan-tooltip"
-        >
-          <button
-            type="button"
-            className="wtr-budget-hero__reset"
-            aria-label={resetTooltip}
-            onClick={() =>
-              onExplorationIncomeChange(defaultExplorationIncome(planMonthlyIncome))
-            }
-          >
-            <IconArrowBackUp size={16} stroke={1} aria-hidden />
-          </button>
-        </Tooltip>
-      ) : null}
     </div>
   )
 

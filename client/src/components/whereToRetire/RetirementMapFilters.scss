@@ -365,22 +365,27 @@
 
 @media (max-width: 768px) {
   .wtr-map-filters--side.wtr-map-filters--mobile-sheet {
+    --wtr-filter-sheet-max-h: var(--mobile-bottom-sheet-height);
+
     position: fixed;
     top: auto;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 1000;
+    z-index: var(--mobile-bottom-sheet-z, 1100);
+    isolation: isolate;
     width: 100%;
     max-width: none;
-    height: 90vh;
-    max-height: 90vh;
+    height: var(--wtr-filter-sheet-max-h);
+    max-height: var(--wtr-filter-sheet-max-h);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     border-radius: 16px 16px 0 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     box-shadow: 0 -12px 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
     transform: translateY(100%);
     transition: transform 0.3s ease, visibility 0s linear 0.3s;
+    box-sizing: border-box;
   }
 
   .wtr-map-filters--side.wtr-map-filters--mobile-sheet.wtr-map-filters--open {

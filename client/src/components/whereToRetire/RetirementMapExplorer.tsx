@@ -355,33 +355,32 @@ export function RetirementMapExplorer({
     [filteredCities, scrollListToTop, selectedId],
   );
 
-  const goToListPage = useCallback(
-    (page: number) => {
-      const pageCount = Math.max(
-        1,
-        Math.ceil(filteredCities.length / LIST_PAGE_SIZE),
-      );
-      const safePage = Math.max(0, Math.min(page, pageCount - 1));
-      setListPage(safePage);
-      scrollListToTop();
-      const firstOnPage = filteredCities[safePage * LIST_PAGE_SIZE];
-      if (firstOnPage) {
-        setSelectedId(firstOnPage.city.id);
-        setPanelOpen(true);
-      }
+  const goToFilteredCityIndex = useCallback(
+    (index: number) => {
+      const item = filteredCities[index];
+      if (!item) return;
+      setSelectedId(item.city.id);
+      setListPage(Math.floor(index / LIST_PAGE_SIZE));
+      setPanelOpen(true);
     },
-    [filteredCities, scrollListToTop],
+    [filteredCities],
   );
 
-  const destinationListPageNav = useMemo(() => {
-    if (filteredCities.length <= LIST_PAGE_SIZE) return null;
+  const destinationListNav = useMemo(() => {
+    if (filteredCities.length <= 1 || selectedId == null) return null;
+    const index = filteredCities.findIndex((item) => item.city.id === selectedId);
+    if (index < 0) return null;
     return {
-      page: safeListPage,
-      pageSize: LIST_PAGE_SIZE,
+      index,
       totalCount: filteredCities.length,
-      onPageChange: goToListPage,
+      onPrev: () => {
+        if (index > 0) goToFilteredCityIndex(index - 1);
+      },
+      onNext: () => {
+        if (index < filteredCities.length - 1) goToFilteredCityIndex(index + 1);
+      },
     };
-  }, [filteredCities.length, goToListPage, safeListPage]);
+  }, [filteredCities, goToFilteredCityIndex, selectedId]);
 
   const openDestination = useCallback(
     (id: string) => {
@@ -692,7 +691,7 @@ export function RetirementMapExplorer({
         mapFilters={filters}
         open={panelOpen && selectedScored != null}
         onClose={closePanel}
-        listPageNav={destinationListPageNav}
+        listNav={destinationListNav}
       />
 
       {!compareOverlayOpen ? (

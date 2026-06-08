@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { IconChevronLeft } from "@tabler/icons-react";
-import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import type { CalculatorInputs, CalculatorUi } from "../lib/computeResults";
 import { ageFromIsoDateString, isValidIsoDateString } from "../lib/ageFromDob";
 import {
@@ -70,6 +69,7 @@ import "./OnboardingOverlay.scss";
 import "./OnboardingFieldShell.scss";
 import "./OnboardingProgressSteps.scss";
 const BODY_CLASS = "onboarding-overlay--open";
+const MOBILE_ONBOARDING_MQ = "(max-width: 760px)";
 
 type OnboardingBackButtonProps = {
   disabled?: boolean;
@@ -97,7 +97,9 @@ function OnboardingBackButton({ disabled, onClick }: OnboardingBackButtonProps) 
 }
 
 function syncOnboardingChromeInsets() {
-  if (typeof document === "undefined") return;
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  if (window.matchMedia(MOBILE_ONBOARDING_MQ).matches) return;
+
   const stack = document.querySelector(".app-header-stack");
   if (!stack) return;
   const top = Math.ceil(stack.getBoundingClientRect().bottom);
@@ -290,17 +292,9 @@ export function OnboardingOverlay({
         : null;
     stack && ro?.observe(stack);
     window.addEventListener("resize", syncOnboardingChromeInsets);
-    window.visualViewport?.addEventListener(
-      "resize",
-      syncOnboardingChromeInsets,
-    );
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", syncOnboardingChromeInsets);
-      window.visualViewport?.removeEventListener(
-        "resize",
-        syncOnboardingChromeInsets,
-      );
       document.documentElement.style.removeProperty(
         "--app-onboarding-inset-top",
       );
@@ -541,9 +535,9 @@ export function OnboardingOverlay({
           ) : null}
         </header>
 
-        {step === "contributions" ? (
-          <div className="onboarding-overlay__scroll onboarding-overlay__scroll--native">
-            <div className="onboarding-overlay__body">
+        <div className="onboarding-overlay__scroll onboarding-overlay__scroll--native">
+          <div className="onboarding-overlay__body">
+            {step === "contributions" ? (
               <WelcomeContributionsStepFields
                 dateOfBirth={form.dob}
                 region={contributionRegion}
@@ -557,45 +551,36 @@ export function OnboardingOverlay({
                   }))
                 }
               />
-            </div>
+            ) : step === "profile" ? (
+              <WelcomeProfileStepFields
+                onboardingLayout
+                regionId={form.locale}
+                onRegionSelect={applyRegionSelection}
+                dateOfBirth={form.dob}
+                onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
+                retireAge={form.retireAge}
+                onRetireAgeChange={(retireAge) =>
+                  setForm((f) => ({ ...f, retireAge }))
+                }
+                onRetireAgePastInvalidChange={setRetireAgePastInvalid}
+                showFillState
+              />
+            ) : (
+              <WelcomeGoalStepFields
+                step3Layout
+                monthlyGoal={form.monthlyGoal}
+                onMonthlyGoalChange={(monthlyGoal) =>
+                  setForm((f) => ({ ...f, monthlyGoal }))
+                }
+                growthGoal={form.growthGoal}
+                onGrowthGoalChange={(growthGoal) =>
+                  setForm((f) => ({ ...f, growthGoal }))
+                }
+                showFillState
+              />
+            )}
           </div>
-        ) : (
-          <AppOverlayScrollbars
-            className="side-panel-shell__scroll onboarding-overlay__scroll"
-            defer={false}
-          >
-            <div className="onboarding-overlay__body">
-              {step === "profile" ? (
-                <WelcomeProfileStepFields
-                  onboardingLayout
-                  regionId={form.locale}
-                  onRegionSelect={applyRegionSelection}
-                  dateOfBirth={form.dob}
-                  onDateOfBirth={(iso) => setForm((f) => ({ ...f, dob: iso }))}
-                  retireAge={form.retireAge}
-                  onRetireAgeChange={(retireAge) =>
-                    setForm((f) => ({ ...f, retireAge }))
-                  }
-                  onRetireAgePastInvalidChange={setRetireAgePastInvalid}
-                  showFillState
-                />
-              ) : (
-                <WelcomeGoalStepFields
-                  step3Layout
-                  monthlyGoal={form.monthlyGoal}
-                  onMonthlyGoalChange={(monthlyGoal) =>
-                    setForm((f) => ({ ...f, monthlyGoal }))
-                  }
-                  growthGoal={form.growthGoal}
-                  onGrowthGoalChange={(growthGoal) =>
-                    setForm((f) => ({ ...f, growthGoal }))
-                  }
-                  showFillState
-                />
-              )}
-            </div>
-          </AppOverlayScrollbars>
-        )}
+        </div>
 
         <footer className="onboarding-overlay__footer">
           {err ? (

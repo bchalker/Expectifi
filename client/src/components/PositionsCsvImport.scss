@@ -910,8 +910,8 @@
     width: 100%;
     max-width: none;
     height: 100%;
-    max-height: none;
-    min-height: 100dvh;
+    max-height: 100svh;
+    min-height: 100svh;
     border-radius: 0;
   }
 
@@ -940,6 +940,6 @@
   }
 
   .csv-import-modal-footer__row {
-    padding-bottom: max(var(--space-3), env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--app-mobile-overlay-footer-pad);
   }
 }

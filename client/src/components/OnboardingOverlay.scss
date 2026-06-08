@@ -8,9 +8,31 @@ html:has(.app-header-shell--onboarding) {
 body.onboarding-overlay--open {
   overflow: hidden;
   touch-action: none;
+  background: var(--surface);
   --goal-bar-h: 0px;
   --subheader-h: 0px;
   --app-header-stack-h: var(--app-top-chrome-h);
+}
+
+body.onboarding-overlay--open .app-scroll-stack {
+  padding-bottom: 0;
+}
+
+body.onboarding-overlay--open .app-privacy-trust,
+body.onboarding-overlay--open .account-plan-bottom-banner-fixed {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  body.onboarding-overlay--open .app-header-shell {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  body.onboarding-overlay--open .subheader-spacer {
+    display: none;
+  }
 }
 
 .onboarding-overlay {
@@ -25,7 +47,7 @@ body.onboarding-overlay--open {
   --onboarding-panel-max-w: 28rem;
 }
 
-/* Modal over dashboard — header stays above (202); covers full viewport below header. */
+/* Modal over dashboard — desktop sits below header; mobile is full viewport (see max-width 760px). */
 .onboarding-overlay--in-app {
   position: fixed;
   inset: var(--app-measured-header-h, var(--app-top-chrome-h)) 0 0 0;
@@ -169,12 +191,10 @@ body.onboarding-overlay--open {
 @keyframes onboarding-panel-in-mobile {
   from {
     opacity: 0;
-    transform: translateY(1.25rem);
   }
 
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
@@ -198,12 +218,10 @@ body.onboarding-overlay--open {
 @keyframes onboarding-panel-out-mobile {
   from {
     opacity: 1;
-    transform: none;
   }
 
   to {
     opacity: 0;
-    transform: translateY(0.75rem);
   }
 }
 
@@ -211,32 +229,50 @@ body.onboarding-overlay--open {
   .onboarding-overlay__panel {
     max-height: min(calc(100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - 2rem), 40rem);
   }
+
+  .onboarding-overlay__header {
+    position: relative;
+  }
+
+  .onboarding-overlay__footer {
+    position: relative;
+  }
 }
 
-/* Mobile sheet — full height below header; covers privacy footer. */
+/* Mobile — full viewport sheet; header/footer pinned via grid, center scrolls. */
 @media (max-width: 760px) {
   .onboarding-overlay--in-app {
-    top: var(
-      --app-onboarding-inset-top,
-      calc(var(--app-measured-header-h, var(--app-top-chrome-h)) + env(safe-area-inset-top, 0px))
-    );
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: auto;
-    z-index: var(--z-onboarding-in-app);
+    inset: 0;
+    height: 100dvh;
+    height: 100svh;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    z-index: var(--z-onboarding);
+    pointer-events: auto;
+  }
+
+  .onboarding-overlay--in-app::before {
+    display: none;
   }
 
   .onboarding-overlay__panel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
+    inset: auto;
+    top: auto;
+    left: auto;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     height: 100%;
-    max-height: 100%;
+    max-height: none;
+    min-height: 0;
+    overflow: hidden;
     transform: none;
     border-radius: 0;
     box-shadow: none;
@@ -247,14 +283,27 @@ body.onboarding-overlay--open {
     animation: onboarding-panel-out-mobile 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
   }
 
-  .onboarding-overlay__footer {
-    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  .onboarding-overlay__header {
+    grid-row: 1;
+    z-index: 3;
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
   }
 
-  .onboarding-overlay--contributions .onboarding-overlay__scroll--native {
-    flex: 1 1 auto;
+  .onboarding-overlay__scroll {
+    grid-row: 2;
+    flex: none;
     min-height: 0;
+    height: auto;
     max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .onboarding-overlay__footer {
+    grid-row: 3;
+    z-index: 3;
+    padding-bottom: var(--app-mobile-overlay-footer-pad);
   }
 }
 
@@ -270,7 +319,6 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__header {
-  position: relative;
   z-index: 2;
   padding: var(--space-4) /* review: was 1.25rem */ var(--space-4) /* review: was 1.25rem */ var(--space-3) /* review: was 0.85rem */;
   background: var(--surface);
@@ -891,7 +939,6 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__footer {
   flex-shrink: 0;
-  position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -1043,9 +1090,9 @@ body.onboarding-overlay--open {
 
 .onboarding-overlay__footer-goals {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: stretch;
-  gap: 0;
+  gap: var(--space-2);
   width: 100%;
 }
 
@@ -1109,7 +1156,7 @@ body.onboarding-overlay--open {
 }
 
 .onboarding-overlay__footer-goals .onboarding-overlay__back-link {
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .onboarding-overlay__back-link:hover:not(:disabled),

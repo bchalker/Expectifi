@@ -102,13 +102,43 @@ export function AppLeftNav({
 
   if (isDesktop) return null;
 
-  const hasPanelItems =
-    APP_NAV_ROUTE_ITEMS.some(({ requires }) =>
-      navRequirementsMet(requires, navContext),
-    ) ||
-    APP_NAV_DRAWER_ITEMS.some(({ requires }) =>
-      navRequirementsMet(requires, navContext),
-    );
+  const routeNavItems = APP_NAV_ROUTE_ITEMS.flatMap(
+    ({ id, path: routePath, label, requires }) => {
+      const available = navRequirementsMet(requires, navContext);
+      const unavailableReason = navItemUnavailableReason(requires, navContext);
+      if (!available) return [];
+      const isActive = path === routePath && available;
+      return [
+        {
+          id,
+          label,
+          isActive,
+          unavailableReason,
+          onSelect: () => {
+            navigateApp(routePath);
+            closeMobile();
+          },
+        },
+      ];
+    },
+  );
+  const drawerNavItems = APP_NAV_DRAWER_ITEMS.flatMap(
+    ({ id, label, requires }) => {
+      const available = navRequirementsMet(requires, navContext);
+      const unavailableReason = navItemUnavailableReason(requires, navContext);
+      if (!available) return [];
+      return [
+        {
+          id,
+          label,
+          isActive: drawer === id && available,
+          unavailableReason,
+          onSelect: () => openDrawer(id),
+        },
+      ];
+    },
+  );
+  const hasPanelItems = routeNavItems.length > 0 || drawerNavItems.length > 0;
   const showGuestProfile = Boolean(accountLabel || showRetireByInProfile);
 
   return (
@@ -137,62 +167,46 @@ export function AppLeftNav({
           .join(" ")}
         aria-label="Panels and tools"
       >
-        <div className="app-left-nav__scroll">
-          {APP_NAV_ROUTE_ITEMS.map(
-            ({ id, path: routePath, label, requires }) => {
-              const available = navRequirementsMet(requires, navContext);
-              const unavailableReason = navItemUnavailableReason(
-                requires,
-                navContext,
-              );
-              if (!available) return null;
-              const isActive = path === routePath && available;
-              return (
+        {routeNavItems.length > 0 ? (
+          <div className="app-left-nav__routes" aria-label="App pages">
+            {routeNavItems.map(
+              ({ id, label, isActive, unavailableReason, onSelect }) => (
                 <button
                   key={id}
                   type="button"
-                  className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}`}
+                  className={[
+                    "app-left-nav__route-btn",
+                    isActive ? "app-left-nav__route-btn--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   aria-current={isActive ? "page" : undefined}
-                  aria-disabled={!available}
-                  title={
-                    !available ? (unavailableReason ?? undefined) : undefined
-                  }
-                  onClick={() => {
-                    if (!available) return;
-                    navigateApp(routePath);
-                    closeMobile();
-                  }}
+                  title={unavailableReason ?? undefined}
+                  onClick={onSelect}
                 >
-                  <span className="app-left-nav__item-label">{label}</span>
+                  {label}
                 </button>
-              );
-            },
-          )}
-          {APP_NAV_DRAWER_ITEMS.map(({ id, label, requires }) => {
-            const available = navRequirementsMet(requires, navContext);
-            const unavailableReason = navItemUnavailableReason(
-              requires,
-              navContext,
-            );
-            if (!available) return null;
-            return (
+              ),
+            )}
+          </div>
+        ) : null}
+        {routeNavItems.length > 0 ? (
+          <div className="app-left-nav__rule" aria-hidden="true" />
+        ) : null}
+        <div className="app-left-nav__scroll">
+          {drawerNavItems.map(
+            ({ id, label, isActive, unavailableReason, onSelect }) => (
               <button
                 key={id}
                 type="button"
-                className={`app-left-nav__item${drawer === id && available ? " app-left-nav__item--active" : ""}`}
-                aria-disabled={!available}
-                title={
-                  !available ? (unavailableReason ?? undefined) : undefined
-                }
-                onClick={() => {
-                  if (!available) return;
-                  openDrawer(id);
-                }}
+                className={`app-left-nav__item${isActive ? " app-left-nav__item--active" : ""}`}
+                title={unavailableReason ?? undefined}
+                onClick={onSelect}
               >
                 <span className="app-left-nav__item-label">{label}</span>
               </button>
-            );
-          })}
+            ),
+          )}
         </div>
         <div className="app-left-nav__footer">
           {!loading && user?.email && showSettings ? (

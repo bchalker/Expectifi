@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -6,9 +7,12 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import type { OverlayScrollbars } from "overlayscrollbars";
+import { CloseButton } from "@heroui/react";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import { AppSelect } from "../ui/AppSelect";
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
+import { BottomSheetPortal } from "../ui/BottomSheetPortal";
 import {
   IconBarbell,
   IconBolt,
@@ -27,7 +31,10 @@ import {
 import { useCityClimate } from "../../hooks/useCityClimate";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
 import { useWtrDestPanelMobileSheet } from "../../hooks/useWtrDestPanelMobileSheet";
-import type { ScoredMapCity, MapFilters } from "../../lib/whereToRetire/cityMapScoring";
+import type {
+  ScoredMapCity,
+  MapFilters,
+} from "../../lib/whereToRetire/cityMapScoring";
 import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
 import { calculateRetirementScore } from "../../utils/retirementScore";
 import type { CityData } from "../../utils/costOfLiving";
@@ -74,11 +81,11 @@ import "./DestinationQualityOfLifeTab.scss";
 import "./RetirementDestinationPanel.scss";
 import "./WtrCityListPagination.scss";
 
-export type DestinationListPageNav = {
-  page: number;
-  pageSize: number;
+export type DestinationListNav = {
+  index: number;
   totalCount: number;
-  onPageChange: (page: number) => void;
+  onPrev: () => void;
+  onNext: () => void;
 };
 
 type Props = {
@@ -87,7 +94,7 @@ type Props = {
   mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   open: boolean;
   onClose: () => void;
-  listPageNav: DestinationListPageNav | null;
+  listNav: DestinationListNav | null;
 };
 
 type PanelTab =
@@ -189,7 +196,10 @@ function DestinationPanelTabSelect({
               className="wtr-dest-panel__tab-select-native"
               ariaLabel="Destination section"
               value={activeTab}
-              options={PANEL_TABS.map((tab) => ({ id: tab.id, label: tab.label }))}
+              options={PANEL_TABS.map((tab) => ({
+                id: tab.id,
+                label: tab.label,
+              }))}
               onChange={(id) => onChange(id as PanelTab)}
               layout="native"
             />
@@ -402,8 +412,9 @@ type CityViewProps = {
   monthlyIncome: number;
   mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
   budgetBreakdown: NonNullable<ReturnType<typeof buildBudgetBreakdownDisplay>>;
-  listPageNav: DestinationListPageNav | null;
+  listNav: DestinationListNav | null;
   mobileSheet: boolean;
+  onClose: () => void;
 };
 
 /** Remounts when city.id changes so scroll content never stacks on prev/next navigation. */
@@ -412,10 +423,12 @@ function DestinationPanelCityView({
   monthlyIncome,
   mapFilters,
   budgetBreakdown,
-  listPageNav,
+  listNav,
   mobileSheet,
+  onClose,
 }: CityViewProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>("col");
+  const [stickyHeadStuck, setStickyHeadStuck] = useState(false);
   const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab);
   const {
     climate,
@@ -447,9 +460,25 @@ function DestinationPanelCityView({
   const colSupplementalItems = buildColSupplementalItems(city);
   const showTravelAdvisory = hasTravelAdvisory(city.country);
 
+  const syncStickyHeadStuck = useCallback((instance: OverlayScrollbars) => {
+    const { scrollOffsetElement } = instance.elements();
+    setStickyHeadStuck(scrollOffsetElement.scrollTop > 0);
+  }, []);
+
+  useEffect(() => {
+    setStickyHeadStuck(false);
+  }, [activeTab, city.id]);
+
   return (
     <div className="wtr-dest-panel__layout">
-      <header className="wtr-dest-panel__sticky-head">
+      <header
+        className={[
+          "wtr-dest-panel__sticky-head",
+          stickyHeadStuck && "wtr-dest-panel__sticky-head--stuck",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <div
           className="wtr-dest-panel__header wtr-dest-panel__stagger-item"
           style={panelStaggerStyle(0)}
@@ -473,6 +502,13 @@ function DestinationPanelCityView({
                 />
               ) : null}
             </div>
+            {!mobileSheet ? (
+              <CloseButton
+                className="panel-close-btn wtr-dest-panel__close"
+                aria-label="Close destination details"
+                onPress={onClose}
+              />
+            ) : null}
           </div>
         </div>
 
@@ -542,7 +578,14 @@ function DestinationPanelCityView({
           </div>
         ) : null}
 
-        <AppOverlayScrollbars className="wtr-dest-panel__tab-content" defer={false}>
+        <AppOverlayScrollbars
+          className="wtr-dest-panel__tab-content"
+          defer={false}
+          events={{
+            initialized: syncStickyHeadStuck,
+            scroll: syncStickyHeadStuck,
+          }}
+        >
           <div className="wtr-dest-panel__body">
             <div
               key={`${city.id}-${activeTab}`}
@@ -592,7 +635,8 @@ function DestinationPanelCityView({
                           key={card.id}
                           card={card}
                           staggerIndex={
-                            index + (mobileSheet ? (showTravelAdvisory ? 4 : 3) : 0)
+                            index +
+                            (mobileSheet ? (showTravelAdvisory ? 4 : 3) : 0)
                           }
                         />
                       ))}
@@ -681,7 +725,7 @@ function DestinationPanelCityView({
                     {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
                   </p>
                 ) : null}
-                {listPageNav ? (
+                {listNav ? (
                   <p className="wtr-dest-panel__scroll-end-source">
                     {PANEL_ESTIMATES_NOTE}
                   </p>
@@ -697,16 +741,22 @@ function DestinationPanelCityView({
           <ColBudgetBreakdownBar breakdown={budgetBreakdown} />
         ) : null}
         {activeTab === "peopleCulture" && !mobileSheet ? (
-          <p className="wtr-dest-panel__footer-source">{DEMOGRAPHICS_TAB_SOURCE_FOOTER}</p>
+          <p className="wtr-dest-panel__footer-source">
+            {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
+          </p>
         ) : null}
-        {listPageNav ? (
+        {listNav ? (
           <WtrCityListPagination
             className="wtr-list-pagination--dest-panel"
-            page={listPageNav.page}
-            pageSize={listPageNav.pageSize}
-            totalCount={listPageNav.totalCount}
-            onPageChange={listPageNav.onPageChange}
+            page={0}
+            pageSize={1}
+            totalCount={listNav.totalCount}
+            onPageChange={() => {}}
+            itemIndex={listNav.index}
+            onItemPrev={listNav.onPrev}
+            onItemNext={listNav.onNext}
             centerNote={mobileSheet ? undefined : PANEL_ESTIMATES_NOTE}
+            showRange={false}
           />
         ) : null}
       </footer>
@@ -720,7 +770,7 @@ export function RetirementDestinationPanel({
   mapFilters,
   open,
   onClose,
-  listPageNav,
+  listNav,
 }: Props) {
   const mobileSheet = useWtrDestPanelMobileSheet();
   const [slideOpen, setSlideOpen] = useState(false);
@@ -775,7 +825,7 @@ export function RetirementDestinationPanel({
     : undefined;
 
   return (
-    <>
+    <BottomSheetPortal enabled={mobileSheet}>
       {mobileSheet ? (
         <div
           className={[
@@ -817,10 +867,11 @@ export function RetirementDestinationPanel({
           monthlyIncome={monthlyIncome}
           mapFilters={mapFilters}
           budgetBreakdown={budgetBreakdown}
-          listPageNav={listPageNav}
+          listNav={listNav}
           mobileSheet={mobileSheet}
+          onClose={onClose}
         />
       </aside>
-    </>
+    </BottomSheetPortal>
   );
 }

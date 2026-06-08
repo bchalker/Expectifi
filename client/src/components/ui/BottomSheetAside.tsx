@@ -5,6 +5,8 @@ import {
   type ReactNode,
 } from 'react'
 import { BottomSheetHandle } from './BottomSheetHandle'
+import { BottomSheetPortal } from './BottomSheetPortal'
+import { useBottomSheetStackRegistration } from '../../context/BottomSheetStackContext'
 import { useBottomSheetDrag } from '../../hooks/useBottomSheetDrag'
 import { useIsMobileBottomSheet } from '../../hooks/useMobileBottomSheet'
 
@@ -44,8 +46,10 @@ export function BottomSheetAside<T extends ElementType = 'aside'>({
     onDismiss: onClose,
   })
 
+  useBottomSheetStackRegistration(open)
+
   return (
-    <>
+    <BottomSheetPortal enabled={isMobileSheet}>
       {isMobileSheet && showBackdrop && open ? (
         <div
           className={[
@@ -80,6 +84,6 @@ export function BottomSheetAside<T extends ElementType = 'aside'>({
         ) : null}
         {children}
       </Tag>
-    </>
+    </BottomSheetPortal>
   )
 }

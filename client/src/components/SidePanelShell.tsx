@@ -5,6 +5,7 @@ import { BottomSheetHandle } from './ui/BottomSheetHandle'
 import { CloseButton } from '@heroui/react'
 import { useBottomSheetDrag } from '../hooks/useBottomSheetDrag'
 import { useIsMobileBottomSheet } from '../hooks/useMobileBottomSheet'
+import { useBottomSheetStackRegistration } from '../context/BottomSheetStackContext'
 import './ui/BottomSheet.scss'
 import './SidePanelShell.scss'
 
@@ -51,6 +52,7 @@ export function SidePanelShell({
 }: SidePanelShellProps) {
   const isMobileSheet = useIsMobileBottomSheet()
   const panelRef = useRef<HTMLDivElement>(null)
+  useBottomSheetStackRegistration(open && isMobileSheet)
   const hasFooter = footer != null && footer !== false
   const hasBelowHeader = belowHeader != null && belowHeader !== false
   const [latchedShellClass, setLatchedShellClass] = useState(shellClassName)

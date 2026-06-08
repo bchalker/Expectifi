@@ -24,6 +24,7 @@ import {
 import type { LifePlans } from '../lib/planStorage/life'
 import { SidePanelShell } from './SidePanelShell'
 import { AppButton } from './ui/AppButton'
+import { BottomSheetPortal } from './ui/BottomSheetPortal'
 import { useIsMobileBottomSheet } from '../hooks/useMobileBottomSheet'
 import './PanelChrome.scss'
 
@@ -150,7 +151,7 @@ export function DrawerPanel({
         .join(' ')}
       bodyClassName="drawer-shell-body"
       belowHeader={isConfigDrawer ? <ConfigDrawerTabs /> : undefined}
-      footer={configFooter}
+      footer={isMobileSheet ? undefined : configFooter}
     >
       {panelDrawer ? (
         isConfigDrawer ? (
@@ -189,7 +190,7 @@ export function DrawerPanel({
   )
 
   return (
-    <>
+    <BottomSheetPortal enabled={isMobileSheet}>
       {open && (!isConfigDrawer || isMobileSheet) ? (
         <div
           className={`panel-backdrop${open ? ' panel-backdrop--open' : ''}`}
@@ -202,7 +203,7 @@ export function DrawerPanel({
       ) : (
         shell
       )}
-    </>
+    </BottomSheetPortal>
   )
 }
 

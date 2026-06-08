@@ -4,6 +4,11 @@
 }
 
 /* Brand landing — #1a2332 navy, #4ecb8d accent (screenshot reference) */
+html:has(.landing-page),
+body:has(.landing-page) {
+  background: #1a2332;
+}
+
 .landing-page {
   overflow-x: clip;
   max-width: 100%;
@@ -20,10 +25,12 @@
   --landing-text-on-light: var(--color-text-primary, #1c2b3a);
   --landing-text-muted-light: var(--color-text-muted, #5f5e5a);
 
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   background: var(--landing-navy);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
   color: var(--landing-text-on-navy);
   font-family: var(--body);
 }

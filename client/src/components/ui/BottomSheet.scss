@@ -20,9 +20,9 @@
 .mobile-bottom-sheet-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: var(--mobile-bottom-sheet-backdrop-z, 1099);
   border: none;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -33,7 +33,20 @@
   pointer-events: auto;
 }
 
+/* iOS-style scale on app content — sheets portal to body, outside this surface */
+.app-scale-surface {
+  min-height: 100vh;
+  transition: transform 0.3s ease, border-radius 0.3s ease;
+  transform-origin: top center;
+  background: var(--color-background-primary, var(--bg, var(--surface)));
+}
+
 @media (max-width: 768px) {
+  .app-scale-surface.app-scale-surface--behind {
+    transform: scale(0.93);
+    border-radius: 12px;
+  }
+
   .mobile-bottom-sheet-panel--dragging {
     transition: none !important;
     animation: none !important;
@@ -49,5 +62,14 @@
 @media (prefers-reduced-motion: reduce) {
   .mobile-bottom-sheet-backdrop {
     transition: none;
+  }
+
+  .app-scale-surface {
+    transition: none;
+  }
+
+  .app-scale-surface.app-scale-surface--behind {
+    transform: none;
+    border-radius: 0;
   }
 }

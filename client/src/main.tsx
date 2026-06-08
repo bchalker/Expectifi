@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AuthProvider } from './context/AuthContext'
+import { BottomSheetStackProvider } from './context/BottomSheetStackContext'
 import { DesignSystemProvider } from './design/DesignSystemContext'
 import './index.scss'
 import AppRoot from './AppRoot.tsx'
@@ -22,7 +23,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <DesignSystemProvider>
-        <AppRoot />
+        <BottomSheetStackProvider>
+          <AppRoot />
+        </BottomSheetStackProvider>
       </DesignSystemProvider>
     </AuthProvider>
   </StrictMode>,

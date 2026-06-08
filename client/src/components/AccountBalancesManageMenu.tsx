@@ -20,11 +20,8 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
-import { BottomSheetHandle } from "./ui/BottomSheetHandle";
 import { useAuth } from "../context/AuthContext";
 import { usePlan } from "../hooks/usePlan";
-import { useBottomSheetDrag } from "../hooks/useBottomSheetDrag";
-import { useIsMobileBottomSheet } from "../hooks/useMobileBottomSheet";
 import {
   CSV_CUSTODIAN_OPTIONS,
   isPositionsCsvCustodian,
@@ -247,7 +244,6 @@ export function AccountBalancesManageMenu({
 }: AccountBalancesManageMenuProps) {
   const { user } = useAuth();
   const { hasPaidSubscription } = usePlan();
-  const isMobileSheet = useIsMobileBottomSheet();
   const ctx = useContext(PlaidConnectionContext);
   const showPlanBadges = !user;
 
@@ -474,19 +470,6 @@ export function AccountBalancesManageMenu({
   const menuLayoutPhase = displayPhase;
   const showMethodSelector = displayPhase === "method" && !methodStageFadingOut;
 
-  const {
-    isDragging,
-    panelStyle: sheetDragStyle,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-  } = useBottomSheetDrag({
-    enabled: isMobileSheet,
-    open: open && !closing,
-    panelRef: menuRef,
-    onDismiss: dismiss,
-  });
-
   const connectLabel = hasConnections
     ? (ctx?.connectButtonLabel ?? "Connect another account")
     : "Connect an account";
@@ -573,11 +556,8 @@ export function AccountBalancesManageMenu({
               <div
                 ref={menuRef}
                 id="account-balances-manage-menu"
-                style={isMobileSheet ? sheetDragStyle : undefined}
                 className={[
                   "account-balances-manage__menu",
-                  isMobileSheet && "account-balances-manage__menu--mobile-sheet",
-                  isDragging && "mobile-bottom-sheet-panel--dragging",
                   menuLayoutPhase === "method" &&
                     "account-balances-manage__menu--method",
                   menuLayoutPhase === "manual" &&
@@ -591,13 +571,6 @@ export function AccountBalancesManageMenu({
                 aria-labelledby="account-balances-manage-panel-title"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                {isMobileSheet ? (
-                  <BottomSheetHandle
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                  />
-                ) : null}
                 <header
                   className={[
                     "account-balances-manage__header",
@@ -651,7 +624,7 @@ export function AccountBalancesManageMenu({
                   {!requiredEntry ? (
                     <button
                       type="button"
-                      className="account-balances-manage__close panel-close-btn"
+                      className="account-balances-manage__close"
                       aria-label="Close"
                       onClick={dismiss}
                     >

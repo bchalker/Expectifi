@@ -317,6 +317,14 @@
   --z-onboarding: 520;
   /* Right / bottom inset for slide-over panels (drawer shell) */
   --drawer-panel-inset: var(--space-6);
+  /* Mobile bottom sheets: cap height to visible viewport (iOS Safari vh bug) */
+  --app-mobile-browser-chrome-h: max(0px, 100dvh - 100svh);
+  --app-mobile-overlay-footer-pad: calc(
+    var(--space-4) + env(safe-area-inset-bottom, 0px) + var(--app-mobile-browser-chrome-h)
+  );
+  --mobile-bottom-sheet-height: min(94dvh, calc(100svh - env(safe-area-inset-top, 0px)));
+  --mobile-bottom-sheet-backdrop-z: 1099;
+  --mobile-bottom-sheet-z: 1100;
 }
 
 @media (max-width: 900px) {
