@@ -44,7 +44,8 @@ export function WhereToRetire({ c }: Props) {
   const storage = useRetirementMapStorage();
   const [explorationIncome, setExplorationIncome] = useState(() => {
     const stashed = readStashedWtrExplorationIncome();
-    if (stashed != null) return clampExplorationIncome(stashed, grossMonthlyIncome);
+    if (stashed != null)
+      return clampExplorationIncome(stashed, grossMonthlyIncome);
     return defaultExplorationIncome(grossMonthlyIncome);
   });
   const mapExplorationIncome = useMemo(
@@ -205,7 +206,10 @@ export function WhereToRetire({ c }: Props) {
                   onExplorationIncomeChange={setExplorationIncome}
                 />
               </div>
-              <div className="where-to-retire__showing-count" aria-live="polite">
+              <div
+                className="where-to-retire__showing-count"
+                aria-live="polite"
+              >
                 <p className="where-to-retire__showing-count-line font-xs">
                   <span className="where-to-retire__showing-count-primary">
                     <AnimatedCount

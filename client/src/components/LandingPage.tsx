@@ -17,9 +17,9 @@ const FEATURE_CARDS = [
     title: "Your retirement portfolio, mapped out",
     subheading:
       "Add your accounts in 60 seconds. See what they are worth when you retire.",
-    imageSrc: "/screenshots/income-mode-preview.png",
+    imageSrc: "/screenshots/growth-mode-preview.png",
     imageAlt:
-      "Expectifi withdrawal strategy showing monthly income, yield settings, and retirement account balances.",
+      "Expectifi growth projection showing portfolio at retirement, account balances, and return scenario controls.",
     body: `Set growth scenarios per holding, model life events that pull from your portfolio before retirement, and see your projected balance at your target retirement age.
 
 The income phase shows what you can draw each month by dividend fund per account, withdrawal rate, or a combination of both. Each account gets its own strategy based on how it is taxed and how long you want it to last. Tax breakdown, runway projections, and withdrawal order guidance are built in.`,
@@ -307,24 +307,44 @@ export function LandingPage({
 
         <section
           id="faq"
-          className="landing-anchor-section landing-anchor-section--alt"
+          className="landing-anchor-section landing-anchor-section--alt landing-faq-section"
           aria-labelledby="landing-faq-title"
         >
-          <div className="landing-page__wrap">
-            <h2
-              id="landing-faq-title"
-              className="landing-section__title landing-section__title--sm"
-            >
-              FAQ
-            </h2>
-            <dl className="landing-faq">
-              {FAQ_ITEMS.map((item) => (
-                <div key={item.q}>
-                  <dt>{item.q}</dt>
-                  <dd>{item.a}</dd>
+          <div className="landing-page__wrap landing-faq-section__wrap">
+            <div className="landing-faq-section__layout">
+              <figure className="landing-faq-section__device">
+                <div className="landing-phone-frame">
+                  <div className="landing-phone-frame__shell">
+                    <div className="landing-phone-frame__island" aria-hidden />
+                    <img
+                      className="landing-phone-frame__screen"
+                      src="/screenshots/growth-mode-mobile-preview.png"
+                      alt="Expectifi mobile app showing growth projection, return slider, and retirement account balances."
+                      width={390}
+                      height={844}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                 </div>
-              ))}
-            </dl>
+              </figure>
+              <div className="landing-faq-section__content">
+                <h2
+                  id="landing-faq-title"
+                  className="landing-section__title landing-section__title--sm"
+                >
+                  FAQ
+                </h2>
+                <dl className="landing-faq">
+                  {FAQ_ITEMS.map((item) => (
+                    <div key={item.q}>
+                      <dt>{item.q}</dt>
+                      <dd>{item.a}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
           </div>
         </section>
 

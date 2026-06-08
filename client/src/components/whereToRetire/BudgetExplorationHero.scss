@@ -87,7 +87,7 @@
   min-width: 0;
 }
 
-@media (min-width: 681px) {
+@media (min-width: 1024px) {
   .where-to-retire__income-toolbar-row .wtr-budget-hero__slider-row {
     display: flex;
     flex: 1 1 auto;
@@ -117,7 +117,7 @@
   min-width: 0;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 1023px) {
   .where-to-retire__income-toolbar-row .wtr-budget-hero__slider-label-block {
     min-width: 0;
   }

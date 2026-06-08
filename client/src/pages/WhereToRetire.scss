@@ -7,6 +7,20 @@
   box-sizing: border-box;
 }
 
+@media (max-width: 760px) {
+  .app-header-shell--where-to-retire .subheader-spacer {
+    display: none;
+  }
+
+  .app-scroll-stack--where-to-retire {
+    padding-top: var(
+      --app-measured-header-h,
+      calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px))
+    );
+    min-height: 0;
+  }
+}
+
 .app-scroll-stack:has(.where-to-retire) > .app-scroll-stack__main,
 .app-scroll-stack--where-to-retire > .app-scroll-stack__main {
   display: flex;
@@ -199,7 +213,9 @@
     flex-shrink: 0;
     transition: all 0.3 ease;
   }
+}
 
+@media (min-width: 1024px) {
   .where-to-retire__income-toolbar-row {
     position: sticky;
     top: var(
@@ -273,7 +289,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 1023px) {
   .where-to-retire__income-toolbar-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -386,7 +402,9 @@
     border-left: none;
     min-height: auto;
   }
+}
 
+@media (max-width: 680px) {
   .where-to-retire__main-panel {
     --wtr-map-area-min-h: 0;
     border-radius: 0;
@@ -588,7 +606,7 @@
   justify-content: flex-end;
 }
 
-@media (min-width: 681px) {
+@media (min-width: 1024px) {
   .where-to-retire__showing-count-primary {
     display: block;
     margin: 0;
@@ -659,8 +677,9 @@
 }
 
 @media (min-width: 681px) {
-  .app-page--where-to-retire.main {
-    padding-top: var(--space-7) /* review: was 2.75rem */;
+  .app-page--where-to-retire.main,
+  .where-to-retire__body.main {
+    padding-top: 0;
   }
 }
 

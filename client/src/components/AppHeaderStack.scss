@@ -30,6 +30,11 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h));
 }
 
+/* Match growth/income header-to-main gap (hero-in-main spacer tail). */
+.app-header-shell--where-to-retire .subheader-spacer {
+  height: calc(var(--app-top-chrome-h) + var(--space-4));
+}
+
 /* Align top chrome with map / dashboard column (--layout-app-boundary). */
 .app-header-shell--where-to-retire .header--app .header__inner {
   width: var(--wtr-content-boundary);
