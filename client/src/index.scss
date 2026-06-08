@@ -22,10 +22,12 @@ html {
 }
 
 html[data-app-phase='income'] {
+  --page-bg-pattern-opacity: 0.15;
   --page-bg-pattern-image: url('/images/feathers-pattern.png');
 }
 
 html[data-app-phase='where-to-retire'] {
+  --page-bg-pattern-opacity: 0.15;
   --page-bg-pattern-image: url('/images/travel-pattern.png');
 }
 

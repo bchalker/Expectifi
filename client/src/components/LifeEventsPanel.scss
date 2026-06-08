@@ -4,7 +4,10 @@
   max-width: 100%;
   margin-bottom: 0;
   box-sizing: border-box;
-  padding: var(--space-5);
+  padding: var(--space-5);  
+  background: var(--surface);
+  // background: var(--sky-blue);
+  border-radius: 0 0 var(--space-2) var(--space-2);
 }
 
 .section--life-events .life-events-panel {
