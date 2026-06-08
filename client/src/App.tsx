@@ -19,6 +19,7 @@ import {
   LifeEventsPanel,
   type LifeEventActiveImpact,
 } from "./components/LifeEventsPanel";
+import { LifeEventsSectionDivider } from "./components/life-events/LifeEventsSectionDivider";
 import { DrawerPanel } from "./components/DrawerPanel";
 import { TaxSummaryCard } from "./components/TaxSummaryCard";
 import { IncomeHarvestPreviewPanel } from "./components/IncomeHarvestPreviewPanel";
@@ -1240,11 +1241,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
                   </div>
 
                   {c.hasPortfolioBalances && phase === "growth" ? (
-                    <hr className="divider" />
-                  ) : null}
-
-                  {c.hasPortfolioBalances && phase === "growth" ? (
                     <div className="section section--life-events">
+                      <LifeEventsSectionDivider />
                       <LifeEventsPanel
                         projectionData={lifeEventsProjectionData}
                         retirementYear={c.retirementCalendarYear}

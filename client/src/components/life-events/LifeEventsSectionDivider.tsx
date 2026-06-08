@@ -1,0 +1,29 @@
+import "../LifeEventsPanel.scss";
+
+type Props = {
+  className?: string;
+};
+
+/** Jagged ribbon divider (1000×100) — top edge of the life events section. */
+const LIFE_EVENTS_SECTION_DIVIDER_D =
+  "M0 52 L6 38 L14 58 L23 42 L33 55 L44 35 L57 60 L70 41 L86 56 L101 37 L120 58 L138 43 L159 54 L179 34 L203 61 L209 40 L217 56 L226 36 L236 59 L247 42 L260 55 L273 32 L289 61 L304 39 L323 57 L341 42 L362 55 L382 35 L406 59 L412 41 L420 56 L429 37 L439 58 L450 43 L463 55 L476 34 L492 60 L507 40 L526 57 L544 36 L565 59 L585 41 L609 56 L615 33 L623 61 L632 38 L642 57 L653 42 L666 55 L679 36 L695 59 L710 40 L729 56 L747 37 L768 58 L788 43 L812 54 L818 35 L826 60 L835 41 L845 56 L856 38 L869 58 L882 42 L898 55 L913 34 L932 61 L950 40 L971 57 L991 36 L1000 59 L1000 69 L991 46 L971 67 L950 50 L932 71 L913 44 L898 65 L882 52 L869 68 L856 48 L845 66 L835 51 L826 70 L818 45 L812 64 L788 53 L768 68 L747 47 L729 66 L710 50 L695 69 L679 46 L666 65 L653 52 L642 67 L632 48 L623 71 L615 43 L609 66 L585 51 L565 69 L544 46 L526 67 L507 50 L492 70 L476 44 L463 65 L450 53 L439 68 L429 47 L420 66 L412 51 L406 69 L382 45 L362 65 L341 52 L323 67 L304 49 L289 71 L273 42 L260 65 L247 52 L236 69 L226 46 L217 66 L209 50 L203 71 L179 44 L159 64 L138 53 L120 68 L101 47 L86 66 L70 51 L57 70 L44 45 L33 65 L23 52 L14 68 L6 48 L0 62Z";
+
+export function LifeEventsSectionDivider({ className }: Props) {
+  return (
+    <div
+      className={["life-events-section-divider", className]
+        .filter(Boolean)
+        .join(" ")}
+      aria-hidden
+    >
+      <svg
+        className="life-events-section-divider__svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1000 100"
+        preserveAspectRatio="none"
+      >
+        <path d={LIFE_EVENTS_SECTION_DIVIDER_D} fill="currentColor" />
+      </svg>
+    </div>
+  );
+}

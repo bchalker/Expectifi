@@ -1,19 +1,45 @@
 /* Shares `.main` column with Retirement Account Balances — same content width, not a second boundary box. */
 .section--life-events {
+  /* Matches header My Plans / Retire by green (Header.scss --header-brand-green) */
+  --life-events-divider-green: #8fbc8f;
+
   width: 100%;
   max-width: 100%;
   margin-bottom: 0;
   box-sizing: border-box;
-  padding: var(--space-5);  
-  background: var(--surface);
+  padding: var(--space-7);
+  padding-top: 0;
+  // background: var(--surface);
   // background: var(--sky-blue);
   border-radius: 0 0 var(--space-2) var(--space-2);
-  box-shadow: hsl(120, 25%, 65%, 20%) 0px -10px 40px -10px;
+  // box-shadow: hsl(120, 25%, 65%, 20%) 0px -10px 40px -10px;
+}
+
+.life-events-section-divider {
+  display: block;
+  width: calc(100% + 2 * var(--space-5));
+  margin: 0 calc(-1 * var(--space-5)) var(--space-4);
+  line-height: 0;
+  color: var(--life-events-divider-green);
+  // filter: drop-shadow(0 0 10px var(--life-events-divider-green));
+  pointer-events: none;
+  padding: var(--space-5);
+}
+
+.life-events-section-divider__svg {
+  display: block;
+  width: 100%;
+  height: clamp(1rem, 2vw, 0.875rem);
+}
+
+.section--life-events > .life-events-panel__header {
+  margin: 0 0 var(--space-4);
+  padding: 0;
 }
 
 .section--life-events .life-events-panel {
   margin-top: 0;
-  padding: var(--space-4) /* review: was 1.25rem */ 0 0;
+  padding: 0;
   border-top: none;
   box-sizing: border-box;
 }
@@ -24,7 +50,9 @@
 }
 
 .life-events-panel__header.account-balances-header-row {
-  margin-top: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .life-events-panel__impact {

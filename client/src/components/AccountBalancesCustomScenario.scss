@@ -9,6 +9,7 @@
   padding: var(--space-4);
   padding: var(--space-4);
   margin-top: var(--space-6);
+  // background: #8fbc8f;
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   
   // border-bottom: 1px solid var(--border);
@@ -17,13 +18,14 @@
 .account-balances-header-row__title-block {
   flex: 1 1 auto;
   min-width: 0;
+  margin-bottom: var(--space-4);
 }
 
 .account-balances-header-row__title {
   margin: 0;
   padding: 0;
   border: none;
-  font-family: var(--body);
+  font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);

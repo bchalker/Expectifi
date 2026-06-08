@@ -12,42 +12,14 @@ export type ActiveEventSummary = {
 type Props = {
   activeEvents: ActiveEventSummary[]
   totalImpact: number
-  activeEventTitle: { word: string; noun: string } | null
-  activeEventCount: number
 }
 
 export function LifeEventsSidebar({
   activeEvents,
   totalImpact,
-  activeEventTitle,
-  activeEventCount,
 }: Props) {
   return (
     <aside className="life-events-sidebar" aria-label="Life events summary">
-      <header className="life-events-sidebar__header account-balances-header-row">
-        <div className="account-balances-header-row__title-block">
-          <h2
-            id="life-events-heading"
-            className="account-balances-header-row__title"
-          >
-            {activeEventTitle ? (
-              <>
-                {activeEventTitle.word}{' '}
-                <span className="life-events-panel__active-count">
-                  ({activeEventCount})
-                </span>{' '}
-                {activeEventTitle.noun}
-              </>
-            ) : (
-              'Life events'
-            )}
-          </h2>
-          <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
-            Moments that pull from your compounding portfolio before retirement
-          </p>
-        </div>
-      </header>
-
       <div className="life-events-sidebar__section">
         <h3 className="life-events-sidebar__heading">Active events</h3>
         {activeEvents.length > 0 ? (

@@ -324,7 +324,7 @@ export function LifeEventsPanel({
     .join(" ");
 
   return (
-    <section className={panelClassName} aria-labelledby="life-events-heading">
+    <>
       {activePhase === "income" ? (
         <header className="life-events-panel__header account-balances-header-row">
           <div className="account-balances-header-row__title-block">
@@ -340,20 +340,46 @@ export function LifeEventsPanel({
             </p>
           </div>
         </header>
-      ) : null}
-
-      {activePhase === "income" ? (
-        <div className="life-events-panel__income-empty">
-          <p className="life-events-panel__income-empty-text">
-            No income phase events yet.
-          </p>
-          <p className="life-events-panel__income-empty-subtext">
-            Switch to growth phase to model expenses before retirement.
-          </p>
-        </div>
       ) : (
-        <div className="life-events-panel__layout">
-          <div className="life-events-panel__cards">
+        <header className="life-events-panel__header account-balances-header-row">
+          <div className="account-balances-header-row__title-block">
+            <h2
+              id="life-events-heading"
+              className="account-balances-header-row__title"
+            >
+              {activeEventTitle ? (
+                <>
+                  {activeEventTitle.word}{" "}
+                  <span className="life-events-panel__active-count">
+                    ({activeEventCount})
+                  </span>{" "}
+                  {activeEventTitle.noun}
+                </>
+              ) : (
+                "Life events"
+              )}
+            </h2>
+            <p className="account-balances-header-row__subtitle account-balances-header-row__subtitle--note">
+              Moments that pull from your compounding portfolio before
+              retirement
+            </p>
+          </div>
+        </header>
+      )}
+
+      <section className={panelClassName} aria-labelledby="life-events-heading">
+        {activePhase === "income" ? (
+          <div className="life-events-panel__income-empty">
+            <p className="life-events-panel__income-empty-text">
+              No income phase events yet.
+            </p>
+            <p className="life-events-panel__income-empty-subtext">
+              Switch to growth phase to model expenses before retirement.
+            </p>
+          </div>
+        ) : (
+          <div className="life-events-panel__layout">
+            <div className="life-events-panel__cards">
             {eventStates.map((state) => {
               const config = growthEventConfigs.find(
                 (c) => c.id === state.configId,
@@ -386,11 +412,10 @@ export function LifeEventsPanel({
           <LifeEventsSidebar
             activeEvents={activeEventSummaries}
             totalImpact={totalActiveImpact}
-            activeEventTitle={activeEventTitle}
-            activeEventCount={activeEventCount}
           />
-        </div>
-      )}
-    </section>
+          </div>
+        )}
+      </section>
+    </>
   );
 }
