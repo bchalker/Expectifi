@@ -100,6 +100,35 @@ function WingRateRange({ row }: { row: GrowthScenarioRangeRow }) {
   );
 }
 
+function WingDeltaPill({
+  row,
+  delta,
+}: {
+  row: GrowthScenarioRangeRow;
+  delta: number;
+}) {
+  let tone: "negative" | "positive" | "neutral" = "neutral";
+  if (delta < -500) tone = "negative";
+  else if (delta > 500) tone = "positive";
+
+  return (
+    <div className="growth-scenario-range-card__wing-delta-row">
+      <span
+        className={[
+          "growth-scenario-range-card__delta-pill",
+          tone === "negative" && "growth-scenario-range-card__delta-pill--negative",
+          tone === "positive" && "growth-scenario-range-card__delta-pill--positive",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <DeltaAmount delta={delta} />
+        <WingTrendIcon id={row.id} />
+      </span>
+    </div>
+  );
+}
+
 function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
   return (
     <div className="growth-scenario-range-card__wing-item">
@@ -111,10 +140,7 @@ function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
       </span>
       <WingRateRange row={row} />
       {row.deltaFromExpected != null ? (
-        <div className="growth-scenario-range-card__wing-delta-row">
-          <DeltaAmount delta={row.deltaFromExpected} />
-          <WingTrendIcon id={row.id} />
-        </div>
+        <WingDeltaPill row={row} delta={row.deltaFromExpected} />
       ) : null}
     </div>
   );

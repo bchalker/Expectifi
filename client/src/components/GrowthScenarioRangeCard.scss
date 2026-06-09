@@ -62,7 +62,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.growth-scenario-range-card__delta-pill {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: normal;
 }
 
 .growth-scenario-range-card__wing-value {
