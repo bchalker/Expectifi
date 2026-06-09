@@ -166,6 +166,28 @@ export async function ensureSchema(): Promise<void> {
   await p.query(`CREATE INDEX IF NOT EXISTS accounts_user_id ON accounts (user_id)`)
 
   await p.query(`
+    CREATE TABLE IF NOT EXISTS user_portfolio_imports (
+      user_id TEXT NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await p.query(
+    `CREATE INDEX IF NOT EXISTS user_portfolio_imports_updated_at ON user_portfolio_imports (updated_at)`,
+  )
+
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS user_plan_state (
+      user_id TEXT NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await p.query(
+    `CREATE INDEX IF NOT EXISTS user_plan_state_updated_at ON user_plan_state (updated_at)`,
+  )
+
+  await p.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT NOT NULL PRIMARY KEY,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

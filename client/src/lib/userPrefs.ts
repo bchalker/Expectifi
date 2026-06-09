@@ -16,6 +16,7 @@ export type UserPrefs = {
   dob: string
   retirementAge: number
   monthlyGoal: number
+  growthGoal?: number
   ssClaimingAge: number
   residenceCountry?: string
 }
@@ -66,14 +67,25 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
   const dob = typeof o.dob === 'string' ? o.dob.trim() : ''
   const retirementAge = typeof o.retirementAge === 'number' ? o.retirementAge : Number(o.retirementAge)
   const monthlyGoal = typeof o.monthlyGoal === 'number' ? o.monthlyGoal : Number(o.monthlyGoal)
+  const growthGoalRaw =
+    o.growthGoal === undefined || o.growthGoal === null
+      ? undefined
+      : typeof o.growthGoal === 'number'
+        ? o.growthGoal
+        : Number(o.growthGoal)
   const ssClaimingAge =
     typeof o.ssClaimingAge === 'number' ? o.ssClaimingAge : Number(o.ssClaimingAge)
   const residenceCountry =
     typeof o.residenceCountry === 'string' ? o.residenceCountry.trim() : ''
+  const growthGoal =
+    growthGoalRaw === undefined || !Number.isFinite(growthGoalRaw)
+      ? undefined
+      : Math.max(0, Math.round(growthGoalRaw))
   const prefs: UserPrefs = {
     dob,
     retirementAge: Math.round(retirementAge),
     monthlyGoal: Math.round(monthlyGoal),
+    ...(growthGoal !== undefined ? { growthGoal } : {}),
     ssClaimingAge: clampClaimAge(Math.round(ssClaimingAge)),
     ...(residenceCountry ? { residenceCountry } : {}),
   }
@@ -85,16 +97,20 @@ export function userPrefsToCalculatorPatch(p: UserPrefs): Partial<CalculatorInpu
     dateOfBirth: p.dob,
     targetRetirementAge: Math.round(p.retirementAge),
     monthlyIncomeGoal: Math.max(0, Math.round(p.monthlyGoal)),
+    growthGoal: Math.max(0, Math.round(p.growthGoal ?? 0)),
     ssAge: clampClaimAge(p.ssClaimingAge),
     residenceCountry: p.residenceCountry ?? '',
   }
 }
 
 export function calculatorInputsToPlanningPrefs(inputs: CalculatorInputs): UserPrefs | null {
+  const growthGoal = Math.max(0, Math.round(inputs.growthGoal))
+  const monthlyGoal = Math.max(0, Math.round(inputs.monthlyIncomeGoal))
   const prefs: UserPrefs = {
     dob: inputs.dateOfBirth,
     retirementAge: inputs.targetRetirementAge,
-    monthlyGoal: inputs.monthlyIncomeGoal,
+    monthlyGoal,
+    growthGoal,
     ssClaimingAge: clampClaimAge(inputs.ssAge),
     ...(inputs.residenceCountry?.trim()
       ? { residenceCountry: inputs.residenceCountry.trim() }

@@ -16,9 +16,9 @@ import {
   hasSavePlanBeenAccepted,
   persistPlanState,
   purgeUnconsentedPlanStorage,
+  resolveUserTier,
   saveMeta,
   setPlanWriteTier,
-  tierCanPersistCsvHoldings,
   type AuthTierInput,
   type PlanHydration,
   type PlanPersistSnapshot,
@@ -35,6 +35,8 @@ import {
   setSessionSavePlanDismissed,
 } from '../lib/sessionFlags'
 import { clearCsvSession } from '../lib/planStorage/csvSession'
+import { hydrateCsvImportFromServer } from '../lib/csvImportServerSync'
+import { hydratePlanStateFromServer } from '../lib/planStateServerSync'
 
 export type SavePlanPromptSignals = {
   dashboardVisible: boolean
@@ -108,20 +110,35 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     setIsHydrated(false)
 
-    const auth = authTierInputFromUser(user)
-    const nextHydration = bootPlanHydration(auth)
-    if (cancelled) return
+    const run = async () => {
+      const auth = authTierInputFromUser(user)
+      if (user) {
+        bootPlanHydration(auth)
+        setPlanWriteTier(resolveUserTier(auth))
+        await hydratePlanStateFromServer()
+        if (cancelled) return
+      }
+      const nextHydration = bootPlanHydration(auth)
+      if (cancelled) return
+      setPlanWriteTier(nextHydration.tier)
+      setHydration(nextHydration)
+      setIsHydrated(true)
+    }
 
-    setPlanWriteTier(nextHydration.tier)
-    setHydration(nextHydration)
-    setIsHydrated(true)
-
+    void run()
     return () => {
       cancelled = true
     }
   }, [authLoading, user?.id, user?.subscriptionStatus])
 
   const tier = hydration.tier
+
+  useEffect(() => {
+    if (!isHydrated || authLoading || tier !== 'pro' || !user) return
+    void hydrateCsvImportFromServer().then((applied) => {
+      if (applied) setCsvHoldingsRev((n) => n + 1)
+    })
+  }, [isHydrated, authLoading, tier, user?.id])
 
   const updateSavePlanPromptSignals = useCallback((signals: SavePlanPromptSignals) => {
     setSavePlanSignals(signals)
@@ -205,7 +222,7 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
       isPro,
       canPersistPlanLocally: canPersistPlanToLocalStorage(tier),
       canUsePlaid: isPro,
-      canPersistCsvHoldings: tierCanPersistCsvHoldings(tier),
+      canPersistCsvHoldings: isPro,
       hasSessionCsvHoldings: sessionCsvHoldings,
       clearCsvSession: clearCsvSessionInContext,
       hydration,

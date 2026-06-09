@@ -60,7 +60,7 @@ function shouldPersistCsvToLocalStorage(): boolean {
   return tierCanPersistCsvHoldings(getPlanWriteTier())
 }
 
-function readLocalStoragePositionsImport(): StoredPositionsImportV2 | null {
+export function readLocalStoragePositionsImport(): StoredPositionsImportV2 | null {
   try {
     const raw = localStorage.getItem(FIDELITY_IMPORT_STORAGE_KEY)
     if (!raw) return null
@@ -86,7 +86,7 @@ function readLocalStoragePositionsImport(): StoredPositionsImportV2 | null {
   }
 }
 
-function writeLocalStoragePositionsImport(data: StoredPositionsImportV2): void {
+export function writeLocalStoragePositionsImport(data: StoredPositionsImportV2): void {
   const batches = enrichImportBatches(data.batches)
   const payload: StoredPositionsImportV2 = {
     version: 2,
@@ -108,8 +108,8 @@ function migrateCsvSessionToLocalStorageIfNeeded(): void {
 }
 
 /**
- * Boot: anonymous guests get ephemeral CSV only; signed-in / browser-save tiers keep
- * localStorage holdings and migrate any in-tab session import before clearing session.
+ * Boot: pro subscribers keep localStorage holdings and migrate any in-tab session import
+ * before clearing session; all other tiers get ephemeral CSV only (cleared each load).
  */
 export function clearNonProCsvHoldingsOnBoot(tier: UserTier = getPlanWriteTier()): void {
   if (tierCanPersistCsvHoldings(tier)) {
@@ -230,8 +230,10 @@ export function saveStoredPositionsImport(data: StoredPositionsImportV2) {
     saveCsvSession(payload)
     return
   }
-  localStorage.setItem(FIDELITY_IMPORT_STORAGE_KEY, JSON.stringify(payload))
-  setSessionHasCsvHoldings((payload.batches?.length ?? 0) > 0)
+  writeLocalStoragePositionsImport(payload)
+  void import('./csvImportServerSync').then(({ queueCsvImportServerSync }) => {
+    queueCsvImportServerSync(payload)
+  })
 }
 
 /**

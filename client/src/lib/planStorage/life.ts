@@ -198,6 +198,9 @@ export function saveLifePlans(patch: Partial<LifePlans>): LifePlans {
   })
   if (canWriteExpectifiPlanBlobs()) {
     writeJsonToLocalStorage(EXPECTIFI_LIFE_PLANS_KEY, next)
+    void import('../planStateServerSync').then(({ queuePlanStateServerSync }) => {
+      queuePlanStateServerSync()
+    })
   }
   return next
 }

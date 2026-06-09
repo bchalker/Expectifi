@@ -2,6 +2,7 @@ export type UserPrefs = {
   dob: string
   retirementAge: number
   monthlyGoal: number
+  growthGoal?: number
   ssClaimingAge: number
   residenceCountry?: string
 }
@@ -44,11 +45,21 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
   const dob = typeof o.dob === 'string' ? o.dob.trim() : ''
   const retirementAge = typeof o.retirementAge === 'number' ? o.retirementAge : Number(o.retirementAge)
   const monthlyGoal = typeof o.monthlyGoal === 'number' ? o.monthlyGoal : Number(o.monthlyGoal)
+  const growthGoalRaw =
+    o.growthGoal === undefined || o.growthGoal === null
+      ? undefined
+      : typeof o.growthGoal === 'number'
+        ? o.growthGoal
+        : Number(o.growthGoal)
   const ssClaimingAge =
     typeof o.ssClaimingAge === 'number' ? o.ssClaimingAge : Number(o.ssClaimingAge)
   if (!isValidIsoDateString(dob)) return null
   const age = Math.round(retirementAge)
   const goal = Math.round(monthlyGoal)
+  const growthGoal =
+    growthGoalRaw === undefined || !Number.isFinite(growthGoalRaw)
+      ? 0
+      : Math.max(0, Math.round(growthGoalRaw))
   const ss = normalizeSsClaimAge(ssClaimingAge)
   if (!Number.isFinite(age) || age < RETIRE_AGE_MIN || age > RETIRE_AGE_MAX) return null
   if (!Number.isFinite(goal) || goal < 0) return null
@@ -58,6 +69,7 @@ export function parseUserPrefs(raw: unknown): UserPrefs | null {
     dob,
     retirementAge: age,
     monthlyGoal: goal,
+    growthGoal: growthGoal ?? 0,
     ssClaimingAge: ss,
     ...(residenceCountry ? { residenceCountry } : {}),
   }

@@ -170,6 +170,7 @@ export function profilePatchFromCalculatorInputs(
     monthly_contribution: Math.max(0, Math.round(inputs.save / 12)),
     target_retirement_age: inputs.targetRetirementAge,
     monthly_income_goal: inputs.monthlyIncomeGoal,
+    growth_goal: Math.max(0, Math.round(inputs.growthGoal)),
     include_social_security: ui.ssIncluded,
     ss_claim_age: clampClaimAgeInRange(inputs.ssAge, pension.claimAgeMin, pension.claimAgeMax),
     ss_benefit_estimate: Math.max(0, Math.round(inputs.ssBenefit67)),
@@ -386,6 +387,7 @@ export function profileToCalculatorPatch(profile: StoredUserProfile | null): Par
   if (profile.monthly_contribution != null) patch.save = Math.max(0, profile.monthly_contribution) * 12
   if (profile.target_retirement_age != null) patch.targetRetirementAge = profile.target_retirement_age
   if (profile.monthly_income_goal != null) patch.monthlyIncomeGoal = profile.monthly_income_goal
+  if (profile.growth_goal != null) patch.growthGoal = profile.growth_goal
   const locale = normalizeOnboardingRegionId(profile.locale) ?? localeForResidenceCountry(profile.country ?? '') ?? 'us'
   const pension = pensionConfigForLocale(locale)
   if (profile.ss_claim_age != null) {
@@ -426,6 +428,9 @@ export function mergeProfileWithDbPrefs(
     }
     if (merged.monthly_income_goal == null && dbPrefs.monthlyGoal != null) {
       merged.monthly_income_goal = dbPrefs.monthlyGoal
+    }
+    if (merged.growth_goal == null && dbPrefs.growthGoal != null) {
+      merged.growth_goal = dbPrefs.growthGoal
     }
     if (merged.ss_claim_age == null && dbPrefs.ssClaimingAge != null) {
       merged.ss_claim_age = dbPrefs.ssClaimingAge

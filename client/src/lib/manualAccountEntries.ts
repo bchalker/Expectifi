@@ -326,6 +326,9 @@ export function loadStoredManualAccounts(): StoredManualAccounts | null {
 export function saveStoredManualAccounts(state: StoredManualAccounts): void {
   if (!canWritePlanLocalStorage()) return
   savePlanAccounts(state)
+  void import('./planStateServerSync').then(({ queuePlanStateServerSync }) => {
+    queuePlanStateServerSync()
+  })
 }
 
 export function clearStoredManualAccounts(): void {

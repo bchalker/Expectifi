@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   blendedGrowthRate,
   type LifeEventsProjectionData,
@@ -27,19 +27,14 @@ export interface LifeEventsPanelProps {
   activePhase: "growth" | "income";
   withdrawalRate: number;
   hsaBalance: number;
+  eventStates: LifeEventState[];
+  onEventStatesChange: (states: LifeEventState[]) => void;
   onEventActiveChange?: (
     eventId: string,
     isActive: boolean,
     impact: LifeEventActiveImpact,
   ) => void;
   className?: string;
-}
-
-let nextEventInstanceId = 1;
-
-function createEventInstanceId(): string {
-  nextEventInstanceId += 1;
-  return `life-event-${nextEventInstanceId}`;
 }
 
 function lifeEventCountWord(count: number): string {
@@ -126,6 +121,8 @@ export function LifeEventsPanel({
   activePhase,
   withdrawalRate: _withdrawalRate,
   hsaBalance,
+  eventStates,
+  onEventStatesChange,
   onEventActiveChange = () => {},
   className = "",
 }: LifeEventsPanelProps) {
@@ -133,111 +130,13 @@ export function LifeEventsPanel({
   const retirementPortfolio = projectionData.baselineTotalAtRetirement;
   const growthRate = blendedGrowthRate(projectionData);
 
-  const [eventStates, setEventStates] = useState<LifeEventState[]>(() => {
-    const carConfig = growthEventConfigs.find((c) => c.id === "buy-car-cash");
-    const mortgageConfig = growthEventConfigs.find(
-      (c) => c.id === "pay-off-mortgage",
-    );
-    const renovationConfig = growthEventConfigs.find(
-      (c) => c.id === "home-renovation",
-    );
-    const medicalConfig = growthEventConfigs.find(
-      (c) => c.id === "medical-expense",
-    );
-    const tuitionConfig = growthEventConfigs.find(
-      (c) => c.id === "tuition-support",
-    );
-    const charitableConfig = growthEventConfigs.find(
-      (c) => c.id === "charitable-giving",
-    );
-    const churchTitheConfig = growthEventConfigs.find(
-      (c) => c.id === "church-tithe",
-    );
-
-    return [
-      {
-        id: createEventInstanceId(),
-        configId: "buy-car-cash",
-        amount: carConfig?.defaultAmount ?? 35000,
-        year:
-          carConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear + 1,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "pay-off-mortgage",
-        amount: mortgageConfig?.defaultAmount ?? 85000,
-        year:
-          mortgageConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear + 2,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "home-renovation",
-        amount: renovationConfig?.defaultAmount ?? 45000,
-        year:
-          renovationConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear + 1,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "medical-expense",
-        amount: medicalConfig?.defaultAmount ?? 25000,
-        year:
-          medicalConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear + 1,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "tuition-support",
-        amount: tuitionConfig?.defaultAmount ?? 600,
-        year:
-          tuitionConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear + 2,
-        duration: tuitionConfig?.defaultDuration ?? 4,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "charitable-giving",
-        amount: charitableConfig?.defaultAmount ?? 400,
-        year:
-          charitableConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear,
-        duration: charitableConfig?.defaultDuration ?? 20,
-        isActive: false,
-        isExpanded: false,
-      },
-      {
-        id: createEventInstanceId(),
-        configId: "church-tithe",
-        amount: churchTitheConfig?.defaultAmount ?? 500,
-        year:
-          churchTitheConfig?.defaultYear(currentYear, retirementYear) ??
-          currentYear,
-        duration: churchTitheConfig?.defaultDuration ?? 25,
-        isActive: false,
-        isExpanded: false,
-      },
-    ];
-  });
-
   const updateEventState = useCallback(
     (id: string, updates: Partial<LifeEventState>) => {
-      setEventStates((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+      onEventStatesChange(
+        eventStates.map((s) => (s.id === id ? { ...s, ...updates } : s)),
       );
     },
-    [],
+    [eventStates, onEventStatesChange],
   );
 
   const totalActiveImpact = useMemo(

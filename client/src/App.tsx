@@ -49,7 +49,16 @@ import {
 import { defaultWithdrawRateForStrategy } from "./lib/accountIncomeStrategy";
 import { normalizeRetireRegions } from "./lib/calc/retireRegions";
 import { buildLifeEventsProjectionData } from "./lib/calc/lifeEvents";
+import type { LifeEventState } from "./components/life-events/types";
+import {
+  loadGrowthLifeEvents,
+  saveGrowthLifeEvents,
+} from "./lib/planStorage/growthLifeEvents";
 import { loadLifePlans, type LifePlans } from "./lib/planStorage/life";
+import {
+  PLAN_STATE_SERVER_HYDRATED_EVENT,
+  queuePlanStateServerSync,
+} from "./lib/planStateServerSync";
 import { clearStoredManualAccounts } from "./lib/manualAccountEntries";
 import {
   inputsForPersistedCalculatorSession,
@@ -99,7 +108,10 @@ import {
 } from "./lib/welcomeGate";
 import { useUserTier } from "./hooks/useUserTier";
 import type { PlanPersistSnapshot } from "./lib/planStorage";
-import { clearSessionOnboardingComplete } from "./lib/sessionFlags";
+import {
+  clearSessionOnboardingComplete,
+  CSV_SESSION_HOLDINGS_EVENT,
+} from "./lib/sessionFlags";
 import {
   defaultCalculatorInputs,
   defaultCalculatorUi,
@@ -107,7 +119,6 @@ import {
 import { syncDisplayCurrencyFromResidence } from "./lib/displayCurrency";
 import {
   calculatorInputsToPlanningPrefs,
-  inputsHavePlanningProfileFields,
   syncPlanningPrefsFromInputs,
   userPrefsToCalculatorPatch,
 } from "./lib/userPrefs";
@@ -377,6 +388,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
     }
   }, []);
 
+  useEffect(() => {
+    if (!isHydrated || authLoading || !user) return;
+    queuePlanStateServerSync();
+  }, [isHydrated, authLoading, user, balanceMode, brokerageMode]);
+
   const setUi = useCallback((p: Partial<CalculatorUi>) => {
     setUiState((s) => ({ ...s, ...p }));
   }, []);
@@ -461,6 +477,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
       if (user && planningPrefs) {
         void saveUserPrefs(planningPrefs);
       }
+      if (user) {
+        queuePlanStateServerSync();
+      }
     }, 400);
     return () => window.clearTimeout(id);
   }, [
@@ -473,6 +492,21 @@ export default function App({ initialAuthModal = null }: AppProps) {
     user,
     saveUserPrefs,
   ]);
+
+  /** After server plan-state hydrate, refresh derived local-only UI state. */
+  useEffect(() => {
+    const onServerHydrated = () => {
+      setLifePlans(loadLifePlans());
+      setBalanceMode(loadBalanceInputMode());
+      setBrokerageMode(loadBrokerageBalanceMode());
+      setManualAccountsRev((n) => n + 1);
+      setPositionsImportRev((n) => n + 1);
+    };
+    window.addEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+    return () => {
+      window.removeEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+    };
+  }, []);
 
   /** After tier hydration, sync welcome overlay to hydration (anonymous = session-only). */
   useEffect(() => {
@@ -496,13 +530,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setOpenImportRequest((n) => n + 1);
   }, [welcomeDone]);
 
+  /** On sign-in, restore planning goals from DB (localStorage is cleared on other devices). */
   useEffect(() => {
     if (!user?.planPrefs) return;
-    setInputsState((s) => {
-      if (inputsHavePlanningProfileFields(s)) return s;
-      return { ...s, ...userPrefsToCalculatorPatch(user.planPrefs!) };
-    });
-  }, [user?.id, user?.planPrefs]);
+    setInputsState((s) => ({ ...s, ...userPrefsToCalculatorPatch(user.planPrefs!) }));
+  }, [user?.id]);
+
+  useEffect(() => {
+    const onCsvHoldingsChange = () => setPositionsImportRev((n) => n + 1);
+    window.addEventListener(CSV_SESSION_HOLDINGS_EVENT, onCsvHoldingsChange);
+    return () => {
+      window.removeEventListener(CSV_SESSION_HOLDINGS_EVENT, onCsvHoldingsChange);
+    };
+  }, []);
 
   const onImportedApplyBalances = useCallback(
     (
@@ -582,10 +622,51 @@ export default function App({ initialAuthModal = null }: AppProps) {
         retirement: balanceMode,
         brokerage: brokerageMode,
       }),
-    [inputs, uiForCompute, balanceMode, brokerageMode],
+    [inputs, uiForCompute, balanceMode, brokerageMode, positionsImportRev],
   );
 
   const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans());
+  const [lifeEventStates, setLifeEventStates] = useState<LifeEventState[]>(() =>
+    loadGrowthLifeEvents(),
+  );
+
+  const lifeEventsCurrentYear = c.retirementCalendarYear - c.yearsToRetirement;
+
+  const handleLifeEventStatesChange = useCallback(
+    (states: LifeEventState[]) => {
+      setLifeEventStates(
+        saveGrowthLifeEvents(
+          states,
+          lifeEventsCurrentYear,
+          c.retirementCalendarYear,
+        ),
+      );
+    },
+    [c.retirementCalendarYear, lifeEventsCurrentYear],
+  );
+
+  /** Push life-tab edits to server for signed-in users. */
+  useEffect(() => {
+    if (!isHydrated || authLoading || !user) return;
+    queuePlanStateServerSync();
+  }, [isHydrated, authLoading, user, lifePlans]);
+
+  /** Push growth life-event edits to server for signed-in users. */
+  useEffect(() => {
+    if (!isHydrated || authLoading || !user) return;
+    queuePlanStateServerSync();
+  }, [isHydrated, authLoading, user, lifeEventStates]);
+
+  useEffect(() => {
+    const onServerHydrated = () => {
+      setLifeEventStates(loadGrowthLifeEvents());
+    };
+    window.addEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+    return () => {
+      window.removeEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+    };
+  }, []);
+
   const [activeLifeEventImpact, setActiveLifeEventImpact] = useState<
     Record<string, LifeEventActiveImpact>
   >({});
@@ -1316,6 +1397,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
                         activePhase={phase}
                         withdrawalRate={inputs.wdRate}
                         hsaBalance={inputs.baseHsa}
+                        eventStates={lifeEventStates}
+                        onEventStatesChange={handleLifeEventStatesChange}
                         onEventActiveChange={handleLifeEventActiveChange}
                       />
                     </div>

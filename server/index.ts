@@ -34,6 +34,8 @@ import { subscriptionStatusFromStripe } from './stripeBilling.js'
 import { installGoogleAuth } from './googleAuth.js'
 import { installStripeWebhook, logStripeBillingConfigAtStartup } from './stripeWebhooks.js'
 import { parseUserPrefs, type UserPrefs } from './userPrefs.js'
+import { installCsvImportRoutes } from './csvImportRoutes.js'
+import { installPlanStateRoutes } from './planStateRoutes.js'
 import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
 import { installContactRoutes } from './contactRoutes.js'
 import { logContactMailConfigAtStartup } from './contactMail.js'
@@ -68,6 +70,8 @@ app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 installGoogleAuth(app, PORT)
 installPlaidRoutes(app, readSessionUser)
+installCsvImportRoutes(app, readSessionUser)
+installPlanStateRoutes(app, readSessionUser)
 installContactRoutes(app, readSessionUser)
 installDevRoutes(app)
 
