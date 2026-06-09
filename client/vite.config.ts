@@ -17,6 +17,9 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
   },
+  css: {
+    devSourcemap: true,
+  },
   server: {
     port: 5173,
     strictPort: false,

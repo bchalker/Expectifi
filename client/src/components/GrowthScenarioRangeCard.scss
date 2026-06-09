@@ -1,13 +1,17 @@
+.growth-scenario-range-card {
+  width: 100%;
+}
+
 .growth-scenario-range-card__expected {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  margin-top: var(--space-3);
-  padding: var(--space-4) 0 var(--space-3);
+  // margin-top: var(--space-3);
+  padding: var(--space-4);
   box-sizing: border-box;
-  border-top: 1px dashed var(--border);
+  // border-top: 1px dashed var(--border);
   border-bottom: 1px dashed var(--border);
   text-align: center;
 }
@@ -18,9 +22,9 @@
 
 .growth-scenario-range-card__expected-value {
   flex-shrink: 0;
-  font-family: var(--heading);
+  font-family: var(--body);
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
   color: var(--accent-text);
   font-variant-numeric: tabular-nums;
@@ -38,7 +42,7 @@
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
-  padding: var(--space-3) 0;
+  padding: var(--space-3);
   text-align: center;
 }
 
@@ -167,6 +171,40 @@
   }
 }
 
+@media (min-width: 680px) and (max-width: 899px) {
+  .growth-scenario-range-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .growth-scenario-range-card__expected {
+    order: 2;
+    margin-top: 0;
+    padding: var(--space-3);
+    border-bottom: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  .growth-scenario-range-card__wings {
+    display: contents;
+  }
+
+  .growth-scenario-range-card__wing-item:first-child {
+    order: 1;
+    padding: var(--space-3);
+  }
+
+  .growth-scenario-range-card__wing-item + .growth-scenario-range-card__wing-item {
+    order: 3;
+    padding: var(--space-3);
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--border);
+    border-top: none;
+  }
+}
+
 @media (max-width: 680px) {
   .growth-scenario-range-card__expected {
     margin-top: 0;
@@ -181,5 +219,6 @@
   .growth-scenario-range-card__wing-item + .growth-scenario-range-card__wing-item {
     padding-top: var(--space-3);
     border-top: 1px solid var(--border);
+    border-left: none;
   }
 }

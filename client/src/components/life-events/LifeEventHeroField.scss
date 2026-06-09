@@ -1,0 +1,56 @@
+.life-event-hero-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  width: 100%;
+}
+
+.life-event-hero-field__label {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.life-event-hero-field__affix-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.life-event-hero-field__control {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.life-event-hero-field__control input {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.life-event-hero-field__control--hug {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.life-event-hero-field__control--hug input {
+  width: auto;
+  min-width: 3.5rem;
+  field-sizing: content;
+}
+
+.life-event-hero-field__suffix {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1;
+}

@@ -166,33 +166,87 @@ export function formatStripPortfolioValue(value: number): string {
   return `$${(value / 1000).toFixed(0)}k`
 }
 
-export interface MortgageTradeoffResult {
-  investmentGain: number
-  interestSaved: number
-  netAdvantageOfInvesting: number
-  investingWins: boolean
-}
-
-export function calcMortgageTradeoff(
-  payoffAmount: number,
-  mortgageRate: number,
-  portfolioGrowthRate: number,
-  eventYear: number,
-  retirementYear: number,
-): MortgageTradeoffResult {
-  const yearsToRetirement = Math.max(0, retirementYear - eventYear)
-
-  const investmentGain =
-    calcFutureValue(payoffAmount, eventYear, retirementYear, portfolioGrowthRate) - payoffAmount
-
-  const interestSaved = payoffAmount * mortgageRate * yearsToRetirement
-
-  const netAdvantageOfInvesting = investmentGain - interestSaved
-
-  return {
-    investmentGain,
-    interestSaved,
-    netAdvantageOfInvesting: Math.round(netAdvantageOfInvesting / 100) * 100,
-    investingWins: netAdvantageOfInvesting > 0,
+/** Compact money for collapsed card helper lines (e.g. $4.8k, $28.8k). */
+export function formatCollapsedSummaryAmount(value: number): string {
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) {
+    return `$${(value / 1_000_000).toFixed(2)}M`
   }
+  if (abs >= 10_000) {
+    return `$${Math.round(value / 1000)}k`
+  }
+  if (abs >= 1_000) {
+    const thousands = value / 1000
+    return Number.isInteger(thousands)
+      ? `$${thousands}k`
+      : `$${thousands.toFixed(1)}k`
+  }
+  return formatCurrency(value)
 }
+
+export function formatCollapsedEventSummary(
+  config: LifeEventConfig,
+  params: {
+    year: number
+    amount: number
+    duration: number
+    retirementYear: number
+    totalOutflow?: number
+    mortgageInterestSaved?: number
+    hsaResult?: HsaOffsetResult | null
+  },
+): string {
+  const {
+    year,
+    amount,
+    duration,
+    retirementYear,
+    totalOutflow,
+    mortgageInterestSaved,
+    hsaResult,
+  } = params
+
+  if (config.isRecurring) {
+    const endYear = year + duration
+    const annualOutflow = amount * 12
+    if (endYear >= retirementYear) {
+      return `Monthly · ongoing · ${formatCollapsedSummaryAmount(annualOutflow)}/yr`
+    }
+    const total = totalOutflow ?? calcTotalOutflow(amount, true, duration)
+    const durationLabel = duration === 1 ? '1 year' : `${duration} years`
+    return `Monthly · ${durationLabel} · ${formatCollapsedSummaryAmount(total)} total`
+  }
+
+  if (isMortgageEventExtras(config.extras)) {
+    const interestSaved = mortgageInterestSaved ?? 0
+    return `One-time · payoff ${year} · ${formatCollapsedSummaryAmount(interestSaved)} interest saved`
+  }
+
+  if (isMedicalEventExtras(config.extras) && hsaResult) {
+    if (hsaResult.fullyCovered) {
+      return `One-time · ${year} · fully covered by HSA`
+    }
+    if (hsaResult.hsaOffset > 0) {
+      return `One-time · ${year} · ${formatCollapsedSummaryAmount(hsaResult.hsaOffset)} covered by HSA`
+    }
+  }
+
+  return `One-time · ${year} · from brokerage`
+}
+
+export function lifeEventRangeFillStyle(
+  value: number,
+  min: number,
+  max: number,
+): Record<string, string> {
+  const span = max - min
+  const pct = span > 0 ? ((value - min) / span) * 100 : 0
+  return { '--range-fill': `${pct}%` }
+}
+
+export type { MortgageTradeoffResult } from '../../lib/calc/mortgageLifeEvent'
+export {
+  calcMortgageBreakEvenRate,
+  calcMortgageTradeoff,
+  formatMortgageBreakEvenSentence,
+} from '../../lib/calc/mortgageLifeEvent'

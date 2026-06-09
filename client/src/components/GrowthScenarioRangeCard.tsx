@@ -178,7 +178,7 @@ export function GrowthScenarioRangeCard({
   const optimistic = rows.find((row) => row.id === "very_bull");
 
   return (
-    <>
+    <div className="growth-scenario-range-card">
       {expected ? (
         <div className="growth-scenario-range-card__expected">
           <span className="growth-scenario-range-card__label">
@@ -201,6 +201,6 @@ export function GrowthScenarioRangeCard({
           <WingTile row={optimistic} />
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

@@ -1,4 +1,10 @@
 import type { LifeEventState } from '../../components/life-events/types'
+import {
+  clampMortgagePayoffYear,
+  getDefaultMortgagePayoffYear,
+  normalizeMortgageLoanStartYear,
+  normalizeMortgageLoanTermYears,
+} from '../calc/mortgageLifeEvent'
 import { EXPECTIFI_GROWTH_LIFE_EVENTS_KEY } from './keys'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'
 import { canWriteExpectifiPlanBlobs } from './writeContext'
@@ -40,7 +46,7 @@ function stableEventId(configId: KnownConfigId): string {
 }
 
 function clampYear(year: number, currentYear: number, retirementYear: number): number {
-  const maxYear = Math.max(currentYear, retirementYear - 1)
+  const maxYear = Math.max(currentYear, retirementYear)
   return Math.min(Math.max(Math.round(year), currentYear), maxYear)
 }
 
@@ -60,14 +66,12 @@ function normalizeEvent(
 ): LifeEventState {
   const seed = DEFAULT_SEEDS[configId]
   const o = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
-  const defaultYear = clampYear(currentYear + seed.yearOffset, currentYear, retirementYear)
   const amount = Math.max(0, num(o.amount, seed.amount))
-  const year = clampYear(num(o.year, defaultYear), currentYear, retirementYear)
   const state: LifeEventState = {
     id: typeof o.id === 'string' && o.id.trim() ? o.id.trim() : stableEventId(configId),
     configId,
     amount,
-    year,
+    year: currentYear,
     isActive: bool(o.isActive, false),
     isExpanded: bool(o.isExpanded, false),
   }
@@ -76,6 +80,32 @@ function normalizeEvent(
   }
   if (seed.duration != null) {
     state.duration = Math.max(1, Math.round(num(o.duration, seed.duration)))
+  }
+  if (configId === 'pay-off-mortgage') {
+    const rate = num(o.mortgageRate, 0.04)
+    state.mortgageRate = Math.min(0.1, Math.max(0.005, rate))
+    state.mortgageMonthlyPayment = Math.min(
+      5000,
+      Math.max(500, Math.round(num(o.mortgageMonthlyPayment, 1500))),
+    )
+    state.mortgageLoanTermYears = normalizeMortgageLoanTermYears(o.mortgageLoanTermYears)
+    state.mortgageLoanStartYear = normalizeMortgageLoanStartYear(o.mortgageLoanStartYear, currentYear)
+    const defaultPayoffYear = getDefaultMortgagePayoffYear(
+      currentYear,
+      retirementYear,
+      state.mortgageLoanTermYears,
+      state.mortgageLoanStartYear,
+    )
+    state.year = clampMortgagePayoffYear(
+      num(o.year, defaultPayoffYear),
+      currentYear,
+      retirementYear,
+      state.mortgageLoanTermYears,
+      state.mortgageLoanStartYear,
+    )
+  } else {
+    const defaultYear = clampYear(currentYear + seed.yearOffset, currentYear, retirementYear)
+    state.year = clampYear(num(o.year, defaultYear), currentYear, retirementYear)
   }
   return state
 }

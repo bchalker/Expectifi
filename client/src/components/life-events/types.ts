@@ -83,6 +83,11 @@ export interface LifeEventState {
   isExpanded: boolean
   label?: string
   duration?: number
+  /** Pay-off-mortgage card only — persisted in growth life-events storage. */
+  mortgageRate?: number
+  mortgageMonthlyPayment?: number
+  mortgageLoanTermYears?: number
+  mortgageLoanStartYear?: number
 }
 
 export interface LifeEventCalculated {

@@ -12,7 +12,7 @@ export const growthEventConfigs: LifeEventConfig[] = [
     color: '#EF9F27',
     defaultAmount: 35000,
     defaultYear: (currentYear, retirementYear) =>
-      Math.min(currentYear + 1, retirementYear - 1),
+      Math.min(currentYear + 1, retirementYear),
     amountMin: 5000,
     amountMax: 100000,
     amountStep: 1000,

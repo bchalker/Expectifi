@@ -4,13 +4,10 @@ import {
   type LifeEventsProjectionData,
 } from "../lib/calc/lifeEvents";
 import GrowthEventCard from "./life-events/GrowthEventCard";
-import { LifeEventsSidebar } from "./life-events/LifeEventsSidebar";
 import { growthEventConfigs } from "./life-events/eventConfigs";
 import {
   calcEventImpactFutureValue,
-  calcEventValues,
-  calcHsaOffset,
-  isMedicalEventExtras,
+  formatCurrency,
 } from "./life-events/utils";
 import type { LifeEventConfig, LifeEventState } from "./life-events/types";
 import "./LifeEventsPanel.scss";
@@ -87,33 +84,6 @@ function calcTotalActiveImpact(
     }, 0);
 }
 
-function calcOtherActiveImpact(
-  excludeId: string,
-  eventStates: LifeEventState[],
-  retirementYear: number,
-  growthRate: number,
-  configs: LifeEventConfig[],
-  hsaBalance: number,
-): number {
-  return eventStates
-    .filter((s) => s.isActive && s.configId !== excludeId)
-    .reduce((sum, s) => {
-      const config = configs.find((c) => c.id === s.configId);
-      if (!config) return sum;
-      const fv = calcEventImpactFutureValue(
-        config,
-        s.amount,
-        s.year,
-        retirementYear,
-        growthRate,
-        hsaBalance,
-        s.duration,
-      );
-      const isOutflow = config.type.includes("out");
-      return sum + (isOutflow ? fv : -fv);
-    }, 0);
-}
-
 export function LifeEventsPanel({
   projectionData,
   retirementYear,
@@ -160,53 +130,6 @@ export function LifeEventsPanel({
     () => (activeEventCount > 0 ? lifeEventCountTitle(activeEventCount) : null),
     [activeEventCount],
   );
-
-  const activeEventSummaries = useMemo(() => {
-    return eventStates
-      .filter((s) => s.isActive)
-      .map((state) => {
-        const config = growthEventConfigs.find((c) => c.id === state.configId);
-        if (!config) return null;
-        const yearValue = Math.min(
-          Math.max(state.year, currentYear),
-          Math.max(currentYear, retirementYear - 1),
-        );
-        const durationValue = state.duration ?? config.defaultDuration ?? 1;
-        const hsaResult = isMedicalEventExtras(config.extras)
-          ? calcHsaOffset(state.amount, hsaBalance)
-          : null;
-        const calcAmount = config.isRecurring
-          ? state.amount
-          : hsaResult
-            ? hsaResult.netExpense
-            : state.amount;
-        const { futureValue, rating: calcRating } = calcEventValues(
-          calcAmount,
-          yearValue,
-          retirementYear,
-          retirementPortfolio,
-          growthRate,
-          config.isRecurring,
-          durationValue,
-        );
-        const rating =
-          hsaResult?.fullyCovered === true ? "minimal" : calcRating;
-        return {
-          id: state.id,
-          label: config.canonicalLabel,
-          futureValue,
-          rating,
-        };
-      })
-      .filter((entry) => entry != null);
-  }, [
-    eventStates,
-    currentYear,
-    retirementYear,
-    retirementPortfolio,
-    growthRate,
-    hsaBalance,
-  ]);
 
   const handleActiveChange = useCallback(
     (id: string, isActive: boolean, futureValue: number) => {
@@ -263,6 +186,14 @@ export function LifeEventsPanel({
               retirement
             </p>
           </div>
+          <div className="life-events-panel__impact">
+            <span className="life-events-panel__impact-value tabular-nums">
+              {totalActiveImpact > 0
+                ? `-${formatCurrency(totalActiveImpact)}`
+                : formatCurrency(0)}
+            </span>
+            <span className="life-events-panel__impact-label">Total impact</span>
+          </div>
         </header>
       )}
 
@@ -277,8 +208,7 @@ export function LifeEventsPanel({
             </p>
           </div>
         ) : (
-          <div className="life-events-panel__layout">
-            <div className="life-events-panel__cards">
+          <div className="life-events-panel__cards">
             {eventStates.map((state) => {
               const config = growthEventConfigs.find(
                 (c) => c.id === state.configId,
@@ -293,25 +223,12 @@ export function LifeEventsPanel({
                   retirementPortfolio={retirementPortfolio}
                   currentYear={currentYear}
                   growthRate={growthRate}
-                  otherActiveImpact={calcOtherActiveImpact(
-                    state.configId,
-                    eventStates,
-                    retirementYear,
-                    growthRate,
-                    growthEventConfigs,
-                    hsaBalance,
-                  )}
                   hsaBalance={hsaBalance}
                   onStateChange={updateEventState}
                   onActiveChange={handleActiveChange}
                 />
               );
             })}
-          </div>
-          <LifeEventsSidebar
-            activeEvents={activeEventSummaries}
-            totalImpact={totalActiveImpact}
-          />
           </div>
         )}
       </section>

@@ -8,6 +8,7 @@
   box-sizing: border-box;
   background: transparent;
   overflow: visible;
+  padding: var(--space-5);
 }
 
 .growth-assumptions-panel__main {
@@ -37,7 +38,10 @@
 }
 
 .growth-assumptions-panel__scenario {
-  padding: 0 var(--space-5) var(--space-4);
+  // padding: var(--space-4);
+  background: var(--surface);
+  border-radius: var(--space-2);
+box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 .growth-assumptions-panel__return-expectations[data-slot='accordion'] {

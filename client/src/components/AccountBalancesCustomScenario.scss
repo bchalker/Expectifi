@@ -36,7 +36,7 @@
 
 .tax-breakdown-panel-trigger {
   display: block;
-  margin: var(--space-1) 0 0;
+  // margin: var(--space-1) 0 0;
   padding: 0;
   border: none;
   background: none;
@@ -187,77 +187,96 @@
   background: var(--border);
 }
 
-/* Tablet — title full width; dropdowns row below; tax icon flush right */
+/* Tablet — Retirement Accounts + Manage on one row (accounts header only) */
 @media (min-width: 681px) and (max-width: 1279px) {
-  .account-balances-header-row {
-    flex-wrap: wrap;
-    align-items: center;
-    row-gap: var(--space-3);
-  }
-
-  .account-balances-header-row__title-block {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .account-balances-header-row__actions {
-    flex: 1 1 100%;
-    width: 100%;
+  .account-balances-header-row:not(.life-events-panel__header) {
     flex-direction: row;
+    align-items: flex-start;
     flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: var(--space-3);
-    margin-left: 0;
+    justify-content: space-between;
+    row-gap: 0;
   }
 
-  .account-balances-header-row__actions-primary {
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__title-block {
     flex: 1 1 auto;
     min-width: 0;
+    width: auto;
+    margin-bottom: 0;
   }
 
-  .account-balances-header-row__actions-primary > * {
-    flex: 1 1 0;
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions {
+    flex: 0 0 auto;
+    width: auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-left: auto;
+  }
+
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary {
+    flex: 0 0 auto;
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary > * {
+    flex: 0 0 auto;
     min-width: 0;
   }
-
 }
 
 @media (max-width: 680px) {
-  .account-balances-header-row {
-    flex-direction: column;
-    align-items: stretch;
+  .account-balances-header-row:not(.life-events-panel__header) {
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     gap: var(--space-3);
     padding-block: var(--space-3);
     padding-inline: 0;
     margin-top: var(--space-4);
   }
 
-  .account-balances-header-row__title-block {
-    width: 100%;
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__title-block {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    margin-bottom: 0;
   }
 
-  .account-balances-header-row__actions {
-    flex-direction: column;
-    align-items: stretch;
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-end;
     gap: var(--space-2);
-    width: 100%;
-    margin-left: 0;
+    width: auto;
+    margin-left: auto;
   }
 
-  .account-balances-header-row__actions-primary {
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    align-items: stretch;
-    justify-content: flex-start;
+    align-items: flex-start;
+    justify-content: flex-end;
     gap: var(--space-2);
-    width: 100%;
+    width: auto;
     min-width: 0;
   }
 
-  .account-balances-header-row__actions-primary > * {
-    flex: 1 1 0;
+  .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary > * {
+    flex: 0 0 auto;
     min-width: 0;
   }
 }

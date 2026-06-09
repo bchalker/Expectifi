@@ -2397,18 +2397,6 @@ export function AccountBalances({
     );
   }
 
-  function renderWithdrawalGuidanceBlock() {
-    if (!showWithdrawalGuidance) return null;
-    return (
-      <p className="account-balances-withdrawal-helper">
-        <span className="account-balances-withdrawal-helper__text">
-          Withdraw in this order to minimize taxes.
-        </span>{" "}
-        <TaxBreakdownPanelTrigger variant="inline">Why?</TaxBreakdownPanelTrigger>
-      </p>
-    );
-  }
-
   function metaFor(bucket: WithdrawalDisplayBucket) {
     return withdrawalBadgeAndHint(
       bucket,
@@ -3435,16 +3423,13 @@ export function AccountBalances({
             <div className="account-balances-header-row">
               <div className="account-balances-header-row__title-block">
                 <h2 className="account-balances-header-row__title">
-                  Retirement Account Balances
+                  Retirement Accounts
                 </h2>
-                {phase === "growth" ? (
+                {phase === "growth" || showWithdrawalGuidance ? (
                   <TaxBreakdownPanelTrigger>
-                    View Tax Breakdown
+                    View Tax Details
                   </TaxBreakdownPanelTrigger>
                 ) : null}
-                {showWithdrawalGuidance
-                  ? renderWithdrawalGuidanceBlock()
-                  : null}
               </div>
               <div className="account-balances-header-row__actions">
                 <div className="account-balances-header-row__actions-primary">
@@ -3528,8 +3513,10 @@ export function AccountBalances({
         </>
       ) : (
         <>
-          <div className="input-col-title">Retirement account balances</div>
-          {showWithdrawalGuidance ? renderWithdrawalGuidanceBlock() : null}
+          <div className="input-col-title">Retirement Accounts</div>
+          {phase === "growth" || showWithdrawalGuidance ? (
+            <TaxBreakdownPanelTrigger>View Tax Details</TaxBreakdownPanelTrigger>
+          ) : null}
           {!readOnly &&
           (hasRetirementAccountData || balanceMode === "imported") ? (
             <div className="balance-input-toolbar">
