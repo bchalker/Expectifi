@@ -34,6 +34,45 @@
   line-height: 1.35;
 }
 
+.tax-breakdown-panel-trigger {
+  display: block;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--color-amber-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.tax-breakdown-panel-trigger:hover {
+  color: var(--amber-d3);
+}
+
+.tax-breakdown-panel-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.tax-breakdown-panel-trigger--active {
+  color: var(--amber-d2);
+}
+
+.tax-breakdown-panel-trigger--inline {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .account-balances-header-row__subtitle {
   margin: var(--space-1) /* review: was 0.2rem */ 0 0;
   font-family: var(--body);
@@ -89,6 +128,11 @@
   align-items: stretch;
   gap: var(--space-3);
   min-width: 0;
+}
+
+.account-balances-header-row__actions-primary > .account-balances-manage {
+  flex: 0 0 auto;
+  width: auto;
 }
 
 .account-balances-header-row__entry {
@@ -177,11 +221,6 @@
     min-width: 0;
   }
 
-  .account-balances-header-row__actions .tax-breakdown-header-btn-wrap {
-    flex: 0 0 auto;
-    margin-left: auto;
-    align-self: center;
-  }
 }
 
 @media (max-width: 680px) {

@@ -25,6 +25,7 @@ import { TaxSummaryCard } from "./components/TaxSummaryCard";
 import { IncomeHarvestPreviewPanel } from "./components/IncomeHarvestPreviewPanel";
 import { GrowthAssumptionsPanel } from "./components/GrowthAssumptionsPanel";
 import { useIncomeHarvestMonthlyTotal } from "./hooks/useIncomeHarvestMonthlyTotal";
+import type { AccountIncomeMonthlyContext } from "./lib/accountIncomeMonthly";
 import { Header } from "./components/Header";
 import { AppLeftNav } from "./components/AppLeftNav";
 import { StripHeader } from "./components/StripHeader";
@@ -80,7 +81,9 @@ import {
   findIncomeSecurity,
   navDriftFromErosionRisk,
 } from "./lib/incomeSecurities";
-import { isGuaranteedIncomeConfigured } from "./lib/guaranteedIncome";
+import {
+  isGuaranteedIncomeConfigured,
+} from "./lib/guaranteedIncome";
 import { isSsConfigured } from "./lib/socialSecurity";
 import {
   clearGuestProfileAndSession,
@@ -595,7 +598,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         wdInflation: inputs.wdInflation,
         monthlyIncomeGoal: inputs.monthlyIncomeGoal,
         targetRetirementAge: inputs.targetRetirementAge,
-        ssIncluded: ui.ssIncluded,
+        ssIncluded: isGuaranteedIncomeConfigured(inputs),
         retireRegions: normalizeRetireRegions(
           inputs.retireRegions,
           inputs.italyCost,
@@ -606,7 +609,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       c,
       lifeEventsPortfolioDelta,
       ui.incomeMode,
-      ui.ssIncluded,
+      inputs,
       inputs.filingStatus,
       inputs.incYield,
       inputs.incGrowth,
@@ -676,6 +679,48 @@ export default function App({ initialAuthModal = null }: AppProps) {
     manualAccountsRev,
     brkBal: inputs.brkBal,
   });
+  const harvestAccountIncomeContext = useMemo((): AccountIncomeMonthlyContext | undefined => {
+    if (!taxSummaryAvailable || phase !== "income") return undefined;
+    return {
+      inputs,
+      accountIncomeFunds: ui.accountIncomeFunds,
+      accountIncomeStrategies: ui.accountIncomeStrategies,
+      accountWithdrawRates: ui.accountWithdrawRates,
+      wdInflation: inputs.wdInflation,
+      hsaMedicalAnnualDraw: cDisplay.strategy.hsaWdAnn,
+      hasPortfolioBalances: cDisplay.hasPortfolioBalances,
+      retFV: cDisplay.retFV,
+      brkFV: cDisplay.brkFV,
+      tradRatio: cDisplay.tradRatio,
+      rothRatio: cDisplay.rothRatio,
+      hsaRatio: cDisplay.hsaRatio,
+      tradBal: cDisplay.tradBal,
+      rothBal: cDisplay.rothBal,
+      hsaBal: cDisplay.hsaBal,
+      brkBal: inputs.brkBal,
+      retirementAge: inputs.targetRetirementAge,
+      retirementBalanceMode: displayBalanceMode,
+    };
+  }, [
+    taxSummaryAvailable,
+    phase,
+    inputs,
+    ui.accountIncomeFunds,
+    ui.accountIncomeStrategies,
+    ui.accountWithdrawRates,
+    cDisplay.strategy.hsaWdAnn,
+    cDisplay.hasPortfolioBalances,
+    cDisplay.retFV,
+    cDisplay.brkFV,
+    cDisplay.tradRatio,
+    cDisplay.rothRatio,
+    cDisplay.hsaRatio,
+    cDisplay.tradBal,
+    cDisplay.rothBal,
+    cDisplay.hsaBal,
+    displayBalanceMode,
+    manualAccountsRev,
+  ]);
   const isWhereToRetire = path === APP_PATHS.whereToRetire;
 
   useEffect(() => {
@@ -816,8 +861,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     grossMon: cDisplay.grossMon,
     totalFV: cDisplay.totalFV,
     targetRetirementAge: inputs.targetRetirementAge,
-    ssIncluded: ui.ssIncluded,
-    onSsIncluded: (v: boolean) => setUi({ ssIncluded: v }),
     guaranteedIncomeConfigured,
     guaranteedIncomeTooltip: cDisplay.guaranteedIncomeTooltip,
     onOpenGuaranteedIncomeConfig: () => {
@@ -832,12 +875,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     yearsToRetirement: cDisplay.yearsToRetirement,
   } as const;
 
-  const openPlanningGoals = useCallback(() => {
-    setMobileNavOpen(false);
-    setConfigTab("plan");
-    setDrawer("config");
-  }, []);
-
   const goalBarProps = {
     phase,
     growthGoal: inputs.growthGoal,
@@ -845,7 +882,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
     monthlyIncomeGoal: inputs.monthlyIncomeGoal,
     incomeGoalProgressPct: cDisplay.incomeGoalProgressPct,
     hasPortfolioBalances: dashboardHasPortfolio,
-    onAddGoal: openPlanningGoals,
+    onGrowthGoal: (growthGoal: number) => setInputs({ growthGoal }),
+    onMonthlyIncomeGoal: (monthlyIncomeGoal: number) =>
+      setInputs({ monthlyIncomeGoal }),
   } as const;
 
   const dashboardGoalBar = showGoalBarRow ? (
@@ -992,7 +1031,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
                     setUi({ incomeMode });
                     if (!incomeMode) setActivePreset(null);
                   }}
-                  ssIncluded={ui.ssIncluded}
                   mergedRetirementPositionModels={
                     c.mergedRetirementPositionModels
                   }
@@ -1083,6 +1121,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                       >
                         <TaxSummaryCard
                           c={cDisplay}
+                          inputs={inputs}
                           showTaxSummary={taxSummaryAvailable}
                           incomeMode={phase === "income"}
                           showScenarioGuideTab={showScenarioGuideTab}
@@ -1090,17 +1129,18 @@ export default function App({ initialAuthModal = null }: AppProps) {
                           onFilingStatusChange={(filingStatus) =>
                             setInputs({ filingStatus })
                           }
+                          accountIncomeContext={harvestAccountIncomeContext}
+                          onOpenSocialSecurity={
+                            dashboardSubHeaderProps.onOpenGuaranteedIncomeConfig
+                          }
                         >
                           <AccountBalances
                             readOnly
                             c={cDisplay}
                             phase={phase}
-                            uiSsIncluded={ui.ssIncluded}
-                            onOpenSocialSecurity={() => {
-                              setMobileNavOpen(false);
-                              setConfigTab("guaranteed-income");
-                              setDrawer("config");
-                            }}
+                            onOpenSocialSecurity={
+                              dashboardSubHeaderProps.onOpenGuaranteedIncomeConfig
+                            }
                             inputs={inputs}
                             setInputs={setInputs}
                             onManualPortfolioPlanApplied={(plan) => {
@@ -1204,7 +1244,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                       </div>
                       {showIncomeHarvestPreview ? (
                         <IncomeHarvestPreviewPanel
-                          monthlyIncome={incomeHarvestPreview.monthlyTotal}
+                          monthlyIncome={cDisplay.grossMon}
                           hasStrategiesSelected={
                             incomeHarvestPreview.hasStrategiesSelected
                           }
@@ -1278,8 +1318,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
           }
           onPositionsImportAppliedBrokerage={onPositionsImportAppliedBrokerage}
           configInitialTab={configTab}
-          ssIncluded={ui.ssIncluded}
-          setUi={setUi}
           onOpenRegister={openAuthRegister}
           onResetGuestProfile={onResetGuestProfile}
           lifePlans={lifePlans}

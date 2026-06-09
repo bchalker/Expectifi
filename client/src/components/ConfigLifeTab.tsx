@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Accordion } from "@heroui/react";
-import { IconArrowNarrowRightDashed, IconChevronDown } from "@tabler/icons-react";
+import { IconArrowNarrowRightDashed, IconCheck, IconChevronDown } from "@tabler/icons-react";
 import { CurrencyAmountInput } from "./ui/CurrencyAmountInput";
 import { ConfigPlanButtonGroup } from "./ConfigPlanButtonGroup";
 import { ConfigPlanYearSelect } from "./ConfigPlanYearSelect";
@@ -50,16 +50,37 @@ function LifeEventHint({ children, id }: { children: ReactNode; id?: string }) {
 function LifeAccordionTriggerContent({
   title,
   subtitle,
+  configured,
 }: {
   title: string;
   subtitle: string;
+  configured: boolean;
 }) {
   return (
     <span className="config-life-tab__accordion-title-wrap">
       <span className="config-life-tab__accordion-title">{title}</span>
-      <span className="config-life-tab__accordion-subtitle">{subtitle}</span>
+      <span className="config-life-tab__accordion-subtitle-row">
+        <span className="config-life-tab__accordion-subtitle">{subtitle}</span>
+        {configured ? (
+          <IconCheck
+            className="config-life-tab__accordion-check"
+            size={14}
+            stroke={2}
+            aria-hidden
+          />
+        ) : null}
+      </span>
     </span>
   );
+}
+
+function lifeAccordionHeadingClass(configured: boolean) {
+  return [
+    "config-life-tab__accordion-heading",
+    configured && "config-life-tab__accordion-heading--configured",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function LifeNumberField({
@@ -195,14 +216,17 @@ export function ConfigLifeTab({ plans, onPlansChange, currentYear }: Props) {
           id={LIFE_ACCORDION_HOME}
           className="config-life-tab__accordion-item"
         >
-          <Accordion.Heading className="config-life-tab__accordion-heading">
+          <Accordion.Heading className={lifeAccordionHeadingClass(meta.home.configured)}>
             <Accordion.Trigger className="config-life-tab__accordion-trigger">
               <LifeAccordionTriggerContent
                 title={meta.home.title}
                 subtitle={meta.home.subtitle}
+                configured={meta.home.configured}
               />
               <Accordion.Indicator className="config-life-tab__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
@@ -312,14 +336,17 @@ export function ConfigLifeTab({ plans, onPlansChange, currentYear }: Props) {
           id={LIFE_ACCORDION_FAMILY}
           className="config-life-tab__accordion-item"
         >
-          <Accordion.Heading className="config-life-tab__accordion-heading">
+          <Accordion.Heading className={lifeAccordionHeadingClass(meta.family.configured)}>
             <Accordion.Trigger className="config-life-tab__accordion-trigger">
               <LifeAccordionTriggerContent
                 title={meta.family.title}
                 subtitle={meta.family.subtitle}
+                configured={meta.family.configured}
               />
               <Accordion.Indicator className="config-life-tab__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
@@ -398,14 +425,17 @@ export function ConfigLifeTab({ plans, onPlansChange, currentYear }: Props) {
           id={LIFE_ACCORDION_INCOME}
           className="config-life-tab__accordion-item"
         >
-          <Accordion.Heading className="config-life-tab__accordion-heading">
+          <Accordion.Heading className={lifeAccordionHeadingClass(meta.income.configured)}>
             <Accordion.Trigger className="config-life-tab__accordion-trigger">
               <LifeAccordionTriggerContent
                 title={meta.income.title}
                 subtitle={meta.income.subtitle}
+                configured={meta.income.configured}
               />
               <Accordion.Indicator className="config-life-tab__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>

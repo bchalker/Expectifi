@@ -320,14 +320,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   margin-top: 0;
 }
 
-.tax-breakdown-header-btn {
-  display: none;
-}
-
-.tax-breakdown-header-btn-wrap {
-  display: none;
-}
-
 .tax-summary-card__accordion {
   display: none;
 }
@@ -340,99 +332,51 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   max-width: none;
 }
 
-.tax-summary-slide-panel {
-  display: none;
+.tax-summary-slide-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--tax-summary-overlay-backdrop-z, 1099);
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-@media (max-width: 680px) {
-  .tax-breakdown-header-btn-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    margin-left: 0;
-  }
+.tax-summary-slide-panel-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-  .tax-breakdown-header-btn-wrap__divider {
-    display: none;
-  }
+.tax-summary-slide-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: fixed;
+  z-index: var(--tax-summary-overlay-panel-z, 1100);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--surface);
+  pointer-events: none;
+  min-width: 0;
+  min-height: 0;
+}
 
-  .tax-breakdown-header-btn--icon {
-    display: none;
-  }
-
-  .tax-breakdown-header-btn--text {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 44px;
-    margin: 0;
-    padding: var(--space-2) var(--space-4);
-    box-sizing: border-box;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm, 6px);
-    background: var(--surface);
-    font-family: var(--body);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    line-height: 1.25;
-    text-align: center;
-    color: var(--text);
-    cursor: pointer;
-    transition:
-      background 150ms ease,
-      border-color 150ms ease,
-      color 150ms ease;
-  }
-
-  .tax-breakdown-header-btn--text:hover {
-    background: var(--surface2);
-    border-color: color-mix(in srgb, var(--border) 70%, var(--text));
-  }
-
-  .tax-breakdown-header-btn--text:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  .tax-breakdown-header-btn--text.tax-breakdown-header-btn--active {
-    border-color: var(--accent-text);
-    color: var(--accent-text);
-    background: color-mix(in srgb, var(--accent-light) 40%, var(--surface));
-  }
-
-  .tax-summary-card--has-panel .tax-summary-card__accordion {
-    display: none;
-  }
-
+@media (max-width: 768px) {
   .tax-summary-slide-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    position: fixed;
     top: auto;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: var(--mobile-bottom-sheet-z, 1100);
     width: 100%;
     max-width: 100%;
-    height: var(--mobile-bottom-sheet-height, min(90dvh, calc(100svh - env(safe-area-inset-top, 0px))));
-    max-height: var(--mobile-bottom-sheet-height, min(90dvh, calc(100svh - env(safe-area-inset-top, 0px))));
-    min-width: 0;
-    min-height: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-    background: var(--surface);
+    height: 85vh;
+    max-height: 85vh;
     border: none;
     border-radius: 16px 16px 0 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
     transform: translateY(100%);
     transition: transform 0.3s ease;
-    pointer-events: none;
   }
 
   .tax-summary-slide-panel--open {
@@ -451,95 +395,38 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   }
 }
 
-@media (min-width: 681px) {
-  .tax-breakdown-header-btn-wrap {
-    display: inline-flex;
-    align-items: center;
-    // gap: 0.5rem;
-    flex-shrink: 0;
-    align-self: stretch;
-  }
-
-  .tax-breakdown-header-btn-wrap__divider {
-    flex-shrink: 0;
-    align-self: stretch;
-    width: 1px;
-    min-height: 1.5rem;
-    margin: 0 var(--space-1) /* review: was 0.1rem */;
-    background: var(--surface2);
-  }
-
-  .tax-breakdown-header-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    min-width: 2rem;
-    min-height: 2.75rem;
-    margin: 0;
-    padding: var(--space-1) /* review: was 0.35rem */;
-    border: none;
-    border-radius: var(--radius-sm, 6px);
-    background: transparent;
-    box-shadow: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color 150ms ease;
-  }
-
-  .tax-breakdown-header-btn--text {
-    display: none;
-  }
-
-  .tax-breakdown-header-btn--icon {
-    display: inline-flex;
-  }
-
-  .tax-breakdown-header-btn:hover {
-    color: var(--text);
-  }
-
-  .tax-breakdown-header-btn:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  .tax-breakdown-header-btn--active {
-    color: var(--text);
-  }
-
-  .tax-summary-card--has-panel .tax-summary-card__accordion {
-    display: none;
-  }
-
+@media (min-width: 769px) {
   .tax-summary-slide-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 2;
-    width: var(--layout-snapshot-panel-width);
-    min-width: var(--layout-snapshot-panel-width);
-    min-height: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-    background: var(--surface);
-    border-left: 1px solid var(--surface2);
-    border-radius: 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0;
+    left: auto;
+    width: 420px;
+    max-width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
     box-shadow: none;
-    transform: translate3d(100%, 0, 0);
+    transform: translateX(100%);
     transition:
       transform 250ms ease-in-out,
       box-shadow 250ms ease-in-out;
-    pointer-events: none;
   }
 
   .tax-summary-slide-panel--open {
+    transform: translateX(0);
     box-shadow: -4px 0 18px color-mix(in srgb, var(--text) 12%, transparent);
-    transform: translate3d(0, 0, 0);
     pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tax-summary-slide-panel-backdrop {
+    transition: none;
+  }
+
+  .tax-summary-slide-panel {
+    transition: none;
   }
 }

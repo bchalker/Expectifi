@@ -7,15 +7,60 @@
   min-width: 0;
 }
 
+.guaranteed-income-setup__accordion-item:not(:last-child):not(
+    :has(.guaranteed-income-setup__accordion-trigger[aria-expanded='true'])
+  )
+  .guaranteed-income-setup__accordion-heading {
+  border-bottom: 1px solid var(--border);
+}
+
 .guaranteed-income-setup__accordion-heading {
   flex: 1 1 auto;
   min-width: 0;
+  background: #f9f9f9;
+  transition: background-color 0.15s ease;
 }
 
+.guaranteed-income-setup__accordion-heading--configured {
+  background: #fff;
+}
+
+.guaranteed-income-setup__accordion-item:has(
+    .guaranteed-income-setup__accordion-trigger[aria-expanded='true']
+  )
+  .guaranteed-income-setup__accordion-heading {
+  background: #fff;
+}
+
+.guaranteed-income-setup__accordion button[data-slot='accordion-trigger'],
 .guaranteed-income-setup__accordion-trigger {
   width: 100%;
   min-width: 0;
-  padding: var(--space-4) var(--space-3);
+  padding: 0;
+  background: transparent;
+}
+
+.guaranteed-income-setup__accordion .guaranteed-income-setup__accordion-trigger:hover,
+.guaranteed-income-setup__accordion .guaranteed-income-setup__accordion-trigger[aria-expanded='true'] {
+  background: transparent;
+}
+
+.guaranteed-income-setup__accordion-item:not(:has(.guaranteed-income-setup__accordion-trigger[aria-expanded='true']))
+  .guaranteed-income-setup__accordion-heading:not(.guaranteed-income-setup__accordion-heading--configured)
+  .guaranteed-income-setup__accordion-title,
+.guaranteed-income-setup__accordion-item:not(:has(.guaranteed-income-setup__accordion-trigger[aria-expanded='true']))
+  .guaranteed-income-setup__accordion-heading:not(.guaranteed-income-setup__accordion-heading--configured)
+  .guaranteed-income-setup__accordion-subtitle {
+  color: var(--text-faint);
+}
+
+.guaranteed-income-setup__accordion-item:has(.guaranteed-income-setup__accordion-trigger[aria-expanded='true'])
+  .guaranteed-income-setup__accordion-title,
+.guaranteed-income-setup__accordion-heading--configured .guaranteed-income-setup__accordion-title,
+.guaranteed-income-setup__accordion-item:has(.guaranteed-income-setup__accordion-trigger[aria-expanded='true'])
+  .guaranteed-income-setup__accordion-subtitle,
+.guaranteed-income-setup__accordion-heading--configured .guaranteed-income-setup__accordion-subtitle {
+  color: var(--text);
 }
 
 .guaranteed-income-setup__accordion-title-wrap {
@@ -25,6 +70,7 @@
   gap: var(--space-1);
   min-width: 0;
   flex: 1 1 auto;
+  padding: var(--space-4) var(--space-2) var(--space-4) var(--space-3);
   text-align: left;
 }
 
@@ -34,6 +80,14 @@
   font-weight: 600;
   line-height: 1.25;
   color: var(--text);
+}
+
+.guaranteed-income-setup__accordion-subtitle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .guaranteed-income-setup__accordion-subtitle {
@@ -46,13 +100,28 @@
   font-feature-settings: 'tnum';
 }
 
-.guaranteed-income-setup__accordion-indicator {
+.guaranteed-income-setup__accordion-check {
   flex-shrink: 0;
+  color: var(--green3);
+}
+
+.guaranteed-income-setup__accordion-indicator {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  margin-left: auto;
+  padding: var(--space-4) var(--space-3);
   color: var(--text-muted);
   transition: transform 0.2s ease;
+}
+
+.guaranteed-income-setup__accordion-indicator svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .guaranteed-income-setup__accordion-indicator[data-expanded='true'],
@@ -167,6 +236,17 @@
   min-height: 2.25rem;
   padding: var(--space-1) var(--space-2);
   font-size: var(--text-sm);
+}
+
+.gi-table-field--filled input[data-slot='input'] {
+  background: #fff;
+}
+
+.gi-table-field--filled input[data-slot='input']:hover:not(:disabled):not([data-disabled='true']),
+.gi-table-field--filled input[data-slot='input']:focus,
+.gi-table-field--filled input[data-slot='input']:focus-visible,
+.gi-table-field--filled input[data-slot='input'][data-focused='true'] {
+  background: #fff;
 }
 
 .gi-table-field--name {

@@ -13,9 +13,9 @@ type Props = {
   onInflationAdjChange?: (value: number) => void;
 };
 
-function TickerBadge({ symbol }: { symbol: string }) {
+function TickerSymbol({ symbol }: { symbol: string }) {
   return (
-    <span className="imported-holdings-scenario-guide__ticker">{symbol}</span>
+    <strong className="imported-holdings-scenario-guide__ticker">{symbol}</strong>
   );
 }
 
@@ -30,14 +30,14 @@ function GrowthLeadCopy({ dynamicHoldings }: { dynamicHoldings: string[] }) {
       {holding1 && holding2 ? (
         <>
           {" "}
-          for positions like <TickerBadge symbol={holding1} /> and{" "}
-          <TickerBadge symbol={holding2} /> that may behave differently from the
+          for positions like <TickerSymbol symbol={holding1} /> and{" "}
+          <TickerSymbol symbol={holding2} /> that may behave differently from the
           rest of your portfolio.
         </>
       ) : holding1 ? (
         <>
           {" "}
-          for positions like <TickerBadge symbol={holding1} /> that may behave
+          for positions like <TickerSymbol symbol={holding1} /> that may behave
           differently from the rest of your portfolio.
         </>
       ) : (

@@ -1,4 +1,5 @@
-import type { ComputedSnapshot } from "../lib/computeResults";
+import type { AccountIncomeMonthlyContext } from "../lib/accountIncomeMonthly";
+import type { CalculatorInputs, ComputedSnapshot } from "../lib/computeResults";
 import { IconX } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
@@ -22,6 +23,8 @@ import { FilingStatusField } from "./FilingStatusField";
 import { AccountIncomeStrategiesPanel } from "./AccountIncomeStrategiesPanel";
 import { HoldingScenarioGuidePanel } from "./HoldingScenarioGuidePanel";
 import { PortfolioGuidancePanel } from "./PortfolioGuidancePanel";
+import { TaxBreakdownForecastContent } from "./TaxBreakdownForecastContent";
+import { TaxBreakdownHarvestContent } from "./TaxBreakdownHarvestContent";
 import "./TaxSummaryPanel.scss";
 
 export type TaxSummaryContentProps = {
@@ -31,12 +34,16 @@ export type TaxSummaryContentProps = {
 export type TaxSummaryPanelBodyProps = TaxSummaryContentProps & {
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
+  incomeMode?: boolean;
+  inputs: CalculatorInputs;
 };
 
 export function TaxSummaryPanelBody({
   c,
   filingStatus,
   onFilingStatusChange,
+  incomeMode = false,
+  inputs,
 }: TaxSummaryPanelBodyProps) {
   return (
     <>
@@ -47,7 +54,11 @@ export function TaxSummaryPanelBody({
         onChange={onFilingStatusChange}
         className="tax-summary-panel__filing"
       />
-      <TaxSummaryContent c={c} />
+      {!incomeMode ? (
+        <TaxBreakdownForecastContent c={c} inputs={inputs} incomeModeFlag={incomeMode} />
+      ) : (
+        <TaxSummaryContent c={c} />
+      )}
     </>
   );
 }
@@ -194,16 +205,22 @@ type ExpectifinsightsTabId =
 
 function ExpectifinsightsPanelTabs({
   c,
+  inputs,
   filingStatus,
   onFilingStatusChange,
   variant,
   panelTitle,
+  accountIncomeContext,
+  onOpenSocialSecurity,
 }: {
   c: ComputedSnapshot;
+  inputs: CalculatorInputs;
   filingStatus: FilingStatusId;
   onFilingStatusChange: (status: FilingStatusId) => void;
   variant: "income" | "growth";
   panelTitle: string;
+  accountIncomeContext?: AccountIncomeMonthlyContext;
+  onOpenSocialSecurity?: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<ExpectifinsightsTabId>("tax-breakdown");
 
@@ -306,7 +323,19 @@ function ExpectifinsightsPanelTabs({
               onChange={onFilingStatusChange}
               className="tax-summary-slide-panel__filing"
             />
-            <TaxSummaryContent c={c} />
+            {variant === "income" && accountIncomeContext ? (
+              <TaxBreakdownHarvestContent
+                c={c}
+                accountIncomeContext={accountIncomeContext}
+                onOpenSocialSecurity={onOpenSocialSecurity}
+              />
+            ) : (
+              <TaxBreakdownForecastContent
+                c={c}
+                inputs={inputs}
+                incomeModeFlag={false}
+              />
+            )}
           </div>
         </AppOverlayScrollbars>
       </div>
@@ -370,14 +399,18 @@ function ExpectifinsightsPanelTabs({
 export function TaxSummarySlidePanel({
   className = "",
   c,
+  inputs,
   open,
   onClose,
   filingStatus,
   onFilingStatusChange,
   incomeMode = false,
   showScenarioGuideTab = false,
+  accountIncomeContext,
+  onOpenSocialSecurity,
 }: TaxSummaryContentProps & {
   className?: string;
+  inputs: CalculatorInputs;
   open: boolean;
   onClose: () => void;
   filingStatus: FilingStatusId;
@@ -385,6 +418,8 @@ export function TaxSummarySlidePanel({
   incomeMode?: boolean;
   /** Growth mode: Tax Breakdown + Scenario Guide tabs. */
   showScenarioGuideTab?: boolean;
+  accountIncomeContext?: AccountIncomeMonthlyContext;
+  onOpenSocialSecurity?: () => void;
 }) {
   const panelTitle = incomeMode
     ? INSIGHTS_PANEL_TITLE_INCOME
@@ -407,10 +442,10 @@ export function TaxSummarySlidePanel({
   useBottomSheetStackRegistration(open);
 
   return (
-    <BottomSheetPortal enabled={isMobileSheet}>
-      {isMobileSheet && open ? (
+    <BottomSheetPortal enabled>
+      {open ? (
         <div
-          className="mobile-bottom-sheet-backdrop mobile-bottom-sheet-backdrop--open"
+          className="tax-summary-slide-panel-backdrop tax-summary-slide-panel-backdrop--open"
           onClick={onClose}
           aria-hidden
         />
@@ -418,6 +453,8 @@ export function TaxSummarySlidePanel({
       <aside
         ref={panelRef}
         id="tax-summary-panel"
+        role="dialog"
+        aria-modal="true"
         style={isMobileSheet ? panelStyle : undefined}
         className={[
           "tax-summary-slide-panel",
@@ -445,7 +482,7 @@ export function TaxSummarySlidePanel({
           </h2>
           <button
             type="button"
-            className="tax-summary-slide-panel__close panel-close-btn"
+            className="tax-summary-slide-panel__close"
             onClick={onClose}
             aria-label={`Close ${panelTitle}`}
           >
@@ -456,10 +493,13 @@ export function TaxSummarySlidePanel({
       {incomeMode || showScenarioGuideTab ? (
         <ExpectifinsightsPanelTabs
           c={c}
+          inputs={inputs}
           filingStatus={filingStatus}
           onFilingStatusChange={onFilingStatusChange}
           variant={incomeMode ? "income" : "growth"}
           panelTitle={panelTitle}
+          accountIncomeContext={accountIncomeContext}
+          onOpenSocialSecurity={onOpenSocialSecurity}
         />
       ) : (
         <AppOverlayScrollbars className="tax-summary-slide-panel__scroll" defer={false}>
@@ -471,7 +511,15 @@ export function TaxSummarySlidePanel({
               onChange={onFilingStatusChange}
               className="tax-summary-slide-panel__filing"
             />
-            <TaxSummaryContent c={c} />
+            {!incomeMode ? (
+              <TaxBreakdownForecastContent
+                c={c}
+                inputs={inputs}
+                incomeModeFlag={incomeMode}
+              />
+            ) : (
+              <TaxSummaryContent c={c} />
+            )}
           </div>
         </AppOverlayScrollbars>
       )}

@@ -1,0 +1,124 @@
+.retirement-age-inline {
+  --retirement-age-control-h: 1.125rem;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  height: var(--retirement-age-control-h);
+  min-width: 0;
+}
+
+.retirement-age-inline__display {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--retirement-age-control-h);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.retirement-age-inline__display--hidden {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+}
+
+.retirement-age-inline__link {
+  display: inline;
+  margin: 0;
+  padding: 0 0 1px;
+  border: none;
+  border-bottom: 1px dashed currentColor;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.retirement-age-inline__link:hover {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+.retirement-age-inline__link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.retirement-age-inline__edit {
+  display: inline-flex;
+  align-items: center;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.retirement-age-inline__edit--open {
+  max-width: 4rem;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.retirement-age-inline__input {
+  width: 2.75ch;
+  max-width: 2.75ch;
+  min-width: 0;
+  height: var(--retirement-age-control-h);
+  margin: 0;
+  padding: 0 var(--space-1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.96);
+  box-sizing: border-box;
+  font-family: var(--body);
+  font-size: inherit;
+  font-weight: 600;
+  line-height: var(--retirement-age-control-h);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  outline: none;
+}
+
+.retirement-age-inline__input:focus {
+  border-color: #fff;
+  outline: 1px solid rgba(255, 255, 255, 0.45);
+  outline-offset: 0;
+}
+
+.retirement-age-inline--hero {
+  color: var(--subheader-label-fg);
+  font-family: var(--body);
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.retirement-age-inline--tab {
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .retirement-age-inline__display,
+  .retirement-age-inline__edit {
+    transition-duration: 0.01ms;
+  }
+}

@@ -59,10 +59,6 @@ import {
   withdrawalBucketOrder,
   type WithdrawalDisplayBucket,
 } from "../lib/withdrawalDisplayOrder";
-import {
-  withdrawalExplainerBody,
-  withdrawalExplainerDisclaimer,
-} from "../lib/withdrawalStrategyContent";
 import type { PositionsCsvCustodian } from "../lib/positionsCsvImport";
 import {
   inputsHavePlanningProfileFields,
@@ -125,7 +121,7 @@ import { BottomSheetAside } from "./ui/BottomSheetAside";
 import { HoldingScenarioPanel } from "./HoldingScenarioPopout";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
-import { TaxBreakdownHeaderButton } from "./TaxBreakdownHeaderButton";
+import { TaxBreakdownPanelTrigger } from "./TaxBreakdownHeaderButton";
 import {
   AccountBalancesManageMenu,
   type ManageOverlayPhase,
@@ -417,8 +413,6 @@ type Props = {
   onManualAccountsCommitted?: () => void;
   /** Growth vs income — drives personalized bucket row hints. */
   phase?: "growth" | "income";
-  /** Whether SS/CPP is included in projections (for income hints). */
-  uiSsIncluded?: boolean;
   /** Opens Configure → Social Security / CPP tab (hint link). */
   onOpenSocialSecurity?: () => void;
   /** Per-account dividend fund selections (income phase). */
@@ -466,7 +460,6 @@ export function AccountBalances({
   onImportOpenHandled,
   onManualAccountsCommitted,
   phase = "growth",
-  uiSsIncluded = false,
   onOpenSocialSecurity,
   accountIncomeFunds = {},
   onAccountIncomeFundChange,
@@ -498,7 +491,6 @@ export function AccountBalances({
     setInputs &&
     (displayBalanceMode === "imported" || displayBalanceMode === "manual"),
   );
-  const [withdrawalExplainerOpen, setWithdrawalExplainerOpen] = useState(false);
   const retirementAge = inputs?.targetRetirementAge ?? c.targetRetirementAge;
   const marketScenarioId = normalizeMarketScenarioId(inputs?.marketScenario);
   const marketScenarioActive = inputs
@@ -1776,7 +1768,6 @@ export function AccountBalances({
         mode: phase,
         c,
         inputs,
-        uiSsIncluded,
         userAccountTypes,
         presentBuckets: presentWithdrawalBuckets,
         brkBal: brkBal ?? 0,
@@ -1799,7 +1790,6 @@ export function AccountBalances({
       phase,
       c,
       inputs,
-      uiSsIncluded,
       userAccountTypes,
       presentWithdrawalBuckets,
       brkBal,
@@ -2410,35 +2400,12 @@ export function AccountBalances({
   function renderWithdrawalGuidanceBlock() {
     if (!showWithdrawalGuidance) return null;
     return (
-      <>
-        <p className="account-balances-withdrawal-helper">
-          <span className="account-balances-withdrawal-helper__text">
-            Withdraw in this order to minimize taxes.
-          </span>{" "}
-          <button
-            type="button"
-            className="withdrawal-why-link"
-            aria-expanded={withdrawalExplainerOpen}
-            aria-controls="withdrawal-order-explainer"
-            title="Why this order?"
-            onClick={() => setWithdrawalExplainerOpen((o) => !o)}
-          >
-            Why?
-          </button>
-        </p>
-        {withdrawalExplainerOpen ? (
-          <div
-            id="withdrawal-order-explainer"
-            className="withdrawal-order-explainer"
-            role="note"
-          >
-            <p>{withdrawalExplainerBody(locale, taxConfig)}</p>
-            <p className="withdrawal-order-explainer__disclaimer">
-              {withdrawalExplainerDisclaimer(taxConfig)}
-            </p>
-          </div>
-        ) : null}
-      </>
+      <p className="account-balances-withdrawal-helper">
+        <span className="account-balances-withdrawal-helper__text">
+          Withdraw in this order to minimize taxes.
+        </span>{" "}
+        <TaxBreakdownPanelTrigger variant="inline">Why?</TaxBreakdownPanelTrigger>
+      </p>
     );
   }
 
@@ -3470,6 +3437,11 @@ export function AccountBalances({
                 <h2 className="account-balances-header-row__title">
                   Retirement Account Balances
                 </h2>
+                {phase === "growth" ? (
+                  <TaxBreakdownPanelTrigger>
+                    View Tax Breakdown
+                  </TaxBreakdownPanelTrigger>
+                ) : null}
                 {showWithdrawalGuidance
                   ? renderWithdrawalGuidanceBlock()
                   : null}
@@ -3490,13 +3462,6 @@ export function AccountBalances({
                   ) : null}
                   {headerManageMenu}
                 </div>
-                <TaxBreakdownHeaderButton
-                  mobileLabel={
-                    phase === "income"
-                      ? "Taxes: The Harvest"
-                      : "Taxes: The Forecast"
-                  }
-                />
               </div>
             </div>
           ) : null}

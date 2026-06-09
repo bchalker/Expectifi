@@ -30,8 +30,9 @@
 
 /* Match .market-scenario-selector__trigger (shadow badge styling). */
 .account-balances-manage .account-balances-manage__trigger.holdings-scenario-trigger--badge {
-  display: flex;
-  min-width: var(--portfolio-scenario-trigger-min, 8rem);
+  display: inline-flex;
+  width: auto;
+  min-width: 0;
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
@@ -62,13 +63,13 @@
 }
 
 .account-balances-manage .account-balances-manage__trigger .holdings-scenario-trigger__text {
-  width: 100%;
+  width: auto;
   text-align: left;
 }
 
 .account-balances-manage .account-balances-manage__trigger .holdings-scenario-trigger__sublabel {
   text-align: left;
-  width: 100%;
+  width: auto;
 }
 
 .account-balances-manage .account-balances-manage__trigger .holdings-scenario-trigger__label-row {
@@ -78,7 +79,7 @@
 
 .account-balances-manage .account-balances-manage__trigger .holdings-scenario-trigger__label {
   text-align: left;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 .account-balances-manage .account-balances-manage__trigger:disabled {
@@ -1089,8 +1090,3 @@ html:has(
   }
 }
 
-@media (max-width: 480px) {
-  .account-balances-manage .account-balances-manage__trigger.holdings-scenario-trigger--badge {
-    min-width: 7rem;
-  }
-}

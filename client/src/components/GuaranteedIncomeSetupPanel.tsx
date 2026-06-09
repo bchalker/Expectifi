@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
+import { clampedAgeFromDob } from '../lib/ageFromDob'
 import { Accordion } from '@heroui/react'
-import { IconChevronDown } from '@tabler/icons-react'
+import { IconCheck, IconChevronDown } from '@tabler/icons-react'
 import type { CalculatorInputs } from '../lib/computeResults'
 import {
   GI_ACCORDION_ANNUITIES,
@@ -14,6 +15,7 @@ import {
   partitionGuaranteedIncomeEntries,
   patchInputsFromGuaranteedIncomeEntries,
   pensionsAccordionMeta,
+  supplementalStartAgeRange,
   type GuaranteedIncomeEntry,
 } from '../lib/guaranteedIncome'
 import { benefitAtClaimAgeFromMonthlyAt67 as ssBenefitAtAge } from '../lib/socialSecurity'
@@ -24,28 +26,55 @@ import './GuaranteedIncomeSetupPanel.scss'
 type Props = {
   inputs: CalculatorInputs
   setInputs: (patch: Partial<CalculatorInputs>) => void
-  ssIncluded: boolean
-  onSsIncludedChange: (value: boolean) => void
   userBenefitError?: string
 }
 
-function AccordionTriggerContent({ title, subtitle }: { title: string; subtitle: string }) {
+function AccordionTriggerContent({
+  title,
+  subtitle,
+  configured,
+}: {
+  title: string
+  subtitle: string
+  configured: boolean
+}) {
   return (
     <span className="guaranteed-income-setup__accordion-title-wrap">
       <span className="guaranteed-income-setup__accordion-title">{title}</span>
-      <span className="guaranteed-income-setup__accordion-subtitle">{subtitle}</span>
+      <span className="guaranteed-income-setup__accordion-subtitle-row">
+        <span className="guaranteed-income-setup__accordion-subtitle">{subtitle}</span>
+        {configured ? (
+          <IconCheck
+            className="guaranteed-income-setup__accordion-check"
+            size={14}
+            stroke={2}
+            aria-hidden
+          />
+        ) : null}
+      </span>
     </span>
   )
+}
+
+function accordionHeadingClass(configured: boolean) {
+  return [
+    'guaranteed-income-setup__accordion-heading',
+    configured && 'guaranteed-income-setup__accordion-heading--configured',
+  ]
+    .filter(Boolean)
+    .join(' ')
 }
 
 export function GuaranteedIncomeSetupPanel({
   inputs,
   setInputs,
-  ssIncluded,
-  onSsIncludedChange,
   userBenefitError,
 }: Props) {
   const country = inputs.residenceCountry ?? ''
+  const supplementalMinStartAge = useMemo(
+    () => supplementalStartAgeRange(clampedAgeFromDob(inputs.dateOfBirth ?? '')).min,
+    [inputs.dateOfBirth],
+  )
   const entries = useMemo(() => guaranteedIncomeEntriesFromInputs(inputs), [inputs])
   const { pensions, annuities } = useMemo(
     () => partitionGuaranteedIncomeEntries(entries, country),
@@ -95,12 +124,16 @@ export function GuaranteedIncomeSetupPanel({
   }
 
   const addPension = () => {
-    replaceCategoryEntries('pensions', [...pensions, createBlankPensionEntry(country)])
+    const entry = createBlankPensionEntry(country)
+    entry.startAge = Math.max(entry.startAge, supplementalMinStartAge)
+    replaceCategoryEntries('pensions', [...pensions, entry])
     setExpandedKeys(new Set([GI_ACCORDION_PENSIONS]))
   }
 
   const addAnnuity = () => {
-    replaceCategoryEntries('annuities', [...annuities, createBlankAnnuityEntry()])
+    const entry = createBlankAnnuityEntry()
+    entry.startAge = Math.max(entry.startAge, supplementalMinStartAge)
+    replaceCategoryEntries('annuities', [...annuities, entry])
     setExpandedKeys(new Set([GI_ACCORDION_ANNUITIES]))
   }
 
@@ -110,7 +143,6 @@ export function GuaranteedIncomeSetupPanel({
     if (!primaryGovEntry) return
     const amountAtClaim = ssBenefitAtAge(monthlyAt67, primaryGovEntry.startAge)
     updateEntry(primaryGovEntry.id, { monthlyAmount: amountAtClaim })
-    if (monthlyAt67 > 0 && !ssIncluded) onSsIncludedChange(true)
   }
 
   const onPrimaryAgeChange = (age: number) => {
@@ -132,11 +164,17 @@ export function GuaranteedIncomeSetupPanel({
         onExpandedChange={(keys) => setExpandedKeys(new Set(keys as Iterable<string>))}
       >
         <Accordion.Item id={GI_ACCORDION_GOVERNMENT} className="guaranteed-income-setup__accordion-item">
-          <Accordion.Heading className="guaranteed-income-setup__accordion-heading">
+          <Accordion.Heading className={accordionHeadingClass(govMeta.configured)}>
             <Accordion.Trigger className="guaranteed-income-setup__accordion-trigger">
-              <AccordionTriggerContent title={govMeta.title} subtitle={govMeta.subtitle} />
+              <AccordionTriggerContent
+                title={govMeta.title}
+                subtitle={govMeta.subtitle}
+                configured={govMeta.configured}
+              />
               <Accordion.Indicator className="guaranteed-income-setup__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
@@ -155,11 +193,17 @@ export function GuaranteedIncomeSetupPanel({
         </Accordion.Item>
 
         <Accordion.Item id={GI_ACCORDION_PENSIONS} className="guaranteed-income-setup__accordion-item">
-          <Accordion.Heading className="guaranteed-income-setup__accordion-heading">
+          <Accordion.Heading className={accordionHeadingClass(pensionsMeta.configured)}>
             <Accordion.Trigger className="guaranteed-income-setup__accordion-trigger">
-              <AccordionTriggerContent title={pensionsMeta.title} subtitle={pensionsMeta.subtitle} />
+              <AccordionTriggerContent
+                title={pensionsMeta.title}
+                subtitle={pensionsMeta.subtitle}
+                configured={pensionsMeta.configured}
+              />
               <Accordion.Indicator className="guaranteed-income-setup__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
@@ -167,6 +211,7 @@ export function GuaranteedIncomeSetupPanel({
             <Accordion.Body className="guaranteed-income-setup__accordion-body">
               <GuaranteedIncomeNamedEntriesSection
                 entries={pensions}
+                minStartAge={supplementalMinStartAge}
                 emptyPrompt="Add a pension if you expect regular monthly income from a former employer."
                 addButtonLabel="Add pension"
                 namePlaceholder="e.g. State Teachers Pension"
@@ -179,11 +224,17 @@ export function GuaranteedIncomeSetupPanel({
         </Accordion.Item>
 
         <Accordion.Item id={GI_ACCORDION_ANNUITIES} className="guaranteed-income-setup__accordion-item">
-          <Accordion.Heading className="guaranteed-income-setup__accordion-heading">
+          <Accordion.Heading className={accordionHeadingClass(annuitiesMeta.configured)}>
             <Accordion.Trigger className="guaranteed-income-setup__accordion-trigger">
-              <AccordionTriggerContent title={annuitiesMeta.title} subtitle={annuitiesMeta.subtitle} />
+              <AccordionTriggerContent
+                title={annuitiesMeta.title}
+                subtitle={annuitiesMeta.subtitle}
+                configured={annuitiesMeta.configured}
+              />
               <Accordion.Indicator className="guaranteed-income-setup__accordion-indicator">
-                <IconChevronDown size={16} stroke={1.5} aria-hidden />
+                <span aria-hidden>
+                  <IconChevronDown size={16} stroke={1.5} />
+                </span>
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
@@ -191,6 +242,7 @@ export function GuaranteedIncomeSetupPanel({
             <Accordion.Body className="guaranteed-income-setup__accordion-body">
               <GuaranteedIncomeNamedEntriesSection
                 entries={annuities}
+                minStartAge={supplementalMinStartAge}
                 emptyPrompt="Add an annuity if you receive or expect to receive fixed monthly payments from an insurance or investment product."
                 addButtonLabel="Add annuity"
                 namePlaceholder="e.g. TIAA Annuity"

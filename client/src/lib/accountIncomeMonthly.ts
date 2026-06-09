@@ -86,6 +86,33 @@ export function resolveIncomeManualAccountEntries(
   ).filter((entry) => entry.type != null && entry.balance > 0)
 }
 
+export type AccountBucketBalanceSnapshot = {
+  pretax: number
+  roth: number
+  hsa: number
+  brokerage: number
+  hasRothAccount: boolean
+}
+
+/** Bucket totals aligned with income-mode Retirement Account Balances rows. */
+export function resolveAccountBucketBalancesFromIncomeLines(
+  ctx: AccountIncomeMonthlyContext,
+): AccountBucketBalanceSnapshot {
+  const lines = listAccountIncomeLines(ctx)
+  const bucketTotal = (bucket: AccountScenarioBucketId): number => {
+    const line = lines.find((entry) => entry.bucket === bucket)
+    return line?.bucketCurrentTotal ?? 0
+  }
+
+  return {
+    pretax: bucketTotal('pretax'),
+    roth: bucketTotal('roth'),
+    hsa: bucketTotal('hsa'),
+    brokerage: bucketTotal('brokerage'),
+    hasRothAccount: lines.some((entry) => entry.bucket === 'roth'),
+  }
+}
+
 function manualEntryBucketTotals(entries: ManualAccountEntry[]): Partial<Record<AccountScenarioBucketId, number>> {
   const totals: Partial<Record<AccountScenarioBucketId, number>> = {}
   for (const entry of entries) {

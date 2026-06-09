@@ -85,8 +85,6 @@ type TabPanelsProps = {
   c: ComputedSnapshot
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  ssIncluded: boolean
-  onSsIncludedChange: (value: boolean) => void
   ssBenefitError?: string
   onDrawerClose?: () => void
   onOpenRegister?: () => void
@@ -100,8 +98,6 @@ export function ConfigDrawerTabPanels({
   c: _c,
   inputs,
   setInputs,
-  ssIncluded,
-  onSsIncludedChange,
   ssBenefitError,
   onDrawerClose,
   onOpenRegister,
@@ -184,8 +180,6 @@ export function ConfigDrawerTabPanels({
             <ConfigGuaranteedIncomeTab
               inputs={inputs}
               setInputs={setInputs}
-              ssIncluded={ssIncluded}
-              onSsIncludedChange={onSsIncludedChange}
               benefitError={ssBenefitError}
             />
           </section>

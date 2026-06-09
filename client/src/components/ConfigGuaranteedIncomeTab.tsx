@@ -4,16 +4,12 @@ import { GuaranteedIncomeSetupPanel } from './GuaranteedIncomeSetupPanel'
 type Props = {
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
-  ssIncluded: boolean
-  onSsIncludedChange: (value: boolean) => void
   benefitError?: string
 }
 
 export function ConfigGuaranteedIncomeTab({
   inputs,
   setInputs,
-  ssIncluded,
-  onSsIncludedChange,
   benefitError,
 }: Props) {
   return (
@@ -21,8 +17,6 @@ export function ConfigGuaranteedIncomeTab({
       <GuaranteedIncomeSetupPanel
         inputs={inputs}
         setInputs={setInputs}
-        ssIncluded={ssIncluded}
-        onSsIncludedChange={onSsIncludedChange}
         userBenefitError={benefitError}
       />
     </div>

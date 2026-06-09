@@ -6,7 +6,7 @@ import {
   localeSupportsWithdrawalBucket,
   taxFreeWithdrawalLabels,
 } from '../config/taxConfig'
-import type { ComputedSnapshot, CalculatorInputs, CalculatorUi, DrawerName } from '../lib/computeResults'
+import type { ComputedSnapshot, CalculatorInputs, DrawerName } from '../lib/computeResults'
 import type { BalanceInputMode } from '../lib/retirementBalanceMode'
 import type { BrokerageBalanceMode } from '../lib/brokerageBalanceMode'
 import { pensionConfigForLocale } from '../lib/localePensionConfig'
@@ -51,8 +51,6 @@ type Props = {
   onPositionsImportAppliedRetirement: () => void
   onPositionsImportAppliedBrokerage: () => void
   configInitialTab?: ConfigDrawerTab
-  ssIncluded: boolean
-  setUi: (p: Partial<CalculatorUi>) => void
   onOpenRegister?: () => void
   onResetGuestProfile?: () => void
   lifePlans: LifePlans
@@ -75,8 +73,6 @@ export function DrawerPanel({
   onPositionsImportAppliedRetirement,
   onPositionsImportAppliedBrokerage,
   configInitialTab,
-  ssIncluded,
-  setUi,
   onOpenRegister,
   onResetGuestProfile,
   lifePlans,
@@ -94,20 +90,7 @@ export function DrawerPanel({
     if (!open) setSsBenefitError(null)
   }, [open])
 
-  useEffect(() => {
-    if (ssIncluded && inputs.ssBenefit67 > 0) setSsBenefitError(null)
-  }, [ssIncluded, inputs.ssBenefit67])
-
-  const onSsIncludedChange = (value: boolean) => {
-    setUi({ ssIncluded: value })
-    if (!value) setSsBenefitError(null)
-  }
-
   const onConfigConfirm = () => {
-    if (ssIncluded && inputs.ssBenefit67 <= 0 && !(inputs.guaranteedIncomeEntries?.some((e) => e.monthlyAmount > 0))) {
-      setSsBenefitError('Enter your expected guaranteed income benefit.')
-      return
-    }
     setSsBenefitError(null)
     onClose()
   }
@@ -159,8 +142,6 @@ export function DrawerPanel({
             c={c}
             inputs={inputs}
             setInputs={setInputs}
-            ssIncluded={ssIncluded}
-            onSsIncludedChange={onSsIncludedChange}
             ssBenefitError={ssBenefitError ?? undefined}
             onDrawerClose={onConfigConfirm}
             onOpenRegister={onOpenRegister}

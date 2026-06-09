@@ -1,12 +1,14 @@
 .goal-progress-bar {
+  --goal-progress-control-h: 1.125rem;
+
   flex-shrink: 0;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: var(--space-3) 0;
-  // min-height: var(--goal-bar-row-h, 2.5rem);
+  min-height: var(--goal-bar-row-h, 2.5rem);
+  padding: 0;
 }
 
 .goal-progress-bar--phase-growth {
@@ -42,6 +44,8 @@
   gap: var(--space-3);
   width: var(--layout-app-boundary);
   max-width: 100%;
+  height: var(--goal-bar-row-h, 2.5rem);
+  min-height: var(--goal-bar-row-h, 2.5rem);
   margin-inline: auto;
   padding-inline: var(--space-4);
   min-width: 0;
@@ -81,6 +85,35 @@
   transition: width 0.35s var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
+.goal-progress-bar__stat-zone {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--goal-progress-control-h);
+  min-width: 0;
+}
+
+.goal-progress-bar__display {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--goal-progress-control-h);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goal-progress-bar__display--hidden {
+  position: absolute;
+  right: 0;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+}
+
 .goal-progress-bar__stat {
   display: inline-flex;
   flex-shrink: 0;
@@ -104,13 +137,36 @@
   color: #fff;
 }
 
+.goal-progress-bar__amount-link {
+  display: inline;
+  margin: 0;
+  padding: 0 0 1px;
+  border: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.45);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.goal-progress-bar__amount-link:hover {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+.goal-progress-bar__amount-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .goal-progress-bar__met-icon {
   flex-shrink: 0;
   color: #fff;
 }
 
-.goal-progress-bar__add-goal {
-  flex-shrink: 0;
+.goal-progress-bar__add {
   display: inline;
   margin: 0;
   padding: 0 0 1px;
@@ -127,15 +183,77 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.goal-progress-bar__add-goal:hover {
+.goal-progress-bar__add:hover {
   color: #fff;
   border-bottom-color: rgba(255, 255, 255, 0.85);
 }
 
-.goal-progress-bar__add-goal:focus-visible {
+.goal-progress-bar__add:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+.goal-progress-bar__inline-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(4px);
+  pointer-events: none;
+  white-space: nowrap;
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goal-progress-bar__inline-edit--open {
+  max-width: 15rem;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.goal-progress-bar__inline-prefix,
+.goal-progress-bar__inline-suffix {
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--goal-progress-control-h);
+  color: rgba(255, 255, 255, 0.92);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.goal-progress-bar__inline-input {
+  width: 12ch;
+  max-width: 12ch;
+  min-width: 0;
+  height: var(--goal-progress-control-h);
+  margin: 0;
+  padding: 0 var(--space-1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.96);
+  box-sizing: border-box;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--goal-progress-control-h);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  outline: none;
+}
+
+.goal-progress-bar__inline-input:focus {
+  border-color: #fff;
+  outline: 1px solid rgba(255, 255, 255, 0.45);
+  outline-offset: 0;
 }
 
 @media (max-width: 760px) {
@@ -149,10 +267,19 @@
   .goal-progress-bar__stat-text {
     font-size: var(--text-xs);
   }
+
+  .goal-progress-bar__add,
+  .goal-progress-bar__inline-prefix,
+  .goal-progress-bar__inline-suffix,
+  .goal-progress-bar__inline-input {
+    font-size: var(--text-xs);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .goal-progress-bar__fill {
+  .goal-progress-bar__fill,
+  .goal-progress-bar__display,
+  .goal-progress-bar__inline-edit {
     transition-duration: 0.01ms;
   }
 }

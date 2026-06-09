@@ -25,6 +25,7 @@ import {
   guaranteedIncomeMonthlyAtAge,
   guaranteedIncomeSourcesFromInputs,
   guaranteedIncomeTooltipModel,
+  isGuaranteedIncomeConfigured,
 } from './guaranteedIncome'
 import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
 import { positionsForBrokerage, positionsForRetirementBucket, type ImportedPositionRow } from './positionsCsv'
@@ -529,10 +530,11 @@ export function computeResults(
     startAge: source.startAge,
     monthlyAmount: source.monthlyAmount,
   }))
-  const totalSS = ui.ssIncluded
+  const guaranteedIncomeActive = isGuaranteedIncomeConfigured(inputs)
+  const totalSS = guaranteedIncomeActive
     ? guaranteedIncomeMonthlyAtAge(inputs, targetRetirementAge)
     : 0
-  const futureGuaranteedIncomeNote = ui.ssIncluded
+  const futureGuaranteedIncomeNote = guaranteedIncomeActive
     ? guaranteedIncomeFutureHeroNote(inputs, targetRetirementAge)
     : null
   const guaranteedIncomeTooltip = guaranteedIncomeTooltipModel(inputs)
@@ -620,7 +622,7 @@ export function computeResults(
         wdRate,
         wdInflation,
         totalSSMonthly: totalSS,
-        ssIncluded: ui.ssIncluded,
+        ssIncluded: guaranteedIncomeActive,
         retirementStartAge: targetRetirementAge,
         guaranteedSources,
       })

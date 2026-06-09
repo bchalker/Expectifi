@@ -173,7 +173,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   grid-auto-rows: auto;
   align-content: start;
   justify-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -552,6 +552,12 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   border-radius: 2px;
 }
 
+.app-tooltip__trigger.subheader-guaranteed-income-toggle__link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .subheader--phase-income .subheader-guaranteed-income-toggle__link:focus-visible {
   outline-color: rgba(0, 0, 0, 0.45);
 }
@@ -649,6 +655,48 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   gap: var(--space-1);
 }
 
+.subheader-income-composition {
+  margin: 0;
+  max-width: min(100%, 22rem);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.subheader-income-composition__text,
+.subheader-income-composition__future {
+  color: inherit;
+}
+
+.subheader-income-composition__link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.subheader-income-composition__link:hover {
+  color: var(--accent);
+}
+
+.subheader-income-composition__link:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .subheader-ss-add-btn {
   display: inline-flex;
   align-items: center;
@@ -657,7 +705,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   margin: 0;
   padding: 0 var(--space-2) /* review: was 10px */;
   min-height: 1.5rem;
-  // border: 1px solid rgba(255, 255, 255, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.88);
   cursor: pointer;
@@ -771,22 +819,27 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   outline-offset: 2px;
 }
 
-.subheader-phase-segment__tab--income {
+.subheader-phase-segment__tab--has-suffix {
   text-transform: none;
   letter-spacing: 0.02em;
   padding: 0 var(--space-3);
 }
 
-.subheader-phase-segment__income-label {
+.subheader-phase-segment__tab-label {
   white-space: nowrap;
 }
 
-.subheader-phase-segment__income-word {
+.subheader-phase-segment__tab-word {
   text-transform: uppercase;
 }
 
-.subheader-phase-segment__income-at {
+.subheader-phase-segment__tab-age-qualifier {
   text-transform: lowercase;
+}
+
+.subheader-phase-segment__tab-age {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .subheader--phase-income .subheader-phase-segment {

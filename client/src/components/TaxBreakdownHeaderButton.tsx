@@ -1,47 +1,41 @@
-import { IconCashMove } from "@tabler/icons-react";
+import type { ReactNode } from "react";
 import { useTaxSummaryPanelOptional } from "../context/TaxSummaryPanelContext";
-import "./TaxSummaryLayout.scss";
 
-/** Opens the tax breakdown slide panel — icon on desktop, labeled button on mobile. */
-export function TaxBreakdownHeaderButton({
-  mobileLabel = "Taxes: The Forecast",
-}: {
-  mobileLabel?: string;
-}) {
+type Props = {
+  children: ReactNode;
+  /** Standalone helper under the section title, or inline (e.g. Why?). */
+  variant?: "standalone" | "inline";
+  className?: string;
+};
+
+/** Amber text control that opens the Forecast / Harvest slide panel. */
+export function TaxBreakdownPanelTrigger({
+  children,
+  variant = "standalone",
+  className = "",
+}: Props) {
   const taxPanel = useTaxSummaryPanelOptional();
 
   if (!taxPanel?.showTaxSummary) return null;
 
-  const { panelOpen, togglePanel } = taxPanel;
-  const btnClass = [
-    "tax-breakdown-header-btn",
-    panelOpen && "tax-breakdown-header-btn--active",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const { panelOpen, openPanel } = taxPanel;
 
   return (
-    <div className="tax-breakdown-header-btn-wrap">
-      <span className="tax-breakdown-header-btn-wrap__divider" aria-hidden />
-      <button
-        type="button"
-        className={`${btnClass} tax-breakdown-header-btn--icon`}
-        aria-expanded={panelOpen}
-        aria-controls="tax-summary-panel"
-        aria-label="Tax breakdown"
-        onClick={togglePanel}
-      >
-        <IconCashMove size={18} stroke={1.25} aria-hidden />
-      </button>
-      <button
-        type="button"
-        className={`${btnClass} tax-breakdown-header-btn--text`}
-        aria-expanded={panelOpen}
-        aria-controls="tax-summary-panel"
-        onClick={togglePanel}
-      >
-        {mobileLabel}
-      </button>
-    </div>
+    <button
+      type="button"
+      className={[
+        "tax-breakdown-panel-trigger",
+        variant === "inline" && "tax-breakdown-panel-trigger--inline",
+        panelOpen && "tax-breakdown-panel-trigger--active",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      aria-expanded={panelOpen}
+      aria-controls="tax-summary-panel"
+      onClick={openPanel}
+    >
+      {children}
+    </button>
   );
 }

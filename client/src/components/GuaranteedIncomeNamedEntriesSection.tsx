@@ -1,18 +1,25 @@
+import { useState } from 'react'
 import { Button, Input, TextField } from '@heroui/react'
 import { IconCircleMinus, IconPlus } from '@tabler/icons-react'
 import type { GuaranteedIncomeEntry } from '../lib/guaranteedIncome'
-import { startAgeRangeForType } from '../lib/guaranteedIncome'
+import { supplementalStartAgeRange } from '../lib/guaranteedIncome'
 import { fmtInput, parseNum } from '../utils/format'
 import './GuaranteedIncomeSetupPanel.scss'
 
 type Props = {
   entries: GuaranteedIncomeEntry[]
+  /** User's current age — supplemental start ages cannot be below this. */
+  minStartAge: number
   emptyPrompt: string
   addButtonLabel: string
   namePlaceholder: string
   onAdd: () => void
   onUpdate: (id: string, patch: Partial<GuaranteedIncomeEntry>) => void
   onRemove: (id: string) => void
+}
+
+function tableFieldClass(base: string, filled: boolean) {
+  return [base, filled && 'gi-table-field--filled'].filter(Boolean).join(' ')
 }
 
 function TableNameInput({
@@ -26,9 +33,11 @@ function TableNameInput({
   placeholder: string
   onChange: (value: string) => void
 }) {
+  const filled = value.trim().length > 0
+
   return (
     <TextField
-      className="gi-table-field gi-table-field--name"
+      className={tableFieldClass('gi-table-field gi-table-field--name', filled)}
       variant="secondary"
       fullWidth
       aria-label="Name"
@@ -50,14 +59,15 @@ function TableMoneyInput({
   onChange: (amount: number) => void
 }) {
   const display = fmtInput(value)
+  const filled = value > 0
 
   return (
-    <div className="gi-table-field gi-table-field--money">
+    <div className={tableFieldClass('gi-table-field gi-table-field--money', filled)}>
       <span className="gi-table-field__prefix" aria-hidden>
         $
       </span>
       <TextField
-        className="gi-table-field__money-input"
+        className={tableFieldClass('gi-table-field__money-input', filled)}
         variant="secondary"
         aria-label="Monthly amount"
         value={display}
@@ -87,19 +97,47 @@ function TableAgeInput({
   max: number
   onChange: (age: number) => void
 }) {
+  const [focused, setFocused] = useState(false)
+  const [draft, setDraft] = useState('')
+  const age = Math.min(max, Math.max(min, Math.round(value)))
+  const maxDigits = String(max).length
+
+  const commitDraft = (raw: string) => {
+    const n = Math.round(Number(raw.replace(/,/g, '')))
+    if (!Number.isFinite(n) || raw.trim() === '') {
+      onChange(age)
+      return
+    }
+    onChange(Math.min(max, Math.max(min, n)))
+  }
+
   return (
     <TextField
-      className="gi-table-field gi-table-field--age"
+      className={tableFieldClass('gi-table-field gi-table-field--age', true)}
       variant="secondary"
       aria-label="Start age"
-      value={String(value)}
+      value={focused ? draft : String(age)}
       onChange={(raw) => {
-        const n = Math.round(Number(raw.replace(/,/g, '')))
-        if (!Number.isFinite(n)) return
-        onChange(Math.min(max, Math.max(min, n)))
+        if (!focused) return
+        setDraft(raw.replace(/[^\d]/g, '').slice(0, maxDigits))
       }}
     >
-      <Input id={id} type="text" inputMode="decimal" />
+      <Input
+        id={id}
+        type="text"
+        inputMode="decimal"
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={age}
+        onFocus={() => {
+          setFocused(true)
+          setDraft(String(age))
+        }}
+        onBlur={() => {
+          setFocused(false)
+          commitDraft(draft)
+        }}
+      />
     </TextField>
   )
 }
@@ -107,15 +145,17 @@ function TableAgeInput({
 function NamedEntryRow({
   entry,
   namePlaceholder,
+  minStartAge,
   onUpdate,
   onRemove,
 }: {
   entry: GuaranteedIncomeEntry
   namePlaceholder: string
+  minStartAge: number
   onUpdate: (patch: Partial<GuaranteedIncomeEntry>) => void
   onRemove: () => void
 }) {
-  const range = startAgeRangeForType(entry.type)
+  const range = supplementalStartAgeRange(minStartAge)
 
   return (
     <div className="gi-named-table__row">
@@ -153,6 +193,7 @@ function NamedEntryRow({
 
 export function GuaranteedIncomeNamedEntriesSection({
   entries,
+  minStartAge,
   emptyPrompt,
   addButtonLabel,
   namePlaceholder,
@@ -178,6 +219,7 @@ export function GuaranteedIncomeNamedEntriesSection({
                 key={entry.id}
                 entry={entry}
                 namePlaceholder={namePlaceholder}
+                minStartAge={minStartAge}
                 onUpdate={(patch) => onUpdate(entry.id, patch)}
                 onRemove={() => onRemove(entry.id)}
               />

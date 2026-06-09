@@ -59,19 +59,49 @@ export function incomeAccordionSubtitle(o: LifePlansOther, v: LifePlansVehicles)
   return `${rental} · ${inheritance} · ${vehicles}`
 }
 
-export function lifeAccordionMeta(plans: LifePlans) {
+export type LifeAccordionMeta = {
+  title: string
+  subtitle: string
+  configured: boolean
+}
+
+function homeIsConfigured(h: LifePlansHousing): boolean {
+  return (
+    h.ownership !== 'own' ||
+    h.mortgageBalance > 0 ||
+    h.saleProceeds > 0 ||
+    h.planToSell === 'Yes'
+  )
+}
+
+function familyIsConfigured(f: LifePlansFamily): boolean {
+  return f.married || f.hasChildren || f.supportingParent
+}
+
+function incomeIsConfigured(o: LifePlansOther, v: LifePlansVehicles): boolean {
+  return o.hasRental || o.expectsInheritance !== 'No' || v.count > 0 || o.tithes
+}
+
+export function lifeAccordionMeta(plans: LifePlans): {
+  home: LifeAccordionMeta
+  family: LifeAccordionMeta
+  income: LifeAccordionMeta
+} {
   return {
     home: {
       title: 'Your home',
       subtitle: homeAccordionSubtitle(plans.housing),
+      configured: homeIsConfigured(plans.housing),
     },
     family: {
       title: 'Your family',
       subtitle: familyAccordionSubtitle(plans.family),
+      configured: familyIsConfigured(plans.family),
     },
     income: {
       title: 'Income & assets',
       subtitle: incomeAccordionSubtitle(plans.other, plans.vehicles),
+      configured: incomeIsConfigured(plans.other, plans.vehicles),
     },
   }
 }

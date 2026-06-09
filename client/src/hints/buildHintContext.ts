@@ -22,7 +22,6 @@ export type BuildAccountHintParams = {
   mode: HintMode
   c: ComputedSnapshot
   inputs?: CalculatorInputs
-  uiSsIncluded: boolean
   userAccountTypes: OnboardingAccountType[]
   presentBuckets: WithdrawalDisplayBucket[]
 }
@@ -77,7 +76,6 @@ export function buildAccountHintContext(params: BuildAccountHintParams & { brkBa
     mode,
     c,
     inputs,
-    uiSsIncluded,
     userAccountTypes,
     presentBuckets,
     brkBal,
@@ -86,7 +84,7 @@ export function buildAccountHintContext(params: BuildAccountHintParams & { brkBa
   const hintLocale = onboardingRegionToHintLocale(locale)
   const pensionConfigured = isSsConfigured(inputs ?? ({} as CalculatorInputs))
   const ssMonthly = c.totalSS ?? 0
-  const hasPension = Boolean(uiSsIncluded && pensionConfigured && ssMonthly > 0)
+  const hasPension = Boolean(pensionConfigured && ssMonthly > 0)
   const { label: scenarioLabel, active: scenarioActive } = scenarioLabelForBucket(
     bucket,
     inputs,

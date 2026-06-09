@@ -24,7 +24,7 @@ const DEFAULT_LABELS: Record<IncomeAccordionGlossaryTermId, string> = {
   magiThreshold: 'MAGI threshold',
 }
 
-/** Dotted-underline glossary term with HeroUI tooltip (income accordion). */
+/** Dotted-underline glossary term with shared tooltip (income accordion). */
 export function IncomeAccordionTerm({ termId, children }: Props) {
   const label = children ?? DEFAULT_LABELS[termId]
 

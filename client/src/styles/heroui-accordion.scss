@@ -79,6 +79,8 @@ button[data-slot='accordion-trigger']:focus-visible {
 }
 
 .guaranteed-income-setup__accordion [data-slot='accordion-indicator'] {
+  flex: 0 0 auto;
+  margin-left: auto;
   transition: transform 0.2s ease;
 }
 
@@ -122,10 +124,33 @@ button[data-slot='accordion-trigger']:focus-visible {
   overflow: hidden;
 }
 
-.guaranteed-income-setup__accordion [data-slot='accordion-item']::after,
+.guaranteed-income-setup__accordion [data-slot='accordion-item']::after {
+  content: none;
+}
+
+.guaranteed-income-setup__accordion
+  [data-slot='accordion-item']:not(:last-child):not(
+    :has(button[data-slot='accordion-trigger'][aria-expanded='true'])
+  )
+  [data-slot='accordion-heading'] {
+  border-bottom: 1px solid var(--border);
+}
+
 .config-life-tab__accordion [data-slot='accordion-item']::after {
-  left: var(--space-3);
-  right: var(--space-3);
+  content: none;
+}
+
+.config-life-tab__accordion
+  [data-slot='accordion-item']:not(:last-child):not(
+    :has(button[data-slot='accordion-trigger'][aria-expanded='true'])
+  )
+  [data-slot='accordion-heading'] {
+  border-bottom: 1px solid var(--border);
+}
+
+.config-life-tab__accordion [data-slot='accordion-indicator'] {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

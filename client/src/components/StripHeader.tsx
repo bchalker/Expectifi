@@ -12,7 +12,6 @@ type Props = {
   c: C;
   incomeMode: boolean;
   onIncomeMode: (incomeMode: boolean) => void;
-  ssIncluded: boolean;
   mergedRetirementPositionModels: PositionReturnModel[];
   mergedBrokeragePositionModels: PositionReturnModel[];
   brkRate: number;
@@ -42,7 +41,6 @@ export function StripHeader({
   c,
   incomeMode: _incomeMode,
   onIncomeMode: _onIncomeMode,
-  ssIncluded: _ssIncluded,
   mergedRetirementPositionModels,
   mergedBrokeragePositionModels,
   brkRate,

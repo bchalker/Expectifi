@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import {
   loadTaxSummaryPanelOpen,
   saveTaxSummaryPanelOpen,
@@ -38,13 +39,7 @@ export function TaxSummaryPanelProvider({ showTaxSummary, children }: ProviderPr
     saveTaxSummaryPanelOpen(panelOpen);
   }, [panelOpen]);
 
-  useEffect(() => {
-    if (!panelOpen || typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(max-width: 680px)");
-    if (!mq.matches) return;
-    document.body.classList.add("tax-summary-panel-open-body");
-    return () => document.body.classList.remove("tax-summary-panel-open-body");
-  }, [panelOpen]);
+  useBodyScrollLock(panelOpen);
 
   const openPanel = useCallback(() => {
     setPanelOpen(true);

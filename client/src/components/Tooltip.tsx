@@ -1,5 +1,11 @@
 import { Tooltip as HeroTooltip } from '@heroui/react'
 import type { ReactNode } from 'react'
+import {
+  Focusable,
+  OverlayArrow,
+  Tooltip as AriaTooltip,
+  TooltipTrigger,
+} from 'react-aria-components'
 import './Tooltip.scss'
 
 type Placement = 'top' | 'bottom' | 'left' | 'right'
@@ -11,19 +17,22 @@ type Props = {
   placement?: Placement
   contentClassName?: string
   triggerClassName?: string
-  /** Point at trigger with HeroUI overlay arrow. */
+  /** Point at trigger with overlay arrow. */
   showArrow?: boolean
   variant?: 'default' | 'dark'
   /** Hover delay before open (ms). */
   delay?: number
   /** Delay before close (ms). */
   closeDelay?: number
-  /** Pass a native control (e.g. button) directly to HeroUI Root — no wrapper trigger. */
+  /** Pass a native control (e.g. button) directly as the trigger — uses HeroUI. */
   nativeTrigger?: boolean
 }
 
+const bodyPortal =
+  typeof document !== 'undefined' ? document.body : undefined
+
 /**
- * Shared hover/focus tooltip (HeroUI + react-aria). Use for icon-only hints such as mode descriptions.
+ * Shared hover/focus tooltip. Native triggers use HeroUI (buttons); inline terms use react-aria.
  */
 export function Tooltip({
   children,
@@ -63,13 +72,25 @@ export function Tooltip({
   }
 
   return (
-    <HeroTooltip.Root delay={delay} closeDelay={closeDelay}>
-      <HeroTooltip.Trigger className={triggerClass}>
-        <span tabIndex={0} className="app-tooltip__trigger-inner">
+    <TooltipTrigger delay={delay} closeDelay={closeDelay}>
+      <Focusable>
+        <span
+          role="button"
+          tabIndex={0}
+          className={['app-tooltip__trigger-inner', triggerClass].filter(Boolean).join(' ')}
+        >
           {children}
         </span>
-      </HeroTooltip.Trigger>
-      {tooltipContent}
-    </HeroTooltip.Root>
+      </Focusable>
+      <AriaTooltip
+        placement={placement}
+        offset={showArrow ? 7 : 3}
+        className={contentClass}
+        UNSTABLE_portalContainer={bodyPortal}
+      >
+        {showArrow ? <OverlayArrow /> : null}
+        {content}
+      </AriaTooltip>
+    </TooltipTrigger>
   )
 }

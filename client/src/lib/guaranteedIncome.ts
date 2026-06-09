@@ -254,6 +254,7 @@ function combinedMonthlyForEntries(entries: GuaranteedIncomeEntry[], inputs: Cal
 export type GuaranteedIncomeAccordionMeta = {
   title: string
   subtitle: string
+  configured: boolean
 }
 
 export function governmentAccordionTitle(country: string): string {
@@ -275,7 +276,11 @@ export function governmentAccordionMeta(
     const total = cppAmount + oasAmount
 
     if (total <= 0) {
-      return { title: governmentAccordionTitle(country), subtitle: 'Not configured' }
+      return {
+        title: governmentAccordionTitle(country),
+        subtitle: 'Not configured',
+        configured: false,
+      }
     }
 
     const parts: string[] = []
@@ -284,18 +289,24 @@ export function governmentAccordionMeta(
     return {
       title: governmentAccordionTitle(country),
       subtitle: `${parts.join(' · ')} · ${formatMoney(total)}/mo`,
+      configured: true,
     }
   }
 
   const ss = government.find((e) => e.type === 'ss')
   const amount = ss ? entryMonthlyAmount(ss, inputs) : 0
   if (amount <= 0 || !ss) {
-    return { title: governmentAccordionTitle(country), subtitle: 'Not configured' }
+    return {
+      title: governmentAccordionTitle(country),
+      subtitle: 'Not configured',
+      configured: false,
+    }
   }
 
   return {
     title: governmentAccordionTitle(country),
     subtitle: `At ${ss.startAge} · ${formatMoney(amount)}/mo`,
+    configured: true,
   }
 }
 
@@ -307,11 +318,15 @@ export function pensionsAccordionMeta(inputs: CalculatorInputs): GuaranteedIncom
   const total = combinedMonthlyForEntries(configured, inputs)
 
   if (configured.length === 0 || total <= 0) {
-    return { title: 'Pensions', subtitle: 'Not configured' }
+    return { title: 'Pensions', subtitle: 'Not configured', configured: false }
   }
 
   const countLabel = configured.length === 1 ? '1 pension' : `${configured.length} pensions`
-  return { title: 'Pensions', subtitle: `${countLabel} · ${formatMoney(total)}/mo` }
+  return {
+    title: 'Pensions',
+    subtitle: `${countLabel} · ${formatMoney(total)}/mo`,
+    configured: true,
+  }
 }
 
 export function annuitiesAccordionMeta(inputs: CalculatorInputs): GuaranteedIncomeAccordionMeta {
@@ -321,11 +336,15 @@ export function annuitiesAccordionMeta(inputs: CalculatorInputs): GuaranteedInco
   const total = combinedMonthlyForEntries(configured, inputs)
 
   if (configured.length === 0 || total <= 0) {
-    return { title: 'Annuities', subtitle: 'Not configured' }
+    return { title: 'Annuities', subtitle: 'Not configured', configured: false }
   }
 
   const countLabel = configured.length === 1 ? '1 annuity' : `${configured.length} annuities`
-  return { title: 'Annuities', subtitle: `${countLabel} · ${formatMoney(total)}/mo` }
+  return {
+    title: 'Annuities',
+    subtitle: `${countLabel} · ${formatMoney(total)}/mo`,
+    configured: true,
+  }
 }
 
 export function isGuaranteedIncomeConfigured(inputs: CalculatorInputs): boolean {
@@ -521,6 +540,14 @@ export function startAgeRangeForType(type: GuaranteedIncomeEntryType): { min: nu
   if (type === 'cpp') return { min: 60, max: 70 }
   if (type === 'oas') return { min: 65, max: 70 }
   return { min: 55, max: 75 }
+}
+
+/** Pension, annuity, and other supplemental entries — min is at least the user's current age. */
+export function supplementalStartAgeRange(currentAge: number): { min: number; max: number } {
+  const age = Math.max(0, Math.round(currentAge))
+  const min = Math.max(startAgeRangeForType('pension').min, age)
+  const max = Math.max(startAgeRangeForType('pension').max, min)
+  return { min, max }
 }
 
 export function createBlankPensionEntry(country: string): GuaranteedIncomeEntry {

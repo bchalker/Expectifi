@@ -49,7 +49,7 @@ export type ManageOverlayPhaseHeader = {
   subtitle?: ReactNode;
   extra?: ReactNode;
 };
-const MANAGE_VALUE_LABEL = "Financial Accounts";
+const MANAGE_VALUE_LABEL = "Accounts";
 
 const CSV_IMPORT_OPTIONS = CSV_CUSTODIAN_OPTIONS.filter(
   (o) => o.id !== "other" && o.id !== "webull",

@@ -54,7 +54,7 @@ function PhaseSegmentTabs({
     const ro = new ResizeObserver(() => measureThumb());
     ro.observe(track);
     return () => ro.disconnect();
-  }, [measureThumb]);
+  }, [measureThumb, targetRetirementAge]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -83,10 +83,28 @@ function PhaseSegmentTabs({
         aria-selected={phase === "growth"}
         aria-controls={`subheader-phase-growth-panel${idSuffix}`}
         tabIndex={phase === "growth" ? 0 : -1}
-        className="subheader-phase-segment__tab"
+        className={[
+          "subheader-phase-segment__tab",
+          phase === "growth" ? "subheader-phase-segment__tab--has-suffix" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         onClick={() => onPhase("growth")}
       >
-        Growth
+        <span className="subheader-phase-segment__tab-label">
+          <span className="subheader-phase-segment__tab-word">Growth</span>
+          {phase === "growth" ? (
+            <>
+              {" "}
+              <span className="subheader-phase-segment__tab-age-qualifier">
+                til
+              </span>{" "}
+              <span className="subheader-phase-segment__tab-age">
+                {targetRetirementAge}
+              </span>
+            </>
+          ) : null}
+        </span>
       </button>
       <button
         ref={incomeRef}
@@ -96,12 +114,27 @@ function PhaseSegmentTabs({
         aria-selected={phase === "income"}
         aria-controls={`subheader-phase-income-panel${idSuffix}`}
         tabIndex={phase === "income" ? 0 : -1}
-        className="subheader-phase-segment__tab subheader-phase-segment__tab--income"
+        className={[
+          "subheader-phase-segment__tab",
+          phase === "income" ? "subheader-phase-segment__tab--has-suffix" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         onClick={() => onPhase("income")}
       >
-        <span className="subheader-phase-segment__income-label">
-          <span className="subheader-phase-segment__income-word">Income</span>{" "}
-          <span className="subheader-phase-segment__income-at">at</span> {targetRetirementAge}
+        <span className="subheader-phase-segment__tab-label">
+          <span className="subheader-phase-segment__tab-word">Income</span>
+          {phase === "income" ? (
+            <>
+              {" "}
+              <span className="subheader-phase-segment__tab-age-qualifier">
+                by
+              </span>{" "}
+              <span className="subheader-phase-segment__tab-age">
+                {targetRetirementAge}
+              </span>
+            </>
+          ) : null}
         </span>
       </button>
     </div>
@@ -124,8 +157,6 @@ type Props = {
   grossMon: number;
   totalFV: number;
   targetRetirementAge: number;
-  ssIncluded: boolean;
-  onSsIncluded: (v: boolean) => void;
   /** When false, show Add guaranteed income until sources are saved. */
   guaranteedIncomeConfigured: boolean;
   onOpenGuaranteedIncomeConfig: () => void;
@@ -154,8 +185,6 @@ export function SubHeader({
   grossMon,
   totalFV,
   targetRetirementAge,
-  ssIncluded,
-  onSsIncluded,
   guaranteedIncomeConfigured,
   onOpenGuaranteedIncomeConfig,
   guaranteedIncomeTooltip,
@@ -264,9 +293,9 @@ export function SubHeader({
                   <span className="subheader-estimate__value-num">
                     {incomePhase ? fmt(grossAnim) : fmt(totalFvAnim)}
                   </span>
-                  <span className="subheader-estimate__value-suffix">
-                    {incomePhase ? "/mo" : `/at ${targetRetirementAge}`}
-                  </span>
+                  {incomePhase ? (
+                    <span className="subheader-estimate__value-suffix">/mo</span>
+                  ) : null}
                 </div>
                 {showMarketScenarioPill ? (
                   <span
@@ -288,12 +317,12 @@ export function SubHeader({
                     <div
                       className="subheader-estimate__note subheader-estimate__note--ss-row subheader-estimate__note--guaranteed-income"
                       role="group"
-                      aria-label="Include guaranteed income in expected monthly income"
+                      aria-label="Guaranteed income in expected monthly income"
                     >
                       {guaranteedIncomeConfigured ? (
                         <div className="subheader-guaranteed-income-toggle">
                           <span className="font-xs subheader-ss-toggle__text subheader-guaranteed-income-toggle__label">
-                            Include{" "}
+                            Includes{" "}
                             <Tooltip
                               nativeTrigger
                               placement="top"
@@ -327,7 +356,7 @@ export function SubHeader({
                                       </ul>
                                       {showGuaranteedIncomeRetirementNote ? (
                                         <p className="subheader-guaranteed-income-tooltip__context font-xs">
-                                          You retire at {targetRetirementAge} -- these
+                                          You retire at {targetRetirementAge} — these
                                           kick in a few years later.
                                         </p>
                                       ) : null}
@@ -352,19 +381,6 @@ export function SubHeader({
                               </button>
                             </Tooltip>
                           </span>
-                          <button
-                            type="button"
-                            role="switch"
-                            aria-checked={ssIncluded}
-                            aria-label="Include guaranteed income in expected monthly income"
-                            className={`subheader-ss-toggle__switch${ssIncluded ? " subheader-ss-toggle__switch--on" : ""}`}
-                            onClick={() => onSsIncluded(!ssIncluded)}
-                          >
-                            <span
-                              className="subheader-ss-toggle__track"
-                              aria-hidden
-                            />
-                          </button>
                         </div>
                       ) : (
                         <button

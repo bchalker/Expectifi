@@ -15,54 +15,122 @@
   min-width: 0;
 }
 
+.config-life-tab__accordion-item:not(:last-child):not(
+    :has(.config-life-tab__accordion-trigger[aria-expanded='true'])
+  )
+  .config-life-tab__accordion-heading {
+  border-bottom: 1px solid var(--border);
+}
+
 .config-life-tab__accordion-heading {
   flex: 1 1 auto;
   min-width: 0;
+  background: #f9f9f9;
+  transition: background-color 0.15s ease;
 }
 
+.config-life-tab__accordion-heading--configured {
+  background: #fff;
+}
+
+.config-life-tab__accordion-item:has(
+    .config-life-tab__accordion-trigger[aria-expanded='true']
+  )
+  .config-life-tab__accordion-heading {
+  background: #fff;
+}
+
+.config-life-tab__accordion button[data-slot='accordion-trigger'],
 .config-life-tab__accordion-trigger {
   width: 100%;
   min-width: 0;
-  padding: 0.875rem 1rem;
+  padding: 0;
+  background: transparent;
   cursor: pointer;
+}
+
+.config-life-tab__accordion .config-life-tab__accordion-trigger:hover,
+.config-life-tab__accordion .config-life-tab__accordion-trigger[aria-expanded='true'] {
+  background: transparent;
+}
+
+.config-life-tab__accordion-item:not(:has(.config-life-tab__accordion-trigger[aria-expanded='true']))
+  .config-life-tab__accordion-heading:not(.config-life-tab__accordion-heading--configured)
+  .config-life-tab__accordion-title,
+.config-life-tab__accordion-item:not(:has(.config-life-tab__accordion-trigger[aria-expanded='true']))
+  .config-life-tab__accordion-heading:not(.config-life-tab__accordion-heading--configured)
+  .config-life-tab__accordion-subtitle {
+  color: var(--text-faint);
+}
+
+.config-life-tab__accordion-item:has(.config-life-tab__accordion-trigger[aria-expanded='true'])
+  .config-life-tab__accordion-title,
+.config-life-tab__accordion-heading--configured .config-life-tab__accordion-title,
+.config-life-tab__accordion-item:has(.config-life-tab__accordion-trigger[aria-expanded='true'])
+  .config-life-tab__accordion-subtitle,
+.config-life-tab__accordion-heading--configured .config-life-tab__accordion-subtitle {
+  color: var(--text);
 }
 
 .config-life-tab__accordion-title-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0;
+  gap: var(--space-1);
   min-width: 0;
   flex: 1 1 auto;
+  padding: var(--space-4) var(--space-2) var(--space-4) var(--space-3);
   text-align: left;
 }
 
 .config-life-tab__accordion-title {
   font-family: var(--body);
   font-size: var(--text-base);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.25;
-  color: var(--color-text-primary);
+  color: var(--text);
+}
+
+.config-life-tab__accordion-subtitle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .config-life-tab__accordion-subtitle {
-  margin-top: 2px;
   font-family: var(--body);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 400;
   line-height: 1.35;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
 
-.config-life-tab__accordion-indicator {
+.config-life-tab__accordion-check {
   flex-shrink: 0;
+  color: var(--green3);
+}
+
+.config-life-tab__accordion-indicator {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  margin-left: auto;
+  padding: var(--space-4) var(--space-3);
   color: var(--text-muted);
   transition: transform 0.2s ease;
+}
+
+.config-life-tab__accordion-indicator svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .config-life-tab__accordion-indicator[data-expanded='true'],
