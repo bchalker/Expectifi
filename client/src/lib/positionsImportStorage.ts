@@ -5,6 +5,7 @@ import type { PositionsCsvCustodian } from './positionsCsvImport'
 import { enrichBatchRows, enrichImportBatches } from './brokerMonogram'
 import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { stripCsvDerivedFromCalculatorInputs } from './calculatorInputSanitize'
+import { tierCanPersistCsvHoldings } from './planStorage/resolveTier'
 import type { UserTier } from './planStorage/types'
 import { getPlanWriteTier } from './planStorage/writeContext'
 import { clearCsvSession, loadCsvSession, saveCsvSession } from './planStorage/csvSession'
@@ -56,13 +57,66 @@ export type StoredPositionsImportV2 = {
 export type StoredPositionsImport = StoredPositionsImportV2
 
 function shouldPersistCsvToLocalStorage(): boolean {
-  // CSV/Plaid holdings blobs: pro only. Guests with browser save keep profile + manual accounts in LS.
-  return getPlanWriteTier() === 'pro'
+  return tierCanPersistCsvHoldings(getPlanWriteTier())
 }
 
-/** Clear CSV holdings on each document load for non-pro (sessionStorage survives refresh). */
+function readLocalStoragePositionsImport(): StoredPositionsImportV2 | null {
+  try {
+    const raw = localStorage.getItem(FIDELITY_IMPORT_STORAGE_KEY)
+    if (!raw) return null
+    const o = JSON.parse(raw) as StoredPositionsImportV1 | StoredPositionsImportV2
+    if (o?.version === 2 && Array.isArray((o as StoredPositionsImportV2).batches)) {
+      const v2 = o as StoredPositionsImportV2
+      if (!v2.balances) return null
+      return {
+        ...v2,
+        batches: enrichImportBatches(v2.batches),
+      }
+    }
+    if (
+      o?.version === 1 &&
+      (o as StoredPositionsImportV1).balances &&
+      Array.isArray((o as StoredPositionsImportV1).positions)
+    ) {
+      return migrateV1ToV2(o as StoredPositionsImportV1)
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+function writeLocalStoragePositionsImport(data: StoredPositionsImportV2): void {
+  const batches = enrichImportBatches(data.batches)
+  const payload: StoredPositionsImportV2 = {
+    version: 2,
+    savedAt: data.savedAt,
+    batches,
+    balances: data.balances,
+  }
+  localStorage.setItem(FIDELITY_IMPORT_STORAGE_KEY, JSON.stringify(payload))
+  setSessionHasCsvHoldings((payload.batches?.length ?? 0) > 0)
+}
+
+/** Promote tab-session CSV into localStorage when the user can persist holdings. */
+function migrateCsvSessionToLocalStorageIfNeeded(): void {
+  const session = loadCsvSession()
+  if (!session?.batches?.length) return
+  const local = readLocalStoragePositionsImport()
+  if (local?.batches?.length) return
+  writeLocalStoragePositionsImport(session)
+}
+
+/**
+ * Boot: anonymous guests get ephemeral CSV only; signed-in / browser-save tiers keep
+ * localStorage holdings and migrate any in-tab session import before clearing session.
+ */
 export function clearNonProCsvHoldingsOnBoot(tier: UserTier = getPlanWriteTier()): void {
-  if (tier === 'pro') return
+  if (tierCanPersistCsvHoldings(tier)) {
+    migrateCsvSessionToLocalStorageIfNeeded()
+    clearCsvSession()
+    return
+  }
   clearCsvSession()
   try {
     localStorage.removeItem(FIDELITY_IMPORT_STORAGE_KEY)
@@ -147,32 +201,9 @@ export function loadStoredPositionsImport(): StoredPositionsImportV2 | null {
   if (!shouldPersistCsvToLocalStorage()) {
     return loadCsvSession()
   }
-  try {
-    const raw = localStorage.getItem(FIDELITY_IMPORT_STORAGE_KEY)
-    if (!raw) return null
-    const o = JSON.parse(raw) as StoredPositionsImportV1 | StoredPositionsImportV2
-    if (o?.version === 2 && Array.isArray((o as StoredPositionsImportV2).batches)) {
-      const v2 = o as StoredPositionsImportV2
-      if (!v2.balances) return null
-      return {
-        ...v2,
-        batches: enrichImportBatches(v2.batches),
-      }
-    }
-    if (o?.version === 1 && (o as StoredPositionsImportV1).balances && Array.isArray((o as StoredPositionsImportV1).positions)) {
-      const v2 = migrateV1ToV2(o as StoredPositionsImportV1)
-      try {
-        if (shouldPersistCsvToLocalStorage()) saveStoredPositionsImport(v2)
-        else saveCsvSession(v2)
-      } catch {
-        /* quota or private mode — still return migrated shape in memory */
-      }
-      return v2
-    }
-    return null
-  } catch {
-    return null
-  }
+  const stored = readLocalStoragePositionsImport()
+  if (stored) return stored
+  return loadCsvSession()
 }
 
 export function clearStoredPositionsImport(): void {

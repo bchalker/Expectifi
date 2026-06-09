@@ -22,3 +22,8 @@ export function resolveUserTier(auth: AuthTierInput): UserTier {
 export function canPersistPlanToLocalStorage(tier: UserTier): boolean {
   return tier === 'browser_saved' || tier === 'authenticated_free' || tier === 'pro'
 }
+
+/** CSV / Plaid holdings blobs persist locally for signed-in and browser-save tiers. */
+export function tierCanPersistCsvHoldings(tier: UserTier): boolean {
+  return tier === 'browser_saved' || tier === 'authenticated_free' || tier === 'pro'
+}

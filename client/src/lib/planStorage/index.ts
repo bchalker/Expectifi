@@ -39,6 +39,7 @@ export {
   canPersistPlanToLocalStorage,
   isPaidSubscription,
   resolveUserTier,
+  tierCanPersistCsvHoldings,
 } from './resolveTier'
 export {
   bootPlanHydration,

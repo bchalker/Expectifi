@@ -222,6 +222,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [hydration.onboardingComplete, user?.onboardingDone, user?.planPrefs],
   );
   const welcomeBlockedRef = useRef(peekForceOnboardingSession());
+  const syncedAuthUserIdRef = useRef<string | null>(null);
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [onboardingMountKey, setOnboardingMountKey] = useState(0);
@@ -379,6 +380,31 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const setUi = useCallback((p: Partial<CalculatorUi>) => {
     setUiState((s) => ({ ...s, ...p }));
   }, []);
+
+  /** After sign-in, re-apply tier hydration (profile, plan session, migrated CSV holdings). */
+  useEffect(() => {
+    if (!isHydrated || authLoading) return;
+    const userId = user?.id ?? null;
+    if (userId && syncedAuthUserIdRef.current !== userId) {
+      syncedAuthUserIdRef.current = userId;
+      setInputsState(hydration.inputs);
+      setUiState(hydration.ui);
+      setPhase(hydration.phase);
+      setActivePreset(hydration.activePreset);
+      setPositionsImportRev((n) => n + 1);
+    }
+    if (!userId) {
+      syncedAuthUserIdRef.current = null;
+    }
+  }, [
+    isHydrated,
+    authLoading,
+    user?.id,
+    hydration.inputs,
+    hydration.ui,
+    hydration.phase,
+    hydration.activePreset,
+  ]);
 
   useEffect(() => {
     if (!isHydrated || authLoading) return;
