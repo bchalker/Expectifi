@@ -1,52 +1,57 @@
-export type EventPhase = 'growth' | 'income' | 'both'
+export type LifeEventGroupId = 'capital-decisions' | 'unexpected-hits' | 'windfalls'
 
-export type EventType = 'lump-sum-out' | 'recurring-out' | 'lump-sum-in' | 'recurring-in'
+export type LifeEventDirection = 'outflow' | 'inflow'
 
 export type ImpactRating = 'minimal' | 'light' | 'moderate' | 'heavy' | 'significant'
 
-export interface MortgageEventExtras {
-  showTradeoffAnalysis: true
-  mortgageRateDefault: number
-  monthlyPaymentDefault: number
-  mortgageRateMin: number
-  mortgageRateMax: number
-  mortgageRateStep: number
-  tradeoffNarrative: (
-    amount: number,
-    year: number,
-    futureValue: number,
-    retirementYear: number,
-    mortgageRate: number,
-    portfolioGrowthRate: number,
-    monthlyPayment: number,
-    yearsRemaining: number,
-    netAdvantage: number,
-    investingWins: boolean,
-  ) => string
+/** Per-instance fields — lump sum only, no recurring. */
+export interface LifeEventInstance {
+  id: string
+  label: string
+  amount: number
+  year: number
+  isExpanded: boolean
+  pendingDelete?: boolean
+  financingEnabled?: boolean
+  loanAmount?: number
+  loanRate?: number
+  loanTermYears?: number
+  financedAmount?: number
+  mortgageRate?: number
+  mortgageMonthlyPayment?: number
+  mortgageLoanTermYears?: number
+  mortgageLoanStartYear?: number
+  downPayment?: number
+  hsaOffsetAmount?: number
+  plan529GrowthRate?: number
+  expectedReturn?: number
+  timelineYears?: number
+  description?: string
+  divorceIsPercent?: boolean
+  divorcePercent?: number
+  investedAccount?: string
+  taxRate?: number
+  taxWithholding?: number
 }
 
-export interface MedicalEventExtras {
-  showHsaAnalysis: true
-  hsaOffsetNarrative: (
-    grossExpense: number,
-    hsaBalance: number,
-    hsaOffset: number,
-    netExpense: number,
-    futureValue: number,
-    retirementYear: number,
-    hasHsa: boolean,
-    fullyCovered: boolean,
-    hsaSavings: number,
-  ) => string
+/** One card per event type; instances live inside as accordion rows. */
+export interface LifeEventTypeCard {
+  configId: string
+  isActive: boolean
+  isExpanded: boolean
+  instances: LifeEventInstance[]
 }
 
 export interface LifeEventConfig {
   id: string
-  canonicalLabel: string
-  displayLabel: string
-  type: EventType
-  phase: EventPhase
-  color: string
+  group: LifeEventGroupId
+  direction: LifeEventDirection
+  title: string
+  /** Plural noun for multi-instance detail lines, e.g. "vehicles" */
+  instanceNoun: string
+  supportsMultiple: boolean
+  labelPlaceholder: string
+  addInstanceLabel: string
   defaultAmount: number
   defaultYear: (currentYear: number, retirementYear: number) => number
   amountMin: number
@@ -54,48 +59,31 @@ export interface LifeEventConfig {
   amountStep: number
   amountLabel: string
   yearLabel: string
-  headerTitlePrefix: string
-  headerTitleSuffix: string
-  formatAmount: (amount: number) => string
-  formatHeaderAmount: (amount: number) => string
-  narrativeTemplate: (
-    amount: number,
-    year: number,
-    futureValue: number,
-    retirementYear: number,
-    duration?: number,
-  ) => string
-  isRecurring: boolean
-  defaultDuration?: number
-  durationMin?: number
-  durationMax?: number
-  durationStep?: number
-  durationLabel?: string
-  extras?: MortgageEventExtras | MedicalEventExtras
+  color: string
 }
 
-export interface LifeEventState {
-  id: string
-  configId: string
-  amount: number
-  year: number
-  isActive: boolean
-  isExpanded: boolean
-  label?: string
-  duration?: number
-  /** Pay-off-mortgage card only — persisted in growth life-events storage. */
-  mortgageRate?: number
-  mortgageMonthlyPayment?: number
-  mortgageLoanTermYears?: number
-  mortgageLoanStartYear?: number
-}
-
-export interface LifeEventCalculated {
+export interface InstanceImpactResult {
   futureValue: number
-  afterEventPortfolio: number
   rating: ImpactRating
-  totalOutflow?: number
+  netAmount: number
+  hsaResult?: {
+    grossExpense: number
+    hsaOffset: number
+    netExpense: number
+    fullyCovered: boolean
+    hasHsa: boolean
+  }
+  hsaSavings?: number
 }
+
+export interface TypeCardImpactResult {
+  totalFutureValue: number
+  totalNetAmount: number
+  highestRating: ImpactRating
+  instanceResults: Map<string, InstanceImpactResult>
+}
+
+export type LifeEventFilterId = 'all' | LifeEventGroupId
 
 export interface EventImpactStripProps {
   baselinePortfolio: number

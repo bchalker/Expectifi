@@ -1,14 +1,6 @@
-import type { ImpactRating, LifeEventCalculated, LifeEventConfig, MedicalEventExtras, MortgageEventExtras } from './types'
+import type { ImpactRating, LifeEventConfig } from './types'
 
 export type { ImpactRating } from './types'
-
-export function isMortgageEventExtras(extras: LifeEventConfig['extras']): extras is MortgageEventExtras {
-  return extras != null && 'showTradeoffAnalysis' in extras
-}
-
-export function isMedicalEventExtras(extras: LifeEventConfig['extras']): extras is MedicalEventExtras {
-  return extras != null && 'showHsaAnalysis' in extras
-}
 
 export interface HsaOffsetResult {
   grossExpense: number
@@ -33,42 +25,6 @@ export function calcHsaOffset(grossExpense: number, hsaBalance: number): HsaOffs
   }
 }
 
-export function eventImpactAmount(
-  config: LifeEventConfig,
-  grossAmount: number,
-  hsaBalance: number,
-): number {
-  if (isMedicalEventExtras(config.extras)) {
-    return calcHsaOffset(grossAmount, hsaBalance).netExpense
-  }
-  return grossAmount
-}
-
-export function calcEventImpactFutureValue(
-  config: LifeEventConfig,
-  grossAmount: number,
-  eventYear: number,
-  retirementYear: number,
-  growthRate: number,
-  hsaBalance: number,
-  duration?: number,
-): number {
-  if (isMedicalEventExtras(config.extras)) {
-    const amount = calcHsaOffset(grossAmount, hsaBalance).netExpense
-    return calcEventValues(amount, eventYear, retirementYear, 0, growthRate, false).futureValue
-  }
-
-  return calcEventValues(
-    grossAmount,
-    eventYear,
-    retirementYear,
-    0,
-    growthRate,
-    config.isRecurring,
-    duration ?? config.defaultDuration,
-  ).futureValue
-}
-
 export function calcFutureValue(
   amount: number,
   eventYear: number,
@@ -77,36 +33,6 @@ export function calcFutureValue(
 ): number {
   const years = Math.max(0, retirementYear - eventYear)
   return Math.round((amount * Math.pow(1 + growthRate, years)) / 100) * 100
-}
-
-export function calcRecurringFutureValue(
-  monthlyAmount: number,
-  startYear: number,
-  durationYears: number,
-  retirementYear: number,
-  growthRate: number,
-): number {
-  if (durationYears <= 0) return 0
-
-  const annualAmount = monthlyAmount * 12
-  let total = 0
-
-  for (let yr = startYear; yr < startYear + durationYears; yr++) {
-    if (yr >= retirementYear) break
-    const yearsToGrow = retirementYear - yr - 0.5
-    total += annualAmount * Math.pow(1 + growthRate, yearsToGrow)
-  }
-
-  return Math.round(total / 100) * 100
-}
-
-export function calcTotalOutflow(
-  amount: number,
-  isRecurring: boolean,
-  duration?: number,
-): number {
-  if (!isRecurring) return amount
-  return amount * 12 * (duration || 0)
 }
 
 export function calcImpactRating(futureValue: number, retirementPortfolio: number): ImpactRating {
@@ -125,26 +51,18 @@ export function calcEventValues(
   retirementYear: number,
   retirementPortfolio: number,
   growthRate: number,
-  isRecurring = false,
-  duration?: number,
-): LifeEventCalculated {
-  const futureValue = isRecurring
-    ? calcRecurringFutureValue(
-        amount,
-        eventYear,
-        duration || 0,
-        retirementYear,
-        growthRate,
-      )
-    : calcFutureValue(amount, eventYear, retirementYear, growthRate)
-
-  const totalOutflow = calcTotalOutflow(amount, isRecurring, duration)
-
+): {
+  futureValue: number
+  afterEventPortfolio: number
+  rating: ImpactRating
+  totalOutflow: number
+} {
+  const futureValue = calcFutureValue(amount, eventYear, retirementYear, growthRate)
   return {
     futureValue,
     afterEventPortfolio: retirementPortfolio - futureValue,
     rating: calcImpactRating(futureValue, retirementPortfolio),
-    totalOutflow,
+    totalOutflow: amount,
   }
 }
 
@@ -166,7 +84,6 @@ export function formatStripPortfolioValue(value: number): string {
   return `$${(value / 1000).toFixed(0)}k`
 }
 
-/** Compact money for collapsed card helper lines (e.g. $4.8k, $28.8k). */
 export function formatCollapsedSummaryAmount(value: number): string {
   const abs = Math.abs(value)
   if (abs >= 1_000_000) {
@@ -184,45 +101,23 @@ export function formatCollapsedSummaryAmount(value: number): string {
   return formatCurrency(value)
 }
 
-export function formatCollapsedEventSummary(
+export function formatInstanceCollapsedSummary(
   config: LifeEventConfig,
   params: {
     year: number
     amount: number
-    duration: number
-    retirementYear: number
-    totalOutflow?: number
     mortgageInterestSaved?: number
     hsaResult?: HsaOffsetResult | null
   },
 ): string {
-  const {
-    year,
-    amount,
-    duration,
-    retirementYear,
-    totalOutflow,
-    mortgageInterestSaved,
-    hsaResult,
-  } = params
+  const { year, amount, mortgageInterestSaved, hsaResult } = params
 
-  if (config.isRecurring) {
-    const endYear = year + duration
-    const annualOutflow = amount * 12
-    if (endYear >= retirementYear) {
-      return `Monthly · ongoing · ${formatCollapsedSummaryAmount(annualOutflow)}/yr`
-    }
-    const total = totalOutflow ?? calcTotalOutflow(amount, true, duration)
-    const durationLabel = duration === 1 ? '1 year' : `${duration} years`
-    return `Monthly · ${durationLabel} · ${formatCollapsedSummaryAmount(total)} total`
-  }
-
-  if (isMortgageEventExtras(config.extras)) {
+  if (config.id === 'pay-off-mortgage' || config.id === 'pay-student-loans') {
     const interestSaved = mortgageInterestSaved ?? 0
     return `One-time · payoff ${year} · ${formatCollapsedSummaryAmount(interestSaved)} interest saved`
   }
 
-  if (isMedicalEventExtras(config.extras) && hsaResult) {
+  if (config.id === 'medical-expense' && hsaResult) {
     if (hsaResult.fullyCovered) {
       return `One-time · ${year} · fully covered by HSA`
     }
@@ -231,7 +126,7 @@ export function formatCollapsedEventSummary(
     }
   }
 
-  return `One-time · ${year} · from brokerage`
+  return `One-time · ${year} · ${formatCollapsedSummaryAmount(amount)}`
 }
 
 export function lifeEventRangeFillStyle(

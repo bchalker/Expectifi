@@ -1,3 +1,4 @@
+export { LifeEventTypeCard } from './LifeEventTypeCard'
 export { default as GrowthEventCard } from './GrowthEventCard'
 export { default as ProjectionChart } from './ProjectionChart'
 export { default as ImpactRatingBadge } from './ImpactRatingBadge'

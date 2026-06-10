@@ -21,7 +21,7 @@ export function buildPlanStatePayloadFromLocal(): UserPlanStatePayload {
     lifePlans: loadLifePlans(),
     growthLifeEvents: normalizeStoredGrowthLifeEvents({
       version: GROWTH_LIFE_EVENTS_VERSION,
-      events: loadGrowthLifeEvents(),
+      cards: loadGrowthLifeEvents(),
     }),
     balanceModes: {
       retirement: loadBalanceInputMode(),

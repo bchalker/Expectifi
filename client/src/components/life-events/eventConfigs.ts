@@ -1,298 +1,320 @@
 import type { LifeEventConfig } from './types'
-import { formatCurrency, formatStripPortfolioValue } from './utils'
 
-export const growthEventConfigs: LifeEventConfig[] = [
+const y = (offset: number) => (currentYear: number, retirementYear: number) =>
+  Math.min(currentYear + offset, retirementYear)
+
+export const LIFE_EVENT_CONFIGS: LifeEventConfig[] = [
   {
     id: 'buy-car-cash',
-    canonicalLabel: 'Buy a car (cash)',
-    displayLabel: 'buy a car with cash',
-    type: 'lump-sum-out',
-    phase: 'growth',
-    isRecurring: false,
-    color: '#EF9F27',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Buy a car with cash',
+    instanceNoun: 'vehicles',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. 2027 SUV',
+    addInstanceLabel: '+ Add vehicle',
     defaultAmount: 35000,
-    defaultYear: (currentYear, retirementYear) =>
-      Math.min(currentYear + 1, retirementYear),
+    defaultYear: y(1),
     amountMin: 5000,
-    amountMax: 100000,
+    amountMax: 150000,
     amountStep: 1000,
     amountLabel: 'Purchase price',
     yearLabel: 'When to purchase?',
-    headerTitlePrefix: 'Buy a ',
-    headerTitleSuffix: ' car with cash',
-    formatAmount: (amount) => '$' + amount.toLocaleString(),
-    formatHeaderAmount: formatStripPortfolioValue,
-    narrativeTemplate: (amount, year, futureValue, retirementYear) =>
-      `A ${formatCurrency(amount)} car purchase in ${year} ` +
-      `costs your retirement portfolio ${formatCurrency(futureValue)}. ` +
-      `That is what it would have grown to by ${retirementYear}.`,
+    color: '#EF9F27',
   },
   {
     id: 'pay-off-mortgage',
-    canonicalLabel: 'Pay off mortgage early',
-    displayLabel: 'pay off my mortgage early',
-    type: 'lump-sum-out',
-    phase: 'growth',
-    isRecurring: false,
-    color: '#E24B4A',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Pay off mortgage early',
+    instanceNoun: 'mortgages',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. Primary home',
+    addInstanceLabel: '+ Add mortgage',
     defaultAmount: 85000,
-    defaultYear: (currentYear) => currentYear + 2,
+    defaultYear: y(2),
     amountMin: 10000,
     amountMax: 600000,
     amountStep: 5000,
     amountLabel: 'Remaining balance',
     yearLabel: 'When to pay off?',
-    headerTitlePrefix: 'Pay ',
-    headerTitleSuffix: ' off my mortgage early',
-    formatAmount: (amount) => '$' + amount.toLocaleString(),
-    formatHeaderAmount: formatStripPortfolioValue,
-    narrativeTemplate: (amount, year, futureValue, retirementYear) =>
-      `Paying off ${formatCurrency(amount)} in ${year} ` +
-      `removes ${formatCurrency(futureValue)} from your ` +
-      `retirement portfolio by ${retirementYear}. ` +
-      `That is what it would have compounded to.`,
-    extras: {
-      showTradeoffAnalysis: true,
-      mortgageRateDefault: 0.04,
-      monthlyPaymentDefault: 1500,
-      mortgageRateMin: 0.5,
-      mortgageRateMax: 10,
-      mortgageRateStep: 0.05,
-      tradeoffNarrative: (
-        _amount,
-        _year,
-        _futureValue,
-        _retirementYear,
-        mortgageRate,
-        portfolioGrowthRate,
-        _monthlyPayment,
-        _yearsRemaining,
-        netAdvantage,
-        investingWins,
-      ) =>
-        investingWins
-          ? `At your ${(mortgageRate * 100).toFixed(2)}% ` +
-            `mortgage rate and ` +
-            `${(portfolioGrowthRate * 100).toFixed(1)}% ` +
-            `portfolio growth rate, staying invested likely ` +
-            `outperforms paying off early by roughly ` +
-            `${formatCurrency(netAdvantage)}. ` +
-            `Carrying a mortgage into retirement is a personal ` +
-            `decision. Here is what each path looks like.`
-          : `At your ${(mortgageRate * 100).toFixed(2)}% ` +
-            `mortgage rate and ` +
-            `${(portfolioGrowthRate * 100).toFixed(1)}% ` +
-            `portfolio growth rate, paying off early likely ` +
-            `outperforms staying invested by roughly ` +
-            `${formatCurrency(Math.abs(netAdvantage))}. ` +
-            `Here is what each path looks like.`,
-    },
+    color: '#E24B4A',
+  },
+  {
+    id: 'pay-student-loans',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Pay off student loans early',
+    instanceNoun: 'loans',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. Federal loans',
+    addInstanceLabel: '+ Add loan',
+    defaultAmount: 45000,
+    defaultYear: y(2),
+    amountMin: 1000,
+    amountMax: 300000,
+    amountStep: 1000,
+    amountLabel: 'Remaining balance',
+    yearLabel: 'When to pay off?',
+    color: '#E24B4A',
+  },
+  {
+    id: 'buy-vacation-property',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Buy a second property or vacation home',
+    instanceNoun: 'properties',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. Beach house',
+    addInstanceLabel: '+ Add property',
+    defaultAmount: 350000,
+    defaultYear: y(2),
+    amountMin: 50000,
+    amountMax: 2000000,
+    amountStep: 10000,
+    amountLabel: 'Purchase price',
+    yearLabel: 'Year of purchase',
+    color: '#185FA5',
+  },
+  {
+    id: 'child-down-payment',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Help a child with a down payment',
+    instanceNoun: 'gifts',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. Down payment help — Sara',
+    addInstanceLabel: '+ Add gift',
+    defaultAmount: 50000,
+    defaultYear: y(3),
+    amountMin: 5000,
+    amountMax: 500000,
+    amountStep: 5000,
+    amountLabel: 'Gift amount',
+    yearLabel: 'When to give?',
+    color: '#0F6E56',
+  },
+  {
+    id: 'fund-529',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Fund a 529 — lump sum',
+    instanceNoun: 'contributions',
+    supportsMultiple: true,
+    labelPlaceholder: "e.g. Emma's college",
+    addInstanceLabel: '+ Add contribution',
+    defaultAmount: 25000,
+    defaultYear: y(1),
+    amountMin: 1000,
+    amountMax: 500000,
+    amountStep: 1000,
+    amountLabel: 'Contribution amount',
+    yearLabel: 'When to contribute?',
+    color: '#534AB7',
+  },
+  {
+    id: 'wedding',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Pay for a wedding — your lump sum contribution',
+    instanceNoun: 'weddings',
+    supportsMultiple: true,
+    labelPlaceholder: "e.g. Jake's wedding",
+    addInstanceLabel: '+ Add wedding',
+    defaultAmount: 35000,
+    defaultYear: y(2),
+    amountMin: 5000,
+    amountMax: 200000,
+    amountStep: 1000,
+    amountLabel: 'Lump sum contribution',
+    yearLabel: 'When?',
+    color: '#D85A30',
+  },
+  {
+    id: 'business-investment',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Invest in a business',
+    instanceNoun: 'investments',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 100000,
+    defaultYear: y(1),
+    amountMin: 5000,
+    amountMax: 1000000,
+    amountStep: 5000,
+    amountLabel: 'Investment amount',
+    yearLabel: 'When to invest?',
+    color: '#0F6E56',
   },
   {
     id: 'home-renovation',
-    canonicalLabel: 'Home renovation / major repair',
-    displayLabel: 'renovate my home',
-    type: 'lump-sum-out',
-    phase: 'growth',
-    isRecurring: false,
-    color: '#534AB7',
+    group: 'capital-decisions',
+    direction: 'outflow',
+    title: 'Major home renovation — lump sum',
+    instanceNoun: 'renovations',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
     defaultAmount: 45000,
-    defaultYear: (currentYear) => currentYear + 1,
+    defaultYear: y(1),
     amountMin: 5000,
     amountMax: 300000,
     amountStep: 2500,
-    amountLabel: 'Renovation budget',
+    amountLabel: 'Renovation amount',
     yearLabel: 'When to renovate?',
-    headerTitlePrefix: 'Spend ',
-    headerTitleSuffix: ' to renovate my home',
-    formatAmount: (amount) => '$' + amount.toLocaleString(),
-    formatHeaderAmount: formatStripPortfolioValue,
-    narrativeTemplate: (amount, year, futureValue, retirementYear) =>
-      `A ${formatCurrency(amount)} renovation in ${year} ` +
-      `costs your retirement portfolio ` +
-      `${formatCurrency(futureValue)}. ` +
-      `That is what it would have grown to by ` +
-      `${retirementYear}.`,
+    color: '#534AB7',
   },
   {
     id: 'medical-expense',
-    canonicalLabel: 'Medical procedure / major health expense',
-    displayLabel: 'cover a major medical expense',
-    type: 'lump-sum-out',
-    phase: 'growth',
-    isRecurring: false,
-    color: '#D85A30',
+    group: 'unexpected-hits',
+    direction: 'outflow',
+    title: 'Major medical expense',
+    instanceNoun: 'expenses',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
     defaultAmount: 25000,
-    defaultYear: (currentYear) => currentYear + 1,
+    defaultYear: y(1),
     amountMin: 1000,
     amountMax: 500000,
     amountStep: 1000,
     amountLabel: 'Estimated expense',
     yearLabel: 'When to plan for?',
-    headerTitlePrefix: 'Cover a ',
-    headerTitleSuffix: ' medical expense',
-    formatAmount: (amount) => '$' + amount.toLocaleString(),
-    formatHeaderAmount: formatStripPortfolioValue,
-    narrativeTemplate: (amount, year, futureValue, retirementYear) =>
-      `A ${formatCurrency(amount)} medical expense ` +
-      `in ${year} costs your retirement portfolio ` +
-      `${formatCurrency(futureValue)}. ` +
-      `That is what the out-of-pocket amount would ` +
-      `have compounded to by ${retirementYear}.`,
-    extras: {
-      showHsaAnalysis: true,
-      hsaOffsetNarrative: (
-        grossExpense,
-        hsaBalance,
-        hsaOffset,
-        netExpense,
-        _futureValue,
-        _retirementYear,
-        hasHsa,
-        fullyCovered,
-        hsaSavings,
-      ) => {
-        if (fullyCovered) {
-          return (
-            `Your HSA balance of ${formatCurrency(hsaBalance)} fully covers ` +
-            `this expense. No retirement portfolio impact. Your HSA is doing exactly what ` +
-            `it was designed for.`
-          )
-        }
-        if (hasHsa && hsaOffset > 0) {
-          return (
-            `Your HSA covers ${formatCurrency(hsaOffset)} of this expense. ` +
-            `Only ${formatCurrency(netExpense)} comes from your retirement portfolio, saving you ` +
-            `${formatCurrency(hsaSavings)} in lost compounding compared to paying ` +
-            `the full amount from retirement savings.`
-          )
-        }
-        return (
-          `You do not currently have an HSA balance. ` +
-          `The full ${formatCurrency(grossExpense)} comes from your retirement portfolio. ` +
-          `An HSA is one of the most tax-efficient ways to prepare for medical costs in retirement. ` +
-          `Contributions go in pre-tax, grow tax-free, and withdraw tax-free for qualified medical expenses.`
-        )
-      },
-    },
+    color: '#D85A30',
   },
   {
-    id: 'tuition-support',
-    canonicalLabel: 'Grandkid / child tuition support',
-    displayLabel: 'give tuition support',
-    type: 'recurring-out',
-    phase: 'growth',
-    isRecurring: true,
+    id: 'home-repair',
+    group: 'unexpected-hits',
+    direction: 'outflow',
+    title: 'Major home repair',
+    instanceNoun: 'repairs',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 15000,
+    defaultYear: y(1),
+    amountMin: 1000,
+    amountMax: 200000,
+    amountStep: 500,
+    amountLabel: 'Repair amount',
+    yearLabel: 'When?',
     color: '#534AB7',
-    defaultAmount: 600,
-    defaultDuration: 4,
-    durationMin: 1,
-    durationMax: 8,
-    durationStep: 1,
-    durationLabel: 'How many years?',
-    defaultYear: (currentYear) => currentYear + 2,
-    amountMin: 100,
-    amountMax: 5000,
-    amountStep: 50,
-    amountLabel: 'Monthly support',
-    yearLabel: 'When to start?',
-    headerTitlePrefix: 'Give ',
-    headerTitleSuffix: ' for tuition support',
-    formatAmount: (amount) => '$' + amount.toLocaleString() + '/mo',
-    formatHeaderAmount: (amount) => '$' + amount.toLocaleString(),
-    narrativeTemplate: (amount, year, futureValue, retirementYear, duration) => {
-      const years = duration ?? 4
-      const total = amount * 12 * years
-      const endYear = year + years
-      return (
-        `Supporting ${formatCurrency(amount)}/mo ` +
-        `from ${year} to ${endYear} ` +
-        `(${formatCurrency(total)} total) costs ` +
-        `your retirement portfolio ` +
-        `${formatCurrency(futureValue)}. ` +
-        `That is what those contributions would ` +
-        `have compounded to by ${retirementYear}.`
-      )
-    },
   },
   {
-    id: 'charitable-giving',
-    canonicalLabel: 'Charitable giving / tithe',
-    displayLabel: 'give regularly to charity',
-    type: 'recurring-out',
-    phase: 'growth',
-    isRecurring: true,
-    color: '#0F6E56',
-    defaultAmount: 400,
-    defaultDuration: 20,
-    durationMin: 1,
-    durationMax: 30,
-    durationStep: 1,
-    durationLabel: 'For how many years?',
-    defaultYear: (currentYear) => currentYear,
-    amountMin: 50,
-    amountMax: 5000,
-    amountStep: 50,
-    amountLabel: 'Monthly giving',
-    yearLabel: 'Starting when?',
-    headerTitlePrefix: 'Give ',
-    headerTitleSuffix: ' to charity',
-    formatAmount: (amount) => '$' + amount.toLocaleString() + '/mo',
-    formatHeaderAmount: (amount) => '$' + amount.toLocaleString(),
-    narrativeTemplate: (amount, year, futureValue, retirementYear, duration) => {
-      const years = duration ?? 20
-      const total = amount * 12 * years
-      const endYear = year + years
-      return (
-        `Giving ${formatCurrency(amount)}/mo ` +
-        `from ${year} to ${endYear} ` +
-        `(${formatCurrency(total)} total) costs ` +
-        `your retirement portfolio ` +
-        `${formatCurrency(futureValue)}. ` +
-        `That is what those contributions would ` +
-        `have compounded to by ${retirementYear}.`
-      )
-    },
+    id: 'family-crisis',
+    group: 'unexpected-hits',
+    direction: 'outflow',
+    title: 'Support a family member in crisis — one-time',
+    instanceNoun: 'supports',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 10000,
+    defaultYear: y(1),
+    amountMin: 500,
+    amountMax: 250000,
+    amountStep: 500,
+    amountLabel: 'Amount',
+    yearLabel: 'When?',
+    color: '#534AB7',
   },
   {
-    id: 'church-tithe',
-    canonicalLabel: 'Church tithe',
-    displayLabel: 'tithe to my church',
-    type: 'recurring-out',
-    phase: 'growth',
-    isRecurring: true,
-    color: '#185FA5',
-    defaultAmount: 500,
-    defaultDuration: 25,
-    durationMin: 1,
-    durationMax: 40,
-    durationStep: 1,
-    durationLabel: 'For how many years?',
-    defaultYear: (currentYear) => currentYear,
-    amountMin: 50,
-    amountMax: 10000,
-    amountStep: 50,
-    amountLabel: 'Monthly tithe',
-    yearLabel: 'Starting when?',
-    headerTitlePrefix: 'Tithe ',
-    headerTitleSuffix: ' to my church',
-    formatAmount: (amount) => '$' + amount.toLocaleString() + '/mo',
-    formatHeaderAmount: (amount) => '$' + amount.toLocaleString(),
-    narrativeTemplate: (amount, year, futureValue, retirementYear, duration) => {
-      const years = duration ?? 25
-      const total = amount * 12 * years
-      const endYear = year + years
-      return (
-        `Tithing ${formatCurrency(amount)}/mo ` +
-        `from ${year} to ${endYear} ` +
-        `(${formatCurrency(total)} total) costs ` +
-        `your retirement portfolio ` +
-        `${formatCurrency(futureValue)}. ` +
-        `That is what those contributions would ` +
-        `have compounded to by ${retirementYear}.`
-      )
-    },
+    id: 'divorce',
+    group: 'unexpected-hits',
+    direction: 'outflow',
+    title: 'Divorce — asset split',
+    instanceNoun: 'splits',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 150000,
+    defaultYear: y(2),
+    amountMin: 0,
+    amountMax: 5000000,
+    amountStep: 5000,
+    amountLabel: 'Estimated split',
+    yearLabel: 'When?',
+    color: '#E24B4A',
+  },
+  {
+    id: 'inheritance',
+    group: 'windfalls',
+    direction: 'inflow',
+    title: 'Inheritance received',
+    instanceNoun: 'inheritances',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. From parents',
+    addInstanceLabel: '+ Add inheritance',
+    defaultAmount: 200000,
+    defaultYear: y(3),
+    amountMin: 1000,
+    amountMax: 5000000,
+    amountStep: 5000,
+    amountLabel: 'Expected amount',
+    yearLabel: 'Year received',
+    color: '#1D9E75',
+  },
+  {
+    id: 'sell-business',
+    group: 'windfalls',
+    direction: 'inflow',
+    title: 'Sell a business',
+    instanceNoun: 'sales',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 500000,
+    defaultYear: y(5),
+    amountMin: 10000,
+    amountMax: 10000000,
+    amountStep: 10000,
+    amountLabel: 'Sale amount',
+    yearLabel: 'Year of sale',
+    color: '#1D9E75',
+  },
+  {
+    id: 'sell-property',
+    group: 'windfalls',
+    direction: 'inflow',
+    title: 'Sell a property',
+    instanceNoun: 'properties',
+    supportsMultiple: true,
+    labelPlaceholder: 'e.g. Rental property',
+    addInstanceLabel: '+ Add property',
+    defaultAmount: 400000,
+    defaultYear: y(4),
+    amountMin: 10000,
+    amountMax: 5000000,
+    amountStep: 10000,
+    amountLabel: 'Sale amount',
+    yearLabel: 'Year of sale',
+    color: '#1D9E75',
+  },
+  {
+    id: 'pension-lump-sum',
+    group: 'windfalls',
+    direction: 'inflow',
+    title: 'Pension buyout or severance lump sum',
+    instanceNoun: 'lump sums',
+    supportsMultiple: false,
+    labelPlaceholder: '',
+    addInstanceLabel: '',
+    defaultAmount: 150000,
+    defaultYear: y(2),
+    amountMin: 5000,
+    amountMax: 2000000,
+    amountStep: 5000,
+    amountLabel: 'Gross amount',
+    yearLabel: 'Year received',
+    color: '#1D9E75',
   },
 ]
 
-export const incomeEventConfigs: LifeEventConfig[] = []
+export function getLifeEventConfig(configId: string): LifeEventConfig | undefined {
+  return LIFE_EVENT_CONFIGS.find((c) => c.id === configId)
+}
+
+/** @deprecated Use LIFE_EVENT_CONFIGS */
+export const growthEventConfigs = LIFE_EVENT_CONFIGS

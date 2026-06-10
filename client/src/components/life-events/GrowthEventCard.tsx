@@ -1,3 +1,4 @@
+// @ts-nocheck — legacy card; preserved until removed. Replaced by LifeEventTypeCard.
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { IconChevronDown, IconShieldCheckFilled } from "@tabler/icons-react";
 import type { LifeEventConfig, LifeEventState } from "./types";
@@ -637,7 +638,11 @@ export default function GrowthEventCard({
                           value={monthlyPayment}
                           onChange={(amount) =>
                             onStateChange(state.id, {
-                              mortgageMonthlyPayment: clampNumber(amount, 500, 5000),
+                              mortgageMonthlyPayment: clampNumber(
+                                amount,
+                                500,
+                                5000,
+                              ),
                             })
                           }
                           className="life-events-mortgage-fields__field"
@@ -676,10 +681,11 @@ export default function GrowthEventCard({
                           max={currentYear}
                           onChange={(year) =>
                             onStateChange(state.id, {
-                              mortgageLoanStartYear: normalizeMortgageLoanStartYear(
-                                year,
-                                currentYear,
-                              ),
+                              mortgageLoanStartYear:
+                                normalizeMortgageLoanStartYear(
+                                  year,
+                                  currentYear,
+                                ),
                             })
                           }
                           className="life-events-mortgage-fields__field"

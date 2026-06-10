@@ -49,7 +49,7 @@ import {
 import { defaultWithdrawRateForStrategy } from "./lib/accountIncomeStrategy";
 import { normalizeRetireRegions } from "./lib/calc/retireRegions";
 import { buildLifeEventsProjectionData } from "./lib/calc/lifeEvents";
-import type { LifeEventState } from "./components/life-events/types";
+import type { LifeEventTypeCard } from "./components/life-events/types";
 import {
   loadGrowthLifeEvents,
   saveGrowthLifeEvents,
@@ -626,17 +626,17 @@ export default function App({ initialAuthModal = null }: AppProps) {
   );
 
   const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans());
-  const [lifeEventStates, setLifeEventStates] = useState<LifeEventState[]>(() =>
+  const [lifeEventCards, setLifeEventCards] = useState<LifeEventTypeCard[]>(() =>
     loadGrowthLifeEvents(),
   );
 
   const lifeEventsCurrentYear = c.retirementCalendarYear - c.yearsToRetirement;
 
-  const handleLifeEventStatesChange = useCallback(
-    (states: LifeEventState[]) => {
-      setLifeEventStates(
+  const handleLifeEventCardsChange = useCallback(
+    (cards: LifeEventTypeCard[]) => {
+      setLifeEventCards(
         saveGrowthLifeEvents(
-          states,
+          cards,
           lifeEventsCurrentYear,
           c.retirementCalendarYear,
         ),
@@ -655,11 +655,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
   useEffect(() => {
     if (!isHydrated || authLoading || !user) return;
     queuePlanStateServerSync();
-  }, [isHydrated, authLoading, user, lifeEventStates]);
+  }, [isHydrated, authLoading, user, lifeEventCards]);
 
   useEffect(() => {
     const onServerHydrated = () => {
-      setLifeEventStates(loadGrowthLifeEvents());
+      setLifeEventCards(loadGrowthLifeEvents());
     };
     window.addEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
     return () => {
@@ -672,15 +672,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
   >({});
 
   const handleLifeEventActiveChange = useCallback(
-    (eventId: string, isActive: boolean, impact: LifeEventActiveImpact) => {
+    (configId: string, isActive: boolean, impact: LifeEventActiveImpact) => {
       setActiveLifeEventImpact((prev) => {
         if (!isActive) {
-          if (!(eventId in prev)) return prev;
+          if (!(configId in prev)) return prev;
           const next = { ...prev };
-          delete next[eventId];
+          delete next[configId];
           return next;
         }
-        return { ...prev, [eventId]: impact };
+        return { ...prev, [configId]: impact };
       });
     },
     [],
@@ -1397,8 +1397,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
                         activePhase={phase}
                         withdrawalRate={inputs.wdRate}
                         hsaBalance={inputs.baseHsa}
-                        eventStates={lifeEventStates}
-                        onEventStatesChange={handleLifeEventStatesChange}
+                        eventCards={lifeEventCards}
+                        onEventCardsChange={handleLifeEventCardsChange}
                         onEventActiveChange={handleLifeEventActiveChange}
                       />
                     </div>

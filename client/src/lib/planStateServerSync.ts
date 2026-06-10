@@ -17,7 +17,7 @@ function planStatePayloadHasData(payload: UserPlanStatePayload): boolean {
   if (payload.session != null) return true
   if (profileHasOnboardingComplete(payload.profile)) return true
   if (planAccountsHaveBalances(payload.accounts)) return true
-  if (growthLifeEventsHaveCustomizations(payload.growthLifeEvents?.events ?? [])) return true
+  if (growthLifeEventsHaveCustomizations(payload.growthLifeEvents?.cards ?? [])) return true
   return false
 }
 

@@ -190,7 +190,7 @@ export function clampMortgagePayoffYear(
 
 export function getMortgagePayoffYearBounds(
   currentYear: number,
-  retirementYear: number,
+  _retirementYear: number,
   loanTermYears: number,
   loanStartYear: number,
 ): Pick<
@@ -199,7 +199,7 @@ export function getMortgagePayoffYearBounds(
 > {
   const scheduledPayoffYear = getMortgageScheduledPayoffYear(loanTermYears, loanStartYear)
   const payoffYearMin = currentYear + 1
-  const payoffYearMax = Math.max(payoffYearMin, retirementYear)
+  const payoffYearMax = Math.max(payoffYearMin, scheduledPayoffYear)
 
   return {
     payoffYearMin,

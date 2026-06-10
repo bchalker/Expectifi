@@ -1,4 +1,5 @@
-import type { LifeEventState } from '../../components/life-events/types'
+import type { LifeEventInstance, LifeEventTypeCard } from '../../components/life-events/types'
+import { LIFE_EVENT_CONFIGS } from '../../components/life-events/eventConfigs'
 import {
   clampMortgagePayoffYear,
   getDefaultMortgagePayoffYear,
@@ -9,40 +10,25 @@ import { EXPECTIFI_GROWTH_LIFE_EVENTS_KEY } from './keys'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'
 import { canWriteExpectifiPlanBlobs } from './writeContext'
 
-export const GROWTH_LIFE_EVENTS_VERSION = 1 as const
+export const GROWTH_LIFE_EVENTS_VERSION = 3 as const
 
 export type StoredGrowthLifeEvents = {
   version: typeof GROWTH_LIFE_EVENTS_VERSION
-  events: LifeEventState[]
+  cards: LifeEventTypeCard[]
 }
 
-const KNOWN_CONFIG_IDS = [
-  'buy-car-cash',
-  'pay-off-mortgage',
-  'home-renovation',
-  'medical-expense',
-  'tuition-support',
+const REMOVED_CONFIG_IDS = new Set([
   'charitable-giving',
   'church-tithe',
-] as const
+  'tuition-support',
+  'job-loss',
+  'early-retirement',
+])
 
-type KnownConfigId = (typeof KNOWN_CONFIG_IDS)[number]
+const CONFIG_IDS = LIFE_EVENT_CONFIGS.map((c) => c.id)
 
-const DEFAULT_SEEDS: Record<
-  KnownConfigId,
-  { amount: number; yearOffset: number; duration?: number }
-> = {
-  'buy-car-cash': { amount: 35000, yearOffset: 1 },
-  'pay-off-mortgage': { amount: 85000, yearOffset: 2 },
-  'home-renovation': { amount: 45000, yearOffset: 1 },
-  'medical-expense': { amount: 25000, yearOffset: 1 },
-  'tuition-support': { amount: 600, yearOffset: 2, duration: 4 },
-  'charitable-giving': { amount: 400, yearOffset: 0, duration: 20 },
-  'church-tithe': { amount: 500, yearOffset: 0, duration: 25 },
-}
-
-function stableEventId(configId: KnownConfigId): string {
-  return `growth-life-event-${configId}`
+function newInstanceId(): string {
+  return `lei-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 }
 
 function clampYear(year: number, currentYear: number, retirementYear: number): number {
@@ -58,65 +44,231 @@ function bool(raw: unknown, fallback: boolean): boolean {
   return typeof raw === 'boolean' ? raw : fallback
 }
 
-function normalizeEvent(
-  raw: unknown,
-  configId: KnownConfigId,
+function str(raw: unknown, fallback = ''): string {
+  return typeof raw === 'string' ? raw.trim() : fallback
+}
+
+function createDefaultInstance(
+  configId: string,
   currentYear: number,
   retirementYear: number,
-): LifeEventState {
-  const seed = DEFAULT_SEEDS[configId]
-  const o = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
-  const amount = Math.max(0, num(o.amount, seed.amount))
-  const state: LifeEventState = {
-    id: typeof o.id === 'string' && o.id.trim() ? o.id.trim() : stableEventId(configId),
+): LifeEventInstance {
+  const config = LIFE_EVENT_CONFIGS.find((c) => c.id === configId)
+  const defaultAmount = config?.defaultAmount ?? 10000
+  const defaultYear = config?.defaultYear(currentYear, retirementYear) ?? currentYear + 1
+
+  const instance: LifeEventInstance = {
+    id: newInstanceId(),
+    label: '',
+    amount: defaultAmount,
+    year: defaultYear,
+    isExpanded: true,
+  }
+
+  if (configId === 'pay-off-mortgage' || configId === 'pay-student-loans') {
+    instance.mortgageRate = 0.04
+    instance.mortgageMonthlyPayment = 1500
+    instance.mortgageLoanTermYears = 30
+    instance.mortgageLoanStartYear = normalizeMortgageLoanStartYear(undefined, currentYear)
+    instance.year = getDefaultMortgagePayoffYear(
+      currentYear,
+      retirementYear,
+      instance.mortgageLoanTermYears,
+      instance.mortgageLoanStartYear,
+    )
+  }
+
+  if (configId === 'buy-vacation-property') {
+    instance.downPayment = Math.round(defaultAmount * 0.2)
+    instance.mortgageRate = 0.065
+    instance.mortgageLoanTermYears = 30
+  }
+
+  if (configId === 'home-renovation') {
+    instance.financedAmount = Math.round(defaultAmount * 0.5)
+    instance.loanRate = 0.08
+  }
+
+  if (configId === 'fund-529') {
+    instance.plan529GrowthRate = 0.06
+  }
+
+  if (configId === 'business-investment') {
+    instance.expectedReturn = 0.12
+    instance.timelineYears = 7
+  }
+
+  if (configId === 'divorce') {
+    instance.divorceIsPercent = true
+    instance.divorcePercent = 50
+  }
+
+  if (configId === 'inheritance') {
+    instance.investedAccount = 'brokerage'
+  }
+
+  if (configId === 'sell-business' || configId === 'sell-property') {
+    instance.taxRate = 0.2
+  }
+
+  if (configId === 'pension-lump-sum') {
+    instance.taxWithholding = 0.22
+  }
+
+  return instance
+}
+
+function createDefaultCard(
+  configId: string,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventTypeCard {
+  return {
     configId,
-    amount,
-    year: currentYear,
-    isActive: bool(o.isActive, false),
-    isExpanded: bool(o.isExpanded, false),
+    isActive: false,
+    isExpanded: false,
+    instances: [createDefaultInstance(configId, currentYear, retirementYear)],
   }
-  if (typeof o.label === 'string' && o.label.trim()) {
-    state.label = o.label.trim()
+}
+
+function normalizeInstance(
+  raw: unknown,
+  configId: string,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventInstance {
+  const base = createDefaultInstance(configId, currentYear, retirementYear)
+  if (!raw || typeof raw !== 'object') return base
+
+  const o = raw as Record<string, unknown>
+  const instance: LifeEventInstance = {
+    ...base,
+    id: str(o.id) || base.id,
+    label: str(o.label),
+    amount: Math.max(0, num(o.amount, base.amount)),
+    year: num(o.year, base.year),
+    isExpanded: bool(o.isExpanded, base.isExpanded),
+    pendingDelete: bool(o.pendingDelete, false) || undefined,
+    financingEnabled: bool(o.financingEnabled, false) || undefined,
+    loanAmount: num(o.loanAmount, base.loanAmount ?? 0) || undefined,
+    loanRate: num(o.loanRate, base.loanRate ?? 0.06) || undefined,
+    loanTermYears: num(o.loanTermYears, base.loanTermYears ?? 5) || undefined,
+    financedAmount: num(o.financedAmount, base.financedAmount ?? 0) || undefined,
+    mortgageRate: num(o.mortgageRate, base.mortgageRate ?? 0.04),
+    mortgageMonthlyPayment: num(o.mortgageMonthlyPayment, base.mortgageMonthlyPayment ?? 1500),
+    mortgageLoanTermYears: normalizeMortgageLoanTermYears(
+      o.mortgageLoanTermYears ?? base.mortgageLoanTermYears,
+    ),
+    mortgageLoanStartYear: normalizeMortgageLoanStartYear(
+      o.mortgageLoanStartYear ?? base.mortgageLoanStartYear,
+      currentYear,
+    ),
+    downPayment: num(o.downPayment, base.downPayment ?? 0) || undefined,
+    hsaOffsetAmount:
+      o.hsaOffsetAmount != null ? Math.max(0, num(o.hsaOffsetAmount, 0)) : undefined,
+    plan529GrowthRate: num(o.plan529GrowthRate, base.plan529GrowthRate ?? 0.06),
+    expectedReturn: num(o.expectedReturn, base.expectedReturn ?? 0.12),
+    timelineYears: Math.max(1, Math.round(num(o.timelineYears, base.timelineYears ?? 7))),
+    description: str(o.description) || undefined,
+    divorceIsPercent: bool(o.divorceIsPercent, base.divorceIsPercent ?? true),
+    divorcePercent: num(o.divorcePercent, base.divorcePercent ?? 50),
+    investedAccount: str(o.investedAccount, base.investedAccount ?? 'brokerage') || 'brokerage',
+    taxRate: num(o.taxRate, base.taxRate ?? 0.2),
+    taxWithholding: num(o.taxWithholding, base.taxWithholding ?? 0.22),
   }
-  if (seed.duration != null) {
-    state.duration = Math.max(1, Math.round(num(o.duration, seed.duration)))
-  }
-  if (configId === 'pay-off-mortgage') {
-    const rate = num(o.mortgageRate, 0.04)
-    state.mortgageRate = Math.min(0.1, Math.max(0.005, rate))
-    state.mortgageMonthlyPayment = Math.min(
-      5000,
-      Math.max(500, Math.round(num(o.mortgageMonthlyPayment, 1500))),
-    )
-    state.mortgageLoanTermYears = normalizeMortgageLoanTermYears(o.mortgageLoanTermYears)
-    state.mortgageLoanStartYear = normalizeMortgageLoanStartYear(o.mortgageLoanStartYear, currentYear)
-    const defaultPayoffYear = getDefaultMortgagePayoffYear(
+
+  if (configId === 'pay-off-mortgage' || configId === 'pay-student-loans') {
+    instance.year = clampMortgagePayoffYear(
+      instance.year,
       currentYear,
       retirementYear,
-      state.mortgageLoanTermYears,
-      state.mortgageLoanStartYear,
-    )
-    state.year = clampMortgagePayoffYear(
-      num(o.year, defaultPayoffYear),
-      currentYear,
-      retirementYear,
-      state.mortgageLoanTermYears,
-      state.mortgageLoanStartYear,
+      instance.mortgageLoanTermYears ?? 30,
+      instance.mortgageLoanStartYear ?? currentYear,
     )
   } else {
-    const defaultYear = clampYear(currentYear + seed.yearOffset, currentYear, retirementYear)
-    state.year = clampYear(num(o.year, defaultYear), currentYear, retirementYear)
+    instance.year = clampYear(instance.year, currentYear, retirementYear)
   }
-  return state
+
+  return instance
+}
+
+function normalizeCard(
+  raw: unknown,
+  configId: string,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventTypeCard {
+  const base = createDefaultCard(configId, currentYear, retirementYear)
+  if (!raw || typeof raw !== 'object') return base
+
+  const o = raw as Record<string, unknown>
+  const rawInstances = Array.isArray(o.instances) ? o.instances : []
+  const instances =
+    rawInstances.length > 0
+      ? rawInstances.map((inst) => normalizeInstance(inst, configId, currentYear, retirementYear))
+      : base.instances
+
+  return {
+    configId,
+    isActive: bool(o.isActive, base.isActive),
+    isExpanded: bool(o.isExpanded, base.isExpanded),
+    instances,
+  }
+}
+
+function migrateV1Events(
+  rawEvents: unknown[],
+  currentYear: number,
+  retirementYear: number,
+): LifeEventTypeCard[] {
+  const byConfig = new Map<string, unknown[]>()
+
+  for (const entry of rawEvents) {
+    if (!entry || typeof entry !== 'object') continue
+    const o = entry as Record<string, unknown>
+    const configId = str(o.configId)
+    if (!configId || REMOVED_CONFIG_IDS.has(configId)) continue
+    if (!CONFIG_IDS.includes(configId)) continue
+    const list = byConfig.get(configId) ?? []
+    list.push(entry)
+    byConfig.set(configId, list)
+  }
+
+  return CONFIG_IDS.map((configId) => {
+    const entries = byConfig.get(configId)
+    if (!entries?.length) {
+      return createDefaultCard(configId, currentYear, retirementYear)
+    }
+
+    const first = entries[0] as Record<string, unknown>
+    const instances = entries.map((entry) => {
+      const e = entry as Record<string, unknown>
+      return normalizeInstance(
+        {
+          ...e,
+          label: e.label ?? '',
+          isExpanded: e.isExpanded ?? false,
+        },
+        configId,
+        currentYear,
+        retirementYear,
+      )
+    })
+
+    return {
+      configId,
+      isActive: entries.some((e) => bool((e as Record<string, unknown>).isActive, false)),
+      isExpanded: bool(first.isExpanded, false),
+      instances,
+    }
+  })
 }
 
 export function buildDefaultGrowthLifeEvents(
   currentYear = new Date().getFullYear(),
   retirementYear = currentYear + 30,
-): LifeEventState[] {
-  return KNOWN_CONFIG_IDS.map((configId) =>
-    normalizeEvent(null, configId, currentYear, retirementYear),
-  )
+): LifeEventTypeCard[] {
+  return CONFIG_IDS.map((configId) => createDefaultCard(configId, currentYear, retirementYear))
 }
 
 export function normalizeStoredGrowthLifeEvents(
@@ -125,38 +277,52 @@ export function normalizeStoredGrowthLifeEvents(
   retirementYear = currentYear + 30,
 ): StoredGrowthLifeEvents {
   const base = buildDefaultGrowthLifeEvents(currentYear, retirementYear)
+
   if (!raw || typeof raw !== 'object') {
-    return { version: GROWTH_LIFE_EVENTS_VERSION, events: base }
+    return { version: GROWTH_LIFE_EVENTS_VERSION, cards: base }
   }
+
   const o = raw as Record<string, unknown>
-  const rawEvents = Array.isArray(o.events) ? o.events : []
-  const byConfigId = new Map<string, unknown>()
-  for (const entry of rawEvents) {
-    if (!entry || typeof entry !== 'object') continue
-    const configId = (entry as Record<string, unknown>).configId
-    if (typeof configId === 'string') byConfigId.set(configId, entry)
+  const version = num(o.version, 1)
+
+  if (version >= 3 && Array.isArray(o.cards)) {
+    const cards = CONFIG_IDS.map((configId, i) => {
+      const match = (o.cards as unknown[]).find(
+        (c) =>
+          c &&
+          typeof c === 'object' &&
+          (c as Record<string, unknown>).configId === configId,
+      )
+      return normalizeCard(match ?? base[i], configId, currentYear, retirementYear)
+    })
+    return { version: GROWTH_LIFE_EVENTS_VERSION, cards }
   }
-  const events = KNOWN_CONFIG_IDS.map((configId) =>
-    normalizeEvent(byConfigId.get(configId), configId, currentYear, retirementYear),
-  )
-  return { version: GROWTH_LIFE_EVENTS_VERSION, events }
+
+  if (Array.isArray(o.events)) {
+    return {
+      version: GROWTH_LIFE_EVENTS_VERSION,
+      cards: migrateV1Events(o.events, currentYear, retirementYear),
+    }
+  }
+
+  return { version: GROWTH_LIFE_EVENTS_VERSION, cards: base }
 }
 
 export function loadGrowthLifeEvents(
   currentYear = new Date().getFullYear(),
   retirementYear = currentYear + 30,
-): LifeEventState[] {
+): LifeEventTypeCard[] {
   const raw = readJsonFromLocalStorage<unknown>(EXPECTIFI_GROWTH_LIFE_EVENTS_KEY)
-  return normalizeStoredGrowthLifeEvents(raw, currentYear, retirementYear).events
+  return normalizeStoredGrowthLifeEvents(raw, currentYear, retirementYear).cards
 }
 
 export function saveGrowthLifeEvents(
-  events: LifeEventState[],
+  cards: LifeEventTypeCard[],
   currentYear = new Date().getFullYear(),
   retirementYear = currentYear + 30,
-): LifeEventState[] {
+): LifeEventTypeCard[] {
   const normalized = normalizeStoredGrowthLifeEvents(
-    { version: GROWTH_LIFE_EVENTS_VERSION, events },
+    { version: GROWTH_LIFE_EVENTS_VERSION, cards },
     currentYear,
     retirementYear,
   )
@@ -166,9 +332,17 @@ export function saveGrowthLifeEvents(
       queuePlanStateServerSync()
     })
   }
-  return normalized.events
+  return normalized.cards
 }
 
-export function growthLifeEventsHaveCustomizations(events: LifeEventState[]): boolean {
-  return events.some((e) => e.isActive)
+export function growthLifeEventsHaveCustomizations(cards: LifeEventTypeCard[]): boolean {
+  return cards.some((c) => c.isActive)
+}
+
+export function createLifeEventInstance(
+  configId: string,
+  currentYear: number,
+  retirementYear: number,
+): LifeEventInstance {
+  return createDefaultInstance(configId, currentYear, retirementYear)
 }
