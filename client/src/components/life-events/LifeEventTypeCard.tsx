@@ -147,8 +147,11 @@ export function LifeEventTypeCard({
         ) : null}
       </div>
 
-      {card.isExpanded ? (
-        <div className="life-events-event__detail-drawer">
+      <div
+        className="life-events-event__detail-drawer"
+        aria-hidden={!card.isExpanded}
+      >
+        <div className="life-events-event__detail-drawer-inner">
           {config.supportsMultiple ? (
             <>
               {card.instances.map((instance, index) => {
@@ -193,7 +196,7 @@ export function LifeEventTypeCard({
             ) : null
           )}
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }

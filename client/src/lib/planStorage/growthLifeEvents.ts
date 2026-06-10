@@ -84,11 +84,6 @@ function createDefaultInstance(
     instance.mortgageLoanTermYears = 30
   }
 
-  if (configId === 'home-renovation') {
-    instance.financedAmount = Math.round(defaultAmount * 0.5)
-    instance.loanRate = 0.08
-  }
-
   if (configId === 'fund-529') {
     instance.plan529GrowthRate = 0.06
   }

@@ -11,8 +11,10 @@ import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 import './ConfigProfileTab.scss'
 
+/* Life tab — commented out, may reuse later
 import { ConfigLifeTab } from './ConfigLifeTab'
 import './ConfigLifeTab.scss'
+*/
 import type { LifePlans } from '../lib/planStorage/life'
 
 export type ConfigDrawerTab = 'profile' | 'plan' | 'guaranteed-income' | 'life'
@@ -21,7 +23,7 @@ const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'guaranteed-income', label: 'Guaranteed Income' },
-  { id: 'life', label: 'Life' },
+  // { id: 'life', label: 'Life' }, // Life tab — commented out, may reuse later
 ]
 
 type TabContextValue = {
@@ -102,9 +104,9 @@ export function ConfigDrawerTabPanels({
   onDrawerClose,
   onOpenRegister,
   onResetGuestProfile,
-  lifePlans,
-  onLifePlansChange,
-  currentYear,
+  lifePlans: _lifePlans,
+  onLifePlansChange: _onLifePlansChange,
+  currentYear: _currentYear,
 }: TabPanelsProps) {
   const { tab } = useConfigDrawerTab()
   const { locale, refreshLocale } = useUserLocale()
@@ -186,6 +188,8 @@ export function ConfigDrawerTabPanels({
         </div>
       ) : null}
 
+      {/*
+      Life tab — commented out, may reuse later
       {tab === 'life' ? (
         <div
           className="config-drawer-tabpanel"
@@ -196,6 +200,7 @@ export function ConfigDrawerTabPanels({
           <ConfigLifeTab plans={lifePlans} onPlansChange={onLifePlansChange} currentYear={currentYear} />
         </div>
       ) : null}
+      */}
     </div>
   )
 }

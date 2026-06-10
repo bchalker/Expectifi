@@ -125,12 +125,6 @@ export function calcInstanceImpact(ctx: InstanceImpactContext): InstanceImpactRe
   }
 
   if (id === 'home-renovation') {
-    if (instance.financingEnabled) {
-      const financed = instance.financedAmount ?? instance.amount * 0.5
-      const cashPortion = Math.max(0, instance.amount - financed)
-      const interest = calcLoanTotalInterest(financed, instance.loanRate ?? 0.08, 15)
-      return outflowResult(cashPortion + interest, instance.year, ctx)
-    }
     return outflowResult(instance.amount, instance.year, ctx)
   }
 

@@ -380,7 +380,7 @@ export function GrowthSliderLabel({
         {suffixLayout === "panel" ? (
           <>
             <div className="growth-slider-label__panel-heading">
-              <p className="growth-slider-label__panel-rate-lead">
+              <p className="growth-slider-label__panel-rate-lead font-xs">
                 I expect to grow at
               </p>
               <div className="growth-slider-label__panel-rate" aria-live="polite">

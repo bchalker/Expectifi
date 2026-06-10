@@ -15,11 +15,13 @@ import { consumeLandingAuthIntent } from "./lib/landingAuthIntent";
 import { useAuth } from "./context/AuthContext";
 import { UserLocaleProvider } from "./context/UserLocaleContext";
 import { AccountBalances } from "./components/AccountBalances";
+/* Life Events section — commented out, may reuse later
 import {
   LifeEventsPanel,
   type LifeEventActiveImpact,
 } from "./components/LifeEventsPanel";
 import { LifeEventsSectionDivider } from "./components/life-events/LifeEventsSectionDivider";
+*/
 import { DrawerPanel } from "./components/DrawerPanel";
 import { TaxSummaryCard } from "./components/TaxSummaryCard";
 import { IncomeHarvestPreviewPanel } from "./components/IncomeHarvestPreviewPanel";
@@ -48,12 +50,14 @@ import {
 } from "./lib/computeResults";
 import { defaultWithdrawRateForStrategy } from "./lib/accountIncomeStrategy";
 import { normalizeRetireRegions } from "./lib/calc/retireRegions";
+/* Life Events section — commented out, may reuse later
 import { buildLifeEventsProjectionData } from "./lib/calc/lifeEvents";
 import type { LifeEventTypeCard } from "./components/life-events/types";
 import {
   loadGrowthLifeEvents,
   saveGrowthLifeEvents,
 } from "./lib/planStorage/growthLifeEvents";
+*/
 import { loadLifePlans, type LifePlans } from "./lib/planStorage/life";
 import {
   PLAN_STATE_SERVER_HYDRATED_EVENT,
@@ -626,6 +630,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
   );
 
   const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans());
+
+  /* Life Events section — commented out, may reuse later
   const [lifeEventCards, setLifeEventCards] = useState<LifeEventTypeCard[]>(() =>
     loadGrowthLifeEvents(),
   );
@@ -645,13 +651,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     [c.retirementCalendarYear, lifeEventsCurrentYear],
   );
 
-  /** Push life-tab edits to server for signed-in users. */
-  useEffect(() => {
-    if (!isHydrated || authLoading || !user) return;
-    queuePlanStateServerSync();
-  }, [isHydrated, authLoading, user, lifePlans]);
-
-  /** Push growth life-event edits to server for signed-in users. */
   useEffect(() => {
     if (!isHydrated || authLoading || !user) return;
     queuePlanStateServerSync();
@@ -694,10 +693,27 @@ export default function App({ initialAuthModal = null }: AppProps) {
     );
   }, [activeLifeEventImpact, phase]);
 
+  const lifeEventsProjectionData = useMemo(
+    () =>
+      buildLifeEventsProjectionData(c, {
+        retRate: inputs.retRate,
+        brkRate: inputs.brkRate,
+        save: inputs.save,
+      }),
+    [c, inputs.retRate, inputs.brkRate, inputs.save],
+  );
+  */
+
+  /** Push life-tab edits to server for signed-in users. */
+  useEffect(() => {
+    if (!isHydrated || authLoading || !user) return;
+    queuePlanStateServerSync();
+  }, [isHydrated, authLoading, user, lifePlans]);
+
   const cDisplay = useMemo(
     () =>
       applyPortfolioDeltaAtRetirement(c, {
-        portfolioDelta: lifeEventsPortfolioDelta,
+        portfolioDelta: 0, // lifeEventsPortfolioDelta — Life Events section commented out
         incomeMode: phase === "income" || ui.incomeMode,
         incYield: inputs.incYield,
         incGrowth: inputs.incGrowth,
@@ -714,7 +730,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
       }),
     [
       c,
-      lifeEventsPortfolioDelta,
       ui.incomeMode,
       inputs,
       inputs.filingStatus,
@@ -727,16 +742,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
       inputs.retireRegions,
       inputs.italyCost,
     ],
-  );
-
-  const lifeEventsProjectionData = useMemo(
-    () =>
-      buildLifeEventsProjectionData(c, {
-        retRate: inputs.retRate,
-        brkRate: inputs.brkRate,
-        save: inputs.save,
-      }),
-    [c, inputs.retRate, inputs.brkRate, inputs.save],
   );
 
   const ssBenefitsConfigured = isSsConfigured(inputs);
@@ -1361,6 +1366,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
                         <GrowthAssumptionsPanel
                           c={cDisplay}
                           inputs={inputs}
+                          ui={uiForCompute}
+                          balanceModes={{
+                            retirement: balanceMode,
+                            brokerage: brokerageMode,
+                          }}
                           retRate={inputs.retRate}
                           onRetRate={(r) => setInputs({ retRate: r })}
                           brkRate={inputs.brkRate}
@@ -1382,11 +1392,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
                               ).filter((p) => !remove.has(p.id)),
                             });
                           }}
+                          onOpenGuaranteedIncomeConfig={
+                            dashboardSubHeaderProps.onOpenGuaranteedIncomeConfig
+                          }
+                          onTargetRetirementAge={(targetRetirementAge) =>
+                            setInputs({ targetRetirementAge })
+                          }
                         />
                       ) : null}
                     </div>
                   </div>
 
+                  {/*
+                  Life Events section — commented out, may reuse later
                   {c.hasPortfolioBalances && phase === "growth" ? (
                     <div className="section section--life-events">
                       <LifeEventsSectionDivider />
@@ -1403,6 +1421,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                       />
                     </div>
                   ) : null}
+                  */}
               </div>
             ) : null}
           </div>
@@ -1431,7 +1450,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
           onResetGuestProfile={onResetGuestProfile}
           lifePlans={lifePlans}
           onLifePlansChange={setLifePlans}
-          currentYear={lifeEventsProjectionData.currentYear}
+          currentYear={c.retirementCalendarYear - c.yearsToRetirement}
         />
         <AuthModal
           open={authModal}

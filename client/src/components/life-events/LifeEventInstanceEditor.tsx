@@ -14,9 +14,6 @@ import { LifeEventHsaBlock } from './LifeEventHsaBlock'
 import { clampNumber } from './LifeEventFieldValue'
 import { LifeEventPercentInput } from './LifeEventPercentInput'
 import { LifeEventYearInput } from './LifeEventYearInput'
-import {
-  calcLoanTotalInterest,
-} from './instanceImpact'
 import type { LifeEventConfig, LifeEventInstance } from './types'
 import {
   calcFutureValue,
@@ -51,7 +48,13 @@ export interface LifeEventInstanceEditorProps {
 
 const MORTGAGE_RATE_MIN = 0.5
 const MORTGAGE_RATE_MAX = 10
-const SIMPLE_OUTFLOW_IDS = new Set(['buy-car-cash', 'child-down-payment', 'wedding', 'home-repair'])
+const SIMPLE_OUTFLOW_IDS = new Set([
+  'buy-car-cash',
+  'child-down-payment',
+  'wedding',
+  'home-repair',
+  'home-renovation',
+])
 
 function enrichTradeoffVerdict(text: string): ReactNode {
   const pattern = /\d+\.\d{1,2}%|\$[\d,]+/g
@@ -640,71 +643,6 @@ export function LifeEventInstanceEditor({
     )
   }
 
-  if (config.id === 'home-renovation') {
-    const financingEnabled = instance.financingEnabled ?? false
-    const financedAmount = instance.financedAmount ?? Math.round(instance.amount * 0.5)
-    const loanRate = instance.loanRate ?? 0.08
-    const cashPortion = Math.max(0, instance.amount - financedAmount)
-    const interest = calcLoanTotalInterest(financedAmount, loanRate, 15)
-    const cashFv = calcFutureValue(instance.amount, instance.year, retirementYear, growthRate)
-    const splitFv =
-      calcFutureValue(cashPortion, instance.year, retirementYear, growthRate) +
-      calcFutureValue(interest, instance.year, retirementYear, growthRate)
-
-    return (
-      <div className="life-events-event__expand">
-        <div className="life-events-event__expand-layout">
-          <div className="life-events-slider-group">
-            <AmountYearFields
-              config={config}
-              instance={instance}
-              idPrefix={instanceIdPrefix}
-              yearMin={yearMin}
-              yearMax={yearMax}
-              onChange={onChange}
-              {...amountYearExtras}
-            />
-            <Toggle
-              label="Finance part of the renovation"
-              value={financingEnabled}
-              onChange={(enabled) => onChange({ financingEnabled: enabled })}
-              className="life-events-event__financing-toggle"
-            />
-            {financingEnabled ? (
-              <div className="life-events-mortgage-fields">
-                <div className="life-events-mortgage-fields__row">
-                  <LifeEventCurrencyInput
-                    id={`${instanceIdPrefix}-financed`}
-                    label="Financed amount"
-                    value={financedAmount}
-                    min={0}
-                    max={instance.amount}
-                    onChange={(amount) => onChange({ financedAmount: amount })}
-                    className="life-events-mortgage-fields__field"
-                  />
-                  <LifeEventPercentInput
-                    id={`${instanceIdPrefix}-reno-rate`}
-                    label="Rate"
-                    value={loanRate * 100}
-                    min={0}
-                    max={20}
-                    onChange={(ratePct) => onChange({ loanRate: ratePct / 100 })}
-                    className="life-events-mortgage-fields__field"
-                  />
-                </div>
-              </div>
-            ) : null}
-          </div>
-          <p className="life-events-event__impact-subline">
-            {financingEnabled
-              ? `Pay ${formatCurrency(cashPortion)} from savings plus ${formatCurrency(interest)} in interest — portfolio impact ${formatCurrency(splitFv)} vs ${formatCurrency(cashFv)} all-cash.`
-              : `All-cash renovation of ${formatCurrency(instance.amount)} costs your portfolio ${formatCurrency(cashFv)} by ${retirementYear}.`}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   if (config.id === 'buy-vacation-property') {
     const downPayment = instance.downPayment ?? Math.round(instance.amount * 0.2)
     const mortgageRate = instance.mortgageRate ?? 0.065
@@ -762,30 +700,27 @@ export function LifeEventInstanceEditor({
                     onChange={(amount) => onChange({ amount })}
                     className="life-events-mortgage-fields__field"
                   />
-                  <LifeEventCurrencyInput
-                    id={`${instanceIdPrefix}-down`}
-                    label="Down payment"
-                    value={downPayment}
-                    min={0}
-                    max={instance.amount}
-                    onChange={(amount) => onChange({ downPayment: amount })}
+                  <LifeEventYearInput
+                    id={`${instanceIdPrefix}-vac-year`}
+                    label={config.yearLabel}
+                    value={instance.year}
+                    min={yearMin}
+                    max={yearMax}
+                    onChange={(year) => onChange({ year })}
                     className="life-events-mortgage-fields__field"
                   />
                 </div>
-              ) : (
-                <div className="life-events-mortgage-fields__row">
-                  <LifeEventCurrencyInput
-                    id={`${instanceIdPrefix}-down`}
-                    label="Down payment"
-                    value={downPayment}
-                    min={0}
-                    max={instance.amount}
-                    onChange={(amount) => onChange({ downPayment: amount })}
-                    className="life-events-mortgage-fields__field"
-                  />
-                </div>
-              )}
+              ) : null}
               <div className="life-events-mortgage-fields__row">
+                <LifeEventCurrencyInput
+                  id={`${instanceIdPrefix}-down`}
+                  label="Down payment"
+                  value={downPayment}
+                  min={0}
+                  max={instance.amount}
+                  onChange={(amount) => onChange({ downPayment: amount })}
+                  className="life-events-mortgage-fields__field"
+                />
                 <LifeEventPercentInput
                   id={`${instanceIdPrefix}-vac-rate`}
                   label="Mortgage rate"
@@ -804,17 +739,6 @@ export function LifeEventInstanceEditor({
                   onChange={(years) => onChange({ mortgageLoanTermYears: years })}
                   className="life-events-mortgage-fields__field"
                 />
-                {!showPrimaryRow ? (
-                  <LifeEventYearInput
-                    id={`${instanceIdPrefix}-vac-year`}
-                    label={config.yearLabel}
-                    value={instance.year}
-                    min={yearMin}
-                    max={yearMax}
-                    onChange={(year) => onChange({ year })}
-                    className="life-events-mortgage-fields__field"
-                  />
-                ) : null}
               </div>
             </div>
           </div>
@@ -1005,15 +929,8 @@ export function LifeEventInstanceEditor({
     )
   }
 
-  if (
-    config.id === 'sell-business' ||
-    config.id === 'sell-property' ||
-    config.id === 'pension-lump-sum'
-  ) {
-    const taxValue =
-      config.id === 'pension-lump-sum'
-        ? (instance.taxWithholding ?? 0.22) * 100
-        : (instance.taxRate ?? 0.2) * 100
+  if (config.id === 'sell-business' || config.id === 'sell-property') {
+    const taxValue = (instance.taxRate ?? 0.2) * 100
 
     return (
       <div className="life-events-event__expand">
@@ -1030,19 +947,47 @@ export function LifeEventInstanceEditor({
             />
             <LifeEventPercentInput
               id={`${instanceIdPrefix}-tax`}
-              label={config.id === 'pension-lump-sum' ? 'Tax withholding' : 'Estimated tax rate'}
+              label="Estimated tax rate"
               value={taxValue}
               min={0}
               max={50}
-              onChange={(pct) =>
-                onChange(
-                  config.id === 'pension-lump-sum'
-                    ? { taxWithholding: pct / 100 }
-                    : { taxRate: pct / 100 },
-                )
-              }
+              onChange={(pct) => onChange({ taxRate: pct / 100 })}
             />
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (config.id === 'pension-lump-sum') {
+    const taxValue = (instance.taxWithholding ?? 0.22) * 100
+
+    return (
+      <div className="life-events-event__expand">
+        <div className="life-events-event__expand-layout">
+          <div className="life-events-slider-group">
+            <AmountYearFields
+              config={config}
+              instance={instance}
+              idPrefix={instanceIdPrefix}
+              yearMin={yearMin}
+              yearMax={yearMax}
+              onChange={onChange}
+              {...amountYearExtras}
+            />
+            <LifeEventPercentInput
+              id={`${instanceIdPrefix}-tax`}
+              label="Tax withholding"
+              value={taxValue}
+              min={0}
+              max={50}
+              onChange={(pct) => onChange({ taxWithholding: pct / 100 })}
+            />
+          </div>
+          <p className="life-events-event__impact-subline">
+            If you also added this pension on the Guaranteed Income tab in Config, remove it there
+            so it is not counted twice.
+          </p>
         </div>
       </div>
     )

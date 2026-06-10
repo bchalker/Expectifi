@@ -111,8 +111,11 @@ export function LifeEventInstanceRow({
         ) : null}
       </div>
 
-      {instance.isExpanded ? (
-        <div className="life-events-instance-row__body">
+      <div
+        className="life-events-instance-row__body"
+        aria-hidden={!instance.isExpanded}
+      >
+        <div className="life-events-instance-row__body-inner">
           <LifeEventInstanceEditor
             config={config}
             instance={instance}
@@ -127,7 +130,7 @@ export function LifeEventInstanceRow({
             useInstancePrimaryRow
           />
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
