@@ -87,6 +87,15 @@ function ReligionLegend({ breakdown }: { breakdown: Record<string, number> }) {
   )
 }
 
+function ReligionBreakdown({ breakdown }: { breakdown: Record<string, number> }) {
+  return (
+    <div className="wtr-people-culture__religion-breakdown">
+      <ReligionStackedBar breakdown={breakdown} />
+      <ReligionLegend breakdown={breakdown} />
+    </div>
+  )
+}
+
 export function DestinationPeopleCultureTab({ country, staggerClassName, staggerStyle }: Props) {
   const data = useMemo(() => getDemographicsData(country), [country])
   const englishLevel = useMemo(() => getEnglishProficiency(country), [country])
@@ -106,27 +115,42 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
   return (
     <div className="wtr-people-culture">
       {religion ? (
-        <section
-          className="wtr-people-culture__group"
-          aria-labelledby="wtr-people-culture-religion-heading"
-          {...staggerSectionProps(
-            sectionIndex++,
-            'wtr-people-culture__group',
-            staggerClassName,
-            staggerStyle,
-          )}
-        >
-          <h3 id="wtr-people-culture-religion-heading" className="wtr-people-culture__section-title">
-            Religion
-          </h3>
-          <p className="wtr-people-culture__dominant">{religion.dominant}</p>
-          <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
-          <ReligionStackedBar breakdown={religion.breakdown} />
-          <ReligionLegend breakdown={religion.breakdown} />
-          <p className="wtr-people-culture__worship-note">
-            <em>Places of worship for expats:</em> {religion.expat_worship}
-          </p>
-        </section>
+        <>
+          <section
+            className="wtr-people-culture__summary"
+            aria-label="Religious composition"
+            {...staggerSectionProps(
+              sectionIndex++,
+              'wtr-people-culture__summary',
+              staggerClassName,
+              staggerStyle,
+            )}
+          >
+            <ReligionBreakdown breakdown={religion.breakdown} />
+          </section>
+          <section
+            className="wtr-people-culture__group"
+            aria-labelledby="wtr-people-culture-religion-heading"
+            {...staggerSectionProps(
+              sectionIndex++,
+              'wtr-people-culture__group',
+              staggerClassName,
+              staggerStyle,
+            )}
+          >
+            <h3
+              id="wtr-people-culture-religion-heading"
+              className="wtr-city-detail__section-title wtr-people-culture__section-title"
+            >
+              Religion
+            </h3>
+            <p className="wtr-people-culture__dominant">{religion.dominant}</p>
+            <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
+            <p className="wtr-people-culture__worship-note">
+              <em>Places of worship for expats:</em> {religion.expat_worship}
+            </p>
+          </section>
+        </>
       ) : null}
 
       {demographics ? (
@@ -140,7 +164,10 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             staggerStyle,
           )}
         >
-          <h3 id="wtr-people-culture-demo-heading" className="wtr-people-culture__section-title">
+          <h3
+            id="wtr-people-culture-demo-heading"
+            className="wtr-city-detail__section-title wtr-people-culture__section-title"
+          >
             People &amp; language
           </h3>
           <dl className="wtr-people-culture__rows">
@@ -189,7 +216,10 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             staggerStyle,
           )}
         >
-          <h3 id="wtr-people-culture-english-heading" className="wtr-people-culture__section-title">
+          <h3
+            id="wtr-people-culture-english-heading"
+            className="wtr-city-detail__section-title wtr-people-culture__section-title"
+          >
             English
           </h3>
           <EnglishProficiencyBadge level={englishLevel} />
@@ -207,7 +237,10 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             staggerStyle,
           )}
         >
-          <h3 id="wtr-people-culture-expat-heading" className="wtr-people-culture__section-title">
+          <h3
+            id="wtr-people-culture-expat-heading"
+            className="wtr-city-detail__section-title wtr-people-culture__section-title"
+          >
             Expat community
           </h3>
           <p className="wtr-people-culture__expat-copy">{demographics.expat_population}</p>

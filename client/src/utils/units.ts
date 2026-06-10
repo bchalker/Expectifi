@@ -2,7 +2,7 @@ import { formatUsdOrDash } from './costOfLiving'
 
 const APARTMENT_AREA_SQM = 85
 const SQFT_PER_SQM = 10.763910416709722
-const LITERS_PER_US_GALLON = 3.785411784
+export const LITERS_PER_US_GALLON = 3.785411784
 
 export function apartmentAreaSqFt(): number {
   return Math.round(APARTMENT_AREA_SQM * SQFT_PER_SQM)

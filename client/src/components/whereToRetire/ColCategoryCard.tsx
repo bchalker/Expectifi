@@ -19,6 +19,7 @@ type HeroCardProps = {
   panelTitle?: string
   rows: ColCategoryRowLine[]
   footerPill?: ReactNode
+  emptyStateNote?: string
 }
 
 type RowsCardProps = {
@@ -101,6 +102,9 @@ export function ColCategoryCard(
             </div>
             {props.footerPill != null ? (
               <div className="wtr-col-category-card__footer-pill">{props.footerPill}</div>
+            ) : null}
+            {props.emptyStateNote ? (
+              <p className="wtr-col-category-card__empty-note">{props.emptyStateNote}</p>
             ) : null}
           </div>
         </>

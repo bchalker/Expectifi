@@ -415,8 +415,8 @@
   margin-left: auto;
   padding: var(--space-2) var(--space-4);
 background: rgba(0,0,0, .025);
-  // background: var(--sky-blue);
-  border-radius: var(--space-2) var(--space-2);
+  background: var(--sky-blue);
+  border-radius: 0 0 var(--space-2) var(--space-2) ;
 }
 
 .account-balances-section-footer {

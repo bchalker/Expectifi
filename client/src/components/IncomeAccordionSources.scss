@@ -16,15 +16,15 @@
 }
 
 .income-accordion-sources__link {
-  color: var(--accent-text, var(--green-d2));
-  text-decoration: none;
+  color: var(--sky-blue-d4);
+  text-decoration: underline;
+  text-underline-offset: 2px;
   transition: color 0.15s ease;
 }
 
 .income-accordion-sources__link:hover {
-  color: var(--green1);
+  color: var(--sky-blue-d2);
   text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .income-accordion-sources__link:focus-visible {

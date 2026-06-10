@@ -1,6 +1,20 @@
+import { useMemo, type CSSProperties } from "react";
 import { useAnimatedScalar } from "../hooks/useAnimatedScalar";
 import type { PositionReturnModel } from "../lib/positionReturnModel";
 import { GrowthSliderLabel } from "./GrowthSliderLabel";
+
+const GROWTH_RATE_SLIDER_MIN = 3;
+const GROWTH_RATE_SLIDER_MAX = 55;
+
+function growthRateRangeFillPct(value: number): string {
+  const span = GROWTH_RATE_SLIDER_MAX - GROWTH_RATE_SLIDER_MIN;
+  const pct = span > 0 ? ((value - GROWTH_RATE_SLIDER_MIN) / span) * 100 : 0;
+  return `${pct}%`;
+}
+
+function growthRateRangeFillStyle(value: number): CSSProperties {
+  return { "--range-fill": growthRateRangeFillPct(value) } as CSSProperties;
+}
 
 export type GlobalGrowthRateSliderProps = {
   retRate: number;
@@ -34,6 +48,12 @@ export function GlobalGrowthRateSlider({
   className,
 }: GlobalGrowthRateSliderProps) {
   const retPctAnim = useAnimatedScalar(retRate * 100);
+  const sliderPct = retRate * 100;
+  const panelRangeFillStyle = useMemo(
+    () =>
+      suffixLayout === "panel" ? growthRateRangeFillStyle(sliderPct) : undefined,
+    [sliderPct, suffixLayout],
+  );
 
   return (
     <div className={className}>
@@ -54,11 +74,19 @@ export function GlobalGrowthRateSlider({
         sliderTrack={
           <input
             type="range"
-            min={3}
-            max={55}
+            className={
+              suffixLayout === "panel" ? "growth-slider-label__panel-range" : undefined
+            }
+            min={GROWTH_RATE_SLIDER_MIN}
+            max={GROWTH_RATE_SLIDER_MAX}
             step={0.5}
-            value={retRate * 100}
-            onChange={(e) => onRetRate(Number(e.target.value) / 100)}
+            value={sliderPct}
+            style={panelRangeFillStyle}
+            onInput={(e) => {
+              const next = Number(e.currentTarget.value);
+              e.currentTarget.style.setProperty("--range-fill", growthRateRangeFillPct(next));
+              onRetRate(next / 100);
+            }}
             aria-label="Global annual return percent"
           />
         }

@@ -65,7 +65,10 @@ export function DestinationGettingThereTab({ country, staggerClassName, staggerS
         aria-labelledby="wtr-getting-there-airports-heading"
         {...staggerSectionProps(0, 'wtr-getting-there__group', staggerClassName, staggerStyle)}
       >
-        <h3 id="wtr-getting-there-airports-heading" className="wtr-getting-there__section-title">
+        <h3
+          id="wtr-getting-there-airports-heading"
+          className="wtr-city-detail__section-title wtr-getting-there__section-title"
+        >
           Main airports
         </h3>
         <ul className="wtr-getting-there__airports">
@@ -86,10 +89,15 @@ export function DestinationGettingThereTab({ country, staggerClassName, staggerS
         aria-labelledby="wtr-getting-there-flights-heading"
         {...staggerSectionProps(1, 'wtr-getting-there__group', staggerClassName, staggerStyle)}
       >
-        <h3 id="wtr-getting-there-flights-heading" className="wtr-getting-there__section-title">
-          Flights from the US
-        </h3>
-        <DirectFlightsBadge direct={data.direct_from_us} />
+        <div className="wtr-getting-there__section-header">
+          <h3
+            id="wtr-getting-there-flights-heading"
+            className="wtr-city-detail__section-title wtr-getting-there__section-title"
+          >
+            Flights from the US
+          </h3>
+          <DirectFlightsBadge direct={data.direct_from_us} />
+        </div>
         {data.direct_from_us ? (
           <div className="wtr-getting-there__city-pills">
             {data.direct_us_cities.map((city) => (
@@ -130,7 +138,10 @@ export function DestinationGettingThereTab({ country, staggerClassName, staggerS
         aria-labelledby="wtr-getting-there-airlines-heading"
         {...staggerSectionProps(3, 'wtr-getting-there__group', staggerClassName, staggerStyle)}
       >
-        <h3 id="wtr-getting-there-airlines-heading" className="wtr-getting-there__section-title">
+        <h3
+          id="wtr-getting-there-airlines-heading"
+          className="wtr-city-detail__section-title wtr-getting-there__section-title"
+        >
           Airlines serving this route
         </h3>
         <p className="wtr-getting-there__airlines-list">{formatAirlinesList(data.airlines)}</p>

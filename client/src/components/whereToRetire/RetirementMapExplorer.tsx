@@ -25,7 +25,7 @@ import {
   monthlyOutflowForMapCity,
 } from "../../lib/whereToRetire/mapIncomeFit";
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
-import { RetirementLeafletMap } from "./RetirementLeafletMap";
+import { RetirementMapLibreMap } from "./RetirementMapLibreMap";
 import { WtrCityListPagination } from "./WtrCityListPagination";
 import "./RetirementMapExplorer.scss";
 
@@ -445,7 +445,7 @@ export function RetirementMapExplorer({
       >
         {!mobileListOnly ? (
           <div className="wtr-explorer__map-stage">
-            <RetirementLeafletMap
+            <RetirementMapLibreMap
               destinations={filteredCities}
               monthlyIncome={explorationIncome}
               pinColorView={pinColorView}

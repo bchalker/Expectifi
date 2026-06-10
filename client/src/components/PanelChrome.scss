@@ -19,11 +19,14 @@
 .drawer-shell {
   position: fixed;
   top: var(--app-header-stack-h);
-  bottom: var(--drawer-panel-inset, 2rem);
+  bottom: var(--drawer-panel-inset, 1rem);
+  top: 1rem;
+  bottom: 1rem;
+  right: 1rem;
   padding-top: 0;
   box-sizing: border-box;
-  width: min(680px, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
-  max-width: calc(100vw - var(--drawer-panel-inset, 2rem) * 2);
+  width: min(680px, calc(100vw - var(--drawer-panel-inset, 1rem) * 2));
+  max-width: calc(100vw - var(--drawer-panel-inset, 1rem) * 2);
   z-index: var(--z-drawer-shell);
   background: var(--surface);
   overflow: hidden;
@@ -53,10 +56,11 @@
 }
 
 .drawer-shell.side-panel-shell.drawer-shell--with-footer {
+  
   grid-template-rows: auto 1fr auto;
 }
 .drawer-shell--right {
-  right: var(--drawer-panel-inset, 2rem);
+  right: 1rem;;
   /* 100% = panel width; + inset clears the gap left by `right: inset` so nothing shows when closed */
   transform: translateX(calc(100% + var(--drawer-panel-inset, 2rem)));
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0);

@@ -10,7 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   optimizeDeps: {
-    include: ['recharts', 'overlayscrollbars', 'overlayscrollbars-react'],
+    include: [
+      'recharts',
+      'overlayscrollbars',
+      'overlayscrollbars-react',
+      'maplibre-gl',
+    ],
   },
   build: {
     commonjsOptions: {

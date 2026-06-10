@@ -63,18 +63,13 @@
 .strip-card.warn .strip-card-val { color: var(--warn); }
 
 /* ── LAYOUT ── */
-/* Centered app column — growth, income (.main), where to retire (.where-to-retire__body.main) */
-.main,
-.where-to-retire__body.main,
-.app-page--where-to-retire.main {
-  width: var(--layout-app-boundary);
-  max-width: 100%;
-  margin-inline: auto;
-  box-sizing: border-box;
-}
-
+/* Centered app column — growth, income (.main) */
 .main {
-  padding: var(--space-2) var(--layout-app-inner-pad) var(--space-6);
+  width: 100%;
+  max-width: var(--layout-app-max);
+  margin-inline: auto;
+  padding: 0 var(--layout-app-inner-pad) var(--space-6);
+  box-sizing: border-box;
 }
 
 .main--has-hero {
@@ -83,31 +78,22 @@
   // background-color: rgba(255,255,255,0.75);
   // background: linear-gradient(to top right, rgba(255,255,255,0.85),  rgba(255,255,255,0.9)); 
   border: 1px solid var(--border);
-  border-radius: var(--border-radius-md, 8px);
+  border-radius: 0;
   overflow: visible;
-}
-
-.main--has-hero.main--hero-stuck,
-html[data-main-hero-stuck='true'] .main--has-hero {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+  height: 100dvh;
 }
 
 /* Wave + goal bar — goal bar scrolls; subheader sticks under app chrome */
 .goal-progress-bar--in-main {
   --goal-bar-row-h: 2.5rem;
-  border-radius: var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0 0;
+  border-radius: 0;
 }
 
 @media (max-width: 520px) {
   .goal-progress-bar--in-main {
     --goal-bar-row-h: 3.35rem;
   }
-}
-
-.goal-progress-bar--in-main + .main__hero {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
 }
 
 @property --main-hero-subheader-max-h-active {
@@ -127,14 +113,14 @@ html[data-main-hero-stuck='true'] .main--has-hero {
     clamp(6.35rem, min(38vw, 34vh), var(--main-hero-subheader-max-h-active))
   );
   position: sticky;
-  top: var(--app-sticky-hero-top, var(--app-measured-header-h, var(--app-top-chrome-h)));
+  top: 0;
   z-index: 201;
   width: 100%;
   margin-inline: 0;
   margin-bottom: 0;
   background: transparent;
   box-sizing: border-box;
-  border-radius: var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0 0;
+  border-radius: 0;
   overflow: hidden;
 
   .subheader--in-main::before {
@@ -152,8 +138,6 @@ html[data-main-hero-stuck='true'] .main--has-hero {
   &--stuck,
   &:stuck {
     --main-hero-subheader-max-h-active: var(--main-hero-subheader-max-h-stuck);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
 
     .subheader-estimate {
       gap: var(--space-2);
@@ -164,8 +148,6 @@ html[data-main-hero-stuck='true'] .main--has-hero {
 
 html[data-main-hero-stuck='true'] .main__hero {
   --main-hero-subheader-max-h-active: var(--main-hero-subheader-max-h-stuck);
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
 
   .subheader-estimate {
     gap: var(--space-3);
@@ -176,35 +158,8 @@ html[data-no-portfolio-subheader='true'] .main__hero {
   --subheader-h: var(--subheader-bubble-h);
 }
 
-.app-scroll-stack {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100dvh - var(--app-header-stack-h) - var(--app-chrome-gap));
-  padding-bottom: calc(
-    var(--app-privacy-trust-h) + var(--app-plan-banner-h, 0px) + var(--app-chrome-gap)
-  );
-  box-sizing: border-box;
-}
-
-.app-scroll-stack--hero-in-main {
-  min-height: calc(100dvh - var(--app-top-chrome-h) - var(--space-4));
-}
-
 .app-scroll-stack--hero-in-main .app-scroll-stack__main {
   overflow: visible;
-}
-
-.app-scroll-stack__main {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-}
-
-.app-scroll-stack--onboarding {
-  min-height: calc(100dvh - var(--app-header-stack-h) - var(--app-chrome-gap));
 }
 
 .app-scroll-stack--onboarding .app-scroll-stack__main {
@@ -772,28 +727,12 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
 
 @media (max-width: 760px) {
   .main {
-    padding: var(--space-5) 0 var(--space-8);
-  }
-
-  .main.main--has-hero,
-  .where-to-retire__body.main,
-  .app-page--where-to-retire.main {
-    width: 100%;
-    max-width: none;
-    padding-top: 0;
+    padding: 0 0 var(--space-8);
   }
 
   .main.main--has-hero {
+    padding-top: 0;
     border: none;
-    border-radius: 0;
-  }
-
-  .goal-progress-bar--in-main {
-    border-radius: 0;
-  }
-
-  .main__hero {
-    border-radius: 0;
   }
 
   .main__hero.main__hero--stuck,
@@ -805,24 +744,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
     --subheader-h: auto;
   }
 
-  .app-scroll-stack {
-    padding-bottom: 0;
-  }
-
   html {
     --app-plan-banner-h: 0px;
-  }
-
-  html[data-app-hero-in-main='true'] .app-header-shell--hero-in-main .subheader-spacer {
-    display: none;
-  }
-
-  html[data-app-hero-in-main='true'] .app-scroll-stack--hero-in-main {
-    padding-top: var(
-      --app-measured-header-h,
-      calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px))
-    );
-    min-height: 0;
   }
 }
 

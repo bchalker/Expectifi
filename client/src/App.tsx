@@ -34,6 +34,9 @@ import { StripHeader } from "./components/StripHeader";
 import { GoalProgressBar } from "./components/GoalProgressBar";
 import { SubHeader } from "./components/SubHeader";
 import { DashboardMainHero } from "./components/DashboardMainHero";
+import { useOverlayScrollbars } from "overlayscrollbars-react";
+import "overlayscrollbars/styles/overlayscrollbars.css";
+import { APP_OVERLAY_SCROLLBARS_OPTIONS } from "./components/ui/AppOverlayScrollbars";
 import "./components/AppHeaderStack.scss";
 import { persistCalculatorSession } from "./lib/appStateStorage";
 import {
@@ -227,7 +230,30 @@ export default function App({ initialAuthModal = null }: AppProps) {
   } = useAuth();
 
   const path = useAppPath();
-  const appHeaderHeight = useAppHeaderStackHeight();
+  useAppHeaderStackHeight();
+  const [initMainScrollRef, getMainScrollInstance] = useOverlayScrollbars({
+    options: {
+      ...APP_OVERLAY_SCROLLBARS_OPTIONS,
+      overflow: {
+        x: "hidden",
+        y: "scroll",
+      },
+      scrollbars: {
+        ...APP_OVERLAY_SCROLLBARS_OPTIONS.scrollbars,
+        autoHide: "scroll",
+      },
+    },
+    defer: false,
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.add("app-shell-layout");
+    document.body.classList.add("app-shell-layout");
+    return () => {
+      document.documentElement.classList.remove("app-shell-layout");
+      document.body.classList.remove("app-shell-layout");
+    };
+  }, []);
   const welcomeCtx = useMemo(
     () => ({
       onboardingComplete: hydration.onboardingComplete,
@@ -967,6 +993,20 @@ export default function App({ initialAuthModal = null }: AppProps) {
     );
   }, [welcomeDone, isWhereToRetire, phase]);
 
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      getMainScrollInstance()?.update();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [
+    getMainScrollInstance,
+    welcomeDone,
+    isWhereToRetire,
+    phase,
+    fixedHeaderHeroHidden,
+    showDashboardSubHeader,
+  ]);
+
   const dashboardSubHeaderProps = {
     phase,
     onPhase: setPhase,
@@ -1009,7 +1049,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const dashboardMainHero = showDashboardSubHeader ? (
     <DashboardMainHero
-      stickyTopPx={appHeaderHeight}
+      stickyTopPx={0}
       showGoalBarRow={showGoalBarRow}
       goalBarProps={goalBarProps}
       subHeaderProps={dashboardSubHeaderProps}
@@ -1020,6 +1060,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   return (
     <UserLocaleProvider residenceCountry={inputs.residenceCountry}>
       <>
+        <div className="app-page-shell">
         <div
           className={[
             "app-header-shell",
@@ -1088,7 +1129,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
             {!fixedHeaderHeroHidden ? dashboardGoalBar : null}
             {!fixedHeaderHeroHidden ? dashboardSubHeader : null}
           </div>
-          <div className="subheader-spacer" aria-hidden="true" />
         </div>
         {!welcomeDone ? (
           <OnboardingOverlay
@@ -1110,6 +1150,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
           />
         ) : null}
         <div
+          ref={(el) => {
+            if (el) initMainScrollRef(el);
+          }}
           className={[
             "app-scroll-stack",
             isWhereToRetire &&
@@ -1428,6 +1471,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         </div>
         <AccountPlanBottomBanner onOpenUpgrade={openCsvUpgrade} />
         <AppPrivacyTrust dividerAbove={isWhereToRetire} />
+        </div>
 
         <DrawerPanel
           drawer={drawer}

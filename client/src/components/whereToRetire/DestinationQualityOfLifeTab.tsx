@@ -95,7 +95,10 @@ function QoLOverallCard({
       style={style}
       aria-labelledby="wtr-qol-overall-heading"
     >
-      <h3 id="wtr-qol-overall-heading" className="wtr-qol-overall__label">
+      <h3
+        id="wtr-qol-overall-heading"
+        className="wtr-city-detail__section-title wtr-qol-overall__label"
+      >
         Overall quality of life score
       </h3>
       <div className="wtr-qol-overall__score-row">

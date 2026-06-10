@@ -42,12 +42,12 @@
   flex-direction: row;
   align-items: center;
   gap: var(--space-3);
-  width: var(--layout-app-boundary);
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   height: var(--goal-bar-row-h, 2.5rem);
   min-height: var(--goal-bar-row-h, 2.5rem);
-  margin-inline: auto;
-  padding-inline: var(--space-4);
+  margin-inline: 0;
+  padding-inline: var(--layout-app-inner-pad);
   min-width: 0;
   box-sizing: border-box;
 }
@@ -114,6 +114,15 @@
   pointer-events: none;
 }
 
+.goal-progress-bar__display--hidden-instant {
+  position: absolute;
+  right: 0;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: none;
+}
+
 .goal-progress-bar__stat {
   display: inline-flex;
   flex-shrink: 0;
@@ -164,6 +173,10 @@
 .goal-progress-bar__met-icon {
   flex-shrink: 0;
   color: #fff;
+}
+
+.goal-progress-bar__stat--met .goal-progress-bar__met-icon {
+  color: #ffffff;
 }
 
 .goal-progress-bar__add {
@@ -281,5 +294,9 @@
   .goal-progress-bar__display,
   .goal-progress-bar__inline-edit {
     transition-duration: 0.01ms;
+  }
+
+  .goal-progress-bar__display--hidden-instant {
+    transition: none;
   }
 }

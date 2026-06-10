@@ -113,8 +113,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.175rem;
-  min-width: 1.175rem;
+  width: 1.675rem;
+  min-width: 1.675rem;
   height: 3.25rem;
   min-height: 3.25rem;
   padding: 0;
@@ -224,7 +224,7 @@
   overflow: hidden;
 }
 
-.wtr-explorer__map-stage .wtr-leaflet-map {
+.wtr-explorer__map-stage .wtr-maplibre-map {
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;

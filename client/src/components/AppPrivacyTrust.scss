@@ -1,12 +1,11 @@
 .app-privacy-trust {
-  position: fixed;
-  z-index: var(--z-privacy-trust);
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
+  z-index: var(--z-privacy-trust);
   width: 100%;
   max-width: none;
   margin: 0;
+  flex-shrink: 0;
   padding: var(--space-3) var(--layout-app-inner-pad)
     calc(0.875rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
@@ -21,8 +20,8 @@
 
 .app-privacy-trust__text {
   margin: 0 auto;
-  width: var(--layout-app-boundary);
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   font-size: var(--text-xs);
   line-height: 1.15;
   text-align: center;
@@ -33,11 +32,4 @@
 .app-privacy-trust__text strong {
   font-weight: 700;
   color: var(--nav-text);
-}
-
-@media (max-width: 680px) {
-  .app-privacy-trust {
-    position: static;
-    box-shadow: none;
-  }
 }

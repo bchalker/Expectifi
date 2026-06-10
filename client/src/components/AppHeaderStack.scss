@@ -30,31 +30,15 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h));
 }
 
-/* Match growth/income header-to-main gap (hero-in-main spacer tail). */
-.app-header-shell--where-to-retire .subheader-spacer {
-  height: calc(var(--app-top-chrome-h) + var(--space-4));
-}
-
-/* Align top chrome with map / dashboard column (--layout-app-boundary). */
-.app-header-shell--where-to-retire .header--app .header__inner {
-  width: var(--wtr-content-boundary);
-  max-width: 100%;
-  margin-inline: auto;
-}
-
 .app-header-shell--where-to-retire.app-header-shell--ss-claim {
   --subheader-h: 0px;
 }
 
-/* Dashboard hero in .main — fixed stack is nav chrome only */
+/* Dashboard hero in .main — sticky stack is nav chrome only */
 .app-header-shell--hero-in-main {
   --goal-bar-h: 0px;
   --subheader-h: 0px;
   --app-header-stack-h: var(--app-top-chrome-h);
-}
-
-.app-header-shell--hero-in-main .subheader-spacer {
-  height: calc(var(--app-top-chrome-h) + var(--space-4));
 }
 
 @media (max-width: 520px) {
@@ -63,16 +47,16 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   }
 }
 
-/* Fixed top: primary chrome + subheader (waves + expected monthly income) */
+/* Sticky top: primary chrome + subheader (waves + expected monthly income) */
 .app-header-stack {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 202;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  width: 100%;
+  flex-shrink: 0;
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
 }

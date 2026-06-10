@@ -1,0 +1,81 @@
+/* App calculator shell — body/html scroll is disabled; .app-scroll-stack scrolls via OverlayScrollbars */
+html.app-shell-layout,
+html.app-shell-layout body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.app-shell-layout #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.app-shell-layout {
+  /* Sidebar sticky offset inside the main scroll viewport (header sits outside scroll). */
+  --app-sidebar-sticky-top: 0px;
+  --app-sidebar-sticky-max-height: calc(
+    100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px)
+  );
+}
+
+html.app-shell-layout[data-main-hero-stuck='true'] {
+  --app-sidebar-sticky-top: 8.5rem;
+  --app-sidebar-sticky-max-height: calc(
+    100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px) - 8.5rem
+  );
+}
+
+.app-page-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.app-header-shell {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.app-scroll-stack {
+  position: relative;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.app-scroll-stack[data-overlayscrollbars='host'] {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-scroll-stack[data-overlayscrollbars='host'] [data-overlayscrollbars-viewport] {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.app-scroll-stack [data-overlayscrollbars-contents] {
+  display: flex;
+  flex-direction: column;
+  min-height: min-content;
+}
+
+.app-scroll-stack__main {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-scroll-stack__main > .main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}

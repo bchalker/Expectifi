@@ -21,9 +21,16 @@ const LEGEND_ITEMS: {
 type Props = {
   breakdown: BudgetBreakdownDisplay
   className?: string
+  showTitle?: boolean
+  utilitiesLegendLabel?: string
 }
 
-export function ColBudgetBreakdownBar({ breakdown, className }: Props) {
+export function ColBudgetBreakdownBar({
+  breakdown,
+  className,
+  showTitle = false,
+  utilitiesLegendLabel,
+}: Props) {
   const { barPercents } = breakdown
   const segments = [
     { key: 'rent', className: 'rent', pct: barPercents.rent },
@@ -38,6 +45,9 @@ export function ColBudgetBreakdownBar({ breakdown, className }: Props) {
       className={['wtr-col-budget-bar', className].filter(Boolean).join(' ')}
       aria-label="Monthly budget breakdown"
     >
+      {showTitle ? (
+        <p className="wtr-col-budget-bar__title">Monthly budget breakdown</p>
+      ) : null}
       <div className="wtr-col-budget-bar__track" role="img" aria-hidden>
         {segments.map((segment) => (
           <span
@@ -55,7 +65,10 @@ export function ColBudgetBreakdownBar({ breakdown, className }: Props) {
               aria-hidden
             />
             <span className="wtr-col-budget-bar__legend-text">
-              {item.label} {barPercents[item.key]}%
+              {item.key === 'utilitiesInternet' && utilitiesLegendLabel
+                ? utilitiesLegendLabel
+                : item.label}{' '}
+              {barPercents[item.key]}%
             </span>
           </li>
         ))}

@@ -90,7 +90,7 @@
   flex-direction: column;
 }
 
-.wtr-dest-panel--sheet .wtr-dest-panel__layout {
+.wtr-dest-panel--sheet .wtr-city-detail {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -114,10 +114,7 @@
   );
 }
 
-.wtr-dest-panel__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto;
+.wtr-dest-panel .wtr-city-detail {
   flex: 1 1 auto;
   min-height: 0;
 }

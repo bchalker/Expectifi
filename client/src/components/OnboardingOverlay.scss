@@ -15,7 +15,7 @@ body.onboarding-overlay--open {
 }
 
 body.onboarding-overlay--open .app-scroll-stack {
-  padding-bottom: 0;
+  overflow: hidden;
 }
 
 body.onboarding-overlay--open .app-privacy-trust,
@@ -28,10 +28,6 @@ body.onboarding-overlay--open .account-plan-bottom-banner-fixed {
   body.onboarding-overlay--open .app-header-shell {
     visibility: hidden;
     pointer-events: none;
-  }
-
-  body.onboarding-overlay--open .subheader-spacer {
-    display: none;
   }
 }
 

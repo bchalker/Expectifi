@@ -60,7 +60,7 @@
   border-radius: var(--space-2) var(--space-2) 0 var(--space-2);
   background: linear-gradient(to left bottom, var(--sky-blue-d2) 0%, var(--sky-blue) 100%);
   background: var(--sky-blue);
-  background: var(--surface1);
+  // background: var(--surface1);
   // background: var(--surface);
 
   // background: rgba(0,0,0,0.05);
@@ -69,8 +69,8 @@
 }
 
 .tax-treatment-disclosure.portfolio-account-group[open] {
-  // margin-top: var(--space-2);
-  // margin-bottom: var(--space-2);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
   background: var(--surface);
   box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
   // border: 1px solid rgba(255,255,255,0.2);
@@ -103,6 +103,7 @@
 .tax-treatment-disclosure.portfolio-account-group > summary {
   background: var(--surface);
   box-shadow: none;
+  // background: var(--sky-blue-u2);
 }
 
 .tax-treatment-disclosure.portfolio-account-group[open] > summary {
@@ -291,6 +292,11 @@
   // background: linear-gradient(to bottom, var(--sky-blue-u2) 10%, #ffffff);
 
   box-shadow: inset 0 5px 0px 0 var(--sky-blue-d2);
+}
+
+.tax-treatment-disclosure.portfolio-account-group[open]
+  .portfolio-bucket-account-row__order-badge {
+  background: var(--sky-blue-d3);
 }
 
 @media (prefers-reduced-motion: reduce) {

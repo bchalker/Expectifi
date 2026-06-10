@@ -265,27 +265,24 @@
   --app-measured-header-h: var(--app-top-chrome-h);
   --goal-bar-h: 0px;
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
-  /* Gap between fixed app chrome and scrollable main (matches subheader-spacer tail) */
-  --app-chrome-gap: 1.5rem;
+  /* Gap between fixed app chrome and scrollable main — flush with header/footer when 0 */
+  --app-chrome-gap: 0;
   /* Mobile slide-over width */
   --app-left-nav-w: 178px;
   --app-left-nav-edge: 14px;
-  /* Header inner + page content share these (marketing: 68rem; app: 1100px + gutters) */
+  /* Header inner + page content share these (marketing: 68rem; app: 1200px + gutters) */
   --layout-marketing-max: 68rem;
   --layout-marketing-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
   --layout-marketing-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
-  --layout-app-max: 1100px;
+  --layout-app-max: 75rem;
   --layout-app-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
   --layout-app-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
-  --layout-app-inner-pad: var(--space-6);
+  --layout-app-inner-pad: 2rem;
   /* Tax Summary: side panel width + viewport split (desktop panel above split) */
   --layout-snapshot-panel-width: 21rem;
   --layout-snapshot-split-min: 1280px;
-  /* Centered column width (viewport minus side gutters) — header + main share this */
-  --layout-app-boundary: min(
-    var(--layout-app-max),
-    calc(100vw - var(--layout-app-gutter) - var(--layout-app-gutter-end))
-  );
+  /* Centered main column max width — horizontal padding is on each container */
+  --layout-app-boundary: min(var(--layout-app-max), 100%);
   /* Where to Retire: same centered column as dashboard (.main / .main--has-hero) */
   --wtr-content-max: var(--layout-app-max);
   --wtr-content-boundary: var(--layout-app-boundary);
@@ -343,10 +340,17 @@
 }
 
 .layout-app-bound {
-  width: var(--layout-app-boundary);
-  max-width: 100%;
+  width: 100%;
+  max-width: var(--layout-app-max);
   margin-inline: auto;
   padding-inline: var(--layout-app-inner-pad);
+  box-sizing: border-box;
+}
+
+/* Break out of a centered column to full viewport width (e.g. map stage) */
+.app-full-bleed {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   box-sizing: border-box;
 }
 

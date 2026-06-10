@@ -3,29 +3,20 @@ import { useLayoutEffect, useRef, useState } from 'react'
 const STUCK_ENTER_PX = 2
 const STUCK_EXIT_PX = 8
 
+function getAppScrollViewport(): HTMLElement | null {
+  return document.querySelector('.app-scroll-stack [data-overlayscrollbars-viewport]')
+}
+
+function readScrollTop(viewport: HTMLElement | null): number {
+  if (viewport) return viewport.scrollTop
+  return window.scrollY
+}
+
 function measureStickyTopPx(hero: HTMLElement): number {
   const computedTop = parseFloat(getComputedStyle(hero).top)
-  if (Number.isFinite(computedTop) && computedTop > 0) return computedTop
+  if (Number.isFinite(computedTop)) return computedTop
 
-  const stack = document.querySelector('.app-header-stack')
-  if (stack) {
-    const stackHeight = Math.ceil(stack.getBoundingClientRect().height)
-    if (stackHeight > 0) return stackHeight
-  }
-
-  const measured = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue(
-      '--app-measured-header-h',
-    ),
-  )
-  if (Number.isFinite(measured) && measured > 0) return measured
-
-  const chrome = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue('--app-top-chrome-h'),
-  )
-  if (Number.isFinite(chrome) && chrome > 0) return chrome
-
-  return 54
+  return 0
 }
 
 /** True when a position:sticky element is pinned at its computed top offset. */
@@ -51,16 +42,16 @@ export function useStickySentinel(stickyTopPx: number | null, enabled = true) {
     const check = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
+        const viewport = getAppScrollViewport()
         const stickyTop =
-          stickyTopPx != null && stickyTopPx > 0
-            ? stickyTopPx
-            : measureStickyTopPx(heroEl)
+          stickyTopPx != null ? stickyTopPx : measureStickyTopPx(heroEl)
         const offset = heroEl.getBoundingClientRect().top - stickyTop
+        const scrollTop = readScrollTop(viewport)
         let next = stuckRef.current
 
         if (stuckRef.current) {
           if (offset > STUCK_EXIT_PX) next = false
-        } else if (offset <= STUCK_ENTER_PX && window.scrollY > 0) {
+        } else if (offset <= STUCK_ENTER_PX && scrollTop > 0) {
           next = true
         }
 
@@ -72,6 +63,9 @@ export function useStickySentinel(stickyTopPx: number | null, enabled = true) {
     }
 
     check()
+
+    const viewport = getAppScrollViewport()
+    viewport?.addEventListener('scroll', check, { passive: true })
     window.addEventListener('scroll', check, { passive: true })
     document.addEventListener('scroll', check, { passive: true, capture: true })
     window.addEventListener('resize', check, { passive: true })
@@ -83,8 +77,12 @@ export function useStickySentinel(stickyTopPx: number | null, enabled = true) {
     const stack = document.querySelector('.app-header-stack')
     if (stack && ro) ro.observe(stack)
 
+    const scrollHost = document.querySelector('.app-scroll-stack')
+    if (scrollHost && ro) ro.observe(scrollHost)
+
     return () => {
       cancelAnimationFrame(raf)
+      viewport?.removeEventListener('scroll', check)
       window.removeEventListener('scroll', check)
       document.removeEventListener('scroll', check, true)
       window.removeEventListener('resize', check)

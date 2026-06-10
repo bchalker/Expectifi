@@ -76,6 +76,7 @@ export function IncomeAccountRow({
         <PortfolioBucketAccountRow
           badgeOrder={badgeOrder}
           label={label}
+          amountBesideScenario
           subtext={strategySubtext}
           total={
             <AccountBucketMonthlyIncomePill

@@ -3,22 +3,8 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-height: calc(100dvh - var(--app-header-stack-h) - var(--app-chrome-gap));
+  min-height: 0;
   box-sizing: border-box;
-}
-
-@media (max-width: 760px) {
-  .app-header-shell--where-to-retire .subheader-spacer {
-    display: none;
-  }
-
-  .app-scroll-stack--where-to-retire {
-    padding-top: var(
-      --app-measured-header-h,
-      calc(var(--app-top-chrome-h) + env(safe-area-inset-top, 0px))
-    );
-    min-height: 0;
-  }
 }
 
 .app-scroll-stack:has(.where-to-retire) > .app-scroll-stack__main,
@@ -26,8 +12,15 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
+  min-height: 100%;
   overflow: visible;
+}
+
+.app-scroll-stack__main > .where-to-retire {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 .where-to-retire {
@@ -44,19 +37,16 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  padding-top: 0;
-  padding-bottom: calc(
-    var(--app-privacy-trust-h) + var(--app-chrome-gap) + env(safe-area-inset-bottom, 0px)
-  );
+  padding: 0;
   box-sizing: border-box;
 }
 
-/* Match growth/income .main.main--has-hero column width */
+/* Full-width column — map and panel span the viewport */
 .app-page--where-to-retire.main,
 .where-to-retire__body.main {
-  width: var(--layout-app-boundary);
-  max-width: 100%;
-  margin-inline: auto;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
   padding: 0;
   background: transparent;
 }
@@ -90,7 +80,7 @@
   min-height: 0;
   margin-bottom: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: 0 2px 10px rgb(28 43 58 / 0.06);
   box-sizing: border-box;
@@ -104,7 +94,8 @@
   width: 100%;
   min-height: 2.75rem;
   padding: var(--space-3) var(--space-5);
-  background: var(--sky-blue);
+  border-radius: 0;
+  background: linear-gradient(to bottom, var(--sky-blue), var(--surface) 40%);
   box-sizing: border-box;
 }
 
@@ -468,7 +459,7 @@
   flex-direction: column;
   min-height: var(--wtr-map-area-min-h, 36rem);
   min-width: 0;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -477,7 +468,6 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  width: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;

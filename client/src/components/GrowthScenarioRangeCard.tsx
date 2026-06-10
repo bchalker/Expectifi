@@ -173,34 +173,17 @@ export function GrowthScenarioRangeCard({
 
   if (!c.hasPortfolioBalances) return null;
 
-  const expected = rows.find((row) => row.id === "normal");
   const pessimistic = rows.find((row) => row.id === "very_bear");
   const optimistic = rows.find((row) => row.id === "very_bull");
 
+  if (!pessimistic || !optimistic) return null;
+
   return (
     <div className="growth-scenario-range-card">
-      {expected ? (
-        <div className="growth-scenario-range-card__expected">
-          <span className="growth-scenario-range-card__label">
-            {expected.label}
-          </span>
-          <span className="growth-scenario-range-card__expected-value tabular-nums">
-            {fmt(Math.round(expected.projectedFv))}
-          </span>
-          {expected.subtext ? (
-            <span className="growth-scenario-range-card__subtext">
-              {expected.subtext}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
-      {pessimistic && optimistic ? (
-        <div className="growth-scenario-range-card__wings">
-          <WingTile row={pessimistic} />
-          <WingTile row={optimistic} />
-        </div>
-      ) : null}
+      <div className="growth-scenario-range-card__wings">
+        <WingTile row={pessimistic} />
+        <WingTile row={optimistic} />
+      </div>
     </div>
   );
 }

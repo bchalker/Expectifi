@@ -1,4 +1,4 @@
-.wtr-leaflet-map {
+.wtr-maplibre-map {
   position: relative;
   width: 100%;
   height: 100%;
@@ -9,7 +9,7 @@
   background: var(--surface2);
 }
 
-.wtr-leaflet-map__legend-overlay {
+.wtr-maplibre-map__legend-overlay {
   position: absolute;
   top: 0.65rem;
   right: 0.65rem;
@@ -18,31 +18,47 @@
   pointer-events: none;
 }
 
-.wtr-leaflet-map__legend-overlay .wtr-map-pin-legend--interactive {
+.wtr-maplibre-map__style-overlay {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 450;
+  max-width: calc(100% - 1.25rem);
   pointer-events: auto;
 }
 
-.wtr-leaflet-map__legend-overlay .wtr-map-pin-legend {
+.wtr-maplibre-map__style-select {
+  min-width: 7.5rem;
+}
+
+.wtr-maplibre-map__legend-overlay .wtr-map-pin-legend--interactive {
+  pointer-events: auto;
+}
+
+.wtr-maplibre-map__legend-overlay .wtr-map-pin-legend {
   flex-wrap: nowrap;
-  gap: var(--space-2) /* review: was 0.45rem */ var(--space-3) /* review: was 0.65rem */;
+  gap: var(--space-2) var(--space-3);
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.wtr-leaflet-map__canvas.leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
+.wtr-maplibre-map__canvas {
+  width: 100%;
+  height: 100%;
   background: var(--surface2);
-  z-index: 0;
 }
 
-.wtr-leaflet-pin-host {
-  background: transparent !important;
-  border: none !important;
+.wtr-maplibre-map__canvas .maplibregl-canvas {
+  outline: none;
 }
 
-.wtr-leaflet-pin {
+.wtr-map-pin-host {
+  display: block;
+  cursor: pointer;
+}
+
+.wtr-map-pin {
   display: block;
   border-radius: 999px;
   border: 2px solid var(--surface);
@@ -58,7 +74,7 @@
     box-shadow 0.15s ease;
 }
 
-.wtr-leaflet-map--pins-enter .wtr-leaflet-pin {
+.wtr-maplibre-map--pins-enter .wtr-map-pin {
   animation: wtr-pin-enter 0.35s ease backwards;
 }
 
@@ -74,16 +90,14 @@
   }
 }
 
-/* Pin fill color set inline from bandColor; class names scope hover/selection */
-
-.wtr-leaflet-pin--selected {
+.wtr-map-pin--selected {
   transform: scale(1.12);
   box-shadow:
     0 0 0 2px color-mix(in srgb, var(--accent-green) 45%, transparent),
     0 3px 10px color-mix(in srgb, var(--color-navy) 24%, transparent);
 }
 
-.wtr-leaflet-pin--detail {
+.wtr-map-pin--detail {
   transform: scale(1.35);
   border-width: 3px;
   box-shadow:
@@ -93,32 +107,32 @@
   z-index: 2;
 }
 
-.leaflet-container a {
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib {
+  font-size: var(--text-xs);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--text-muted);
+}
+
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a {
   color: var(--accent);
 }
 
-.leaflet-control-attribution {
-  font-size: 10px !important;
-  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
-  color: var(--text-muted) !important;
+.wtr-maplibre-map__canvas .maplibregl-ctrl-group button {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
 }
 
-.leaflet-control-zoom a {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border-color: var(--border) !important;
-}
-
-.leaflet-control-zoom a:hover {
-  background: var(--surface2) !important;
+.wtr-maplibre-map__canvas .maplibregl-ctrl-group button:hover {
+  background: var(--surface2);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wtr-leaflet-map--pins-enter .wtr-leaflet-pin {
+  .wtr-maplibre-map--pins-enter .wtr-map-pin {
     animation: none;
   }
 
-  .wtr-leaflet-pin {
+  .wtr-map-pin {
     transition: none;
   }
 }

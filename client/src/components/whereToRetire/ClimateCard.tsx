@@ -111,10 +111,10 @@ export function ClimateCard({
     <article className="wtr-climate-card" aria-label="Typical climate">
       <header {...staggerSectionProps(0, 'wtr-climate-card__head', staggerClassName, staggerStyle)}>
         <span className="wtr-climate-card__icon" aria-hidden>
-          <IconSun size={24} stroke={1.5} />
+          <IconSun size={36} stroke={1.5} />
         </span>
         <div className="wtr-climate-card__head-copy">
-          <h4 className="wtr-climate-card__title">Typical Climate</h4>
+          <h4 className="wtr-city-detail__section-title wtr-climate-card__title">Typical Climate</h4>
           <p className="wtr-climate-card__label">{climate.climateLabel}</p>
         </div>
         <div className="wtr-climate-card__unit-toggle" role="group" aria-label="Temperature unit">

@@ -11,6 +11,13 @@
   padding: var(--space-5);
 }
 
+@media (min-width: 769px) {
+  .growth-assumptions-panel {
+    height: fit-content;
+    min-height: 0;
+  }
+}
+
 .growth-assumptions-panel__main {
   display: flex;
   flex-direction: column;
@@ -23,8 +30,8 @@
 .growth-assumptions-panel__slider {
   width: 100%;
   box-sizing: border-box;
-  padding: var(--space-4) var(--space-5) var(--space-3);
-  // background: var(--surface1);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border-bottom: 1px dashed var(--border);
 }
 
 .growth-assumptions-panel__slider .growth-slider-label {
@@ -39,9 +46,9 @@
 
 .growth-assumptions-panel__scenario {
   // padding: var(--space-4);
-  background: var(--surface);
-  border-radius: var(--space-2);
-  box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
+  // background: var(--surface);
+  // border-radius: var(--space-2);
+  // box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
 }
 
 .growth-assumptions-panel__return-expectations[data-slot='accordion'] {
@@ -79,11 +86,6 @@
 @media (max-width: 680px) {
   .growth-assumptions-panel__scenario {
     padding: 0 var(--space-4) var(--space-3);
-  }
-
-  .growth-assumptions-panel__return-expectations .growth-scenario-range-card__expected {
-    margin-top: var(--space-2);
-    padding: var(--space-2) 0;
   }
 
   .growth-assumptions-panel__return-expectations .growth-scenario-range-card__wing-item {

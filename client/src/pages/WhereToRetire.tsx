@@ -262,7 +262,7 @@ export function WhereToRetire({ c }: Props) {
             </div>
           </div>
           <div className="where-to-retire__main-panel-map">
-            <div className="where-to-retire__map-stage">
+            <div className="where-to-retire__map-stage app-full-bleed">
               <RetirementMapExplorer
                 explorationIncome={mapExplorationIncome}
                 filters={mapFilters}

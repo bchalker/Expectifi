@@ -115,12 +115,6 @@ export function GoalProgressBar({
   onMonthlyIncomeGoal,
   className,
 }: Props) {
-  const [editing, setEditing] = useState(false)
-  const [revealDisplay, setRevealDisplay] = useState(true)
-  const zoneRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const closeEdit = useCallback(() => setEditing(false), [])
-
   const isGrowth = phase === 'growth'
   const goalValue = isGrowth ? growthGoal : monthlyIncomeGoal
   const onGoalChange = isGrowth ? onGrowthGoal : onMonthlyIncomeGoal
@@ -128,25 +122,50 @@ export function GoalProgressBar({
   const showGrowth = isGrowth && hasActiveGoal && growthGoalProgressPct != null
   const showIncome =
     !isGrowth && hasActiveGoal && incomeGoalProgressPct != null
-  const isEmpty = !showGrowth && !showIncome
-  const displayHidden = editing || (isEmpty && !revealDisplay)
+
+  const [editing, setEditing] = useState(false)
+  const [showDisplay, setShowDisplay] = useState(true)
+  const [instantHideDisplay, setInstantHideDisplay] = useState(false)
+  const zoneRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const closeTimerRef = useRef<number | null>(null)
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimerRef.current != null) {
+      window.clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }, [])
+
+  const openEdit = useCallback(() => {
+    clearCloseTimer()
+    if (hasActiveGoal) {
+      setInstantHideDisplay(true)
+      setShowDisplay(false)
+    } else {
+      setInstantHideDisplay(false)
+      setShowDisplay(false)
+    }
+    setEditing(true)
+  }, [clearCloseTimer, hasActiveGoal])
+
+  const closeEdit = useCallback(() => {
+    setEditing(false)
+    clearCloseTimer()
+    closeTimerRef.current = window.setTimeout(() => {
+      setInstantHideDisplay(false)
+      setShowDisplay(true)
+      closeTimerRef.current = null
+    }, GOAL_EDIT_EXIT_MS)
+  }, [clearCloseTimer])
+
+  useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
+
+  const displayHidden = !showDisplay
 
   const phaseClass = isGrowth
     ? 'goal-progress-bar--phase-growth'
     : 'goal-progress-bar--phase-income'
-
-  useEffect(() => {
-    if (editing) {
-      setRevealDisplay(false)
-      return
-    }
-    if (!isEmpty) {
-      setRevealDisplay(true)
-      return
-    }
-    const timer = window.setTimeout(() => setRevealDisplay(true), GOAL_EDIT_EXIT_MS)
-    return () => window.clearTimeout(timer)
-  }, [editing, isEmpty])
 
   useClickOutside(zoneRef, () => {
     if (!editing) return
@@ -221,7 +240,8 @@ export function GoalProgressBar({
           <div
             className={[
               'goal-progress-bar__display',
-              displayHidden && 'goal-progress-bar__display--hidden',
+              displayHidden && instantHideDisplay && 'goal-progress-bar__display--hidden-instant',
+              displayHidden && !instantHideDisplay && 'goal-progress-bar__display--hidden',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -231,7 +251,7 @@ export function GoalProgressBar({
               <button
                 type="button"
                 className="goal-progress-bar__add"
-                onClick={() => setEditing(true)}
+                onClick={openEdit}
               >
                 Add
               </button>
@@ -258,7 +278,7 @@ export function GoalProgressBar({
                       <button
                         type="button"
                         className="goal-progress-bar__amount-link"
-                        onClick={() => setEditing(true)}
+                        onClick={openEdit}
                       >
                         {amountLabel}
                       </button>

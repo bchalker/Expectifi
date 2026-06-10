@@ -82,7 +82,7 @@ export function AccountIncomeStrategyCards({
         <div className="income-strategy-strip__withdraw-stack">
           <span className="income-strategy-strip__rate-label">Medical draw</span>
           <span className="income-strategy-strip__rate-value tabular-nums">
-            {fmtMon(breakdown.monthlyWithdraw)}/mo
+            {fmtMon(breakdown.monthlyWithdraw)}
           </span>
           {breakdown.preservedBalance != null ? (
             <span className="income-strategy-strip__rate-hint">

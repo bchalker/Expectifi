@@ -59,8 +59,8 @@
   opacity: 0.95;
 }
 
-.leaflet-tooltip.wtr-pin-tooltip-host {
-  padding: var(--space-2) var(--space-2) /* review: was 0.6rem */;
+.maplibregl-popup.wtr-pin-tooltip-host .maplibregl-popup-content {
+  padding: var(--space-2);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
@@ -68,6 +68,6 @@
   color: var(--text);
 }
 
-.leaflet-tooltip.wtr-pin-tooltip-host::before {
+.maplibregl-popup.wtr-pin-tooltip-host .maplibregl-popup-tip {
   border-top-color: var(--surface);
 }

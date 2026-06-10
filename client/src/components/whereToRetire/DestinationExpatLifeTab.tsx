@@ -81,7 +81,7 @@ export function DestinationExpatLifeTab({
           staggerStyle,
         )}
       >
-        <h3 className="wtr-expat-life__section-title">Community</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Community</h3>
         <div className="wtr-expat-life__community-row">
           <span className={`wtr-expat-life__size-badge wtr-expat-life__size-badge--${tone}`}>
             {data.community_size}
@@ -102,7 +102,7 @@ export function DestinationExpatLifeTab({
             staggerStyle,
           )}
         >
-          <h3 className="wtr-expat-life__section-title">Popular expat areas</h3>
+          <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Popular expat areas</h3>
           <div className="wtr-expat-life__area-pills">
             {visibleAreas.map((area) => (
               <span key={area} className="wtr-expat-life__area-pill">
@@ -127,7 +127,7 @@ export function DestinationExpatLifeTab({
           staggerStyle,
         )}
       >
-        <h3 className="wtr-expat-life__section-title">What expats say</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">What expats say</h3>
         <blockquote className="wtr-expat-life__vibe">{data.expat_vibe}</blockquote>
       </section>
 
@@ -151,7 +151,7 @@ export function DestinationExpatLifeTab({
           staggerStyle,
         )}
       >
-        <h3 className="wtr-expat-life__section-title">Cost reality check</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Cost reality check</h3>
         <div className="wtr-expat-life__cost-callout" role="note">
           <IconAlertCircle size={18} stroke={1.5} className="wtr-expat-life__cost-icon" aria-hidden />
           <p>{data.cost_note}</p>
@@ -167,7 +167,7 @@ export function DestinationExpatLifeTab({
           staggerStyle,
         )}
       >
-        <h3 className="wtr-expat-life__section-title">Connect with the community</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Connect with the community</h3>
         <ul className="wtr-expat-life__fb-list">
           {data.facebook_groups.map((group) => (
             <li key={group}>

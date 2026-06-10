@@ -10,10 +10,7 @@
 }
 
 .wtr-expat-life__section-title {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text);
+  margin-bottom: var(--space-2);
 }
 
 .wtr-expat-life__community-row {
@@ -85,9 +82,9 @@
 
 .wtr-expat-life__vibe {
   margin: 0;
-  padding: var(--space-3) /* review: was 0.65rem */ 0 var(--space-3) /* review: was 0.65rem */ var(--space-3);
+  padding-left: var(--space-3);
   border-left: 3px solid var(--accent);
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
   line-height: 1.55;
   color: var(--text);
 }
@@ -104,9 +101,9 @@
 }
 
 .wtr-expat-life__row dt {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+
 }
 
 .wtr-expat-life__row dd {
@@ -121,9 +118,10 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3) /* review: was 0.65rem */ var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--color-amber-dark) 35%, var(--border));
+
   border-radius: 10px;
   background: var(--color-amber-bg);
+  background: #f9f9f9;
   box-sizing: border-box;
 }
 
