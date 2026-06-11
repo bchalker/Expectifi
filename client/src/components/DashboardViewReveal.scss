@@ -12,6 +12,19 @@
   }
 }
 
+/* Subheader content drops in from above while sections rise below. */
+@keyframes dashboard-view-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Side panel: opacity only — translateY trips overflow scrollbars on stretch columns. */
 @keyframes dashboard-view-fade-in {
   from {
@@ -26,25 +39,23 @@
 @keyframes dashboard-view-wave-in {
   from {
     transform: scaleY(0);
+    transform-origin: top center;
   }
 
   to {
     transform: scaleY(1);
-  }
-}
-
-@keyframes dashboard-view-fill-in {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: scaleX(1);
+    transform-origin: top center;
   }
 }
 
 @mixin dashboard-view-rise($step) {
   animation: dashboard-view-rise-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--dashboard-stagger-step) * #{$step});
+}
+
+@mixin dashboard-view-drop($step) {
+  animation: dashboard-view-drop-in var(--dashboard-reveal-duration)
     cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--dashboard-stagger-step) * #{$step});
 }
@@ -56,12 +67,27 @@
   transform-origin: top center;
 }
 
+@mixin dashboard-view-fade($step) {
+  animation: dashboard-view-fade-in var(--dashboard-reveal-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--dashboard-stagger-step) * #{$step});
+}
+
+/* translateY enter animations inside max-height sidebars trip overflow scrollbars. */
+@media (min-width: 768px) {
+  html[data-dashboard-view-enter] .section--tax-summary__sidebar,
+  html[data-dashboard-view-flush] .section--tax-summary__sidebar {
+    overflow-y: hidden;
+  }
+}
+
 /* Default visible — flush/enter animations override temporarily. */
 .main .results-strip,
 .growth-assumptions-panel__slider,
 .growth-assumptions-panel__scenario,
 .account-balances-header-row,
 .where-to-retire-preview-panel,
+.wtr-panel-entry,
 .account-balances-stack,
 .main > .section--life-events,
 .where-to-retire__main-panel-back,
@@ -75,17 +101,9 @@
 /* Pre-reveal: hide targets while import modal fades or tab switch resets. */
 html[data-portfolio-import-flush],
 html[data-dashboard-view-flush] {
-  .goal-progress-bar--in-main {
-    opacity: 0;
-  }
-
-  .goal-progress-bar--in-main .goal-progress-bar__fill {
-    transform: scaleX(0);
-    transition: none;
-  }
-
   .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
     transform: scaleY(0);
+    transform-origin: top center;
     transition: none;
   }
 
@@ -98,6 +116,7 @@ html[data-dashboard-view-flush] {
   .growth-assumptions-panel__scenario,
   .account-balances-header-row,
   .where-to-retire-preview-panel,
+  .wtr-panel-entry,
   .account-balances-stack,
   .main > .section--life-events,
   .where-to-retire__main-panel-back,
@@ -112,22 +131,12 @@ html[data-dashboard-view-flush] {
 /* Shared hero stack (growth + income dashboard). */
 html[data-dashboard-view-enter='growth'],
 html[data-dashboard-view-enter='income'] {
-  .goal-progress-bar--in-main {
-    @include dashboard-view-rise(0);
-  }
-
-  .goal-progress-bar--in-main .goal-progress-bar__fill {
-    animation: dashboard-view-fill-in var(--dashboard-reveal-duration)
-      cubic-bezier(0.16, 1, 0.3, 1)
-      calc(var(--dashboard-stagger-step) * 0 + 0.08s) both;
-  }
-
   .subheader:not(.subheader--no-balances) .subheader-waves__front-scale {
-    @include dashboard-view-wave(1);
+    @include dashboard-view-wave(0);
   }
 
   .subheader:not(.subheader--no-balances) .subheader-content {
-    @include dashboard-view-rise(2);
+    @include dashboard-view-drop(1);
   }
 }
 
@@ -138,15 +147,11 @@ html[data-dashboard-view-enter='growth'] {
   }
 
   .growth-assumptions-panel__slider {
-    animation: dashboard-view-fade-in var(--dashboard-reveal-duration)
-      cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(var(--dashboard-stagger-step) * 3);
+    @include dashboard-view-fade(3);
   }
 
   .growth-assumptions-panel__scenario {
-    animation: dashboard-view-fade-in var(--dashboard-reveal-duration)
-      cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(var(--dashboard-stagger-step) * 4);
+    @include dashboard-view-fade(4);
   }
 
   .account-balances-stack {
@@ -155,6 +160,10 @@ html[data-dashboard-view-enter='growth'] {
 
   .main > .section--life-events {
     @include dashboard-view-rise(6);
+  }
+
+  .wtr-panel-entry {
+    @include dashboard-view-fade(4);
   }
 }
 
@@ -165,7 +174,7 @@ html[data-dashboard-view-enter='income'] {
   }
 
   .where-to-retire-preview-panel {
-    @include dashboard-view-rise(4);
+    @include dashboard-view-fade(4);
   }
 
   .account-balances-stack {
@@ -251,8 +260,6 @@ html[data-dashboard-view-enter='income']
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-dashboard-view-enter] .goal-progress-bar--in-main,
-  html[data-dashboard-view-enter] .goal-progress-bar--in-main .goal-progress-bar__fill,
   html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-waves__front-scale,
   html[data-dashboard-view-enter] .subheader:not(.subheader--no-balances) .subheader-content,
   html[data-dashboard-view-enter='growth'] .main .results-strip,
@@ -260,6 +267,7 @@ html[data-dashboard-view-enter='income']
   html[data-dashboard-view-enter='growth'] .growth-assumptions-panel__scenario,
   html[data-dashboard-view-enter='growth'] .account-balances-stack,
   html[data-dashboard-view-enter='growth'] .main > .section--life-events,
+  html[data-dashboard-view-enter='growth'] .wtr-panel-entry,
   html[data-dashboard-view-enter='income'] .account-balances-header-row,
   html[data-dashboard-view-enter='income'] .where-to-retire-preview-panel,
   html[data-dashboard-view-enter='income'] .account-balances-stack,

@@ -5,6 +5,7 @@ import { savePlanAccounts } from './accounts'
 import { savePlanProfile } from './profile'
 import { savePlanSession } from './session'
 import { hasSavePlanBeenAccepted } from './meta'
+import { touchLocalPlanStateSavedAt } from './localSavedAt'
 import { canPersistPlanToLocalStorage } from './resolveTier'
 import type { UserTier } from './types'
 
@@ -30,4 +31,5 @@ export function persistPlanState(tier: UserTier, snapshot: PlanPersistSnapshot):
       snapshot.activePreset,
     ),
   )
+  touchLocalPlanStateSavedAt()
 }

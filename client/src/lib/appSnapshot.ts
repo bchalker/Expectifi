@@ -5,6 +5,7 @@ import type { AccountIncomeStrategy } from './accountIncomeStrategy'
 import { normalizeRetireRegions } from './calc/retireRegions'
 import { findIncomeSecurity } from './incomeSecurities'
 import { normalizeSocialSecurityFields } from './socialSecurity'
+import { migrateIncomeUiFields } from './accountIncomeStorage'
 import { normalizeGuaranteedIncomeEntries } from './guaranteedIncome'
 
 export type AppSnapshotV1 = {
@@ -108,38 +109,40 @@ export function hydrateAppSnapshot(raw: unknown, defaultInputs: CalculatorInputs
         if (!raw) return null
         return findIncomeSecurity(raw) ? raw : null
       })(),
-      accountIncomeFunds: (() => {
-        const raw = uiRest.accountIncomeFunds
-        if (!raw || typeof raw !== 'object') return {}
-        const out: Record<string, string> = {}
-        for (const [key, val] of Object.entries(raw)) {
-          if (typeof key !== 'string' || typeof val !== 'string') continue
-          const ticker = val.trim()
-          if (!ticker || !findIncomeSecurity(ticker)) continue
-          out[key] = ticker
-        }
-        return out
-      })(),
-      accountIncomeStrategies: (() => {
-        const raw = uiRest.accountIncomeStrategies
-        if (!raw || typeof raw !== 'object') return {}
-        const out: Record<string, AccountIncomeStrategy> = {}
-        for (const [key, val] of Object.entries(raw)) {
-          if (typeof key !== 'string') continue
-          if (val === 'none' || val === 'dividend' || val === 'withdraw' || val === 'both') out[key] = val
-        }
-        return out
-      })(),
-      accountWithdrawRates: (() => {
-        const raw = uiRest.accountWithdrawRates
-        if (!raw || typeof raw !== 'object') return {}
-        const out: Record<string, number> = {}
-        for (const [key, val] of Object.entries(raw)) {
-          if (typeof key !== 'string' || typeof val !== 'number' || !Number.isFinite(val)) continue
-          out[key] = val
-        }
-        return out
-      })(),
+      ...migrateIncomeUiFields({
+        accountIncomeFunds: (() => {
+          const raw = uiRest.accountIncomeFunds
+          if (!raw || typeof raw !== 'object') return {}
+          const out: Record<string, string> = {}
+          for (const [key, val] of Object.entries(raw)) {
+            if (typeof key !== 'string' || typeof val !== 'string') continue
+            const ticker = val.trim()
+            if (!ticker || !findIncomeSecurity(ticker)) continue
+            out[key] = ticker
+          }
+          return out
+        })(),
+        accountIncomeStrategies: (() => {
+          const raw = uiRest.accountIncomeStrategies
+          if (!raw || typeof raw !== 'object') return {}
+          const out: Record<string, AccountIncomeStrategy> = {}
+          for (const [key, val] of Object.entries(raw)) {
+            if (typeof key !== 'string') continue
+            if (val === 'none' || val === 'dividend' || val === 'withdraw' || val === 'both') out[key] = val
+          }
+          return out
+        })(),
+        accountWithdrawRates: (() => {
+          const raw = uiRest.accountWithdrawRates
+          if (!raw || typeof raw !== 'object') return {}
+          const out: Record<string, number> = {}
+          for (const [key, val] of Object.entries(raw)) {
+            if (typeof key !== 'string' || typeof val !== 'number' || !Number.isFinite(val)) continue
+            out[key] = val
+          }
+          return out
+        })(),
+      }),
     },
     phase,
     activePreset,

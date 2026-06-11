@@ -1,18 +1,18 @@
-import { useCallback, useMemo } from 'react'
-import { IconArrowRight, IconChevronLeft } from '@tabler/icons-react'
+import { useMemo, useState } from 'react'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { useRetirementPreferences } from '../hooks/useRetirementPreferences'
 import { useUserLocale } from '../context/UserLocaleContext'
-import { APP_PATHS, navigateApp } from '../lib/appPaths'
 import {
   computeIncomeHarvestPreview,
   homeCountrySectionTitle,
+  previewMapDestinationsForIncome,
   type IncomeHarvestCityRow,
   type IncomeHarvestContextParagraph,
 } from '../lib/whereToRetire/incomeHarvestPreview'
-import { stashWtrExplorationIncome } from '../lib/whereToRetire/wtrPreviewIncome'
 import { fmtMon } from '../utils/format'
-import { AppButton } from './ui/AppButton'
 import { IncomeHarvestPreviewMap } from './IncomeHarvestPreviewMap'
+import { IncomeHarvestPreferencesEntry } from './IncomeHarvestPreferencesEntry'
+import { WhereToRetirePanelEntry } from './WhereToRetirePanelEntry'
 import './IncomeHarvestPreviewPanel.scss'
 
 const WTR_SCORE_FACTORS =
@@ -20,7 +20,6 @@ const WTR_SCORE_FACTORS =
 
 type Props = {
   monthlyIncome: number
-  hasStrategiesSelected: boolean
 }
 
 function ContextParagraph({ paragraph }: { paragraph: IncomeHarvestContextParagraph }) {
@@ -103,47 +102,33 @@ function CityRows({ rows, mobileMax }: { rows: IncomeHarvestCityRow[]; mobileMax
   )
 }
 
-export function IncomeHarvestPreviewPanel({
-  monthlyIncome,
-  hasStrategiesSelected,
-}: Props) {
+export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
   const { locale } = useUserLocale()
+  const { prefs, hasSavedPrefs } = useRetirementPreferences()
+  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false)
   const debouncedIncome = useDebouncedValue(monthlyIncome, 300)
+  const hasIncome = debouncedIncome > 0
 
   const preview = useMemo(
-    () => computeIncomeHarvestPreview(debouncedIncome, locale),
-    [debouncedIncome, locale],
+    () =>
+      hasIncome
+        ? computeIncomeHarvestPreview(debouncedIncome, locale, prefs)
+        : computeIncomeHarvestPreview(0, locale, prefs),
+    [debouncedIncome, hasIncome, locale, prefs],
   )
 
-  const handleExplore = () => {
-    stashWtrExplorationIncome(monthlyIncome)
-    navigateApp(APP_PATHS.whereToRetire)
-  }
+  const mapDestinations = useMemo(
+    () => previewMapDestinationsForIncome(debouncedIncome, prefs),
+    [debouncedIncome, prefs],
+  )
 
-  const handleChooseStrategies = useCallback(() => {
-    const list = document.querySelector('.portfolio-account-list--income')
-    const firstRow =
-      list?.querySelector<HTMLElement>('.income-account-row') ?? list
-    firstRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    const summary = firstRow?.querySelector<HTMLElement>('summary')
-    const details = summary?.closest('details')
-    if (details && !details.open) summary?.click()
-  }, [])
-
-  const showStrategyCta = !hasStrategiesSelected
-  const showSkeleton = !showStrategyCta && !preview.dataReady
-  const showLowIncomeHint =
-    !showStrategyCta && preview.dataReady && debouncedIncome <= 0
-  const showHomeSection =
-    !showSkeleton && !showLowIncomeHint && !preview.homeSectionHidden
+  const showHomeSection = hasIncome && preview.dataReady && !preview.homeSectionHidden
 
   return (
     <aside className="where-to-retire-preview-panel" aria-label="Where to Retire preview">
       <header className="where-to-retire-preview-panel__header">
         <h3 className="where-to-retire-preview-panel__title">
-          {showStrategyCta ? (
-            <>See where your income takes you</>
-          ) : (
+          {hasIncome ? (
             <>
               See where{' '}
               <span className="where-to-retire-preview-panel__title-income tabular-nums">
@@ -151,103 +136,61 @@ export function IncomeHarvestPreviewPanel({
               </span>{' '}
               takes you
             </>
+          ) : (
+            <>See where your income takes you</>
           )}
         </h3>
       </header>
 
       <div className="where-to-retire-preview-panel__main">
         <IncomeHarvestPreviewMap
-          destinations={showStrategyCta ? [] : preview.mapDestinations}
-          loading={showSkeleton}
+          destinations={mapDestinations}
+          dimmed={!hasIncome}
+          loading={mapDestinations.length === 0}
         />
 
-        {showStrategyCta ? (
-          <div
-            className="where-to-retire-preview-panel__strategy-cta"
-            role="region"
-            aria-labelledby="where-to-retire-preview-strategy-cta-title"
-          >
-            <h4
-              id="where-to-retire-preview-strategy-cta-title"
-              className="where-to-retire-preview-panel__strategy-cta-title"
-            >
-              Set up your account strategies first
-            </h4>
-            <p className="where-to-retire-preview-panel__strategy-cta-lead">
-              Choose dividend, withdraw, or both for each account on the left. We
-              will rank destinations that fit your projected monthly income.
+        <section className="where-to-retire-preview-panel__section">
+          <h4 className="where-to-retire-preview-panel__section-label">Worldwide</h4>
+          {hasIncome && preview.dataReady ? (
+            <CityRows rows={preview.worldwideTop} mobileMax={2} />
+          ) : (
+            <p className="where-to-retire-preview-panel__income-placeholder">
+              Add your retirement income in My Plans to see your matches
             </p>
-            <AppButton
-              type="button"
-              variant="primary"
-              size="sm"
-              className="where-to-retire-preview-panel__strategy-cta-btn"
-              onPress={handleChooseStrategies}
-            >
-              <IconChevronLeft size={16} stroke={1.5} aria-hidden />
-              Choose account strategies
-            </AppButton>
-          </div>
-        ) : showLowIncomeHint ? (
-          <p className="where-to-retire-preview-panel__strategy-cta-lead">
-            Your strategies are set, but projected monthly income is still zero.
-            Check withdrawal rates and fund picks on each account, or add dividend
-            or withdraw strategies where needed.
-          </p>
-        ) : showSkeleton ? (
-          <div className="where-to-retire-preview-panel__sections-skeleton" aria-hidden>
-            <div className="where-to-retire-preview-panel__skeleton-line" />
-            <div className="where-to-retire-preview-panel__skeleton-line where-to-retire-preview-panel__skeleton-line--short" />
-            <div className="where-to-retire-preview-panel__skeleton-line" />
-            <div className="where-to-retire-preview-panel__skeleton-line where-to-retire-preview-panel__skeleton-line--short" />
-          </div>
-        ) : (
+          )}
+        </section>
+
+        {showHomeSection ? (
           <>
+            <div className="where-to-retire-preview-panel__divider" aria-hidden />
             <section className="where-to-retire-preview-panel__section">
-              <h4 className="where-to-retire-preview-panel__section-label">Worldwide</h4>
-              <CityRows rows={preview.worldwideTop} mobileMax={2} />
+              <h4 className="where-to-retire-preview-panel__section-label">
+                {homeCountrySectionTitle(preview.homeCountryLabel)}
+              </h4>
+              <CityRows rows={preview.homeTop} mobileMax={2} />
             </section>
-
-            {showHomeSection ? (
-              <>
-                <div className="where-to-retire-preview-panel__divider" aria-hidden />
-                <section className="where-to-retire-preview-panel__section">
-                  <h4 className="where-to-retire-preview-panel__section-label">
-                    {homeCountrySectionTitle(preview.homeCountryLabel)}
-                  </h4>
-                  <CityRows rows={preview.homeTop} mobileMax={2} />
-                </section>
-              </>
-            ) : null}
-
-            {preview.contextParagraph ? (
-              <>
-                <div className="where-to-retire-preview-panel__divider" aria-hidden />
-                <ContextParagraph paragraph={preview.contextParagraph} />
-                <div className="where-to-retire-preview-panel__travel-mark" aria-hidden>
-                  <span className="where-to-retire-preview-panel__travel-icon" />
-                </div>
-              </>
-            ) : null}
           </>
-        )}
+        ) : null}
+
+        {hasIncome && preview.contextParagraph ? (
+          <>
+            <div className="where-to-retire-preview-panel__divider" aria-hidden />
+            <ContextParagraph paragraph={preview.contextParagraph} />
+            <IncomeHarvestPreferencesEntry
+              hasSavedPrefs={hasSavedPrefs}
+              onOpenWizard={() => setPreferencesWizardOpen(true)}
+            />
+          </>
+        ) : null}
       </div>
 
-      {!showStrategyCta &&
-      !showSkeleton &&
-      !showLowIncomeHint &&
-      preview.qualifyingCount > 0 ? (
-        <footer className="where-to-retire-preview-panel__footer">
-          <button
-            type="button"
-            className="where-to-retire-preview-panel__explore"
-            onClick={handleExplore}
-          >
-            Explore your options
-            <IconArrowRight size={13} strokeWidth={1.5} aria-hidden />
-          </button>
-        </footer>
-      ) : null}
+      <footer className="where-to-retire-preview-panel__footer">
+        <WhereToRetirePanelEntry
+          monthlyIncome={monthlyIncome}
+          preferencesWizardOpen={preferencesWizardOpen}
+          onPreferencesWizardOpenChange={setPreferencesWizardOpen}
+        />
+      </footer>
     </aside>
   )
 }

@@ -13,6 +13,7 @@ import {
   type MapFilters,
   type ScoredMapCity,
 } from "../../lib/whereToRetire/cityMapScoring";
+import type { RetirementPreferences } from "../../types/preferences";
 import { lookupRetirementCity } from "../../lib/whereToRetire/retirementCityLookup";
 import { countryToIsoCode } from "../../utils/costOfLiving";
 import { expatCommunitySortRank } from "../../utils/expatInfo";
@@ -35,6 +36,7 @@ type Props = {
   /** Resolved income for map pins, scores, and list (slider value). */
   explorationIncome: number;
   filters: MapFilters;
+  preferences: RetirementPreferences;
   onFiltersChange: (
     next: MapFilters | ((prev: MapFilters) => MapFilters),
   ) => void;
@@ -137,6 +139,7 @@ function sortCitiesForPinView(
 export function RetirementMapExplorer({
   explorationIncome,
   filters,
+  preferences,
   onFiltersChange,
   pinColorView,
   headerSlot,
@@ -178,8 +181,9 @@ export function RetirementMapExplorer({
         filters,
         undefined,
         excludedCountries,
+        preferences,
       ),
-    [explorationIncome, filters, excludedCountries],
+    [explorationIncome, filters, excludedCountries, preferences],
   );
 
   const filteredCities = useMemo(
@@ -689,6 +693,7 @@ export function RetirementMapExplorer({
         scored={selectedScored}
         monthlyIncome={explorationIncome}
         mapFilters={filters}
+        preferences={preferences}
         open={panelOpen && selectedScored != null}
         onClose={closePanel}
         listNav={destinationListNav}

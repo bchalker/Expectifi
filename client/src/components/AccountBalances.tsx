@@ -139,10 +139,12 @@ import {
   buildIncomeAccountAccordionContent,
   buildIncomeAccountAccordionParams,
 } from "../lib/incomeAccountAccordionContent";
+import { resolveAccountIncomeFundTicker } from "../lib/accountIncomeFund";
 import {
-  accountIncomeFundStorageKey,
-  resolveAccountIncomeFundTicker,
-} from "../lib/accountIncomeFund";
+  canonicalIncomeStorageKeyForBucket,
+  canonicalIncomeStorageKeyForEntry,
+  canonicalIncomeStorageKeyForManualId,
+} from "../lib/accountIncomeStorage";
 import {
   computeAccountIncomeBreakdown,
   defaultWithdrawRateForStrategy,
@@ -2934,7 +2936,7 @@ export function AccountBalances({
         );
         for (const entry of entriesForStep) {
           const meta = getAccountTypeMeta(entry.type!, locale);
-          const storageKey = accountIncomeFundStorageKey("manual", entry.id);
+          const storageKey = canonicalIncomeStorageKeyForEntry(entry);
           const { order } = withdrawalUi
             ? metaFor(meta.withdrawalBucket)
             : { order: null };
@@ -2966,7 +2968,7 @@ export function AccountBalances({
           : { order: null };
         nodes.push(
           renderIncomeAccountRow(
-            accountIncomeFundStorageKey("bucket", "brokerage"),
+            canonicalIncomeStorageKeyForBucket("brokerage"),
             importedBucketLabel("brokerage", "Brokerage"),
             "brokerage",
             brkBal,
@@ -2992,7 +2994,7 @@ export function AccountBalances({
           )) {
             nodes.push(
               renderIncomeAccountRow(
-                accountIncomeFundStorageKey("manual", row.key),
+                canonicalIncomeStorageKeyForManualId(row.key),
                 row.label,
                 "pretax",
                 display(row.key),
@@ -3004,7 +3006,7 @@ export function AccountBalances({
         } else {
           nodes.push(
             renderIncomeAccountRow(
-              accountIncomeFundStorageKey("bucket", "pretax"),
+              canonicalIncomeStorageKeyForBucket("pretax"),
               importedBucketLabel("pretax", "Pre-tax"),
               "pretax",
               pretaxTotal,
@@ -3030,7 +3032,7 @@ export function AccountBalances({
           if (rothRow) {
             nodes.push(
               renderIncomeAccountRow(
-                accountIncomeFundStorageKey("manual", rothRow.key),
+                canonicalIncomeStorageKeyForManualId(rothRow.key),
                 rothRow.label,
                 "roth",
                 display(rothRow.key),
@@ -3042,7 +3044,7 @@ export function AccountBalances({
         } else {
           nodes.push(
             renderIncomeAccountRow(
-              accountIncomeFundStorageKey("bucket", "roth"),
+              canonicalIncomeStorageKeyForBucket("roth"),
               importedBucketLabel("roth", "Tax-advantaged"),
               "roth",
               c.bal.balRoth,
@@ -3068,7 +3070,7 @@ export function AccountBalances({
           if (hsaRow) {
             nodes.push(
               renderIncomeAccountRow(
-                accountIncomeFundStorageKey("manual", hsaRow.key),
+                canonicalIncomeStorageKeyForManualId(hsaRow.key),
                 hsaRow.label,
                 "hsa",
                 display(hsaRow.key),
@@ -3080,7 +3082,7 @@ export function AccountBalances({
         } else {
           nodes.push(
             renderIncomeAccountRow(
-              accountIncomeFundStorageKey("bucket", "hsa"),
+              canonicalIncomeStorageKeyForBucket("hsa"),
               importedBucketLabel("hsa", "HSA"),
               "hsa",
               c.bal.balHsa,

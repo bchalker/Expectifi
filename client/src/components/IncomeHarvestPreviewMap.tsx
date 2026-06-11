@@ -28,7 +28,7 @@ let cachedWorldMap: WorldMapAssets | null = null
 let worldMapPromise: Promise<WorldMapAssets> | null = null
 
 function previewPinColor(band: RetirementScoreBand): string {
-  if (band === 'excellent' || band === 'strong') return PREVIEW_PIN_GREEN
+  if (band === 'excellent' || band === 'good') return PREVIEW_PIN_GREEN
   if (band === 'moderate') return PREVIEW_PIN_AMBER
   return PREVIEW_PIN_GREEN
 }
@@ -59,9 +59,10 @@ function projectCity(projection: GeoProjection, lat: number, lng: number): [numb
 type Props = {
   destinations: ScoredMapCity[]
   loading?: boolean
+  dimmed?: boolean
 }
 
-export function IncomeHarvestPreviewMap({ destinations, loading }: Props) {
+export function IncomeHarvestPreviewMap({ destinations, loading, dimmed = false }: Props) {
   const [worldMap, setWorldMap] = useState<WorldMapAssets | null>(cachedWorldMap)
 
   useEffect(() => {
@@ -100,7 +101,15 @@ export function IncomeHarvestPreviewMap({ destinations, loading }: Props) {
   }
 
   return (
-    <div className="income-harvest-preview-map" aria-hidden>
+    <div
+      className={[
+        'income-harvest-preview-map',
+        dimmed ? 'income-harvest-preview-map--dimmed' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-hidden
+    >
       <div className="income-harvest-preview-map__viewport">
         <div className="income-harvest-preview-map__drift">
           <svg
@@ -129,7 +138,7 @@ export function IncomeHarvestPreviewMap({ destinations, loading }: Props) {
                 cx={pin.x}
                 cy={pin.y}
                 r={2.5}
-                fill={pin.color}
+                fill={dimmed ? '#9ca3af' : pin.color}
               />
             ))}
           </svg>

@@ -1,0 +1,71 @@
+// Badge / pill colors by preference step (WCAG-friendly pairs).
+
+@mixin pref-badge-step-0 {
+  background: var(--color-background-secondary, #f3f4f6);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+@mixin pref-badge-step-1 {
+  background: var(--color-background-secondary, #f3f4f6);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+@mixin pref-badge-step-2 {
+  background: var(--color-background-secondary, #f3f4f6);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+@mixin pref-badge-step-3 {
+  background: var(--color-background-warning, #fef3c7);
+  color: var(--color-text-warning, #b45309);
+}
+
+@mixin pref-badge-step-4 {
+  background: var(--color-background-success, #dcfce7);
+  color: var(--color-text-success, #15803d);
+}
+
+@mixin pref-badge-step-5 {
+  background: #166534;
+  color: #f0fdf4;
+}
+
+@mixin pref-option-step-0 {
+  border-color: var(--color-border-secondary, #d1d5db);
+  background: var(--color-background-secondary, #f3f4f6);
+}
+
+@mixin pref-option-step-1 {
+  @include pref-option-step-0;
+}
+
+@mixin pref-option-step-2 {
+  @include pref-option-step-0;
+}
+
+@mixin pref-option-step-3 {
+  border-color: var(--color-border-warning, #f59e0b);
+  background: var(--color-background-warning, #fef3c7);
+
+  .pref-factor-row__opt-label {
+    color: var(--color-text-warning, #b45309);
+  }
+}
+
+@mixin pref-option-step-4 {
+  border-color: var(--color-border-success, #22c55e);
+  background: var(--color-background-success, #dcfce7);
+
+  .pref-factor-row__opt-label {
+    color: var(--color-text-success, #15803d);
+  }
+}
+
+@mixin pref-option-step-5 {
+  border-color: #166534;
+  background: #f0fdf4;
+
+  .pref-factor-row__opt-label {
+    color: #166534;
+  }
+}

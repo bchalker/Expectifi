@@ -26,7 +26,7 @@ import { DrawerPanel } from "./components/DrawerPanel";
 import { TaxSummaryCard } from "./components/TaxSummaryCard";
 import { IncomeHarvestPreviewPanel } from "./components/IncomeHarvestPreviewPanel";
 import { GrowthAssumptionsPanel } from "./components/GrowthAssumptionsPanel";
-import { useIncomeHarvestMonthlyTotal } from "./hooks/useIncomeHarvestMonthlyTotal";
+import { WhereToRetirePanelEntry } from "./components/WhereToRetirePanelEntry";
 import type { AccountIncomeMonthlyContext } from "./lib/accountIncomeMonthly";
 import { Header } from "./components/Header";
 import { AppLeftNav } from "./components/AppLeftNav";
@@ -64,8 +64,21 @@ import {
 import { loadLifePlans, type LifePlans } from "./lib/planStorage/life";
 import {
   PLAN_STATE_SERVER_HYDRATED_EVENT,
+  flushPlanStateServerSync,
   queuePlanStateServerSync,
 } from "./lib/planStateServerSync";
+import { hydrateAppSnapshot } from "./lib/appSnapshot";
+import {
+  clearIncomeUiSnap,
+  mergeHydratedCalculatorUi,
+  saveIncomeUiSnap,
+} from "./lib/accountIncomeStorage";
+import {
+  clearCalculatorPhaseSnap,
+  resolveCalculatorPhase,
+  saveCalculatorPhaseSnap,
+} from "./lib/calculatorPhaseSnap";
+import { loadPlanSession } from "./lib/planStorage";
 import { clearStoredManualAccounts } from "./lib/manualAccountEntries";
 import {
   inputsForPersistedCalculatorSession,
@@ -195,9 +208,11 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const [inputs, setInputsState] = useState<CalculatorInputs>(
     () => hydration.inputs,
   );
-  const [ui, setUiState] = useState<CalculatorUi>(() => hydration.ui);
-  const [phase, setPhase] = useState<"growth" | "income">(
-    () => hydration.phase,
+  const [ui, setUiState] = useState<CalculatorUi>(() =>
+    mergeHydratedCalculatorUi(hydration.ui),
+  );
+  const [phase, setPhase] = useState<"growth" | "income">(() =>
+    resolveCalculatorPhase(hydration.phase),
   );
   const [drawer, setDrawer] = useState<DrawerName | null>(null);
   const [configTab, setConfigTab] = useState<ConfigDrawerTab>("profile");
@@ -243,7 +258,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
         autoHide: "scroll",
       },
     },
-    defer: false,
+    defer: true,
   });
 
   useEffect(() => {
@@ -264,6 +279,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   );
   const welcomeBlockedRef = useRef(peekForceOnboardingSession());
   const syncedAuthUserIdRef = useRef<string | null>(null);
+  const hydrationBootSyncedRef = useRef(false);
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [onboardingMountKey, setOnboardingMountKey] = useState(0);
@@ -373,6 +389,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const onResetGuestProfile = useCallback(() => {
     clearGuestProfileAndSession();
     clearSessionOnboardingComplete();
+    clearCalculatorPhaseSnap();
+    clearIncomeUiSnap();
     welcomeBlockedRef.current = true;
     const fresh = freshAppState();
     setInputsState(fresh.inputs);
@@ -427,20 +445,36 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setUiState((s) => ({ ...s, ...p }));
   }, []);
 
-  /** After sign-in, re-apply tier hydration (profile, plan session, migrated CSV holdings). */
+  /** Apply boot hydration to React state (refresh + sign-in). Avoids persisting empty defaults over saved income UI. */
   useEffect(() => {
     if (!isHydrated || authLoading) return;
     const userId = user?.id ?? null;
+
+    const applyHydration = () => {
+      const resolvedPhase = resolveCalculatorPhase(hydration.phase);
+      const resolvedUi = mergeHydratedCalculatorUi(hydration.ui);
+      setInputsState(hydration.inputs);
+      setUiState(resolvedUi);
+      setPhase(resolvedPhase);
+      setActivePreset(hydration.activePreset);
+      saveCalculatorPhaseSnap(resolvedPhase);
+      saveIncomeUiSnap(resolvedUi);
+    };
+
     if (userId && syncedAuthUserIdRef.current !== userId) {
       syncedAuthUserIdRef.current = userId;
-      setInputsState(hydration.inputs);
-      setUiState(hydration.ui);
-      setPhase(hydration.phase);
-      setActivePreset(hydration.activePreset);
+      hydrationBootSyncedRef.current = true;
+      applyHydration();
       setPositionsImportRev((n) => n + 1);
+      return;
     }
     if (!userId) {
       syncedAuthUserIdRef.current = null;
+    }
+
+    if (!hydrationBootSyncedRef.current) {
+      hydrationBootSyncedRef.current = true;
+      applyHydration();
     }
   }, [
     isHydrated,
@@ -496,10 +530,29 @@ export default function App({ initialAuthModal = null }: AppProps) {
     };
   }, [isHydrated, authLoading, user, tier]);
 
+  const persistSessionNow = useCallback(
+    (snapshot: {
+      inputs: CalculatorInputs;
+      ui: CalculatorUi;
+      phase: "growth" | "income";
+      activePreset: string | null;
+    }) => {
+      saveCalculatorPhaseSnap(snapshot.phase);
+      saveIncomeUiSnap(snapshot.ui);
+      persistCalculatorSession(snapshot);
+      if (user) flushPlanStateServerSync();
+    },
+    [user],
+  );
+
   /** Persist calculator session when tier allows local plan writes. */
   useEffect(() => {
     if (!isHydrated || authLoading) return;
+    if (!hydrationBootSyncedRef.current) return;
+    if (user && syncedAuthUserIdRef.current !== user.id) return;
     const id = window.setTimeout(() => {
+      saveCalculatorPhaseSnap(phase);
+      saveIncomeUiSnap(ui);
       persistCalculatorSession({ inputs, ui, phase, activePreset });
       syncPlanningPrefsFromInputs(inputs);
       syncUserProfileFromCalculatorInputs(inputs, ui);
@@ -523,9 +576,43 @@ export default function App({ initialAuthModal = null }: AppProps) {
     saveUserPrefs,
   ]);
 
-  /** After server plan-state hydrate, refresh derived local-only UI state. */
+  /** Flush income strategy / session edits before the tab closes. */
+  useEffect(() => {
+    if (!user) return;
+    const onPageHide = () => {
+      saveCalculatorPhaseSnap(sessionRef.current.phase);
+      saveIncomeUiSnap(sessionRef.current.ui);
+      persistCalculatorSession({
+        inputs: sessionRef.current.inputs,
+        ui: sessionRef.current.ui,
+        phase: sessionRef.current.phase,
+        activePreset: sessionRef.current.activePreset,
+      });
+      flushPlanStateServerSync();
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, [user]);
+
+  /** After server plan-state hydrate, refresh session UI and derived local-only state. */
   useEffect(() => {
     const onServerHydrated = () => {
+      const session = loadPlanSession();
+      const hydrated = session
+        ? hydrateAppSnapshot(session, defaultCalculatorInputs)
+        : null;
+      if (hydrated) {
+        const resolvedUi = mergeHydratedCalculatorUi(hydrated.ui);
+        setUiState((s) => ({
+          ...s,
+          ...resolvedUi,
+        }));
+        saveIncomeUiSnap(resolvedUi);
+        const resolvedPhase = resolveCalculatorPhase(hydrated.phase);
+        setPhase(resolvedPhase);
+        saveCalculatorPhaseSnap(resolvedPhase);
+        setActivePreset(hydrated.activePreset);
+      }
       setLifePlans(loadLifePlans());
       setBalanceMode(loadBalanceInputMode());
       setBrokerageMode(loadBrokerageBalanceMode());
@@ -587,6 +674,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
       saveBrokerageBalanceMode("imported");
       setBalanceMode("imported");
       setBrokerageMode("imported");
+      saveCalculatorPhaseSnap("growth");
       setPhase("growth");
       setInputsState((prev) => {
         const next = {
@@ -805,18 +893,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
     welcomeDone;
   const useTaxSummarySplitLayout =
     showIncomeHarvestPreview || showGrowthAssumptionsPanel;
-
-  const incomeHarvestPreview = useIncomeHarvestMonthlyTotal({
-    enabled: showIncomeHarvestPreview,
-    c: cDisplay,
-    inputs,
-    accountIncomeFunds: ui.accountIncomeFunds,
-    accountIncomeStrategies: ui.accountIncomeStrategies,
-    accountWithdrawRates: ui.accountWithdrawRates,
-    balanceMode: displayBalanceMode,
-    manualAccountsRev,
-    brkBal: inputs.brkBal,
-  });
   const harvestAccountIncomeContext = useMemo((): AccountIncomeMonthlyContext | undefined => {
     if (!taxSummaryAvailable || phase !== "income") return undefined;
     return {
@@ -924,20 +1000,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
     if (!isWhereToRetire) return;
     setDrawer(null);
     setMobileNavOpen(false);
+    saveCalculatorPhaseSnap("income");
     setPhase("income");
   }, [isWhereToRetire]);
-
-  const hadPortfolioBalancesRef = useRef(c.hasPortfolioBalances);
-
-  /** First time balances appear (manual or import), default to Growth (portfolio at retirement). */
-  useEffect(() => {
-    if (!welcomeDone) return;
-    const had = hadPortfolioBalancesRef.current;
-    hadPortfolioBalancesRef.current = c.hasPortfolioBalances;
-    if (c.hasPortfolioBalances && !had) {
-      setPhase("growth");
-    }
-  }, [welcomeDone, c.hasPortfolioBalances]);
 
   /** Replay top-down stagger when switching growth / income / where to retire. */
   useEffect(() => {
@@ -1007,9 +1072,23 @@ export default function App({ initialAuthModal = null }: AppProps) {
     showDashboardSubHeader,
   ]);
 
+  const onPhaseChange = useCallback(
+    (next: "growth" | "income") => {
+      saveCalculatorPhaseSnap(next);
+      setPhase(next);
+      persistSessionNow({
+        inputs: sessionRef.current.inputs,
+        ui: sessionRef.current.ui,
+        phase: next,
+        activePreset: sessionRef.current.activePreset,
+      });
+    },
+    [persistSessionNow],
+  );
+
   const dashboardSubHeaderProps = {
     phase,
-    onPhase: setPhase,
+    onPhase: onPhaseChange,
     grossMon: cDisplay.grossMon,
     totalFV: cDisplay.totalFV,
     targetRetirementAge: inputs.targetRetirementAge,
@@ -1300,6 +1379,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             setInputs={setInputs}
                             onManualPortfolioPlanApplied={(plan) => {
                               setInputs(plan);
+                              saveCalculatorPhaseSnap("growth");
                               setPhase("growth");
                               const merged = {
                                 ...sessionRef.current.inputs,
@@ -1356,11 +1436,21 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             }
                             accountIncomeFunds={ui.accountIncomeFunds}
                             onAccountIncomeFundChange={(storageKey, ticker) =>
-                              setUi({
-                                accountIncomeFunds: {
-                                  ...ui.accountIncomeFunds,
-                                  [storageKey]: ticker,
-                                },
+                              setUiState((s) => {
+                                const nextUi = {
+                                  ...s,
+                                  accountIncomeFunds: {
+                                    ...s.accountIncomeFunds,
+                                    [storageKey]: ticker,
+                                  },
+                                };
+                                persistSessionNow({
+                                  inputs: sessionRef.current.inputs,
+                                  ui: nextUi,
+                                  phase: sessionRef.current.phase,
+                                  activePreset: sessionRef.current.activePreset,
+                                });
+                                return nextUi;
                               })
                             }
                             accountIncomeStrategies={ui.accountIncomeStrategies}
@@ -1368,45 +1458,58 @@ export default function App({ initialAuthModal = null }: AppProps) {
                               storageKey,
                               strategy,
                             ) => {
-                              const nextRates = { ...ui.accountWithdrawRates };
-                              if (
-                                (strategy === "withdraw" ||
-                                  strategy === "both") &&
-                                nextRates[storageKey] == null
-                              ) {
-                                nextRates[storageKey] =
-                                  defaultWithdrawRateForStrategy(strategy);
-                              }
-                              setUi({
-                                accountIncomeStrategies: {
-                                  ...ui.accountIncomeStrategies,
-                                  [storageKey]: strategy,
-                                },
-                                accountWithdrawRates: nextRates,
+                              setUiState((s) => {
+                                const nextRates = { ...s.accountWithdrawRates };
+                                if (
+                                  (strategy === "withdraw" ||
+                                    strategy === "both") &&
+                                  nextRates[storageKey] == null
+                                ) {
+                                  nextRates[storageKey] =
+                                    defaultWithdrawRateForStrategy(strategy);
+                                }
+                                const nextUi = {
+                                  ...s,
+                                  accountIncomeStrategies: {
+                                    ...s.accountIncomeStrategies,
+                                    [storageKey]: strategy,
+                                  },
+                                  accountWithdrawRates: nextRates,
+                                };
+                                persistSessionNow({
+                                  inputs: sessionRef.current.inputs,
+                                  ui: nextUi,
+                                  phase: sessionRef.current.phase,
+                                  activePreset: sessionRef.current.activePreset,
+                                });
+                                return nextUi;
                               });
                             }}
                             accountWithdrawRates={ui.accountWithdrawRates}
                             onAccountWithdrawRateChange={(storageKey, rate) =>
-                              setUi({
-                                accountWithdrawRates: {
-                                  ...ui.accountWithdrawRates,
-                                  [storageKey]: rate,
-                                },
+                              setUiState((s) => {
+                                const nextUi = {
+                                  ...s,
+                                  accountWithdrawRates: {
+                                    ...s.accountWithdrawRates,
+                                    [storageKey]: rate,
+                                  },
+                                };
+                                persistSessionNow({
+                                  inputs: sessionRef.current.inputs,
+                                  ui: nextUi,
+                                  phase: sessionRef.current.phase,
+                                  activePreset: sessionRef.current.activePreset,
+                                });
+                                return nextUi;
                               })
                             }
                           />
                         </TaxSummaryCard>
                       </div>
-                      {showIncomeHarvestPreview ? (
-                        <IncomeHarvestPreviewPanel
-                          monthlyIncome={cDisplay.grossMon}
-                          hasStrategiesSelected={
-                            incomeHarvestPreview.hasStrategiesSelected
-                          }
-                        />
-                      ) : null}
-                      {showGrowthAssumptionsPanel ? (
-                        <GrowthAssumptionsPanel
+                      <div className="section--tax-summary__sidebar">
+                        {showGrowthAssumptionsPanel ? (
+                          <GrowthAssumptionsPanel
                           c={cDisplay}
                           inputs={inputs}
                           ui={uiForCompute}
@@ -1441,8 +1544,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
                           onTargetRetirementAge={(targetRetirementAge) =>
                             setInputs({ targetRetirementAge })
                           }
-                        />
-                      ) : null}
+                          />
+                        ) : null}
+                        {showIncomeHarvestPreview ? (
+                          <IncomeHarvestPreviewPanel
+                            monthlyIncome={cDisplay.grossMon}
+                          />
+                        ) : null}
+                        {showGrowthAssumptionsPanel ? (
+                          <WhereToRetirePanelEntry
+                            monthlyIncome={cDisplay.grossMon}
+                          />
+                        ) : null}
+                      </div>
                     </div>
                   </div>
 

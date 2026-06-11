@@ -102,14 +102,12 @@ function HeaderAuthTail({
   onCreateAccount,
   drawer,
   onOpenConfig,
-  targetRetirementAge,
   welcomeDone = true,
   wrapInTail = true,
 }: HeaderAuthProps & {
   variant: HeaderProps['variant']
   drawer?: DrawerName | null
   onOpenConfig?: () => void
-  targetRetirementAge?: number
   welcomeDone?: boolean
   wrapInTail?: boolean
 }) {
@@ -120,7 +118,7 @@ function HeaderAuthTail({
     : googleCheckoutUi
       ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
       : ''
-  const showRetireByInProfile = Boolean(user?.onboardingDone)
+  const showViewMyPlansInProfile = Boolean(user?.onboardingDone)
   const isApp = variant === 'app'
 
   const wrap = (node: ReactNode) =>
@@ -137,38 +135,19 @@ function HeaderAuthTail({
           .filter(Boolean)
           .join(' ')}
       >
-        <button
-          type="button"
-          className={[
-            'header__settings',
-            'header__settings--signed-in',
-            drawer === 'config' ? 'header__settings--active' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          aria-label="My Plans: planning and Social Security"
-          aria-expanded={drawer === 'config'}
-          aria-controls="drawer"
-          onClick={onOpenConfig}
-        >
-          <span className="header__settings-label">My Plans</span>
-          <IconAdjustments size={18} stroke={1.65} aria-hidden />
-        </button>
         <div className="header__profile-menu">
           <button
             type="button"
             className="header__account-group__profile"
-            aria-label="My Plans: profile"
+            aria-label="View My Plans"
             aria-haspopup="menu"
             aria-expanded={drawer === 'config'}
             aria-controls="drawer"
             onClick={onOpenConfig}
           >
             {accountLabel ? <span className="header__profile-name">{accountLabel}</span> : null}
-            {showRetireByInProfile && targetRetirementAge != null ? (
-              <span className="header__profile-ages" aria-hidden>
-                Retire by {targetRetirementAge}
-              </span>
+            {showViewMyPlansInProfile ? (
+              <span className="header__profile-ages">View My Plans</span>
             ) : null}
           </button>
           <div className="header__profile-popout" role="menu" aria-label="Profile">
@@ -338,7 +317,7 @@ function HeaderAppRouteLinks({ navContext }: { navContext: NavPanelContext }) {
       <button
         key={id}
         type="button"
-        className={`header__link${isActive ? ' header__link--active' : ''}`}
+        className={`header__link header__link--utility${isActive ? ' header__link--active' : ''}`}
         aria-current={isActive ? 'page' : undefined}
         aria-disabled={!available}
         title={!available ? (unavailableReason ?? undefined) : undefined}
@@ -497,7 +476,6 @@ export function Header(props: HeaderProps) {
               onCreateAccount={onCreateAccount}
               drawer={variant === 'app' ? props.drawer : undefined}
               onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
-              targetRetirementAge={variant === 'app' ? props.targetRetirementAge : undefined}
               welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
               wrapInTail={false}
             />

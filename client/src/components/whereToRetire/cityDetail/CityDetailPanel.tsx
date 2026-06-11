@@ -12,7 +12,8 @@ import {
 } from '@tabler/icons-react'
 import { useCityClimate } from '../../../hooks/useCityClimate'
 import type { MapFilters, ScoredMapCity } from '../../../lib/whereToRetire/cityMapScoring'
-import { monthlyOutflowForMapCity } from '../../../lib/whereToRetire/mapIncomeFit'
+import { monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScoring'
+import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import type { BudgetBreakdownDisplay } from '../../../utils/costOfLiving'
 import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from '../../../utils/demographics'
 import { calculateRetirementScore } from '../../../utils/retirementScore'
@@ -61,7 +62,7 @@ const PANEL_TABS: {
   },
   {
     id: 'gettingThere',
-    label: 'Getting there',
+    label: 'Flights',
     tabId: 'wtr-dest-tab-getting-there',
     panelId: 'wtr-dest-tabpanel-getting-there',
     icon: <IconPlane size={16} stroke={1.5} />,
@@ -82,7 +83,7 @@ const PANEL_TABS: {
   },
   {
     id: 'peopleCulture',
-    label: 'People & culture',
+    label: 'Community',
     tabId: 'wtr-dest-tab-people-culture',
     panelId: 'wtr-dest-tabpanel-people-culture',
     icon: <IconUsers size={16} stroke={1.5} />,
@@ -161,6 +162,8 @@ type CityDetailPanelBodyProps = {
   listNav: DestinationListNav | null
   activeTab: CityDetailTab
   onActiveTabChange: (tab: CityDetailTab) => void
+  climatePreferenceStep: PreferenceStep
+  climatePreferenceDirection: RetirementPreferences['climatePreference']
 }
 
 function CityDetailPanelBody({
@@ -170,6 +173,8 @@ function CityDetailPanelBody({
   listNav,
   activeTab,
   onActiveTabChange,
+  climatePreferenceStep,
+  climatePreferenceDirection,
 }: CityDetailPanelBodyProps) {
   const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab)
   const {
@@ -198,6 +203,9 @@ function CityDetailPanelBody({
         return (
           <WeatherTab
             climate={climate}
+            climatePreferenceStep={climatePreferenceStep}
+            climatePreferenceDirection={climatePreferenceDirection}
+            lat={city.lat}
             loading={climateLoading}
             failed={climateFailed}
             staggerClassName={staggerClassName}
@@ -342,6 +350,7 @@ export type CityDetailPanelProps = {
   scored: ScoredMapCity
   monthlyIncome: number
   mapFilters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>
+  preferences: RetirementPreferences
   budgetBreakdown: BudgetBreakdownDisplay
   listNav: DestinationListNav | null
   mobileSheet: boolean
@@ -353,6 +362,7 @@ export function CityDetailPanel({
   scored,
   monthlyIncome,
   mapFilters,
+  preferences,
   budgetBreakdown,
   listNav,
   mobileSheet,
@@ -360,10 +370,11 @@ export function CityDetailPanel({
 }: CityDetailPanelProps) {
   const { city } = scored
   const [activeTab, setActiveTab] = useState<CityDetailTab>('col')
+  const { climate } = useCityClimate(scored.city)
 
   const panelMonthlyBudget = useMemo(
-    () => monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters),
-    [scored, monthlyIncome, mapFilters],
+    () => monthlyBudgetForScoring(scored.city, mapFilters),
+    [scored.city, mapFilters],
   )
 
   const headerScore = useMemo(
@@ -371,10 +382,12 @@ export function CityDetailPanel({
       calculateRetirementScore(
         monthlyIncome,
         panelMonthlyBudget,
-        null,
+        scored.city,
         city.country,
+        preferences,
+        { climate },
       ),
-    [monthlyIncome, panelMonthlyBudget, city.country],
+    [monthlyIncome, panelMonthlyBudget, scored.city, city.country, preferences, climate],
   )
 
   const monthlySurplus = Math.max(0, monthlyIncome - panelMonthlyBudget)
@@ -411,6 +424,8 @@ export function CityDetailPanel({
         listNav={listNav}
         activeTab={activeTab}
         onActiveTabChange={setActiveTab}
+        climatePreferenceStep={preferences.climate}
+        climatePreferenceDirection={preferences.climatePreference}
       />
     </div>
   )

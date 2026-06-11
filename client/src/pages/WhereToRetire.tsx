@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { AnimatedCount } from "../components/ui/AnimatedCount";
+import { AppToast } from "../components/ui/AppToast";
+import { PreferencesWizardModal } from "../components/preferences/PreferencesWizardModal";
 import { BudgetExplorationHero } from "../components/whereToRetire/BudgetExplorationHero";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
 import { WtrIncomeToolbarMapSelects } from "../components/whereToRetire/WtrIncomeToolbarMapSelects";
@@ -25,6 +27,8 @@ import {
 } from "../lib/whereToRetire/budgetExplorationStats";
 import { readStashedWtrExplorationIncome } from "../lib/whereToRetire/wtrPreviewIncome";
 import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
+import { useRetirementPreferences } from "../hooks/useRetirementPreferences";
+import { hasRetirementPreferences } from "../types/preferences";
 import { useStickySentinel } from "../hooks/useStickySentinel";
 import { useWtrMapPinColorView } from "../hooks/useWtrMapPinColorView";
 import type { MapCity } from "../utils/costOfLiving";
@@ -42,6 +46,12 @@ export function WhereToRetire({ c }: Props) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
   const storage = useRetirementMapStorage();
+  const { prefs, setPrefs, reloadPrefs } = useRetirementPreferences();
+  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(
+    () => !hasRetirementPreferences(),
+  );
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
   const [explorationIncome, setExplorationIncome] = useState(() => {
     const stashed = readStashedWtrExplorationIncome();
     if (stashed != null)
@@ -140,6 +150,34 @@ export function WhereToRetire({ c }: Props) {
 
   const removeCompare = useCallback((cityId: string) => {
     setCompareIds((prev) => prev.filter((id) => id !== cityId));
+  }, []);
+
+  const showPreferencesToast = useCallback((message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+  }, []);
+
+  const handlePreferencesComplete = useCallback(
+    (next: typeof prefs) => {
+      setPrefs(next);
+      setPreferencesWizardOpen(false);
+      showPreferencesToast("Map scored for your priorities");
+    },
+    [setPrefs, showPreferencesToast],
+  );
+
+  useEffect(() => {
+    const onPreferencesUpdated = () => reloadPrefs();
+    window.addEventListener("retirement-preferences-updated", onPreferencesUpdated);
+    return () =>
+      window.removeEventListener("retirement-preferences-updated", onPreferencesUpdated);
+  }, [reloadPrefs]);
+
+  useEffect(() => {
+    const onOpenWizard = () => setPreferencesWizardOpen(true);
+    window.addEventListener("retirement-preferences-open-wizard", onOpenWizard);
+    return () =>
+      window.removeEventListener("retirement-preferences-open-wizard", onOpenWizard);
   }, []);
 
   return (
@@ -266,6 +304,7 @@ export function WhereToRetire({ c }: Props) {
               <RetirementMapExplorer
                 explorationIncome={mapExplorationIncome}
                 filters={mapFilters}
+                preferences={prefs}
                 onFiltersChange={setMapFilters}
                 pinColorView={pinColorView}
                 excludedCountries={storage.excludedCountries}
@@ -314,6 +353,7 @@ export function WhereToRetire({ c }: Props) {
               onRemoveExcludedCountry={storage.removeExcludedCountry}
               onClearExcludedCountries={storage.clearExcludedCountries}
               onRemoveFavorite={storage.removeFavoriteCity}
+              onOpenPreferences={() => setPreferencesWizardOpen(true)}
             />
           </div>
           <footer
@@ -341,6 +381,17 @@ export function WhereToRetire({ c }: Props) {
           </footer>
         </div>
       </div>
+      <PreferencesWizardModal
+        open={preferencesWizardOpen}
+        onClose={() => setPreferencesWizardOpen(false)}
+        initialValues={prefs}
+        onComplete={handlePreferencesComplete}
+      />
+      <AppToast
+        message={toastMessage}
+        visible={toastVisible}
+        onDismiss={() => setToastVisible(false)}
+      />
     </div>
   );
 }

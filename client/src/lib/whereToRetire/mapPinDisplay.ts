@@ -5,6 +5,7 @@ import {
   type ExpatCommunityPinTier,
 } from '../../utils/expatInfo'
 import type { RetirementScoreBand } from '../../utils/retirementScore'
+export { scorePinBandFromScore } from '../../utils/retirementScore'
 import type { ScoredMapCity } from './cityMapScoring'
 
 export type MapPinColorView = 'score' | 'budget' | 'expat'
@@ -151,9 +152,8 @@ export function resolveMapPinDisplay(
 
 export const SCORE_PIN_LEGEND: MapPinLegendItem[] = [
   { bandClass: 'excellent', color: '#22c55e', label: 'Excellent' },
-  { bandClass: 'strong', color: '#0d9488', label: 'Strong' },
-  { bandClass: 'good', color: '#f59e0b', label: 'Good' },
-  { bandClass: 'moderate', color: '#f97316', label: 'Moderate' },
+  { bandClass: 'good', color: '#0d9488', label: 'Good' },
+  { bandClass: 'moderate', color: '#f59e0b', label: 'Moderate' },
   { bandClass: 'poor', color: '#ef4444', label: 'Poor' },
 ]
 

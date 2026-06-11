@@ -83,7 +83,7 @@ margin-top: var(--space-3);
 }
 
 .wtr-getting-there__airport-name {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.35;
   color: var(--text);
@@ -109,23 +109,27 @@ margin-top: var(--space-3);
   color: var(--color-amber-dark);
 }
 
-.wtr-getting-there__city-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) /* review: was 0.35rem */;
+.wtr-getting-there__us-cities {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1) var(--space-3);
 }
 
-.wtr-getting-there__city-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1) /* review: was 0.2rem */ var(--space-2);
-  border-radius: 999px;
-  font-size: var(--text-xs);
+.wtr-getting-there__us-city {
+  min-width: 0;
+  font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--text);
-  background: var(--color-card);
-  border: 1px solid var(--border);
+}
+
+@media (min-width: 480px) {
+  .wtr-getting-there__us-cities {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .wtr-getting-there__connection-note {
@@ -153,10 +157,6 @@ margin-top: var(--space-3);
   text-align: center;
 }
 
-.wtr-getting-there__metric-icon {
-  color: var(--text-muted);
-}
-
 .wtr-getting-there__metric-label {
   margin: 0;
   font-size: var(--text-sm);
@@ -165,10 +165,25 @@ margin-top: var(--space-3);
   color: var(--text-muted);
 }
 
+.wtr-getting-there__metric-value-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--text-xl);
+}
+
+.wtr-getting-there__metric-icon {
+  flex-shrink: 0;
+  width: 0.82em;
+  height: 0.82em;
+  color: var(--text-muted);
+}
+
 .wtr-getting-there__metric-value {
   margin: 0;
   font-family: var(--heading);
-  font-size: var(--text-xl);
+  font-size: inherit;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

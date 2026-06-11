@@ -128,7 +128,7 @@ function PhaseSegmentTabs({
             <>
               {" "}
               <span className="subheader-phase-segment__tab-age-qualifier">
-                by
+                at
               </span>{" "}
               <span className="subheader-phase-segment__tab-age">
                 {targetRetirementAge}

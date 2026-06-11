@@ -9,6 +9,7 @@ import {
 import { formatUsdToLocalRate } from '../../lib/api/exchangeRates'
 import { useDestinationLiveData } from '../../hooks/useDestinationLiveData'
 import { countryToCurrencyCode, type MapCity } from '../../utils/costOfLiving'
+import { Tooltip } from '../Tooltip'
 import {
   DOLLAR_STRENGTH_LABELS,
   dollarStrengthBand,
@@ -17,6 +18,7 @@ import {
   type DollarStrengthBand,
 } from './cityDetail/cityDetailTabUtils'
 import './DestinationExchangeRate.scss'
+import '../Tooltip.scss'
 
 type Props = {
   city: MapCity
@@ -114,7 +116,7 @@ export function DestinationExchangeRate({
   if (variant === 'compact') {
     return (
       <p className={rootClass} {...staggerProps(staggerClassName, staggerStyle, 0)}>
-        <span className="wtr-exchange-rate__compact-label">Exchange rate:</span>{' '}
+        <IconArrowsExchange size={14} stroke={1.5} aria-hidden className="wtr-exchange-rate__compact-icon" />
         <span className="tabular-nums">{rateLabel}</span>
       </p>
     )
@@ -126,15 +128,25 @@ export function DestinationExchangeRate({
     <section className={rootClass} aria-label="Exchange rate vs US dollar" {...staggerProps(staggerClassName, staggerStyle, 0)}>
       <div className="wtr-exchange-rate__layout">
         <div className="wtr-exchange-rate__primary">
-          <header className="wtr-exchange-rate__head">
+          <p className="wtr-exchange-rate__rate-row">
             <IconArrowsExchange size={18} stroke={1.5} aria-hidden />
-            <h3 className="wtr-exchange-rate__title">Exchange rate</h3>
-          </header>
-          <p className="wtr-exchange-rate__rate tabular-nums">{rateLabel}</p>
-          <p className="wtr-exchange-rate__currency-name">
-            <span className="wtr-exchange-rate__currency-label">Currency:</span>{' '}
-            {currency.currencyName}
+            <Tooltip
+              placement="top"
+              showArrow
+              delay={250}
+              closeDelay={80}
+              content={
+                <>
+                  Spot rate, updated daily.
+                  <br />
+                  Not a quote for transfers.
+                </>
+              }
+            >
+              <span className="wtr-exchange-rate__rate tabular-nums">{rateLabel}</span>
+            </Tooltip>
           </p>
+          <p className="wtr-exchange-rate__currency-name">{currency.currencyName}</p>
         </div>
         {purchasingMeta && StrengthIcon ? (
           <div className="wtr-exchange-rate__meta">

@@ -20,11 +20,13 @@ export type MonthlyClimate = {
   avgHighC: number
   avgLowC: number
   avgPrecipMm: number
+  avgHumidityPct?: number
 }
 
 export type CityClimate = {
   monthly: MonthlyClimate[]
   annualAvgTempC: number
+  annualAvgHumidityPct?: number | null
   annualPrecipMm: number
   summerAvgTempC: number
   winterAvgTempC: number
@@ -47,6 +49,7 @@ type ClimateDailyResponse = {
     temperature_2m_max?: number[]
     temperature_2m_min?: number[]
     precipitation_sum?: number[]
+    relative_humidity_2m_mean?: number[]
   }
 }
 
@@ -87,7 +90,7 @@ function geocodeCacheKey(city: string, country: string): string {
 }
 
 function climateCacheKey(lat: number, lng: number): string {
-  return `climate-${lat.toFixed(2)}-${lng.toFixed(2)}`
+  return `climate-v2-${lat.toFixed(2)}-${lng.toFixed(2)}`
 }
 
 function summerMonths(lat: number): number[] {
@@ -115,23 +118,29 @@ function aggregateClimate(daily: NonNullable<ClimateDailyResponse['daily']>, lat
   const highs = daily.temperature_2m_max ?? []
   const lows = daily.temperature_2m_min ?? []
   const precips = daily.precipitation_sum ?? []
+  const humidities = daily.relative_humidity_2m_mean ?? []
   if (!times.length) return null
 
   const monthBuckets = Array.from({ length: 12 }, () => ({
     highSum: 0,
     lowSum: 0,
     precipSum: 0,
+    humiditySum: 0,
+    humidityCount: 0,
     count: 0,
   }))
 
   let annualTempSum = 0
   let annualTempCount = 0
   let annualPrecipSum = 0
+  let annualHumiditySum = 0
+  let annualHumidityCount = 0
 
   for (let i = 0; i < times.length; i += 1) {
     const high = highs[i]
     const low = lows[i]
     const precip = precips[i] ?? 0
+    const humidity = humidities[i]
     if (high == null || low == null || !Number.isFinite(high) || !Number.isFinite(low)) continue
 
     const month = Number(times[i].slice(5, 7)) - 1
@@ -141,6 +150,13 @@ function aggregateClimate(daily: NonNullable<ClimateDailyResponse['daily']>, lat
     monthBuckets[month].lowSum += low
     monthBuckets[month].precipSum += precip
     monthBuckets[month].count += 1
+
+    if (humidity != null && Number.isFinite(humidity)) {
+      monthBuckets[month].humiditySum += humidity
+      monthBuckets[month].humidityCount += 1
+      annualHumiditySum += humidity
+      annualHumidityCount += 1
+    }
 
     annualTempSum += (high + low) / 2
     annualTempCount += 1
@@ -155,6 +171,10 @@ function aggregateClimate(daily: NonNullable<ClimateDailyResponse['daily']>, lat
     avgHighC: bucket.count ? bucket.highSum / bucket.count : 0,
     avgLowC: bucket.count ? bucket.lowSum / bucket.count : 0,
     avgPrecipMm: bucket.count ? bucket.precipSum / bucket.count : 0,
+    avgHumidityPct:
+      bucket.humidityCount > 0
+        ? Math.round(bucket.humiditySum / bucket.humidityCount)
+        : undefined,
   }))
 
   const annualAvgTempC = annualTempSum / annualTempCount
@@ -179,6 +199,10 @@ function aggregateClimate(daily: NonNullable<ClimateDailyResponse['daily']>, lat
   return {
     monthly,
     annualAvgTempC,
+    annualAvgHumidityPct:
+      annualHumidityCount > 0
+        ? Math.round(annualHumiditySum / annualHumidityCount)
+        : null,
     annualPrecipMm: annualPrecipSum,
     summerAvgTempC,
     winterAvgTempC,
@@ -240,7 +264,7 @@ export async function getCityClimate(lat: number, lng: number): Promise<CityClim
       latitude: String(lat),
       longitude: String(lng),
       models: 'EC_Earth3P_HR',
-      daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum',
+      daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m_mean',
       start_date: '1990-01-01',
       end_date: '2020-12-31',
     })

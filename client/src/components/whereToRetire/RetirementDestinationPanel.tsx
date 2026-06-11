@@ -4,6 +4,7 @@ import { BottomSheetPortal } from '../ui/BottomSheetPortal'
 import { useBottomSheetDrag } from '../../hooks/useBottomSheetDrag'
 import { useWtrDestPanelMobileSheet } from '../../hooks/useWtrDestPanelMobileSheet'
 import type { ScoredMapCity, MapFilters } from '../../lib/whereToRetire/cityMapScoring'
+import type { RetirementPreferences } from '../../types/preferences'
 import { buildBudgetBreakdownDisplay } from '../../utils/costOfLiving'
 import { CityDetailPanel } from './cityDetail/CityDetailPanel'
 import './RetirementDestinationPanel.scss'
@@ -19,6 +20,7 @@ type Props = {
   scored: ScoredMapCity | null
   monthlyIncome: number
   mapFilters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>
+  preferences: RetirementPreferences
   open: boolean
   onClose: () => void
   listNav: DestinationListNav | null
@@ -28,6 +30,7 @@ export function RetirementDestinationPanel({
   scored,
   monthlyIncome,
   mapFilters,
+  preferences,
   open,
   onClose,
   listNav,
@@ -83,7 +86,7 @@ export function RetirementDestinationPanel({
   const sheetStyle: CSSProperties | undefined = mobileSheet ? dragPanelStyle : undefined
 
   return (
-    <BottomSheetPortal enabled={mobileSheet}>
+    <BottomSheetPortal enabled>
       {mobileSheet ? (
         <div
           className={[
@@ -123,6 +126,7 @@ export function RetirementDestinationPanel({
           scored={scored}
           monthlyIncome={monthlyIncome}
           mapFilters={mapFilters}
+          preferences={preferences}
           budgetBreakdown={budgetBreakdown}
           listNav={listNav}
           mobileSheet={mobileSheet}

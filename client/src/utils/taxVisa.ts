@@ -1,5 +1,7 @@
 import taxVisaDataset from '../data/retirement-tax-visa.json'
 
+export type PublicBehaviorLaws = 'strict' | 'moderate' | 'open'
+
 export type TaxVisaCountryData = {
   tax_rate_label: string
   tax_summary: string
@@ -10,6 +12,21 @@ export type TaxVisaCountryData = {
   healthcare_notes: string
   us_tax_treaty: boolean
   top_reason: string
+  retirement_visa_available?: boolean
+  residency_years_to_permanent?: number
+  min_income_required_usd?: number
+  english_friendly_process?: boolean
+  alcohol_restricted?: boolean
+  dress_code_enforced?: boolean
+  religious_law_basis?: boolean
+  public_behavior_laws?: PublicBehaviorLaws
+  estimated_expat_insurance_usd?: number
+  disaster_risk_score?: number
+  stability_score?: number
+  official_language?: string
+  language_difficulty?: 'easy' | 'moderate' | 'hard' | 'very_hard'
+  avg_broadband_mbps?: number
+  flight_hours_from_us?: number
 }
 
 type TaxVisaDatasetFile = {

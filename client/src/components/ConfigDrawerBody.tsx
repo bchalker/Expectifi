@@ -7,9 +7,11 @@ import { findOnboardingRegion } from '../lib/onboardingRegions'
 import { useUserLocale } from '../context/UserLocaleContext'
 import { saveRegionToProfile } from '../lib/userProfileStorage'
 import { ConfigProfileTab } from './ConfigProfileTab'
+import { ConfigPreferencesTab } from './ConfigPreferencesTab'
 import './ConfigDrawerBody.scss'
 import './PlanningProfileFields.scss'
 import './ConfigProfileTab.scss'
+import './ConfigPreferencesTab.scss'
 
 /* Life tab — commented out, may reuse later
 import { ConfigLifeTab } from './ConfigLifeTab'
@@ -17,12 +19,13 @@ import './ConfigLifeTab.scss'
 */
 import type { LifePlans } from '../lib/planStorage/life'
 
-export type ConfigDrawerTab = 'profile' | 'plan' | 'guaranteed-income' | 'life'
+export type ConfigDrawerTab = 'profile' | 'plan' | 'guaranteed-income' | 'preferences' | 'life'
 
 const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'guaranteed-income', label: 'Guaranteed Income' },
+  { id: 'preferences', label: 'Preferences' },
   // { id: 'life', label: 'Life' }, // Life tab — commented out, may reuse later
 ]
 
@@ -183,6 +186,26 @@ export function ConfigDrawerTabPanels({
               inputs={inputs}
               setInputs={setInputs}
               benefitError={ssBenefitError}
+            />
+          </section>
+        </div>
+      ) : null}
+
+      {tab === 'preferences' ? (
+        <div
+          className="config-drawer-tabpanel"
+          role="tabpanel"
+          id="config-panel-preferences"
+          aria-labelledby="config-tab-preferences"
+        >
+          <section className="config-drawer-section">
+            <ConfigPreferencesTab
+              onRescore={() => {
+                window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
+              }}
+              onRetakeWizard={() => {
+                window.dispatchEvent(new CustomEvent('retirement-preferences-open-wizard'))
+              }}
             />
           </section>
         </div>

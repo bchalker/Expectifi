@@ -36,7 +36,7 @@ type Props = {
 };
 
 export function AppLeftNav({
-  targetRetirementAge,
+  targetRetirementAge: _targetRetirementAge,
   drawer,
   mobileOpen,
   onMobileOpenChange,
@@ -54,7 +54,7 @@ export function AppLeftNav({
     : googleCheckoutUi
       ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
       : "";
-  const showRetireByInProfile = Boolean(user?.onboardingDone);
+  const showViewMyPlansInProfile = Boolean(user?.onboardingDone);
   const path = useAppPath();
   const [isDesktop, setIsDesktop] = useState(readIsDesktopNav);
 
@@ -139,7 +139,7 @@ export function AppLeftNav({
     },
   );
   const hasPanelItems = routeNavItems.length > 0 || drawerNavItems.length > 0;
-  const showGuestProfile = Boolean(accountLabel || showRetireByInProfile);
+  const showGuestProfile = Boolean(accountLabel || showViewMyPlansInProfile);
 
   return (
     <>
@@ -175,8 +175,8 @@ export function AppLeftNav({
                   key={id}
                   type="button"
                   className={[
-                    "app-left-nav__route-btn",
-                    isActive ? "app-left-nav__route-btn--active" : "",
+                    "app-left-nav__route-link",
+                    isActive ? "app-left-nav__route-link--active" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -221,7 +221,7 @@ export function AppLeftNav({
               ]
                 .filter(Boolean)
                 .join(" ")}
-              aria-label="Open configure: planning and Social Security"
+              aria-label="View My Plans"
               aria-expanded={drawer === "config"}
               aria-controls="drawer"
               onClick={openConfig}
@@ -232,14 +232,9 @@ export function AppLeftNav({
                     {accountLabel}
                   </span>
                 ) : null}
-                {showRetireByInProfile ? (
-                  <span className="app-left-nav__profile-age" aria-hidden>
-                    Retire by {targetRetirementAge}
-                  </span>
+                {showViewMyPlansInProfile ? (
+                  <span className="app-left-nav__profile-age">View My Plans</span>
                 ) : null}
-              </span>
-              <span className="app-left-nav__account-group__icons" aria-hidden>
-                <IconAdjustments size={18} stroke={1.65} />
               </span>
             </button>
           ) : !loading ? (
@@ -251,12 +246,12 @@ export function AppLeftNav({
                       {accountLabel}
                     </span>
                   ) : null}
-                  {showRetireByInProfile ? (
+                  {showViewMyPlansInProfile ? (
                     <span
                       className="app-left-nav__profile-age"
-                      aria-label={`Retire by age ${targetRetirementAge}`}
+                      aria-label="View My Plans"
                     >
-                      Retire by {targetRetirementAge}
+                      View My Plans
                     </span>
                   ) : null}
                 </div>

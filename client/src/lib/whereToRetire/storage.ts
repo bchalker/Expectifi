@@ -149,6 +149,7 @@ export function clearGuestWhereToRetireStorage(): void {
     localStorage.removeItem(LEGACY_DESTINATIONS_KEY)
     localStorage.removeItem(INCOME_OVERRIDE_KEY)
     localStorage.removeItem('wtr-preferences')
+    localStorage.removeItem('retirement_preferences')
     const keysToRemove: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)

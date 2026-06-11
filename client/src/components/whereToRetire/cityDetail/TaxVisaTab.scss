@@ -2,8 +2,9 @@
   margin: 0;
   font-size: var(--text-sm);
   font-style: italic;
+  text-align: center;
   line-height: 1.45;
-  color: var(--color-text-tertiary, var(--text-muted));
+  color: var(--text);
 }
 
 .wtr-tax-visa-tab__cards {

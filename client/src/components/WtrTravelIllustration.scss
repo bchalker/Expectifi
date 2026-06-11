@@ -1,0 +1,63 @@
+.wtr-travel-illustration {
+  position: relative;
+  width: 174px;
+  height: 174px;
+  flex-shrink: 0;
+}
+
+.wtr-travel-illustration__globe,
+.wtr-travel-illustration__plane-path {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+  background-color: var(--sky-blue);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+.wtr-travel-illustration__plane-path {
+  background-color: var(--sky-blue-d1);
+
+
+}
+
+.wtr-travel-illustration__globe {
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  mask-image: url('/icons/wtr-globe.svg');
+  -webkit-mask-image: url('/icons/wtr-globe.svg');
+}
+
+.wtr-travel-illustration__plane-path {
+  width: 144px;
+  height: 144px;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  mask-image: url('/icons/wtr-plane-path.svg');
+  -webkit-mask-image: url('/icons/wtr-plane-path.svg');
+  animation: wtr-travel-plane-path-spin 24s linear infinite;
+}
+
+@keyframes wtr-travel-plane-path-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wtr-travel-illustration__plane-path {
+    animation: none;
+  }
+}

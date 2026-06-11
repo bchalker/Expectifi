@@ -1,3 +1,4 @@
+import { migrateIncomeUiFields } from './accountIncomeStorage'
 import { hydrateAppSnapshot, type AppSnapshotV1 } from './appSnapshot'
 import type { CalculatorInputs, CalculatorUi } from './computeResults'
 import { inputsForPersistedCalculatorSession } from './positionsImportStorage'
@@ -17,12 +18,14 @@ export type PersistedCalculatorSession = {
 
 export function persistCalculatorSession(session: PersistedCalculatorSession): void {
   if (!canWritePlanLocalStorage()) return
+  const incomeUi = migrateIncomeUiFields(session.ui)
+  const ui = { ...session.ui, ...incomeUi }
   persistPlanState(getPlanWriteTier(), {
     inputs: inputsForPersistedCalculatorSession(session.inputs),
-    ui: session.ui,
+    ui,
     phase: session.phase,
     activePreset: session.activePreset,
-    profile: planProfilePatchFromCalculatorInputs(session.inputs, session.ui),
+    profile: planProfilePatchFromCalculatorInputs(session.inputs, ui),
     accounts: null,
   })
 }

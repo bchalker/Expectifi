@@ -1,24 +1,26 @@
 .wtr-dest-panel {
-  position: relative;
   --wtr-match-strong: var(--color-text-success);
   --wtr-match-moderate: var(--color-teal-mid);
   --wtr-match-stretch: var(--color-amber);
   --wtr-match-poor: var(--color-text-danger);
   --wtr-panel-stagger-base: 0.14s;
   --wtr-panel-stagger-step: 0.048s;
+  --wtr-dest-panel-top: calc(
+    var(--app-measured-header-h, var(--app-header-stack-h, var(--app-top-chrome-h))) + 1rem
+  );
 
   position: fixed;
   isolation: isolate;
-  top: 1rem;
+  top: var(--wtr-dest-panel-top);
   right: 1rem;
   bottom: 1rem;
   left: auto;
-  z-index: 310;
+  z-index: var(--z-drawer-shell);
   display: flex;
   flex-direction: column;
   width: min(37.5rem, calc(100vw - 4rem));
   height: auto;
-  max-height: calc(100dvh - 4rem);
+  max-height: calc(100dvh - var(--wtr-dest-panel-top) - 1rem);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg, 12px);
   background: var(--surface);

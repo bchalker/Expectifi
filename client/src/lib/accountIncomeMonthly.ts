@@ -1,7 +1,9 @@
 import type { AccountScenarioBucketId } from './accountReturnScenario'
 import {
-  accountIncomeFundStorageKey,
-} from './accountIncomeFund'
+  canonicalIncomeStorageKeyForBucket,
+  canonicalIncomeStorageKeyForEntry,
+  canonicalIncomeStorageKeyForManualId,
+} from './accountIncomeStorage'
 import {
   accountRetirementBalance,
   type AccountRetirementFvSnapshot,
@@ -156,7 +158,7 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
         const meta = getAccountTypeMeta(entry.type, locale)
         if (meta.withdrawalBucket !== step) continue
         lines.push({
-          storageKey: accountIncomeFundStorageKey('manual', entry.id),
+          storageKey: canonicalIncomeStorageKeyForEntry(entry),
           bucket: meta.withdrawalBucket,
           currentBalance: entry.balance,
           bucketCurrentTotal: bucketTotals[meta.withdrawalBucket] ?? entry.balance,
@@ -171,7 +173,7 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
     if (step === 'brokerage') {
       if (ctx.brkBal <= 0) continue
       lines.push({
-        storageKey: accountIncomeFundStorageKey('bucket', 'brokerage'),
+        storageKey: canonicalIncomeStorageKeyForBucket('brokerage'),
         bucket: 'brokerage',
         currentBalance: ctx.brkBal,
         bucketCurrentTotal: ctx.brkBal,
@@ -188,7 +190,7 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
         ].filter((p) => p.balance > 0)
         for (const part of parts) {
           lines.push({
-            storageKey: accountIncomeFundStorageKey('manual', part.key),
+            storageKey: canonicalIncomeStorageKeyForManualId(part.key),
             bucket: 'pretax',
             currentBalance: part.balance,
             bucketCurrentTotal: pretaxTotal,
@@ -196,7 +198,7 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
         }
       } else {
         lines.push({
-          storageKey: accountIncomeFundStorageKey('bucket', 'pretax'),
+          storageKey: canonicalIncomeStorageKeyForBucket('pretax'),
           bucket: 'pretax',
           currentBalance: pretaxTotal,
           bucketCurrentTotal: pretaxTotal,
@@ -208,8 +210,8 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
       lines.push({
         storageKey:
           retirementBalanceMode === 'manual'
-            ? accountIncomeFundStorageKey('manual', 'roth')
-            : accountIncomeFundStorageKey('bucket', 'roth'),
+            ? canonicalIncomeStorageKeyForManualId('roth')
+            : canonicalIncomeStorageKeyForBucket('roth'),
         bucket: 'roth',
         currentBalance: ctx.rothBal,
         bucketCurrentTotal: ctx.rothBal,
@@ -220,8 +222,8 @@ export function listAccountIncomeLines(ctx: AccountIncomeMonthlyContext): Accoun
       lines.push({
         storageKey:
           retirementBalanceMode === 'manual'
-            ? accountIncomeFundStorageKey('manual', 'hsa')
-            : accountIncomeFundStorageKey('bucket', 'hsa'),
+            ? canonicalIncomeStorageKeyForManualId('hsa')
+            : canonicalIncomeStorageKeyForBucket('hsa'),
         bucket: 'hsa',
         currentBalance: ctx.hsaBal,
         bucketCurrentTotal: ctx.hsaBal,

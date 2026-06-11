@@ -11,7 +11,17 @@ import {
   getEnglishProficiencyTone,
   type EnglishProficiencyLevel,
 } from '../../utils/englishProficiency'
+import { getCountryPreferenceFields } from '../../utils/countryPreferenceData'
 import './DestinationPeopleCultureTab.scss'
+
+function socialLawDisclosureLabels(country: string): string[] {
+  const fields = getCountryPreferenceFields(country)
+  const labels: string[] = []
+  if (fields.alcohol_restricted) labels.push('Alcohol restricted')
+  if (fields.dress_code_enforced) labels.push('Dress code enforced')
+  if (fields.religious_law_basis) labels.push('Religious law basis')
+  return labels
+}
 
 type Props = {
   country: string
@@ -96,9 +106,16 @@ function ReligionBreakdown({ breakdown }: { breakdown: Record<string, number> })
   )
 }
 
+function medianAgeInterpretation(age: number): string {
+  if (age < 35) return 'Young population — fewer expat retirees'
+  if (age <= 50) return 'Mixed age population'
+  return 'Older population — more retirees nearby'
+}
+
 export function DestinationPeopleCultureTab({ country, staggerClassName, staggerStyle }: Props) {
   const data = useMemo(() => getDemographicsData(country), [country])
   const englishLevel = useMemo(() => getEnglishProficiency(country), [country])
+  const socialDisclosures = useMemo(() => socialLawDisclosureLabels(country), [country])
 
   if (!data && !englishLevel) {
     return (
@@ -114,43 +131,51 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
 
   return (
     <div className="wtr-people-culture">
+      {socialDisclosures.length > 0 ? (
+        <div
+          className="wtr-people-culture__social-disclosures"
+          {...staggerSectionProps(
+            (() => {
+              const idx = sectionIndex
+              sectionIndex += 1
+              return idx
+            })(),
+            undefined,
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          {socialDisclosures.map((label) => (
+            <span key={label} className="wtr-people-culture__social-badge">
+              {label}
+            </span>
+          ))}
+        </div>
+      ) : null}
       {religion ? (
-        <>
-          <section
-            className="wtr-people-culture__summary"
-            aria-label="Religious composition"
-            {...staggerSectionProps(
-              sectionIndex++,
-              'wtr-people-culture__summary',
-              staggerClassName,
-              staggerStyle,
-            )}
+        <section
+          className="wtr-people-culture__group"
+          aria-labelledby="wtr-people-culture-religion-heading"
+          {...staggerSectionProps(
+            sectionIndex++,
+            'wtr-people-culture__group',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          <h3
+            id="wtr-people-culture-religion-heading"
+            className="wtr-city-detail__section-title wtr-people-culture__section-title"
           >
-            <ReligionBreakdown breakdown={religion.breakdown} />
-          </section>
-          <section
-            className="wtr-people-culture__group"
-            aria-labelledby="wtr-people-culture-religion-heading"
-            {...staggerSectionProps(
-              sectionIndex++,
-              'wtr-people-culture__group',
-              staggerClassName,
-              staggerStyle,
-            )}
-          >
-            <h3
-              id="wtr-people-culture-religion-heading"
-              className="wtr-city-detail__section-title wtr-people-culture__section-title"
-            >
-              Religion
-            </h3>
-            <p className="wtr-people-culture__dominant">{religion.dominant}</p>
-            <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
-            <p className="wtr-people-culture__worship-note">
-              <em>Places of worship for expats:</em> {religion.expat_worship}
-            </p>
-          </section>
-        </>
+            Religion
+          </h3>
+          <ReligionBreakdown breakdown={religion.breakdown} />
+          <p className="wtr-people-culture__dominant">{religion.dominant}</p>
+          <p className="wtr-people-culture__dominant-note">{religion.christian_note}</p>
+          <p className="wtr-people-culture__worship-note">
+            <em>Places of worship for expats:</em> {religion.expat_worship}
+          </p>
+        </section>
       ) : null}
 
       {demographics ? (
@@ -168,7 +193,7 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             id="wtr-people-culture-demo-heading"
             className="wtr-city-detail__section-title wtr-people-culture__section-title"
           >
-            People &amp; language
+            Demographics
           </h3>
           <dl className="wtr-people-culture__rows">
             <div className="wtr-people-culture__row">
@@ -179,6 +204,9 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
               <dt>Median age</dt>
               <dd>
                 <span className="tabular-nums">{demographics.median_age}</span> years
+                <span className="wtr-people-culture__age-note">
+                  {medianAgeInterpretation(demographics.median_age)}
+                </span>
               </dd>
             </div>
             <div className="wtr-people-culture__row">

@@ -1,6 +1,7 @@
 import { findOnboardingRegion, type OnboardingRegionId } from '../onboardingRegions'
 import { getFlagEmoji } from '../regionUtils'
 import { countryToIsoCode, getAllMapCities } from '../../utils/costOfLiving'
+import type { RetirementPreferences } from '../../types/preferences'
 import {
   DEFAULT_MAP_FILTERS,
   scoreAndFilterMapCities,
@@ -10,7 +11,10 @@ import { getExcludedCountries } from '../retirementStorage'
 import { getUsCityStateAbbr } from './usCityStateAbbr'
 import type { RetirementScoreBand } from '../../utils/retirementScore'
 
-const PREVIEW_MAP_BANDS = new Set<RetirementScoreBand>(['excellent', 'strong', 'moderate'])
+const PREVIEW_MAP_BANDS = new Set<RetirementScoreBand>(['excellent', 'good', 'moderate'])
+
+/** Reference income for greyed map pins when projected income is not set yet. */
+const PREVIEW_MAP_FALLBACK_INCOME = 2_500
 
 const PREVIEW_MAP_FILTERS = {
   ...DEFAULT_MAP_FILTERS,
@@ -85,12 +89,27 @@ function homeCountryName(locale: OnboardingRegionId): string {
   return findOnboardingRegion(locale)?.country ?? 'United States'
 }
 
-function qualifyingAtIncome(monthlyIncome: number): ScoredMapCity[] {
+export function previewMapDestinationsForIncome(
+  monthlyIncome: number,
+  prefs?: RetirementPreferences,
+): ScoredMapCity[] {
+  const scoringIncome =
+    monthlyIncome > 0 ? monthlyIncome : PREVIEW_MAP_FALLBACK_INCOME
+  return qualifyingAtIncome(scoringIncome, prefs)
+    .filter(isPreviewMapCity)
+    .slice(0, 30)
+}
+
+function qualifyingAtIncome(
+  monthlyIncome: number,
+  prefs?: RetirementPreferences,
+): ScoredMapCity[] {
   return scoreAndFilterMapCities(
     monthlyIncome,
     PREVIEW_MAP_FILTERS,
     undefined,
     getExcludedCountries(),
+    prefs,
   )
 }
 
@@ -133,6 +152,7 @@ function buildContextParagraph(args: {
 export function computeIncomeHarvestPreview(
   monthlyIncome: number,
   locale: OnboardingRegionId,
+  prefs?: RetirementPreferences,
 ): IncomeHarvestPreviewData {
   const allCities = getAllMapCities()
   if (allCities.length === 0 || monthlyIncome <= 0) {
@@ -148,10 +168,10 @@ export function computeIncomeHarvestPreview(
     }
   }
 
-  const qualifying = qualifyingAtIncome(monthlyIncome)
+  const qualifying = qualifyingAtIncome(monthlyIncome, prefs)
   const qualifyingCount = qualifying.length
 
-  const mapDestinations = qualifying.filter(isPreviewMapCity).slice(0, 30)
+  const mapDestinations = previewMapDestinationsForIncome(monthlyIncome, prefs)
 
   const worldwideTop = qualifying
     .slice(0, 3)

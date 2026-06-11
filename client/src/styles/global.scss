@@ -162,8 +162,13 @@
   --sky-blue-d3: hsl(var(--sky-blue-h), var(--sky-blue-s), 62%);
   --sky-blue-d4: hsl(var(--sky-blue-h), var(--sky-blue-s), 50%);
   
+  --color-background-primary: #ffffff;
   --color-background-success: var(--green6);
+  --color-border-success: color-mix(in srgb, var(--color-text-success) 32%, transparent);
   --color-background-warning: var(--amber6);
+  --color-background-danger: color-mix(in srgb, var(--color-text-danger) 12%, var(--surface));
+  --color-background-danger-strong: color-mix(in srgb, var(--color-text-danger) 20%, var(--surface));
+  --color-text-warning: var(--color-amber-dark);
   --color-background-secondary: var(--surface2);
   --color-background-hindu: #f8dcc8;
   --color-background-jewish: #e4ddf0;

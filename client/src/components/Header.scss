@@ -192,6 +192,32 @@
   color: var(--nav-text);
 }
 
+.header__link--utility {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--nav-text-muted);
+}
+
+.header__link--utility:hover {
+  background: transparent;
+  color: var(--nav-text);
+  text-decoration: underline;
+}
+
+.header__link--utility.header__link--active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--nav-text);
+  text-decoration: underline;
+}
+
+.header__link--utility.header__link--active:hover {
+  background: transparent;
+}
+
 .header__link--unavailable,
 .header__link[aria-disabled='true'] {
   opacity: 0.38;

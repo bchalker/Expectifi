@@ -1,6 +1,5 @@
 import { formatUsd } from '../../utils/costOfLiving'
 import {
-  calculateRetirementScore,
   retirementScoreBandFromScore,
   type RetirementScoreBand,
 } from '../../utils/retirementScore'
@@ -13,7 +12,8 @@ export function calculateRetirementIncomeFitScore(
   monthlyIncome: number,
   monthlyBudget: number,
 ): number {
-  return calculateRetirementScore(monthlyIncome, monthlyBudget, null).incomeFitScore
+  if (monthlyBudget <= 0 || monthlyIncome <= 0) return 0
+  return Math.min(100, Math.round((monthlyIncome / monthlyBudget) * 50))
 }
 
 export function matchRetirementIncomeFitTier(score: number): RetirementScoreBand {

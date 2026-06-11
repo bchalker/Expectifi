@@ -38,6 +38,10 @@ import {
   type ExpatLegendTierId,
 } from './mapPinDisplay'
 import { expatCommunityPinTier } from '../../utils/expatInfo'
+import {
+  resolveRetirementPreferences,
+  type RetirementPreferences,
+} from './preferences'
 
 export type { ForeignTaxFilter }
 export type {
@@ -375,7 +379,11 @@ export function countMapCityVisibility(
       excludedByCountryCount += 1
       continue
     }
-    const scored = scoreMapCity(city, monthlyIncome)
+    const scored = scoreMapCity(city, monthlyIncome, {
+      prefs: resolveRetirementPreferences(),
+      includeHealthIns: filters.includeHealthIns,
+      healthInsMonthlyUsd: filters.healthInsMonthlyUsd,
+    })
     if (passesMapFilters(scored, filters, monthlyIncome)) {
       visibleCount += 1
       visibleCountries.add(city.country)
@@ -407,15 +415,43 @@ function passesClimate(country: string, climate: ClimateFilter): boolean {
   return cityClimate === climate
 }
 
-export function scoreMapCity(city: MapCity, monthlyIncome: number): ScoredMapCity {
-  const monthlyBudget = calculateMonthlyBudget(city)
-  const score = calculateRetirementScore(monthlyIncome, monthlyBudget, null, city.country)
+export type ScoreMapCityOptions = {
+  prefs?: RetirementPreferences
+  includeHealthIns?: boolean
+  healthInsMonthlyUsd?: number
+}
+
+export function monthlyBudgetForScoring(
+  city: MapCity,
+  options?: Pick<ScoreMapCityOptions, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+): number {
+  let budget = calculateMonthlyBudget(city)
+  if (options?.includeHealthIns) {
+    budget += options.healthInsMonthlyUsd ?? DEFAULT_HEALTH_INS_MONTHLY_USD
+  }
+  return budget
+}
+
+export function scoreMapCity(
+  city: MapCity,
+  monthlyIncome: number,
+  options?: ScoreMapCityOptions,
+): ScoredMapCity {
+  const prefs = options?.prefs ?? resolveRetirementPreferences()
+  const monthlyBudget = monthlyBudgetForScoring(city, options)
+  const score = calculateRetirementScore(
+    monthlyIncome,
+    monthlyBudget,
+    city,
+    city.country,
+    prefs,
+  )
 
   return {
     city,
     monthlyBudget,
     score,
-    retirementScore: score.rawRetirementScore,
+    retirementScore: score.retirementScore,
     displayScore: score.displayScore,
     incomeFitScore: score.incomeFitScore,
     qolNormalized: score.qolNormalized,
@@ -587,10 +623,17 @@ export function scoreAndFilterMapCities(
   filters: MapFilters,
   limit?: number,
   excludedCountries: string[] = getExcludedCountries(),
+  prefs?: RetirementPreferences,
 ): ScoredMapCity[] {
+  const resolvedPrefs = prefs ?? resolveRetirementPreferences()
+  const scoreOptions: ScoreMapCityOptions = {
+    prefs: resolvedPrefs,
+    includeHealthIns: filters.includeHealthIns,
+    healthInsMonthlyUsd: filters.healthInsMonthlyUsd,
+  }
   const scored = getAllMapCities()
     .filter((city) => passesExclusionFilters(city, excludedCountries))
-    .map((city) => scoreMapCity(city, monthlyIncome))
+    .map((city) => scoreMapCity(city, monthlyIncome, scoreOptions))
     .filter((item) => passesMapFilters(item, filters, monthlyIncome))
     .sort((a, b) => compareMapCities(a, b, filters.sortBy, monthlyIncome, filters))
 

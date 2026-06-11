@@ -10,7 +10,10 @@ import {
   retirementScoreBandFromScore,
   type RetirementScoreBand,
 } from '../../utils/retirementScore'
+import type { CityData } from '../../utils/costOfLiving'
 import { buildRetirementIncomeFitExplanation } from './retirementIncomeFitScore'
+
+const SCORING_STUB_CITY = { city: '', country: '' } as CityData
 
 export type MatchTier = RetirementScoreBand
 
@@ -52,7 +55,7 @@ export function computeColGauge(
 ): CostOfLivingGauge {
   const income = Math.max(0, userMonthlyIncome)
   const cost = Math.max(500, avgExpatCostUsd)
-  const result = calculateRetirementScore(income, cost, null)
+  const result = calculateRetirementScore(income, cost, SCORING_STUB_CITY)
   const explanation = buildRetirementIncomeFitExplanation(income, result.incomeFitScore)
   return { score: result.retirementScore, explanation }
 }

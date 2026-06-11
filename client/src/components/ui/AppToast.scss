@@ -1,0 +1,31 @@
+.app-toast {
+  position: fixed;
+  z-index: 1200;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translate(-50%, 120%);
+  max-width: min(28rem, calc(100vw - 2rem));
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(28 43 58 / 0.14);
+  font-size: var(--text-sm);
+  color: var(--text);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
+}
+
+.app-toast--visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+@media (min-width: 681px) {
+  .app-toast {
+    bottom: 2rem;
+  }
+}

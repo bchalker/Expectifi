@@ -1,5 +1,5 @@
 import { useMemo, type CSSProperties } from 'react'
-import { IconBulb, IconPlane } from '@tabler/icons-react'
+import { IconBulb, IconPlaneFilled } from '@tabler/icons-react'
 import {
   formatAirlinesList,
   formatVisaFreeEntryNote,
@@ -99,13 +99,13 @@ export function DestinationGettingThereTab({ country, staggerClassName, staggerS
           <DirectFlightsBadge direct={data.direct_from_us} />
         </div>
         {data.direct_from_us ? (
-          <div className="wtr-getting-there__city-pills">
+          <ul className="wtr-getting-there__us-cities">
             {data.direct_us_cities.map((city) => (
-              <span key={city} className="wtr-getting-there__city-pill">
+              <li key={city} className="wtr-getting-there__us-city">
                 {city}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : (
           <p className="wtr-getting-there__connection-note">{formatAirlinesList(data.airlines)}</p>
         )}
@@ -116,20 +116,24 @@ export function DestinationGettingThereTab({ country, staggerClassName, staggerS
         {...staggerSectionProps(2, 'wtr-getting-there__flight-metrics', staggerClassName, staggerStyle)}
       >
         <article className="wtr-getting-there__metric-card">
-          <IconPlane className="wtr-getting-there__metric-icon" size={18} stroke={1.5} aria-hidden />
           <p className="wtr-getting-there__metric-label">From East Coast</p>
-          <p className="wtr-getting-there__metric-value tabular-nums">
-            {formatFlightHours(data.flight_time_hours.east_coast)}
-            <span className="wtr-getting-there__metric-unit"> hrs</span>
-          </p>
+          <div className="wtr-getting-there__metric-value-row">
+            <IconPlaneFilled className="wtr-getting-there__metric-icon" aria-hidden />
+            <p className="wtr-getting-there__metric-value tabular-nums">
+              {formatFlightHours(data.flight_time_hours.east_coast)}
+              <span className="wtr-getting-there__metric-unit"> hrs</span>
+            </p>
+          </div>
         </article>
         <article className="wtr-getting-there__metric-card">
-          <IconPlane className="wtr-getting-there__metric-icon" size={18} stroke={1.5} aria-hidden />
           <p className="wtr-getting-there__metric-label">From West Coast</p>
-          <p className="wtr-getting-there__metric-value tabular-nums">
-            {formatFlightHours(data.flight_time_hours.west_coast)}
-            <span className="wtr-getting-there__metric-unit"> hrs</span>
-          </p>
+          <div className="wtr-getting-there__metric-value-row">
+            <IconPlaneFilled className="wtr-getting-there__metric-icon" aria-hidden />
+            <p className="wtr-getting-there__metric-value tabular-nums">
+              {formatFlightHours(data.flight_time_hours.west_coast)}
+              <span className="wtr-getting-there__metric-unit"> hrs</span>
+            </p>
+          </div>
         </article>
       </div>
 

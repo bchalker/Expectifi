@@ -54,6 +54,54 @@
   color: var(--text-muted);
 }
 
+.wtr-climate-card__notes {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--border-radius-lg, 12px);
+  background: var(--color-background-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text);
+  text-align: left;
+}
+
+.wtr-climate-card__notes-score {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.wtr-climate-card__notes--success {
+  background: var(--color-background-success);
+  color: var(--color-text-success);
+}
+
+.wtr-climate-card__notes--success .wtr-climate-card__notes-score {
+  color: var(--color-text-success);
+}
+
+.wtr-climate-card__notes--warning {
+  background: var(--color-background-warning);
+  color: var(--color-text-warning);
+}
+
+.wtr-climate-card__notes--warning .wtr-climate-card__notes-score {
+  color: var(--color-text-warning);
+}
+
+.wtr-climate-card__notes--danger {
+  background: var(--color-background-danger);
+  color: var(--color-text-danger);
+}
+
+.wtr-climate-card__notes--danger .wtr-climate-card__notes-score {
+  color: var(--color-text-danger);
+}
+
 .wtr-climate-card__unit-toggle {
   display: inline-flex;
   border: 1px solid var(--border);

@@ -1,0 +1,15 @@
+.config-preferences-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.config-preferences-tab__saved {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius-lg, 12px);
+  background: var(--color-background-success);
+  color: var(--color-text-success);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

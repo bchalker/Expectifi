@@ -6,6 +6,9 @@
 }
 
 .wtr-exchange-rate--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   border: none;
   border-radius: 0;
   background: transparent;
@@ -16,9 +19,9 @@
   line-height: 1.4;
 }
 
-.wtr-exchange-rate__compact-label {
-  font-weight: 600;
-  color: var(--text);
+.wtr-exchange-rate__compact-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
 }
 
 .wtr-exchange-rate__layout {
@@ -34,18 +37,12 @@
   min-width: 0;
 }
 
-.wtr-exchange-rate__head {
+.wtr-exchange-rate__rate-row {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--text-muted);
-}
-
-.wtr-exchange-rate__title {
   margin: 0;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text);
+  color: var(--text-muted);
 }
 
 .wtr-exchange-rate__rate {
@@ -55,6 +52,7 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--text);
+  cursor: help;
 }
 
 .wtr-exchange-rate__currency-name {

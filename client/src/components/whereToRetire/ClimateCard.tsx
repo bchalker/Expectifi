@@ -1,12 +1,16 @@
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { IconSun } from '@tabler/icons-react'
 import type { CityClimate } from '../../lib/api/openMeteo'
 import { formatTemp } from '../../lib/api/openMeteo'
+import type { ClimatePreferenceDirection, PreferenceStep } from '../../types/preferences'
+import { deriveClimateNotes } from '../../utils/climateNotes'
 import { ClimateMonthlyChart } from './ClimateMonthlyChart'
 import './ClimateCard.scss'
 
 type Props = {
   climate: CityClimate | null
+  climatePreferenceStep?: PreferenceStep
+  climatePreferenceDirection?: ClimatePreferenceDirection
   loading: boolean
   failed: boolean
   staggerClassName?: string
@@ -47,12 +51,21 @@ function StaggerSection({
 
 export function ClimateCard({
   climate,
+  climatePreferenceStep = 0,
+  climatePreferenceDirection = 'none',
   loading,
   failed,
   staggerClassName,
   staggerStyle,
 }: Props) {
   const [tempUnit, setTempUnit] = useState<'c' | 'f'>('f')
+  const climateNotes = useMemo(
+    () =>
+      climate
+        ? deriveClimateNotes(climate, climatePreferenceStep, climatePreferenceDirection)
+        : null,
+    [climate, climatePreferenceStep, climatePreferenceDirection],
+  )
 
   if (failed) {
     return (
@@ -137,11 +150,35 @@ export function ClimateCard({
         </div>
       </header>
 
-      <div {...staggerSectionProps(1, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}>
+      {climateNotes ? (
+        <p
+          {...staggerSectionProps(
+            1,
+            [
+              'wtr-climate-card__notes',
+              climateNotes.fitTone !== 'muted' &&
+                `wtr-climate-card__notes--${climateNotes.fitTone}`,
+            ]
+              .filter(Boolean)
+              .join(' '),
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          {climateNotes.climateScore != null && climatePreferenceStep > 0 ? (
+            <span className="wtr-climate-card__notes-score tabular-nums">
+              {climateNotes.climateScore}/100
+            </span>
+          ) : null}
+          {climateNotes.climateNotes}
+        </p>
+      ) : null}
+
+      <div {...staggerSectionProps(2, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}>
         <ClimateMonthlyChart monthly={climate.monthly} />
       </div>
 
-      <dl {...staggerSectionProps(2, 'wtr-climate-card__stats', staggerClassName, staggerStyle)}>
+      <dl {...staggerSectionProps(3, 'wtr-climate-card__stats', staggerClassName, staggerStyle)}>
         <div className="wtr-climate-card__stat">
           <dt>Annual average</dt>
           <dd>{formatTemp(climate.annualAvgTempC, tempUnit)}</dd>
@@ -156,7 +193,7 @@ export function ClimateCard({
         </div>
       </dl>
 
-      <p {...staggerSectionProps(3, 'wtr-climate-card__range-note', staggerClassName, staggerStyle)}>
+      <p {...staggerSectionProps(4, 'wtr-climate-card__range-note', staggerClassName, staggerStyle)}>
         Monthly avg. highs{' '}
         {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
         {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} (1990–2020)

@@ -1,0 +1,25 @@
+.wtr-panel-entry {
+  --wtr-panel-cta-overlap: 60px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wtr-panel-entry__travel-mark {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.wtr-panel-entry .where-to-retire-preview-panel__cta-actions {
+  position: relative;
+  z-index: 2;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: calc(-1 * var(--wtr-panel-cta-overlap));
+}

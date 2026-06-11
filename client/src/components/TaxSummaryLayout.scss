@@ -56,8 +56,27 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   box-shadow: none;
 }
 
-.section--tax-summary--income-harvest .where-to-retire-preview-panel {
+$tax-summary-sidebar-shadow:
+  rgba(33, 35, 38, 0.32) -16px 0 12px -18px,
+  rgba(33, 35, 38, 0.12) -16px 0 12px -30px,
+  rgba(33, 35, 38, 0.12) -36px 0 40px -30px;
+
+.section--tax-summary__sidebar {
   order: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  box-shadow: $tax-summary-sidebar-shadow;
+}
+
+.section--tax-summary--growth-assumptions .section--tax-summary__sidebar {
+  order: 1;
+}
+
+.section--tax-summary--income-harvest .where-to-retire-preview-panel,
+.section--tax-summary--growth-assumptions .wtr-panel-entry {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -67,10 +86,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   flex: none;
   border: none;
   border-radius: var(--space-2);
-  box-shadow:
-    rgba(33, 35, 38, 0.32) -16px 0 12px -18px,
-    rgba(33, 35, 38, 0.12) -16px 0 12px -30px,
-    rgba(33, 35, 38, 0.12) -36px 0 40px -30px;
   padding: var(--space-5);
 }
 
@@ -136,23 +151,21 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
     overflow: visible;
   }
 
-  .section--tax-summary--income-harvest .where-to-retire-preview-panel {
+  .section--tax-summary__sidebar {
     order: unset;
     width: 280px;
-    position: sticky;
-    top: var(--app-sidebar-sticky-top, 0px);
-    height: fit-content;
     align-self: start;
-    max-height: var(
-      --app-sidebar-sticky-max-height,
-      calc(100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px))
-    );
+height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
-    box-shadow:
-      rgba(33, 35, 38, 0.32) -16px 0 12px -18px,
-      rgba(33, 35, 38, 0.12) -16px 0 12px -30px,
-      rgba(33, 35, 38, 0.12) -36px 0 40px -30px;
+  }
+
+  .section--tax-summary--income-harvest .where-to-retire-preview-panel,
+  .section--tax-summary--growth-assumptions .wtr-panel-entry {
+    position: static;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -192,7 +205,6 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 }
 
 .section--tax-summary--growth-assumptions .growth-assumptions-panel {
-  order: 1;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -201,13 +213,7 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   min-height: 0;
   flex: none;
   border: none;
-  
   border-radius: var(--space-2);
-  // background: linear-gradient(to left, hsla(120, 25%, 65%, 0.15), transparent);
-    box-shadow: rgba(33, 35, 38, 0.32) -16px 0 12px -18px,
-    rgba(33, 35, 38, 0.12) -16px 0 12px -30px, 
-    rgba(33, 35, 38, 0.12) -36px 0 40px -30px;
-  // box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
 }
 
 @media (max-width: 680px) {
@@ -312,18 +318,11 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   }
 
   .section--tax-summary--growth-assumptions .growth-assumptions-panel {
-    order: unset;
-    width: 280px;
-    position: sticky;
-    top: var(--app-sidebar-sticky-top, 0px);
-    height: 100%;
-    align-self: start;
-    max-height: var(
-      --app-sidebar-sticky-max-height,
-      calc(100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px))
-    );
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    position: static;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .section--tax-summary--growth-assumptions .growth-assumptions-panel__main {
@@ -333,8 +332,10 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 }
 
 @media (max-width: 768px) {
+  .section--tax-summary__sidebar,
   .section--tax-summary--income-harvest .where-to-retire-preview-panel,
-  .section--tax-summary--growth-assumptions .growth-assumptions-panel {
+  .section--tax-summary--growth-assumptions .growth-assumptions-panel,
+  .section--tax-summary--growth-assumptions .wtr-panel-entry {
     position: static;
     max-height: none;
     overflow-y: visible;
