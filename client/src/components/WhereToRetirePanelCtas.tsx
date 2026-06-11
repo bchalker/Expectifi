@@ -1,8 +1,8 @@
 type Props = {
-  hasOpenedPrefsOverlay: boolean
-  onExplore: () => void
-  onOpenPreferences: () => void
-}
+  hasOpenedPrefsOverlay: boolean;
+  onExplore: () => void;
+  onOpenPreferences: () => void;
+};
 
 export function WhereToRetirePanelCtas({
   hasOpenedPrefsOverlay,
@@ -24,9 +24,9 @@ export function WhereToRetirePanelCtas({
         onClick={onOpenPreferences}
       >
         {hasOpenedPrefsOverlay
-          ? 'Update destination priorities'
-          : 'Set Destination priorities'}
+          ? "Update destination priorities"
+          : "Set Destination priorities"}
       </button>
     </div>
-  )
+  );
 }
