@@ -243,7 +243,7 @@ export function SubHeader({
             viewBox="0 0 1000 100"
             preserveAspectRatio="xMidYMax slice"
           >
-            <path d={SUBHEADER_WAVE_BACK_D} fill="var(--nav-bg)" />
+            <path d={SUBHEADER_WAVE_BACK_D} />
           </svg>
           <div className="subheader-waves__front-scale">
             <svg

@@ -60,7 +60,7 @@ html:not([data-no-portfolio-subheader]) .subheader::before {
   z-index: 0;
   box-sizing: border-box;
   pointer-events: none;
-  transition: all 250ms ease;
+  transition: all .3s ease;
   // .main__hero--stuck & {
   //   height: 120px;
   // }
@@ -75,6 +75,7 @@ html:not([data-no-portfolio-subheader]) .subheader::before {
   height: 100%;
   pointer-events: none;
   transform-origin: top center;
+  
 }
 
 html:not([data-no-portfolio-subheader]) .subheader-waves__bubbles {
@@ -91,11 +92,16 @@ html:not([data-no-portfolio-subheader]) .subheader-waves__bubbles {
   height: 100%;
   pointer-events: none;
   transform-origin: top center;
+    fill: var(--bg-faint);
 }
 
 .subheader-bubble--back {
   z-index: 0;
-  opacity: 0.1;
+  opacity: 0.7;
+
+  path {
+    fill: var(--bg-faint);
+  }
 }
 
 /* Front wave: vertical scale from top (transform-origin top center); thin strip when empty portfolio */
