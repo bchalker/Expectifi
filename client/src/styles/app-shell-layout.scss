@@ -1,12 +1,20 @@
 /* App calculator shell — body/html scroll is disabled; .app-scroll-stack scrolls via OverlayScrollbars */
+html.app-shell-layout {
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
 html.app-shell-layout,
 html.app-shell-layout body {
   height: 100%;
+  min-height: 100svh;
   overflow: hidden;
 }
 
 html.app-shell-layout #root {
   height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -14,14 +22,14 @@ html.app-shell-layout {
   /* Sidebar sticky offset inside the main scroll viewport (header sits outside scroll). */
   --app-sidebar-sticky-top: 0px;
   --app-sidebar-sticky-max-height: calc(
-    100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px)
+    100svh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px)
   );
 }
 
 html.app-shell-layout[data-main-hero-stuck='true'] {
   --app-sidebar-sticky-top: 8.5rem;
   --app-sidebar-sticky-max-height: calc(
-    100dvh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px) - 8.5rem
+    100svh - var(--app-measured-header-h, var(--app-top-chrome-h)) - var(--app-privacy-trust-h, 0px) - 8.5rem
   );
 }
 
@@ -29,8 +37,11 @@ html.app-shell-layout[data-main-hero-stuck='true'] {
   display: flex;
   flex-direction: column;
   width: 100%;
+  /* svh = visible viewport (Safari toolbar shown); dvh can extend under browser chrome. */
   height: 100vh;
-  height: 100dvh;
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
   overflow: hidden;
   box-sizing: border-box;
 }

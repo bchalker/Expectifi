@@ -26,10 +26,12 @@ body:has(.landing-page) {
   --landing-text-on-light: var(--color-text-primary, #1c2b3a);
   --landing-text-muted-light: var(--color-text-muted, #5f5e5a);
 
+  min-height: 100vh;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   background: var(--landing-navy);
+  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
   color: var(--landing-text-on-navy);

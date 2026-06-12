@@ -13,6 +13,7 @@ import {
   navRequirementsMet,
   type NavPanelContext,
 } from '../lib/appNavDrawers'
+import { firstNameFromDisplayName } from '../utils/userDisplayName'
 import './Header.scss'
 
 const MARKETING_SECTIONS = [
@@ -116,9 +117,9 @@ function HeaderAuthTail({
   const { apiReady, loading, user, googleCheckoutUi, signOut } = useAuth()
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone)
   const accountLabel = user
-    ? user.displayName?.trim() || user.email
+    ? firstNameFromDisplayName(user.displayName) || user.email
     : googleCheckoutUi
-      ? googleCheckoutUi.displayName?.trim() || googleCheckoutUi.email
+      ? firstNameFromDisplayName(googleCheckoutUi.displayName) || googleCheckoutUi.email
       : ''
   const showViewMyPlansInProfile = Boolean(user?.onboardingDone)
   const isApp = variant === 'app'
