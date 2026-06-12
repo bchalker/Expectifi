@@ -77,6 +77,7 @@
 
   /* App page canvas — body and chrome that sit on the page background */
   --page-bg: hsl(36, 20%, 86%);
+  --page-bg-light: hsl(36, 20%, 92%);
   /* Fixed privacy trust bar — reserve on .app-scroll-stack (text may wrap on narrow screens) */
   --app-privacy-trust-h: 4.75rem;
   --app-plan-banner-h: 0px;
@@ -209,6 +210,7 @@
   --ds-color-danger: var(--red1);
 
   --bg: var(--page-bg);
+  --bg-faint: var(--page-bg-light);
   --surface: var(--ds-color-surface);
   --surface2: var(--ds-color-surface2);
   --text: var(--ds-color-text);

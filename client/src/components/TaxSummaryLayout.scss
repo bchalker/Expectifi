@@ -77,8 +77,9 @@ $tax-summary-sidebar-shadow:
   // gap: var(--space-4);
   width: 100%;
   min-width: 0;
-  box-shadow: $tax-summary-sidebar-shadow;
+  box-shadow: $tax-summary-sidebar-shadow, inset -2px 0 4px 0 var(--surface);
   z-index: 999;
+  background: radial-gradient(ellipse 40% 120% at calc(100% - 3px) center,  white 0%, var(--bg-faint) 0%, transparent 50%);
 }
 
 .section--tax-summary--growth-assumptions .section--tax-summary__sidebar {

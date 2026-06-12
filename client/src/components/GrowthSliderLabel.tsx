@@ -1,5 +1,6 @@
 import {
   IconArrowNarrowDownDashed,
+  IconChevronCompactDown,
   IconTrendingDown,
   IconTrendingUp,
   IconTransfer,
@@ -390,6 +391,12 @@ export function GrowthSliderLabel({
                 <span className="growth-slider-label__panel-rate-caption">
                   annual return
                 </span>
+                <IconChevronCompactDown
+                  className="growth-slider-label__panel-rate-chevron"
+                  size={14}
+                  stroke={1.25}
+                  aria-hidden
+                />
               </div>
             </div>
             <div className="range-inline-row growth-slider-label__panel-track">
