@@ -99,10 +99,10 @@ html:not([data-no-portfolio-subheader]) .subheader-waves__bubbles {
 
 .subheader-bubble--back {
   z-index: 0;
-  opacity: 0.7;
+  opacity: 1;
 
   path {
-    fill: var(--bg-faint);
+    fill: var(--bg);
   }
 }
 
