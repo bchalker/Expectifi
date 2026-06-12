@@ -47,6 +47,8 @@ type HeaderAppProps = HeaderAuthProps & {
   onOpenConfig: () => void
   welcomeDone?: boolean
   navContext: NavPanelContext
+  /** Desktop header center — between brand and tail. */
+  goalBar?: ReactNode
 }
 
 export type HeaderProps = HeaderMarketingProps | HeaderAppProps
@@ -420,6 +422,10 @@ export function Header(props: HeaderProps) {
           onBrandClick={variant === 'app' && !onboardingChrome ? props.onBrandClick : undefined}
           onboardingMode={onboardingChrome}
         />
+
+        {!onboardingChrome && variant === 'app' && props.goalBar ? (
+          <div className="header__goal">{props.goalBar}</div>
+        ) : null}
 
         {!onboardingChrome && variant === 'marketing' ? (
           <HeaderMarketingNav onMarketingAnchor={props.onMarketingAnchor} />

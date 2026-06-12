@@ -1118,8 +1118,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setInputs({ monthlyIncomeGoal }),
   } as const;
 
-  const dashboardGoalBar = showGoalBarRow ? (
-    <GoalProgressBar {...goalBarProps} />
+  const headerGoalBar = showGoalBarRow ? (
+    <GoalProgressBar {...goalBarProps} className="goal-progress-bar--in-header" />
+  ) : null;
+
+  const mobileNavGoalBar = showGoalBarRow ? (
+    <GoalProgressBar {...goalBarProps} className="goal-progress-bar--in-mobile-nav" />
   ) : null;
 
   const dashboardSubHeader = showDashboardSubHeader ? (
@@ -1129,8 +1133,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const dashboardMainHero = showDashboardSubHeader ? (
     <DashboardMainHero
       stickyTopPx={0}
-      showGoalBarRow={showGoalBarRow}
-      goalBarProps={goalBarProps}
       subHeaderProps={dashboardSubHeaderProps}
       onStuckChange={setMainHeroStuck}
     />
@@ -1143,9 +1145,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
         <div
           className={[
             "app-header-shell",
-            !fixedHeaderHeroHidden &&
-              showGoalBarRow &&
-              "app-header-shell--has-goal",
             fixedHeaderHeroHidden && "app-header-shell--hero-in-main",
             welcomeDone &&
               isWhereToRetire &&
@@ -1180,6 +1179,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               onSignIn={openAuthSignIn}
               onCreateAccount={openAuthRegister}
               welcomeDone={welcomeDone}
+              goalBar={headerGoalBar}
             />
             <AppLeftNav
               targetRetirementAge={inputs.targetRetirementAge}
@@ -1204,8 +1204,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
               }}
               navContext={navContext}
               welcomeDone={welcomeDone}
+              goalBar={mobileNavGoalBar}
             />
-            {!fixedHeaderHeroHidden ? dashboardGoalBar : null}
             {!fixedHeaderHeroHidden ? dashboardSubHeader : null}
           </div>
         </div>

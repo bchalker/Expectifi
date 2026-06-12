@@ -32,6 +32,17 @@
   transition: opacity 0.28s ease, visibility 0s linear 0s;
 }
 
+.app-left-nav__goal {
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 761px) {
+  .app-left-nav__goal {
+    display: none;
+  }
+}
+
 .app-left-nav {
   position: fixed;
   z-index: 1;

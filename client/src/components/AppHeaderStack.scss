@@ -4,11 +4,6 @@
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h) + var(--subheader-h));
 }
 
-.app-header-shell--has-goal {
-  --goal-bar-row-h: 2.5rem;
-  --goal-bar-h: var(--goal-bar-row-h);
-}
-
 /* Extra room when income subheader shows SS claim-age row */
 .app-header-shell--ss-claim {
   --subheader-h: max(var(--subheader-bubble-h), clamp(7.25rem, min(40vw, 36vh), 9.5rem));
@@ -39,12 +34,6 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --goal-bar-h: 0px;
   --subheader-h: 0px;
   --app-header-stack-h: var(--app-top-chrome-h);
-}
-
-@media (max-width: 520px) {
-  .app-header-shell--has-goal {
-    --goal-bar-row-h: 3.35rem;
-  }
 }
 
 /* Sticky top: primary chrome + subheader (waves + expected monthly income) */

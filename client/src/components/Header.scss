@@ -62,6 +62,22 @@
   padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
 }
 
+.header--app:has(.header__goal) {
+  position: relative;
+}
+
+.header__goal {
+  display: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.header--app .header__inner:has(.header__goal) .header__nav--app {
+  flex: 0 1 auto;
+}
+
 .header__brand {
   flex-shrink: 0;
   display: flex;
@@ -638,6 +654,34 @@
   .header__nav--marketing .header__link {
     font-size: var(--text-sm);
     padding: var(--space-2) /* review: was 0.45rem */ var(--space-3) /* review: was 0.65rem */;
+  }
+}
+
+@media (min-width: 761px) {
+  .header--app .header__goal {
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    z-index: 1;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    width: min(var(--layout-app-max), 100%);
+    max-width: var(--layout-app-max);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .header--app .header__goal .goal-progress-bar {
+    pointer-events: auto;
+  }
+
+  .header--app .header__brand,
+  .header--app .header__nav--app,
+  .header--app .header__tail {
+    position: relative;
+    z-index: 2;
   }
 }
 

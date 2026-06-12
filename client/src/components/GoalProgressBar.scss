@@ -1,3 +1,40 @@
+.goal-progress-bar--in-header {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  background: transparent !important;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.goal-progress-bar--in-header.goal-progress-bar--phase-growth,
+.goal-progress-bar--in-header.goal-progress-bar--phase-income {
+  background: transparent !important;
+}
+
+.goal-progress-bar--in-header .goal-progress-bar__row {
+  height: auto;
+  min-height: 0;
+  margin-inline: 0;
+  padding-inline: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.goal-progress-bar--in-mobile-nav {
+  width: 100%;
+  max-width: var(--layout-app-max);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.goal-progress-bar--in-mobile-nav .goal-progress-bar__row {
+  margin-inline: 0;
+  padding-inline: var(--layout-app-inner-pad);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .goal-progress-bar {
   --goal-progress-control-h: 1.125rem;
 

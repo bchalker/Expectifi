@@ -1,5 +1,5 @@
 import { IconAdjustments } from "@tabler/icons-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   APP_NAV_DRAWER_ITEMS,
@@ -33,6 +33,8 @@ type Props = {
   onOpenRegister: () => void;
   navContext: NavPanelContext;
   welcomeDone?: boolean;
+  /** Upper area of the mobile nav sheet. */
+  goalBar?: ReactNode;
 };
 
 export function AppLeftNav({
@@ -46,6 +48,7 @@ export function AppLeftNav({
   onOpenRegister,
   navContext,
   welcomeDone = true,
+  goalBar = null,
 }: Props) {
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone);
@@ -167,6 +170,7 @@ export function AppLeftNav({
           .join(" ")}
         aria-label="Panels and tools"
       >
+        {goalBar ? <div className="app-left-nav__goal">{goalBar}</div> : null}
         {routeNavItems.length > 0 ? (
           <div className="app-left-nav__routes" aria-label="App pages">
             {routeNavItems.map(
