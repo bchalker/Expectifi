@@ -1,7 +1,7 @@
 .wtr-travel-illustration {
   position: relative;
-  width: 174px;
-  height: 174px;
+  width: 154px;
+  height: 154px;
   flex-shrink: 0;
 }
 
@@ -29,16 +29,16 @@
 }
 
 .wtr-travel-illustration__globe {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   transform: translate(-50%, -50%);
   mask-image: url('/icons/wtr-globe.svg');
   -webkit-mask-image: url('/icons/wtr-globe.svg');
 }
 
 .wtr-travel-illustration__plane-path {
-  width: 144px;
-  height: 144px;
+  width: 124px;
+  height: 124px;
   transform: translate(-50%, -50%);
   transform-origin: center center;
   mask-image: url('/icons/wtr-plane-path.svg');
