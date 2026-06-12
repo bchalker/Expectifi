@@ -46,6 +46,7 @@ type Props = {
   currentBalance: number
   horizon: number
   targetRetirementAge: number
+  compact?: boolean
 }
 
 export function AccountCustomRateTab({
@@ -57,6 +58,7 @@ export function AccountCustomRateTab({
   currentBalance,
   horizon,
   targetRetirementAge,
+  compact = false,
 }: Props) {
   void _accountName
   const h = horizonClamp(horizon)
@@ -130,11 +132,18 @@ export function AccountCustomRateTab({
       </div>
 
       <div className="account-custom-rate-tab__preview" role="status">
-        <p className="account-custom-rate-tab__preview-line account-custom-rate-tab__preview-line--headline">
+        <p
+          className={[
+            'account-custom-rate-tab__preview-line',
+            compact
+              ? 'account-custom-rate-tab__preview-line--compact'
+              : 'account-custom-rate-tab__preview-line--headline',
+          ].join(' ')}
+        >
           <AnimatedProjectionAmount value={projected} />
           <span className="account-custom-rate-tab__preview-age"> at {targetRetirementAge}</span>
         </p>
-        {showDelta ? (
+        {!compact && showDelta ? (
           <p className="account-custom-rate-tab__preview-line account-custom-rate-tab__preview-line--delta">
             <span
               className={[

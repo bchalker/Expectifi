@@ -1,0 +1,88 @@
+.account-scenario-outlook-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.account-scenario-outlook-card {
+  display: flex;
+  flex: 1 1 calc(50% - 3px);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 120px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-background-primary);
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.account-scenario-outlook-card--full {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.account-scenario-outlook-card:hover {
+  border-color: var(--border-strong);
+}
+
+.account-scenario-outlook-card--selected {
+  border-color: var(--color-border-success);
+  background: var(--color-background-success);
+}
+
+.account-scenario-outlook-card__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.account-scenario-outlook-card__dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.account-scenario-outlook-card__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.account-scenario-outlook-card--selected .account-scenario-outlook-card__label,
+.account-scenario-outlook-card--selected .account-scenario-outlook-card__range {
+  color: var(--color-text-success);
+}
+
+.account-scenario-outlook-card__trends {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.account-scenario-outlook-card__range {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}

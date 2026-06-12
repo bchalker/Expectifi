@@ -26,6 +26,15 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   min-height: 0;
 }
 
+.portfolio-accounts-reveal.portfolio-accounts-reveal--in {
+  position: relative;
+}
+
+.portfolio-accounts-reveal.portfolio-accounts-reveal--in.portfolio-accounts-reveal--scenario-slide-open {
+  overflow: hidden;
+  isolation: isolate;
+}
+
 .section--tax-summary--income-harvest .section--tax-summary__income-layout {
   display: flex;
   flex-direction: column;
@@ -69,6 +78,7 @@ $tax-summary-sidebar-shadow:
   width: 100%;
   min-width: 0;
   box-shadow: $tax-summary-sidebar-shadow;
+  z-index: 999;
 }
 
 .section--tax-summary--growth-assumptions .section--tax-summary__sidebar {

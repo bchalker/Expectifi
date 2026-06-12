@@ -285,7 +285,6 @@ export function HoldingScenarioPanel({
   const globalBlended = targets[0]
     ? blendedRateForDashboardPositionId(targets[0].id, retRate, brkRate)
     : retRate
-  const globalPct = (globalBlended * 100).toFixed(1)
   const nHoldings = importLineCountForSymbol
 
   const outlookPreviewValue = useMemo(
@@ -376,7 +375,11 @@ export function HoldingScenarioPanel({
           </div>
         </AppOverlayScrollbars>
       </div>
-      <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
+      <HoldingScenarioPanelFooter
+        hasScenario={resolvedChoice !== 'default'}
+        onNoScenario={onNoScenario}
+        onDone={onClose}
+      />
     </div>
   )
 }

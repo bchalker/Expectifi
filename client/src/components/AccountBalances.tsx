@@ -36,8 +36,6 @@ import {
   type OnboardingAccountType,
 } from "../lib/manualAccountEntries";
 import {
-  accountScenarioContextForBucket,
-  manualEntryIdForScenarioBucket,
 } from "../lib/allocationProfile";
 import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
 import "./ManualAccountAllocationSlider.scss";
@@ -86,9 +84,9 @@ import {
   type AccountScenarioBucketId,
 } from "../lib/accountReturnScenario";
 import {
-  ACCOUNT_SCENARIO_PLACEHOLDER_LABEL,
   horizonClamp,
   scenarioColumnShortLabel,
+  ACCOUNT_SCENARIO_PLACEHOLDER_LABEL,
 } from "../lib/holdingScenarioApply";
 import {
   computeMergedDashboardPositionModels,
@@ -110,7 +108,8 @@ import {
   AggregatedHoldingsTable,
   type HoldingsScenarioBundle,
 } from "./AggregatedHoldingsTable";
-import { AccountScenarioPanel } from "./AccountScenarioPanel";
+import { AccountScenarioPopoutDataProvider } from "../context/AccountScenarioPopoutDataContext";
+import { ScenarioPopoutProvider, useScenarioPopout } from "../context/ScenarioPopoutContext";
 import {
   PortfolioBucketAccountRow,
   type PortfolioBucketAccountScenarioProps,
@@ -118,6 +117,7 @@ import {
 import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { BottomSheetAside } from "./ui/BottomSheetAside";
+import { PortfolioAccountsScenarioPortal } from "./ui/PortfolioAccountsScenarioPortal";
 import { HoldingScenarioPanel } from "./HoldingScenarioPopout";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
@@ -434,7 +434,15 @@ type Props = {
 const REMOVE_ACCOUNTS_CONFIRM_BODY =
   "Remove all account balances from this card? Manual totals, imported positions, and custom return overrides for these accounts will be cleared.";
 
-export function AccountBalances({
+export function AccountBalances(props: Props) {
+  return (
+    <ScenarioPopoutProvider>
+      <AccountBalancesContent {...props} />
+    </ScenarioPopoutProvider>
+  );
+}
+
+function AccountBalancesContent({
   c,
   onBases,
   balanceMode,
@@ -750,17 +758,17 @@ export function AccountBalances({
     ).some((bucket) => accountScenarioIsActive(inputs, bucket));
   }, [hasCustomScenarioBadge, inputs]);
 
+  const {
+    accountOpen,
+    openAccountScenario,
+    closeAccountScenario,
+    isAccountScenarioOpen,
+  } = useScenarioPopout();
   const [holdingScenarioPanel, setHoldingScenarioPanel] = useState<{
     symbol: string;
     contributingRows: ImportedPositionRow[];
   } | null>(null);
   const [holdingScenarioClosing, setHoldingScenarioClosing] = useState(false);
-  const [accountScenarioPanel, setAccountScenarioPanel] =
-    useState<AccountScenarioBucketId | null>(null);
-  const [accountScenarioClosing, setAccountScenarioClosing] = useState(false);
-  const [accountScenarioInitialTab, setAccountScenarioInitialTab] = useState<
-    ScenarioIntentTabId | undefined
-  >(undefined);
   const [balanceEditPanel, setBalanceEditPanel] = useState<
     "manual" | "import" | null
   >(null);
@@ -902,8 +910,7 @@ export function AccountBalances({
     removeAccountsModalState.close();
     setHoldingScenarioPanel(null);
     setHoldingScenarioClosing(false);
-    setAccountScenarioPanel(null);
-    setAccountScenarioClosing(false);
+    closeAccountScenario();
     setBalanceEditPanel(null);
     setBalanceEditClosing(false);
     onRemoveRetirementAccounts?.();
@@ -938,12 +945,11 @@ export function AccountBalances({
     (payload: { symbol: string; contributingRows: ImportedPositionRow[] }) => {
       setBalanceEditPanel(null);
       setBalanceEditClosing(false);
-      setAccountScenarioPanel(null);
-      setAccountScenarioClosing(false);
+      closeAccountScenario();
       setHoldingScenarioClosing(false);
       setHoldingScenarioPanel(payload);
     },
-    [],
+    [closeAccountScenario],
   );
 
   useEffect(() => {
@@ -976,12 +982,6 @@ export function AccountBalances({
     onHoldingScenarioOpen,
     onReturnEditorOpenHandled,
   ]);
-
-  const finalizeAccountScenarioClose = useCallback(() => {
-    setAccountScenarioPanel(null);
-    setAccountScenarioClosing(false);
-    setAccountScenarioInitialTab(undefined);
-  }, []);
 
   const syncManualEntriesToInputs = useCallback(
     (entries: ManualAccountEntry[]) => {
@@ -1083,59 +1083,15 @@ export function AccountBalances({
     ],
   );
 
-  const handleRequestSetAllocationProfile = useCallback(() => {
-    if (!accountScenarioPanel) return;
-    const entryId = manualEntryIdForScenarioBucket(
-      manualAccountEntries,
-      accountScenarioPanel,
-    );
-    finalizeAccountScenarioClose();
-    if (!entryId) return;
-    const el = document.querySelector(
-      `[data-manual-account-entry="${entryId}"]`,
-    );
-    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    const trigger = el?.querySelector<HTMLButtonElement>(
-      ".manual-account-allocation__trigger",
-    );
-    trigger?.click();
-    requestAnimationFrame(() => {
-      el?.querySelector<HTMLInputElement>(
-        ".manual-account-allocation-slider-panel__range",
-      )?.focus();
-    });
-  }, [
-    accountScenarioPanel,
-    finalizeAccountScenarioClose,
-    manualAccountEntries,
-  ]);
-
-  const requestAccountScenarioClose = useCallback(() => {
-    if (!accountScenarioPanel || accountScenarioClosing) return;
-    setAccountScenarioClosing(true);
-  }, [accountScenarioPanel, accountScenarioClosing]);
-
-  const onAccountScenarioSheetAnimationEnd = useCallback(
-    (e: AnimationEvent<HTMLElement>) => {
-      if (e.target !== e.currentTarget) return;
-      if (e.animationName !== "holding-scenario-slide-sheet-out") return;
-      if (!accountScenarioClosing) return;
-      finalizeAccountScenarioClose();
-    },
-    [accountScenarioClosing, finalizeAccountScenarioClose],
-  );
-
   const onAccountScenarioOpen = useCallback(
     (bucket: AccountScenarioBucketId, initialTab?: ScenarioIntentTabId) => {
       setBalanceEditPanel(null);
       setBalanceEditClosing(false);
       setHoldingScenarioPanel(null);
       setHoldingScenarioClosing(false);
-      setAccountScenarioClosing(false);
-      setAccountScenarioInitialTab(initialTab);
-      setAccountScenarioPanel(bucket);
+      openAccountScenario(bucket, initialTab);
     },
-    [],
+    [openAccountScenario],
   );
 
   const accountScenarioPanelTitle = useCallback(
@@ -1178,24 +1134,22 @@ export function AccountBalances({
           : ACCOUNT_SCENARIO_PLACEHOLDER_LABEL,
         common: choice,
         variant: active ? "badge" : "outline",
-        rowActive: accountScenarioPanel === bucket && !accountScenarioClosing,
-        onOpen: () => onAccountScenarioOpen(bucket),
+        bucket,
+        accountName: accountScenarioPanelTitle(bucket),
+        triggerId: `account-scenario-trigger-${bucket}`,
       };
     },
     [
-      accountScenarioPanel,
-      accountScenarioClosing,
       accountScenarioEditingEnabled,
+      accountScenarioPanelTitle,
       c.yearsToRetirement,
       inputs,
-      onAccountScenarioOpen,
     ],
   );
 
   const isAccountScenarioRowActive = useCallback(
-    (bucket: AccountScenarioBucketId) =>
-      accountScenarioPanel === bucket && !accountScenarioClosing,
-    [accountScenarioPanel, accountScenarioClosing],
+    (bucket: AccountScenarioBucketId) => isAccountScenarioOpen(bucket),
+    [isAccountScenarioOpen],
   );
 
   const portfolioAccountGroupClassName = useCallback(
@@ -1344,8 +1298,7 @@ export function AccountBalances({
     (panel: "manual" | "import") => {
       setHoldingScenarioPanel(null);
       setHoldingScenarioClosing(false);
-      setAccountScenarioPanel(null);
-      setAccountScenarioClosing(false);
+      closeAccountScenario();
       setBalanceEditClosing(false);
       setManualConfirmPhase(false);
       setManualConfirmProgress(0);
@@ -1398,6 +1351,7 @@ export function AccountBalances({
       c.bal.balRoth,
       c.bal.balSE401k,
       c.bal.balTradIRA,
+      closeAccountScenario,
       inputs,
       onBalanceModeChange,
     ],
@@ -1631,7 +1585,7 @@ export function AccountBalances({
   useEffect(() => {
     if (
       !holdingScenarioPanel &&
-      !accountScenarioPanel &&
+      !accountOpen &&
       !balanceEditPanel &&
       !removeAccountsModalState.isOpen
     )
@@ -1641,19 +1595,19 @@ export function AccountBalances({
       if (manageMenuOpen) return;
       if (removeAccountsModalState.isOpen) removeAccountsModalState.close();
       else if (balanceEditPanel) requestBalanceEditClose();
-      else if (accountScenarioPanel) requestAccountScenarioClose();
+      else if (accountOpen) closeAccountScenario();
       else if (holdingScenarioPanel) requestHoldingScenarioClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [
     holdingScenarioPanel,
-    accountScenarioPanel,
+    accountOpen,
     balanceEditPanel,
     removeAccountsModalState.isOpen,
     removeAccountsModalState.close,
     requestHoldingScenarioClose,
-    requestAccountScenarioClose,
+    closeAccountScenario,
     requestBalanceEditClose,
     manageMenuOpen,
   ]);
@@ -1676,27 +1630,27 @@ export function AccountBalances({
     c.retirementCalendarYear,
   ]);
 
+  const accountScenarioPopoutData = useMemo(() => {
+    if (!accountScenarioBundle) return null;
+    return {
+      inputs: accountScenarioBundle.inputs,
+      setInputs: accountScenarioBundle.setInputs,
+      importedPositionRows,
+      yearsToRetirement: accountScenarioBundle.yearsToRetirement,
+      retirementCalendarYear: accountScenarioBundle.retirementCalendarYear,
+      retRate: accountScenarioBundle.retRate,
+      brkRate: accountScenarioBundle.brkRate,
+      accountNameForBucket: accountScenarioPanelTitle,
+    };
+  }, [
+    accountScenarioBundle,
+    accountScenarioPanelTitle,
+    importedPositionRows,
+  ]);
+
   const holdingsScenarioBundle = holdingsScenarioEditingEnabled
     ? accountScenarioBundle
     : null;
-
-  const openAccountScenarioContext = useMemo(
-    () =>
-      accountScenarioPanel
-        ? accountScenarioContextForBucket({
-            bucket: accountScenarioPanel,
-            balanceMode: displayBalanceMode,
-            manualEntries: manualAccountEntries,
-            importedPositionRows,
-          })
-        : { source: null, allocationProfile: null },
-    [
-      accountScenarioPanel,
-      displayBalanceMode,
-      manualAccountEntries,
-      importedPositionRows,
-    ],
-  );
 
   const showWithdrawalGuidance =
     phase === "income" &&
@@ -3267,18 +3221,26 @@ export function AccountBalances({
         : "var(--space-4)",
   };
 
-  const balanceEditPanelOpen = Boolean(
-    balanceEditPanel ||
-    balanceEditClosing ||
-    holdingScenarioPanel ||
-    holdingScenarioClosing ||
-    accountScenarioPanel ||
-    accountScenarioClosing ||
-    removeAccountsModalState.isOpen,
+  const scenarioSlideOpen = Boolean(
+    holdingScenarioPanel || holdingScenarioClosing,
   );
 
-  const renderMergedDashboardOverlays = () => (
-    <div className="account-balances-dashboard-overlays">
+  useEffect(() => {
+    if (!mergedDashboard || typeof document === "undefined") return;
+    const host = document.querySelector(
+      ".portfolio-accounts-reveal.portfolio-accounts-reveal--in",
+    );
+    if (!host) return;
+    host.classList.toggle(
+      "portfolio-accounts-reveal--scenario-slide-open",
+      scenarioSlideOpen,
+    );
+    return () =>
+      host.classList.remove("portfolio-accounts-reveal--scenario-slide-open");
+  }, [mergedDashboard, scenarioSlideOpen]);
+
+  const renderScenarioSlidePanels = () => (
+    <>
       {holdingScenarioPanel && holdingsScenarioBundle ? (
         <BottomSheetAside
           open={!holdingScenarioClosing}
@@ -3304,41 +3266,11 @@ export function AccountBalances({
           />
         </BottomSheetAside>
       ) : null}
-      {accountScenarioPanel && accountScenarioBundle ? (
-        <BottomSheetAside
-          open={!accountScenarioClosing}
-          onClose={requestAccountScenarioClose}
-          className={`holding-scenario-slide__sheet${accountScenarioClosing ? " holding-scenario-slide__sheet--closing" : ""}`}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="account-scenario-panel-title"
-          onAnimationEnd={onAccountScenarioSheetAnimationEnd}
-        >
-          <AccountScenarioPanel
-            accountName={accountScenarioPanelTitle(accountScenarioPanel)}
-            bucket={accountScenarioPanel}
-            importedPositionRows={importedPositionRows}
-            inputs={accountScenarioBundle.inputs}
-            setInputs={accountScenarioBundle.setInputs}
-            yearsToRetirement={accountScenarioBundle.yearsToRetirement}
-            retirementCalendarYear={
-              accountScenarioBundle.retirementCalendarYear
-            }
-            retRate={accountScenarioBundle.retRate}
-            brkRate={accountScenarioBundle.brkRate}
-            initialTab={accountScenarioInitialTab}
-            accountSource={openAccountScenarioContext.source}
-            allocationProfile={openAccountScenarioContext.allocationProfile}
-            onRequestSetAllocationProfile={
-              openAccountScenarioContext.source === "manual" &&
-              !openAccountScenarioContext.allocationProfile
-                ? handleRequestSetAllocationProfile
-                : undefined
-            }
-            onClose={requestAccountScenarioClose}
-          />
-        </BottomSheetAside>
-      ) : null}
+    </>
+  );
+
+  const renderMergedDashboardOverlays = () => (
+    <div className="account-balances-dashboard-overlays">
       {balanceEditPanel === "manual" && !manageMenuOpen ? (
         <aside
           className={`account-balances-manual-sheet account-balances-edit-sheet account-balances-edit-sheet--manual${balanceEditClosing ? " account-balances-manual-sheet--closing" : ""}`}
@@ -3493,10 +3425,8 @@ export function AccountBalances({
           >
             <div
               className={`account-balances-card-inner-wrap${
-                balanceEditPanelOpen
-                  ? " account-balances-card-inner-wrap--scenario-slide-open"
-                  : ""
-              }${!hasAnyAccountCardData ? " account-balances-card-inner-wrap--empty-state" : ""}`}
+                !hasAnyAccountCardData ? " account-balances-card-inner-wrap--empty-state" : ""
+              }`}
               style={hasAnyAccountCardData ? cardStyle : undefined}
             >
               {!hasAnyAccountCardData && canEditBalances
@@ -3562,8 +3492,19 @@ export function AccountBalances({
           {accountSectionFooter}
         </>
       )}
+      {mergedDashboard ? (
+        <PortfolioAccountsScenarioPortal>
+          {renderScenarioSlidePanels()}
+        </PortfolioAccountsScenarioPortal>
+      ) : null}
       {mergedDashboard ? renderMergedDashboardOverlays() : null}
     </>
+  );
+
+  const accountBalancesBodyWithPopoutData = (
+    <AccountScenarioPopoutDataProvider value={accountScenarioPopoutData}>
+      {accountBalancesBody}
+    </AccountScenarioPopoutDataProvider>
   );
 
   const csvImportModal =
@@ -3593,12 +3534,12 @@ export function AccountBalances({
         onApplyBalances={onImportedApplyBalances}
         onImportApplied={onPositionsImportApplied}
       >
-        {accountBalancesBody}
+        {accountBalancesBodyWithPopoutData}
         {csvImportModal}
         {csvImportModalOpen && renderReplaceSourceConfirmOverlay(true)}
       </PlaidConnectionProvider>
     );
   }
 
-  return accountBalancesBody;
+  return accountBalancesBodyWithPopoutData;
 }

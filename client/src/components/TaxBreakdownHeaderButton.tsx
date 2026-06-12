@@ -1,3 +1,4 @@
+import { IconCornerDownRight } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useTaxSummaryPanelOptional } from "../context/TaxSummaryPanelContext";
 
@@ -35,6 +36,9 @@ export function TaxBreakdownPanelTrigger({
       aria-controls="tax-summary-panel"
       onClick={openPanel}
     >
+      <span className="tax-breakdown-panel-trigger__icon" aria-hidden>
+        <IconCornerDownRight size={14} stroke={1.25} />
+      </span>
       {children}
     </button>
   );

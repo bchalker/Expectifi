@@ -14,6 +14,7 @@ export type ScenarioPerYearGridProps = {
   globalBlended: number
   yearlyReturns: number[]
   onPatchRates: (nextRates: number[]) => void
+  className?: string
 }
 
 export function ScenarioPerYearGrid({
@@ -22,6 +23,7 @@ export function ScenarioPerYearGrid({
   globalBlended,
   yearlyReturns,
   onPatchRates,
+  className = '',
 }: ScenarioPerYearGridProps) {
   const years = useMemo(
     () => growthPhaseProjectionYears(retirementCalendarYear, yearsToRetirement),
@@ -36,7 +38,7 @@ export function ScenarioPerYearGrid({
   const globalPct = (globalBlended * 100).toFixed(1)
 
   return (
-    <div className="scenario-per-year-grid">
+    <div className={['scenario-per-year-grid', className].filter(Boolean).join(' ')}>
       <p className="scenario-per-year-grid__hint">
         Unedited years use your{' '}
         <strong className="scenario-per-year-grid__hint-rate">{globalPct}%</strong> global rate.

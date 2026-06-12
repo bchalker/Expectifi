@@ -1,0 +1,220 @@
+.account-scenario-popout {
+  width: 350px;
+  max-width: min(350px, calc(100vw - 16px));
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-secondary, var(--border));
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.account-scenario-popout--heroui-inner {
+  width: 100%;
+  max-width: none;
+  border: none;
+  border-radius: inherit;
+  box-shadow: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.account-scenario-popout__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+}
+
+.account-scenario-popout__head-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.account-scenario-popout__eyebrow {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.account-scenario-popout__title {
+  margin: 2px 0 0;
+  font-family: var(--body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.account-scenario-popout__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--border-radius-md, 8px);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.account-scenario-popout__close:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.account-scenario-popout__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.account-scenario-popout__tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 8px;
+  padding: 0 12px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.account-scenario-popout__tab {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 4px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.account-scenario-popout__tab--active {
+  border-bottom-color: var(--green1);
+  color: var(--text);
+}
+
+.account-scenario-popout__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.account-scenario-popout__body {
+  padding: 10px 12px 12px;
+  max-height: min(52vh, 420px);
+  overflow: auto;
+}
+
+.account-scenario-popout__conflict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--surface2);
+}
+
+.account-scenario-popout__conflict-text {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.account-scenario-popout__conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout {
+  --scenario-per-year-cell-gap: 6px;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .scenario-per-year-grid__hint {
+  margin-bottom: 8px;
+  font-size: 0.6875rem;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .scenario-per-year-grid__matrix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .scenario-per-year-grid__cell {
+  flex: 1 1 50px;
+  width: auto;
+  min-width: 50px;
+  max-width: none;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .scenario-per-year-grid__year {
+  font-size: 0.625rem;
+  text-align: center;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .holding-scenario-popout__year-input-wrap {
+  min-height: 1.75rem;
+  justify-content: center;
+}
+
+.account-scenario-popout__body .scenario-per-year-grid--popout .holding-scenario-popout__year-input {
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.account-scenario-popout__foot.holding-scenario-popout__foot {
+  padding: var(--space-3);
+  border-top: 0.5px solid var(--color-border-tertiary);
+  background: var(--sky-blue-u1);
+  border-bottom-left-radius: var(--border-radius-lg);
+  border-bottom-right-radius: var(--border-radius-lg);
+}
+
+@media (max-width: 680px) {
+  .account-scenario-popout--heroui-inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100svh;
+    height: 100%;
+  }
+
+  .account-scenario-popout__head {
+    flex-shrink: 0;
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  }
+
+  .account-scenario-popout__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .account-scenario-popout__foot.holding-scenario-popout__foot {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-bottom: var(--app-mobile-overlay-footer-pad);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}

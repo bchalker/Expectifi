@@ -3,15 +3,16 @@ import { AppButton } from './ui/AppButton'
 import './HoldingScenarioPopout.scss'
 
 export type HoldingScenarioPanelFooterProps = {
-  globalPct: string
+  /** When true, left action reads "Remove Scenario" instead of "Do not add a scenario". */
+  hasScenario?: boolean
   onNoScenario: () => void
   onDone: () => void
   className?: string
 }
 
-/** Modal footer: clear scenario (global rate) on the left, Done on the right. */
+/** Modal footer: clear scenario on the left, Done on the right. */
 export function HoldingScenarioPanelFooter({
-  globalPct,
+  hasScenario = false,
   onNoScenario,
   onDone,
   className = '',
@@ -29,13 +30,8 @@ export function HoldingScenarioPanelFooter({
         className="holding-scenario-popout__no-scenario"
         onPress={onNoScenario}
       >
-        <span className="holding-scenario-popout__no-scenario-text">
-          <span className="holding-scenario-popout__no-scenario-label">Do not add a scenario</span>
-          <span className="holding-scenario-popout__no-scenario-sub">
-            Use my{' '}
-            <strong className="holding-scenario-popout__no-scenario-pct">{globalPct}%</strong>{' '}
-            global rate
-          </span>
+        <span className="holding-scenario-popout__no-scenario-label">
+          {hasScenario ? 'Remove Scenario' : 'Do not add a scenario'}
         </span>
       </AppButton>
       <Button

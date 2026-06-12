@@ -22,6 +22,7 @@ export type HoldingsSymbolCardScenarioProps = {
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
   variant: HoldingsScenarioTriggerVariant
+  customPctDecimal?: number
   inheritAccent?: ScenarioUiChoice | null
   /** Holding rows: show when holding scenario diverges from account scenario. */
   overridesAccountScenario?: boolean
@@ -165,9 +166,6 @@ export function HoldingsSymbolCardScenarioPanel({
 }: {
   scenario: HoldingsSymbolCardScenarioProps
 }) {
-  const inheritAccent =
-    scenario.rateSource === 'account' ? (scenario.inheritAccent ?? null) : null
-
   return (
     <div className="holdings-symbol-card__scenario">
       <PortfolioScenarioCell
@@ -175,7 +173,7 @@ export function HoldingsSymbolCardScenarioPanel({
         label={scenario.label}
         common={scenario.common}
         variant={scenario.variant}
-        inheritAccent={inheritAccent}
+        inheritAccent={scenario.inheritAccent}
         rateSource={scenario.rateSource}
         overridesAccountScenario={scenario.overridesAccountScenario}
         rowActive={scenario.rowActive}

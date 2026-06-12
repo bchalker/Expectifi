@@ -1,59 +1,108 @@
-import type { HoldingReturnRateSource } from '../lib/accountReturnScenario'
+import type { AccountScenarioBucketId, HoldingReturnRateSource } from '../lib/accountReturnScenario'
 import {
-  ACCOUNT_SCENARIO_SUBLABEL,
   HOLDING_ROW_SCENARIO_SUBLABEL,
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
+import { useScenarioPopout } from '../context/ScenarioPopoutContext'
 import {
   HoldingsScenarioTrigger,
   type HoldingsScenarioTriggerVariant,
 } from './HoldingsScenarioTrigger'
+import { AccountScenarioRowPopout } from './accountScenario/AccountScenarioRowPopout'
 import './PortfolioScenarioCell.scss'
 
-export type PortfolioScenarioCellProps = {
+export type PortfolioScenarioCellAccountProps = {
+  bucket: AccountScenarioBucketId
+  accountName: string
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
   variant: HoldingsScenarioTriggerVariant
-  /** Account scenario color when a holding follows the account scenario (outline). */
+  triggerId?: string
+}
+
+export type PortfolioScenarioCellHoldingProps = {
+  label: string
+  common: ScenarioUiChoice | typeof SCENARIO_MIXED
+  variant: HoldingsScenarioTriggerVariant
   inheritAccent?: ScenarioUiChoice | null
-  /** Holding rows: whether return rate follows account vs custom override. */
   rateSource?: HoldingReturnRateSource
-  /** Holding badge differs from account scenario. */
   overridesAccountScenario?: boolean
   rowActive: boolean
   onOpen: () => void
-  layout: 'account' | 'holding'
-  className?: string
 }
+
+export type PortfolioScenarioCellProps =
+  | ({
+      layout: 'account'
+      className?: string
+    } & PortfolioScenarioCellAccountProps)
+  | ({
+      layout: 'holding'
+      className?: string
+    } & PortfolioScenarioCellHoldingProps)
 
 /**
  * Shared scenario column for portfolio account rows and holding rows.
  */
-export function PortfolioScenarioCell({
-  label,
-  common,
-  variant,
-  inheritAccent: _inheritAccent = null,
-  rateSource,
-  overridesAccountScenario = false,
-  rowActive,
-  onOpen,
-  layout,
-  className = '',
-}: PortfolioScenarioCellProps) {
+export function PortfolioScenarioCell(props: PortfolioScenarioCellProps) {
+  const { isAccountScenarioOpen } = useScenarioPopout()
+
+  if (props.layout === 'account') {
+    const {
+      bucket,
+      accountName,
+      label,
+      common,
+      variant,
+      triggerId,
+      className = '',
+    } = props
+    return (
+      <div
+        className={[
+          'portfolio-scenario-cell',
+          'portfolio-scenario-cell--account',
+          isAccountScenarioOpen(bucket) && 'portfolio-scenario-cell--account-active',
+          className,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <AccountScenarioRowPopout
+          bucket={bucket}
+          accountName={accountName}
+          label={label}
+          common={common}
+          variant={variant}
+          triggerId={triggerId}
+        />
+      </div>
+    )
+  }
+
+  const {
+    label,
+    common,
+    variant,
+    inheritAccent = null,
+    rateSource,
+    overridesAccountScenario = false,
+    rowActive,
+    onOpen,
+    className = '',
+  } = props
+
   const inheritsAccountScenario =
-    layout === 'holding' && rateSource === 'account' && variant === 'outline'
-  const holdingScenarioActive = layout === 'holding' && rowActive
+    rateSource === 'account' && variant === 'outline'
 
   return (
     <div
       className={[
         'portfolio-scenario-cell',
-        `portfolio-scenario-cell--${layout}`,
-        layout === 'account' && rowActive && 'portfolio-scenario-cell--account-active',
+        'portfolio-scenario-cell--holding',
         inheritsAccountScenario && 'portfolio-scenario-cell--inherits-account',
-        holdingScenarioActive && 'portfolio-scenario-cell--holding-active',
+        rowActive && 'portfolio-scenario-cell--holding-active',
         className,
       ]
         .filter(Boolean)
@@ -64,15 +113,15 @@ export function PortfolioScenarioCell({
           label={label}
           common={common}
           variant={variant}
-          inheritAccent={null}
+          inheritAccent={inheritAccent}
           rowActive={rowActive}
           onOpen={onOpen}
           sublabel={
-            layout === 'holding' ? HOLDING_ROW_SCENARIO_SUBLABEL : ACCOUNT_SCENARIO_SUBLABEL
+            HOLDING_ROW_SCENARIO_SUBLABEL
           }
           className="portfolio-scenario-cell__trigger"
         />
-        {layout === 'holding' && overridesAccountScenario ? (
+        {overridesAccountScenario ? (
           <span className="portfolio-scenario-cell__override-note">Overrides account scenario</span>
         ) : null}
       </div>

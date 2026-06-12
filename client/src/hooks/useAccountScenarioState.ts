@@ -1,5 +1,3 @@
-import { IconAlertSquareRounded, IconX } from '@tabler/icons-react'
-import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   blendedRateForAccountBucket,
@@ -12,12 +10,6 @@ import {
   type AccountReturnScenario,
   type AccountScenarioBucketId,
 } from '../lib/accountReturnScenario'
-import {
-  accountScenarioManualHeaderNote,
-  scenarioAllocationMismatchNote,
-  type AccountDataSource,
-  type AllocationProfile,
-} from '../lib/allocationProfile'
 import type { CalculatorInputs } from '../lib/computeResults'
 import type { ImportedPositionRow } from '../lib/positionsCsv'
 import {
@@ -41,12 +33,8 @@ import {
   type PositionReturnModel,
 } from '../lib/positionReturnModel'
 import { growthPhaseProjectionYears } from '../lib/marketScenarioProjection'
-import { parseScenarioPct } from './HoldingScenarioPopout'
-import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
-import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
-import { ScenarioPerYearGrid } from './ScenarioPerYearGrid'
-import { AppButton } from './ui/AppButton'
-import './HoldingScenarioPopout.scss'
+import { parseScenarioPct } from '../components/HoldingScenarioPopout'
+import type { ScenarioIntentTabId } from '../components/HoldingScenarioIntentTabs'
 
 function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boolean {
   const h = horizonClamp(horizon)
@@ -81,41 +69,29 @@ function accountScenarioToPositionModel(scenario: AccountReturnScenario): Positi
   }
 }
 
-export type AccountScenarioPanelProps = {
-  accountName: string
+export type UseAccountScenarioStateArgs = {
   bucket: AccountScenarioBucketId
-  onClose: () => void
-  importedPositionRows: ImportedPositionRow[]
   inputs: CalculatorInputs
   setInputs: (p: Partial<CalculatorInputs>) => void
+  importedPositionRows: ImportedPositionRow[]
   yearsToRetirement: number
   retirementCalendarYear: number
   retRate: number
   brkRate: number
-  /** Focus this tab when the panel opens (e.g. from account row hint link). */
   initialTab?: ScenarioIntentTabId
-  accountSource?: AccountDataSource | null
-  allocationProfile?: AllocationProfile | null
-  /** Manual account with no profile: close drawer and open row inline picker. */
-  onRequestSetAllocationProfile?: () => void
 }
 
-export function AccountScenarioPanel({
-  accountName,
+export function useAccountScenarioState({
   bucket,
-  onClose,
-  importedPositionRows,
   inputs,
   setInputs,
+  importedPositionRows,
   yearsToRetirement,
   retirementCalendarYear,
   retRate,
   brkRate,
   initialTab,
-  accountSource = null,
-  allocationProfile = null,
-  onRequestSetAllocationProfile,
-}: AccountScenarioPanelProps) {
+}: UseAccountScenarioStateArgs) {
   const h = horizonClamp(yearsToRetirement)
   const calY = retirementCalendarYear
   const blended = blendedRateForAccountBucket(bucket, retRate, brkRate)
@@ -150,7 +126,7 @@ export function AccountScenarioPanel({
   useEffect(() => {
     setUiChoice(resolvedChoice)
     setActiveTab(intentFromScenarioChoice(resolvedChoice))
-  }, [resolvedChoice])
+  }, [resolvedChoice, bucket])
 
   useEffect(() => {
     if (initialTab) setActiveTab(initialTab)
@@ -248,11 +224,6 @@ export function AccountScenarioPanel({
     setOverrideConflict(null)
   }, [bucket, inputs, setInputs])
 
-  const onNoScenario = useCallback(() => {
-    clearToGlobalRate()
-    onClose()
-  }, [clearToGlobalRate, onClose])
-
   const primaryModel = useMemo(
     () => (stored ? accountScenarioToPositionModel(stored) : targets[0]),
     [stored, targets],
@@ -271,7 +242,8 @@ export function AccountScenarioPanel({
       setActiveTab(tab)
       if (tab === 'outlook') {
         return
-      } else if (tab === 'custom') {
+      }
+      if (tab === 'custom') {
         setUiChoice('custom')
         tryPatchAccount('custom', parseScenarioPct(draftPct))
       } else if (tab === 'peryear') {
@@ -302,139 +274,39 @@ export function AccountScenarioPanel({
     return holdingsPreviewValue > 0 ? holdingsPreviewValue : fromInputs
   }, [bucket, holdingsPreviewValue, inputs])
 
-  const outlookTiles = OUTLOOK_SCENARIO_TILES
-
   const outlookSelection = isOutlookScenarioChoice(uiChoice) ? uiChoice : null
 
-  const scenarioMismatchNote = scenarioAllocationMismatchNote(allocationProfile, outlookSelection)
-  const isManual = accountSource === 'manual'
-  const isHoldingsKnown = accountSource === 'csv' || accountSource === 'plaid'
-  const manualHeaderNote = isManual ? accountScenarioManualHeaderNote(allocationProfile) : null
-  const showSetProfileLink = isManual && !allocationProfile && Boolean(onRequestSetAllocationProfile)
+  const showPerYearGrid =
+    primaryModel &&
+    activeTab === 'peryear' &&
+    (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h))
 
-  const yearGrid =
-    primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
-      <ScenarioPerYearGrid
-        retirementCalendarYear={calY}
-        yearsToRetirement={yearsToRetirement}
-        globalBlended={blended}
-        yearlyReturns={primaryModel.yearlyReturns}
-        onPatchRates={patchYearRates}
-      />
-    ) : null
-
-  return (
-    <div className="holding-scenario-popout holding-scenario-popout--panel">
-      <header className="holding-scenario-popout__head">
-        <div className="holding-scenario-popout__head-stack">
-          <div className="holding-scenario-popout__head-row">
-            <h2 className="holding-scenario-popout__title" id="account-scenario-panel-title">
-              Account scenario — {accountName}
-            </h2>
-            <button type="button" className="holding-scenario-popout__close panel-close-btn" onClick={onClose} aria-label="Close">
-              <IconX size={14} stroke={1.5} aria-hidden />
-            </button>
-          </div>
-          {isHoldingsKnown ? (
-            <p className="holding-scenario-popout__head-subtext" role="note">
-              This rate applies to all holdings in <strong>{accountName}</strong> without a custom scenario.
-            </p>
-          ) : isManual && manualHeaderNote ? (
-            <p className="holding-scenario-popout__head-subtext" role="note">
-              {manualHeaderNote}
-              {showSetProfileLink ? (
-                <>
-                  {' '}
-                  <button
-                    type="button"
-                    className="holding-scenario-popout__head-link"
-                    onClick={() => onRequestSetAllocationProfile?.()}
-                  >
-                    Set profile
-                  </button>
-                </>
-              ) : null}
-            </p>
-          ) : (
-            <p className="holding-scenario-popout__head-subtext" role="note">
-              This rate applies to all holdings in <strong>{accountName}</strong> without a custom scenario.
-            </p>
-          )}
-        </div>
-      </header>
-      <div className="holding-scenario-popout__body">
-        <AppOverlayScrollbars className="holding-scenario-popout__scroll" defer={false}>
-          <div className="holding-scenario-popout__scroll-inner">
-            {overrideConflict ? (
-              <div className="holding-scenario-override-conflict" role="status">
-                <div className="holding-scenario-override-conflict__lead">
-                  <IconAlertSquareRounded
-                    className="holding-scenario-override-conflict__icon"
-                    size={16}
-                    stroke={1.5}
-                    aria-hidden
-                  />
-                  <p className="holding-scenario-override-conflict__text">
-                    <strong>{overrideConflict.count}</strong> holding
-                    {overrideConflict.count === 1 ? '' : 's'} already have{' '}
-                    <strong>{scenarioChoiceConflictLabel(overrideConflict.choice)}</strong> set individually.
-                    Remove their overrides and let them inherit from this account instead?
-                  </p>
-                </div>
-                <div className="holding-scenario-override-conflict__actions">
-                  <AppButton
-                    type="button"
-                    size="sm"
-                    variant="primary"
-                    className="holding-scenario-override-conflict__btn"
-                    onPress={onRemoveOverrides}
-                  >
-                    Remove overrides
-                  </AppButton>
-                  <AppButton
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    className="holding-scenario-override-conflict__btn"
-                    onPress={onKeepBothOverrides}
-                  >
-                    Keep both
-                  </AppButton>
-                </div>
-              </div>
-            ) : null}
-            <div className="holding-scenario-popout__intent-stack">
-              <HoldingScenarioIntentTabs
-                variant="account"
-                activeTab={activeTab}
-                onTabChange={onTabChange}
-                outlookValue={outlookSelection}
-                onOutlookChange={onSelectOutlookTile}
-                outlookTiles={outlookTiles}
-                globalBlended={blended}
-                outlookHorizon={h}
-                outlookPreviewCurrentValue={outlookPreviewValue}
-                accountName={accountName}
-                targetRetirementAge={inputs.targetRetirementAge}
-                accountCurrentBalance={outlookPreviewValue > 0 ? outlookPreviewValue : undefined}
-                draftPct={draftPct}
-                onDraftPctChange={(s) => {
-                  setDraftPct(s)
-                  tryPatchAccount('custom', parseScenarioPct(s))
-                }}
-                onDraftPctBlur={() => {
-                  const nextPct = clampPct(parseScenarioPct(draftPct))
-                  setDraftPct(String(nextPct))
-                  tryPatchAccount('custom', nextPct)
-                }}
-                yearGrid={yearGrid}
-                scenarioMismatchNote={scenarioMismatchNote}
-              />
-            </div>
-          </div>
-        </AppOverlayScrollbars>
-      </div>
-      <HoldingScenarioPanelFooter globalPct={globalPct} onNoScenario={onNoScenario} onDone={onClose} />
-    </div>
-  )
+  return {
+    h,
+    blended,
+    globalPct,
+    activeTab,
+    onTabChange,
+    outlookTiles: OUTLOOK_SCENARIO_TILES,
+    outlookSelection,
+    onSelectOutlookTile,
+    outlookPreviewValue,
+    draftPct,
+    setDraftPct,
+    tryPatchAccount,
+    clampPct,
+    parseScenarioPct,
+    patchYearRates,
+    primaryModel,
+    showPerYearGrid,
+    perYearCalendarYears,
+    yearsToRetirement,
+    calY,
+    overrideConflict,
+    onRemoveOverrides,
+    onKeepBothOverrides,
+    scenarioChoiceConflictLabel,
+    clearToGlobalRate,
+    targetRetirementAge: inputs.targetRetirementAge,
+  }
 }

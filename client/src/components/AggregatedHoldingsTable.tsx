@@ -203,6 +203,7 @@ function AggregatedHoldingGroup({
         variant: (rateSource === "custom" ? "badge" : "outline") as
           | "badge"
           | "outline",
+        customPctDecimal: customDec,
         inheritAccent:
           rateSource === "account" && accountInheritChoice !== "default"
             ? accountInheritChoice

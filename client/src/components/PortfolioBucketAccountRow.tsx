@@ -1,18 +1,20 @@
 import type { ReactNode } from 'react'
 import { SCENARIO_MIXED, type ScenarioUiChoice } from '../lib/holdingScenarioApply'
+import type { AccountScenarioBucketId } from '../lib/accountReturnScenario'
 import type { BucketTrendDisplay } from '../lib/bucketHoldingTrend'
+import type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
 import { PortfolioScenarioCell } from './PortfolioScenarioCell'
 import { BucketTotalTrend } from './ui/BucketTotalTrend'
 import { ViewHoldingsHint } from './ui/ViewHoldingsHint'
-import type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
 import './PortfolioBucketAccountRow.scss'
 
 export type PortfolioBucketAccountScenarioProps = {
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
   variant: HoldingsScenarioTriggerVariant
-  rowActive: boolean
-  onOpen: () => void
+  bucket: AccountScenarioBucketId
+  accountName: string
+  triggerId?: string
 }
 
 type Props = {

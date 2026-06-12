@@ -1,4 +1,5 @@
 import { IconLibraryPlus } from '@tabler/icons-react'
+import { forwardRef, type ComponentPropsWithRef } from 'react'
 import {
   ACCOUNT_SCENARIO_SUBLABEL,
   SCENARIO_MIXED,
@@ -32,42 +33,58 @@ export type HoldingsScenarioTriggerProps = {
   /** Badge sublabel — account rows vs holding rows. */
   sublabel?: string
   className?: string
+  /** Merged when composed inside HeroUI `Popover.Trigger` `render`. */
+  triggerSlotProps?: ComponentPropsWithRef<'button'>
 }
 
 /** Scenario control button — outline placeholder or white card badge with dot + trend icon. */
-export function HoldingsScenarioTrigger({
-  label,
-  common,
-  variant,
-  inheritAccent = null,
-  rowActive,
-  onOpen,
-  sublabel = ACCOUNT_SCENARIO_SUBLABEL,
-  className = '',
-}: HoldingsScenarioTriggerProps) {
+export const HoldingsScenarioTrigger = forwardRef<HTMLButtonElement, HoldingsScenarioTriggerProps>(
+  function HoldingsScenarioTrigger(
+    {
+      label,
+      common,
+      variant,
+      inheritAccent = null,
+      rowActive,
+      onOpen,
+      sublabel = ACCOUNT_SCENARIO_SUBLABEL,
+      className = '',
+      triggerSlotProps,
+    },
+    forwardedRef,
+  ) {
   const accentChoice =
     variant === 'outline' && inheritAccent && inheritAccent !== 'default' ? inheritAccent : null
   const badgeChoice = variant === 'badge' ? common : null
   const choiceClass = badgeChoice ? holdingsScenarioTriggerChoiceClass(badgeChoice) : ''
   const shellClass = accentChoice ? holdingsScenarioInheritShellClass(accentChoice) : ''
+  const { ref: slotRef, className: slotClassName, onClick: slotOnClick, ...restSlotProps } =
+    triggerSlotProps ?? {}
 
   const button = (
     <button
+      {...restSlotProps}
+      ref={slotRef ?? forwardedRef}
       type="button"
       className={[
         'holdings-scenario-trigger',
         variant === 'outline' ? 'holdings-scenario-trigger--outline' : 'holdings-scenario-trigger--badge',
         rowActive && 'holdings-scenario-trigger--open',
         choiceClass,
+        slotClassName,
         className,
       ]
         .filter(Boolean)
         .join(' ')}
       data-holdings-scenario-trigger
-      aria-expanded={rowActive}
-      aria-haspopup="dialog"
+      aria-expanded={restSlotProps['aria-expanded'] ?? rowActive}
+      aria-haspopup={restSlotProps['aria-haspopup'] ?? 'dialog'}
       onClick={(e) => {
         e.stopPropagation()
+        if (slotOnClick) {
+          slotOnClick(e)
+          return
+        }
         onOpen()
       }}
     >
@@ -97,4 +114,5 @@ export function HoldingsScenarioTrigger({
       {button}
     </div>
   )
-}
+  },
+)
