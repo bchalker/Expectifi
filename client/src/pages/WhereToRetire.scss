@@ -402,8 +402,9 @@
     --wtr-mobile-pagination-h: 2.75rem;
   }
 
-  html[data-app-phase='where-to-retire'] .app-privacy-trust {
-    display: none;
+  .app-scroll-stack--where-to-retire > .app-scroll-stack__main > .where-to-retire {
+    flex: 0 0 auto;
+    min-height: auto;
   }
 
   .where-to-retire__main-panel {
@@ -424,10 +425,27 @@
     z-index: auto;
   }
 
+  .where-to-retire__body > .where-to-retire__main-panel {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+
   .where-to-retire__main-panel-map {
     min-height: 0;
     border-radius: 0;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .where-to-retire__main-panel-map .wtr-explorer {
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .where-to-retire__main-panel-map .where-to-retire__map-stage {
+    flex: 0 0 auto;
+    min-height: auto;
     overflow: visible;
   }
 
@@ -443,8 +461,8 @@
   }
 
   .where-to-retire__body--map .where-to-retire__main-panel {
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
   }
 
   .where-to-retire__body.where-to-retire__body--map.main,
@@ -460,7 +478,14 @@
   .app-page.app-page--where-to-retire.where-to-retire__body.main,
   .app-page--where-to-retire.where-to-retire__body--map.main {
     padding: 0;
-    padding-bottom: 0;
+  }
+
+  @media (max-width: 680px) {
+    .where-to-retire__body.where-to-retire__body--map.main,
+    .app-page.app-page--where-to-retire.where-to-retire__body.main,
+    .app-page--where-to-retire.where-to-retire__body--map.main {
+      padding-bottom: calc(var(--wtr-mobile-pagination-h) + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .where-to-retire__main-panel {
@@ -475,40 +500,44 @@
 .where-to-retire__main-panel-map {
   position: relative;
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
-  min-height: var(--wtr-map-area-min-h, 36rem);
   min-width: 0;
   border-radius: 0;
-  overflow: hidden;
 }
 
-@media (max-width: 680px) {
+@media (min-width: 681px) {
   .where-to-retire__main-panel-map {
-    overflow: visible;
+    flex: 1 1 auto;
+    min-height: var(--wtr-map-area-min-h, 36rem);
+    overflow: hidden;
+  }
+
+  .where-to-retire__main-panel-map .wtr-explorer,
+  .where-to-retire__map-stage .wtr-explorer {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
   }
 }
 
 .where-to-retire__map-stage {
   position: relative;
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
-  min-height: 0;
-  overflow: hidden;
+}
+
+@media (min-width: 681px) {
+  .where-to-retire__map-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
 }
 
 /* Discover / alternate layouts may need protruding chrome */
 .where-to-retire__body--map .where-to-retire__view-panel {
   overflow: visible;
-}
-
-.where-to-retire__main-panel-map .wtr-explorer,
-.where-to-retire__map-stage .wtr-explorer {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
 }
 
 .where-to-retire__map-stage .where-to-retire__compare-overlay {
@@ -804,5 +833,16 @@
 
   a:hover {
     text-decoration: underline;
+  }
+}
+
+/* Mobile WTR list layout — must follow desktop flex/overflow rules above. */
+@media (max-width: 680px) {
+  .where-to-retire__main-panel-map,
+  .where-to-retire__main-panel-map .where-to-retire__map-stage,
+  .where-to-retire__main-panel-map .wtr-explorer {
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
   }
 }

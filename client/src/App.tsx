@@ -1180,6 +1180,15 @@ export default function App({ initialAuthModal = null }: AppProps) {
               onCreateAccount={openAuthRegister}
               welcomeDone={welcomeDone}
               goalBar={headerGoalBar}
+              phaseToggle={
+                showDashboardSubHeader && dashboardHasPortfolio
+                  ? {
+                      phase,
+                      onPhase: onPhaseChange,
+                      targetRetirementAge: inputs.targetRetirementAge,
+                    }
+                  : null
+              }
             />
             <AppLeftNav
               targetRetirementAge={inputs.targetRetirementAge}
@@ -1581,10 +1590,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
                   */}
               </div>
             ) : null}
+            <AppPrivacyTrust dividerAbove={isWhereToRetire} />
           </div>
         </div>
         <AccountPlanBottomBanner onOpenUpgrade={openCsvUpgrade} />
-        <AppPrivacyTrust dividerAbove={isWhereToRetire} />
         </div>
 
         <DrawerPanel

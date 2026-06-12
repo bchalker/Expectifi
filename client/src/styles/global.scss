@@ -78,8 +78,8 @@
   /* App page canvas — body and chrome that sit on the page background */
   --page-bg: hsl(36, 20%, 86%);
   --page-bg-light: hsl(36, 20%, 92%);
-  /* Fixed privacy trust bar — reserve on .app-scroll-stack (text may wrap on narrow screens) */
-  --app-privacy-trust-h: 4.75rem;
+  /* Scrolls with page content — no fixed viewport reservation */
+  --app-privacy-trust-h: 0px;
   --app-plan-banner-h: 0px;
   --z-plan-banner: 44;
   --z-privacy-trust: 45;
@@ -423,7 +423,7 @@ body.app-left-nav--mobile-open-body {
 @media (max-width: 680px) {
   :root {
     --drawer-panel-inset: 0;
-    --app-privacy-trust-h: 5.5rem;
+    --app-privacy-trust-h: 0px;
     --range-thumb-size: 1.625rem;
   }
 }

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import './AppPrivacyTrust.scss'
 
 type Props = {
@@ -6,30 +5,9 @@ type Props = {
   dividerAbove?: boolean
 }
 
-function syncPrivacyTrustHeight(el: HTMLElement | null) {
-  if (typeof document === 'undefined' || !el) return
-  document.documentElement.style.setProperty(
-    '--app-privacy-trust-h',
-    `${el.getBoundingClientRect().height}px`,
-  )
-}
-
 export function AppPrivacyTrust({ dividerAbove = false }: Props) {
-  const footerRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const el = footerRef.current
-    if (!el || typeof ResizeObserver === 'undefined') return
-
-    syncPrivacyTrustHeight(el)
-    const ro = new ResizeObserver(() => syncPrivacyTrustHeight(el))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [dividerAbove])
-
   return (
     <footer
-      ref={footerRef}
       className={['app-privacy-trust', dividerAbove && 'app-privacy-trust--divider'].filter(Boolean).join(' ')}
       role="contentinfo"
       aria-label="Privacy commitment"

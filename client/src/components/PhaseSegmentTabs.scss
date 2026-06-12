@@ -1,0 +1,141 @@
+/* Growth / Income segmented pill */
+.subheader-phase-segment {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  margin: 0;
+  min-height: 1.4375rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: none;
+  background: rgba(0, 0, 0, 0.32);
+  padding: var(--space-half);
+  box-sizing: border-box;
+}
+
+.subheader-phase-segment__thumb {
+  position: absolute;
+  top: var(--space-half);
+  bottom: var(--space-half);
+  left: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  pointer-events: none;
+  transition:
+    transform 250ms var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1)),
+    width 250ms var(--ease-out-fluid, cubic-bezier(0.22, 1, 0.36, 1));
+  will-change: transform, width;
+}
+
+.subheader-phase-segment__tab {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: 0;
+  height: auto;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: 9999px;
+  font-family: var(--body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--subheader-phase-muted-fg);
+  background: transparent;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.subheader-phase-segment__tab:hover {
+  color: #fff;
+}
+
+.subheader-phase-segment__tab[aria-selected='true'] {
+  color: var(--nav-bg);
+}
+
+.subheader-phase-segment__tab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 2px;
+}
+
+.subheader-phase-segment__tab--has-suffix {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  padding: 0 var(--space-3);
+}
+
+.subheader-phase-segment__tab-label {
+  white-space: nowrap;
+}
+
+.subheader-phase-segment__tab-word {
+  text-transform: uppercase;
+}
+
+.subheader-phase-segment__tab-age-qualifier {
+  text-transform: lowercase;
+}
+
+.subheader-phase-segment__tab-age {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.subheader-phase-segment--income,
+.subheader--phase-income .subheader-phase-segment {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--nav-bg);
+}
+
+.subheader-phase-segment--income .subheader-phase-segment__thumb,
+.subheader--phase-income .subheader-phase-segment__thumb {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.subheader-phase-segment--income .subheader-phase-segment__tab,
+.subheader--phase-income .subheader-phase-segment__tab {
+  color: var(--subheader-phase-muted-fg);
+}
+
+.subheader-phase-segment--income .subheader-phase-segment__tab:hover,
+.subheader--phase-income .subheader-phase-segment__tab:hover {
+  color: #fff;
+}
+
+.subheader-phase-segment--income .subheader-phase-segment__tab[aria-selected='true'],
+.subheader--phase-income .subheader-phase-segment__tab[aria-selected='true'] {
+  color: var(--nav-bg);
+}
+
+.subheader-phase-segment--income .subheader-phase-segment__tab:focus-visible,
+.subheader--phase-income .subheader-phase-segment__tab:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.45);
+}
+
+.subheader-phase-segment__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: var(--space-1);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subheader-phase-segment__thumb,
+  .subheader-phase-segment__tab {
+    transition-duration: 0.01ms;
+  }
+}

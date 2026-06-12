@@ -14,6 +14,7 @@ import {
   type NavPanelContext,
 } from '../lib/appNavDrawers'
 import { firstNameFromDisplayName } from '../utils/userDisplayName'
+import { PhaseSegmentTabs, type PhaseSegment } from './PhaseSegmentTabs'
 import './Header.scss'
 
 const MARKETING_SECTIONS = [
@@ -50,6 +51,12 @@ type HeaderAppProps = HeaderAuthProps & {
   navContext: NavPanelContext
   /** Desktop header center — between brand and tail. */
   goalBar?: ReactNode
+  /** Mobile header center — Growth / Income toggle between brand and menu. */
+  phaseToggle?: {
+    phase: PhaseSegment
+    onPhase: (phase: PhaseSegment) => void
+    targetRetirementAge: number
+  } | null
 }
 
 export type HeaderProps = HeaderMarketingProps | HeaderAppProps
@@ -423,6 +430,18 @@ export function Header(props: HeaderProps) {
           onBrandClick={variant === 'app' && !onboardingChrome ? props.onBrandClick : undefined}
           onboardingMode={onboardingChrome}
         />
+
+        {!onboardingChrome && variant === 'app' && props.phaseToggle ? (
+          <div className="header__phase">
+            <PhaseSegmentTabs
+              phase={props.phaseToggle.phase}
+              onPhase={props.phaseToggle.onPhase}
+              targetRetirementAge={props.phaseToggle.targetRetirementAge}
+              instanceId="mobile-header"
+              incomePhase={props.phaseToggle.phase === 'income'}
+            />
+          </div>
+        ) : null}
 
         {!onboardingChrome && variant === 'app' && props.goalBar ? (
           <div className="header__goal">{props.goalBar}</div>

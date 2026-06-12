@@ -1,6 +1,5 @@
 .app-privacy-trust {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   z-index: var(--z-privacy-trust);
   width: 100%;
   max-width: none;

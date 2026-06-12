@@ -83,7 +83,24 @@ html.app-shell-layout[data-main-hero-stuck='true'] {
   flex: 1 0 auto;
   flex-direction: column;
   min-width: 0;
-  height: 100%;
+}
+
+@media (min-width: 681px) {
+  .app-scroll-stack__main {
+    height: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-scroll-stack__main {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .app-scroll-stack [data-overlayscrollbars-contents] {
+    min-height: auto;
+  }
 }
 
 .app-scroll-stack__main > .main {

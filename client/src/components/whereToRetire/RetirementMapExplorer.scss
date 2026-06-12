@@ -6,11 +6,16 @@
   --wtr-list-panel-w: 22.5rem;
 
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
   gap: 0;
   box-sizing: border-box;
+}
+
+@media (min-width: 681px) {
+  .wtr-explorer {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
 }
 
 .where-to-retire__view-panel .wtr-explorer {
@@ -550,8 +555,8 @@
 @media (max-width: 680px) {
   .wtr-explorer {
     --wtr-list-panel-w: 100%;
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
     overflow: visible;
   }
 
@@ -561,16 +566,16 @@
 
   .wtr-explorer__map-row,
   .wtr-explorer__map-row--list-only {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     flex-direction: column;
-    min-height: 0;
+    min-height: auto;
     height: auto;
     overflow: visible;
   }
 
   .where-to-retire__main-panel .wtr-explorer__map-row {
-    min-height: 0;
-    flex: 0 1 auto;
+    min-height: auto;
+    flex: 0 0 auto;
   }
 
   .wtr-explorer__map-stage {
@@ -583,10 +588,10 @@
     left: auto;
     right: auto;
     bottom: auto;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     width: 100%;
     max-height: none;
-    min-height: 0;
+    min-height: auto;
     height: auto;
     transform: none;
     pointer-events: auto;
@@ -602,9 +607,10 @@
   .wtr-explorer__list-panel-inner {
     width: 100%;
     min-width: 0;
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
     height: auto;
+    overflow: visible;
   }
 
   .wtr-explorer__list-head {
@@ -620,15 +626,20 @@
   }
 
   .wtr-explorer__list-body {
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
     overflow: visible;
   }
 
   .wtr-explorer__list-scroll {
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
     overflow: visible;
+  }
+
+  .wtr-explorer__list-scroll.wtr-scroll-y--hover {
+    overflow-x: visible;
+    overflow-y: visible;
   }
 
   .wtr-explorer__list-scroll-inner {
