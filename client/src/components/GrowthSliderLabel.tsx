@@ -61,6 +61,8 @@ export type GrowthSliderLabelProps = {
   hideDefaultHelperText?: boolean;
   /** Panel column: stack default label, arrow, and exception rows. */
   suffixLayout?: "inline" | "panel";
+  /** Mobile panel: embed clickable retirement age in the lead line. */
+  onOpenRetirementAgeCompare?: () => void;
 };
 
 export function GrowthSliderLabel({
@@ -79,6 +81,7 @@ export function GrowthSliderLabel({
   sliderTicks,
   hideDefaultHelperText = false,
   suffixLayout = "inline",
+  onOpenRetirementAgeCompare,
 }: GrowthSliderLabelProps) {
   const h = Math.max(1, Math.min(50, horizon));
 
@@ -382,7 +385,22 @@ export function GrowthSliderLabel({
           <>
             <div className="growth-slider-label__panel-heading">
               <p className="growth-slider-label__panel-rate-lead font-xs">
-                I expect to grow at
+                {onOpenRetirementAgeCompare ? (
+                  <>
+                    When I am{" "}
+                    <button
+                      type="button"
+                      className="growth-slider-label__panel-age-link tabular-nums"
+                      onClick={onOpenRetirementAgeCompare}
+                      aria-label={`When I am ${retirementAge}. Compare other retirement ages.`}
+                    >
+                      {retirementAge}
+                    </button>
+                    , I expect to grow at
+                  </>
+                ) : (
+                  "I expect to grow at"
+                )}
               </p>
               <div className="growth-slider-label__panel-rate" aria-live="polite">
                 <span className="growth-slider-label__panel-rate-pct strip-equation-main-val--tween">

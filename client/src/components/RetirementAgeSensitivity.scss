@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--space-5) var(--space-3);
+  padding: var(--space-5) var(--space-3);
   box-sizing: border-box;
 }
 
@@ -541,9 +541,15 @@ line-height: normal;
   .retirement-sensitivity__table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    padding-left: 0px;
   }
 
   .retirement-sensitivity-trigger {
+    padding-inline: 0;
+  }
+
+  .retirement-sensitivity-trigger__btn {
     padding-inline: var(--space-4);
+    padding-bottom: var(--space-2);
   }
 }

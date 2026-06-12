@@ -1,7 +1,10 @@
 .goal-progress-bar--in-header {
+  flex: 1 1 0;
   width: 100%;
+  min-width: 0;
   max-width: none;
   min-height: 0;
+  justify-content: stretch;
   background: transparent !important;
   padding: 0;
   box-sizing: border-box;
@@ -9,29 +12,32 @@
 
 .goal-progress-bar--in-header.goal-progress-bar--phase-growth,
 .goal-progress-bar--in-header.goal-progress-bar--phase-income {
-  background: transparent !important;
+  // background: transparent !important;
 }
 
 .goal-progress-bar--in-header .goal-progress-bar__row {
+  width: 100%;
   height: auto;
   min-height: 0;
   margin-inline: 0;
   padding-inline: 0;
-  max-width: 100%;
+  max-width: none;
   box-sizing: border-box;
 }
 
 .goal-progress-bar--in-mobile-nav {
   width: 100%;
-  max-width: var(--layout-app-max);
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
+  justify-content: stretch;
   box-sizing: border-box;
 }
 
 .goal-progress-bar--in-mobile-nav .goal-progress-bar__row {
   margin-inline: 0;
   padding-inline: var(--layout-app-inner-pad);
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   box-sizing: border-box;
 }
 
@@ -64,6 +70,7 @@
 
 .goal-progress-bar--phase-growth .goal-progress-bar__fill--met {
   background: var(--green-d3);
+  background: var(--header-brand-green);
 }
 
 .goal-progress-bar--phase-income .goal-progress-bar__fill {
@@ -101,14 +108,16 @@
 
 .goal-progress-bar__meter {
   display: flex;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   align-items: center;
-  min-width: 3rem;
+  min-width: 0;
+  width: auto;
 }
 
 .goal-progress-bar__track {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   width: 100%;
+  min-width: 0;
   height: 5px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.14);

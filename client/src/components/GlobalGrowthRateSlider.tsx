@@ -29,6 +29,7 @@ export type GlobalGrowthRateSliderProps = {
   onRemovePositionReturn: (positionIds: string[]) => void;
   hideDefaultHelperText?: boolean;
   suffixLayout?: "inline" | "panel";
+  onOpenRetirementAgeCompare?: () => void;
   className?: string;
 };
 
@@ -45,6 +46,7 @@ export function GlobalGrowthRateSlider({
   onRemovePositionReturn,
   hideDefaultHelperText = false,
   suffixLayout = "inline",
+  onOpenRetirementAgeCompare,
   className,
 }: GlobalGrowthRateSliderProps) {
   const retPctAnim = useAnimatedScalar(retRate * 100);
@@ -71,6 +73,7 @@ export function GlobalGrowthRateSlider({
         onRemovePositionReturn={onRemovePositionReturn}
         hideDefaultHelperText={hideDefaultHelperText}
         suffixLayout={suffixLayout}
+        onOpenRetirementAgeCompare={onOpenRetirementAgeCompare}
         sliderTrack={
           <input
             type="range"

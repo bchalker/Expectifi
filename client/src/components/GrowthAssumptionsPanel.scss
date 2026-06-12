@@ -85,6 +85,25 @@
 }
 
 @media (max-width: 680px) {
+  .growth-assumptions-panel {
+    padding-inline: 0;
+  }
+
+  .growth-assumptions-panel__main > .retirement-sensitivity-trigger {
+    display: none;
+  }
+
+  .growth-assumptions-panel__slider {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border-bottom: none;
+  }
+
+  .growth-assumptions-panel__slider .growth-slider-label__panel-heading {
+    align-items: center;
+    text-align: center;
+    margin-bottom: var(--space-2);
+  }
+
   .growth-assumptions-panel__scenario {
     padding: 0 var(--space-4) var(--space-3);
   }

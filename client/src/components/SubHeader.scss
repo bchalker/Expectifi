@@ -1039,6 +1039,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
     position: relative;
     inset: auto;
     width: 100%;
+    padding-bottom: var(--space-2);
   }
 
   .subheader-estimate {
@@ -1086,7 +1087,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
   .subheader-estimate {
     padding-block: var(--space-2);
-    gap: var(--space-1);
+    gap: var(--space-3);
   }
 
   .subheader-estimate__meta {

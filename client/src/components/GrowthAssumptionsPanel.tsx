@@ -102,6 +102,9 @@ export function GrowthAssumptionsPanel({
           onRemovePositionReturn={onRemovePositionReturn}
           hideDefaultHelperText
           suffixLayout="panel"
+          onOpenRetirementAgeCompare={
+            isMobile ? () => setSensitivityOpen(true) : undefined
+          }
         />
 
         <div className="growth-assumptions-panel__scenario">

@@ -8,8 +8,10 @@
   flex-shrink: 0;
   box-sizing: border-box;
   background: var(--header-brand-navy);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+    background: var(--sky-blue-d6);
+    background: linear-gradient(to bottom, var(--sky-blue-d6) 0%, var(--sky-blue-d6) 100%);
+  // border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  // box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
 .header--app {
@@ -42,7 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-8);
   width: 100%;
   min-height: var(--app-top-chrome-h);
   box-sizing: border-box;
@@ -52,7 +54,7 @@
   width: 100%;
   max-width: none;
   margin-inline: 0;
-  padding-inline: var(--layout-app-inner-pad);
+  padding-inline: var(--space-4);
 }
 
 .header--marketing .header__inner {
@@ -62,16 +64,14 @@
   padding-inline: var(--layout-marketing-gutter) var(--layout-marketing-gutter-end);
 }
 
-.header--app:has(.header__goal) {
-  position: relative;
-}
-
 .header__goal {
   display: none;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
+  width: auto;
+  max-width: none;
   align-items: center;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .header--app .header__inner:has(.header__goal) .header__nav--app {
@@ -267,7 +267,7 @@
 .header__tail:has(.header__account-group) {
   align-self: stretch;
   align-items: stretch;
-  margin-right: calc(-1 * var(--layout-app-inner-pad));
+  // margin-right: calc(-1 * var(--layout-app-inner-pad));
 }
 
 /* Signed-in: My Plans + name + retire — profile strip with configure control */
@@ -281,6 +281,7 @@
   height: 100%;
   margin: 0;
   padding: 0 max(12px, var(--layout-app-gutter-end)) 0 var(--space-3) /* review: was 0.65rem */;
+  padding-right: 0;
   box-sizing: border-box;
   border: none;
   border-radius: 0;
@@ -659,29 +660,7 @@
 
 @media (min-width: 761px) {
   .header--app .header__goal {
-    position: absolute;
-    inset-block: 0;
-    left: 50%;
-    z-index: 1;
-    flex: none;
     display: flex;
-    align-items: center;
-    justify-content: stretch;
-    width: min(var(--layout-app-max), 100%);
-    max-width: var(--layout-app-max);
-    transform: translateX(-50%);
-    pointer-events: none;
-  }
-
-  .header--app .header__goal .goal-progress-bar {
-    pointer-events: auto;
-  }
-
-  .header--app .header__brand,
-  .header--app .header__nav--app,
-  .header--app .header__tail {
-    position: relative;
-    z-index: 2;
   }
 }
 

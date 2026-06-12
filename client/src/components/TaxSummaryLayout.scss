@@ -228,6 +228,28 @@ height: 100%;
   border-radius: var(--space-2);
 }
 
+@media (max-width: 767px) {
+  .section--tax-summary--growth-assumptions .section--tax-summary__sidebar {
+    display: contents;
+  }
+
+  .section--tax-summary--growth-assumptions .growth-assumptions-panel {
+    order: 1;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .section--tax-summary__growth-layout
+    > .portfolio-accounts-reveal {
+    order: 2;
+  }
+
+  .section--tax-summary--growth-assumptions .wtr-panel-entry {
+    order: 3;
+    box-shadow: none;
+    background: transparent;
+  }
+}
+
 @media (max-width: 680px) {
   .section--tax-summary.section--tax-summary--growth-assumptions,
   .section--tax-summary.section--tax-summary--income-harvest {
