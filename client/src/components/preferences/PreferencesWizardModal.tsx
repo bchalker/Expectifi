@@ -84,7 +84,7 @@ export function PreferencesWizardModal({
             <h2 className="pref-wizard-modal__title">Set your retirement priorities</h2>
             <p className="pref-wizard-modal__helper">
               Your answers personalize how every city is scored — the more honest you are, the more
-              useful your results. You can always update these in Settings → Preferences as your
+              useful your results. You can always update these in Settings → Travel Priorities as your
               plans or priorities change.
             </p>
           </div>

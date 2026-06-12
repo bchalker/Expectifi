@@ -241,6 +241,16 @@ export function PreferencesWizard({
     </div>
   )
 
+  const renderNarrative = () => (
+    <div className="pref-wizard__narrative">
+      <div className="pref-wizard__narrative-header">
+        <IconUserCircle size={18} stroke={1.5} aria-hidden />
+        <span>Your retirement profile</span>
+      </div>
+      <p className="pref-wizard__narrative-copy">{narrative}</p>
+    </div>
+  )
+
   const renderStepBody = () => {
     if (mode === 'settings') {
       return (
@@ -249,15 +259,9 @@ export function PreferencesWizard({
           {renderFactorList(STEP_2_SAFETY, 'Safety & health')}
           {renderFactorList(STEP_3_LIFESTYLE, 'Lifestyle & wellbeing')}
           {renderFactorList(STEP_4_DAILY, 'Daily life', true)}
-          <div className="pref-wizard__review">
+          <div className="pref-wizard__review pref-wizard__review--settings">
             {renderReviewList()}
-            <div className="pref-wizard__narrative">
-              <div className="pref-wizard__narrative-header">
-                <IconUserCircle size={18} stroke={1.5} aria-hidden />
-                <span>Your retirement profile</span>
-              </div>
-              <p className="pref-wizard__narrative-copy">{narrative}</p>
-            </div>
+            {renderNarrative()}
           </div>
         </div>
       )
@@ -277,13 +281,7 @@ export function PreferencesWizard({
         return (
           <div className="pref-wizard__review">
             {renderReviewList()}
-            <div className="pref-wizard__narrative">
-              <div className="pref-wizard__narrative-header">
-                <IconUserCircle size={18} stroke={1.5} aria-hidden />
-                <span>Your retirement profile</span>
-              </div>
-              <p className="pref-wizard__narrative-copy">{narrative}</p>
-            </div>
+            {renderNarrative()}
           </div>
         )
     }

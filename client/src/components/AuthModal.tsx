@@ -345,6 +345,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         undefined,
         undefined,
         applied.promotionCodeId,
+        firstName.trim(),
       );
       if (error) setMsg(error);
       else {
@@ -390,7 +391,14 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       return;
     }
     setBusy(true);
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(
+      email,
+      password,
+      undefined,
+      undefined,
+      undefined,
+      firstName.trim(),
+    );
     setBusy(false);
     if (error) {
       setMsg(error);

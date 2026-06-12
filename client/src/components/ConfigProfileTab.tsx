@@ -84,27 +84,17 @@ export function ConfigProfileTab({
     )
   }
 
-  const displayName = user.displayName?.trim() || user.email
-
   return (
-    <section className="config-profile-tab" aria-labelledby="config-profile-heading">
-      <div className="config-profile-tab__identity-row">
-        <div className="config-profile-tab__identity">
-          <p id="config-profile-heading" className="config-profile-tab__name">
-            {displayName}
-          </p>
-          <p className="config-profile-tab__email">{user.email}</p>
-        </div>
-        <AppButton
-          type="button"
-          size="sm"
-          variant="secondary"
-          className="config-profile-tab__signout-btn"
-          onPress={() => void signOut()}
-        >
-          Sign out
-        </AppButton>
-      </div>
+    <section className="config-profile-tab" aria-label="Account">
+      <AppButton
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="config-profile-tab__signout-btn"
+        onPress={() => void signOut()}
+      >
+        Sign out
+      </AppButton>
 
       <div className="config-profile-tab__cancel-card">
         <p className="config-profile-tab__cancel-note">

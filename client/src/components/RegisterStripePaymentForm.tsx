@@ -69,6 +69,7 @@ type SignUpFn = (
   paymentMethodId?: string,
   promoCode?: string,
   promotionCodeId?: string,
+  displayName?: string,
 ) => Promise<{ error?: string }>
 
 type CompleteGoogleFn = (
@@ -192,6 +193,7 @@ function RegisterStripePaymentInner({
           paymentMethodId,
           promotionCodeId ? undefined : promoCode,
           promotionCodeId,
+          billingFirstName?.trim() || undefined,
         )
         if (regErr) setMsg(regErr)
         else {

@@ -75,6 +75,13 @@ installPlanStateRoutes(app, readSessionUser)
 installContactRoutes(app, readSessionUser)
 installDevRoutes(app)
 
+function normalizeDisplayNameInput(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null
+  const t = raw.trim()
+  if (!t || t.length > 255) return null
+  return t
+}
+
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase()
 }
@@ -505,6 +512,13 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(400).json({ ok: false, error: 'password_too_short' })
     return
   }
+  const displayNameInput =
+    typeof req.body?.displayName === 'string'
+      ? req.body.displayName
+      : typeof req.body?.firstName === 'string'
+        ? req.body.firstName
+        : ''
+  const displayName = normalizeDisplayNameInput(displayNameInput)
 
   const stripe = getStripeBackend()
   let promo: Awaited<ReturnType<typeof resolveSignupPromoFromRequest>> = null
@@ -534,11 +548,10 @@ app.post('/api/auth/register', async (req, res) => {
   const id = randomUUID()
   const passwordHash = await bcrypt.hash(password, 10)
   try {
-    await dbQuery('INSERT INTO users (id, email, password_hash, onboarding_done) VALUES (?, ?, ?, FALSE)', [
-      id,
-      email,
-      passwordHash,
-    ])
+    await dbQuery(
+      'INSERT INTO users (id, email, password_hash, display_name, onboarding_done) VALUES (?, ?, ?, ?, FALSE)',
+      [id, email, passwordHash, displayName],
+    )
   } catch (e: unknown) {
     if (isUniqueViolation(e)) {
       res.status(409).json({ ok: false, error: 'email_in_use' })
@@ -590,7 +603,7 @@ app.post('/api/auth/register', async (req, res) => {
     user: publicAuthUser({
       id,
       email,
-      display_name: null,
+      display_name: displayName,
       onboarding_done: false,
       user_prefs: null,
       subscription_status: stripe ? 'active' : 'none',
@@ -641,6 +654,21 @@ app.post('/api/auth/login', async (req, res) => {
     ok: true,
     user: await loadAuthUserProfile(row.id, email),
   })
+})
+
+app.put('/api/user/display-name', async (req, res) => {
+  const u = await readSessionUser(req)
+  if (!u) {
+    res.status(401).json({ ok: false, error: 'unauthorized' })
+    return
+  }
+  const displayName = normalizeDisplayNameInput(req.body?.displayName)
+  if (!displayName) {
+    res.status(400).json({ ok: false, error: 'invalid_display_name' })
+    return
+  }
+  await dbQuery('UPDATE users SET display_name = ? WHERE id = ?', [displayName, u.userId])
+  res.json({ ok: true, user: await loadAuthUserProfile(u.userId, u.email) })
 })
 
 app.put('/api/user/prefs', async (req, res) => {

@@ -82,9 +82,13 @@
 }
 
 @media (min-width: 900px) {
-  .pref-wizard__review {
+  .pref-wizard__review:not(.pref-wizard__review--settings) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
+}
+
+.pref-wizard__review--settings {
+  grid-template-columns: 1fr;
 }
 
 .pref-wizard__review-list {

@@ -25,7 +25,7 @@ const TABS: { id: ConfigDrawerTab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'guaranteed-income', label: 'Guaranteed Income' },
-  { id: 'preferences', label: 'Preferences' },
+  { id: 'preferences', label: 'Travel Priorities' },
   // { id: 'life', label: 'Life' }, // Life tab — commented out, may reuse later
 ]
 

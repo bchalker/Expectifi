@@ -114,7 +114,10 @@ type AuthCtx = {
     paymentMethodId?: string,
     promoCode?: string,
     promotionCodeId?: string,
+    displayName?: string,
   ) => Promise<{ error?: string }>;
+  /** Persist first name / display name on the signed-in profile. */
+  updateDisplayName: (displayName: string) => Promise<{ error?: string }>;
   /** Full-page navigation to `/api/auth/google` (cookie session on return). */
   signInWithGoogle: () => void;
   signOut: () => Promise<void>;
@@ -339,6 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       paymentMethodId?: string,
       promoCode?: string,
       promotionCodeId?: string,
+      displayName?: string,
     ) => {
       try {
         const body: Record<string, string> = { email, password };
@@ -346,6 +350,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (promotionCodeId?.trim())
           body.promotionCodeId = promotionCodeId.trim();
         else if (promoCode?.trim()) body.promoCode = promoCode.trim();
+        const trimmedName = displayName?.trim();
+        if (trimmedName) body.displayName = trimmedName;
         const data = await apiFetchJson<{ ok: true; user: AuthUser }>(
           "/api/auth/register",
           {
@@ -420,6 +426,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const updateDisplayName = useCallback(async (displayName: string) => {
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      return { error: "Enter your first name." };
+    }
+    try {
+      const data = await apiFetchJson<{ ok: true; user: AuthUser }>(
+        "/api/user/display-name",
+        {
+          method: "PUT",
+          body: JSON.stringify({ displayName: trimmed }),
+        },
+      );
+      setUser(normalizeAuthUser(data.user));
+      return {};
+    } catch (e) {
+      if (e instanceof ApiRequestError && e.code === "invalid_display_name") {
+        return { error: "Enter a valid first name." };
+      }
+      return { error: "Could not save your name. Try again." };
+    }
+  }, []);
+
   const saveUserPrefs = useCallback(async (prefs: UserPrefs) => {
     try {
       const data = await apiFetchJson<{ ok: true; user: AuthUser }>(
@@ -477,6 +506,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signOut,
       completeOnboarding,
+      updateDisplayName,
       saveUserPrefs,
       cancelAccount,
     } satisfies AuthCtx;
@@ -496,6 +526,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithGoogle,
     signOut,
     completeOnboarding,
+    updateDisplayName,
     saveUserPrefs,
     cancelAccount,
   ]);
