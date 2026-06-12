@@ -16,6 +16,8 @@ type Props = {
   targetRetirementAge: number
   instanceId?: string
   incomePhase?: boolean
+  /** When false, show only "Growth" / "Income" (no "til 62" / "at 62"). */
+  showAge?: boolean
 }
 
 /** Growth / Income pill toggle — single sliding thumb (HeroUI Tabs.Indicator mis-animates here). */
@@ -25,6 +27,7 @@ export function PhaseSegmentTabs({
   targetRetirementAge,
   instanceId,
   incomePhase = false,
+  showAge = true,
 }: Props) {
   const idSuffix = instanceId ? `-${instanceId}` : ''
   const trackRef = useRef<HTMLDivElement>(null)
@@ -85,7 +88,7 @@ export function PhaseSegmentTabs({
           tabIndex={phase === 'growth' ? 0 : -1}
           className={[
             'subheader-phase-segment__tab',
-            phase === 'growth' ? 'subheader-phase-segment__tab--has-suffix' : '',
+            showAge && phase === 'growth' ? 'subheader-phase-segment__tab--has-suffix' : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -93,7 +96,7 @@ export function PhaseSegmentTabs({
         >
           <span className="subheader-phase-segment__tab-label">
             <span className="subheader-phase-segment__tab-word">Growth</span>
-            {phase === 'growth' ? (
+            {showAge && phase === 'growth' ? (
               <>
                 {' '}
                 <span className="subheader-phase-segment__tab-age-qualifier">
@@ -116,7 +119,7 @@ export function PhaseSegmentTabs({
           tabIndex={phase === 'income' ? 0 : -1}
           className={[
             'subheader-phase-segment__tab',
-            phase === 'income' ? 'subheader-phase-segment__tab--has-suffix' : '',
+            showAge && phase === 'income' ? 'subheader-phase-segment__tab--has-suffix' : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -124,7 +127,7 @@ export function PhaseSegmentTabs({
         >
           <span className="subheader-phase-segment__tab-label">
             <span className="subheader-phase-segment__tab-word">Income</span>
-            {phase === 'income' ? (
+            {showAge && phase === 'income' ? (
               <>
                 {' '}
                 <span className="subheader-phase-segment__tab-age-qualifier">

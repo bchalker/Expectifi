@@ -439,6 +439,7 @@ export function Header(props: HeaderProps) {
               targetRetirementAge={props.phaseToggle.targetRetirementAge}
               instanceId="mobile-header"
               incomePhase={props.phaseToggle.phase === 'income'}
+              showAge={false}
             />
           </div>
         ) : null}
