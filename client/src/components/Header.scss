@@ -34,6 +34,10 @@
   font-size: clamp(1.125rem, 3vw, 1.35rem);
 }
 
+.header--onboarding .header__logo {
+  height: 1.5rem;
+}
+
 .header--marketing {
   position: sticky;
   top: 0;
@@ -114,10 +118,31 @@
   color: var(--nav-text);
 }
 
+.header__brand:hover .header__logo {
+  opacity: 0.9;
+}
+
 .header__brand:focus-visible {
   outline: none;
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
+}
+
+.header__logo-picture {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.header__logo {
+  display: block;
+  flex-shrink: 0;
+  height: 1.575rem;
+  width: auto;
+  max-width: min(8.75rem, 44vw);
+  object-fit: contain;
+  object-position: left center;
 }
 
 .header__mark {
@@ -677,6 +702,11 @@
 }
 
 @media (max-width: 760px) {
+  .header__logo {
+    height: 1.625rem;
+    max-width: 1.75rem;
+  }
+
   .header--marketing .header__inner {
     display: flex;
     align-items: center;
