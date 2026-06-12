@@ -93,7 +93,8 @@
 .subheader-phase-segment--income,
 .subheader--phase-income .subheader-phase-segment {
   border-color: rgba(255, 255, 255, 0.22);
-  background: var(--nav-bg);
+  background: var(--sky-blue-d6);
+  border: 1px solid var(--sky-blue-d7);
 }
 
 .subheader-phase-segment--income .subheader-phase-segment__thumb,
