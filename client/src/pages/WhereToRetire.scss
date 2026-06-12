@@ -397,34 +397,53 @@
 }
 
 @media (max-width: 680px) {
+  html[data-app-phase='where-to-retire'] {
+    --app-privacy-trust-h: 0px;
+    --wtr-mobile-pagination-h: 2.75rem;
+  }
+
+  html[data-app-phase='where-to-retire'] .app-privacy-trust {
+    display: none;
+  }
+
   .where-to-retire__main-panel {
     --wtr-map-area-min-h: 0;
+    --wtr-main-panel-back-h: 2.75rem;
     border-radius: 0;
+  }
+
+  .where-to-retire__main-panel-back {
+    position: sticky;
+    top: 0;
+    z-index: 12;
+  }
+
+  .where-to-retire__income-intro,
+  .where-to-retire__income-toolbar {
+    position: relative;
+    z-index: auto;
   }
 
   .where-to-retire__main-panel-map {
     min-height: 0;
     border-radius: 0;
+    flex: 0 1 auto;
+    overflow: visible;
   }
 
   .where-to-retire {
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .where-to-retire__body--map {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .where-to-retire__body--map .where-to-retire__main-panel {
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  .where-to-retire__main-panel-map {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
   }
 
@@ -432,7 +451,7 @@
   .app-page.app-page--where-to-retire.where-to-retire__body.main,
   .app-page--where-to-retire.where-to-retire__body--map.main {
     padding: 0;
-    padding-bottom: 0;
+    padding-bottom: calc(var(--wtr-mobile-pagination-h) + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -462,6 +481,12 @@
   min-width: 0;
   border-radius: 0;
   overflow: hidden;
+}
+
+@media (max-width: 680px) {
+  .where-to-retire__main-panel-map {
+    overflow: visible;
+  }
 }
 
 .where-to-retire__map-stage {

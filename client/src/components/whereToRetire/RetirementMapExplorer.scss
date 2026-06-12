@@ -550,9 +550,9 @@
 @media (max-width: 680px) {
   .wtr-explorer {
     --wtr-list-panel-w: 100%;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .wtr-explorer__chrome {
@@ -561,15 +561,16 @@
 
   .wtr-explorer__map-row,
   .wtr-explorer__map-row--list-only {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-direction: column;
     min-height: 0;
     height: auto;
+    overflow: visible;
   }
 
   .where-to-retire__main-panel .wtr-explorer__map-row {
     min-height: 0;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
   }
 
   .wtr-explorer__map-stage {
@@ -582,7 +583,7 @@
     left: auto;
     right: auto;
     bottom: auto;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     width: 100%;
     max-height: none;
     min-height: 0;
@@ -601,21 +602,49 @@
   .wtr-explorer__list-panel-inner {
     width: 100%;
     min-width: 0;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
     height: auto;
   }
 
+  .wtr-explorer__list-head {
+    position: sticky;
+    top: var(--wtr-main-panel-back-h, 2.75rem);
+    z-index: 11;
+    background: var(--surface);
+    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  }
+
+  .where-to-retire__main-panel .wtr-explorer__list-head {
+    padding: var(--space-3) var(--space-5);
+  }
+
   .wtr-explorer__list-body {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
+    overflow: visible;
   }
 
   .wtr-explorer__list-scroll {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
+  }
+
+  .wtr-explorer__list-scroll-inner {
+    padding-bottom: var(--space-2);
+  }
+
+  .wtr-list-pagination--dest-panel.wtr-list-pagination--explorer-list {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 10;
+    margin: 0;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: 0 -8px 20px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
   }
 
   .wtr-explorer__list-collapse,
