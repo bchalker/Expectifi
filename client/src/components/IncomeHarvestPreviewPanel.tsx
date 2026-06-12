@@ -1,69 +1,80 @@
-import { useMemo, useState } from 'react'
-import { useDebouncedValue } from '../hooks/useDebouncedValue'
-import { useRetirementPreferences } from '../hooks/useRetirementPreferences'
-import { useUserLocale } from '../context/UserLocaleContext'
+import { useMemo, useState } from "react";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { useRetirementPreferences } from "../hooks/useRetirementPreferences";
+import { useUserLocale } from "../context/UserLocaleContext";
 import {
   computeIncomeHarvestPreview,
   homeCountrySectionTitle,
   previewMapDestinationsForIncome,
   type IncomeHarvestCityRow,
   type IncomeHarvestContextParagraph,
-} from '../lib/whereToRetire/incomeHarvestPreview'
-import { fmtMon } from '../utils/format'
-import { IncomeHarvestPreviewMap } from './IncomeHarvestPreviewMap'
-import { IncomeHarvestPreferencesEntry } from './IncomeHarvestPreferencesEntry'
-import { WhereToRetirePanelEntry } from './WhereToRetirePanelEntry'
-import './IncomeHarvestPreviewPanel.scss'
+} from "../lib/whereToRetire/incomeHarvestPreview";
+import { fmtMon } from "../utils/format";
+import { IncomeHarvestPreviewMap } from "./IncomeHarvestPreviewMap";
+import { IncomeHarvestPreferencesEntry } from "./IncomeHarvestPreferencesEntry";
+import { WhereToRetirePanelEntry } from "./WhereToRetirePanelEntry";
+import "./IncomeHarvestPreviewPanel.scss";
 
 const WTR_SCORE_FACTORS =
-  'cost of living, quality of life, food prices, healthcare, climate, and tax treatment'
+  "cost of living, quality of life, food prices, healthcare, climate, and tax treatment";
 
 type Props = {
-  monthlyIncome: number
-}
+  monthlyIncome: number;
+};
 
-function ContextParagraph({ paragraph }: { paragraph: IncomeHarvestContextParagraph }) {
-  if (paragraph.kind === 'abroad') {
+function ContextParagraph({
+  paragraph,
+}: {
+  paragraph: IncomeHarvestContextParagraph;
+}) {
+  if (paragraph.kind === "abroad") {
     return (
       <p className="where-to-retire-preview-panel__context">
-        Your income goes further abroad.{' '}
+        Your income goes further abroad.{" "}
         <span className="where-to-retire-preview-panel__context-emphasis">
           {paragraph.topCityLabel}
-        </span>{' '}
-        scores {paragraph.scoreDelta} points higher than your best US match. Our Where to Retire
-        tool scores each city on {WTR_SCORE_FACTORS} —{' '}
+        </span>{" "}
+        scores {paragraph.scoreDelta} points higher than your best US match. Our
+        Where to Retire tool scores each city on {WTR_SCORE_FACTORS} —{" "}
         <span className="where-to-retire-preview-panel__context-emphasis">
           {paragraph.topCityLabel}
-        </span>{' '}
+        </span>{" "}
         ranks well across all of them at this income level.
       </p>
-    )
+    );
   }
 
-  if (paragraph.kind === 'international') {
+  if (paragraph.kind === "international") {
     return (
       <p className="where-to-retire-preview-panel__context">
-        At{' '}
+        At{" "}
         <span className="where-to-retire-preview-panel__context-emphasis tabular-nums">
           {fmtMon(paragraph.monthlyIncome)}
-        </span>{' '}
-        your strongest matches are all international. Our Where to Retire tool scores each city on{' '}
-        {WTR_SCORE_FACTORS} — explore the full list to find your fit.
+        </span>{" "}
+        your strongest matches are all international. Our Where to Retire tool
+        scores each city on {WTR_SCORE_FACTORS} — explore the full list to find
+        your fit.
       </p>
-    )
+    );
   }
 
   return (
     <p className="where-to-retire-preview-panel__context">
-      Your top domestic matches are competitive with the best worldwide options at this income
-      level. Our Where to Retire tool scores each city on {WTR_SCORE_FACTORS} so you can compare
-      your options in detail.
+      Your top domestic matches are competitive with the best worldwide options
+      at this income level. Our Where to Retire tool scores each city on{" "}
+      {WTR_SCORE_FACTORS} so you can compare your options in detail.
     </p>
-  )
+  );
 }
 
-function CityRows({ rows, mobileMax }: { rows: IncomeHarvestCityRow[]; mobileMax: number }) {
-  if (rows.length === 0) return null
+function CityRows({
+  rows,
+  mobileMax,
+}: {
+  rows: IncomeHarvestCityRow[];
+  mobileMax: number;
+}) {
+  if (rows.length === 0) return null;
 
   return (
     <ul className="where-to-retire-preview-panel__city-list">
@@ -71,43 +82,49 @@ function CityRows({ rows, mobileMax }: { rows: IncomeHarvestCityRow[]; mobileMax
         <li
           key={`${row.city}-${row.country}`}
           className={[
-            'where-to-retire-preview-panel__city-row',
-            row.rank > mobileMax ? 'where-to-retire-preview-panel__city-row--mobile-hide' : '',
+            "where-to-retire-preview-panel__city-row",
+            row.rank > mobileMax
+              ? "where-to-retire-preview-panel__city-row--mobile-hide"
+              : "",
           ]
             .filter(Boolean)
-            .join(' ')}
+            .join(" ")}
         >
           <span className="where-to-retire-preview-panel__city-main">
-            <span className="where-to-retire-preview-panel__rank">{row.rank}</span>
+            <span className="where-to-retire-preview-panel__rank">
+              {row.rank}
+            </span>
             {row.flag ? (
               <span className="where-to-retire-preview-panel__flag" aria-hidden>
                 {row.flag}
               </span>
             ) : null}
-            <span className="where-to-retire-preview-panel__city-label">{row.label}</span>
+            <span className="where-to-retire-preview-panel__city-label">
+              {row.label}
+            </span>
           </span>
           <span
             className={[
-              'where-to-retire-preview-panel__score',
-              row.rank === 1 ? 'where-to-retire-preview-panel__score--top' : '',
+              "where-to-retire-preview-panel__score",
+              row.rank === 1 ? "where-to-retire-preview-panel__score--top" : "",
             ]
               .filter(Boolean)
-              .join(' ')}
+              .join(" ")}
           >
             {row.score}
           </span>
         </li>
       ))}
     </ul>
-  )
+  );
 }
 
 export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
-  const { locale } = useUserLocale()
-  const { prefs, hasSavedPrefs } = useRetirementPreferences()
-  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false)
-  const debouncedIncome = useDebouncedValue(monthlyIncome, 300)
-  const hasIncome = debouncedIncome > 0
+  const { locale } = useUserLocale();
+  const { prefs, hasSavedPrefs } = useRetirementPreferences();
+  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false);
+  const debouncedIncome = useDebouncedValue(monthlyIncome, 300);
+  const hasIncome = debouncedIncome > 0;
 
   const preview = useMemo(
     () =>
@@ -115,25 +132,29 @@ export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
         ? computeIncomeHarvestPreview(debouncedIncome, locale, prefs)
         : computeIncomeHarvestPreview(0, locale, prefs),
     [debouncedIncome, hasIncome, locale, prefs],
-  )
+  );
 
   const mapDestinations = useMemo(
     () => previewMapDestinationsForIncome(debouncedIncome, prefs),
     [debouncedIncome, prefs],
-  )
+  );
 
-  const showHomeSection = hasIncome && preview.dataReady && !preview.homeSectionHidden
+  const showHomeSection =
+    hasIncome && preview.dataReady && !preview.homeSectionHidden;
 
   return (
-    <aside className="where-to-retire-preview-panel" aria-label="Where to Retire preview">
+    <aside
+      className="where-to-retire-preview-panel"
+      aria-label="Where to Retire preview"
+    >
       <header className="where-to-retire-preview-panel__header">
         <h3 className="where-to-retire-preview-panel__title">
           {hasIncome ? (
             <>
-              See where{' '}
+              See where your{" "}
               <span className="where-to-retire-preview-panel__title-income tabular-nums">
                 {fmtMon(monthlyIncome)}
-              </span>{' '}
+              </span>{" "}
               takes you
             </>
           ) : (
@@ -150,7 +171,9 @@ export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
         />
 
         <section className="where-to-retire-preview-panel__section">
-          <h4 className="where-to-retire-preview-panel__section-label">Worldwide</h4>
+          <h4 className="where-to-retire-preview-panel__section-label">
+            Worldwide
+          </h4>
           {hasIncome && preview.dataReady ? (
             <CityRows rows={preview.worldwideTop} mobileMax={2} />
           ) : (
@@ -162,7 +185,10 @@ export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
 
         {showHomeSection ? (
           <>
-            <div className="where-to-retire-preview-panel__divider" aria-hidden />
+            <div
+              className="where-to-retire-preview-panel__divider"
+              aria-hidden
+            />
             <section className="where-to-retire-preview-panel__section">
               <h4 className="where-to-retire-preview-panel__section-label">
                 {homeCountrySectionTitle(preview.homeCountryLabel)}
@@ -174,7 +200,10 @@ export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
 
         {hasIncome && preview.contextParagraph ? (
           <>
-            <div className="where-to-retire-preview-panel__divider" aria-hidden />
+            <div
+              className="where-to-retire-preview-panel__divider"
+              aria-hidden
+            />
             <ContextParagraph paragraph={preview.contextParagraph} />
             <IncomeHarvestPreferencesEntry
               hasSavedPrefs={hasSavedPrefs}
@@ -192,5 +221,5 @@ export function IncomeHarvestPreviewPanel({ monthlyIncome }: Props) {
         />
       </footer>
     </aside>
-  )
+  );
 }

@@ -25,7 +25,7 @@ export function WhereToRetirePanelCtas({
       >
         {hasOpenedPrefsOverlay
           ? "Update destination priorities"
-          : "Set Destination priorities"}
+          : "Set destination priorities"}
       </button>
     </div>
   );
