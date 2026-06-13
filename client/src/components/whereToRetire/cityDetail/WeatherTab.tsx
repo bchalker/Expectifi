@@ -6,7 +6,6 @@ import {
   IconInfoCircle,
   IconSnowflake,
   IconSun,
-  IconUsers,
 } from '@tabler/icons-react'
 import type { CityClimate } from '../../../lib/api/openMeteo'
 import { formatTemp } from '../../../lib/api/openMeteo'
@@ -46,6 +45,12 @@ function formatDualTemp(celsius: number, primaryUnit: 'c' | 'f'): { primary: str
     primary: `${Math.round(celsiusToFahrenheit(celsius))}°F`,
     secondary: `${Math.round(celsius)}°C`,
   }
+}
+
+function splitRetireeNote(note: string): { label: string; body: string } {
+  const match = note.match(/^For retirees:\s*(.+)$/i)
+  if (!match) return { label: '', body: note }
+  return { label: 'For retirees:', body: match[1] }
 }
 
 function ClimateTagIcon({ tone }: { tone: ClimateTagTone }) {
@@ -132,8 +137,7 @@ export function WeatherTab({
       <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--weather">
         <p
           role="status"
-          className="wtr-weather-tab__unavailable"
-          {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
+          {...staggerSectionProps(0, 'wtr-weather-tab__unavailable', staggerClassName, staggerStyle)}
         >
           Climate data unavailable
         </p>
@@ -152,15 +156,16 @@ export function WeatherTab({
   if (!climate || !detail) return null
 
   const avgHigh = formatDualTemp(detail.metrics.avgHighC, tempUnit)
+  const tagStaggerOffset = detail.tags.length ? 1 : 0
+  const retireeNote = splitRetireeNote(detail.retireeNote)
 
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--weather">
       <article className="wtr-weather-tab" aria-label="Climate and weather">
-        <header
-          className="wtr-weather-tab__header"
-          {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
-        >
-          {detail.tags.length ? (
+        {detail.tags.length ? (
+          <div
+            {...staggerSectionProps(0, 'wtr-weather-tab__tags-wrap', staggerClassName, staggerStyle)}
+          >
             <ul className="wtr-weather-tab__tags" aria-label="Climate traits">
               {detail.tags.map((tag) => (
                 <li key={tag.label}>
@@ -171,50 +176,78 @@ export function WeatherTab({
                 </li>
               ))}
             </ul>
-          ) : null}
-
-          <div className="wtr-weather-tab__title-row">
-            <h2 className="wtr-weather-tab__title">{detail.categoryLabel}</h2>
-            <div className="wtr-weather-tab__unit-toggle" role="group" aria-label="Temperature unit">
-              <button
-                type="button"
-                className={`wtr-weather-tab__unit-btn${tempUnit === 'c' ? ' wtr-weather-tab__unit-btn--active' : ''}`}
-                aria-pressed={tempUnit === 'c'}
-                onClick={() => setTempUnit('c')}
-              >
-                °C
-              </button>
-              <button
-                type="button"
-                className={`wtr-weather-tab__unit-btn${tempUnit === 'f' ? ' wtr-weather-tab__unit-btn--active' : ''}`}
-                aria-pressed={tempUnit === 'f'}
-                onClick={() => setTempUnit('f')}
-              >
-                °F
-              </button>
-            </div>
           </div>
+        ) : null}
 
-          <p className="wtr-weather-tab__description">{detail.description}</p>
-        </header>
+        <div className="wtr-weather-tab__title-row">
+          <h2 className="wtr-weather-tab__title">{detail.categoryLabel}</h2>
+          <div className="wtr-weather-tab__unit-toggle" role="group" aria-label="Temperature unit">
+            <button
+              type="button"
+              className={`wtr-weather-tab__unit-btn${tempUnit === 'c' ? ' wtr-weather-tab__unit-btn--active' : ''}`}
+              aria-pressed={tempUnit === 'c'}
+              onClick={() => setTempUnit('c')}
+            >
+              °C
+            </button>
+            <button
+              type="button"
+              className={`wtr-weather-tab__unit-btn${tempUnit === 'f' ? ' wtr-weather-tab__unit-btn--active' : ''}`}
+              aria-pressed={tempUnit === 'f'}
+              onClick={() => setTempUnit('f')}
+            >
+              °F
+            </button>
+          </div>
+        </div>
+
+        <p
+          {...staggerSectionProps(
+            detail.tags.length ? 1 : 0,
+            'wtr-weather-tab__description',
+            staggerClassName,
+            staggerStyle,
+          )}
+        >
+          {detail.description}
+        </p>
 
         <aside
-          className="wtr-weather-tab__retiree-callout"
-          {...staggerSectionProps(1, undefined, staggerClassName, staggerStyle)}
+          {...staggerSectionProps(
+            detail.tags.length ? 2 : 1,
+            'wtr-weather-tab__retiree-callout',
+            staggerClassName,
+            staggerStyle,
+          )}
         >
-          <IconUsers size={18} stroke={1.5} aria-hidden />
-          <p>{detail.retireeNote}</p>
+          <p>
+            {retireeNote.label ? (
+              <strong className="wtr-weather-tab__retiree-label">{retireeNote.label}</strong>
+            ) : null}
+            {retireeNote.label ? ' ' : null}
+            {retireeNote.body}
+          </p>
         </aside>
 
         {climateNotes && climatePreferenceStep > 0 ? (
           <p
-            className={[
-              'wtr-weather-tab__preference-note',
-              climateNotes.fitTone !== 'muted' && `wtr-weather-tab__preference-note--${climateNotes.fitTone}`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
+            {...staggerSectionProps(
+              detail.tags.length
+                ? climatePreferenceStep > 0
+                  ? 3
+                  : 2
+                : climatePreferenceStep > 0
+                  ? 2
+                  : 1,
+              [
+                'wtr-weather-tab__preference-note',
+                climateNotes.fitTone !== 'muted' && `wtr-weather-tab__preference-note--${climateNotes.fitTone}`,
+              ]
+                .filter(Boolean)
+                .join(' '),
+              staggerClassName,
+              staggerStyle,
+            )}
           >
             {climateNotes.climateScore != null ? (
               <span className="wtr-weather-tab__preference-score tabular-nums">
@@ -225,25 +258,26 @@ export function WeatherTab({
           </p>
         ) : null}
 
-        <dl
-          className="wtr-weather-tab__metrics"
+        <div
+          role="group"
+          aria-label="Climate averages"
           {...staggerSectionProps(
-            climatePreferenceStep > 0 ? 3 : 2,
-            undefined,
+            (climatePreferenceStep > 0 ? 3 : 2) + tagStaggerOffset,
+            'wtr-weather-tab__metrics',
             staggerClassName,
             staggerStyle,
           )}
         >
           <div className="wtr-weather-tab__metric">
-            <dt>Avg high</dt>
-            <dd>
+            <p className="wtr-weather-tab__metric-label">Avg high</p>
+            <div className="wtr-weather-tab__metric-values">
               <span className="wtr-weather-tab__metric-primary tabular-nums">{avgHigh.primary}</span>
               <span className="wtr-weather-tab__metric-secondary tabular-nums">{avgHigh.secondary}</span>
-            </dd>
+            </div>
           </div>
           <div className="wtr-weather-tab__metric">
-            <dt>Avg humidity</dt>
-            <dd>
+            <p className="wtr-weather-tab__metric-label">Avg humidity</p>
+            <div className="wtr-weather-tab__metric-values">
               {detail.metrics.avgHumidityPct != null ? (
                 <>
                   <span
@@ -273,11 +307,11 @@ export function WeatherTab({
               ) : (
                 <span className="wtr-weather-tab__metric-primary">—</span>
               )}
-            </dd>
+            </div>
           </div>
           <div className="wtr-weather-tab__metric">
-            <dt>Rainy months</dt>
-            <dd>
+            <p className="wtr-weather-tab__metric-label">Rainy months</p>
+            <div className="wtr-weather-tab__metric-values">
               <span className="wtr-weather-tab__metric-primary tabular-nums">
                 {detail.metrics.rainyMonthCount}
               </span>
@@ -286,16 +320,15 @@ export function WeatherTab({
                   {detail.metrics.rainyMonthRange}
                 </span>
               ) : null}
-            </dd>
+            </div>
           </div>
-        </dl>
+        </div>
 
         <section
-          className="wtr-weather-tab__seasons"
           aria-labelledby="wtr-weather-seasons-heading"
           {...staggerSectionProps(
-            climatePreferenceStep > 0 ? 4 : 3,
-            undefined,
+            (climatePreferenceStep > 0 ? 4 : 3) + tagStaggerOffset,
+            'wtr-weather-tab__seasons',
             staggerClassName,
             staggerStyle,
           )}
@@ -321,11 +354,10 @@ export function WeatherTab({
 
         {detail.considerations.length ? (
           <section
-            className="wtr-weather-tab__considerations"
             aria-labelledby="wtr-weather-considerations-heading"
             {...staggerSectionProps(
-              climatePreferenceStep > 0 ? 5 : 4,
-              undefined,
+              (climatePreferenceStep > 0 ? 5 : 4) + tagStaggerOffset,
+              'wtr-weather-tab__considerations',
               staggerClassName,
               staggerStyle,
             )}
@@ -361,11 +393,10 @@ export function WeatherTab({
         ) : null}
 
         <section
-          className="wtr-weather-tab__chart-section"
           aria-labelledby="wtr-weather-chart-heading"
           {...staggerSectionProps(
-            climatePreferenceStep > 0 ? 6 : 5,
-            undefined,
+            (climatePreferenceStep > 0 ? 6 : 5) + tagStaggerOffset,
+            'wtr-weather-tab__chart-section',
             staggerClassName,
             staggerStyle,
           )}
@@ -381,10 +412,9 @@ export function WeatherTab({
         </section>
 
         <p
-          className="wtr-weather-tab__source"
           {...staggerSectionProps(
-            climatePreferenceStep > 0 ? 7 : 6,
-            undefined,
+            (climatePreferenceStep > 0 ? 7 : 6) + tagStaggerOffset,
+            'wtr-weather-tab__source',
             staggerClassName,
             staggerStyle,
           )}

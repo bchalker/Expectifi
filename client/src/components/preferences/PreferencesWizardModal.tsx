@@ -9,7 +9,7 @@ import {
 import { PreferencesWizard, type PreferencesWizardMode } from './PreferencesWizard'
 import './PreferencesWizard.scss'
 
-const FADE_OUT_ANIMATION = 'pref-wizard-modal-fade-out'
+const FADE_MS = 280
 
 function prefersReducedMotion(): boolean {
   return (
@@ -36,47 +36,62 @@ export function PreferencesWizardModal({
   allowDismiss,
 }: Props) {
   const [mounted, setMounted] = useState(open)
-  const [closing, setClosing] = useState(false)
+  const [visible, setVisible] = useState(open && prefersReducedMotion())
   const canDismiss = allowDismiss ?? hasRetirementPreferences()
 
   useEffect(() => {
     if (open) {
       markDestinationPrefsOverlayOpened()
       setMounted(true)
-      setClosing(false)
-      return
+      if (prefersReducedMotion()) {
+        setVisible(true)
+        return
+      }
+      setVisible(false)
+      let enterFrame = 0
+      const mountFrame = window.requestAnimationFrame(() => {
+        enterFrame = window.requestAnimationFrame(() => setVisible(true))
+      })
+      return () => {
+        window.cancelAnimationFrame(mountFrame)
+        if (enterFrame) window.cancelAnimationFrame(enterFrame)
+      }
     }
+
     if (!mounted) return
+
     if (prefersReducedMotion()) {
+      setVisible(false)
       setMounted(false)
-      setClosing(false)
       return
     }
-    setClosing(true)
+
+    setVisible(false)
+    const timeout = window.setTimeout(() => setMounted(false), FADE_MS)
+    return () => window.clearTimeout(timeout)
   }, [open, mounted])
 
-  const handleOverlayAnimationEnd = useCallback(
-    (e: React.AnimationEvent<HTMLDivElement>) => {
+  const handleOverlayTransitionEnd = useCallback(
+    (e: React.TransitionEvent<HTMLDivElement>) => {
       if (e.target !== e.currentTarget) return
-      if (e.animationName !== FADE_OUT_ANIMATION) return
-      if (!closing) return
-      setClosing(false)
+      if (e.propertyName !== 'opacity') return
+      if (open || visible) return
       setMounted(false)
     },
-    [closing],
+    [open, visible],
   )
 
   if (!mounted) return null
 
   return createPortal(
     <div
-      className={['pref-wizard-modal', closing ? 'pref-wizard-modal--closing' : '']
+      className={['pref-wizard-modal', visible && 'pref-wizard-modal--visible']
         .filter(Boolean)
         .join(' ')}
       role="dialog"
       aria-modal="true"
       aria-label="Retirement preferences"
-      onAnimationEnd={handleOverlayAnimationEnd}
+      onTransitionEnd={handleOverlayTransitionEnd}
     >
       <div className="pref-wizard-modal__panel">
         <div className="pref-wizard-modal__header">

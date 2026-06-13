@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import {
   getTaxVisaData,
-  getTaxVisaScopeLabel,
   TAX_VISA_FOREIGN_INCOME_NOTE,
   TAX_VISA_TAB_DISCLAIMER_BODY,
   TAX_VISA_UNAVAILABLE_MESSAGE,
@@ -37,7 +36,6 @@ function TaxInfoCard({
 
 export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
   const data = useMemo(() => getTaxVisaData(country), [country])
-  const scope = useMemo(() => getTaxVisaScopeLabel(country), [country])
 
   if (!data) {
     return (
@@ -54,16 +52,9 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
 
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--tax-visa">
-      <p
-        className="wtr-tax-visa-tab__scope"
-        {...staggerSectionProps(0, 'wtr-tax-visa-tab__scope', staggerClassName, staggerStyle)}
-      >
-        {scope.text}
-      </p>
-
       <div
         className="wtr-city-detail__cards wtr-tax-visa-tab__cards"
-        {...staggerSectionProps(1, 'wtr-tax-visa-tab__cards', staggerClassName, staggerStyle)}
+        {...staggerSectionProps(0, 'wtr-tax-visa-tab__cards', staggerClassName, staggerStyle)}
       >
         <TaxInfoCard title="Tax rate" value={formatTextField(data.tax_rate_label)} />
         <TaxInfoCard
@@ -85,7 +76,7 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
       <section
         className="wtr-tax-visa-tab__visa-section"
         aria-labelledby="wtr-tax-visa-visa-heading"
-        {...staggerSectionProps(2, 'wtr-tax-visa-tab__visa-section', staggerClassName, staggerStyle)}
+        {...staggerSectionProps(1, 'wtr-tax-visa-tab__visa-section', staggerClassName, staggerStyle)}
       >
         <h3 id="wtr-tax-visa-visa-heading" className="wtr-city-detail__section-title">
           Residency &amp; visa
@@ -110,7 +101,7 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
 
       <p
         className="wtr-tax-visa-tab__disclaimer"
-        {...staggerSectionProps(3, 'wtr-tax-visa-tab__disclaimer', staggerClassName, staggerStyle)}
+        {...staggerSectionProps(2, 'wtr-tax-visa-tab__disclaimer', staggerClassName, staggerStyle)}
       >
         <strong>Sources</strong>: {TAX_VISA_TAB_DISCLAIMER_BODY}
       </p>

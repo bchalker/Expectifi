@@ -91,8 +91,8 @@
 .account-balances-stack,
 .main > .section--life-events,
 .where-to-retire__main-panel-back,
-.where-to-retire__income-intro,
-.where-to-retire__income-toolbar-slider,
+.wtr-filters-sidebar__intro,
+.wtr-filters-sidebar__slider,
 .where-to-retire__map-stage,
 .where-to-retire__main-panel-footer {
   opacity: 1;
@@ -120,8 +120,8 @@ html[data-dashboard-view-flush] {
   .account-balances-stack,
   .main > .section--life-events,
   .where-to-retire__main-panel-back,
-  .where-to-retire__income-intro,
-  .where-to-retire__income-toolbar-slider,
+  .wtr-filters-sidebar__intro,
+  .wtr-filters-sidebar__slider,
   .where-to-retire__map-stage,
   .where-to-retire__main-panel-footer {
     opacity: 0;
@@ -188,11 +188,11 @@ html[data-dashboard-view-enter='where-to-retire'] {
     @include dashboard-view-rise(0);
   }
 
-  .where-to-retire__income-intro {
+  .wtr-filters-sidebar__intro {
     @include dashboard-view-rise(2);
   }
 
-  .where-to-retire__income-toolbar-slider {
+  .wtr-filters-sidebar__slider {
     @include dashboard-view-rise(3);
   }
 
@@ -272,8 +272,8 @@ html[data-dashboard-view-enter='income']
   html[data-dashboard-view-enter='income'] .where-to-retire-preview-panel,
   html[data-dashboard-view-enter='income'] .account-balances-stack,
   html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__main-panel-back,
-  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__income-intro,
-  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__income-toolbar-slider,
+  html[data-dashboard-view-enter='where-to-retire'] .wtr-filters-sidebar__intro,
+  html[data-dashboard-view-enter='where-to-retire'] .wtr-filters-sidebar__slider,
   html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__map-stage,
   html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__main-panel-footer,
   html[data-dashboard-view-enter='growth'] .account-balances-stack .portfolio-account-list > *,

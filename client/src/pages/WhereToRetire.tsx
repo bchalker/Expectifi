@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { AnimatedCount } from "../components/ui/AnimatedCount";
 import { AppToast } from "../components/ui/AppToast";
 import { PreferencesWizardModal } from "../components/preferences/PreferencesWizardModal";
-import { BudgetExplorationHero } from "../components/whereToRetire/BudgetExplorationHero";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
-import { WtrIncomeToolbarMapSelects } from "../components/whereToRetire/WtrIncomeToolbarMapSelects";
-import { WtrMapWaveDivider } from "../components/whereToRetire/WtrMapWaveDivider";
-import { WtrMapFilterButton } from "../components/whereToRetire/WtrMapFilterButton";
+import { WtrFiltersSidebar } from "../components/whereToRetire/WtrFiltersSidebar";
 import { RetirementMapFilters } from "../components/whereToRetire/RetirementMapFilters";
 import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
 import type { ComputedSnapshot } from "../lib/computeResults";
@@ -29,9 +25,9 @@ import { readStashedWtrExplorationIncome } from "../lib/whereToRetire/wtrPreview
 import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
 import { useRetirementPreferences } from "../hooks/useRetirementPreferences";
 import { hasRetirementPreferences } from "../types/preferences";
-import { useStickySentinel } from "../hooks/useStickySentinel";
 import { useWtrMapPinColorView } from "../hooks/useWtrMapPinColorView";
 import type { MapCity } from "../utils/costOfLiving";
+import "../components/TaxSummaryLayout.scss";
 import "./WhereToRetire.scss";
 
 type WtrViewMode = "map" | "compare";
@@ -71,16 +67,8 @@ export function WhereToRetire({ c }: Props) {
     setMapFilters,
   );
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
-  const [toolbarStickyEnabled, setToolbarStickyEnabled] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(min-width: 681px)").matches
-      : false,
-  );
-  const { heroRef: toolbarRowRef, stuck: toolbarRowStuck } = useStickySentinel(
-    null,
-    toolbarStickyEnabled,
-  );
 
   useEffect(() => {
     setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
@@ -135,14 +123,6 @@ export function WhereToRetire({ c }: Props) {
     return () => window.clearTimeout(id);
   }, [filtersOpen]);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 681px)");
-    const sync = () => setToolbarStickyEnabled(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
   const clearCompare = useCallback(() => {
     setCompareIds([]);
     setBaselineCity(null);
@@ -182,205 +162,142 @@ export function WhereToRetire({ c }: Props) {
 
   return (
     <div className="where-to-retire">
-      <div
-        className={[
-          "where-to-retire__body",
-          "main",
-          "app-page",
-          "app-page--where-to-retire",
-          "where-to-retire__body--map",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        <div
-          className={[
-            "where-to-retire__main-panel",
-            viewMode === "compare" &&
-              "where-to-retire__main-panel--compare-open",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <div className="where-to-retire__main-panel-back">
-            <button
-              type="button"
-              className="app-page-back where-to-retire__panel-back"
-              onClick={() => navigateApp(APP_DASHBOARD_PATH)}
+      <div className="main main--has-hero main--where-to-retire">
+        <div className="section section--tax-summary section--tax-summary--where-to-retire">
+          <div className="section--tax-summary__income-layout">
+            <div
+              className={[
+                "portfolio-accounts-reveal",
+                "portfolio-accounts-reveal--in",
+                "where-to-retire__main",
+                viewMode === "compare" && "where-to-retire__main--compare-open",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
-              <IconArrowLeft size={16} stroke={1.5} aria-hidden />
-              Back to dashboard
-            </button>
-          </div>
-          <section
-            className="where-to-retire__income-intro"
-            aria-labelledby="wtr-budget-hero-title"
-          >
-            <BudgetExplorationHero
-              section="intro"
-              planMonthlyIncome={grossMonthlyIncome}
-              explorationIncome={explorationIncome}
-              onExplorationIncomeChange={setExplorationIncome}
-            />
-          </section>
-          <div className="where-to-retire__income-toolbar">
-            <WtrMapWaveDivider />
-          </div>
-          <div
-            ref={toolbarRowRef}
-            className={[
-              "where-to-retire__income-toolbar-row",
-              toolbarRowStuck && "where-to-retire__income-toolbar-row--stuck",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            <div className="where-to-retire__income-toolbar-meta">
-              <div className="where-to-retire__income-toolbar-label">
-                <BudgetExplorationHero
-                  section="slider-label"
-                  planMonthlyIncome={grossMonthlyIncome}
-                  explorationIncome={explorationIncome}
-                  onExplorationIncomeChange={setExplorationIncome}
-                />
+              <div className="where-to-retire__main-panel-back">
+                <button
+                  type="button"
+                  className="app-page-back where-to-retire__panel-back"
+                  onClick={() => navigateApp(APP_DASHBOARD_PATH)}
+                >
+                  <IconArrowLeft size={16} stroke={1.5} aria-hidden />
+                  Back to dashboard
+                </button>
               </div>
-              <div
-                className="where-to-retire__showing-count"
-                aria-live="polite"
+
+              <div className="where-to-retire__main-panel-map">
+                <div className="where-to-retire__map-stage">
+                  <RetirementMapExplorer
+                    explorationIncome={mapExplorationIncome}
+                    filters={mapFilters}
+                    preferences={prefs}
+                    onFiltersChange={setMapFilters}
+                    pinColorView={pinColorView}
+                    excludedCountries={storage.excludedCountries}
+                    isFavoritedCity={storage.isFavoritedCity}
+                    onToggleFavoriteCity={storage.toggleFavoriteCity}
+                    favoriteCities={storage.favoriteCities}
+                    filtersOpen={filtersOpen}
+                    onFiltersOpenChange={setFiltersOpen}
+                    compareIds={compareIds}
+                    compareOverlayOpen={viewMode === "compare"}
+                    explorerViewMode={viewMode === "compare" ? "compare" : "map"}
+                    onExplorerViewModeChange={(mode) =>
+                      setViewMode(mode === "compare" ? "compare" : "map")
+                    }
+                    onClearCompare={clearCompare}
+                    onViewComparison={() => setViewMode("compare")}
+                    onDetailPanelOpenChange={setDetailPanelOpen}
+                  />
+                  {viewMode === "compare" ? (
+                    <div
+                      className="where-to-retire__compare-overlay"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="City comparison"
+                    >
+                      <WtrComparisonTableView
+                        monthlyIncome={mapExplorationIncome}
+                        compareIds={compareIds}
+                        baselineCity={baselineCity}
+                        onBaselineCityChange={setBaselineCity}
+                        onBackToMap={() => setViewMode("map")}
+                        onClearAll={clearCompare}
+                        onRemoveCompare={removeCompare}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <footer
+                className="where-to-retire__main-panel-footer font-xs"
+                role="note"
               >
-                <p className="where-to-retire__showing-count-line font-xs">
-                  <span className="where-to-retire__showing-count-primary">
-                    <AnimatedCount
-                      value={visibilityCounts.visibleCount}
-                      className="where-to-retire__showing-count-num"
-                    />{" "}
-                    cities
-                  </span>{" "}
-                  <span className="where-to-retire__showing-count-sub">
-                    from{" "}
-                    <AnimatedCount
-                      value={visibilityCounts.visibleCountryCount}
-                      className="where-to-retire__showing-count-num where-to-retire__showing-count-num--sub"
-                    />{" "}
-                    countries
-                  </span>
-                </p>
-              </div>
+                All figures are educational estimates only — not tax, legal,
+                financial, or immigration advice. Consult qualified professionals
+                before relocating. Sources:{" "}
+                <a
+                  href="https://www.irs.gov/individuals/international-taxpayers"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  IRS
+                </a>
+                {" · "}
+                <a
+                  href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Tax Foundation
+                </a>
+              </footer>
             </div>
-            <WtrIncomeToolbarMapSelects
-              pinColorView={pinColorView}
-              onPinColorViewChange={handlePinColorViewChange}
-              filters={mapFilters}
-              onFiltersChange={setMapFilters}
-            />
-            <div className="where-to-retire__income-toolbar-slider where-to-retire__income-toolbar-slider--mobile">
-              <BudgetExplorationHero
-                section="slider-rail"
+
+            <div
+              className={[
+                "section--tax-summary__sidebar",
+                "where-to-retire__sidebar",
+                detailPanelOpen && "section--tax-summary__sidebar--detail-open",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <WtrFiltersSidebar
                 planMonthlyIncome={grossMonthlyIncome}
                 explorationIncome={explorationIncome}
                 onExplorationIncomeChange={setExplorationIncome}
-              />
-            </div>
-            <div className="where-to-retire__income-toolbar-slider where-to-retire__income-toolbar-slider--desktop">
-              <BudgetExplorationHero
-                section="slider"
-                planMonthlyIncome={grossMonthlyIncome}
-                explorationIncome={explorationIncome}
-                onExplorationIncomeChange={setExplorationIncome}
-              />
-            </div>
-            <div className="where-to-retire__income-toolbar-actions">
-              <WtrMapFilterButton
-                ref={filterButtonRef}
-                active={activeFilterCount > 0}
+                visibilityCounts={visibilityCounts}
+                pinColorView={pinColorView}
+                onPinColorViewChange={handlePinColorViewChange}
+                filters={mapFilters}
+                onFiltersChange={setMapFilters}
                 activeFilterCount={activeFilterCount}
                 filtersOpen={filtersOpen}
-                onToggle={toggleFiltersPanel}
+                onToggleFilters={toggleFiltersPanel}
+                filterButtonRef={filterButtonRef}
+                onOpenPreferences={() => setPreferencesWizardOpen(true)}
               />
-            </div>
-          </div>
-          <div className="where-to-retire__main-panel-map">
-            <div className="where-to-retire__map-stage app-full-bleed">
-              <RetirementMapExplorer
-                explorationIncome={mapExplorationIncome}
+              <RetirementMapFilters
+                open={filtersOpen}
+                onClose={() => setFiltersOpen(false)}
                 filters={mapFilters}
-                preferences={prefs}
-                onFiltersChange={setMapFilters}
-                pinColorView={pinColorView}
+                onChange={setMapFilters}
+                monthlyIncome={mapExplorationIncome}
                 excludedCountries={storage.excludedCountries}
-                isFavoritedCity={storage.isFavoritedCity}
-                onToggleFavoriteCity={storage.toggleFavoriteCity}
                 favoriteCities={storage.favoriteCities}
-                filtersOpen={filtersOpen}
-                onFiltersOpenChange={setFiltersOpen}
-                compareIds={compareIds}
-                compareOverlayOpen={viewMode === "compare"}
-                explorerViewMode={viewMode === "compare" ? "compare" : "map"}
-                onExplorerViewModeChange={(mode) =>
-                  setViewMode(mode === "compare" ? "compare" : "map")
-                }
-                onClearCompare={clearCompare}
-                onViewComparison={() => setViewMode("compare")}
+                onAddExcludedCountry={storage.addExcludedCountry}
+                onRemoveExcludedCountry={storage.removeExcludedCountry}
+                onClearExcludedCountries={storage.clearExcludedCountries}
+                onRemoveFavorite={storage.removeFavoriteCity}
               />
-              {viewMode === "compare" ? (
-                <div
-                  className="where-to-retire__compare-overlay"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="City comparison"
-                >
-                  <WtrComparisonTableView
-                    monthlyIncome={mapExplorationIncome}
-                    compareIds={compareIds}
-                    baselineCity={baselineCity}
-                    onBaselineCityChange={setBaselineCity}
-                    onBackToMap={() => setViewMode("map")}
-                    onClearAll={clearCompare}
-                    onRemoveCompare={removeCompare}
-                  />
-                </div>
-              ) : null}
             </div>
-            <RetirementMapFilters
-              open={filtersOpen}
-              onClose={() => setFiltersOpen(false)}
-              filters={mapFilters}
-              onChange={setMapFilters}
-              monthlyIncome={mapExplorationIncome}
-              excludedCountries={storage.excludedCountries}
-              favoriteCities={storage.favoriteCities}
-              onAddExcludedCountry={storage.addExcludedCountry}
-              onRemoveExcludedCountry={storage.removeExcludedCountry}
-              onClearExcludedCountries={storage.clearExcludedCountries}
-              onRemoveFavorite={storage.removeFavoriteCity}
-              onOpenPreferences={() => setPreferencesWizardOpen(true)}
-            />
           </div>
-          <footer
-            className="where-to-retire__main-panel-footer font-xs"
-            role="note"
-          >
-            All figures are educational estimates only — not tax, legal,
-            financial, or immigration advice. Consult qualified professionals
-            before relocating. Sources:{" "}
-            <a
-              href="https://www.irs.gov/individuals/international-taxpayers"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              IRS
-            </a>
-            {" · "}
-            <a
-              href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Tax Foundation
-            </a>
-          </footer>
         </div>
       </div>
+
       <PreferencesWizardModal
         open={preferencesWizardOpen}
         onClose={() => setPreferencesWizardOpen(false)}

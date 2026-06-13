@@ -414,7 +414,6 @@ type PanelProps = FilterChangeProps & {
   onRemoveExcludedCountry: (country: string) => void;
   onClearExcludedCountries: () => void;
   onRemoveFavorite: (city: string, country: string) => void;
-  onOpenPreferences?: () => void;
 };
 
 const FILTER_PANEL_TABS: { id: FilterPanelTab; label: string }[] = [
@@ -436,7 +435,6 @@ export function RetirementMapFilters({
   onRemoveExcludedCountry,
   onClearExcludedCountries,
   onRemoveFavorite,
-  onOpenPreferences,
 }: PanelProps) {
   const isMobileSheet = useIsMobileBottomSheet();
   const panelRef = useRef<HTMLElement>(null);
@@ -546,20 +544,7 @@ export function RetirementMapFilters({
       <div className="wtr-map-filters__scroll">
         <div className="wtr-map-filters__body">
           {activeTab === "filters" ? (
-            <>
-              {onOpenPreferences ? (
-                <div className="wtr-map-filters__preferences-cta">
-                  <button
-                    type="button"
-                    className="wtr-map-filters__preferences-btn"
-                    onClick={onOpenPreferences}
-                  >
-                    Update my preferences
-                  </button>
-                </div>
-              ) : null}
-              <FilterControlsStack filters={filters} onChange={onChange} />
-            </>
+            <FilterControlsStack filters={filters} onChange={onChange} />
           ) : null}
 
           {activeTab === "exclude" ? (

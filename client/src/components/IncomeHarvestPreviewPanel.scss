@@ -494,3 +494,65 @@
     display: none;
   }
 }
+
+/* Explorer: full interactive map in the same rail shell as Growth/Income teaser */
+.where-to-retire-preview-panel--full {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 20rem;
+  overflow: visible;
+}
+
+.where-to-retire-preview-panel__full-rail {
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 20rem;
+  overflow: visible;
+}
+
+.where-to-retire-preview-panel__map-slot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 20rem;
+  border: 1px solid var(--border);
+  border-radius: var(--space-3);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.where-to-retire-preview-panel__map-slot .wtr-maplibre-map {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.where-to-retire-preview-panel__map-slot .wtr-maplibre-map__canvas {
+  flex: 1 1 auto;
+  min-height: 20rem;
+}
+
+@media (min-width: 1024px) {
+  .where-to-retire-preview-panel--full {
+    min-height: calc(100dvh - var(--app-header-stack-h) - 8rem);
+    max-height: calc(100dvh - var(--app-header-stack-h) - 6rem);
+  }
+
+  .where-to-retire-preview-panel__full-rail,
+  .where-to-retire-preview-panel__map-slot {
+    min-height: calc(100dvh - var(--app-header-stack-h) - 8rem);
+    max-height: calc(100dvh - var(--app-header-stack-h) - 6rem);
+  }
+
+  .where-to-retire-preview-panel__map-slot .wtr-maplibre-map__canvas {
+    min-height: calc(100dvh - var(--app-header-stack-h) - 8rem);
+  }
+}

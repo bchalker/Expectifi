@@ -67,7 +67,7 @@ export type TaxVisaScopeLabel = {
   regional: boolean
 }
 
-/** Scope note shown below the Tax & Visa tab row and above section cards. */
+/** Scope note shown in city detail pagination when Tax & Visa tab is active. */
 export function getTaxVisaScopeLabel(country: string): TaxVisaScopeLabel {
   const trimmed = country.trim()
   const override = TAX_VISA_SCOPE_OVERRIDES[trimmed]

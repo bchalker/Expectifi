@@ -16,6 +16,7 @@ import { monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScori
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import type { BudgetBreakdownDisplay } from '../../../utils/costOfLiving'
 import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from '../../../utils/demographics'
+import { getTaxVisaScopeLabel } from '../../../utils/taxVisa'
 import { calculateRetirementScore } from '../../../utils/retirementScore'
 import type { DestinationListNav } from '../RetirementDestinationPanel'
 import { WtrCityListPagination } from '../WtrCityListPagination'
@@ -185,6 +186,18 @@ function CityDetailPanelBody({
 
   const { city } = scored
 
+  const taxVisaScopeNote = useMemo(
+    () => getTaxVisaScopeLabel(city.country).text,
+    [city.country],
+  )
+
+  const paginationCenterNote =
+    activeTab === 'taxVisa'
+      ? taxVisaScopeNote
+      : mobileSheet
+        ? undefined
+        : PANEL_ESTIMATES_NOTE
+
   const tabContent = (() => {
     const staggerClassName = 'wtr-city-detail__stagger-item'
     const staggerStyle = panelStaggerStyle
@@ -317,7 +330,7 @@ function CityDetailPanelBody({
               {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
             </p>
           ) : null}
-          {mobileSheet && listNav ? (
+          {mobileSheet && listNav && activeTab !== 'taxVisa' ? (
             <p className="wtr-city-detail__scroll-end-source">{PANEL_ESTIMATES_NOTE}</p>
           ) : null}
         </AppOverlayScrollbars>
@@ -337,7 +350,7 @@ function CityDetailPanelBody({
             itemIndex={listNav.index}
             onItemPrev={listNav.onPrev}
             onItemNext={listNav.onNext}
-            centerNote={mobileSheet ? undefined : PANEL_ESTIMATES_NOTE}
+            centerNote={paginationCenterNote}
             showRange={false}
           />
         ) : null}

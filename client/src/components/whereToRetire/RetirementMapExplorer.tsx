@@ -6,7 +6,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { IconChevronLeft, IconChevronRight, IconSortAscending, IconSortDescending } from "@tabler/icons-react";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconSortAscending,
+  IconSortDescending,
+} from "@tabler/icons-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
 import {
   scoreAndFilterMapCities,
@@ -60,6 +65,7 @@ type Props = {
     country: string;
     country_iso: string;
   }) => void;
+  onDetailPanelOpenChange?: (open: boolean) => void;
 };
 
 const LIST_PAGE_SIZE = 25;
@@ -156,12 +162,10 @@ export function RetirementMapExplorer({
   favoriteCities,
   isFavoritedCity,
   onToggleFavoriteCity,
+  onDetailPanelOpenChange,
 }: Props) {
   const favoritedKeySet = useMemo(
-    () =>
-      new Set(
-        favoriteCities.map((f) => `${f.city}\u0001${f.country}`),
-      ),
+    () => new Set(favoriteCities.map((f) => `${f.city}\u0001${f.country}`)),
     [favoriteCities],
   );
 
@@ -332,6 +336,13 @@ export function RetirementMapExplorer({
     [filteredCities, selectedId],
   );
 
+  const detailPanelOpen = panelOpen && selectedScored != null;
+
+  useEffect(() => {
+    onDetailPanelOpenChange?.(detailPanelOpen);
+    return () => onDetailPanelOpenChange?.(false);
+  }, [detailPanelOpen, onDetailPanelOpenChange]);
+
   const scrollListToTop = useCallback(() => {
     listScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, []);
@@ -365,14 +376,16 @@ export function RetirementMapExplorer({
       if (!item) return;
       setSelectedId(item.city.id);
       setListPage(Math.floor(index / LIST_PAGE_SIZE));
-      setPanelOpen(true);
+      if (!panelOpen) setPanelOpen(true);
     },
-    [filteredCities],
+    [filteredCities, panelOpen],
   );
 
   const destinationListNav = useMemo(() => {
     if (filteredCities.length <= 1 || selectedId == null) return null;
-    const index = filteredCities.findIndex((item) => item.city.id === selectedId);
+    const index = filteredCities.findIndex(
+      (item) => item.city.id === selectedId,
+    );
     if (index < 0) return null;
     return {
       index,
@@ -389,11 +402,13 @@ export function RetirementMapExplorer({
   const openDestination = useCallback(
     (id: string) => {
       setSelectedId(id);
-      setPanelOpen(true);
       const index = filteredCities.findIndex((s) => s.city.id === id);
       if (index >= 0) setListPage(Math.floor(index / LIST_PAGE_SIZE));
+      if (panelOpen && selectedId === id) return;
+      if (panelOpen) return;
+      setPanelOpen(true);
     },
-    [filteredCities],
+    [filteredCities, panelOpen, selectedId],
   );
 
   const closePanel = useCallback(() => {
@@ -442,7 +457,9 @@ export function RetirementMapExplorer({
         className={[
           "wtr-explorer__map-row",
           mobileListOnly && "wtr-explorer__map-row--list-only",
-          !mobileListOnly && !listPanelOpen && "wtr-explorer__map-row--list-collapsed",
+          !mobileListOnly &&
+            !listPanelOpen &&
+            "wtr-explorer__map-row--list-collapsed",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -457,7 +474,7 @@ export function RetirementMapExplorer({
               onFiltersChange={onFiltersChange}
               favoritedKeySet={favoritedKeySet}
               selectedId={selectedId}
-              detailPanelOpen={panelOpen && selectedScored != null}
+              detailPanelOpen={detailPanelOpen}
               fitKey={structuralFiltersKey}
               onSelect={openDestination}
             />
@@ -687,17 +704,17 @@ export function RetirementMapExplorer({
             </span>
           </button>
         ) : null}
-      </div>
 
-      <RetirementDestinationPanel
-        scored={selectedScored}
-        monthlyIncome={explorationIncome}
-        mapFilters={filters}
-        preferences={preferences}
-        open={panelOpen && selectedScored != null}
-        onClose={closePanel}
-        listNav={destinationListNav}
-      />
+        <RetirementDestinationPanel
+          scored={selectedScored}
+          monthlyIncome={explorationIncome}
+          mapFilters={filters}
+          preferences={preferences}
+          open={detailPanelOpen}
+          onClose={closePanel}
+          listNav={destinationListNav}
+        />
+      </div>
 
       {!compareOverlayOpen ? (
         <WtrCompareBar

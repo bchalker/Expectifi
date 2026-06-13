@@ -1,0 +1,43 @@
+name: Refresh flight routes
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Amadeus SDK
+        run: npm install amadeus
+
+      - name: Refresh flight routes
+        run: node scripts/refresh-flight-routes.mjs
+        env:
+          AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
+          AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
+          AMADEUS_HOSTNAME: production
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet client/src/data/getting-there.json; then
+            echo "No changes to getting-there.json"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add client/src/data/getting-there.json
+            git commit -m "chore: refresh flight routes from Amadeus"
+            git push
+          fi

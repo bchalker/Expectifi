@@ -18,19 +18,6 @@
   pointer-events: none;
 }
 
-.wtr-maplibre-map__style-overlay {
-  position: absolute;
-  left: 0.65rem;
-  bottom: 0.65rem;
-  z-index: 450;
-  max-width: calc(100% - 1.25rem);
-  pointer-events: auto;
-}
-
-.wtr-maplibre-map__style-select {
-  min-width: 7.5rem;
-}
-
 .wtr-maplibre-map__legend-overlay .wtr-map-pin-legend--interactive {
   pointer-events: auto;
 }

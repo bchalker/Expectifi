@@ -10,12 +10,14 @@
         {
           "code": "LIS",
           "name": "Lisbon Humberto Delgado",
-          "city": "Lisbon"
+          "city": "Lisbon",
+          "official_url": "https://lisbonairport.pt"
         },
         {
           "code": "OPO",
           "name": "Francisco Sá Carneiro",
-          "city": "Porto"
+          "city": "Porto",
+          "official_url": "http://www.ana.pt/en-US/Aeroportos/porto/Porto/Pages/Homepage-Porto.aspx"
         }
       ],
       "direct_from_us": true,
@@ -48,12 +50,14 @@
         {
           "code": "MAD",
           "name": "Adolfo Suárez Madrid-Barajas",
-          "city": "Madrid"
+          "city": "Madrid",
+          "official_url": "https://www.aena.es/en/adolfo-suarez-madrid-barajas.html"
         },
         {
           "code": "BCN",
           "name": "Josep Tarradellas Barcelona-El Prat",
-          "city": "Barcelona"
+          "city": "Barcelona",
+          "official_url": "https://www.aena.es/en/josep-tarradellas-barcelona-el-prat.html"
         }
       ],
       "direct_from_us": true,
@@ -88,17 +92,20 @@
         {
           "code": "FCO",
           "name": "Leonardo da Vinci (Fiumicino)",
-          "city": "Rome"
+          "city": "Rome",
+          "official_url": "http://www.adr.it/portal/portal/adr/Fiumicino/Leonardo_da_vinci/Header_Window?action=2"
         },
         {
           "code": "MXP",
           "name": "Malpensa",
-          "city": "Milan"
+          "city": "Milan",
+          "official_url": "http://www.sea-aeroportimilano.it/en/malpensa/index.phtml"
         },
         {
           "code": "VCE",
           "name": "Marco Polo",
-          "city": "Venice"
+          "city": "Venice",
+          "official_url": "http://www.veniceairport.com/core/index.jsp?_requestid=37300&language=en"
         }
       ],
       "direct_from_us": true,
@@ -133,12 +140,14 @@
         {
           "code": "ATH",
           "name": "Athens International Eleftherios Venizelos",
-          "city": "Athens"
+          "city": "Athens",
+          "official_url": "https://www.aia.gr"
         },
         {
           "code": "HER",
           "name": "Nikos Kazantzakis",
-          "city": "Crete/Heraklion"
+          "city": "Crete/Heraklion",
+          "official_url": "https://www.heraklion-airport.gr/en/"
         }
       ],
       "direct_from_us": true,
@@ -169,12 +178,14 @@
         {
           "code": "CDG",
           "name": "Charles de Gaulle",
-          "city": "Paris"
+          "city": "Paris",
+          "official_url": "http://www.aeroportsdeparis.fr/"
         },
         {
           "code": "NCE",
           "name": "Nice Côte d'Azur",
-          "city": "Nice"
+          "city": "Nice",
+          "official_url": "https://www.nice.aeroport.fr/en"
         }
       ],
       "direct_from_us": true,
@@ -211,17 +222,20 @@
         {
           "code": "DBV",
           "name": "Dubrovnik Airport",
-          "city": "Dubrovnik"
+          "city": "Dubrovnik",
+          "official_url": "https://www.airport-dubrovnik.hr/en"
         },
         {
           "code": "ZAG",
           "name": "Zagreb Airport",
-          "city": "Zagreb"
+          "city": "Zagreb",
+          "official_url": "https://www.zagreb-airport.hr/en"
         },
         {
           "code": "SPU",
           "name": "Split Airport",
-          "city": "Split"
+          "city": "Split",
+          "official_url": "https://split-airport.hr"
         }
       ],
       "direct_from_us": false,
@@ -246,7 +260,8 @@
         {
           "code": "BUD",
           "name": "Budapest Ferenc Liszt International",
-          "city": "Budapest"
+          "city": "Budapest",
+          "official_url": "http://www.bud.hu/english"
         }
       ],
       "direct_from_us": false,
@@ -272,7 +287,8 @@
         {
           "code": "PRG",
           "name": "Václav Havel Airport Prague",
-          "city": "Prague"
+          "city": "Prague",
+          "official_url": "http://www.prg.aero"
         }
       ],
       "direct_from_us": false,
@@ -297,12 +313,14 @@
         {
           "code": "WAW",
           "name": "Warsaw Chopin Airport",
-          "city": "Warsaw"
+          "city": "Warsaw",
+          "official_url": "http://www.lotnisko-chopina.pl/?lang=en"
         },
         {
           "code": "KRK",
           "name": "Kraków John Paul II International",
-          "city": "Kraków"
+          "city": "Kraków",
+          "official_url": "http://www.krakowairport.pl/en/"
         }
       ],
       "direct_from_us": true,
@@ -331,7 +349,8 @@
         {
           "code": "OTP",
           "name": "Henri Coandă International",
-          "city": "Bucharest"
+          "city": "Bucharest",
+          "official_url": "http://www.bucharestairports.ro/en/"
         }
       ],
       "direct_from_us": false,
@@ -356,12 +375,14 @@
         {
           "code": "SOF",
           "name": "Sofia Airport",
-          "city": "Sofia"
+          "city": "Sofia",
+          "official_url": "http://sofia-airport.bg"
         },
         {
           "code": "VAR",
           "name": "Varna Airport",
-          "city": "Varna (Black Sea coast)"
+          "city": "Varna (Black Sea coast)",
+          "official_url": "https://www.varna-airport.bg/"
         }
       ],
       "direct_from_us": false,
@@ -386,7 +407,8 @@
         {
           "code": "BEG",
           "name": "Belgrade Nikola Tesla Airport",
-          "city": "Belgrade"
+          "city": "Belgrade",
+          "official_url": "http://www.beg.aero/"
         }
       ],
       "direct_from_us": false,
@@ -411,12 +433,14 @@
         {
           "code": "TBS",
           "name": "Tbilisi International",
-          "city": "Tbilisi"
+          "city": "Tbilisi",
+          "official_url": "http://www.tbilisiairport.com/"
         },
         {
           "code": "BUS",
           "name": "Batumi International",
-          "city": "Batumi"
+          "city": "Batumi",
+          "official_url": "https://batumiairport.com/"
         }
       ],
       "direct_from_us": false,
@@ -443,12 +467,14 @@
         {
           "code": "CMN",
           "name": "Mohammed V International",
-          "city": "Casablanca"
+          "city": "Casablanca",
+          "official_url": "https://www.aeroportcasablanca.ma/en/Our-Airports/Casablanca-Mohammed-V-Airport"
         },
         {
           "code": "RAK",
           "name": "Marrakech Menara",
-          "city": "Marrakech"
+          "city": "Marrakech",
+          "official_url": "https://www.onda.ma/en/aeroport-marrakech-menara"
         }
       ],
       "direct_from_us": true,
@@ -476,17 +502,20 @@
         {
           "code": "MEX",
           "name": "Felipe Ángeles International / Benito Juárez",
-          "city": "Mexico City"
+          "city": "Mexico City",
+          "official_url": "https://www.aicm.com.mx"
         },
         {
           "code": "CUN",
           "name": "Cancún International",
-          "city": "Cancún"
+          "city": "Cancún",
+          "official_url": "https://cancunairport.com"
         },
         {
           "code": "GDL",
           "name": "Miguel Hidalgo y Costilla",
-          "city": "Guadalajara"
+          "city": "Guadalajara",
+          "official_url": "https://www.aeropuertosgap.com.mx/es/guadalajara"
         }
       ],
       "direct_from_us": true,
@@ -517,17 +546,20 @@
         {
           "code": "BOG",
           "name": "El Dorado International",
-          "city": "Bogotá"
+          "city": "Bogotá",
+          "official_url": "https://eldorado.aero/"
         },
         {
           "code": "MDE",
           "name": "José María Córdova",
-          "city": "Medellín"
+          "city": "Medellín",
+          "official_url": "https://www.aeropuertorionegro.co/"
         },
         {
           "code": "CTG",
           "name": "Rafael Núñez",
-          "city": "Cartagena"
+          "city": "Cartagena",
+          "official_url": "https://www.aeropuertocartagena.com.co/"
         }
       ],
       "direct_from_us": true,
@@ -563,7 +595,8 @@
         {
           "code": "PTY",
           "name": "Tocumen International",
-          "city": "Panama City"
+          "city": "Panama City",
+          "official_url": "https://www.tocumenpanama.aero/"
         }
       ],
       "direct_from_us": true,
@@ -597,12 +630,14 @@
         {
           "code": "SJO",
           "name": "Juan Santamaría International",
-          "city": "San José"
+          "city": "San José",
+          "official_url": "https://www.sjoairport.com/"
         },
         {
           "code": "LIR",
           "name": "Daniel Oduber Quirós",
-          "city": "Liberia (Guanacaste)"
+          "city": "Liberia (Guanacaste)",
+          "official_url": "https://www.guanacastecostaairport.com/"
         }
       ],
       "direct_from_us": true,
@@ -641,12 +676,14 @@
         {
           "code": "UIO",
           "name": "Mariscal Sucre International",
-          "city": "Quito"
+          "city": "Quito",
+          "official_url": "https://www.aeropuertoquito.aero/?lang=en"
         },
         {
           "code": "GYE",
           "name": "José Joaquín de Olmedo",
-          "city": "Guayaquil"
+          "city": "Guayaquil",
+          "official_url": "https://www.aeropuertodeguayaquil.com/"
         }
       ],
       "direct_from_us": true,
@@ -679,12 +716,14 @@
         {
           "code": "SDQ",
           "name": "Las Américas International",
-          "city": "Santo Domingo"
+          "city": "Santo Domingo",
+          "official_url": "http://www.aerodom.com/app/do/lasamericas.aspx"
         },
         {
           "code": "PUJ",
           "name": "Punta Cana International",
-          "city": "Punta Cana"
+          "city": "Punta Cana",
+          "official_url": "https://www.puntacanainternationalairport.com/"
         }
       ],
       "direct_from_us": true,
@@ -721,7 +760,8 @@
         {
           "code": "MVD",
           "name": "Carrasco International",
-          "city": "Montevideo"
+          "city": "Montevideo",
+          "official_url": "https://www.uruguayairport.com/"
         }
       ],
       "direct_from_us": false,
@@ -747,7 +787,8 @@
         {
           "code": "EZE",
           "name": "Ministro Pistarini (Ezeiza)",
-          "city": "Buenos Aires"
+          "city": "Buenos Aires",
+          "official_url": "https://www.aeropuertosargentina.com/es/EZE"
         }
       ],
       "direct_from_us": true,
@@ -779,17 +820,20 @@
         {
           "code": "GRU",
           "name": "São Paulo Guarulhos International",
-          "city": "São Paulo"
+          "city": "São Paulo",
+          "official_url": "http://www.gru.com.br/"
         },
         {
           "code": "GIG",
           "name": "Rio de Janeiro Galeão",
-          "city": "Rio de Janeiro"
+          "city": "Rio de Janeiro",
+          "official_url": "https://www.riogaleao.com/passageiros"
         },
         {
           "code": "FLN",
           "name": "Florianópolis International",
-          "city": "Florianópolis"
+          "city": "Florianópolis",
+          "official_url": "http://www.infraero.gov.br/usa/aero_prev_home.php?ai=228"
         }
       ],
       "direct_from_us": true,
@@ -824,7 +868,8 @@
         {
           "code": "LIM",
           "name": "Jorge Chávez International",
-          "city": "Lima"
+          "city": "Lima",
+          "official_url": "http://www.lap.com.pe/"
         }
       ],
       "direct_from_us": true,
@@ -859,7 +904,8 @@
         {
           "code": "SCL",
           "name": "Arturo Merino Benítez International",
-          "city": "Santiago"
+          "city": "Santiago",
+          "official_url": "http://www.aeropuertosantiago.cl/ingles/index.php"
         }
       ],
       "direct_from_us": true,
@@ -893,17 +939,20 @@
         {
           "code": "BKK",
           "name": "Suvarnabhumi International",
-          "city": "Bangkok"
+          "city": "Bangkok",
+          "official_url": "https://suvarnabhumi.airportthai.co.th/"
         },
         {
           "code": "CNX",
           "name": "Chiang Mai International",
-          "city": "Chiang Mai"
+          "city": "Chiang Mai",
+          "official_url": "https://chiangmai.airportthai.co.th/"
         },
         {
           "code": "HKT",
           "name": "Phuket International",
-          "city": "Phuket"
+          "city": "Phuket",
+          "official_url": "https://phuket.airportthai.co.th/"
         }
       ],
       "direct_from_us": false,
@@ -931,12 +980,14 @@
         {
           "code": "KUL",
           "name": "Kuala Lumpur International (KLIA)",
-          "city": "Kuala Lumpur"
+          "city": "Kuala Lumpur",
+          "official_url": "https://www.malaysiaairports.com.my/airport/kuala-lumpur-international-klia"
         },
         {
           "code": "PEN",
           "name": "Penang International",
-          "city": "Penang"
+          "city": "Penang",
+          "official_url": "https://www.malaysiaairports.com.my/airport/penang-international"
         }
       ],
       "direct_from_us": false,
@@ -963,17 +1014,20 @@
         {
           "code": "SGN",
           "name": "Tan Son Nhat International",
-          "city": "Ho Chi Minh City"
+          "city": "Ho Chi Minh City",
+          "official_url": "http://www.tsnairport.hochiminhcity.gov.vn/"
         },
         {
           "code": "HAN",
           "name": "Noi Bai International",
-          "city": "Hanoi"
+          "city": "Hanoi",
+          "official_url": "https://www.hanoiairport.vn/"
         },
         {
           "code": "DAD",
           "name": "Da Nang International",
-          "city": "Da Nang"
+          "city": "Da Nang",
+          "official_url": "https://www.danangairport.vn/"
         }
       ],
       "direct_from_us": false,
@@ -1000,12 +1054,14 @@
         {
           "code": "MNL",
           "name": "Ninoy Aquino International",
-          "city": "Manila"
+          "city": "Manila",
+          "official_url": "https://newnaia.com.ph/"
         },
         {
           "code": "CEB",
           "name": "Mactan-Cebu International",
-          "city": "Cebu"
+          "city": "Cebu",
+          "official_url": "http://www.mactan-cebuairport.com.ph/"
         }
       ],
       "direct_from_us": true,
@@ -1037,12 +1093,14 @@
         {
           "code": "DPS",
           "name": "Ngurah Rai International (Bali)",
-          "city": "Bali/Denpasar"
+          "city": "Bali/Denpasar",
+          "official_url": "http://www.angkasapura1.co.id/eng/location/bali.htm"
         },
         {
           "code": "CGK",
           "name": "Soekarno-Hatta International",
-          "city": "Jakarta"
+          "city": "Jakarta",
+          "official_url": "http://www.jakartasoekarnohattaairport.com/"
         }
       ],
       "direct_from_us": false,
@@ -1069,17 +1127,20 @@
         {
           "code": "NRT",
           "name": "Narita International",
-          "city": "Tokyo"
+          "city": "Tokyo",
+          "official_url": "https://www.narita-airport.jp/en/"
         },
         {
           "code": "HND",
           "name": "Haneda International",
-          "city": "Tokyo"
+          "city": "Tokyo",
+          "official_url": "http://www.haneda-airport.jp/"
         },
         {
           "code": "KIX",
           "name": "Kansai International",
-          "city": "Osaka"
+          "city": "Osaka",
+          "official_url": "http://www.kansai-airport.or.jp/en/index.asp"
         }
       ],
       "direct_from_us": true,
@@ -1116,7 +1177,8 @@
         {
           "code": "ICN",
           "name": "Incheon International",
-          "city": "Seoul"
+          "city": "Seoul",
+          "official_url": "https://www.airport.kr/ap/en/index.do"
         }
       ],
       "direct_from_us": true,
@@ -1153,7 +1215,8 @@
         {
           "code": "TPE",
           "name": "Taiwan Taoyuan International",
-          "city": "Taipei"
+          "city": "Taipei",
+          "official_url": "http://www.taoyuan-airport.com/"
         }
       ],
       "direct_from_us": true,
@@ -1186,7 +1249,8 @@
         {
           "code": "SIN",
           "name": "Changi Airport",
-          "city": "Singapore"
+          "city": "Singapore",
+          "official_url": "http://www.changiairport.com/"
         }
       ],
       "direct_from_us": true,
@@ -1218,7 +1282,8 @@
         {
           "code": "HKG",
           "name": "Hong Kong International",
-          "city": "Hong Kong"
+          "city": "Hong Kong",
+          "official_url": "http://www.hongkongairport.com/"
         }
       ],
       "direct_from_us": true,
@@ -1252,17 +1317,20 @@
         {
           "code": "DEL",
           "name": "Indira Gandhi International",
-          "city": "New Delhi"
+          "city": "New Delhi",
+          "official_url": "https://www.newdelhiairport.in/"
         },
         {
           "code": "BOM",
           "name": "Chhatrapati Shivaji Maharaj",
-          "city": "Mumbai"
+          "city": "Mumbai",
+          "official_url": "http://www.csia.in/"
         },
         {
           "code": "COK",
           "name": "Cochin International",
-          "city": "Kochi (Kerala)"
+          "city": "Kochi (Kerala)",
+          "official_url": "http://www.cial.aero/"
         }
       ],
       "direct_from_us": true,
@@ -1298,12 +1366,14 @@
         {
           "code": "PNH",
           "name": "Phnom Penh International",
-          "city": "Phnom Penh"
+          "city": "Phnom Penh",
+          "official_url": "http://www.cambodia-airports.com/phnompenh/en/"
         },
         {
           "code": "REP",
           "name": "Siem Reap–Angkor International",
-          "city": "Siem Reap"
+          "city": "Siem Reap",
+          "official_url": "https://www.cambodia-airports.com/siemreap/en/"
         }
       ],
       "direct_from_us": false,
@@ -1329,7 +1399,8 @@
         {
           "code": "CMB",
           "name": "Bandaranaike International",
-          "city": "Colombo"
+          "city": "Colombo",
+          "official_url": "http://www.airport.lk/"
         }
       ],
       "direct_from_us": false,
@@ -1356,7 +1427,8 @@
         {
           "code": "KTM",
           "name": "Tribhuvan International",
-          "city": "Kathmandu"
+          "city": "Kathmandu",
+          "official_url": "https://www.tiairport.com.np/"
         }
       ],
       "direct_from_us": false,
@@ -1383,12 +1455,14 @@
         {
           "code": "IST",
           "name": "Istanbul Airport",
-          "city": "Istanbul"
+          "city": "Istanbul",
+          "official_url": "https://www.istairport.com/"
         },
         {
           "code": "AYT",
           "name": "Antalya Airport",
-          "city": "Antalya (coast)"
+          "city": "Antalya (coast)",
+          "official_url": "http://www.antalya.dhmi.gov.tr/havaalanlari/default.aspx?hv=4"
         }
       ],
       "direct_from_us": true,
@@ -1421,7 +1495,8 @@
         {
           "code": "MCT",
           "name": "Muscat International",
-          "city": "Muscat"
+          "city": "Muscat",
+          "official_url": "https://www.muscatairport.co.om/"
         }
       ],
       "direct_from_us": false,
@@ -1450,12 +1525,14 @@
         {
           "code": "DXB",
           "name": "Dubai International",
-          "city": "Dubai"
+          "city": "Dubai",
+          "official_url": "https://www.dubaiairport.com/"
         },
         {
           "code": "AUH",
           "name": "Abu Dhabi International",
-          "city": "Abu Dhabi"
+          "city": "Abu Dhabi",
+          "official_url": "https://www.zayedinternationalairport.ae/"
         }
       ],
       "direct_from_us": true,
@@ -1493,7 +1570,8 @@
         {
           "code": "MLA",
           "name": "Malta International Airport",
-          "city": "Valletta"
+          "city": "Valletta",
+          "official_url": "https://www.maltairport.com/"
         }
       ],
       "direct_from_us": false,
@@ -1518,12 +1596,14 @@
         {
           "code": "LCA",
           "name": "Larnaca International",
-          "city": "Larnaca"
+          "city": "Larnaca",
+          "official_url": "http://www.cyprusairports.com.cy/showpage.php?PageID=2"
         },
         {
           "code": "PFO",
           "name": "Paphos International",
-          "city": "Paphos"
+          "city": "Paphos",
+          "official_url": "https://www.hermesairports.com/"
         }
       ],
       "direct_from_us": false,
@@ -1549,12 +1629,14 @@
         {
           "code": "AKL",
           "name": "Auckland Airport",
-          "city": "Auckland"
+          "city": "Auckland",
+          "official_url": "http://www.auckland-airport.co.nz/"
         },
         {
           "code": "CHC",
           "name": "Christchurch International",
-          "city": "Christchurch"
+          "city": "Christchurch",
+          "official_url": "http://www.christchurchairport.co.nz/"
         }
       ],
       "direct_from_us": true,
@@ -1584,17 +1666,20 @@
         {
           "code": "SYD",
           "name": "Sydney Kingsford Smith",
-          "city": "Sydney"
+          "city": "Sydney",
+          "official_url": "http://www.sydneyairport.com.au/"
         },
         {
           "code": "MEL",
           "name": "Melbourne Airport",
-          "city": "Melbourne"
+          "city": "Melbourne",
+          "official_url": "http://melbourneairport.com.au/"
         },
         {
           "code": "PER",
           "name": "Perth Airport",
-          "city": "Perth"
+          "city": "Perth",
+          "official_url": "https://www.perthairport.com.au/"
         }
       ],
       "direct_from_us": true,
@@ -1627,17 +1712,20 @@
         {
           "code": "LHR",
           "name": "Heathrow",
-          "city": "London"
+          "city": "London",
+          "official_url": "http://www.heathrow.com/"
         },
         {
           "code": "LGW",
           "name": "Gatwick",
-          "city": "London"
+          "city": "London",
+          "official_url": "http://www.gatwickairport.com/"
         },
         {
           "code": "MAN",
           "name": "Manchester Airport",
-          "city": "Manchester"
+          "city": "Manchester",
+          "official_url": "http://www.manchesterairport.co.uk/"
         }
       ],
       "direct_from_us": true,
@@ -1668,17 +1756,20 @@
         {
           "code": "YYZ",
           "name": "Toronto Pearson International",
-          "city": "Toronto"
+          "city": "Toronto",
+          "official_url": "http://www.torontopearson.com/"
         },
         {
           "code": "YVR",
           "name": "Vancouver International",
-          "city": "Vancouver"
+          "city": "Vancouver",
+          "official_url": "http://www.yvr.ca/"
         },
         {
           "code": "YUL",
           "name": "Montréal-Trudeau International",
-          "city": "Montreal"
+          "city": "Montreal",
+          "official_url": "http://www.admtl.com/passager/Home.aspx"
         }
       ],
       "direct_from_us": true,
@@ -1709,17 +1800,20 @@
         {
           "code": "FRA",
           "name": "Frankfurt Airport",
-          "city": "Frankfurt"
+          "city": "Frankfurt",
+          "official_url": "https://www.frankfurt-airport.de/"
         },
         {
           "code": "MUC",
           "name": "Munich Airport",
-          "city": "Munich"
+          "city": "Munich",
+          "official_url": "http://www.munich-airport.com/"
         },
         {
           "code": "BER",
           "name": "Berlin Brandenburg",
-          "city": "Berlin"
+          "city": "Berlin",
+          "official_url": "https://ber.berlin-airport.de/"
         }
       ],
       "direct_from_us": true,
@@ -1758,12 +1852,14 @@
         {
           "code": "CPT",
           "name": "Cape Town International",
-          "city": "Cape Town"
+          "city": "Cape Town",
+          "official_url": "https://www.airports.co.za/airports/cape-town-international-airport"
         },
         {
           "code": "JNB",
           "name": "OR Tambo International",
-          "city": "Johannesburg"
+          "city": "Johannesburg",
+          "official_url": "https://ortambo-airport.com/"
         }
       ],
       "direct_from_us": false,

@@ -18,13 +18,13 @@
   z-index: var(--z-drawer-shell);
   display: flex;
   flex-direction: column;
-  width: min(37.5rem, calc(100vw - 4rem));
+  width: min(46rem, calc(100vw - 4rem));
   height: auto;
   max-height: calc(100dvh - var(--wtr-dest-panel-top) - 1rem);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg, 12px);
+  // border: 1px solid var(--border);
+  border-radius: 0px;
   background: var(--surface);
-  box-shadow: -12px 0 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
+  // box-shadow: -12px 0 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
   box-sizing: border-box;
   transform: translateX(calc(100% + 2rem));
   visibility: hidden;
@@ -778,8 +778,49 @@
   color: var(--text-muted);
 }
 
+@media (min-width: 769px) {
+  .wtr-explorer__map-row .wtr-dest-panel--map-rail {
+    --wtr-dest-panel-rail-width: 40rem;
+    --wtr-dest-panel-shadow-open: -2px 0 6px color-mix(in srgb, var(--color-navy) 20%, transparent);
+    --wtr-dest-panel-shadow-closed: none;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: min(var(--wtr-dest-panel-rail-width), 100%);
+    max-width: var(--wtr-dest-panel-rail-width);
+    height: 100%;
+    max-height: none;
+    border-radius: var(--radius-lg, 12px) 0 0 var(--radius-lg, 12px);
+    border-radius: 0px;
+    z-index: 8;
+    box-shadow: var(--wtr-dest-panel-shadow-closed);
+    transform: translateX(100%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: none;
+    padding: var(--space-2);
+  }
+
+  /* Transform and shadow are driven by Web Animations API — block base --open snap */
+  .wtr-explorer__map-row .wtr-dest-panel--map-rail.wtr-dest-panel--open {
+    visibility: visible;
+    pointer-events: none;
+    transform: translateX(100%);
+    box-shadow: var(--wtr-dest-panel-shadow-closed);
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wtr-dest-panel {
+    transition: none;
+  }
+
+  .wtr-explorer__map-row .wtr-dest-panel--map-rail,
+  .wtr-explorer__map-row .wtr-dest-panel--map-rail.wtr-dest-panel--open {
     transition: none;
   }
 
@@ -809,17 +850,20 @@
     max-height: var(--mobile-bottom-sheet-height, min(90dvh, calc(100svh - env(safe-area-inset-top, 0px))));
     border: none;
     border-radius: 16px 16px 0 0;
-    box-shadow: 0 -12px 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
+    box-shadow: none;
     transform: translateY(100%);
     transition:
       transform 0.3s ease,
+      box-shadow 0.3s ease,
       visibility 0s linear 0.3s;
   }
 
   .wtr-dest-panel--sheet.wtr-dest-panel--open {
     transform: translateY(0);
+    box-shadow: 0 -12px 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
     transition:
       transform 0.3s ease,
+      box-shadow 0.3s ease,
       visibility 0s linear 0s;
   }
 

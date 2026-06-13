@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -14,44 +14,12 @@ import {
 } from '../../lib/whereToRetire/mapPinDisplay'
 import { WtrMapPinLegend } from './WtrMapPinLegend'
 import { WtrMapPinTooltip } from './WtrMapPinTooltip'
-import { WtrToolbarSelect } from './WtrToolbarSelect'
 import './RetirementMapLibreMap.scss'
 import './WtrMapPinLegend.scss'
 import './WtrMapPinTooltip.scss'
-import './WtrToolbarSelect.scss'
 
-const DETAIL_FOCUS_ZOOM = 8
-const DETAIL_EASE_DURATION_MS = 900
 const BOUNDS_EASE_DURATION_MS = 900
-const MAP_STYLE_STORAGE_KEY = 'wtr-map-style'
-
-const MAP_STYLES = [
-  { id: 'bright', label: 'Bright', url: 'https://tiles.openfreemap.org/styles/bright' },
-  { id: 'positron', label: 'Positron', url: 'https://tiles.openfreemap.org/styles/positron' },
-  { id: 'liberty', label: 'Liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
-  { id: 'dark', label: 'Dark', url: 'https://tiles.openfreemap.org/styles/dark' },
-  { id: 'fiord', label: 'Fiord', url: 'https://tiles.openfreemap.org/styles/fiord' },
-] as const
-
-type MapStyleId = (typeof MAP_STYLES)[number]['id']
-
-const DEFAULT_MAP_STYLE_ID: MapStyleId = 'bright'
-
-function readMapStyleId(): MapStyleId {
-  try {
-    const stored = localStorage.getItem(MAP_STYLE_STORAGE_KEY)
-    if (stored && MAP_STYLES.some((style) => style.id === stored)) {
-      return stored as MapStyleId
-    }
-  } catch {
-    // ignore storage errors
-  }
-  return DEFAULT_MAP_STYLE_ID
-}
-
-function mapStyleUrl(id: MapStyleId): string {
-  return MAP_STYLES.find((style) => style.id === id)?.url ?? MAP_STYLES[0].url
-}
+const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/bright'
 
 type Props = {
   destinations: ScoredMapCity[]
@@ -61,7 +29,7 @@ type Props = {
   onFiltersChange: (filters: MapFilters) => void
   favoritedKeySet: ReadonlySet<string>
   selectedId: string | null
-  /** When true, emphasize the selected pin and fly to that city; when false, fit all destinations. */
+  /** When true, emphasize the selected pin; map camera does not move with the detail panel. */
   detailPanelOpen: boolean
   fitKey: string
   onSelect: (id: string) => void
@@ -151,10 +119,7 @@ export function RetirementMapLibreMap({
   const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>())
   const destinationsRef = useRef(destinations)
   const onSelectRef = useRef(onSelect)
-  const [mapStyleId, setMapStyleId] = useState<MapStyleId>(readMapStyleId)
-  const mapStyleIdRef = useRef(mapStyleId)
   const prevFocusIdForBoundsRef = useRef<string | null>(null)
-  const prevFocusFlyRef = useRef<string | null>(null)
   const prevFitKeyRef = useRef(fitKey)
   const hasAutoFitRef = useRef(false)
 
@@ -195,7 +160,7 @@ export function RetirementMapLibreMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: mapStyleUrl(mapStyleIdRef.current),
+      style: MAP_STYLE_URL,
       center: [0, 20],
       zoom: 2,
       minZoom: 2,
@@ -217,22 +182,6 @@ export function RetirementMapLibreMap({
       mapRef.current = null
     }
   }, [])
-
-  const handleMapStyleChange = useCallback((id: MapStyleId) => {
-    setMapStyleId(id)
-    try {
-      localStorage.setItem(MAP_STYLE_STORAGE_KEY, id)
-    } catch {
-      // ignore storage errors
-    }
-  }, [])
-
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || mapStyleId === mapStyleIdRef.current) return
-    mapStyleIdRef.current = mapStyleId
-    map.setStyle(mapStyleUrl(mapStyleId))
-  }, [mapStyleId])
 
   useEffect(() => {
     const map = mapRef.current
@@ -353,6 +302,8 @@ export function RetirementMapLibreMap({
     if (focusId) return
 
     const panelJustClosed = prevFocus != null
+    if (panelJustClosed) return
+
     const filtersChanged = fitKey !== prevFitKeyRef.current
     prevFitKeyRef.current = fitKey
 
@@ -389,29 +340,6 @@ export function RetirementMapLibreMap({
       })
     })
   }, [fitKey, focusId])
-
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !focusId) {
-      prevFocusFlyRef.current = null
-      return
-    }
-    if (focusId === prevFocusFlyRef.current) return
-    prevFocusFlyRef.current = focusId
-
-    const hit = destinationsRef.current.find((d) => d.city.id === focusId)
-    if (!hit) return
-
-    return whenMapReady(map, () => {
-      map.stop()
-      map.easeTo({
-        center: [hit.city.lng, hit.city.lat],
-        zoom: DETAIL_FOCUS_ZOOM,
-        duration: prefersReducedMotion() ? 0 : DETAIL_EASE_DURATION_MS,
-        essential: true,
-      })
-    })
-  }, [focusId])
 
   useEffect(() => {
     const container = containerRef.current
@@ -467,19 +395,6 @@ export function RetirementMapLibreMap({
           onToggleExpatTier={
             pinColorView === 'expat' ? handleToggleExpatTier : undefined
           }
-        />
-      </div>
-      <div className="wtr-maplibre-map__style-overlay">
-        <WtrToolbarSelect
-          ariaLabel="Map style"
-          value={mapStyleId}
-          options={MAP_STYLES.map((style) => ({
-            id: style.id,
-            label: style.label,
-          }))}
-          onChange={handleMapStyleChange}
-          className="wtr-maplibre-map__style-select"
-          layout="auto"
         />
       </div>
       <div ref={containerRef} className="wtr-maplibre-map__canvas" />

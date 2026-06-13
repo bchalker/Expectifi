@@ -48,8 +48,10 @@
   background: var(--surface);
 }
 
+.where-to-retire__main .wtr-explorer__map-row,
 .where-to-retire__main-panel .wtr-explorer__map-row {
-  min-height: var(--wtr-map-area-min-h, 36rem);
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .wtr-explorer__list-panel {
@@ -106,6 +108,7 @@
   box-sizing: border-box;
 }
 
+.where-to-retire__main .wtr-explorer__list-head,
 .where-to-retire__main-panel .wtr-explorer__list-head {
   padding: var(--space-4) var(--space-5);
 }
@@ -233,6 +236,42 @@
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
+  --wtr-map-edge-fade-size: 20%;
+}
+
+.wtr-explorer__map-stage .wtr-maplibre-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+//   background:
+//     linear-gradient(
+//       to bottom,
+//       var(--surface) 0%,
+//       color-mix(in srgb, var(--surface) 0%, transparent) var(--wtr-map-edge-fade-size)
+//     ),
+//     linear-gradient(
+//       to top,
+//       var(--surface) 0%,
+//       color-mix(in srgb, var(--surface) 0%, transparent) var(--wtr-map-edge-fade-size)
+//     ),
+//     linear-gradient(
+//       to right,
+//       var(--surface) 0%,
+//       color-mix(in srgb, var(--surface) 0%, transparent) var(--wtr-map-edge-fade-size)
+//     ),
+//     linear-gradient(
+//       to left,
+//       var(--surface) 0%,
+//       color-mix(in srgb, var(--surface) 0%, transparent) var(--wtr-map-edge-fade-size)
+//     );
+//     background: radial-gradient(
+
+//   ellipse at center,
+//   transparent 30%,
+//   #fff 100%
+// );
 }
 
 .wtr-explorer__list-sort-control {
@@ -393,6 +432,7 @@
   padding: var(--space-2) /* review: was 0.55rem */ var(--space-2) var(--space-3) /* review: was 0.65rem */ var(--space-3) /* review: was 0.65rem */;
 }
 
+.where-to-retire__main .wtr-explorer__list-scroll-inner,
 .where-to-retire__main-panel .wtr-explorer__list-scroll-inner {
   padding: var(--space-2) /* review: was 0.55rem */ var(--wtr-panel-inline-pad, 1.25rem) var(--space-3) /* review: was 0.65rem */;
   padding: 0;
@@ -548,6 +588,7 @@
   margin: var(--space-3) /* review: was 0.65rem */;
 }
 
+.where-to-retire__main .wtr-explorer__list-empty,
 .where-to-retire__main-panel .wtr-explorer__list-empty {
   margin: var(--space-3) /* review: was 0.65rem */ var(--wtr-panel-inline-pad, 1.25rem);
 }
@@ -573,6 +614,7 @@
     overflow: visible;
   }
 
+  .where-to-retire__main .wtr-explorer__map-row,
   .where-to-retire__main-panel .wtr-explorer__map-row {
     min-height: auto;
     flex: 0 0 auto;
@@ -621,6 +663,7 @@
     box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   }
 
+  .where-to-retire__main .wtr-explorer__list-head,
   .where-to-retire__main-panel .wtr-explorer__list-head {
     padding: var(--space-3) var(--space-5);
   }

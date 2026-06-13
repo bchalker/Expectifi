@@ -33,28 +33,28 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
 
   return (
     <header className="wtr-city-detail__header" aria-label="Destination summary">
-      <div className="wtr-city-detail__hero-row">
-        <div
-          className={[
-            'wtr-city-detail__fit-score',
-            `wtr-city-detail__fit-score--${scoreBand}`,
-          ].join(' ')}
-          aria-label={`Retirement fit score ${fitScore} out of 100, ${scoreBandLabel}`}
-        >
-          <div className="wtr-city-detail__fit-score-value-row">
-            <p className="wtr-city-detail__fit-score-value tabular-nums">{fitScore}</p>
-            {scoreBand === 'exceptional' ? (
-              <IconThumbUpFilled
-                className="wtr-city-detail__fit-score-thumb"
-                size={18}
-                aria-hidden
-              />
-            ) : null}
-          </div>
-          <p className="wtr-city-detail__fit-score-caption">Fit score</p>
-          <p className="wtr-city-detail__fit-score-label">{scoreBandLabel}</p>
+      <div
+        className={[
+          'wtr-city-detail__fit-score',
+          `wtr-city-detail__fit-score--${scoreBand}`,
+        ].join(' ')}
+        aria-label={`Retirement fit score ${fitScore} out of 100, ${scoreBandLabel}`}
+      >
+        <div className="wtr-city-detail__fit-score-value-row">
+          <p className="wtr-city-detail__fit-score-value tabular-nums">{fitScore}</p>
+          {scoreBand === 'exceptional' ? (
+            <IconThumbUpFilled
+              className="wtr-city-detail__fit-score-thumb"
+              size={18}
+              aria-hidden
+            />
+          ) : null}
         </div>
+        <p className="wtr-city-detail__fit-score-caption">Fit score</p>
+        <p className="wtr-city-detail__fit-score-label">{scoreBandLabel}</p>
+      </div>
 
+      <div className="wtr-city-detail__header-group">
         <div className="wtr-city-detail__identity">
           <h2 id="wtr-dest-panel-title" className="wtr-city-detail__name">
             {cityName}

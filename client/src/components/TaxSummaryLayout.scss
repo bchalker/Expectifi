@@ -10,12 +10,14 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
 
 @media (min-width: 769px) {
   .section--tax-summary.section--tax-summary--growth-assumptions,
-  .section--tax-summary.section--tax-summary--income-harvest {
+  .section--tax-summary.section--tax-summary--income-harvest,
+  .section--tax-summary.section--tax-summary--where-to-retire {
     overflow: visible;
   }
 
   .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout,
-  .section--tax-summary--income-harvest .section--tax-summary__income-layout {
+  .section--tax-summary--income-harvest .section--tax-summary__income-layout,
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout {
     overflow: visible;
   }
 }
@@ -47,6 +49,21 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   background: transparent;
 }
 
+.section--tax-summary--where-to-retire .section--tax-summary__income-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--border-radius-md, 8px);
+  border-radius: 0px;
+  overflow: hidden;
+  background: transparent;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
   order: 1;
   min-width: 0;
@@ -55,6 +72,16 @@ $layout-snapshot-split-min: 1280px; /* keep in sync with --layout-snapshot-split
   flex-direction: column;
   min-height: 0;
   padding: var(--space-5);
+}
+
+.section--tax-summary--where-to-retire .section--tax-summary__income-layout > .portfolio-accounts-reveal {
+  order: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-0);
 }
 
 .section--tax-summary--income-harvest .tax-summary-card {
@@ -70,6 +97,10 @@ $tax-summary-sidebar-shadow:
   rgba(33, 35, 38, 0.12) -16px 0 12px -30px,
   rgba(33, 35, 38, 0.12) -36px 0 40px -30px;
 
+$tax-summary-sidebar-shadow-detail-open:
+  rgba(33, 35, 38, 0.1) -2px 0 4px -2px,
+  rgba(33, 35, 38, 0.06) -4px 0 6px -4px;
+
 .section--tax-summary__sidebar {
   order: 2;
   display: flex;
@@ -78,8 +109,13 @@ $tax-summary-sidebar-shadow:
   width: 100%;
   min-width: 0;
   box-shadow: $tax-summary-sidebar-shadow, inset -2px 0 4px 0 var(--surface);
+  transition: box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 999;
   background: radial-gradient(ellipse 40% 120% at calc(100% - 3px) center,  white 0%, var(--bg-faint) 0%, transparent 50%);
+}
+
+.section--tax-summary__sidebar--detail-open {
+  box-shadow: $tax-summary-sidebar-shadow-detail-open, inset -1px 0 2px 0 var(--surface);
 }
 
 .section--tax-summary--growth-assumptions .section--tax-summary__sidebar {
@@ -87,7 +123,8 @@ $tax-summary-sidebar-shadow:
 }
 
 .section--tax-summary--income-harvest .where-to-retire-preview-panel,
-.section--tax-summary--growth-assumptions .wtr-panel-entry {
+.section--tax-summary--growth-assumptions .wtr-panel-entry,
+.section--tax-summary--where-to-retire .wtr-filters-sidebar {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -104,8 +141,17 @@ $tax-summary-sidebar-shadow:
 @media (min-width: 768px) {
   .section--tax-summary--income-harvest .section--tax-summary__income-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: minmax(0, 1fr) var(--layout-snapshot-panel-width);
     align-items: start;
+  }
+
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--layout-snapshot-panel-width);
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
   }
 
   .section--tax-summary--income-harvest .section--tax-summary__income-layout > .portfolio-accounts-reveal {
@@ -115,6 +161,25 @@ $tax-summary-sidebar-shadow:
     flex: 0 1 auto;
     min-height: 0;
     align-self: start;
+  }
+
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout > .portfolio-accounts-reveal {
+    order: unset;
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-self: stretch;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .section--tax-summary--where-to-retire .section--tax-summary__sidebar {
+    grid-column: 2 / 3;
+    align-self: stretch;
+    height: 100%;
+    overflow: hidden;
   }
 
   .section--tax-summary--income-harvest .tax-summary-card {
@@ -165,15 +230,16 @@ $tax-summary-sidebar-shadow:
 
   .section--tax-summary__sidebar {
     order: unset;
-    width: 280px;
+    width: var(--layout-snapshot-panel-width);
     align-self: start;
-height: 100%;
+    height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
   .section--tax-summary--income-harvest .where-to-retire-preview-panel,
-  .section--tax-summary--growth-assumptions .wtr-panel-entry {
+  .section--tax-summary--growth-assumptions .wtr-panel-entry,
+  .section--tax-summary--where-to-retire .wtr-filters-sidebar {
     position: static;
     width: 100%;
     max-height: none;
@@ -250,14 +316,34 @@ height: 100%;
   }
 }
 
+@media (max-width: 767px) {
+  .section--tax-summary--where-to-retire .section--tax-summary__sidebar {
+    display: contents;
+  }
+
+  .section--tax-summary--where-to-retire .wtr-filters-sidebar {
+    order: 1;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .section--tax-summary--where-to-retire
+    .section--tax-summary__income-layout
+    > .portfolio-accounts-reveal {
+    order: 2;
+  }
+}
+
 @media (max-width: 680px) {
   .section--tax-summary.section--tax-summary--growth-assumptions,
-  .section--tax-summary.section--tax-summary--income-harvest {
+  .section--tax-summary.section--tax-summary--income-harvest,
+  .section--tax-summary.section--tax-summary--where-to-retire {
     padding: 0;
   }
 
   .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout,
-  .section--tax-summary--income-harvest .section--tax-summary__income-layout {
+  .section--tax-summary--income-harvest .section--tax-summary__income-layout,
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout {
     border-radius: 0;
   }
 
@@ -269,6 +355,9 @@ height: 100%;
     .section--tax-summary__growth-layout
     > .portfolio-accounts-reveal,
   .section--tax-summary--income-harvest
+    .section--tax-summary__income-layout
+    > .portfolio-accounts-reveal,
+  .section--tax-summary--where-to-retire
     .section--tax-summary__income-layout
     > .portfolio-accounts-reveal {
     padding: var(--space-2);
@@ -288,7 +377,7 @@ height: 100%;
 @media (min-width: 768px) {
   .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: minmax(0, 1fr) var(--layout-snapshot-panel-width);
     align-items: start;
   }
 
@@ -365,11 +454,22 @@ height: 100%;
   }
 }
 
+@media (min-width: 768px) {
+  .section--tax-summary__sidebar .income-harvest-preview-map {
+    height: 140px;
+  }
+
+  .section--tax-summary__sidebar .where-to-retire-preview-panel__title {
+    font-size: var(--text-base);
+  }
+}
+
 @media (max-width: 768px) {
   .section--tax-summary__sidebar,
   .section--tax-summary--income-harvest .where-to-retire-preview-panel,
   .section--tax-summary--growth-assumptions .growth-assumptions-panel,
-  .section--tax-summary--growth-assumptions .wtr-panel-entry {
+  .section--tax-summary--growth-assumptions .wtr-panel-entry,
+  .section--tax-summary--where-to-retire .wtr-filters-sidebar {
     position: static;
     max-height: none;
     overflow-y: visible;

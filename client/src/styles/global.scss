@@ -285,12 +285,12 @@
   --layout-marketing-max: 68rem;
   --layout-marketing-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
   --layout-marketing-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
-  --layout-app-max: 75rem;
+  --layout-app-max: 86rem;
   --layout-app-gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
   --layout-app-gutter-end: max(var(--space-4), env(safe-area-inset-right, 0px));
   --layout-app-inner-pad: 2rem;
   /* Tax Summary: side panel width + viewport split (desktop panel above split) */
-  --layout-snapshot-panel-width: 21rem;
+  --layout-snapshot-panel-width: 24rem; /* 440px — growth/income right rail */
   --layout-snapshot-split-min: 1280px;
   /* Centered main column max width — horizontal padding is on each container */
   --layout-app-boundary: min(var(--layout-app-max), 100%);
