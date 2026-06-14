@@ -3,6 +3,7 @@ import { AnimatedCount } from "../ui/AnimatedCount";
 import { BudgetExplorationHero } from "./BudgetExplorationHero";
 import { WtrIncomeToolbarMapSelects } from "./WtrIncomeToolbarMapSelects";
 import { WtrMapFilterButton } from "./WtrMapFilterButton";
+import { WtrFitScoreInfoCard } from "./WtrFitScoreInfoCard";
 import type { MapFilters } from "../../lib/whereToRetire/cityMapScoring";
 import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import "./WtrFiltersSidebar.scss";
@@ -108,18 +109,41 @@ export function WtrFiltersSidebar({
           </div>
 
           {onOpenPreferences ? (
-            <div className="wtr-filters-sidebar__preferences-cta">
-              <button
-                type="button"
-                className="wtr-filters-sidebar__preferences-btn"
-                onClick={onOpenPreferences}
-              >
-                Update my preferences
-              </button>
-            </div>
+            <>
+              <div className="wtr-filters-sidebar__preferences-cta">
+                <button
+                  type="button"
+                  className="wtr-filters-sidebar__preferences-btn"
+                  onClick={onOpenPreferences}
+                >
+                  Update my preferences
+                </button>
+              </div>
+              <WtrFitScoreInfoCard onOpenPreferences={onOpenPreferences} />
+            </>
           ) : null}
         </div>
       </div>
+
+      <footer className="wtr-filters-sidebar__footer font-xs" role="note">
+        All figures are educational estimates only — not tax, legal, financial, or
+        immigration advice. Consult qualified professionals before relocating. Sources:{" "}
+        <a
+          href="https://www.irs.gov/individuals/international-taxpayers"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          IRS
+        </a>
+        {" · "}
+        <a
+          href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Tax Foundation
+        </a>
+      </footer>
     </div>
   );
 }

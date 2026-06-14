@@ -64,7 +64,6 @@ export const STEP_2_SAFETY: CorePreferenceKey[] = [
 
 export const STEP_3_LIFESTYLE: CorePreferenceKey[] = [
   'climate',
-  'qualityOfLife',
   'politicalStability',
   'socialLaws',
 ]
@@ -202,21 +201,6 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
       { badge: 'Counts for me', sub: 'Good weather improves my daily life' },
       { badge: 'Love mild warmth', sub: 'Mediterranean or dry warmth is a top draw' },
       { badge: 'Must be comfortable', sub: 'Tropical humidity or harsh winters are dealbreakers' },
-    ),
-  },
-  qualityOfLife: {
-    id: 'qualityOfLife',
-    icon: 'star',
-    label: 'Quality of life',
-    noun: 'overall quality of life',
-    defaultStep: 4,
-    levels: buildLevels(
-      { badge: 'Not a factor', sub: "QoL won't influence your score" },
-      { badge: 'Nice bonus', sub: 'A pleasant place is a perk' },
-      { badge: 'Matters some', sub: "I'd like good infrastructure" },
-      { badge: 'Important to me', sub: 'Quality of life is a meaningful factor' },
-      { badge: 'Top priority', sub: 'I want to thrive, not just afford it' },
-      { badge: 'Above all else', sub: "I won't settle for a low quality of life" },
     ),
   },
   politicalStability: {

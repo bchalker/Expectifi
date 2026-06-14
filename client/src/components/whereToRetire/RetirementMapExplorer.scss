@@ -3,7 +3,7 @@
   --wtr-match-moderate: var(--color-teal-mid);
   --wtr-match-stretch: var(--color-amber);
   --wtr-match-poor: var(--color-text-danger);
-  --wtr-list-panel-w: 22.5rem;
+  --wtr-list-panel-w: 18.5rem;
 
   display: flex;
   flex-direction: column;
@@ -100,33 +100,139 @@
 .wtr-explorer__list-head {
   flex-shrink: 0;
   display: flex;
-  align-items: center;
-  min-height: 3.25rem;
-  padding: var(--space-2) var(--space-3) /* review: was 0.65rem */ var(--space-2) var(--space-3) /* review: was 0.85rem */;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: var(--space-2) var(--space-3);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
+.wtr-explorer__list-head-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 3.25rem;
+  min-width: 0;
+}
+
+.wtr-explorer__list-head-actions {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wtr-explorer__list-head-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.wtr-explorer__list-head-icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wtr-explorer__list-head-icon-btn:hover .wtr-explorer__list-sort-icon,
+.wtr-explorer__list-head-icon-btn--active .wtr-explorer__list-sort-icon {
+  color: var(--text);
+}
+
+.wtr-explorer__list-head-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border);
+}
+
+.wtr-explorer__list-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-bottom: var(--space-2);
+}
+
+.wtr-explorer__list-search-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.wtr-explorer__list-search-field input[data-slot='input'] {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 0 var(--space-2);
+  box-sizing: border-box;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.wtr-explorer__list-search--has-value .wtr-explorer__list-search-field input[data-slot='input'] {
+  padding-right: calc(var(--space-1) + 2rem);
+}
+
+.wtr-explorer__list-search-clear {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.15s ease;
+}
+
+.wtr-explorer__list-search-clear:hover {
+  color: var(--text);
+}
+
+.wtr-explorer__list-search-clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .where-to-retire__main .wtr-explorer__list-head,
 .where-to-retire__main-panel .wtr-explorer__list-head {
-  padding: var(--space-4) var(--space-5);
+  // padding: var(--space-4) var(--space-5);
 }
 
 .wtr-explorer__list-collapse {
   position: absolute;
   top: 50%;
-  right: 0;
+  left: 100%;
+  right: auto;
   z-index: 6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.675rem;
-  min-width: 1.675rem;
+  width: 1.375rem;
+  min-width: 1.375rem;
   height: 3.25rem;
   min-height: 3.25rem;
   padding: 0;
-  // border: 1px solid var(--border);
   border-left: none;
   border-radius: 0 6px 6px 0;
   background: var(--surface);
@@ -134,7 +240,7 @@
   cursor: pointer;
   box-sizing: border-box;
   box-shadow: 4px 0 10px -4px color-mix(in srgb, var(--color-navy) 10%, transparent);
-  transform: translate(50%, -50%);
+  transform: translateY(-50%);
   transition:
     color 0.15s ease,
     background 0.15s ease,
@@ -278,8 +384,6 @@
   flex: 1 1 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
   min-width: 0;
   min-height: 0;
   padding: 0;
@@ -307,7 +411,7 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1) /* review: was 0.1rem */;
+  // gap: var(--space-1) /* review: was 0.1rem */;
   min-width: 0;
 }
 
@@ -394,12 +498,16 @@
   border: 0;
 }
 
-/* Native overflow scroll (custom scrollbar unreliable in this flex panel) */
+/* OverlayScrollbars scroll region for city list */
 .wtr-explorer__list-scroll {
   flex: 1 1 0;
   min-height: 0;
   width: 100%;
   align-self: stretch;
+}
+
+.wtr-explorer__list-scroll [data-overlayscrollbars-viewport] {
+  min-height: 0;
 }
 
 .wtr-explorer__hide-undo {
@@ -545,6 +653,7 @@
   flex: 0 0 2.25rem;
   width: 2.25rem;
   align-self: stretch;
+  background: var(--sky-blue-u2);
 }
 
 .wtr-explorer__list-panel .wtr-dest-card__rank-stack {
@@ -554,6 +663,21 @@
 
 .wtr-explorer__list-panel .wtr-dest-card__rank {
   font-size: var(--text-sm);
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__fit-col {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  align-self: stretch;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__fit-stack {
+  justify-content: center;
+  min-height: 100%;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__fit-badge {
+  font-size: var(--text-base);
 }
 
 .wtr-explorer__list-panel .wtr-dest-card__visa-inline {
@@ -677,12 +801,6 @@
   .wtr-explorer__list-scroll {
     flex: 0 0 auto;
     min-height: auto;
-    overflow: visible;
-  }
-
-  .wtr-explorer__list-scroll.wtr-scroll-y--hover {
-    overflow-x: visible;
-    overflow-y: visible;
   }
 
   .wtr-explorer__list-scroll-inner {

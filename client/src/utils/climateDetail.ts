@@ -48,6 +48,7 @@ export type ClimateConsideration = {
 
 export type ClimateDetailMetrics = {
   avgHighC: number
+  avgLowC: number
   avgHumidityPct: number | null
   humidityLabel: string | null
   rainyMonthCount: number
@@ -467,6 +468,8 @@ export function deriveClimateDetail(climate: CityClimate, lat = 0): ClimateDetai
   const wet = rainyMonths(climate)
   const avgHighC =
     climate.monthly.reduce((sum, month) => sum + month.avgHighC, 0) / climate.monthly.length
+  const avgLowC =
+    climate.monthly.reduce((sum, month) => sum + month.avgLowC, 0) / climate.monthly.length
 
   return {
     category,
@@ -478,6 +481,7 @@ export function deriveClimateDetail(climate: CityClimate, lat = 0): ClimateDetai
     retireeNote: category ? RETIREE_NOTES[category] : fallbackRetireeNote(),
     metrics: {
       avgHighC,
+      avgLowC,
       avgHumidityPct: humidity,
       humidityLabel: humidityComfortLabel(humidity),
       rainyMonthCount: wet.length,

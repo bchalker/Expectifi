@@ -10,15 +10,8 @@ import type { RetirementCityRecord } from '../../lib/retirementDestinations'
 import { formatUsd } from '../../utils/costOfLiving'
 import { fmtMon } from '../../utils/format'
 import { WtrIncomeFitBadges } from './WtrIncomeFitBadges'
+import { CountryFlag } from '../ui/CountryFlag'
 import './RetirementFitCalculator.scss'
-
-function flagFromIso(iso: string): string {
-  const code = iso.toUpperCase()
-  if (code.length !== 2) return ''
-  return String.fromCodePoint(
-    ...[...code].map((c) => 0x1f1e6 - 65 + c.charCodeAt(0)),
-  )
-}
 
 function truncate(text: string, max: number): string {
   const t = text.trim()
@@ -172,9 +165,7 @@ export function RetirementFitCityCard({
         onClick={() => setExpanded((v) => !v)}
       >
         <header className="wtr-fit-card__head">
-          <span className="wtr-fit-card__flag" aria-hidden>
-            {flagFromIso(city.country_iso)}
-          </span>
+          <CountryFlag iso={city.country_iso} size="s" className="wtr-fit-card__flag" />
           <div className="wtr-fit-card__titles">
             <span className="wtr-fit-card__city">{city.city}</span>
             <span className="wtr-fit-card__country">{city.country}</span>

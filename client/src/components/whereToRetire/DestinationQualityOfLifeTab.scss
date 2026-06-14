@@ -121,13 +121,6 @@
   background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 12%, var(--surface));
 }
 
-.wtr-qol-overall__proxy-note {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.35;
-  color: var(--text-muted);
-}
-
 /* Shared progress bars */
 .wtr-qol-bar__track {
   width: 100%;

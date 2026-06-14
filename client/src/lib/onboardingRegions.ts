@@ -11,13 +11,13 @@ export type OnboardingRegionOption = {
   country: string
   locale: OnboardingRegionId
   currency: DisplayCurrencyCode
-  /** Regional indicator emoji — Tabler has no country flags. */
-  flag: string
+  /** ISO 3166-1 alpha-2 for Flagpack. */
+  iso: string
 }
 
 export const ONBOARDING_REGION_OPTIONS: readonly OnboardingRegionOption[] = [
-  { id: 'us', label: 'United States', country: 'United States', locale: 'us', currency: 'USD', flag: '🇺🇸' },
-  { id: 'ca', label: 'Canada', country: 'Canada', locale: 'ca', currency: 'CAD', flag: '🇨🇦' },
+  { id: 'us', label: 'United States', country: 'United States', locale: 'us', currency: 'USD', iso: 'US' },
+  { id: 'ca', label: 'Canada', country: 'Canada', locale: 'ca', currency: 'CAD', iso: 'CA' },
 ] as const
 
 /** Country picker grid (US & Canada). */

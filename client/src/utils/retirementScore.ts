@@ -172,10 +172,9 @@ function buildWeightedScore(factorScores: { score: number; weight: number }[]): 
       { score: factors[5]?.score ?? 50, weight: STEP_WEIGHTS[fallback.airQuality] },
       { score: factors[6]?.score ?? 50, weight: STEP_WEIGHTS[fallback.disasterRisk] },
       { score: factors[7]?.score ?? 50, weight: STEP_WEIGHTS[fallback.climate] },
-      { score: factors[8]?.score ?? 50, weight: STEP_WEIGHTS[fallback.qualityOfLife] },
-      { score: factors[9]?.score ?? 50, weight: STEP_WEIGHTS[fallback.politicalStability] },
-      { score: factors[10]?.score ?? 50, weight: STEP_WEIGHTS[fallback.socialLaws] },
-      ...factors.slice(11),
+      { score: factors[8]?.score ?? 50, weight: STEP_WEIGHTS[fallback.politicalStability] },
+      { score: factors[9]?.score ?? 50, weight: STEP_WEIGHTS[fallback.socialLaws] },
+      ...factors.slice(10),
     ]
     totalWeight = factors.reduce((sum, f) => sum + f.weight, 0)
   }
@@ -327,7 +326,6 @@ export function calculateRetirementScore(
     { score: airQualityScore, weight: STEP_WEIGHTS[resolvedPrefs.airQuality] },
     { score: disasterScore, weight: STEP_WEIGHTS[resolvedPrefs.disasterRisk] },
     { score: climateScore, weight: STEP_WEIGHTS[resolvedPrefs.climate] },
-    { score: qolNormalized, weight: STEP_WEIGHTS[resolvedPrefs.qualityOfLife] },
     { score: politicalStabilityScore, weight: STEP_WEIGHTS[resolvedPrefs.politicalStability] },
     { score: socialLawsScore, weight: STEP_WEIGHTS[resolvedPrefs.socialLaws] },
     ...resolvedPrefs.dailyLife.map((entry) => ({

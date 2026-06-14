@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { getMapCountryCatalog } from '../../lib/whereToRetire/mapCountryCatalog'
+import { CountryFlag } from '../ui/CountryFlag'
 import { WtrExcludeCountryIcon } from './WtrExcludeCountryIcon'
 import './WtrMapFiltersExcludeTab.scss'
 
@@ -94,7 +95,7 @@ export function WtrMapFiltersExcludeTab({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pickCountry(opt.name)}
                   >
-                    <span aria-hidden>{opt.flag}</span>
+                    <CountryFlag iso={opt.iso} size="s" />
                     {opt.name}
                   </button>
                 </li>
@@ -121,10 +122,8 @@ export function WtrMapFiltersExcludeTab({
                     onClick={() => onRemoveExcludedCountry(name)}
                     aria-label={`Remove ${name} from exclusions`}
                   >
-                    {meta?.flag ? (
-                      <span className="wtr-map-exclude__pill-flag" aria-hidden>
-                        {meta.flag}
-                      </span>
+                    {meta?.iso ? (
+                      <CountryFlag iso={meta.iso} size="s" className="wtr-map-exclude__pill-flag" />
                     ) : null}
                     <span>{name}</span>
                     <span className="wtr-map-exclude__pill-x" aria-hidden>

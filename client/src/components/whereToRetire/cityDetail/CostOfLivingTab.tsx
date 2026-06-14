@@ -6,7 +6,6 @@ import {
   IconMovie,
   IconToolsKitchen3,
 } from '@tabler/icons-react'
-import type { CSSProperties } from 'react'
 import type { BudgetBreakdownDisplay, MapCity } from '../../../utils/costOfLiving'
 import { formatUsd } from '../../../utils/costOfLiving'
 import {
@@ -28,7 +27,7 @@ import {
 import { ColExtrasList, type ColExtraLineItem } from '../ColExtrasList'
 import { DestinationExchangeRate } from '../DestinationExchangeRate'
 import { TravelAdvisoryNotice } from '../TravelAdvisoryNotice'
-import { formatUsdField, type CityDetailTabStaggerProps, staggerSectionProps } from './cityDetailTabUtils'
+import { formatUsdField } from './cityDetailTabUtils'
 
 type ColCategoryPanelCard = ColCategoryCardProps & { id: string }
 
@@ -181,32 +180,38 @@ function buildColSupplementalItems(city: MapCity): ColExtraLineItem[] {
   ]
 }
 
-type Props = CityDetailTabStaggerProps & {
+type Props = {
   city: MapCity
   budgetBreakdown: BudgetBreakdownDisplay
-}
-
-function panelStaggerStyle(index: number): CSSProperties {
-  return { '--wtr-panel-i': index } as CSSProperties
 }
 
 export function CostOfLivingTab({
   city,
   budgetBreakdown,
-  staggerClassName,
-  staggerStyle,
 }: Props) {
   const colBudgetCards = buildColBudgetCards(city)
   const colSupplementalItems = buildColSupplementalItems(city)
   const showTravelAdvisory = hasTravelAdvisory(city.country)
-  const stagger = staggerStyle ?? panelStaggerStyle
 
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--col">
       <section
         className="wtr-city-detail__col-summary"
-        aria-label="Budget breakdown and cost indices"
-        {...staggerSectionProps(0, 'wtr-city-detail__col-summary', staggerClassName, stagger)}
+        aria-label="Cost indices"
+      >
+        <CityDetailIndexRows country={city.country} />
+      </section>
+      {showTravelAdvisory ? (
+        <div>
+          <TravelAdvisoryNotice />
+        </div>
+      ) : null}
+      <div>
+        <DestinationExchangeRate city={city} />
+      </div>
+      <section
+        className="wtr-city-detail__col-budget-group"
+        aria-label="Monthly budget breakdown and costs"
       >
         <ColBudgetBreakdownBar
           breakdown={budgetBreakdown}
@@ -214,52 +219,22 @@ export function CostOfLivingTab({
           showTitle
           utilitiesLegendLabel="Utilities"
         />
-        <CityDetailIndexRows country={city.country} />
-      </section>
-      {showTravelAdvisory ? (
-        <div {...staggerSectionProps(1, undefined, staggerClassName, stagger)}>
-          <TravelAdvisoryNotice />
+        <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
+          {colBudgetCards.map((card) => {
+            const { id: _id, ...categoryProps } = card
+            return (
+              <div key={card.id} className="wtr-city-detail__card-cell">
+                <ColCategoryCard {...categoryProps} />
+              </div>
+            )
+          })}
         </div>
-      ) : null}
-      <DestinationExchangeRate
-        city={city}
-        staggerClassName={staggerClassName}
-        staggerStyle={stagger}
-      />
-      <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
-        {colBudgetCards.map((card, index) => {
-          const { id: _id, ...categoryProps } = card
-          const staggerOffset = 1 + (showTravelAdvisory ? 1 : 0)
-          return (
-            <div
-              key={card.id}
-              className={['wtr-city-detail__card-cell', staggerClassName]
-                .filter(Boolean)
-                .join(' ')}
-              style={stagger(index + staggerOffset)}
-            >
-              <ColCategoryCard {...categoryProps} />
-            </div>
-          )
-        })}
-      </div>
+      </section>
       <div className="wtr-city-detail__col-extras">
-        <p
-          className="wtr-city-detail__col-extras-note"
-          {...staggerSectionProps(
-            colBudgetCards.length + 1 + (showTravelAdvisory ? 1 : 0),
-            'wtr-city-detail__col-extras-note',
-            staggerClassName,
-            stagger,
-          )}
-        >
+        <p className="wtr-city-detail__col-extras-note">
           Optional lifestyle costs
         </p>
-        <ColExtrasList
-          items={colSupplementalItems}
-          className={staggerClassName}
-          style={stagger(colBudgetCards.length + 2 + (showTravelAdvisory ? 1 : 0))}
-        />
+        <ColExtrasList items={colSupplementalItems} />
       </div>
     </div>
   )

@@ -7,7 +7,8 @@
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "react-flagpack"
   },
   "dependencies": {
     "@heroui/react": "^3.0.4",
@@ -25,6 +26,7 @@
     "overlayscrollbars-react": "^0.5.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-flagpack": "^2.0.6",
     "react-i18next": "^17.0.8",
     "react-plaid-link": "^4.1.1",
     "recharts": "^3.8.1",

@@ -1,0 +1,882 @@
+{
+  "metadata": {
+    "generated": "2026-06",
+    "source": "Open-Meteo",
+    "default_source_period": "2011-2020",
+    "default_variables": [
+      "temp_max",
+      "temp_min",
+      "humidity"
+    ],
+    "model": "EC_Earth3P_HR",
+    "coordinates": "city-coordinates.json (bundled lat/lng, no geocoding)",
+    "weighted_calls_per_city_formula": 78,
+    "weighted_calls_per_city_empirical": 303,
+    "total_cities": 9,
+    "valid_count": 8,
+    "null_count": 1,
+    "last_run_fetched": 1,
+    "last_run_valid": 1,
+    "last_run_failed": 0
+  },
+  "cities": {
+    "Seoul|South Korea": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 1.1284079084287202,
+          "avgLowC": -8.055359001040578,
+          "avgPrecipMm": 0.7244640998959421,
+          "avgHumidityPct": 62
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 4.049429223744292,
+          "avgLowC": -5.015525114155252,
+          "avgPrecipMm": 0.9532191780821914,
+          "avgHumidityPct": 62
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 9.589906347554638,
+          "avgLowC": -0.11155046826222685,
+          "avgPrecipMm": 1.6127887617065548,
+          "avgHumidityPct": 67
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 16.00096774193548,
+          "avgLowC": 5.573440860215058,
+          "avgPrecipMm": 2.960978494623652,
+          "avgHumidityPct": 69
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 21.36670135275756,
+          "avgLowC": 11.585744016649326,
+          "avgPrecipMm": 3.089864724245583,
+          "avgHumidityPct": 74
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 26.03612903225807,
+          "avgLowC": 17.30301075268817,
+          "avgPrecipMm": 5.405602150537632,
+          "avgHumidityPct": 77
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 28.61436004162332,
+          "avgLowC": 22.12216441207077,
+          "avgPrecipMm": 8.29531737773152,
+          "avgHumidityPct": 83
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 28.975338189386036,
+          "avgLowC": 22.380957336108196,
+          "avgPrecipMm": 8.551040582726328,
+          "avgHumidityPct": 82
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 25.167849462365613,
+          "avgLowC": 16.68086021505376,
+          "avgPrecipMm": 4.532118279569895,
+          "avgHumidityPct": 79
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 18.42330905306971,
+          "avgLowC": 8.862643080124869,
+          "avgPrecipMm": 1.9296045785639955,
+          "avgHumidityPct": 72
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 10.516451612903237,
+          "avgLowC": 1.6927956989247293,
+          "avgPrecipMm": 1.131333333333334,
+          "avgHumidityPct": 70
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 3.6601456815816844,
+          "avgLowC": -4.125806451612903,
+          "avgPrecipMm": 1.0607596253902192,
+          "avgHumidityPct": 66
+        }
+      ],
+      "annualAvgTempC": 11.825571844917429,
+      "annualAvgHumidityPct": 72,
+      "annualPrecipMm": 38161.4999999998,
+      "summerAvgTempC": 24.23865996068909,
+      "winterAvgTempC": -1.3931179588423397,
+      "wettestMonth": "Aug",
+      "driestMonth": "Jan",
+      "climateLabel": "Four seasons"
+    },
+    "Shanghai|China": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 8.164099895941725,
+          "avgLowC": 0.8571279916753389,
+          "avgPrecipMm": 1.5247346514047864,
+          "avgHumidityPct": 73
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 9.571232876712337,
+          "avgLowC": 2.468949771689498,
+          "avgPrecipMm": 2.288447488584473,
+          "avgHumidityPct": 75
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 13.629448491155047,
+          "avgLowC": 6.619458896982314,
+          "avgPrecipMm": 3.1709885535900106,
+          "avgHumidityPct": 77
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 18.199784946236573,
+          "avgLowC": 11.325913978494627,
+          "avgPrecipMm": 3.9588172043010785,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 23.673881373569237,
+          "avgLowC": 16.92601456815815,
+          "avgPrecipMm": 4.677627471383967,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 27.249569892473097,
+          "avgLowC": 21.755161290322576,
+          "avgPrecipMm": 8.42125806451615,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 30.493756503642047,
+          "avgLowC": 25.47689906347554,
+          "avgPrecipMm": 6.095036420395419,
+          "avgHumidityPct": 85
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 30.38813735691983,
+          "avgLowC": 25.435587929240377,
+          "avgPrecipMm": 5.133173777315296,
+          "avgHumidityPct": 85
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 27.167741935483896,
+          "avgLowC": 21.831075268817226,
+          "avgPrecipMm": 3.4250967741935505,
+          "avgHumidityPct": 81
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 22.2142559833507,
+          "avgLowC": 16.16670135275755,
+          "avgPrecipMm": 2.0642039542143635,
+          "avgHumidityPct": 76
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 16.5079569892473,
+          "avgLowC": 9.698064516129035,
+          "avgPrecipMm": 1.7666129032258067,
+          "avgHumidityPct": 74
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 10.958064516129031,
+          "avgLowC": 4.093028095733618,
+          "avgPrecipMm": 1.6471696149843893,
+          "avgHumidityPct": 75
+        }
+      ],
+      "annualAvgTempC": 16.755661043893014,
+      "annualAvgHumidityPct": 78,
+      "annualPrecipMm": 41711.17000000007,
+      "summerAvgTempC": 26.799852006012248,
+      "winterAvgTempC": 6.018750524646925,
+      "wettestMonth": "Jun",
+      "driestMonth": "Jan",
+      "climateLabel": "Four seasons"
+    },
+    "Guangzhou|China": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 18.306451612903235,
+          "avgLowC": 9.716337148803333,
+          "avgPrecipMm": 1.3684391259105095,
+          "avgHumidityPct": 67
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 20.150913242009157,
+          "avgLowC": 12.041552511415526,
+          "avgPrecipMm": 2.1657990867579904,
+          "avgHumidityPct": 73
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 23.122892819979217,
+          "avgLowC": 16.083142559833515,
+          "avgPrecipMm": 3.8729760665972983,
+          "avgHumidityPct": 79
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 26.37774193548388,
+          "avgLowC": 20.006989247311832,
+          "avgPrecipMm": 9.03540860215052,
+          "avgHumidityPct": 83
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 29.180437044745055,
+          "avgLowC": 23.198647242455756,
+          "avgPrecipMm": 8.993818938605614,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 31.142903225806457,
+          "avgLowC": 25.387204301075275,
+          "avgPrecipMm": 8.919677419354864,
+          "avgHumidityPct": 85
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 31.786888657648266,
+          "avgLowC": 25.931217481789833,
+          "avgPrecipMm": 8.144214360041637,
+          "avgHumidityPct": 85
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 31.580332986472442,
+          "avgLowC": 25.760770031217426,
+          "avgPrecipMm": 9.289271592091565,
+          "avgHumidityPct": 86
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 30.636559139784936,
+          "avgLowC": 24.09247311827955,
+          "avgPrecipMm": 4.6935591397849485,
+          "avgHumidityPct": 81
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 28.139750260145682,
+          "avgLowC": 20.524037460978136,
+          "avgPrecipMm": 1.9317585848074927,
+          "avgHumidityPct": 71
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 24.13913978494623,
+          "avgLowC": 15.547419354838713,
+          "avgPrecipMm": 1.1413440860215045,
+          "avgHumidityPct": 63
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 19.96503642039543,
+          "avgLowC": 11.655359001040585,
+          "avgPrecipMm": 1.5247346514047857,
+          "avgHumidityPct": 67
+        }
+      ],
+      "annualAvgTempC": 22.714214430804574,
+      "annualAvgHumidityPct": 77,
+      "annualPrecipMm": 57777.259999999806,
+      "summerAvgTempC": 28.59821944733495,
+      "winterAvgTempC": 15.305941656094545,
+      "wettestMonth": "Aug",
+      "driestMonth": "Nov",
+      "climateLabel": "Mediterranean"
+    },
+    "Mumbai|India": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 29.66222684703435,
+          "avgLowC": 19.360978147762758,
+          "avgPrecipMm": 0.08316337148803332,
+          "avgHumidityPct": 62
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 30.379566210045635,
+          "avgLowC": 19.975228310502295,
+          "avgPrecipMm": 0.037694063926940635,
+          "avgHumidityPct": 62
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 32.03298647242453,
+          "avgLowC": 22.154838709677442,
+          "avgPrecipMm": 0.03206035379812695,
+          "avgHumidityPct": 66
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 32.585161290322574,
+          "avgLowC": 24.353870967741972,
+          "avgPrecipMm": 0.049387096774193374,
+          "avgHumidityPct": 72
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 32.397190426638936,
+          "avgLowC": 26.53152965660775,
+          "avgPrecipMm": 0.4619771071800234,
+          "avgHumidityPct": 76
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 30.289892473118297,
+          "avgLowC": 26.35913978494624,
+          "avgPrecipMm": 14.87936559139786,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 28.40135275754424,
+          "avgLowC": 25.68761706555673,
+          "avgPrecipMm": 20.6603121748179,
+          "avgHumidityPct": 89
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 28.080853277835597,
+          "avgLowC": 25.26670135275754,
+          "avgPrecipMm": 11.646815816857448,
+          "avgHumidityPct": 88
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 28.66215053763443,
+          "avgLowC": 24.902473118279577,
+          "avgPrecipMm": 11.06936559139784,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 31.083454734651426,
+          "avgLowC": 24.340062434963595,
+          "avgPrecipMm": 2.1088657648283085,
+          "avgHumidityPct": 77
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 31.454838709677436,
+          "avgLowC": 22.625161290322577,
+          "avgPrecipMm": 0.2374731182795697,
+          "avgHumidityPct": 68
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 30.291779396462037,
+          "avgLowC": 20.33610822060355,
+          "avgPrecipMm": 0.0916545265348595,
+          "avgHumidityPct": 64
+        }
+      ],
+      "annualAvgTempC": 26.97321381259394,
+      "annualAvgHumidityPct": 74,
+      "annualPrecipMm": 58148.66000000013,
+      "summerAvgTempC": 27.347592785293106,
+      "winterAvgTempC": 25.000981188735107,
+      "wettestMonth": "Jul",
+      "driestMonth": "Mar",
+      "climateLabel": "Tropical"
+    },
+    "Delhi|India": null,
+    "Dhaka|Bangladesh": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 24.78917793964619,
+          "avgLowC": 13.451300728407913,
+          "avgPrecipMm": 0.27219562955254945,
+          "avgHumidityPct": 68
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 27.442009132420097,
+          "avgLowC": 15.834474885844758,
+          "avgPrecipMm": 0.7098972602739724,
+          "avgHumidityPct": 65
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 32.25473465140479,
+          "avgLowC": 19.87336108220606,
+          "avgPrecipMm": 1.2640582726326757,
+          "avgHumidityPct": 61
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 34.44913978494621,
+          "avgLowC": 24.5075268817204,
+          "avgPrecipMm": 4.2755913978494595,
+          "avgHumidityPct": 73
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 31.944016649323626,
+          "avgLowC": 25.739750260145698,
+          "avgPrecipMm": 10.934880332986463,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 30.72903225806452,
+          "avgLowC": 26.15892473118279,
+          "avgPrecipMm": 13.072032258064501,
+          "avgHumidityPct": 88
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 30.957752341311114,
+          "avgLowC": 25.93184183142563,
+          "avgPrecipMm": 8.59519250780437,
+          "avgHumidityPct": 86
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 31.045265348595212,
+          "avgLowC": 25.90000000000001,
+          "avgPrecipMm": 8.930988553590018,
+          "avgHumidityPct": 86
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 30.625161290322556,
+          "avgLowC": 25.41225806451615,
+          "avgPrecipMm": 8.88917204301075,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 29.44266389177938,
+          "avgLowC": 23.386056191467233,
+          "avgPrecipMm": 6.371383975026015,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 27.50408602150536,
+          "avgLowC": 18.21655913978494,
+          "avgPrecipMm": 1.0923225806451624,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 25.04318418314253,
+          "avgLowC": 14.450260145681591,
+          "avgPrecipMm": 0.4562330905306973,
+          "avgHumidityPct": 74
+        }
+      ],
+      "annualAvgTempC": 25.641433365715898,
+      "annualAvgHumidityPct": 78,
+      "annualPrecipMm": 61426.71000000035,
+      "summerAvgTempC": 28.453802751763217,
+      "winterAvgTempC": 20.168401169190513,
+      "wettestMonth": "Jun",
+      "driestMonth": "Jan",
+      "climateLabel": "Tropical"
+    },
+    "Osaka|Japan": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 8.133610822060348,
+          "avgLowC": 1.1182101977107184,
+          "avgPrecipMm": 1.8009573361082203,
+          "avgHumidityPct": 73
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 8.966894977168957,
+          "avgLowC": 1.3437214611872146,
+          "avgPrecipMm": 2.2577625570776245,
+          "avgHumidityPct": 71
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 12.829032258064514,
+          "avgLowC": 4.466493236212277,
+          "avgPrecipMm": 3.8122372528615993,
+          "avgHumidityPct": 72
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 17.91569892473117,
+          "avgLowC": 9.289784946236553,
+          "avgPrecipMm": 5.050279569892476,
+          "avgHumidityPct": 73
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 22.471383975026026,
+          "avgLowC": 14.259729448491152,
+          "avgPrecipMm": 4.919625390218513,
+          "avgHumidityPct": 75
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 26.0489247311828,
+          "avgLowC": 19.409999999999954,
+          "avgPrecipMm": 7.926569892473117,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 29.5788761706556,
+          "avgLowC": 23.226430801248718,
+          "avgPrecipMm": 6.346264308012466,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 30.84765868886577,
+          "avgLowC": 23.876378772112375,
+          "avgPrecipMm": 4.036618106139428,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 27.469999999999995,
+          "avgLowC": 21.347526881720427,
+          "avgPrecipMm": 6.783333333333313,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 21.425182101977093,
+          "avgLowC": 14.230176899063453,
+          "avgPrecipMm": 3.711925078043691,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 15.770215053763446,
+          "avgLowC": 8.313763440860207,
+          "avgPrecipMm": 2.502763440860208,
+          "avgHumidityPct": 76
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 10.895317377731539,
+          "avgLowC": 3.718210197710718,
+          "avgPrecipMm": 2.066045785639955,
+          "avgHumidityPct": 76
+        }
+      ],
+      "annualAvgTempC": 15.7583281815773,
+      "annualAvgHumidityPct": 76,
+      "annualPrecipMm": 48334.96000000005,
+      "summerAvgTempC": 25.498044860677535,
+      "winterAvgTempC": 5.6959941722615826,
+      "wettestMonth": "Jun",
+      "driestMonth": "Jan",
+      "climateLabel": "Four seasons"
+    },
+    "Jakarta|Indonesia": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 28.221019771071802,
+          "avgLowC": 23.527055150884557,
+          "avgPrecipMm": 9.257013527575431,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 28.360502283104978,
+          "avgLowC": 23.56244292237441,
+          "avgPrecipMm": 9.204771689497717,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 29.070239334027054,
+          "avgLowC": 23.66014568158168,
+          "avgPrecipMm": 8.381654526534861,
+          "avgHumidityPct": 86
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 29.36860215053762,
+          "avgLowC": 23.579032258064508,
+          "avgPrecipMm": 7.170075268817212,
+          "avgHumidityPct": 87
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 29.477315296566108,
+          "avgLowC": 23.555567117585834,
+          "avgPrecipMm": 4.651727367325703,
+          "avgHumidityPct": 86
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 29.713978494623674,
+          "avgLowC": 23.33956989247313,
+          "avgPrecipMm": 2.5577849462365574,
+          "avgHumidityPct": 82
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 30.070655567117647,
+          "avgLowC": 22.92486992715923,
+          "avgPrecipMm": 1.926628511966704,
+          "avgHumidityPct": 79
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 30.75889698231007,
+          "avgLowC": 23.25868886576481,
+          "avgPrecipMm": 1.6890530697190445,
+          "avgHumidityPct": 76
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 31.00139784946235,
+          "avgLowC": 23.593118279569893,
+          "avgPrecipMm": 2.6458817204301055,
+          "avgHumidityPct": 77
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 31.083662851196653,
+          "avgLowC": 23.975442247658684,
+          "avgPrecipMm": 4.396534859521337,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 29.893548387096796,
+          "avgLowC": 23.745913978494656,
+          "avgPrecipMm": 7.553838709677427,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 28.920603537981272,
+          "avgLowC": 23.57367325702393,
+          "avgPrecipMm": 8.173371488033306,
+          "avgHumidityPct": 85
+        }
+      ],
+      "annualAvgTempC": 26.595866819747318,
+      "annualAvgHumidityPct": 83,
+      "annualPrecipMm": 63571.45000000017,
+      "summerAvgTempC": 26.027549487073497,
+      "winterAvgTempC": 26.67777662157476,
+      "wettestMonth": "Jan",
+      "driestMonth": "Aug",
+      "climateLabel": "Tropical"
+    },
+    "Lisbon|Portugal": {
+      "monthly": [
+        {
+          "month": 1,
+          "monthLabel": "Jan",
+          "avgHighC": 14.07387096774192,
+          "avgLowC": 9.474516129032256,
+          "avgHumidityPct": 82
+        },
+        {
+          "month": 2,
+          "monthLabel": "Feb",
+          "avgHighC": 14.379151943462903,
+          "avgLowC": 9.960424028268552,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 3,
+          "monthLabel": "Mar",
+          "avgHighC": 15.493870967741938,
+          "avgLowC": 10.506129032258062,
+          "avgHumidityPct": 78
+        },
+        {
+          "month": 4,
+          "monthLabel": "Apr",
+          "avgHighC": 17.833333333333332,
+          "avgLowC": 12.441333333333336,
+          "avgHumidityPct": 77
+        },
+        {
+          "month": 5,
+          "monthLabel": "May",
+          "avgHighC": 19.589354838709678,
+          "avgLowC": 14.204193548387103,
+          "avgHumidityPct": 76
+        },
+        {
+          "month": 6,
+          "monthLabel": "Jun",
+          "avgHighC": 23.721000000000007,
+          "avgLowC": 16.938333333333325,
+          "avgHumidityPct": 72
+        },
+        {
+          "month": 7,
+          "monthLabel": "Jul",
+          "avgHighC": 26.46322580645162,
+          "avgLowC": 18.60967741935483,
+          "avgHumidityPct": 71
+        },
+        {
+          "month": 8,
+          "monthLabel": "Aug",
+          "avgHighC": 27.686129032258055,
+          "avgLowC": 19.557096774193568,
+          "avgHumidityPct": 69
+        },
+        {
+          "month": 9,
+          "monthLabel": "Sep",
+          "avgHighC": 25.401999999999994,
+          "avgLowC": 18.536333333333317,
+          "avgHumidityPct": 72
+        },
+        {
+          "month": 10,
+          "monthLabel": "Oct",
+          "avgHighC": 20.810645161290317,
+          "avgLowC": 16.012580645161282,
+          "avgHumidityPct": 80
+        },
+        {
+          "month": 11,
+          "monthLabel": "Nov",
+          "avgHighC": 17.282333333333337,
+          "avgLowC": 13.459333333333328,
+          "avgHumidityPct": 84
+        },
+        {
+          "month": 12,
+          "monthLabel": "Dec",
+          "avgHighC": 14.47258064516129,
+          "avgLowC": 10.422580645161291,
+          "avgHumidityPct": 82
+        }
+      ],
+      "annualAvgTempC": 16.99411442649877,
+      "annualAvgHumidityPct": 77,
+      "summerAvgTempC": 22.1625770609319,
+      "winterAvgTempC": 12.130520726471369,
+      "wettestMonth": "—",
+      "driestMonth": "—",
+      "climateLabel": "Four seasons",
+      "source_period": "2011-2020",
+      "variables": [
+        "temp_max",
+        "temp_min",
+        "humidity"
+      ]
+    }
+  }
+}

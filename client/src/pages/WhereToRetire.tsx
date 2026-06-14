@@ -231,29 +231,6 @@ export function WhereToRetire({ c }: Props) {
                 </div>
               </div>
 
-              <footer
-                className="where-to-retire__main-panel-footer font-xs"
-                role="note"
-              >
-                All figures are educational estimates only — not tax, legal,
-                financial, or immigration advice. Consult qualified professionals
-                before relocating. Sources:{" "}
-                <a
-                  href="https://www.irs.gov/individuals/international-taxpayers"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  IRS
-                </a>
-                {" · "}
-                <a
-                  href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Tax Foundation
-                </a>
-              </footer>
             </div>
 
             <div

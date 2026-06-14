@@ -1,12 +1,13 @@
 import { memo } from 'react'
 import { CloseButton } from '@heroui/react'
-import { IconThumbUpFilled, IconWallet } from '@tabler/icons-react'
+import { IconPlus, IconThumbUpFilled } from '@tabler/icons-react'
 import {
-  countryToFlagEmoji,
   formatUsd,
 } from '../../../utils/costOfLiving'
+import { getFitScoreColors } from '../../../utils/fitScore'
 import { scoreDetailBandFromScore } from '../../../utils/retirementScore'
 import type { RetirementScoreResult } from '../../../utils/retirementScore'
+import { CountryFlag } from '../../ui/CountryFlag'
 
 export type CityDetailPanelHeaderProps = {
   cityName: string
@@ -27,42 +28,45 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
   onClose,
   showClose = true,
 }: CityDetailPanelHeaderProps) {
-  const flagEmoji = countryToFlagEmoji(country)
   const fitScore = Math.max(0, Math.min(100, Math.round(headerScore.displayScore)))
   const { band: scoreBand, label: scoreBandLabel } = scoreDetailBandFromScore(fitScore)
+  const fitScoreColors = getFitScoreColors(fitScore)
 
   return (
     <header className="wtr-city-detail__header" aria-label="Destination summary">
-      <div
-        className={[
-          'wtr-city-detail__fit-score',
-          `wtr-city-detail__fit-score--${scoreBand}`,
-        ].join(' ')}
-        aria-label={`Retirement fit score ${fitScore} out of 100, ${scoreBandLabel}`}
-      >
-        <div className="wtr-city-detail__fit-score-value-row">
-          <p className="wtr-city-detail__fit-score-value tabular-nums">{fitScore}</p>
-          {scoreBand === 'exceptional' ? (
-            <IconThumbUpFilled
-              className="wtr-city-detail__fit-score-thumb"
-              size={18}
-              aria-hidden
-            />
-          ) : null}
-        </div>
-        <p className="wtr-city-detail__fit-score-caption">Fit score</p>
-        <p className="wtr-city-detail__fit-score-label">{scoreBandLabel}</p>
-      </div>
-
       <div className="wtr-city-detail__header-group">
+        <div className="wtr-city-detail__fit-score-wrap">
+          <div
+            className="wtr-city-detail__fit-score"
+            style={{
+              backgroundColor: fitScoreColors.background,
+              color: fitScoreColors.text,
+            }}
+            aria-label={`Retirement fit score ${fitScore} out of 100, ${scoreBandLabel}`}
+          >
+            <div className="wtr-city-detail__fit-score-value-row">
+              <p className="wtr-city-detail__fit-score-value tabular-nums">
+                <span className="wtr-city-detail__fit-score-number">{fitScore}</span>
+              </p>
+              {scoreBand === 'exceptional' ? (
+                <IconThumbUpFilled
+                  className="wtr-city-detail__fit-score-thumb"
+                  size={18}
+                  aria-hidden
+                />
+              ) : null}
+            </div>
+            <p className="wtr-city-detail__fit-score-caption">Fit</p>
+            <p className="wtr-city-detail__fit-score-label">{scoreBandLabel}</p>
+          </div>
+        </div>
+
         <div className="wtr-city-detail__identity">
           <h2 id="wtr-dest-panel-title" className="wtr-city-detail__name">
             {cityName}
           </h2>
           <div className="wtr-city-detail__country-line">
-            <span className="wtr-city-detail__flag" aria-hidden>
-              {flagEmoji}
-            </span>
+            <CountryFlag country={country} size="s" className="wtr-city-detail__flag" />
             <p className="wtr-city-detail__country">{country}</p>
           </div>
         </div>
@@ -73,8 +77,8 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
             <span className="wtr-city-detail__cost-period">/mo</span>
           </p>
           {monthlySurplus > 0 ? (
-            <span className="wtr-city-detail__surplus-badge tabular-nums">
-              <IconWallet size={14} stroke={1.5} aria-hidden />
+            <span className="wtr-city-detail__surplus tabular-nums">
+              <IconPlus size={14} stroke={1.5} aria-hidden />
               {formatUsd(monthlySurplus)} surplus
             </span>
           ) : null}

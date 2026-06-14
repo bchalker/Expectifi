@@ -4,6 +4,7 @@ import { buildFavoriteMapRows, formatFavoriteSurplus } from '../../lib/whereToRe
 import type { MapFilters } from '../../lib/whereToRetire/cityMapScoring'
 import type { FavoriteCityEntry } from '../../lib/retirementStorage'
 import { sendPrompt } from '../../lib/sendPrompt'
+import { CountryFlag } from '../ui/CountryFlag'
 import './WtrMapFiltersFavoritesTab.scss'
 
 type Props = {
@@ -38,9 +39,7 @@ export function WtrMapFiltersFavoritesTab({
         {rows.map((row) => (
           <li key={`${row.entry.city}|${row.entry.country}`} className="wtr-map-favorites__row">
             <span className="wtr-map-favorites__row-main">
-              <span className="wtr-map-favorites__flag" aria-hidden>
-                {row.flag}
-              </span>
+              <CountryFlag iso={row.iso} size="s" className="wtr-map-favorites__flag" />
               <span className="wtr-map-favorites__label">{row.label}</span>
             </span>
             <span

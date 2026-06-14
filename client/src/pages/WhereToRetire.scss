@@ -107,7 +107,7 @@
   padding: var(--space-3) var(--space-5);
   border-radius: 0;
   background: var(--sky-blue);
-  background: linear-gradient(to right, var(--sky-blue-d1) 0%,  var(--sky-blue) 50%);
+  background: linear-gradient(to right, var(--sky-blue) 0%,  var(--sky-blue) 50%);
   box-sizing: border-box;
 }
 
@@ -466,29 +466,6 @@
   margin-bottom: 0;
 }
 
-.where-to-retire__main-panel-footer {
-  flex-shrink: 0;
-  // margin: 0 calc(-1 * var(--space-5)) calc(-1 * var(--space-5));
-  width: calc(100% + 2 * var(--space-5));
-  padding: var(--space-3);
-  // border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface2) 92%, var(--bg));
-  background: var(--sky-blue-u2);
-  text-align: center;
-  color: var(--text-muted);
-  box-sizing: border-box;
-
-  a {
-    font-weight: 600;
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
-  }
-}
-
 .where-to-retire__sidebar {
   position: relative;
   display: flex;
@@ -499,8 +476,6 @@
 .where-to-retire__sidebar .wtr-filters-sidebar {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 @media (min-width: 769px) {
@@ -517,11 +492,6 @@
 
 /* Mobile WTR list layout — must follow desktop flex/overflow rules above. */
 @media (max-width: 680px) {
-  .section--tax-summary--where-to-retire .where-to-retire__main-panel-footer {
-    margin: 0 calc(-1 * var(--space-2)) calc(-1 * var(--space-2));
-    width: calc(100% + 2 * var(--space-2));
-  }
-
   .where-to-retire__main-panel-map,
   .where-to-retire__main-panel-map .where-to-retire__map-stage,
   .where-to-retire__main-panel-map .wtr-explorer {

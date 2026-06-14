@@ -43,7 +43,7 @@ type ExpatInfoDatasetFile = {
 const dataset = expatInfoDataset as ExpatInfoDatasetFile
 
 export const EXPAT_TAB_SOURCE_FOOTER =
-  'Sources: InterNations Expat Insider 2024, Expat.com, community reports. Conditions change — verify through current expat forums before relocating.'
+  'Sources: InterNations Expat Insider 2024, Expat.com, community reports. Conditions change so always verify.'
 
 export const EXPAT_UNAVAILABLE_MESSAGE =
   'Expat community data not yet available for this destination. Try searching expat groups on Facebook for current community information.'

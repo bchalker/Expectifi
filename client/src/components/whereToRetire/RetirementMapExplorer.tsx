@@ -7,12 +7,16 @@ import {
   type ReactNode,
 } from "react";
 import {
-  IconChevronLeft,
   IconChevronRight,
+  IconCircleX,
+  IconSearch,
   IconSortAscending,
   IconSortDescending,
 } from "@tabler/icons-react";
+import { Input, TextField } from "@heroui/react";
+import type { OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
+import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import {
   scoreAndFilterMapCities,
   type MapFilters,
@@ -178,6 +182,13 @@ export function RetirementMapExplorer({
   const [expatSortDescending, setExpatSortDescending] = useState(true);
   const [budgetSortDescending, setBudgetSortDescending] = useState(false);
   const [scoreSortDescending, setScoreSortDescending] = useState(true);
+  const [listSearchQuery, setListSearchQuery] = useState("");
+  const [listSearchOpen, setListSearchOpen] = useState(false);
+
+  const toggleListSearch = useCallback(() => {
+    setListSearchOpen((open) => !open);
+  }, []);
+
   const baseFilteredCities = useMemo(
     () =>
       scoreAndFilterMapCities(
@@ -190,7 +201,7 @@ export function RetirementMapExplorer({
     [explorationIncome, filters, excludedCountries, preferences],
   );
 
-  const filteredCities = useMemo(
+  const sortedCities = useMemo(
     () =>
       sortCitiesForPinView(
         baseFilteredCities,
@@ -211,6 +222,15 @@ export function RetirementMapExplorer({
       scoreSortDescending,
     ],
   );
+
+  const filteredCities = useMemo(() => {
+    const query = listSearchQuery.trim().toLowerCase();
+    if (!query) return sortedCities;
+    return sortedCities.filter(({ city }) => {
+      const haystack = `${city.city} ${city.country}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [sortedCities, listSearchQuery]);
 
   const listPageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredCities.length / LIST_PAGE_SIZE)),
@@ -293,7 +313,7 @@ export function RetirementMapExplorer({
 
   const listCardsRef = useRef<HTMLDivElement>(null);
   const listBodyRef = useRef<HTMLDivElement>(null);
-  const listScrollRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   useEffect(() => {
     setListPage(0);
@@ -321,6 +341,7 @@ export function RetirementMapExplorer({
     scoreSortDescending,
     budgetSortDescending,
     expatSortDescending,
+    listSearchQuery,
   ]);
 
   useEffect(() => {
@@ -344,7 +365,8 @@ export function RetirementMapExplorer({
   }, [detailPanelOpen, onDetailPanelOpenChange]);
 
   const scrollListToTop = useCallback(() => {
-    listScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    const viewport = listScrollRef.current?.osInstance()?.elements().viewport;
+    viewport?.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   const changeListPage = useCallback(
@@ -415,10 +437,6 @@ export function RetirementMapExplorer({
     setPanelOpen(false);
   }, []);
 
-  const collapseListPanel = useCallback(() => {
-    setListPanelOpen(false);
-  }, []);
-
   const expandListPanel = useCallback(() => {
     setListPanelOpen(true);
   }, []);
@@ -487,20 +505,9 @@ export function RetirementMapExplorer({
           aria-label="City list"
           aria-hidden={!mobileListOnly && !listPanelOpen}
         >
-          {!mobileListOnly && listPanelOpen ? (
-            <button
-              type="button"
-              className="wtr-explorer__list-collapse"
-              aria-expanded={listPanelOpen}
-              aria-controls="wtr-explorer-list-panel"
-              aria-label="Hide city list"
-              onClick={collapseListPanel}
-            >
-              <IconChevronLeft size={18} stroke={1.5} aria-hidden />
-            </button>
-          ) : null}
           <div className="wtr-explorer__list-panel-inner">
             <header className="wtr-explorer__list-head">
+              <div className="wtr-explorer__list-head-top">
               {pinColorView === "expat" ? (
                 <button
                   type="button"
@@ -518,21 +525,6 @@ export function RetirementMapExplorer({
                   <span className="wtr-explorer__list-sort-label">
                     Sort by expat community size
                   </span>
-                  {expatSortDescending ? (
-                    <IconSortDescending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  ) : (
-                    <IconSortAscending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  )}
                 </button>
               ) : pinColorView === "budget" ? (
                 <button
@@ -558,21 +550,6 @@ export function RetirementMapExplorer({
                         : "From lowest to highest"}
                     </span>
                   </span>
-                  {budgetSortDescending ? (
-                    <IconSortDescending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  ) : (
-                    <IconSortAscending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  )}
                 </button>
               ) : (
                 <button
@@ -580,8 +557,8 @@ export function RetirementMapExplorer({
                   className="wtr-explorer__list-sort-control"
                   aria-label={
                     scoreSortDescending
-                      ? "Sort by overall fit, highest first. Click to sort lowest first."
-                      : "Sort by overall fit, lowest first. Click to sort highest first."
+                      ? "Sort by Fit score, highest first. Click to sort lowest first."
+                      : "Sort by Fit score, lowest first. Click to sort highest first."
                   }
                   onClick={() => {
                     setScoreSortDescending((prev) => !prev);
@@ -590,7 +567,7 @@ export function RetirementMapExplorer({
                 >
                   <span className="wtr-explorer__list-sort-text">
                     <span className="wtr-explorer__list-sort-label">
-                      Sort by overall fit
+                      Sort by Fit score
                     </span>
                     <span className="wtr-explorer__list-sort-sub">
                       {scoreSortDescending
@@ -598,34 +575,177 @@ export function RetirementMapExplorer({
                         : "From lowest to highest"}
                     </span>
                   </span>
-                  {scoreSortDescending ? (
-                    <IconSortDescending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  ) : (
-                    <IconSortAscending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  )}
                 </button>
               )}
+              <div className="wtr-explorer__list-head-actions">
+                {pinColorView === "expat" ? (
+                  <button
+                    type="button"
+                    className="wtr-explorer__list-head-icon-btn"
+                    aria-label={
+                      expatSortDescending
+                        ? "Sort by expat community size, largest first. Click to sort smallest first."
+                        : "Sort by expat community size, smallest first. Click to sort largest first."
+                    }
+                    onClick={() => {
+                      setExpatSortDescending((prev) => !prev);
+                      setListPage(0);
+                    }}
+                  >
+                    {expatSortDescending ? (
+                      <IconSortDescending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    ) : (
+                      <IconSortAscending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                ) : pinColorView === "budget" ? (
+                  <button
+                    type="button"
+                    className="wtr-explorer__list-head-icon-btn"
+                    aria-label={
+                      budgetSortDescending
+                        ? "Sort by monthly cost, highest first. Click to sort lowest first."
+                        : "Sort by monthly cost, lowest first. Click to sort highest first."
+                    }
+                    onClick={() => {
+                      setBudgetSortDescending((prev) => !prev);
+                      setListPage(0);
+                    }}
+                  >
+                    {budgetSortDescending ? (
+                      <IconSortDescending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    ) : (
+                      <IconSortAscending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="wtr-explorer__list-head-icon-btn"
+                    aria-label={
+                      scoreSortDescending
+                        ? "Sort by Fit score, highest first. Click to sort lowest first."
+                        : "Sort by Fit score, lowest first. Click to sort highest first."
+                    }
+                    onClick={() => {
+                      setScoreSortDescending((prev) => !prev);
+                      setListPage(0);
+                    }}
+                  >
+                    {scoreSortDescending ? (
+                      <IconSortDescending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    ) : (
+                      <IconSortAscending
+                        className="wtr-explorer__list-sort-icon"
+                        size={18}
+                        stroke={1.5}
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                )}
+                <span className="wtr-explorer__list-head-divider" aria-hidden />
+                <button
+                  type="button"
+                  className={[
+                    "wtr-explorer__list-head-icon-btn",
+                    listSearchOpen && "wtr-explorer__list-head-icon-btn--active",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-label={listSearchOpen ? "Hide city search" : "Search cities"}
+                  aria-pressed={listSearchOpen}
+                  onClick={toggleListSearch}
+                >
+                  <IconSearch
+                    className="wtr-explorer__list-sort-icon"
+                    size={18}
+                    stroke={1.5}
+                    aria-hidden
+                  />
+                </button>
+              </div>
+              </div>
+              {listSearchOpen ? (
+              <div
+                className={[
+                  "wtr-explorer__list-search",
+                  listSearchQuery && "wtr-explorer__list-search--has-value",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <TextField
+                  className="wtr-explorer__list-search-field"
+                  variant="secondary"
+                  fullWidth
+                  aria-label="Search city list"
+                  value={listSearchQuery}
+                  onChange={(value) => {
+                    setListSearchQuery(value);
+                    setListPage(0);
+                  }}
+                >
+                  <Input
+                    type="text"
+                    inputMode="search"
+                    placeholder="Search cities or countries"
+                    autoFocus
+                  />
+                </TextField>
+                {listSearchQuery ? (
+                  <button
+                    type="button"
+                    className="wtr-explorer__list-search-clear"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setListSearchQuery("");
+                      setListPage(0);
+                    }}
+                  >
+                    <IconCircleX size={16} stroke={1.5} aria-hidden />
+                  </button>
+                ) : null}
+              </div>
+              ) : null}
             </header>
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
-                No cities match your filters. Try clearing filters or adjusting
-                your income scenario above.
+                {listSearchQuery.trim()
+                  ? `No cities match "${listSearchQuery.trim()}".`
+                  : "No cities match your filters. Try clearing filters or adjusting your income scenario above."}
               </p>
             ) : (
               <div ref={listBodyRef} className="wtr-explorer__list-body">
-                <div
+                <AppOverlayScrollbars
                   ref={listScrollRef}
-                  className="wtr-explorer__list-scroll wtr-scroll-y--hover"
+                  className="wtr-explorer__list-scroll"
+                  defer={false}
                 >
                   <div className="wtr-explorer__list-scroll-inner">
                     <div
@@ -672,7 +792,7 @@ export function RetirementMapExplorer({
                       ))}
                     </div>
                   </div>
-                </div>
+                </AppOverlayScrollbars>
                 <WtrCityListPagination
                   className="wtr-list-pagination--dest-panel wtr-list-pagination--explorer-list"
                   page={listPage}

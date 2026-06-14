@@ -15,17 +15,6 @@ import "./RetirementDestinationPanel.scss";
 const MAP_RAIL_SLIDE_MS = 320;
 const MAP_RAIL_SLIDE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-function mapRailShadowTokens(el: HTMLElement) {
-  const styles = getComputedStyle(el);
-  const open = styles.getPropertyValue("--wtr-dest-panel-shadow-open").trim();
-  return {
-    open: open || "none",
-    closed:
-      styles.getPropertyValue("--wtr-dest-panel-shadow-closed").trim() ||
-      "none",
-  };
-}
-
 export type DestinationListNav = {
   index: number;
   totalCount: number;
@@ -81,18 +70,14 @@ export function RetirementDestinationPanel({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const shadows = mapRailShadowTokens(el);
-
     const setClosedStyles = () => {
       el.style.transform = "translateX(100%)";
-      el.style.boxShadow = shadows.closed;
       el.style.visibility = "hidden";
       el.style.pointerEvents = "none";
     };
 
     const setOpenStyles = () => {
       el.style.transform = "translateX(0)";
-      el.style.boxShadow = shadows.open;
       el.style.visibility = "visible";
       el.style.pointerEvents = "auto";
     };
@@ -100,7 +85,6 @@ export function RetirementDestinationPanel({
     if (reducedMotion) {
       if (open) {
         setOpenStyles();
-        el.style.boxShadow = shadows.open;
       } else {
         setClosedStyles();
       }
@@ -111,11 +95,10 @@ export function RetirementDestinationPanel({
     if (open) {
       el.style.visibility = "visible";
       el.style.pointerEvents = "none";
-      el.style.boxShadow = shadows.closed;
       const anim = el.animate(
         [
-          { transform: "translateX(100%)", boxShadow: shadows.closed },
-          { transform: "translateX(0)", boxShadow: shadows.open },
+          { transform: "translateX(100%)" },
+          { transform: "translateX(0)" },
         ],
         {
           duration: MAP_RAIL_SLIDE_MS,
@@ -144,8 +127,8 @@ export function RetirementDestinationPanel({
     el.style.pointerEvents = "none";
     const anim = el.animate(
       [
-        { transform: "translateX(0)", boxShadow: shadows.open },
-        { transform: "translateX(100%)", boxShadow: shadows.closed },
+        { transform: "translateX(0)" },
+        { transform: "translateX(100%)" },
       ],
       {
         duration: MAP_RAIL_SLIDE_MS,

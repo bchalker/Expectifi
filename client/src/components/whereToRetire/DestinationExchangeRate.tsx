@@ -1,10 +1,6 @@
 import { useMemo, type CSSProperties } from 'react'
 import {
   IconArrowsExchange,
-  IconCoin,
-  IconMinus,
-  IconTrendingDown,
-  IconTrendingUp,
 } from '@tabler/icons-react'
 import { formatUsdToLocalRate } from '../../lib/api/exchangeRates'
 import { useDestinationLiveData } from '../../hooks/useDestinationLiveData'
@@ -15,7 +11,6 @@ import {
   dollarStrengthBand,
   getColIndexForCountry,
   usPurchasingPowerMultiplier,
-  type DollarStrengthBand,
 } from './cityDetail/cityDetailTabUtils'
 import './DestinationExchangeRate.scss'
 import '../Tooltip.scss'
@@ -26,12 +21,6 @@ type Props = {
   className?: string
   staggerClassName?: string
   staggerStyle?: (index: number) => CSSProperties
-}
-
-const STRENGTH_ICONS: Record<DollarStrengthBand, typeof IconTrendingUp> = {
-  strong: IconTrendingUp,
-  moderate: IconMinus,
-  weak: IconTrendingDown,
 }
 
 function staggerProps(
@@ -122,14 +111,11 @@ export function DestinationExchangeRate({
     )
   }
 
-  const StrengthIcon = purchasingMeta ? STRENGTH_ICONS[purchasingMeta.band] : null
-
   return (
     <section className={rootClass} aria-label="Exchange rate vs US dollar" {...staggerProps(staggerClassName, staggerStyle, 0)}>
       <div className="wtr-exchange-rate__layout">
         <div className="wtr-exchange-rate__primary">
           <p className="wtr-exchange-rate__rate-row">
-            <IconArrowsExchange size={18} stroke={1.5} aria-hidden />
             <Tooltip
               placement="top"
               showArrow
@@ -143,29 +129,30 @@ export function DestinationExchangeRate({
                 </>
               }
             >
-              <span className="wtr-exchange-rate__rate tabular-nums">{rateLabel}</span>
+              <span className="wtr-exchange-rate__rate font-sm tabular-nums">{rateLabel}</span>
             </Tooltip>
           </p>
-          <p className="wtr-exchange-rate__currency-name">{currency.currencyName}</p>
+          <p className="wtr-exchange-rate__subtitle font-xs">
+            {currency.currencyName}
+            {purchasingMeta ? (
+              <>
+                {' · '}
+                <span className="tabular-nums">
+                  {purchasingMeta.multiplier}× your US purchasing power
+                </span>
+              </>
+            ) : null}
+          </p>
         </div>
-        {purchasingMeta && StrengthIcon ? (
-          <div className="wtr-exchange-rate__meta">
-            <span
-              className={[
-                'wtr-exchange-rate__strength-badge',
-                `wtr-exchange-rate__strength-badge--${purchasingMeta.band}`,
-              ].join(' ')}
-            >
-              <StrengthIcon size={14} stroke={1.5} aria-hidden />
-              {DOLLAR_STRENGTH_LABELS[purchasingMeta.band]}
-            </span>
-            <span className="wtr-exchange-rate__purchasing-pill">
-              <IconCoin size={14} stroke={1.5} aria-hidden />
-              <span className="tabular-nums">
-                {purchasingMeta.multiplier}× your US purchasing power
-              </span>
-            </span>
-          </div>
+        {purchasingMeta ? (
+          <span
+            className={[
+              'wtr-exchange-rate__strength-badge',
+              `wtr-exchange-rate__strength-badge--${purchasingMeta.band}`,
+            ].join(' ')}
+          >
+            {DOLLAR_STRENGTH_LABELS[purchasingMeta.band]}
+          </span>
         ) : null}
       </div>
     </section>

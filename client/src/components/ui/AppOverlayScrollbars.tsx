@@ -1,5 +1,8 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react'
+import {
+  OverlayScrollbarsComponent,
+  type OverlayScrollbarsComponentRef,
+} from 'overlayscrollbars-react'
 import type { PartialOptions } from 'overlayscrollbars'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 
@@ -25,34 +28,31 @@ type Props = Omit<
 }
 
 /** Thin themed OverlayScrollbars wrapper used across panels, modals, and menus. */
-export function AppOverlayScrollbars({
-  children,
-  className,
-  options,
-  defer = true,
-  ...rest
-}: Props) {
-  const mergedOptions: PartialOptions = {
-    ...APP_OVERLAY_SCROLLBARS_OPTIONS,
-    ...options,
-    scrollbars: {
-      ...APP_OVERLAY_SCROLLBARS_OPTIONS.scrollbars,
-      ...options?.scrollbars,
-    },
-  }
+export const AppOverlayScrollbars = forwardRef<OverlayScrollbarsComponentRef, Props>(
+  function AppOverlayScrollbars({ children, className, options, defer = true, ...rest }, ref) {
+    const mergedOptions: PartialOptions = {
+      ...APP_OVERLAY_SCROLLBARS_OPTIONS,
+      ...options,
+      scrollbars: {
+        ...APP_OVERLAY_SCROLLBARS_OPTIONS.scrollbars,
+        ...options?.scrollbars,
+      },
+    }
 
-  return (
-    <OverlayScrollbarsComponent
-      className={className}
-      options={mergedOptions}
-      defer={defer}
-      data-overlayscrollbars-initialize=""
-      {...rest}
-    >
-      {children}
-    </OverlayScrollbarsComponent>
-  )
-}
+    return (
+      <OverlayScrollbarsComponent
+        ref={ref}
+        className={className}
+        options={mergedOptions}
+        defer={defer}
+        data-overlayscrollbars-initialize=""
+        {...rest}
+      >
+        {children}
+      </OverlayScrollbarsComponent>
+    )
+  },
+)
 
 /** Scroll viewport for a portaled select menu item (OverlayScrollbars or native list). */
 export function overlayScrollbarsViewport(item: HTMLElement): HTMLElement | null {

@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import { AppOverlayScrollbars } from '../../ui/AppOverlayScrollbars'
 import { AppSelect } from '../../ui/AppSelect'
 import {
@@ -16,6 +16,8 @@ import { monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScori
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import type { BudgetBreakdownDisplay } from '../../../utils/costOfLiving'
 import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from '../../../utils/demographics'
+import { EXPAT_TAB_SOURCE_FOOTER } from '../../../utils/expatInfo'
+import { getQualityOfLifeData, QOL_WORLD_BANK_PROXY_NOTE } from '../../../utils/qualityOfLife'
 import { getTaxVisaScopeLabel } from '../../../utils/taxVisa'
 import { calculateRetirementScore } from '../../../utils/retirementScore'
 import type { DestinationListNav } from '../RetirementDestinationPanel'
@@ -101,9 +103,8 @@ const PANEL_TABS: {
 const PANEL_ESTIMATES_NOTE =
   'Estimates based on real prices reported by locals. Updated periodically. All amounts in USD.'
 
-function panelStaggerStyle(index: number): CSSProperties {
-  return { '--wtr-panel-i': index } as CSSProperties
-}
+const WEATHER_TAB_SOURCE_NOTE =
+  'Climate normals from Open-Meteo (1990–2020). Current weather may differ.'
 
 function CityDetailTabSelect({
   activeTab,
@@ -191,25 +192,42 @@ function CityDetailPanelBody({
     [city.country],
   )
 
+  const qolData = useMemo(() => getQualityOfLifeData(city.country), [city.country])
+  const qolUsesWorldBankProxy = qolData?.source === 'world_bank_proxy'
+
   const paginationCenterNote =
     activeTab === 'taxVisa'
       ? taxVisaScopeNote
-      : mobileSheet
-        ? undefined
-        : PANEL_ESTIMATES_NOTE
+      : activeTab === 'weather'
+        ? WEATHER_TAB_SOURCE_NOTE
+        : activeTab === 'expatLife'
+          ? EXPAT_TAB_SOURCE_FOOTER
+          : activeTab === 'peopleCulture'
+            ? DEMOGRAPHICS_TAB_SOURCE_FOOTER
+            : activeTab === 'qol' && qolUsesWorldBankProxy
+              ? QOL_WORLD_BANK_PROXY_NOTE
+              : mobileSheet
+                ? undefined
+                : PANEL_ESTIMATES_NOTE
+
+  const tabKey = `${city.id}-${activeTab}`
+  const [fadedTabKey, setFadedTabKey] = useState<string | null>(null)
+
+  useLayoutEffect(() => {
+    setFadedTabKey(null)
+    const id = requestAnimationFrame(() => setFadedTabKey(tabKey))
+    return () => cancelAnimationFrame(id)
+  }, [tabKey])
+
+  const tabFadeIn = fadedTabKey === tabKey
 
   const tabContent = (() => {
-    const staggerClassName = 'wtr-city-detail__stagger-item'
-    const staggerStyle = panelStaggerStyle
-
     switch (activeTab) {
       case 'col':
         return (
           <CostOfLivingTab
             city={scored.city}
             budgetBreakdown={budgetBreakdown}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'weather':
@@ -221,40 +239,30 @@ function CityDetailPanelBody({
             lat={city.lat}
             loading={climateLoading}
             failed={climateFailed}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'gettingThere':
         return (
           <GettingThereTab
             country={city.country}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'taxVisa':
         return (
           <TaxVisaTab
             country={city.country}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'qol':
         return (
           <QualityOfLifeTab
             country={city.country}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'peopleCulture':
         return (
           <PeopleAndCultureTab
             country={city.country}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       case 'expatLife':
@@ -262,8 +270,6 @@ function CityDetailPanelBody({
           <ExpatLifeTab
             city={city.city}
             country={city.country}
-            staggerClassName={staggerClassName}
-            staggerStyle={staggerStyle}
           />
         )
       default:
@@ -311,7 +317,6 @@ function CityDetailPanelBody({
 
         <AppOverlayScrollbars className="wtr-city-detail__tab-scroll" defer={false}>
           <div
-            key={`${city.id}-${activeTab}`}
             id={activeTabMeta?.panelId}
             role={mobileSheet ? 'region' : 'tabpanel'}
             aria-label={
@@ -320,26 +325,28 @@ function CityDetailPanelBody({
                 : undefined
             }
             aria-labelledby={mobileSheet ? undefined : activeTabMeta?.tabId}
-            className="wtr-city-detail__tabpanel wtr-city-detail__tabpanel--enter"
+            className="wtr-city-detail__tabpanel"
           >
-            {tabContent}
+            <div
+              key={tabKey}
+              className={[
+                'wtr-city-detail__tab-fade',
+                tabFadeIn && 'wtr-city-detail__tab-fade--in',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {tabContent}
+            </div>
           </div>
 
-          {mobileSheet && activeTab === 'peopleCulture' ? (
-            <p className="wtr-city-detail__scroll-end-source">
-              {DEMOGRAPHICS_TAB_SOURCE_FOOTER}
-            </p>
-          ) : null}
-          {mobileSheet && listNav && activeTab !== 'taxVisa' ? (
+          {mobileSheet && listNav && activeTab !== 'taxVisa' && activeTab !== 'weather' && activeTab !== 'expatLife' && activeTab !== 'peopleCulture' && !(activeTab === 'qol' && qolUsesWorldBankProxy) ? (
             <p className="wtr-city-detail__scroll-end-source">{PANEL_ESTIMATES_NOTE}</p>
           ) : null}
         </AppOverlayScrollbars>
       </div>
 
       <footer className="wtr-city-detail__footer">
-        {activeTab === 'peopleCulture' && !mobileSheet ? (
-          <p className="wtr-city-detail__footer-source">{DEMOGRAPHICS_TAB_SOURCE_FOOTER}</p>
-        ) : null}
         {listNav ? (
           <WtrCityListPagination
             className="wtr-list-pagination--dest-panel"

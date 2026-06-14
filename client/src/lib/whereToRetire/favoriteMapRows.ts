@@ -1,4 +1,3 @@
-import { getFlagEmoji } from '../regionUtils'
 import {
   getEffectiveTaxRate,
   taxBadgeLabel,
@@ -10,7 +9,6 @@ import { calcMapIncomeFit } from './mapIncomeFit'
 import { lookupRetirementCity } from './retirementCityLookup'
 import {
   calculateMonthlyBudget,
-  countryToFlagEmoji,
   countryToIsoCode,
   formatUsd,
   getAllMapCities,
@@ -19,7 +17,7 @@ import {
 
 export type FavoriteMapRow = {
   entry: FavoriteCityEntry
-  flag: string
+  iso: string
   label: string
   surplus: number
   taxLabel: string
@@ -86,11 +84,10 @@ export function buildFavoriteMapRows(
     const record = lookupRetirementCity(entry.city, entry.country)
     const iso = resolveFavoriteIso(entry, record?.country_iso)
     const { surplus, taxRate } = favoriteSurplusAndTax(entry, monthlyIncome, filters)
-    const flag = iso.length === 2 ? getFlagEmoji(iso) : countryToFlagEmoji(entry.country)
 
     rows.push({
       entry,
-      flag,
+      iso,
       label: `${entry.city}, ${entry.country}`,
       surplus,
       taxLabel: taxBadgeLabel(taxRate),

@@ -9,7 +9,7 @@ type Props = {
 }
 
 const OPTIONS = [
-  { id: 'score' as const, label: 'Best overall fit' },
+  { id: 'score' as const, label: 'Best Fit score' },
   { id: 'budget' as const, label: 'Lowest cost' },
   { id: 'expat' as const, label: 'Expat friendly' },
 ]

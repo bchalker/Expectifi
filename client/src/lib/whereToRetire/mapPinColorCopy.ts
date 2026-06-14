@@ -30,7 +30,7 @@ const VIEW_COPY: Record<MapPinColorView, MapPinViewChromeCopy> = {
   budget: {
     title: 'Where your money goes furthest',
     description:
-      "Shows only affordability — how much of your monthly budget each city requires. Useful for finding hidden gems. Remember cheap doesn't always mean good — switch to Best overall fit to add quality of life context.",
+      "Shows only affordability — how much of your monthly budget each city requires. Useful for finding hidden gems. Remember cheap doesn't always mean good — switch to Best Fit score to add quality of life context.",
     legend: [
       { label: 'Well within budget', color: BUDGET_PIN_LEGEND[0].color },
       { label: 'Comfortable', color: BUDGET_PIN_LEGEND[1].color },
@@ -53,7 +53,7 @@ const VIEW_COPY: Record<MapPinColorView, MapPinViewChromeCopy> = {
 }
 
 const VIEW_BUTTON_LABELS: Record<MapPinColorView, string> = {
-  score: 'Best overall fit',
+  score: 'Best Fit score',
   budget: 'Lowest cost',
   expat: 'Expat friendly',
 }

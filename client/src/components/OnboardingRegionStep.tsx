@@ -5,6 +5,7 @@ import {
   ONBOARDING_COUNTRY_GRID,
   type OnboardingRegionId,
 } from '../lib/onboardingRegions'
+import { CountryFlag } from './ui/CountryFlag'
 import './OnboardingRegionStep.scss'
 
 type Props = {
@@ -16,12 +17,8 @@ type Props = {
   className?: string
 }
 
-function RegionFlag({ flag }: { flag: string }) {
-  return (
-    <span className="onboarding-region-step__flag" aria-hidden>
-      {flag}
-    </span>
-  )
+function RegionFlag({ iso }: { iso: string }) {
+  return <CountryFlag iso={iso} size="l" className="onboarding-region-step__flag" />
 }
 
 export function OnboardingRegionStep({
@@ -76,7 +73,7 @@ export function OnboardingRegionStep({
                 aria-label={region.label}
               >
                 <span className="onboarding-region-step__cell-main">
-                  <RegionFlag flag={region.flag} />
+                  <RegionFlag iso={region.iso} />
                   <span className="onboarding-region-step__cell-copy">
                     <span className="onboarding-region-step__cell-label">{region.label}</span>
                     {isDetected ? (

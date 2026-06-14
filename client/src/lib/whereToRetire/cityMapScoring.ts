@@ -3,6 +3,7 @@ import { getHealthcareRating } from '../../data/destinationHealthcare'
 import { getTeleportFallback } from '../../data/teleportFallbacks'
 import { readApiCache } from '../api/apiCache'
 import type { DollarStrengthSeries } from '../api/exchangeRates'
+import { getCityClimateNormals } from '../../utils/climateNormals'
 import {
   calculateMonthlyBudget,
   countryToIsoCode,
@@ -445,6 +446,7 @@ export function scoreMapCity(
     city,
     city.country,
     prefs,
+    { climate: getCityClimateNormals(city.city, city.country) },
   )
 
   return {

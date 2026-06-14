@@ -1,10 +1,8 @@
-import { getFlagEmoji } from '../regionUtils'
 import { countryToIsoCode, getAllMapCities } from '../../utils/costOfLiving'
 
 export type MapCountryOption = {
   name: string
   iso: string
-  flag: string
 }
 
 let cachedCountries: MapCountryOption[] | null = null
@@ -20,7 +18,6 @@ export function getMapCountryCatalog(): MapCountryOption[] {
     byName.set(row.country, {
       name: row.country,
       iso,
-      flag: getFlagEmoji(iso),
     })
   }
 

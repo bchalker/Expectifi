@@ -18,6 +18,8 @@ export type ClimateNotesResult = {
   categoryLabel: string | null
   climateScore: number | null
   climateNotes: string
+  /** Preference fit copy without the parenthetical score — for summary card body text. */
+  matchSummary: string
   fitTone: ClimateNotesFitTone
 }
 
@@ -117,6 +119,10 @@ function preferenceFitCopy(
   return `Climate fit for ${directionLabel}: ${scoreLabel}${suffix}.`
 }
 
+function matchSummaryFromFitCopy(fitCopy: string): string {
+  return fitCopy.replace(/\s*\(\d+\/100\)/g, '')
+}
+
 /** Plain-language climate notes tied to direction + weight preferences. */
 export function deriveClimateNotes(
   climate: CityClimate,
@@ -138,6 +144,7 @@ export function deriveClimateNotes(
         categoryLabel: typeCopy.categoryLabel,
         climateScore: score,
         climateNotes: `${typeCopy.climateNotes} Climate comfort isn't weighted in your score.`,
+        matchSummary: typeCopy.climateNotes,
         fitTone: 'muted',
       }
     }
@@ -146,6 +153,8 @@ export function deriveClimateNotes(
       categoryLabel: null,
       climateScore: score,
       climateNotes:
+        'Set climate comfort in preferences to see how this destination fits your priorities.',
+      matchSummary:
         'Set climate comfort in preferences to see how this destination fits your priorities.',
       fitTone: 'muted',
     }
@@ -164,6 +173,7 @@ export function deriveClimateNotes(
     categoryLabel: typeCopy?.categoryLabel ?? null,
     climateScore: score,
     climateNotes: `${typeLead}${fitCopy}`.trim(),
+    matchSummary: matchSummaryFromFitCopy(fitCopy),
     fitTone: fitToneFor(score, climatePreferenceStep),
   }
 }

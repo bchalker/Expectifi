@@ -1,5 +1,4 @@
 import { findOnboardingRegion, type OnboardingRegionId } from '../onboardingRegions'
-import { getFlagEmoji } from '../regionUtils'
 import { countryToIsoCode, getAllMapCities } from '../../utils/costOfLiving'
 import type { RetirementPreferences } from '../../types/preferences'
 import {
@@ -26,7 +25,7 @@ export type IncomeHarvestCityRow = {
   city: string
   country: string
   label: string
-  flag: string
+  iso: string
   score: number
 }
 
@@ -80,7 +79,7 @@ function toCityRow(scored: ScoredMapCity, rank: number): IncomeHarvestCityRow {
     city: scored.city.city,
     country: scored.city.country,
     label: formatIncomeHarvestCityLabel(scored.city.city, scored.city.country),
-    flag: iso ? getFlagEmoji(iso) : '',
+    iso: iso ?? '',
     score: scored.displayScore,
   }
 }

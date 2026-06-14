@@ -1,16 +1,21 @@
 import type { CSSProperties, KeyboardEvent } from "react";
-import { IconAlertTriangle, IconHeart, IconHeartFilled } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconHeart,
+  IconHeartFilled,
+} from "@tabler/icons-react";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
 import {
   resolveMapPinDisplay,
-  type BudgetFitBand,
   type MapPinColorView,
 } from "../../lib/whereToRetire/mapPinDisplay";
 import {
-  countryToFlagEmoji,
   formatUsd,
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
+import { getFitScoreColors } from "../../utils/fitScore";
+import { CountryFlag } from "../ui/CountryFlag";
 import {
   formatEstimatedAmericans,
   getExpatDestinationInfo,
@@ -19,8 +24,6 @@ import {
 import type { MapIncomeFitDisplay } from "../../lib/whereToRetire/mapIncomeFit";
 import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
 import type { MapFilters } from "../../lib/whereToRetire/cityMapScoring";
-import { WtrAffordabilityScoreBar } from "./WtrAffordabilityScoreBar";
-import { WtrIncomeFitBadges } from "./WtrIncomeFitBadges";
 import "./RetirementDestinationCard.scss";
 import "./WtrMapPinLegend.scss";
 
@@ -54,6 +57,7 @@ export function RetirementDestinationCard({
   const { city } = scored;
   const display = resolveMapPinDisplay(scored, pinColorView, monthlyIncome);
   const { displayScore: badgeScore, bandClass, pinColor, bandLabel } = display;
+  const fitBadgeColors = getFitScoreColors(badgeScore);
   const showAdvisory = hasTravelAdvisory(city.country);
   const expatInfo =
     pinColorView === "expat" ? getExpatDestinationInfo(city.country) : null;
@@ -134,25 +138,17 @@ export function RetirementDestinationCard({
           </div>
           <span className="wtr-dest-card__rank-sep" aria-hidden />
         </div>
-        <span className="wtr-dest-card__body">
-          {incomeFit ? (
-            <WtrIncomeFitBadges fit={incomeFit} variant="list" part="tax" />
-          ) : null}
-          <span className="wtr-dest-card__head-row">
-            <span className="wtr-dest-card__identity">
-              <span className="wtr-dest-card__name-row">
-                <span className="wtr-dest-card__name">{city.city}</span>
-              </span>
+
+        <div className="wtr-dest-card__body">
+          <div className="wtr-dest-card__head-row">
+            <div className="wtr-dest-card__identity">
+              <span className="wtr-dest-card__name">{city.city}</span>
               <span className="wtr-dest-card__country">
-                <span className="wtr-dest-card__flag" aria-hidden>
-                  {countryToFlagEmoji(city.country)}
-                </span>
+                <CountryFlag country={city.country} size="s" className="wtr-dest-card__flag" />
                 <span className="wtr-dest-card__country-name">{city.country}</span>
-                {incomeFit ? (
-                  <WtrIncomeFitBadges fit={incomeFit} variant="list" part="visa" />
-                ) : null}
               </span>
-            </span>
+            </div>
+
             {pinColorView === "budget" && monthlyCost != null ? (
               <span className="wtr-dest-card__budget-stat">
                 <span className="wtr-dest-card__budget-amount tabular-nums">
@@ -165,7 +161,8 @@ export function RetirementDestinationCard({
                 ) : null}
               </span>
             ) : null}
-          </span>
+          </div>
+
           {pinColorView === "expat" ? (
             <span className="wtr-dest-card__expat-badge-row">
               <span className="wtr-map-pin-legend__item">
@@ -180,25 +177,72 @@ export function RetirementDestinationCard({
                 <span className="wtr-dest-card__expat-count">{americansNote}</span>
               ) : null}
             </span>
-          ) : pinColorView === "budget" ? null : (
-            <WtrAffordabilityScoreBar
-              score={badgeScore}
-              band={
-                pinColorView === "score"
-                  ? scored.band
-                  : (bandClass as BudgetFitBand)
-              }
-              bandColor={pinColor}
-              className="wtr-dest-card__score"
-            />
-          )}
+          ) : null}
+
+          {incomeFit ? (
+            <div className="wtr-dest-card__meta">
+              <span
+                className={[
+                  "wtr-dest-card__meta-pill",
+                  "wtr-dest-card__meta-pill--visa",
+                  incomeFit.visaQualifies && "wtr-dest-card__meta-pill--visa-friendly",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {incomeFit.visaQualifies ? (
+                  <IconCheck
+                    className="wtr-dest-card__meta-visa-icon"
+                    size={14}
+                    stroke={2}
+                    aria-hidden
+                  />
+                ) : null}
+                {incomeFit.visaLabel}
+              </span>
+              <span
+                className={[
+                  "wtr-dest-card__meta-pill",
+                  "wtr-dest-card__meta-pill--tax",
+                  `wtr-dest-card__meta-pill--tax-${incomeFit.taxTone}`,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {incomeFit.taxLabel}
+              </span>
+            </div>
+          ) : null}
+
           {showAdvisory ? (
             <span className="wtr-dest-card__advisory-footer">
               <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
               Travel advisory
             </span>
           ) : null}
-        </span>
+        </div>
+
+        {pinColorView === "score" ? (
+          <div
+            className="wtr-dest-card__fit-col"
+            style={
+              {
+                "--wtr-fit-col-bg": fitBadgeColors.background,
+                "--wtr-fit-score-color": fitBadgeColors.text,
+              } as CSSProperties
+            }
+          >
+            <span className="wtr-dest-card__fit-sep" aria-hidden />
+            <div className="wtr-dest-card__fit-stack">
+              <span
+                className="wtr-dest-card__fit-badge tabular-nums"
+                aria-label={`Fit score ${badgeScore} out of 100`}
+              >
+                {badgeScore}
+              </span>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

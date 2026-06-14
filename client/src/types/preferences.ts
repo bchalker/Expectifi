@@ -33,7 +33,6 @@ export type CorePreferenceKey =
   | 'airQuality'
   | 'disasterRisk'
   | 'climate'
-  | 'qualityOfLife'
   | 'politicalStability'
   | 'socialLaws'
 
@@ -46,7 +45,6 @@ export interface RetirementPreferences {
   airQuality: PreferenceStep
   disasterRisk: PreferenceStep
   climate: PreferenceStep
-  qualityOfLife: PreferenceStep
   politicalStability: PreferenceStep
   socialLaws: PreferenceStep
   climatePreference: ClimatePreferenceDirection
@@ -62,7 +60,6 @@ export const DEFAULT_PREFERENCES: RetirementPreferences = {
   airQuality: 3,
   disasterRisk: 3,
   climate: 2,
-  qualityOfLife: 4,
   politicalStability: 3,
   socialLaws: 3,
   climatePreference: 'none',
@@ -132,6 +129,8 @@ function normalizeDailyLife(raw: unknown): DailyLifeFactor[] {
 
 type LegacyRetirementPreferences = Partial<RetirementPreferences> & {
   healthcare?: PreferenceStep
+  /** Ignored on load — removed from Fit score weighting (QoL sub-metrics scored separately). */
+  qualityOfLife?: PreferenceStep
 }
 
 export function normalizeRetirementPreferences(
@@ -152,7 +151,6 @@ export function normalizeRetirementPreferences(
     airQuality: clampStep(raw.airQuality ?? DEFAULT_PREFERENCES.airQuality),
     disasterRisk: clampStep(raw.disasterRisk ?? DEFAULT_PREFERENCES.disasterRisk),
     climate: clampStep(raw.climate ?? DEFAULT_PREFERENCES.climate),
-    qualityOfLife: clampStep(raw.qualityOfLife ?? DEFAULT_PREFERENCES.qualityOfLife),
     politicalStability: clampStep(
       raw.politicalStability ?? DEFAULT_PREFERENCES.politicalStability,
     ),

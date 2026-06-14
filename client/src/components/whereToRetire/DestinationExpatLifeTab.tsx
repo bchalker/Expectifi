@@ -1,7 +1,6 @@
 import { useMemo, type CSSProperties } from 'react'
 import { IconAlertCircle, IconExternalLink } from '@tabler/icons-react'
 import {
-  EXPAT_TAB_SOURCE_FOOTER,
   expatCommunitySizeTone,
   expatUnavailableMessage,
   facebookGroupSearchUrl,
@@ -177,7 +176,7 @@ export function DestinationExpatLifeTab({
                 rel="noopener noreferrer"
                 className="wtr-expat-life__fb-link"
               >
-                <span aria-hidden>🔍</span> {group} on Facebook
+                {group} on Facebook
                 <IconExternalLink size={14} stroke={1.5} aria-hidden />
               </a>
             </li>
@@ -212,18 +211,6 @@ export function DestinationExpatLifeTab({
           </a>
         ) : null}
       </section>
-
-      <p
-        className="wtr-dest-panel__data-source"
-        {...staggerSectionProps(
-          sectionIndex,
-          'wtr-dest-panel__data-source',
-          staggerClassName,
-          staggerStyle,
-        )}
-      >
-        {EXPAT_TAB_SOURCE_FOOTER}
-      </p>
     </div>
   )
 }

@@ -13,6 +13,7 @@ import { fmtMon } from "../utils/format";
 import { IncomeHarvestPreviewMap } from "./IncomeHarvestPreviewMap";
 import { IncomeHarvestPreferencesEntry } from "./IncomeHarvestPreferencesEntry";
 import { WhereToRetirePanelEntry } from "./WhereToRetirePanelEntry";
+import { CountryFlag } from "./ui/CountryFlag";
 import "./IncomeHarvestPreviewPanel.scss";
 
 const WTR_SCORE_FACTORS =
@@ -94,10 +95,12 @@ function CityRows({
             <span className="where-to-retire-preview-panel__rank">
               {row.rank}
             </span>
-            {row.flag ? (
-              <span className="where-to-retire-preview-panel__flag" aria-hidden>
-                {row.flag}
-              </span>
+            {row.iso ? (
+              <CountryFlag
+                iso={row.iso}
+                size="s"
+                className="where-to-retire-preview-panel__flag"
+              />
             ) : null}
             <span className="where-to-retire-preview-panel__city-label">
               {row.label}

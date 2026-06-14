@@ -6,4 +6,5 @@ dist
 .DS_Store
 client/dist
 server/dist
+client/public/flags
 supabase/.temp

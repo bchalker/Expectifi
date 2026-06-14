@@ -15,7 +15,8 @@ import { getEnglishProficiency } from '../../utils/englishProficiency'
 import './DestinationGettingThereTab.scss'
 import './DestinationPeopleCultureTab.scss'
 import { scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
-import { countryToFlagEmoji, getAllMapCities, type MapCity } from '../../utils/costOfLiving'
+import { getAllMapCities, type MapCity } from '../../utils/costOfLiving'
+import { CountryFlag } from '../ui/CountryFlag'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
 import './WtrComparisonTableView.scss'
 
@@ -180,7 +181,7 @@ function CityColumnHeader({
                           className="wtr-compare-table__col-picker-option"
                           onClick={() => onPickCity?.(c)}
                         >
-                          <span aria-hidden>{countryToFlagEmoji(c.country)}</span>
+                          <CountryFlag country={c.country} size="s" />
                           {c.city}, {c.country}
                         </button>
                       </li>
@@ -203,9 +204,7 @@ function CityColumnHeader({
         {!isEmptyBaseline ? (
           <>
             <div className="wtr-compare-table__col-meta">
-              <span className="wtr-compare-table__col-flag" aria-hidden>
-                {countryToFlagEmoji(mapCity!.country)}
-              </span>
+              <CountryFlag country={mapCity!.country} size="s" className="wtr-compare-table__col-flag" />
               <span className="wtr-compare-table__col-country">{mapCity!.country}</span>
             </div>
             {headerScore != null && headerBand != null && headerBandColor != null ? (

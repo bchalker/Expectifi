@@ -1,45 +1,172 @@
+import { useUserLocale } from '../../../context/UserLocaleContext'
+import { Tooltip } from '../../Tooltip'
 import {
   formatQoLIndex,
   getQualityOfLifeData,
   qolNormalizedFromIndex,
+  qolOverallScoreBand,
+  QOL_NORMALIZED_MAX,
+  type QoLOverallBand,
 } from '../../../utils/qualityOfLife'
 import {
+  colComparisonParts,
+  colIndexBand,
   getColIndexForCountry,
+  getHomeColBenchmark,
   INDEX_UNAVAILABLE_DISPLAY,
+  indexBarScaleMax,
+  type ColIndexBand,
+  type IndexComparisonParts,
 } from './cityDetailTabUtils'
+import './CityDetailIndexRows.scss'
+import '../../Tooltip.scss'
 
-type IndexBarProps = {
+const COL_INDEX_TOOLTIP =
+  'Numbeo cost of living index (New York City = 100). Lower scores mean lower everyday costs. Country-level data — city costs may vary.'
+
+const QOL_INDEX_TOOLTIP =
+  'Overall quality of life score normalized to 0–100 from Numbeo country data. Country-level data — city conditions may vary.'
+
+const HOME_AVG_TOOLTIPS = {
+  col: COL_INDEX_TOOLTIP,
+  qol: QOL_INDEX_TOOLTIP,
+} as const
+
+type IndexCardProps = {
   label: string
+  tooltip: string
   value: number | null
   displayValue: string
+  band: ColIndexBand | QoLOverallBand | null
+  benchmark: number | null
+  comparison: IndexComparisonParts | null
+  tierLabel: string | null
+  titleSuffix: string | null
+  fillVariant: 'col' | 'qol'
 }
 
-function CityDetailIndexBar({ label, value, displayValue }: IndexBarProps) {
+function IndexComparisonRow({
+  comparison,
+  band,
+  tooltip,
+}: {
+  comparison: IndexComparisonParts
+  band: ColIndexBand | null
+  tooltip: string
+}) {
+  return (
+    <div className="wtr-city-detail-index-card__comparison-row">
+      <span
+        className={[
+          'wtr-city-detail-index-card__pill',
+          band ? `wtr-city-detail-index-card__pill--${band}` : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {comparison.pillLabel}
+      </span>
+      <span className="wtr-city-detail-index-card__comparison-text">
+        {comparison.suffixBeforeBenchmark}
+        <Tooltip
+          content={tooltip}
+          placement="top"
+          triggerClassName="wtr-city-detail-index-card__comparison-tip"
+        >
+          <span className="wtr-city-detail-index-card__comparison-ref">
+            {comparison.benchmarkPhrase}
+          </span>
+        </Tooltip>
+      </span>
+    </div>
+  )
+}
+
+function IndexTierRow({ label, band }: { label: string; band: QoLOverallBand }) {
+  return (
+    <div className="wtr-city-detail-index-card__tier-row">
+      <span className={`wtr-city-detail-index-card__pill wtr-city-detail-index-card__pill--${band}`}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function CityDetailIndexCard({
+  label,
+  tooltip,
+  value,
+  displayValue,
+  band,
+  benchmark,
+  comparison,
+  tierLabel,
+  titleSuffix,
+  fillVariant,
+}: IndexCardProps) {
   const showBar = value != null && Number.isFinite(value)
-  const fillPct = showBar ? Math.min(100, Math.max(0, value)) : 0
+  const usesHomeBenchmark = benchmark != null && Number.isFinite(benchmark)
+  const scaleMax = showBar
+    ? usesHomeBenchmark
+      ? indexBarScaleMax(value, benchmark)
+      : QOL_NORMALIZED_MAX
+    : QOL_NORMALIZED_MAX
+  const fillPct = showBar ? Math.min(100, (value / scaleMax) * 100) : 0
+  const markerPct =
+    showBar && usesHomeBenchmark ? Math.min(100, (benchmark / scaleMax) * 100) : null
 
   return (
-    <div className="wtr-city-detail__index-block">
-      <div className="wtr-city-detail__index-head">
-        <span className="wtr-city-detail__index-label">{label}</span>
-        <span className="wtr-city-detail__index-value tabular-nums">{displayValue}</span>
-      </div>
+    <article
+      className={[
+        'wtr-city-detail-index-card',
+        band ? `wtr-city-detail-index-card--${band}` : 'wtr-city-detail-index-card--unavailable',
+        `wtr-city-detail-index-card--${fillVariant}`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <h4 className="wtr-city-detail-index-card__title">
+        {label}
+        {titleSuffix ? (
+          <span className="wtr-city-detail-index-card__title-suffix">{titleSuffix}</span>
+        ) : null}
+      </h4>
+
+      <p className="wtr-city-detail-index-card__score tabular-nums">{displayValue}</p>
+
       {showBar ? (
-        <div
-          className="wtr-city-detail__index-track"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={fillPct}
-          aria-label={`${label}: ${displayValue}`}
-        >
+        <div className="wtr-city-detail-index-card__bar-wrap">
           <div
-            className="wtr-city-detail__index-fill"
-            style={{ width: `${fillPct}%` }}
-          />
+            className="wtr-city-detail-index-card__track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={scaleMax}
+            aria-valuenow={value}
+            aria-label={`${label}: ${displayValue}`}
+          >
+            <div
+              className="wtr-city-detail-index-card__fill"
+              style={{ width: `${fillPct}%` }}
+            />
+          </div>
+          {markerPct != null ? (
+            <div
+              className="wtr-city-detail-index-card__marker"
+              style={{ left: `${markerPct}%` }}
+              aria-hidden
+            >
+              <span className="wtr-city-detail-index-card__marker-tick" />
+            </div>
+          ) : null}
         </div>
       ) : null}
-    </div>
+
+      {tierLabel && band ? (
+        <IndexTierRow label={tierLabel} band={band as QoLOverallBand} />
+      ) : comparison ? (
+        <IndexComparisonRow comparison={comparison} band={band as ColIndexBand | null} tooltip={tooltip} />
+      ) : null}
+    </article>
   )
 }
 
@@ -64,20 +191,48 @@ type Props = {
 }
 
 export function CityDetailIndexRows({ country, className }: Props) {
+  const { locale } = useUserLocale()
   const colIndex = colIndexMetrics(country)
+  const qolData = getQualityOfLifeData(country)
   const qolIndex = qolIndexMetrics(country)
+  const homeColBenchmark = getHomeColBenchmark(locale)
+  const qolTier = qolData ? qolOverallScoreBand(qolData.quality_of_life_index) : null
+
+  const colBand =
+    colIndex.value != null && homeColBenchmark != null
+      ? colIndexBand(colIndex.value, homeColBenchmark)
+      : null
+
+  const colComparison =
+    colIndex.value != null && homeColBenchmark != null
+      ? colComparisonParts(colIndex.value, homeColBenchmark, locale)
+      : null
 
   return (
     <div className={['wtr-city-detail__index-rows', className].filter(Boolean).join(' ')}>
-      <CityDetailIndexBar
-        label="Cost of living index"
+      <CityDetailIndexCard
+        label="Cost of Living"
+        tooltip={HOME_AVG_TOOLTIPS.col}
         value={colIndex.value}
         displayValue={colIndex.display}
+        band={colBand}
+        benchmark={homeColBenchmark}
+        comparison={colComparison}
+        tierLabel={null}
+        titleSuffix={null}
+        fillVariant="col"
       />
-      <CityDetailIndexBar
-        label="Quality of life index"
+      <CityDetailIndexCard
+        label="Quality of Life"
+        tooltip={HOME_AVG_TOOLTIPS.qol}
         value={qolIndex.value}
         displayValue={qolIndex.display}
+        band={qolTier?.band ?? null}
+        benchmark={null}
+        comparison={null}
+        tierLabel={qolTier?.label ?? null}
+        titleSuffix="(Country avg)"
+        fillVariant="qol"
       />
     </div>
   )

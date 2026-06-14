@@ -4,7 +4,6 @@ import {
   QOL_NORMALIZED_MAX,
   QOL_TAB_SOURCE_FOOTER,
   QOL_UNAVAILABLE_MESSAGE,
-  QOL_WORLD_BANK_PROXY_NOTE,
   qolBarFillPercent,
   qolMetricBarBand,
   qolNormalizedFromIndex,
@@ -115,9 +114,6 @@ function QoLOverallCard({
         label={`Overall quality of life: ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
         tone={band}
       />
-      {data.source === 'world_bank_proxy' ? (
-        <p className="wtr-qol-overall__proxy-note">{QOL_WORLD_BANK_PROXY_NOTE}</p>
-      ) : null}
     </article>
   )
 }
