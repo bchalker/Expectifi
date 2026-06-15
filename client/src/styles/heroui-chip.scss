@@ -1,0 +1,69 @@
+/* HeroUI Chip — plain CSS fallback when Tailwind @apply in @heroui/styles does not expand. */
+
+.app-chip.chip[data-slot='chip'] {
+  border: none;
+}
+
+.app-chip.chip.chip--soft.chip--success[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 85%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 14%, var(--surface));
+}
+
+.app-chip.chip.chip--soft.chip--warning[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 90%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 18%, var(--surface));
+}
+
+.app-chip.chip.chip--soft.chip--danger[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 82%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 12%, var(--surface));
+}
+
+.app-chip.chip.chip--soft.chip--default[data-slot='chip'] {
+  color: var(--text-muted);
+  background: var(--surface2);
+}
+
+.app-chip.chip.chip--soft.chip--accent[data-slot='chip'] {
+  color: color-mix(in srgb, var(--accent) 88%, var(--text));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+
+.app-chip.chip.chip--primary.chip--default[data-slot='chip'],
+.app-chip.chip.chip--primary.chip--success[data-slot='chip'],
+.app-chip.chip.chip--primary.chip--warning[data-slot='chip'],
+.app-chip.chip.chip--primary.chip--danger[data-slot='chip'],
+.app-chip.chip.chip--primary.chip--accent[data-slot='chip'] {
+  color: var(--surface);
+  background: var(--color-primary);
+}
+
+.app-chip.chip.chip--secondary.chip--default[data-slot='chip'] {
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.app-chip.chip.chip--secondary.chip--success[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 85%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 28%, var(--border));
+}
+
+.app-chip.chip.chip--secondary.chip--danger[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 82%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 24%, var(--border));
+}
+
+.app-chip.chip.chip--secondary.chip--warning[data-slot='chip'] {
+  color: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 90%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 18%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 30%, var(--border));
+}
+
+.app-chip.chip.chip--secondary.chip--accent[data-slot='chip'] {
+  color: color-mix(in srgb, var(--accent) 88%, var(--text));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+}

@@ -86,7 +86,6 @@ export function RetirementScoreHeader({
           className="wtr-score-header__panel-band-chip"
           variant="primary"
           color="default"
-          style={{ background: bandColor }}
         >
           {pillLabel}
         </AppChip>

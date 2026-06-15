@@ -67,9 +67,9 @@
   color: var(--text-muted);
 }
 
-.wtr-score-header__panel-band-chip[data-slot='chip'],
-.wtr-score-header__panel-band-chip.chip {
-  --chip-fg: var(--surface);
+.app-chip.wtr-score-header__panel-band-chip.chip.chip--primary[data-slot='chip'] {
+  color: var(--surface);
+  background: var(--wtr-band-color, var(--color-text-success));
   padding-inline: 0.4375rem;
   border: none;
 }

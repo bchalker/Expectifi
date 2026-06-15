@@ -154,6 +154,7 @@ export function RetirementMapLibreMap({
   const closeTooltipRef = useRef<(cityId: string) => void>(() => {});
   const hideTooltipTimeoutRef = useRef<number | null>(null);
   const enterTooltipFrameRef = useRef<number | null>(null);
+  const detailPanelOpenRef = useRef(detailPanelOpen);
   const prevFocusIdForBoundsRef = useRef<string | null>(null);
   const prevFitKeyRef = useRef(fitKey);
   const hasAutoFitRef = useRef(false);
@@ -196,8 +197,10 @@ export function RetirementMapLibreMap({
   monthlyIncomeRef.current = monthlyIncome;
   pinColorViewRef.current = pinColorView;
   filtersRef.current = filters;
+  detailPanelOpenRef.current = detailPanelOpen;
 
   openTooltipRef.current = (cityId, x, y) => {
+    if (detailPanelOpenRef.current) return;
     if (hideTooltipTimeoutRef.current != null) {
       window.clearTimeout(hideTooltipTimeoutRef.current);
       hideTooltipTimeoutRef.current = null;
@@ -245,6 +248,42 @@ export function RetirementMapLibreMap({
     ? destinations.find((item) => item.city.id === tooltip.cityId)
     : null;
   const hoveredDisplay = tooltip ? pinDisplays.get(tooltip.cityId) : null;
+
+  useEffect(() => {
+    if (!detailPanelOpen) return;
+
+    if (hideTooltipTimeoutRef.current != null) {
+      window.clearTimeout(hideTooltipTimeoutRef.current);
+      hideTooltipTimeoutRef.current = null;
+    }
+    if (enterTooltipFrameRef.current != null) {
+      window.cancelAnimationFrame(enterTooltipFrameRef.current);
+      enterTooltipFrameRef.current = null;
+    }
+    setTooltip(null);
+  }, [detailPanelOpen]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const interactionModes = [
+      map.dragPan,
+      map.scrollZoom,
+      map.boxZoom,
+      map.dragRotate,
+      map.keyboard,
+      map.doubleClickZoom,
+      map.touchZoomRotate,
+    ] as const;
+
+    if (detailPanelOpen) {
+      interactionModes.forEach((mode) => mode.disable());
+      return;
+    }
+
+    interactionModes.forEach((mode) => mode.enable());
+  }, [detailPanelOpen]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -338,10 +377,12 @@ export function RetirementMapLibreMap({
         host.appendChild(pinEl);
 
         host.addEventListener("click", () => {
+          if (detailPanelOpenRef.current) return;
           onSelectRef.current(cityId);
         });
 
         host.addEventListener("mouseenter", () => {
+          if (detailPanelOpenRef.current) return;
           const scored = destinationsRef.current.find(
             (d) => d.city.id === cityId,
           );
@@ -554,7 +595,14 @@ export function RetirementMapLibreMap({
 
   return (
     <>
-      <div className="wtr-maplibre-map">
+      <div
+        className={[
+          "wtr-maplibre-map",
+          detailPanelOpen && "wtr-maplibre-map--detail-open",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <div className="wtr-maplibre-map__legend-overlay">
           <WtrMapPinLegend
             view={pinColorView}
