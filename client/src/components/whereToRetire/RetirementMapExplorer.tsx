@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  IconArrowLeft,
   IconChevronRight,
   IconCircleX,
   IconSearch,
@@ -83,6 +84,7 @@ type Props = {
     country_iso: string;
   }) => void;
   onDetailPanelOpenChange?: (open: boolean) => void;
+  onBackToDashboard?: () => void;
 };
 
 const LIST_PAGE_SIZE = 25;
@@ -187,6 +189,7 @@ export function RetirementMapExplorer({
   isFavoritedCity,
   onToggleFavoriteCity,
   onDetailPanelOpenChange,
+  onBackToDashboard,
 }: Props) {
   const favoritedKeySet = useMemo(
     () => new Set(favoriteCities.map((f) => `${f.city}\u0001${f.country}`)),
@@ -501,31 +504,6 @@ export function RetirementMapExplorer({
           .filter(Boolean)
           .join(" ")}
       >
-        {filtersOpen ? (
-          <button
-            type="button"
-            className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
-            aria-label="Close map options"
-            onClick={() => onFiltersOpenChange(false)}
-          />
-        ) : null}
-        {!mobileListOnly ? (
-          <div className="wtr-explorer__map-stage">
-            <RetirementMapLibreMap
-              destinations={filteredCities}
-              monthlyIncome={explorationIncome}
-              pinColorView={pinColorView}
-              filters={filters}
-              onFiltersChange={onFiltersChange}
-              favoritedKeySet={favoritedKeySet}
-              selectedId={selectedId}
-              detailPanelOpen={detailPanelOpen}
-              fitKey={structuralFiltersKey}
-              onSelect={openDestination}
-            />
-          </div>
-        ) : null}
-
         <aside
           id="wtr-explorer-list-panel"
           className="wtr-explorer__list-panel"
@@ -533,6 +511,18 @@ export function RetirementMapExplorer({
           aria-hidden={!mobileListOnly && !listPanelOpen}
         >
           <div className="wtr-explorer__list-panel-inner">
+            {onBackToDashboard ? (
+              <div className="wtr-explorer__list-panel-back where-to-retire__main-panel-back">
+                <button
+                  type="button"
+                  className="app-page-back where-to-retire__panel-back"
+                  onClick={onBackToDashboard}
+                >
+                  <IconArrowLeft size={16} stroke={1.5} aria-hidden />
+                  Back to dashboard
+                </button>
+              </div>
+            ) : null}
             <header className="wtr-explorer__list-head">
               <div className="wtr-explorer__list-head-top">
               {pinColorView === "expat" ? (
@@ -832,6 +822,31 @@ export function RetirementMapExplorer({
             )}
           </div>
         </aside>
+
+        {!mobileListOnly ? (
+          <div className="wtr-explorer__map-stage">
+            {filtersOpen ? (
+              <button
+                type="button"
+                className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
+                aria-label="Close map options"
+                onClick={() => onFiltersOpenChange(false)}
+              />
+            ) : null}
+            <RetirementMapLibreMap
+              destinations={filteredCities}
+              monthlyIncome={explorationIncome}
+              pinColorView={pinColorView}
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              favoritedKeySet={favoritedKeySet}
+              selectedId={selectedId}
+              detailPanelOpen={detailPanelOpen}
+              fitKey={structuralFiltersKey}
+              onSelect={openDestination}
+            />
+          </div>
+        ) : null}
 
         {!mobileListOnly && !listPanelOpen ? (
           <button

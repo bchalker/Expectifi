@@ -1,3 +1,5 @@
+import { touchLocalPlanStateSavedAt } from '../lib/planStorage/localSavedAt'
+
 export type PreferenceStep =
   | 0
   | 1
@@ -303,6 +305,10 @@ export function saveRetirementPreferences(
     config.storageKey,
     JSON.stringify({ ...normalized, _version: PREFERENCES_STORAGE_VERSION }),
   )
+  touchLocalPlanStateSavedAt()
+  void import('../lib/planStateServerSync').then(({ queuePlanStateServerSync }) => {
+    queuePlanStateServerSync()
+  })
 }
 
 export function hasRetirementPreferences(

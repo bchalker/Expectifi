@@ -1,5 +1,9 @@
 import { saveBrokerageBalanceMode } from '../brokerageBalanceMode'
 import { saveBalanceInputMode } from '../retirementBalanceMode'
+import {
+  normalizeRetirementPreferences,
+  saveRetirementPreferences,
+} from '../../types/preferences'
 import type { UserPlanStatePayload } from '../planStateTypes'
 import {
   normalizeStoredGrowthLifeEvents,
@@ -41,5 +45,11 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
   }
   if (payload.balanceModes?.brokerage) {
     saveBrokerageBalanceMode(payload.balanceModes.brokerage)
+  }
+  if (payload.retirementPreferences) {
+    saveRetirementPreferences(
+      normalizeRetirementPreferences(payload.retirementPreferences),
+    )
+    window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
   }
 }

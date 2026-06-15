@@ -1,5 +1,6 @@
 import { loadBrokerageBalanceMode } from '../brokerageBalanceMode'
 import { loadBalanceInputMode } from '../retirementBalanceMode'
+import { loadRetirementPreferences } from '../../types/preferences'
 import type { UserPlanStatePayload } from '../planStateTypes'
 import { loadPlanAccounts } from './accounts'
 import {
@@ -27,5 +28,6 @@ export function buildPlanStatePayloadFromLocal(): UserPlanStatePayload {
       retirement: loadBalanceInputMode(),
       brokerage: loadBrokerageBalanceMode(),
     },
+    retirementPreferences: loadRetirementPreferences(),
   }
 }

@@ -43,16 +43,23 @@ function FilterGroupCard({
   subtitle,
   children,
 }: {
-  title: string
+  title?: string
   subtitle?: string
   children: React.ReactNode
 }) {
-  const titleId = `wtr-budget-group-${title.replace(/\s+/g, '-').toLowerCase()}`
+  const titleId = title
+    ? `wtr-budget-group-${title.replace(/\s+/g, '-').toLowerCase()}`
+    : undefined
   return (
-    <section className="wtr-map-filters__group-card" aria-labelledby={titleId}>
-      <h3 id={titleId} className="wtr-map-filters__group-title">
-        {title}
-      </h3>
+    <section
+      className="wtr-map-filters__group-card"
+      {...(titleId ? { 'aria-labelledby': titleId } : {})}
+    >
+      {title ? (
+        <h3 id={titleId} className="wtr-map-filters__group-title">
+          {title}
+        </h3>
+      ) : null}
       {subtitle ? (
         <p className="wtr-map-filters__group-subtitle">{subtitle}</p>
       ) : null}
@@ -70,29 +77,28 @@ export function WtrBudgetTabContent({ filters, onChange }: Props) {
 
   return (
     <div className="wtr-map-filters__controls wtr-budget-panel">
-      <p className="wtr-map-filters__budget-intro font-xs">
-        Spending profile for map estimates
-      </p>
-      <FilterGroupCard title="Household">
-        <WtrFilterToggleBox
-          label="Include spouse/partner"
-          pressed={prefs.includeSpouse}
-          onToggle={() => updatePrefs({ includeSpouse: !prefs.includeSpouse })}
-        />
-      </FilterGroupCard>
-
-      <FilterGroupCard title="Housing">
-        <AppSelect
-          className="wtr-map-filters__field"
-          ariaLabel="Housing"
-          label="Housing"
-          labelClassName="wtr-map-filters__field-label"
-          value={prefs.housing}
-          options={HOUSING_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
-          onChange={(id) => updatePrefs({ housing: id as HousingTier })}
-          popoverClassName="wtr-map-filters__select-popover"
-          listClassName="wtr-map-filters__select-list"
-        />
+      <FilterGroupCard>
+        <div className="wtr-budget-panel__profile-row">
+          <div className="wtr-map-filters__field">
+            <span className="wtr-map-filters__field-label">Spouse/Partner</span>
+            <WtrFilterToggleBox
+              label="Include"
+              pressed={prefs.includeSpouse}
+              onToggle={() => updatePrefs({ includeSpouse: !prefs.includeSpouse })}
+            />
+          </div>
+          <AppSelect
+            className="wtr-map-filters__field"
+            ariaLabel="Housing"
+            label="Housing"
+            labelClassName="wtr-map-filters__field-label"
+            value={prefs.housing}
+            options={HOUSING_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
+            onChange={(id) => updatePrefs({ housing: id as HousingTier })}
+            popoverClassName="wtr-map-filters__select-popover"
+            listClassName="wtr-map-filters__select-list"
+          />
+        </div>
       </FilterGroupCard>
 
       <FilterGroupCard title="Healthcare">

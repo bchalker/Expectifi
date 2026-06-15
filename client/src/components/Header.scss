@@ -34,7 +34,7 @@
   font-size: clamp(1.125rem, 3vw, 1.35rem);
 }
 
-.header--onboarding .header__logo {
+.header--onboarding .header__logo svg {
   height: 1.5rem;
 }
 
@@ -138,11 +138,19 @@
 .header__logo {
   display: block;
   flex-shrink: 0;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.header__logo svg {
+  display: block;
   height: 1.575rem;
   width: auto;
   max-width: min(8.75rem, 44vw);
-  object-fit: contain;
-  object-position: left center;
+}
+
+.header__logo--mark {
+  display: none;
 }
 
 .header__mark {
@@ -702,7 +710,15 @@
 }
 
 @media (max-width: 760px) {
-  .header__logo {
+  .header__logo--full {
+    display: none;
+  }
+
+  .header__logo--mark {
+    display: block;
+  }
+
+  .header__logo--mark svg {
     height: 1.625rem;
     max-width: 1.75rem;
   }

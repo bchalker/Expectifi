@@ -41,6 +41,8 @@
 .wtr-explorer__map-row {
   position: relative;
   display: flex;
+  flex-direction: row;
+  align-items: stretch;
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
@@ -81,25 +83,29 @@
 }
 
 .wtr-explorer__list-panel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 4;
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex: 0 0 var(--wtr-list-panel-w);
   flex-direction: column;
   width: var(--wtr-list-panel-w);
+  min-width: 0;
   min-height: 0;
   overflow: visible;
-  // border-right: 1px solid var(--border);
   background: transparent;
-  transform: translateX(0);
-  transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1);
+  box-shadow:
+    rgba(33, 35, 38, 0.32) 16px 0 12px -18px,
+    rgba(33, 35, 38, 0.12) 16px 0 12px -30px,
+    rgba(33, 35, 38, 0.12) 36px 0 40px -30px,
+    inset 2px 0 4px 0 var(--surface);
+  transition: flex-basis 0.32s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .wtr-explorer__map-row--list-collapsed .wtr-explorer__list-panel {
-  transform: translateX(-100%);
-  box-shadow: 0 0 0 0 rgba(0,0,0,0);
+  flex-basis: 0;
+  width: 0;
+  overflow: hidden;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -112,7 +118,21 @@
   min-height: 0;
   overflow: hidden;
   background: var(--surface);
-  box-shadow: 14px 0 20px -20px rgb(28 43 58 / 0.4);
+  box-sizing: border-box;
+}
+
+.wtr-explorer__list-panel-back {
+  flex-shrink: 0;
+}
+
+.where-to-retire__main .wtr-explorer__list-panel-back {
+  padding-inline: var(--space-3);
+}
+
+@media (max-width: 680px) {
+  .where-to-retire__main .wtr-explorer__list-panel-back {
+    padding-inline: var(--space-5);
+  }
 }
 
 .wtr-explorer__list-body {
@@ -354,10 +374,10 @@
 }
 
 .wtr-explorer__map-stage {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 1;
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
@@ -789,15 +809,16 @@
     max-height: none;
     min-height: auto;
     height: auto;
-    transform: none;
+    overflow: visible;
     pointer-events: auto;
-    box-shadow: none;
     border-right: none;
     border-bottom: none;
+    box-shadow: none;
   }
 
   .wtr-explorer__map-row--list-collapsed .wtr-explorer__list-panel {
-    transform: none;
+    flex-basis: auto;
+    width: 100%;
   }
 
   .wtr-explorer__list-panel-inner {
@@ -807,11 +828,12 @@
     min-height: auto;
     height: auto;
     overflow: visible;
+    border-right: none;
   }
 
   .wtr-explorer__list-head {
     position: sticky;
-    top: var(--wtr-main-panel-back-h, 2.75rem);
+    top: 0;
     z-index: 11;
     background: var(--surface);
     box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;

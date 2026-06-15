@@ -3,6 +3,7 @@ import type { StoredManualAccounts } from './manualAccountEntries'
 import type { StoredGrowthLifeEvents } from './planStorage/growthLifeEvents'
 import type { LifePlans } from './planStorage/life'
 import type { StoredPlanProfile } from './planStorage/types'
+import type { RetirementPreferences } from '../types/preferences'
 
 export const PLAN_STATE_PAYLOAD_VERSION = 1 as const
 
@@ -20,4 +21,5 @@ export type UserPlanStatePayload = {
   lifePlans: LifePlans | null
   growthLifeEvents: StoredGrowthLifeEvents | null
   balanceModes: UserPlanStateBalanceModes | null
+  retirementPreferences: RetirementPreferences | null
 }

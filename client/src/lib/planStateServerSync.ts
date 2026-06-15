@@ -95,6 +95,7 @@ function planStatePayloadHasData(payload: UserPlanStatePayload): boolean {
   if (profileHasOnboardingComplete(payload.profile)) return true
   if (planAccountsHaveBalances(payload.accounts)) return true
   if (growthLifeEventsHaveCustomizations(payload.growthLifeEvents?.cards ?? [])) return true
+  if (payload.retirementPreferences != null) return true
   return false
 }
 

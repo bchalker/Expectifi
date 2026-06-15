@@ -97,24 +97,16 @@
 .where-to-retire__main-panel-back {
   position: sticky;
   top: 0;
-  z-index: 12;
+  z-index: 5;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  width: calc(100% + 2 * var(--space-5));
+  width: 100%;
   min-height: 2.75rem;
-  // margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) 0;
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-3);
   border-radius: 0;
   background: var(--sky-blue);
-  background: linear-gradient(to right, var(--sky-blue) 0%,  var(--sky-blue) 50%);
   box-sizing: border-box;
-}
-
-.where-to-retire__main--drawer-open .where-to-retire__main-panel-back,
-.section--tax-summary--where-to-retire--drawer-open .where-to-retire__main-panel-back {
-  position: relative;
-  z-index: 0;
 }
 
 .where-to-retire__main--drawer-open,
@@ -131,13 +123,6 @@
 
 .where-to-retire__main--drawer-open .wtr-explorer__drawer-backdrop {
   z-index: 18;
-}
-
-@media (max-width: 680px) {
-  .section--tax-summary--where-to-retire .where-to-retire__main-panel-back {
-    width: calc(100% + 2 * var(--space-2));
-    margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
-  }
 }
 
 .where-to-retire__compare-overlay {
@@ -177,10 +162,10 @@
   }
 
   .where-to-retire__main {
-    --wtr-main-panel-back-h: 2.75rem;
+    --wtr-main-panel-back-h: 0px;
   }
 
-  .where-to-retire__main-panel-map { 
+  .where-to-retire__main-panel-map {
     min-height: 0;
     border-radius: 0;
     flex: 0 0 auto;
