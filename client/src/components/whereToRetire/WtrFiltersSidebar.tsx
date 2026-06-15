@@ -92,9 +92,7 @@ export function WtrFiltersSidebar({
                 Need cushion - or restraint? Adjust your budget
               </h2>
               <p className="wtr-filters-sidebar__slider-helper font-xs">
-                This won&apos;t change your projected retirement income above — it
-                just adjusts what counts as a comfortable budget for the
-                destinations below.
+                Doesn&apos;t affect your retirement income above
               </p>
             </div>
             <BudgetExplorationHero

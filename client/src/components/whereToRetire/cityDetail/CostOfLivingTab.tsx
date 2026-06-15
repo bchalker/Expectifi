@@ -77,7 +77,6 @@ function buildColBudgetCards(
         { label: 'Dining & coffee', value: formatUsd(breakdown.dining) },
         { label: 'Alcohol', value: formatUsd(breakdown.alcohol) },
       ],
-      footerPill: 'Based on your lifestyle preset basket and dining habits',
     },
     {
       id: 'rent',
@@ -276,6 +275,9 @@ export function CostOfLivingTab({
             )
           })}
         </div>
+        <p className="wtr-city-detail__col-budget-footnote font-xs">
+          Based on your lifestyle preset basket and dining habits
+        </p>
       </section>
       <div className="wtr-city-detail__col-extras">
         <p className="wtr-city-detail__col-extras-note">

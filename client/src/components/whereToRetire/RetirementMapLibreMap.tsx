@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type {
@@ -22,6 +22,7 @@ import "./WtrMapPinLegend.scss";
 import "./WtrMapPinTooltip.scss";
 
 const BOUNDS_EASE_DURATION_MS = 900;
+const TOOLTIP_FADE_MS = 180;
 const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/bright";
 
 type Props = {
@@ -41,10 +42,18 @@ type Props = {
 type MarkerEntry = {
   marker: maplibregl.Marker;
   pinEl: HTMLSpanElement;
-  popup: maplibregl.Popup;
-  popupContainer: HTMLDivElement;
-  popupRoot: Root | null;
   cityId: string;
+};
+
+type HoveredPin = {
+  cityId: string;
+  x: number;
+  y: number;
+};
+
+type TooltipState = HoveredPin & {
+  visible: boolean;
+  leaving: boolean;
 };
 
 function detailFocusId(
@@ -69,6 +78,19 @@ function whenMapReady(map: maplibregl.Map, run: () => void): () => void {
   map.once("load", run);
   return () => {
     map.off("load", run);
+  };
+}
+
+function projectPinTooltipPosition(
+  map: maplibregl.Map,
+  lng: number,
+  lat: number,
+): { x: number; y: number } {
+  const rect = map.getContainer().getBoundingClientRect();
+  const point = map.project([lng, lat]);
+  return {
+    x: rect.left + point.x,
+    y: rect.top + point.y,
   };
 }
 
@@ -125,9 +147,17 @@ export function RetirementMapLibreMap({
   const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>());
   const destinationsRef = useRef(destinations);
   const onSelectRef = useRef(onSelect);
+  const monthlyIncomeRef = useRef(monthlyIncome);
+  const pinColorViewRef = useRef(pinColorView);
+  const filtersRef = useRef(filters);
+  const openTooltipRef = useRef<(cityId: string, x: number, y: number) => void>(() => {});
+  const closeTooltipRef = useRef<(cityId: string) => void>(() => {});
+  const hideTooltipTimeoutRef = useRef<number | null>(null);
+  const enterTooltipFrameRef = useRef<number | null>(null);
   const prevFocusIdForBoundsRef = useRef<string | null>(null);
   const prevFitKeyRef = useRef(fitKey);
   const hasAutoFitRef = useRef(false);
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const handleToggleExpatTier = useCallback(
     (tier: ExpatLegendTierId) => {
@@ -163,6 +193,58 @@ export function RetirementMapLibreMap({
   pinDisplaysRef.current = pinDisplays;
   destinationsRef.current = destinations;
   onSelectRef.current = onSelect;
+  monthlyIncomeRef.current = monthlyIncome;
+  pinColorViewRef.current = pinColorView;
+  filtersRef.current = filters;
+
+  openTooltipRef.current = (cityId, x, y) => {
+    if (hideTooltipTimeoutRef.current != null) {
+      window.clearTimeout(hideTooltipTimeoutRef.current);
+      hideTooltipTimeoutRef.current = null;
+    }
+    if (enterTooltipFrameRef.current != null) {
+      window.cancelAnimationFrame(enterTooltipFrameRef.current);
+      enterTooltipFrameRef.current = null;
+    }
+
+    setTooltip({ cityId, x, y, visible: false, leaving: false });
+
+    const mountFrame = window.requestAnimationFrame(() => {
+      enterTooltipFrameRef.current = window.requestAnimationFrame(() => {
+        setTooltip((prev) =>
+          prev?.cityId === cityId
+            ? { ...prev, visible: true, leaving: false }
+            : prev,
+        );
+        enterTooltipFrameRef.current = null;
+      });
+    });
+
+    void mountFrame;
+  };
+
+  closeTooltipRef.current = (cityId) => {
+    setTooltip((prev) => {
+      if (!prev || prev.cityId !== cityId) return prev;
+      return { ...prev, visible: false, leaving: true };
+    });
+
+    if (hideTooltipTimeoutRef.current != null) {
+      window.clearTimeout(hideTooltipTimeoutRef.current);
+    }
+
+    hideTooltipTimeoutRef.current = window.setTimeout(() => {
+      setTooltip((prev) =>
+        prev?.cityId === cityId && prev.leaving ? null : prev,
+      );
+      hideTooltipTimeoutRef.current = null;
+    }, TOOLTIP_FADE_MS);
+  };
+
+  const hoveredScored = tooltip
+    ? destinations.find((item) => item.city.id === tooltip.cityId)
+    : null;
+  const hoveredDisplay = tooltip ? pinDisplays.get(tooltip.cityId) : null;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -185,8 +267,13 @@ export function RetirementMapLibreMap({
     mapRef.current = map;
 
     return () => {
+      if (hideTooltipTimeoutRef.current != null) {
+        window.clearTimeout(hideTooltipTimeoutRef.current);
+      }
+      if (enterTooltipFrameRef.current != null) {
+        window.cancelAnimationFrame(enterTooltipFrameRef.current);
+      }
       markersRef.current.forEach((entry) => {
-        entry.popupRoot?.unmount();
         entry.marker.remove();
       });
       markersRef.current.clear();
@@ -234,7 +321,6 @@ export function RetirementMapLibreMap({
 
     for (const [cityId, entry] of markersRef.current) {
       if (nextIds.has(cityId)) continue;
-      entry.popupRoot?.unmount();
       entry.marker.remove();
       markersRef.current.delete(cityId);
     }
@@ -251,15 +337,6 @@ export function RetirementMapLibreMap({
         host.className = "wtr-map-pin-host";
         host.appendChild(pinEl);
 
-        const popupContainer = document.createElement("div");
-        const popup = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-          closeOnMove: false,
-          offset: [0, -6],
-          className: "wtr-pin-tooltip-host",
-        }).setDOMContent(popupContainer);
-
         host.addEventListener("click", () => {
           onSelectRef.current(cityId);
         });
@@ -268,23 +345,19 @@ export function RetirementMapLibreMap({
           const scored = destinationsRef.current.find(
             (d) => d.city.id === cityId,
           );
-          const currentDisplay = pinDisplaysRef.current.get(cityId);
-          if (!scored || !currentDisplay) return;
+          const mapInstance = mapRef.current;
+          if (!scored || !mapInstance) return;
 
-          const markerEntry = markersRef.current.get(cityId);
-          if (!markerEntry) return;
-
-          if (!markerEntry.popupRoot) {
-            markerEntry.popupRoot = createRoot(popupContainer);
-          }
-          markerEntry.popupRoot.render(
-            <WtrMapPinTooltip scored={scored} display={currentDisplay} />,
+          const { x, y } = projectPinTooltipPosition(
+            mapInstance,
+            scored.city.lng,
+            scored.city.lat,
           );
-          popup.setLngLat([scored.city.lng, scored.city.lat]).addTo(map);
+          openTooltipRef.current(cityId, x, y);
         });
 
         host.addEventListener("mouseleave", () => {
-          popup.remove();
+          closeTooltipRef.current(cityId);
         });
 
         const marker = new maplibregl.Marker({
@@ -297,9 +370,6 @@ export function RetirementMapLibreMap({
         entry = {
           marker,
           pinEl,
-          popup,
-          popupContainer,
-          popupRoot: null,
           cityId,
         };
         markersRef.current.set(cityId, entry);
@@ -310,6 +380,41 @@ export function RetirementMapLibreMap({
       applyPinDisplay(entry.pinEl, display, item.pinSizePx, focusId, cityId);
     });
   }, [destinations, pinDisplays, focusId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !tooltip || tooltip.leaving) return;
+
+    const syncPosition = () => {
+      const scored = destinationsRef.current.find(
+        (item) => item.city.id === tooltip.cityId,
+      );
+      if (!scored) return;
+
+      const { x, y } = projectPinTooltipPosition(
+        map,
+        scored.city.lng,
+        scored.city.lat,
+      );
+      setTooltip((prev) =>
+        prev?.cityId === scored.city.id && !prev.leaving
+          ? { ...prev, x, y }
+          : prev,
+      );
+    };
+
+    map.on("move", syncPosition);
+    map.on("zoom", syncPosition);
+    map.on("resize", syncPosition);
+    window.addEventListener("scroll", syncPosition, true);
+
+    return () => {
+      map.off("move", syncPosition);
+      map.off("zoom", syncPosition);
+      map.off("resize", syncPosition);
+      window.removeEventListener("scroll", syncPosition, true);
+    };
+  }, [tooltip?.cityId, tooltip?.leaving]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -418,19 +523,51 @@ export function RetirementMapLibreMap({
     focusId,
   ]);
 
+  const hoverTooltip =
+    tooltip && hoveredScored && hoveredDisplay && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className={[
+              "wtr-pin-tooltip-portal",
+              tooltip.visible && "wtr-pin-tooltip-portal--visible",
+              tooltip.leaving && "wtr-pin-tooltip-portal--leaving",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            style={{
+              left: `${tooltip.x}px`,
+              top: `${tooltip.y}px`,
+            }}
+            role="tooltip"
+          >
+            <WtrMapPinTooltip
+              scored={hoveredScored}
+              display={hoveredDisplay}
+              monthlyIncome={monthlyIncome}
+              pinColorView={pinColorView}
+              filters={filters}
+            />
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div className="wtr-maplibre-map">
-      <div className="wtr-maplibre-map__legend-overlay">
-        <WtrMapPinLegend
-          view={pinColorView}
-          variant="overlay"
-          activeExpatTiers={filters.expatCommunityTiers}
-          onToggleExpatTier={
-            pinColorView === "expat" ? handleToggleExpatTier : undefined
-          }
-        />
+    <>
+      <div className="wtr-maplibre-map">
+        <div className="wtr-maplibre-map__legend-overlay">
+          <WtrMapPinLegend
+            view={pinColorView}
+            variant="overlay"
+            activeExpatTiers={filters.expatCommunityTiers}
+            onToggleExpatTier={
+              pinColorView === "expat" ? handleToggleExpatTier : undefined
+            }
+          />
+        </div>
+        <div ref={containerRef} className="wtr-maplibre-map__canvas" />
       </div>
-      <div ref={containerRef} className="wtr-maplibre-map__canvas" />
-    </div>
+      {hoverTooltip}
+    </>
   );
 }

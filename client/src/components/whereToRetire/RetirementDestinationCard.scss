@@ -353,10 +353,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin-top: var(--space-2);
   padding-top: var(--space-2);
   border-top: 1px dotted var(--border);
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.wtr-dest-card__meta-visa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.wtr-dest-card__meta-tax {
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .wtr-dest-card__meta-visa-icon {

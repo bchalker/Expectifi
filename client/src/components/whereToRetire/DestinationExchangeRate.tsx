@@ -43,11 +43,6 @@ function staggerProps(
   }
 }
 
-function formatPurchasingPowerMultiplier(multiplier: number): string {
-  const rounded = Number(multiplier.toFixed(1))
-  return Number.isInteger(rounded) ? String(rounded) : String(rounded)
-}
-
 export function DestinationExchangeRate({
   city,
   planMonthlyIncome = 0,
@@ -189,44 +184,29 @@ export function DestinationExchangeRate({
           >
             <span
               className={[
-                'wtr-exchange-rate__power-badge',
-                `wtr-exchange-rate__power-badge--${purchasingMeta.band}`,
+                'wtr-exchange-rate__strength-label',
+                `wtr-exchange-rate__strength-label--${purchasingMeta.band}`,
               ].join(' ')}
             >
-              {formatPurchasingPowerMultiplier(purchasingMeta.multiplier)}x your US purchasing power
+              {DOLLAR_STRENGTH_LABELS[purchasingMeta.band]}
             </span>
           </Tooltip>
         ) : null}
       </div>
       <div className="wtr-exchange-rate__footer">
-        <p className="wtr-exchange-rate__attribution">
-          {currency.currencyName}
-          {currency.source === 'wise' ? (
-            <>
-              {' · '}
-              <span className="wtr-exchange-rate__attribution-source">
-                Rates provided via{' '}
-                <a
-                  href={wiseTransferUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="wtr-exchange-rate__wise-link"
-                >
-                  Wise
-                </a>
-              </span>
-            </>
-          ) : null}
-        </p>
-        {purchasingMeta ? (
-          <span
-            className={[
-              'wtr-exchange-rate__strength-label',
-              `wtr-exchange-rate__strength-label--${purchasingMeta.band}`,
-            ].join(' ')}
-          >
-            {DOLLAR_STRENGTH_LABELS[purchasingMeta.band]}
-          </span>
+        <p className="wtr-exchange-rate__attribution">{currency.currencyName}</p>
+        {currency.source === 'wise' ? (
+          <p className="wtr-exchange-rate__attribution wtr-exchange-rate__attribution--wise">
+            Rates provided by{' '}
+            <a
+              href={wiseTransferUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="wtr-exchange-rate__wise-link"
+            >
+              Wise
+            </a>
+          </p>
         ) : null}
       </div>
     </section>

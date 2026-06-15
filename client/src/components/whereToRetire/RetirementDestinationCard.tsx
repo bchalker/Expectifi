@@ -15,9 +15,7 @@ import {
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
 import { getFitScoreColors } from "../../utils/fitScore";
-import { AppChip } from "../ui/AppChip";
 import { CountryFlag } from "../ui/CountryFlag";
-import { wtrTaxChipColor } from "../../lib/whereToRetire/wtrChipColors";
 import {
   formatEstimatedAmericans,
   getExpatDestinationInfo,
@@ -188,17 +186,8 @@ export function RetirementDestinationCard({
           ) : null}
 
           {incomeFit ? (
-            <div className="wtr-dest-card__meta">
-              <AppChip
-                className={[
-                  "app-chip--visa",
-                  incomeFit.visaQualifies && "app-chip--visa-friendly",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                variant="secondary"
-                color={incomeFit.visaQualifies ? "success" : "default"}
-              >
+            <div className="wtr-dest-card__meta font-xs">
+              <span className="wtr-dest-card__meta-visa">
                 {incomeFit.visaQualifies ? (
                   <IconCheck
                     className="wtr-dest-card__meta-visa-icon"
@@ -208,13 +197,8 @@ export function RetirementDestinationCard({
                   />
                 ) : null}
                 {incomeFit.visaLabel}
-              </AppChip>
-              <AppChip
-                color={wtrTaxChipColor(incomeFit.taxTone)}
-                variant="soft"
-              >
-                {incomeFit.taxLabel}
-              </AppChip>
+              </span>
+              <span className="wtr-dest-card__meta-tax">{incomeFit.taxLabel}</span>
             </div>
           ) : null}
 
