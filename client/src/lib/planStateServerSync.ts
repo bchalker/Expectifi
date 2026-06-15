@@ -10,6 +10,7 @@ import { loadLocalPlanStateSavedAt, touchLocalPlanStateSavedAt } from './planSto
 import { getPlanWriteTier } from './planStorage/writeContext'
 import { tierIsAuthenticated } from './planStorage/resolveTier'
 import type { UserPlanStatePayload } from './planStateTypes'
+import { loadRetirementPreferences } from '../types/preferences'
 
 function asSession(raw: unknown): AppSnapshotV1 | null {
   if (!raw || typeof raw !== 'object') return null
@@ -71,16 +72,62 @@ function incomeUiFieldCountFromPayload(raw: unknown): number {
 function mergeRetirementPreferences(
   remote: UserPlanStatePayload,
   local: UserPlanStatePayload,
+  remoteUpdatedAt: string | null = null,
 ): UserPlanStatePayload['retirementPreferences'] {
-  return remote.retirementPreferences ?? local.retirementPreferences ?? null
+  const remotePrefs = remote.retirementPreferences ?? null
+  const localPrefs = local.retirementPreferences ?? null
+  if (!remotePrefs) return localPrefs
+  if (!localPrefs) return remotePrefs
+  if (loadRetirementPreferences() == null) return remotePrefs
+
+  const localSavedAt = loadLocalPlanStateSavedAt()
+  const remoteMs = parseSavedAtMs(remoteUpdatedAt)
+  const localMs = parseSavedAtMs(localSavedAt)
+  if (remoteMs > localMs) return remotePrefs
+
+  return localPrefs
+}
+
+function applyMergedSyncedFields(merged: UserPlanStatePayload): void {
+  const patch: UserPlanStatePayload = {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    profile: null,
+    accounts: null,
+    session: null,
+    lifePlans: null,
+    growthLifeEvents: null,
+    balanceModes: null,
+    retirementPreferences: null,
+    accountIncomeUi: null,
+  }
+  let hasPatch = false
+
+  if (merged.retirementPreferences) {
+    patch.retirementPreferences = merged.retirementPreferences
+    hasPatch = true
+  }
+  if (merged.accountIncomeUi) {
+    patch.accountIncomeUi = merged.accountIncomeUi
+    hasPatch = true
+  }
+
+  if (hasPatch) {
+    applyPlanStatePayloadToLocal(patch)
+  }
 }
 
 /** Preserve remote fields missing locally so a stale local win cannot wipe synced data. */
 function mergeRemoteFieldsIntoLocal(
   remote: UserPlanStatePayload,
   local: UserPlanStatePayload,
+  remoteUpdatedAt: string | null = null,
 ): UserPlanStatePayload {
-  const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+  const mergedRetirementPreferences = mergeRetirementPreferences(
+    remote,
+    local,
+    remoteUpdatedAt,
+  )
   const mergedAccountIncomeUi =
     remote.accountIncomeUi || local.accountIncomeUi
       ? mergeIncomeUiFields(
@@ -142,6 +189,7 @@ function restoreMissingLocalFieldsFromRemote(
 function mergeLocalSessionOverrides(
   remote: UserPlanStatePayload,
   local: UserPlanStatePayload,
+  remoteUpdatedAt: string | null = null,
 ): UserPlanStatePayload {
   const remoteSession = asSession(remote.session)
   const localSession = asSession(local.session)
@@ -158,7 +206,11 @@ function mergeLocalSessionOverrides(
       : null
 
   if (!remoteSession || !localSession) {
-    const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+    const mergedRetirementPreferences = mergeRetirementPreferences(
+      remote,
+      local,
+      remoteUpdatedAt,
+    )
     if (
       !mergedAccountIncomeUi &&
       mergedRetirementPreferences === remote.retirementPreferences
@@ -205,7 +257,11 @@ function mergeLocalSessionOverrides(
     }
   }
 
-  const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+  const mergedRetirementPreferences = mergeRetirementPreferences(
+    remote,
+    local,
+    remoteUpdatedAt,
+  )
 
   if (
     session === remoteSession &&
@@ -314,7 +370,8 @@ export async function hydratePlanStateFromServer(): Promise<boolean> {
 
       if (remote && planStatePayloadHasData(remote)) {
         if (localSessionShouldWinOverRemote(local, remote, localSavedAt, remoteUpdatedAt)) {
-          const mergedLocal = mergeRemoteFieldsIntoLocal(remote, local)
+          const mergedLocal = mergeRemoteFieldsIntoLocal(remote, local, remoteUpdatedAt)
+          applyMergedSyncedFields(mergedLocal)
           restoreMissingLocalFieldsFromRemote(remote, local)
           if (planStatePayloadHasData(mergedLocal)) {
             pushPlanStateToServer(mergedLocal)
@@ -322,7 +379,7 @@ export async function hydratePlanStateFromServer(): Promise<boolean> {
             return true
           }
         }
-        const merged = mergeLocalSessionOverrides(remote, local)
+        const merged = mergeLocalSessionOverrides(remote, local, remoteUpdatedAt)
         applyPlanStatePayloadToLocal(merged)
         const mergedDiffersFromRemote = merged !== remote
         touchLocalPlanStateSavedAt(

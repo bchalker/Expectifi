@@ -170,8 +170,8 @@ export function WhereToRetire({ c }: Props) {
   );
 
   const syncPreferencesWizardOpen = useCallback(() => {
-    setPreferencesWizardOpen(!hasRetirementPreferences() && !hasSavedPrefs);
-  }, [hasSavedPrefs]);
+    setPreferencesWizardOpen(!hasRetirementPreferences());
+  }, []);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -180,11 +180,14 @@ export function WhereToRetire({ c }: Props) {
   }, [isHydrated, reloadPrefs, syncPreferencesWizardOpen]);
 
   useEffect(() => {
+    if (!hasSavedPrefs) return;
+    setPreferencesWizardOpen(false);
+  }, [hasSavedPrefs]);
+
+  useEffect(() => {
     const onPreferencesUpdated = () => {
       reloadPrefs();
-      if (hasRetirementPreferences()) {
-        setPreferencesWizardOpen(false);
-      }
+      setPreferencesWizardOpen(!hasRetirementPreferences());
     };
     const onPlanStateHydrated = () => {
       reloadPrefs();
@@ -325,6 +328,7 @@ export function WhereToRetire({ c }: Props) {
         initialValues={prefs}
         onComplete={handlePreferencesComplete}
         placement="map-rail"
+        allowDismiss={hasRetirementPreferences()}
       />
     </div>
   );
