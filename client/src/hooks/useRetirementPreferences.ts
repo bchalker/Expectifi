@@ -22,8 +22,17 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
           : { ...DEFAULT_PREFERENCES, dailyLife: [] },
       )
     }
+    const onUpdated = () => {
+      setPrefsState(
+        loadRetirementPreferences(config) ?? { ...DEFAULT_PREFERENCES, dailyLife: [] },
+      )
+    }
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    window.addEventListener('retirement-preferences-updated', onUpdated)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('retirement-preferences-updated', onUpdated)
+    }
   }, [config.storageKey])
 
   const setPrefs = useCallback(

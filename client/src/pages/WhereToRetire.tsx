@@ -27,7 +27,9 @@ import {
 import { readStashedWtrExplorationIncome } from "../lib/whereToRetire/wtrPreviewIncome";
 import { useRetirementMapStorage } from "../hooks/useRetirementMapStorage";
 import { useRetirementPreferences } from "../hooks/useRetirementPreferences";
+import { useUserTier } from "../hooks/useUserTier";
 import { hasRetirementPreferences } from "../types/preferences";
+import { PLAN_STATE_SERVER_HYDRATED_EVENT } from "../lib/planStateServerSync";
 import { useWtrMapPinColorView } from "../hooks/useWtrMapPinColorView";
 import type { MapCity } from "../utils/costOfLiving";
 import "../components/TaxSummaryLayout.scss";
@@ -45,10 +47,9 @@ export function WhereToRetire({ c }: Props) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
   const storage = useRetirementMapStorage();
+  const { isHydrated } = useUserTier();
   const { prefs, setPrefs, reloadPrefs } = useRetirementPreferences();
-  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(
-    () => !hasRetirementPreferences(),
-  );
+  const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false);
   const [prefsUpdatedFlash, setPrefsUpdatedFlash] = useState(false);
   const [explorationIncome, setExplorationIncome] = useState(() => {
     const stashed = readStashedWtrExplorationIncome();
@@ -168,12 +169,34 @@ export function WhereToRetire({ c }: Props) {
     [setPrefs],
   );
 
+  const syncPreferencesWizardOpen = useCallback(() => {
+    setPreferencesWizardOpen(!hasRetirementPreferences());
+  }, []);
+
   useEffect(() => {
-    const onPreferencesUpdated = () => reloadPrefs();
+    if (!isHydrated) return;
+    reloadPrefs();
+    syncPreferencesWizardOpen();
+  }, [isHydrated, reloadPrefs, syncPreferencesWizardOpen]);
+
+  useEffect(() => {
+    const onPreferencesUpdated = () => {
+      reloadPrefs();
+      if (hasRetirementPreferences()) {
+        setPreferencesWizardOpen(false);
+      }
+    };
+    const onPlanStateHydrated = () => {
+      reloadPrefs();
+      syncPreferencesWizardOpen();
+    };
     window.addEventListener("retirement-preferences-updated", onPreferencesUpdated);
-    return () =>
+    window.addEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onPlanStateHydrated);
+    return () => {
       window.removeEventListener("retirement-preferences-updated", onPreferencesUpdated);
-  }, [reloadPrefs]);
+      window.removeEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onPlanStateHydrated);
+    };
+  }, [reloadPrefs, syncPreferencesWizardOpen]);
 
   useEffect(() => {
     const onOpenWizard = () => setPreferencesWizardOpen(true);

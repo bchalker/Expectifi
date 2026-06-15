@@ -298,6 +298,7 @@ export function loadRetirementPreferences(
 export function saveRetirementPreferences(
   prefs: RetirementPreferences,
   config: WizardConfig = RETIREMENT_WIZARD_CONFIG,
+  options?: { skipServerSync?: boolean },
 ): void {
   if (typeof window === 'undefined') return
   const normalized = normalizeRetirementPreferences(prefs)
@@ -306,9 +307,11 @@ export function saveRetirementPreferences(
     JSON.stringify({ ...normalized, _version: PREFERENCES_STORAGE_VERSION }),
   )
   touchLocalPlanStateSavedAt()
-  void import('../lib/planStateServerSync').then(({ queuePlanStateServerSync }) => {
-    queuePlanStateServerSync()
-  })
+  if (!options?.skipServerSync) {
+    void import('../lib/planStateServerSync').then(({ queuePlanStateServerSync }) => {
+      queuePlanStateServerSync()
+    })
+  }
 }
 
 export function hasRetirementPreferences(

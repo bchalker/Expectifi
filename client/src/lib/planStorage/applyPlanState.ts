@@ -57,6 +57,8 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
   if (payload.retirementPreferences) {
     saveRetirementPreferences(
       normalizeRetirementPreferences(payload.retirementPreferences),
+      undefined,
+      { skipServerSync: true },
     )
     window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
   }
