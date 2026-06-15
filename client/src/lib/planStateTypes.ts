@@ -1,3 +1,4 @@
+import type { IncomeUiFields } from './accountIncomeStorage'
 import type { AppSnapshotV1 } from './appSnapshot'
 import type { StoredManualAccounts } from './manualAccountEntries'
 import type { StoredGrowthLifeEvents } from './planStorage/growthLifeEvents'
@@ -22,4 +23,5 @@ export type UserPlanStatePayload = {
   growthLifeEvents: StoredGrowthLifeEvents | null
   balanceModes: UserPlanStateBalanceModes | null
   retirementPreferences: RetirementPreferences | null
+  accountIncomeUi: IncomeUiFields | null
 }

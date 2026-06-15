@@ -6,6 +6,7 @@ export const EXPECTIFI_META_KEY = 'expectifi/meta-v1'
 export const EXPECTIFI_PROFILE_KEY = 'expectifi/profile-v1'
 export const EXPECTIFI_ACCOUNTS_KEY = 'expectifi/accounts-v1'
 export const EXPECTIFI_SESSION_KEY = 'expectifi/session-v1'
+export const EXPECTIFI_ACCOUNT_INCOME_UI_KEY = 'expectifi/account-income-ui-v1'
 export const EXPECTIFI_PLAN_STATE_LOCAL_SAVED_AT_KEY = 'expectifi/plan-state-local-saved-at-v1'
 export const EXPECTIFI_LIFE_PLANS_KEY = 'expectifi/life-plans-v1'
 export const EXPECTIFI_GROWTH_LIFE_EVENTS_KEY = 'expectifi/growth-life-events-v1'
@@ -49,6 +50,7 @@ export const ALL_EXPECTIFI_PLAN_KEYS = [
   EXPECTIFI_PROFILE_KEY,
   EXPECTIFI_ACCOUNTS_KEY,
   EXPECTIFI_SESSION_KEY,
+  EXPECTIFI_ACCOUNT_INCOME_UI_KEY,
   EXPECTIFI_LIFE_PLANS_KEY,
   EXPECTIFI_GROWTH_LIFE_EVENTS_KEY,
 ] as const

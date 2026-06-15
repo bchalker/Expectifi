@@ -1,5 +1,11 @@
 import { loadBrokerageBalanceMode } from '../brokerageBalanceMode'
 import { loadBalanceInputMode } from '../retirementBalanceMode'
+import {
+  incomeUiFieldsHaveData,
+  loadAccountIncomeUiFieldsForPlanState,
+  migrateIncomeUiFields,
+  type IncomeUiFields,
+} from '../accountIncomeStorage'
 import { loadRetirementPreferences } from '../../types/preferences'
 import type { UserPlanStatePayload } from '../planStateTypes'
 import { loadPlanAccounts } from './accounts'
@@ -11,6 +17,20 @@ import {
 import { loadLifePlans } from './life'
 import { loadPlanProfile } from './profile'
 import { loadPlanSession } from './session'
+
+function resolveAccountIncomeUiForPlanState(): IncomeUiFields | null {
+  const persisted = loadAccountIncomeUiFieldsForPlanState()
+  if (persisted) return persisted
+
+  const session = loadPlanSession()
+  if (!session?.ui) return null
+  const fromSession = migrateIncomeUiFields({
+    accountIncomeFunds: session.ui.accountIncomeFunds ?? {},
+    accountIncomeStrategies: session.ui.accountIncomeStrategies ?? {},
+    accountWithdrawRates: session.ui.accountWithdrawRates ?? {},
+  })
+  return incomeUiFieldsHaveData(fromSession) ? fromSession : null
+}
 
 export function buildPlanStatePayloadFromLocal(): UserPlanStatePayload {
   return {
@@ -29,5 +49,6 @@ export function buildPlanStatePayloadFromLocal(): UserPlanStatePayload {
       brokerage: loadBrokerageBalanceMode(),
     },
     retirementPreferences: loadRetirementPreferences(),
+    accountIncomeUi: resolveAccountIncomeUiForPlanState(),
   }
 }

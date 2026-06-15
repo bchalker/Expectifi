@@ -1,10 +1,16 @@
 import { saveBrokerageBalanceMode } from '../brokerageBalanceMode'
 import { saveBalanceInputMode } from '../retirementBalanceMode'
 import {
+  migrateIncomeUiFields,
+  saveIncomeUiSnap,
+  type IncomeUiFields,
+} from '../accountIncomeStorage'
+import {
   normalizeRetirementPreferences,
   saveRetirementPreferences,
 } from '../../types/preferences'
 import type { UserPlanStatePayload } from '../planStateTypes'
+import { loadPlanSession, savePlanSession } from './session'
 import {
   normalizeStoredGrowthLifeEvents,
   type StoredGrowthLifeEvents,
@@ -18,6 +24,8 @@ import {
 } from './keys'
 import { normalizeLifePlans, type LifePlans } from './life'
 import { writeJsonToLocalStorage } from './storageUtils'
+
+export const ACCOUNT_INCOME_UI_UPDATED_EVENT = 'account-income-ui-updated'
 
 /** Apply server plan state to localStorage (bypasses tier write guards). */
 export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): void {
@@ -51,5 +59,20 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
       normalizeRetirementPreferences(payload.retirementPreferences),
     )
     window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
+  }
+  if (payload.accountIncomeUi) {
+    const normalized = migrateIncomeUiFields(payload.accountIncomeUi as IncomeUiFields)
+    saveIncomeUiSnap(normalized, { skipServerSync: true })
+    const session = loadPlanSession()
+    if (session) {
+      savePlanSession({
+        ...session,
+        ui: {
+          ...session.ui,
+          ...normalized,
+        },
+      })
+    }
+    window.dispatchEvent(new CustomEvent(ACCOUNT_INCOME_UI_UPDATED_EVENT))
   }
 }

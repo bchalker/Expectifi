@@ -15,6 +15,7 @@ export type UserPlanStatePayload = {
   growthLifeEvents: unknown | null
   balanceModes: UserPlanStateBalanceModes | null
   retirementPreferences: unknown | null
+  accountIncomeUi: unknown | null
 }
 
 function parseBalanceModes(raw: unknown): UserPlanStateBalanceModes | null {
@@ -50,6 +51,7 @@ export function parseUserPlanStatePayload(raw: unknown): UserPlanStatePayload | 
     growthLifeEvents: o.growthLifeEvents ?? null,
     balanceModes: parseBalanceModes(o.balanceModes),
     retirementPreferences: o.retirementPreferences ?? null,
+    accountIncomeUi: o.accountIncomeUi ?? null,
   }
 }
 
@@ -58,6 +60,9 @@ export function planStatePayloadHasData(payload: UserPlanStatePayload): boolean 
   if (payload.profile != null && typeof payload.profile === 'object') return true
   if (payload.accounts != null && typeof payload.accounts === 'object') return true
   if (payload.retirementPreferences != null && typeof payload.retirementPreferences === 'object') {
+    return true
+  }
+  if (payload.accountIncomeUi != null && typeof payload.accountIncomeUi === 'object') {
     return true
   }
   return false

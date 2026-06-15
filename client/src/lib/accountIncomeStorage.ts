@@ -8,6 +8,10 @@ import {
   type OnboardingAccountType,
 } from './manualAccountEntries'
 import { loadPlanAccounts } from './planStorage/accounts'
+import { EXPECTIFI_ACCOUNT_INCOME_UI_KEY } from './planStorage/keys'
+import { touchLocalPlanStateSavedAt } from './planStorage/localSavedAt'
+import { readJsonFromLocalStorage, removeFromLocalStorage, writeJsonToLocalStorage } from './planStorage/storageUtils'
+import { canWriteExpectifiPlanBlobs } from './planStorage/writeContext'
 
 const INCOME_UI_SNAP_KEY = 'expectifi/income-ui-snap-v1'
 
@@ -156,7 +160,7 @@ export function mergeIncomeUiFields(
 }
 
 export function mergeHydratedCalculatorUi(ui: CalculatorUi): CalculatorUi {
-  const snap = loadIncomeUiSnap()
+  const snap = loadPersistedAccountIncomeUiFields()
   const merged = mergeIncomeUiFields(ui, snap)
   return {
     ...ui,
@@ -164,9 +168,77 @@ export function mergeHydratedCalculatorUi(ui: CalculatorUi): CalculatorUi {
   }
 }
 
-export function saveIncomeUiSnap(ui: IncomeUiFields): void {
-  if (typeof sessionStorage === 'undefined') return
+export function incomeUiFieldsHaveData(fields: IncomeUiFields | null | undefined): boolean {
+  if (!fields) return false
+  return (
+    Object.keys(fields.accountIncomeFunds).length > 0 ||
+    Object.keys(fields.accountIncomeStrategies).length > 0 ||
+    Object.keys(fields.accountWithdrawRates).length > 0
+  )
+}
+
+function parseStoredIncomeUiFields(raw: unknown): IncomeUiFields | null {
+  if (!raw || typeof raw !== 'object') return null
+  const parsed = raw as Partial<IncomeUiFields>
+  return migrateIncomeUiFields({
+    accountIncomeFunds:
+      parsed.accountIncomeFunds && typeof parsed.accountIncomeFunds === 'object'
+        ? parsed.accountIncomeFunds
+        : {},
+    accountIncomeStrategies:
+      parsed.accountIncomeStrategies && typeof parsed.accountIncomeStrategies === 'object'
+        ? parsed.accountIncomeStrategies
+        : {},
+    accountWithdrawRates:
+      parsed.accountWithdrawRates && typeof parsed.accountWithdrawRates === 'object'
+        ? parsed.accountWithdrawRates
+        : {},
+  })
+}
+
+export function loadPersistedAccountIncomeUiFields(): IncomeUiFields | null {
+  if (canWriteExpectifiPlanBlobs()) {
+    const fromLocal = parseStoredIncomeUiFields(
+      readJsonFromLocalStorage<unknown>(EXPECTIFI_ACCOUNT_INCOME_UI_KEY),
+    )
+    if (fromLocal) return fromLocal
+    const fromSession = loadIncomeUiSnapFromSessionStorage()
+    if (fromSession) {
+      writeJsonToLocalStorage(EXPECTIFI_ACCOUNT_INCOME_UI_KEY, fromSession)
+      return fromSession
+    }
+    return null
+  }
+  return loadIncomeUiSnapFromSessionStorage()
+}
+
+/** Plan-state payload: prefer dedicated blob, then fall back to session UI fields. */
+export function loadAccountIncomeUiFieldsForPlanState(): IncomeUiFields | null {
+  const persisted = loadPersistedAccountIncomeUiFields()
+  if (incomeUiFieldsHaveData(persisted)) return persisted
+  return null
+}
+
+export function saveIncomeUiSnap(
+  ui: IncomeUiFields,
+  options?: { skipServerSync?: boolean },
+): void {
   const migrated = migrateIncomeUiFields(ui)
+  if (canWriteExpectifiPlanBlobs()) {
+    writeJsonToLocalStorage(EXPECTIFI_ACCOUNT_INCOME_UI_KEY, migrated)
+    touchLocalPlanStateSavedAt()
+    if (!options?.skipServerSync) {
+      void import('./planStateServerSync').then(({ queuePlanStateServerSync }) => {
+        queuePlanStateServerSync()
+      })
+    }
+    return
+  }
+  saveIncomeUiSnapToSessionStorage(migrated)
+}
+
+function saveIncomeUiSnapToSessionStorage(migrated: IncomeUiFields): void {
+  if (typeof sessionStorage === 'undefined') return
   try {
     sessionStorage.setItem(INCOME_UI_SNAP_KEY, JSON.stringify(migrated))
   } catch {
@@ -174,33 +246,26 @@ export function saveIncomeUiSnap(ui: IncomeUiFields): void {
   }
 }
 
-export function loadIncomeUiSnap(): IncomeUiFields | null {
+function loadIncomeUiSnapFromSessionStorage(): IncomeUiFields | null {
   if (typeof sessionStorage === 'undefined') return null
   try {
     const raw = sessionStorage.getItem(INCOME_UI_SNAP_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<IncomeUiFields>
-    if (!parsed || typeof parsed !== 'object') return null
-    return migrateIncomeUiFields({
-      accountIncomeFunds:
-        parsed.accountIncomeFunds && typeof parsed.accountIncomeFunds === 'object'
-          ? parsed.accountIncomeFunds
-          : {},
-      accountIncomeStrategies:
-        parsed.accountIncomeStrategies && typeof parsed.accountIncomeStrategies === 'object'
-          ? parsed.accountIncomeStrategies
-          : {},
-      accountWithdrawRates:
-        parsed.accountWithdrawRates && typeof parsed.accountWithdrawRates === 'object'
-          ? parsed.accountWithdrawRates
-          : {},
-    })
+    return parseStoredIncomeUiFields(JSON.parse(raw) as unknown)
   } catch {
     return null
   }
 }
 
+/** @deprecated Prefer loadPersistedAccountIncomeUiFields */
+export function loadIncomeUiSnap(): IncomeUiFields | null {
+  return loadPersistedAccountIncomeUiFields()
+}
+
 export function clearIncomeUiSnap(): void {
+  if (canWriteExpectifiPlanBlobs()) {
+    removeFromLocalStorage(EXPECTIFI_ACCOUNT_INCOME_UI_KEY)
+  }
   if (typeof sessionStorage === 'undefined') return
   try {
     sessionStorage.removeItem(INCOME_UI_SNAP_KEY)

@@ -1,4 +1,4 @@
-import { migrateIncomeUiFields } from './accountIncomeStorage'
+import { migrateIncomeUiFields, mergeIncomeUiFields, type IncomeUiFields } from './accountIncomeStorage'
 import type { AppSnapshotV1 } from './appSnapshot'
 import { fetchUserPlanState, saveUserPlanState } from './api/planState'
 import { applyPlanStatePayloadToLocal } from './planStorage/applyPlanState'
@@ -32,12 +32,40 @@ function localSessionShouldWinOverRemote(
   localSavedAt: string | null,
   remoteUpdatedAt: string | null,
 ): boolean {
-  if (localPlanStateIsNewerThanRemote(localSavedAt, remoteUpdatedAt)) return true
+  if (localPlanStateIsNewerThanRemote(localSavedAt, remoteUpdatedAt)) {
+    const localSession = asSession(local.session)
+    const remoteSession = asSession(remote.session)
+    const localIncomeCount = incomeUiFieldCount(localSession)
+    const remoteIncomeCount = incomeUiFieldCount(remoteSession)
+    const remoteAccountIncomeUiCount = incomeUiFieldCountFromPayload(remote.accountIncomeUi)
+    const localAccountIncomeUiCount = incomeUiFieldCountFromPayload(local.accountIncomeUi)
+    if (
+      remoteIncomeCount + remoteAccountIncomeUiCount >
+      localIncomeCount + localAccountIncomeUiCount
+    ) {
+      return false
+    }
+    return true
+  }
   const localSession = asSession(local.session)
   const remoteSession = asSession(remote.session)
   if (localSession?.phase === 'income' && remoteSession?.phase !== 'income') return true
   if (incomeUiFieldCount(localSession) > incomeUiFieldCount(remoteSession)) return true
   return false
+}
+
+function incomeUiFieldCountFromPayload(raw: unknown): number {
+  if (!raw || typeof raw !== 'object') return 0
+  const fields = raw as {
+    accountIncomeStrategies?: Record<string, unknown>
+    accountIncomeFunds?: Record<string, unknown>
+    accountWithdrawRates?: Record<string, unknown>
+  }
+  return (
+    Object.keys(fields.accountIncomeStrategies ?? {}).length +
+    Object.keys(fields.accountIncomeFunds ?? {}).length +
+    Object.keys(fields.accountWithdrawRates ?? {}).length
+  )
 }
 
 /** Keep local income tab + per-account income picks when the server copy is stale. */
@@ -47,7 +75,22 @@ function mergeLocalSessionOverrides(
 ): UserPlanStatePayload {
   const remoteSession = asSession(remote.session)
   const localSession = asSession(local.session)
-  if (!remoteSession || !localSession) return remote
+  const mergedAccountIncomeUi =
+    remote.accountIncomeUi || local.accountIncomeUi
+      ? mergeIncomeUiFields(
+          (remote.accountIncomeUi ?? {
+            accountIncomeFunds: {},
+            accountIncomeStrategies: {},
+            accountWithdrawRates: {},
+          }) as IncomeUiFields,
+          (local.accountIncomeUi ?? null) as IncomeUiFields | null,
+        )
+      : null
+
+  if (!remoteSession || !localSession) {
+    if (!mergedAccountIncomeUi) return remote
+    return { ...remote, accountIncomeUi: mergedAccountIncomeUi }
+  }
 
   const remoteUi = remoteSession.ui
   const localUi = localSession.ui
@@ -80,8 +123,12 @@ function mergeLocalSessionOverrides(
     }
   }
 
-  if (session === remoteSession) return remote
-  return { ...remote, session }
+  if (session === remoteSession && !mergedAccountIncomeUi) return remote
+  return {
+    ...remote,
+    session,
+    ...(mergedAccountIncomeUi ? { accountIncomeUi: mergedAccountIncomeUi } : {}),
+  }
 }
 
 export const PLAN_STATE_SERVER_HYDRATED_EVENT = 'expectifi/plan-state-server-hydrated'
@@ -96,6 +143,7 @@ function planStatePayloadHasData(payload: UserPlanStatePayload): boolean {
   if (planAccountsHaveBalances(payload.accounts)) return true
   if (growthLifeEventsHaveCustomizations(payload.growthLifeEvents?.cards ?? [])) return true
   if (payload.retirementPreferences != null) return true
+  if (payload.accountIncomeUi != null) return true
   return false
 }
 

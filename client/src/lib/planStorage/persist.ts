@@ -32,4 +32,7 @@ export function persistPlanState(tier: UserTier, snapshot: PlanPersistSnapshot):
     ),
   )
   touchLocalPlanStateSavedAt()
+  void import('../planStateServerSync').then(({ queuePlanStateServerSync }) => {
+    queuePlanStateServerSync()
+  })
 }

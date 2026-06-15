@@ -79,6 +79,7 @@ import {
   saveCalculatorPhaseSnap,
 } from "./lib/calculatorPhaseSnap";
 import { loadPlanSession } from "./lib/planStorage";
+import { ACCOUNT_INCOME_UI_UPDATED_EVENT } from "./lib/planStorage/applyPlanState";
 import { clearStoredManualAccounts } from "./lib/manualAccountEntries";
 import {
   inputsForPersistedCalculatorSession,
@@ -619,9 +620,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setManualAccountsRev((n) => n + 1);
       setPositionsImportRev((n) => n + 1);
     };
+    const onAccountIncomeUiUpdated = () => {
+      setUiState((current) => mergeHydratedCalculatorUi(current));
+    };
     window.addEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+    window.addEventListener(ACCOUNT_INCOME_UI_UPDATED_EVENT, onAccountIncomeUiUpdated);
     return () => {
       window.removeEventListener(PLAN_STATE_SERVER_HYDRATED_EVENT, onServerHydrated);
+      window.removeEventListener(ACCOUNT_INCOME_UI_UPDATED_EVENT, onAccountIncomeUiUpdated);
     };
   }, []);
 
