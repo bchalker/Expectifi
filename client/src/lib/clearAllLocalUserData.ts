@@ -8,6 +8,7 @@ import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import {
   FORCE_ONBOARDING_SESSION_KEY,
   ONBOARDING_FROM_SIGNUP_KEY,
+  POST_SIGNOUT_SESSION_KEY,
 } from './welcomeGate'
 
 const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
@@ -25,6 +26,7 @@ function clearSessionOnboardingFlags(): void {
     sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY)
     sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
     sessionStorage.removeItem(ONBOARDING_FROM_SIGNUP_KEY)
+    sessionStorage.removeItem(POST_SIGNOUT_SESSION_KEY)
     sessionStorage.removeItem(AUTH_INTENT_KEY)
     for (const key of LEGACY_AUTH_INTENT_KEYS) {
       sessionStorage.removeItem(key)

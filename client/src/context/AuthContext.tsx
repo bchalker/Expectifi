@@ -9,7 +9,12 @@ import {
 } from "react";
 import { ApiRequestError, apiFetchJson } from "../lib/api";
 import { clearAllLocalUserData } from "../lib/clearAllLocalUserData";
-import { markOnboardingFromSignup } from "../lib/welcomeGate";
+import { APP_PATHS, replaceAppPath } from "../lib/appPaths";
+import {
+  clearPostSignOutSession,
+  markOnboardingFromSignup,
+  markPostSignOutSession,
+} from "../lib/welcomeGate";
 import type { UserPrefs } from "../lib/userPrefs";
 import { parseUserPrefs } from "../lib/userPrefs";
 
@@ -196,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.status === "session_ready") {
           setUser(normalizeAuthUser(data.user));
           setGoogleCheckoutUi(null);
+          clearPostSignOutSession();
           if (!data.user.onboardingDone) markOnboardingFromSignup();
           return { status: "session_ready" };
         }
@@ -235,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         setUser(normalizeAuthUser(data.user));
         setGoogleCheckoutUi(null);
+        clearPostSignOutSession();
         if (!data.user.onboardingDone) markOnboardingFromSignup();
         return {};
       } catch (e) {
@@ -324,6 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ email, password }),
         });
         await refreshSession();
+        clearPostSignOutSession();
         return {};
       } catch (e) {
         if (e instanceof ApiRequestError && e.code === "invalid_credentials") {
@@ -360,6 +368,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         );
         setUser(normalizeAuthUser(data.user));
+        clearPostSignOutSession();
         if (!data.user.onboardingDone) markOnboardingFromSignup();
         return {};
       } catch (e) {
@@ -409,6 +418,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     setGoogleCheckoutUi(null);
+    markPostSignOutSession();
+    replaceAppPath(APP_PATHS.home);
   }, []);
 
   const completeOnboarding = useCallback(async () => {

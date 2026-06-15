@@ -9,6 +9,8 @@ export const FORCE_ONBOARDING_SESSION_KEY = 'expectifi_force_onboarding'
 const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
 /** Set after register / Google checkout so welcome starts at region, not a stale guest profile step. */
 export const ONBOARDING_FROM_SIGNUP_KEY = 'expectifi_onboarding_from_signup'
+/** Set after sign-out so AppRoot shows the marketing landing instead of the guest calculator. */
+export const POST_SIGNOUT_SESSION_KEY = 'expectifi_post_signout'
 
 export type WelcomeSkipContext = {
   /** From plan hydration (localStorage or sessionStorage for tier 1). */
@@ -81,6 +83,30 @@ export function clearForceOnboardingSession(): void {
   try {
     sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY)
     sessionStorage.removeItem(LEGACY_FORCE_ONBOARDING_SESSION_KEY)
+  } catch {
+    /* private mode */
+  }
+}
+
+export function markPostSignOutSession(): void {
+  try {
+    sessionStorage.setItem(POST_SIGNOUT_SESSION_KEY, '1')
+  } catch {
+    /* private mode */
+  }
+}
+
+export function peekPostSignOutSession(): boolean {
+  try {
+    return sessionStorage.getItem(POST_SIGNOUT_SESSION_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function clearPostSignOutSession(): void {
+  try {
+    sessionStorage.removeItem(POST_SIGNOUT_SESSION_KEY)
   } catch {
     /* private mode */
   }

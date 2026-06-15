@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from './context/AuthContext'
 import { useAppPath } from './hooks/useAppPath'
 import { APP_PATHS } from './lib/appPaths'
-import { guestHasCompletedOnboarding } from './lib/welcomeGate'
+import { guestHasCompletedOnboarding, peekPostSignOutSession } from './lib/welcomeGate'
 import App from './App'
 import { CalculatorShell } from './components/CalculatorShell'
 import { markForceOnboardingSession } from './lib/welcomeGate'
@@ -16,6 +16,7 @@ import { trackPageView } from './lib/analytics'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 
 function resolveGuestView(path: string): 'landing' | 'app' {
+  if (peekPostSignOutSession()) return 'landing'
   if (path === APP_PATHS.home) {
     return guestHasCompletedOnboarding() ? 'app' : 'landing'
   }
@@ -35,7 +36,7 @@ export default function AppRoot() {
   const [landingAuthModal, setLandingAuthModal] = useState<AuthModalMode | null>(null)
   const [contactOpen, setContactOpen] = useState(false)
 
-  const guestView = useMemo(() => resolveGuestView(path), [path])
+  const guestView = useMemo(() => resolveGuestView(path), [path, user])
 
   const initialAuthModal: AuthModalMode | null = path === APP_PATHS.login ? 'signin' : null
 
