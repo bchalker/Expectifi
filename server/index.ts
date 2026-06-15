@@ -12,6 +12,7 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { COOKIE_NAME, GOOGLE_CHECKOUT_COOKIE, createToken, verifyGoogleCheckoutToken, verifyToken } from './authToken.js'
+import { clearSessionCookieOpts, sessionCookieOpts } from './sessionCookie.js'
 import { ensureSchema } from './db.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import {
@@ -712,8 +713,9 @@ app.post('/api/user/onboarding-complete', async (req, res) => {
 })
 
 app.post('/api/auth/logout', (_req, res) => {
-  res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
-  res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
+  const clearOpts = clearSessionCookieOpts()
+  res.clearCookie(COOKIE_NAME, clearOpts)
+  res.clearCookie(GOOGLE_CHECKOUT_COOKIE, clearOpts)
   res.json({ ok: true })
 })
 
@@ -777,8 +779,8 @@ app.post('/api/user/cancel-account', async (req, res) => {
     return
   }
 
-  res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
-  res.clearCookie(GOOGLE_CHECKOUT_COOKIE, { path: '/', sameSite: 'lax' })
+  res.clearCookie(COOKIE_NAME, clearSessionCookieOpts())
+  res.clearCookie(GOOGLE_CHECKOUT_COOKIE, clearSessionCookieOpts())
   res.json({ ok: true })
 })
 

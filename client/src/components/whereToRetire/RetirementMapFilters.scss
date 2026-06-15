@@ -47,7 +47,7 @@
     visibility 0s linear 0s;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 900px) {
   .wtr-explorer__map-row .wtr-map-filters--map-rail {
     --wtr-filter-panel-rail-width: 30rem;
     --wtr-filter-panel-edge-fade-w: 0.5rem;
@@ -423,7 +423,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .wtr-map-filters--side.wtr-map-filters--mobile-sheet {
     --wtr-filter-sheet-max-h: var(--mobile-bottom-sheet-height);
 

@@ -6,6 +6,7 @@ import {
   createGoogleCheckoutToken,
   createToken,
 } from './authToken.js'
+import { clearSessionCookieOpts, sessionCookieOpts } from './sessionCookie.js'
 import { dbQuery, isUniqueViolation } from './dbQuery.js'
 import {
   getStripeBackend,
@@ -26,7 +27,7 @@ const STATE_MAX_AGE_MS = 10 * 60 * 1000
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 const CHECKOUT_MAX_AGE_MS = 30 * 60 * 1000
 
-function authCookieOpts(maxAgeMs: number) {
+function oauthStateCookieOpts(maxAgeMs: number) {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -44,14 +45,14 @@ async function setSessionOrGoogleCheckoutCookie(
   stripeCustomerId: string | null,
 ): Promise<void> {
   if (googleSignupRequiresStripePayment(stripeCustomerId)) {
-    res.clearCookie(COOKIE_NAME, { path: '/', sameSite: 'lax' })
+    res.clearCookie(COOKIE_NAME, clearSessionCookieOpts())
     const checkoutTok = await createGoogleCheckoutToken(userId, email)
-    res.cookie(GOOGLE_CHECKOUT_COOKIE, checkoutTok, authCookieOpts(CHECKOUT_MAX_AGE_MS))
+    res.cookie(GOOGLE_CHECKOUT_COOKIE, checkoutTok, sessionCookieOpts(CHECKOUT_MAX_AGE_MS))
     res.redirect(302, `${clientOrigin}/?google_checkout=1`)
     return
   }
   const token = await createToken(userId, email)
-  res.cookie(COOKIE_NAME, token, authCookieOpts(SESSION_MAX_AGE_MS))
+  res.cookie(COOKIE_NAME, token, sessionCookieOpts(SESSION_MAX_AGE_MS))
   res.redirect(302, `${clientOrigin}/`)
 }
 

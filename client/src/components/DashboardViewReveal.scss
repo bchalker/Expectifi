@@ -74,7 +74,7 @@
 }
 
 /* translateY enter animations inside max-height sidebars trip overflow scrollbars. */
-@media (min-width: 768px) {
+@media (min-width: 760px) {
   html[data-dashboard-view-enter] .section--tax-summary__sidebar,
   html[data-dashboard-view-flush] .section--tax-summary__sidebar {
     overflow-y: hidden;

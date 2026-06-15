@@ -341,6 +341,13 @@
   }
 }
 
+/* Tablet: narrower growth/income right rail (desktop restores 24rem from :root). */
+@media (min-width: 760px) and (max-width: 899px) {
+  :root {
+    --layout-snapshot-panel-width: 20rem;
+  }
+}
+
 /* Shared horizontal bounds — header, landing sections, app main column */
 .layout-marketing-bound {
   width: var(--layout-marketing-boundary);

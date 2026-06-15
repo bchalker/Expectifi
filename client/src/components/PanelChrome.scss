@@ -204,7 +204,7 @@
   min-height: 2.75rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .panel-backdrop {
     z-index: var(--mobile-bottom-sheet-backdrop-z, 1099);
     background: rgba(0, 0, 0, 0.5);

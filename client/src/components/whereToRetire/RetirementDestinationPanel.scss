@@ -777,7 +777,7 @@
   color: var(--text-muted);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 900px) {
   .wtr-explorer__map-row .wtr-dest-panel--map-rail {
     --wtr-dest-panel-rail-width: 40rem;
     --wtr-dest-panel-edge-fade-w: .5rem;
@@ -853,7 +853,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .wtr-dest-panel--sheet {
     top: auto;
     right: 0;

@@ -12,9 +12,16 @@
   padding-top: 0;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 760px) {
   .wtr-filters-sidebar {
     height: fit-content;
+    min-height: 0;
+  }
+}
+
+@media (min-width: 760px) and (max-width: 899px) {
+  .where-to-retire__sidebar .wtr-filters-sidebar {
+    height: 100%;
     min-height: 0;
   }
 }

@@ -70,8 +70,43 @@
   cursor: default;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 759px) {
   .wtr-explorer__drawer-backdrop {
+    display: none;
+  }
+}
+
+/* Tablet WTR: hide map, let city list fill the main column (map returns at 900px+). */
+@media (min-width: 760px) and (max-width: 899px) {
+  .where-to-retire__main .wtr-explorer {
+    --wtr-list-panel-w: 100%;
+  }
+
+  .where-to-retire__main .wtr-explorer__map-stage {
+    display: none;
+  }
+
+  .where-to-retire__main .wtr-explorer__list-panel,
+  .where-to-retire__main .wtr-explorer__map-row--list-collapsed .wtr-explorer__list-panel {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    pointer-events: auto;
+    box-shadow: none;
+  }
+
+  .where-to-retire__main .wtr-explorer__list-panel-inner {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .where-to-retire__main .wtr-explorer__list-reopen {
+    display: none;
+  }
+
+  .where-to-retire__main .wtr-explorer__drawer-backdrop {
     display: none;
   }
 }

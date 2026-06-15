@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-/** Mobile breakpoint for bottom-sheet panels (desktop drawer unchanged above this). */
-export const MOBILE_BOTTOM_SHEET_MQ = '(max-width: 768px)'
+/** Mobile and tablet: bottom-sheet panels; desktop (900px+) uses side slides. */
+export const MOBILE_BOTTOM_SHEET_MQ = '(max-width: 899px)'
 
 export function useIsMobileBottomSheet(): boolean {
   const [isMobileSheet, setIsMobileSheet] = useState(() => {

@@ -1820,27 +1820,29 @@ background: rgba(0,0,0, .025);
 }
 
 /* Desktop slide: anchored to portfolio-accounts-reveal column, not the viewport. */
-.portfolio-accounts-reveal.portfolio-accounts-reveal--in .holding-scenario-slide__sheet {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
-  width: min(100%, 420px);
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  border-radius: inherit;
-  /* Closed / pre-open: no shadow; keyframes + forwards bring in the depth. */
-  box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
-  animation: holding-scenario-slide-sheet-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
+@media (min-width: 900px) {
+  .portfolio-accounts-reveal.portfolio-accounts-reveal--in .holding-scenario-slide__sheet {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    width: min(100%, 420px);
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    border-radius: inherit;
+    /* Closed / pre-open: no shadow; keyframes + forwards bring in the depth. */
+    box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+    animation: holding-scenario-slide-sheet-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
 
-.portfolio-accounts-reveal.portfolio-accounts-reveal--in
-  .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
-  animation: holding-scenario-slide-sheet-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+  .portfolio-accounts-reveal.portfolio-accounts-reveal--in
+    .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
+    animation: holding-scenario-slide-sheet-out 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+  }
 }
 
 @keyframes holding-scenario-slide-sheet-in {
@@ -1866,17 +1868,19 @@ background: rgba(0,0,0, .025);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portfolio-accounts-reveal.portfolio-accounts-reveal--in .holding-scenario-slide__sheet {
-    animation: none;
-    transform: translateX(0);
-    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
-  }
+  @media (min-width: 900px) {
+    .portfolio-accounts-reveal.portfolio-accounts-reveal--in .holding-scenario-slide__sheet {
+      animation: none;
+      transform: translateX(0);
+      box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
+    }
 
-  .portfolio-accounts-reveal.portfolio-accounts-reveal--in
-    .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
-    animation: none;
-    transform: translateX(100%);
-    box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+    .portfolio-accounts-reveal.portfolio-accounts-reveal--in
+      .holding-scenario-slide__sheet.holding-scenario-slide__sheet--closing {
+      animation: none;
+      transform: translateX(100%);
+      box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+    }
   }
 }
 
@@ -2100,8 +2104,8 @@ background: rgba(0,0,0, .025);
   }
 }
 
-/* Mobile: bottom-sheet scenario drawers (portaled to body via BottomSheetAside) */
-@media (max-width: 768px) {
+/* Mobile + tablet: bottom-sheet scenario drawers (portaled to body via BottomSheetAside) */
+@media (max-width: 899px) {
   .holding-scenario-slide__sheet.mobile-bottom-sheet-panel {
     position: fixed;
     top: auto;

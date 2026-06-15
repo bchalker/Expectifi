@@ -31,12 +31,14 @@ function resolveGuestView(path: string): 'landing' | 'app' {
 }
 
 export default function AppRoot() {
-  const { loading: authLoading, user, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi } = useAuth()
+  const { loading: authLoading, user, signedOut, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi } = useAuth()
   const path = useAppPath()
   const [landingAuthModal, setLandingAuthModal] = useState<AuthModalMode | null>(null)
   const [contactOpen, setContactOpen] = useState(false)
 
-  const guestView = useMemo(() => resolveGuestView(path), [path, user])
+  const guestView = useMemo(() => resolveGuestView(path), [path, user, signedOut])
+
+  const showLanding = signedOut || guestView === 'landing'
 
   const initialAuthModal: AuthModalMode | null = path === APP_PATHS.login ? 'signin' : null
 
@@ -145,7 +147,7 @@ export default function AppRoot() {
     )
   }
 
-  if (guestView === 'landing') {
+  if (showLanding) {
     return (
       <>
         <LandingPage
