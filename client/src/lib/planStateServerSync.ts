@@ -68,6 +68,76 @@ function incomeUiFieldCountFromPayload(raw: unknown): number {
   )
 }
 
+function mergeRetirementPreferences(
+  remote: UserPlanStatePayload,
+  local: UserPlanStatePayload,
+): UserPlanStatePayload['retirementPreferences'] {
+  return remote.retirementPreferences ?? local.retirementPreferences ?? null
+}
+
+/** Preserve remote fields missing locally so a stale local win cannot wipe synced data. */
+function mergeRemoteFieldsIntoLocal(
+  remote: UserPlanStatePayload,
+  local: UserPlanStatePayload,
+): UserPlanStatePayload {
+  const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+  const mergedAccountIncomeUi =
+    remote.accountIncomeUi || local.accountIncomeUi
+      ? mergeIncomeUiFields(
+          (remote.accountIncomeUi ?? {
+            accountIncomeFunds: {},
+            accountIncomeStrategies: {},
+            accountWithdrawRates: {},
+          }) as IncomeUiFields,
+          (local.accountIncomeUi ?? null) as IncomeUiFields | null,
+        )
+      : null
+
+  return {
+    ...local,
+    ...(mergedRetirementPreferences != null
+      ? { retirementPreferences: mergedRetirementPreferences }
+      : {}),
+    ...(mergedAccountIncomeUi ? { accountIncomeUi: mergedAccountIncomeUi } : {}),
+  }
+}
+
+function dispatchPlanStateServerHydrated(): void {
+  window.dispatchEvent(new CustomEvent(PLAN_STATE_SERVER_HYDRATED_EVENT))
+}
+
+function restoreMissingLocalFieldsFromRemote(
+  remote: UserPlanStatePayload,
+  local: UserPlanStatePayload,
+): void {
+  const patch: UserPlanStatePayload = {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    profile: null,
+    accounts: null,
+    session: null,
+    lifePlans: null,
+    growthLifeEvents: null,
+    balanceModes: null,
+    retirementPreferences: null,
+    accountIncomeUi: null,
+  }
+  let hasPatch = false
+
+  if (!local.retirementPreferences && remote.retirementPreferences) {
+    patch.retirementPreferences = remote.retirementPreferences
+    hasPatch = true
+  }
+  if (!local.accountIncomeUi && remote.accountIncomeUi) {
+    patch.accountIncomeUi = remote.accountIncomeUi
+    hasPatch = true
+  }
+
+  if (hasPatch) {
+    applyPlanStatePayloadToLocal(patch)
+  }
+}
+
 /** Keep local income tab + per-account income picks when the server copy is stale. */
 function mergeLocalSessionOverrides(
   remote: UserPlanStatePayload,
@@ -88,8 +158,20 @@ function mergeLocalSessionOverrides(
       : null
 
   if (!remoteSession || !localSession) {
-    if (!mergedAccountIncomeUi) return remote
-    return { ...remote, accountIncomeUi: mergedAccountIncomeUi }
+    const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+    if (
+      !mergedAccountIncomeUi &&
+      mergedRetirementPreferences === remote.retirementPreferences
+    ) {
+      return remote
+    }
+    return {
+      ...remote,
+      ...(mergedAccountIncomeUi ? { accountIncomeUi: mergedAccountIncomeUi } : {}),
+      ...(mergedRetirementPreferences != null
+        ? { retirementPreferences: mergedRetirementPreferences }
+        : {}),
+    }
   }
 
   const remoteUi = remoteSession.ui
@@ -123,11 +205,23 @@ function mergeLocalSessionOverrides(
     }
   }
 
-  if (session === remoteSession && !mergedAccountIncomeUi) return remote
+  const mergedRetirementPreferences = mergeRetirementPreferences(remote, local)
+
+  if (
+    session === remoteSession &&
+    !mergedAccountIncomeUi &&
+    mergedRetirementPreferences === remote.retirementPreferences
+  ) {
+    return remote
+  }
+
   return {
     ...remote,
     session,
     ...(mergedAccountIncomeUi ? { accountIncomeUi: mergedAccountIncomeUi } : {}),
+    ...(mergedRetirementPreferences != null
+      ? { retirementPreferences: mergedRetirementPreferences }
+      : {}),
   }
 }
 
@@ -220,8 +314,11 @@ export async function hydratePlanStateFromServer(): Promise<boolean> {
 
       if (remote && planStatePayloadHasData(remote)) {
         if (localSessionShouldWinOverRemote(local, remote, localSavedAt, remoteUpdatedAt)) {
-          if (planStatePayloadHasData(local)) {
-            pushPlanStateToServer(local)
+          const mergedLocal = mergeRemoteFieldsIntoLocal(remote, local)
+          restoreMissingLocalFieldsFromRemote(remote, local)
+          if (planStatePayloadHasData(mergedLocal)) {
+            pushPlanStateToServer(mergedLocal)
+            dispatchPlanStateServerHydrated()
             return true
           }
         }
@@ -234,14 +331,16 @@ export async function hydratePlanStateFromServer(): Promise<boolean> {
         if (mergedDiffersFromRemote) {
           pushPlanStateToServer(merged)
         }
-        window.dispatchEvent(new CustomEvent(PLAN_STATE_SERVER_HYDRATED_EVENT))
+        dispatchPlanStateServerHydrated()
         return true
       }
 
       if (planStatePayloadHasData(local)) {
         pushPlanStateToServer(local)
+        dispatchPlanStateServerHydrated()
         return true
       }
+      dispatchPlanStateServerHydrated()
       return false
     } catch {
       return false

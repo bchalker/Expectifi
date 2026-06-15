@@ -48,7 +48,7 @@ export function WhereToRetire({ c }: Props) {
   const [baselineCity, setBaselineCity] = useState<MapCity | null>(null);
   const storage = useRetirementMapStorage();
   const { isHydrated } = useUserTier();
-  const { prefs, setPrefs, reloadPrefs } = useRetirementPreferences();
+  const { prefs, setPrefs, reloadPrefs, hasSavedPrefs } = useRetirementPreferences();
   const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false);
   const [prefsUpdatedFlash, setPrefsUpdatedFlash] = useState(false);
   const [explorationIncome, setExplorationIncome] = useState(() => {
@@ -170,8 +170,8 @@ export function WhereToRetire({ c }: Props) {
   );
 
   const syncPreferencesWizardOpen = useCallback(() => {
-    setPreferencesWizardOpen(!hasRetirementPreferences());
-  }, []);
+    setPreferencesWizardOpen(!hasRetirementPreferences() && !hasSavedPrefs);
+  }, [hasSavedPrefs]);
 
   useEffect(() => {
     if (!isHydrated) return;

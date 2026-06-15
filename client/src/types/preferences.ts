@@ -308,9 +308,12 @@ export function saveRetirementPreferences(
   )
   touchLocalPlanStateSavedAt()
   if (!options?.skipServerSync) {
-    void import('../lib/planStateServerSync').then(({ queuePlanStateServerSync }) => {
-      queuePlanStateServerSync()
-    })
+    void import('../lib/planStateServerSync').then(
+      ({ queuePlanStateServerSync, flushPlanStateServerSync }) => {
+        queuePlanStateServerSync()
+        flushPlanStateServerSync()
+      },
+    )
   }
 }
 

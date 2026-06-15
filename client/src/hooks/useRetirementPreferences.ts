@@ -12,6 +12,13 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
   const [prefs, setPrefsState] = useState<RetirementPreferences>(() =>
     loadRetirementPreferences(config) ?? { ...DEFAULT_PREFERENCES, dailyLife: [] },
   )
+  const [hasSavedPrefs, setHasSavedPrefs] = useState(
+    () => loadRetirementPreferences(config) != null,
+  )
+
+  const syncSavedPrefsFlag = useCallback(() => {
+    setHasSavedPrefs(loadRetirementPreferences(config) != null)
+  }, [config])
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
@@ -26,6 +33,7 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
       setPrefsState(
         loadRetirementPreferences(config) ?? { ...DEFAULT_PREFERENCES, dailyLife: [] },
       )
+      syncSavedPrefsFlag()
     }
     window.addEventListener('storage', onStorage)
     window.addEventListener('retirement-preferences-updated', onUpdated)
@@ -33,7 +41,7 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('retirement-preferences-updated', onUpdated)
     }
-  }, [config.storageKey])
+  }, [config.storageKey, config, syncSavedPrefsFlag])
 
   const setPrefs = useCallback(
     (next: RetirementPreferences | ((prev: RetirementPreferences) => RetirementPreferences)) => {
@@ -42,6 +50,7 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
         const normalized = normalizeRetirementPreferences(resolved)
         saveRetirementPreferences(normalized, config)
         window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
+        setHasSavedPrefs(true)
         return normalized
       })
     },
@@ -50,10 +59,12 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
 
   const reloadPrefs = useCallback(() => {
     setPrefsState(loadRetirementPreferences(config) ?? { ...DEFAULT_PREFERENCES, dailyLife: [] })
-  }, [config])
+    syncSavedPrefsFlag()
+  }, [config, syncSavedPrefsFlag])
 
   const resetPrefs = useCallback(() => {
     setPrefsState({ ...DEFAULT_PREFERENCES, dailyLife: [] })
+    setHasSavedPrefs(false)
   }, [])
 
   return {
@@ -61,6 +72,6 @@ export function useRetirementPreferences(config: WizardConfig = RETIREMENT_WIZAR
     setPrefs,
     reloadPrefs,
     resetPrefs,
-    hasSavedPrefs: loadRetirementPreferences(config) != null,
+    hasSavedPrefs,
   }
 }
