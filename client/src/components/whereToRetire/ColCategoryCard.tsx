@@ -1,4 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { Fragment, type CSSProperties, type ReactNode } from 'react'
+import { AppChip } from '../ui/AppChip'
 import { formatUsdOrDash } from '../../utils/costOfLiving'
 import './ColCategoryCard.scss'
 
@@ -19,6 +20,9 @@ type HeroCardProps = {
   panelTitle?: string
   rows: ColCategoryRowLine[]
   footerPill?: ReactNode
+  /** Renders before the row at `insertBeforeRowIndex` with dashed divider below. */
+  insertBeforeRowIndex?: number
+  insertBlock?: ReactNode
   emptyStateNote?: string
 }
 
@@ -40,24 +44,30 @@ export function ColCategoryCard(
   const renderRows = () => (
     <dl className="wtr-col-category-card__rows">
       {props.variant === 'hero'
-        ? props.rows.map((row) => (
-            <div
-              key={row.label}
-              className={[
-                'wtr-col-category-card__row',
-                row.value == null && 'wtr-col-category-card__row--label-only',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <dt className="wtr-col-category-card__row-label">
-                <span>{row.label}</span>
-                {row.note ? <span className="wtr-col-category-card__row-note">{row.note}</span> : null}
-              </dt>
-              {row.value != null ? (
-                <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
+        ? props.rows.map((row, rowIndex) => (
+            <Fragment key={row.label}>
+              {props.insertBlock != null &&
+              props.insertBeforeRowIndex != null &&
+              rowIndex === props.insertBeforeRowIndex ? (
+                <div className="wtr-col-category-card__insert-block">{props.insertBlock}</div>
               ) : null}
-            </div>
+              <div
+                className={[
+                  'wtr-col-category-card__row',
+                  row.value == null && 'wtr-col-category-card__row--label-only',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <dt className="wtr-col-category-card__row-label">
+                  <span>{row.label}</span>
+                  {row.note ? <span className="wtr-col-category-card__row-note">{row.note}</span> : null}
+                </dt>
+                {row.value != null ? (
+                  <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
+                ) : null}
+              </div>
+            </Fragment>
           ))
         : null}
     </dl>
@@ -101,7 +111,15 @@ export function ColCategoryCard(
               {renderRows()}
             </div>
             {props.footerPill != null ? (
-              <div className="wtr-col-category-card__footer-pill">{props.footerPill}</div>
+              <div className="wtr-col-category-card__footer-pill">
+                {typeof props.footerPill === 'string' ? (
+                  <AppChip variant="secondary" color="default">
+                    {props.footerPill}
+                  </AppChip>
+                ) : (
+                  props.footerPill
+                )}
+              </div>
             ) : null}
             {props.emptyStateNote ? (
               <p className="wtr-col-category-card__empty-note">{props.emptyStateNote}</p>

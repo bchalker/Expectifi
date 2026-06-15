@@ -5,10 +5,15 @@ import { readApiCache } from '../api/apiCache'
 import type { DollarStrengthSeries } from '../api/exchangeRates'
 import { getCityClimateNormals } from '../../utils/climateNormals'
 import {
+  buildLifestyleInputs,
   calculateMonthlyBudget,
   countryToIsoCode,
+  DEFAULT_BUDGET_PREFERENCES,
+  DEFAULT_LIFESTYLE,
   getAllMapCities,
   hasTravelAdvisory,
+  type BudgetPreferences,
+  type LifestyleInputs,
   type MapCity,
 } from '../../utils/costOfLiving'
 import {
@@ -60,11 +65,7 @@ import {
   type RetirementScoreResult,
 } from '../../utils/retirementScore'
 import { buildRetirementIncomeFitExplanation } from './retirementIncomeFitScore'
-import {
-  DEFAULT_HEALTH_INS_MONTHLY_USD,
-  monthlyOutflowForMapCity,
-  passesVisaQualifyingMapFilter,
-} from './mapIncomeFit'
+import { monthlyOutflowForMapCity, passesVisaQualifyingMapFilter } from './mapIncomeFit'
 import { isoRegionToDestinationRegion } from '../regionUtils'
 import { getExcludedCountries } from '../retirementStorage'
 import {
@@ -72,7 +73,12 @@ import {
   type MapWhereToLook,
 } from './whereToLookCountries'
 
-export { DEFAULT_HEALTH_INS_MONTHLY_USD } from './mapIncomeFit'
+export type { BudgetPreferences, LifestyleInputs } from '../../utils/costOfLiving'
+export {
+  DEFAULT_BUDGET_PREFERENCES,
+  DEFAULT_LIFESTYLE,
+  buildLifestyleInputs,
+} from '../../utils/costOfLiving'
 
 export type { MapWhereToLook } from './whereToLookCountries'
 export { MAP_WHERE_TO_LOOK_OPTIONS } from './whereToLookCountries'
@@ -136,10 +142,10 @@ export type MapFilters = {
   visaFreeDays: VisaFreeDaysFilter
   /** Minimum retirement fit score (0 = any). */
   minRetirementScore: number
-  /** Include health insurance in income-fit cost (retirement catalog cities). */
-  includeHealthIns: boolean
-  /** Monthly health insurance estimate when `includeHealthIns` is true. */
-  healthInsMonthlyUsd: number
+  /** User-facing budget panel preferences (lifestyle is derived). */
+  budgetPreferences: BudgetPreferences
+  /** Lifestyle inputs for monthly budget and income-fit scoring (derived). */
+  lifestyle?: LifestyleInputs
   /** Only cities that meet visa income rules in the income-fit model. */
   visaQualifyingOnly: boolean
   /** Active expat community size tiers (expat pin view legend filter). */
@@ -166,8 +172,8 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   directFlightOrigin: 'us',
   visaFreeDays: 'any',
   minRetirementScore: 0,
-  includeHealthIns: true,
-  healthInsMonthlyUsd: DEFAULT_HEALTH_INS_MONTHLY_USD,
+  budgetPreferences: DEFAULT_BUDGET_PREFERENCES,
+  lifestyle: DEFAULT_LIFESTYLE,
   visaQualifyingOnly: false,
   expatCommunityTiers: [...EXPAT_LEGEND_TIER_IDS],
 }
@@ -265,12 +271,33 @@ function passesMapDealbreakers(country: string, filters: MapFilters): boolean {
   return true
 }
 
+export function resolveMapLifestyle(filters: {
+  budgetPreferences?: BudgetPreferences
+  lifestyle?: LifestyleInputs
+}): LifestyleInputs {
+  if (filters.budgetPreferences) {
+    return buildLifestyleInputs(filters.budgetPreferences)
+  }
+  return filters.lifestyle ?? DEFAULT_LIFESTYLE
+}
+
+export function applyMapFiltersBudgetPreferences(
+  filters: MapFilters,
+  budgetPreferences: BudgetPreferences,
+): MapFilters {
+  return {
+    ...filters,
+    budgetPreferences,
+    lifestyle: buildLifestyleInputs(budgetPreferences),
+  }
+}
+
 function compareMapCities(
   a: ScoredMapCity,
   b: ScoredMapCity,
   sortBy: MapSortBy,
   monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): number {
   switch (sortBy) {
     case 'lowest-budget':
@@ -382,8 +409,7 @@ export function countMapCityVisibility(
     }
     const scored = scoreMapCity(city, monthlyIncome, {
       prefs: resolveRetirementPreferences(),
-      includeHealthIns: filters.includeHealthIns,
-      healthInsMonthlyUsd: filters.healthInsMonthlyUsd,
+      lifestyle: resolveMapLifestyle(filters),
     })
     if (passesMapFilters(scored, filters, monthlyIncome)) {
       visibleCount += 1
@@ -418,19 +444,14 @@ function passesClimate(country: string, climate: ClimateFilter): boolean {
 
 export type ScoreMapCityOptions = {
   prefs?: RetirementPreferences
-  includeHealthIns?: boolean
-  healthInsMonthlyUsd?: number
+  lifestyle?: LifestyleInputs
 }
 
 export function monthlyBudgetForScoring(
   city: MapCity,
-  options?: Pick<ScoreMapCityOptions, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
 ): number {
-  let budget = calculateMonthlyBudget(city)
-  if (options?.includeHealthIns) {
-    budget += options.healthInsMonthlyUsd ?? DEFAULT_HEALTH_INS_MONTHLY_USD
-  }
-  return budget
+  return calculateMonthlyBudget(city, lifestyle).total
 }
 
 export function scoreMapCity(
@@ -439,7 +460,8 @@ export function scoreMapCity(
   options?: ScoreMapCityOptions,
 ): ScoredMapCity {
   const prefs = options?.prefs ?? resolveRetirementPreferences()
-  const monthlyBudget = monthlyBudgetForScoring(city, options)
+  const lifestyle = options?.lifestyle ?? DEFAULT_LIFESTYLE
+  const monthlyBudget = monthlyBudgetForScoring(city, lifestyle)
   const score = calculateRetirementScore(
     monthlyIncome,
     monthlyBudget,
@@ -532,8 +554,6 @@ export function countActiveMapFilters(filters: MapFilters): number {
   if (filters.directFromUsOnly) count += 1
   if (filters.visaFreeDays !== 'any') count += 1
   if (filters.minRetirementScore > 0) count += 1
-  if (!filters.includeHealthIns) count += 1
-  if (filters.healthInsMonthlyUsd !== DEFAULT_HEALTH_INS_MONTHLY_USD) count += 1
   if (filters.visaQualifyingOnly) count += 1
   if (!isDefaultExpatCommunityTiers(filters.expatCommunityTiers)) count += 1
   return count
@@ -564,8 +584,7 @@ export function mapFiltersKey(filters: MapFilters): string {
     filters.directFlightOrigin,
     filters.visaFreeDays,
     String(filters.minRetirementScore),
-    filters.includeHealthIns ? '1' : '0',
-    String(filters.healthInsMonthlyUsd),
+    JSON.stringify(filters.budgetPreferences),
     filters.visaQualifyingOnly ? '1' : '0',
     [...filters.expatCommunityTiers].sort().join(','),
   ].join('|')
@@ -630,8 +649,7 @@ export function scoreAndFilterMapCities(
   const resolvedPrefs = prefs ?? resolveRetirementPreferences()
   const scoreOptions: ScoreMapCityOptions = {
     prefs: resolvedPrefs,
-    includeHealthIns: filters.includeHealthIns,
-    healthInsMonthlyUsd: filters.healthInsMonthlyUsd,
+    lifestyle: resolveMapLifestyle(filters),
   }
   const scored = getAllMapCities()
     .filter((city) => passesExclusionFilters(city, excludedCountries))

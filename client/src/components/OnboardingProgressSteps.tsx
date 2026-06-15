@@ -1,16 +1,20 @@
 import './OnboardingProgressSteps.scss'
 
-const STEPS = ['profile', 'contributions', 'goals'] as const
-
-type StepId = (typeof STEPS)[number]
-
 type Props = {
-  activeStep: StepId
+  /** 0-based index of the active step */
+  activeIndex: number
+  totalSteps: number
   className?: string
+  ariaLabel?: string
 }
 
-export function OnboardingProgressSteps({ activeStep, className }: Props) {
-  const activeIndex = STEPS.indexOf(activeStep)
+export function OnboardingProgressSteps({
+  activeIndex,
+  totalSteps,
+  className,
+  ariaLabel,
+}: Props) {
+  const clampedIndex = Math.max(0, Math.min(totalSteps - 1, activeIndex))
 
   return (
     <div className={['onboarding-progress', className].filter(Boolean).join(' ')}>
@@ -18,16 +22,16 @@ export function OnboardingProgressSteps({ activeStep, className }: Props) {
         className="onboarding-progress__track"
         role="progressbar"
         aria-valuemin={1}
-        aria-valuemax={STEPS.length}
-        aria-valuenow={activeIndex + 1}
-        aria-label={`Step ${activeIndex + 1} of ${STEPS.length}`}
+        aria-valuemax={totalSteps}
+        aria-valuenow={clampedIndex + 1}
+        aria-label={ariaLabel ?? `Step ${clampedIndex + 1} of ${totalSteps}`}
       >
-        {STEPS.map((id, index) => {
-          const isActive = index === activeIndex
-          const isPast = index < activeIndex
+        {Array.from({ length: totalSteps }, (_, index) => {
+          const isActive = index === clampedIndex
+          const isPast = index < clampedIndex
           return (
             <span
-              key={id}
+              key={index}
               className={[
                 'onboarding-progress__dot',
                 isActive && 'onboarding-progress__dot--active',

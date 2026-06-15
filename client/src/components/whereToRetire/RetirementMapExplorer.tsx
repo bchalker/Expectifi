@@ -37,6 +37,11 @@ import {
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
 import { RetirementMapLibreMap } from "./RetirementMapLibreMap";
 import { WtrCityListPagination } from "./WtrCityListPagination";
+import {
+  RetirementMapFilters,
+  type MapOptionsPanelTab,
+} from "./RetirementMapFilters";
+import type { FavoriteCityEntry } from "../../lib/retirementStorage";
 import "./RetirementMapExplorer.scss";
 
 export type WtrExplorerViewMode = "map" | "compare";
@@ -44,6 +49,8 @@ export type WtrExplorerViewMode = "map" | "compare";
 type Props = {
   /** Resolved income for map pins, scores, and list (slider value). */
   explorationIncome: number;
+  /** Expectifi projected monthly income from the calculator. */
+  planMonthlyIncome: number;
   filters: MapFilters;
   preferences: RetirementPreferences;
   onFiltersChange: (
@@ -55,6 +62,12 @@ type Props = {
   chromeFooterSlot?: ReactNode;
   filtersOpen: boolean;
   onFiltersOpenChange: (open: boolean) => void;
+  drawerTab: MapOptionsPanelTab;
+  onDrawerTabChange: (tab: MapOptionsPanelTab) => void;
+  onAddExcludedCountry: (country: string) => void;
+  onRemoveExcludedCountry: (country: string) => void;
+  onClearExcludedCountries: () => void;
+  onRemoveFavorite: (city: string, country: string) => void;
   compareIds: string[];
   compareOverlayOpen?: boolean;
   explorerViewMode: WtrExplorerViewMode;
@@ -62,7 +75,7 @@ type Props = {
   onClearCompare: () => void;
   onViewComparison: () => void;
   excludedCountries: string[];
-  favoriteCities: { city: string; country: string }[];
+  favoriteCities: FavoriteCityEntry[];
   isFavoritedCity: (city: string, country: string) => boolean;
   onToggleFavoriteCity: (entry: {
     city: string;
@@ -102,7 +115,7 @@ function sortCitiesForPinView(
   cities: ScoredMapCity[],
   pinColorView: MapPinColorView,
   monthlyIncome: number,
-  filters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">,
+  filters: Pick<MapFilters, "lifestyle">,
   expatSortDescending = true,
   budgetSortDescending = false,
   scoreSortDescending = true,
@@ -148,6 +161,7 @@ function sortCitiesForPinView(
 
 export function RetirementMapExplorer({
   explorationIncome,
+  planMonthlyIncome,
   filters,
   preferences,
   onFiltersChange,
@@ -156,6 +170,12 @@ export function RetirementMapExplorer({
   chromeFooterSlot,
   filtersOpen,
   onFiltersOpenChange,
+  drawerTab,
+  onDrawerTabChange,
+  onAddExcludedCountry,
+  onRemoveExcludedCountry,
+  onClearExcludedCountries,
+  onRemoveFavorite,
   compareIds,
   compareOverlayOpen = false,
   explorerViewMode,
@@ -276,8 +296,7 @@ export function RetirementMapExplorer({
         filters.directFlightOrigin,
         filters.visaFreeDays,
         filters.minRetirementScore,
-        filters.includeHealthIns ? "1" : "0",
-        String(filters.healthInsMonthlyUsd),
+        JSON.stringify(filters.lifestyle ?? null),
         filters.visaQualifyingOnly ? "1" : "0",
         pinColorView,
         excludedCountries.join(","),
@@ -296,8 +315,7 @@ export function RetirementMapExplorer({
       filters.directFlightOrigin,
       filters.visaFreeDays,
       filters.minRetirementScore,
-      filters.includeHealthIns,
-      filters.healthInsMonthlyUsd,
+      filters.lifestyle,
       filters.visaQualifyingOnly,
       filters.fitsMyIncome,
       filters.hideAdvisories,
@@ -474,6 +492,7 @@ export function RetirementMapExplorer({
       <div
         className={[
           "wtr-explorer__map-row",
+          filtersOpen && "wtr-explorer__map-row--filters-open",
           mobileListOnly && "wtr-explorer__map-row--list-only",
           !mobileListOnly &&
             !listPanelOpen &&
@@ -482,6 +501,14 @@ export function RetirementMapExplorer({
           .filter(Boolean)
           .join(" ")}
       >
+        {filtersOpen ? (
+          <button
+            type="button"
+            className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
+            aria-label="Close map options"
+            onClick={() => onFiltersOpenChange(false)}
+          />
+        ) : null}
         {!mobileListOnly ? (
           <div className="wtr-explorer__map-stage">
             <RetirementMapLibreMap
@@ -828,11 +855,28 @@ export function RetirementMapExplorer({
         <RetirementDestinationPanel
           scored={selectedScored}
           monthlyIncome={explorationIncome}
+          planMonthlyIncome={planMonthlyIncome}
           mapFilters={filters}
           preferences={preferences}
           open={detailPanelOpen}
           onClose={closePanel}
           listNav={destinationListNav}
+        />
+
+        <RetirementMapFilters
+          open={filtersOpen}
+          onClose={() => onFiltersOpenChange(false)}
+          activeTab={drawerTab}
+          onActiveTabChange={onDrawerTabChange}
+          filters={filters}
+          onChange={onFiltersChange}
+          monthlyIncome={explorationIncome}
+          excludedCountries={excludedCountries}
+          favoriteCities={favoriteCities}
+          onAddExcludedCountry={onAddExcludedCountry}
+          onRemoveExcludedCountry={onRemoveExcludedCountry}
+          onClearExcludedCountries={onClearExcludedCountries}
+          onRemoveFavorite={onRemoveFavorite}
         />
       </div>
 

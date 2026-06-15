@@ -4,6 +4,11 @@ import type {
   PreferenceStep,
 } from '../types/preferences'
 import { DAILY_LIFE_FACTOR_IDS } from '../types/preferences'
+import {
+  bandsFromLevels,
+  valueToBandIndex,
+  type PriorityBand,
+} from './preferenceBands'
 
 export type PreferenceFactorId = CorePreferenceKey | DailyLifeFactorId
 
@@ -25,6 +30,7 @@ export type PreferenceFactorDefinition = {
   icon: string
   label: string
   noun: string
+  cardDescription: string
   levels: PreferenceLevelCopy[]
   defaultStep: PreferenceStep
 }
@@ -70,13 +76,23 @@ export const STEP_3_LIFESTYLE: CorePreferenceKey[] = [
 
 export const STEP_4_DAILY: DailyLifeFactorId[] = [...DAILY_LIFE_FACTOR_IDS]
 
+/** Wizard step (1–4) where a factor is edited; review-only factors return step 5. */
+export function wizardStepForFactor(factorId: PreferenceFactorId): number {
+  if ((STEP_1_FINANCIAL as readonly string[]).includes(factorId)) return 1
+  if ((STEP_2_SAFETY as readonly string[]).includes(factorId)) return 2
+  if ((STEP_3_LIFESTYLE as readonly string[]).includes(factorId)) return 3
+  if ((STEP_4_DAILY as readonly string[]).includes(factorId)) return 4
+  return 5
+}
+
 export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, PreferenceFactorDefinition> = {
   affordability: {
     id: 'affordability',
     icon: 'coin',
     label: 'Affordability',
     noun: 'affordability',
-    defaultStep: 3,
+    cardDescription: 'How much should cost of living influence your destination scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Cost of living won't influence your score" },
       { badge: 'Nice to have', sub: 'Slightly prefer where money goes further' },
@@ -91,7 +107,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'receipt-tax',
     label: 'Tax efficiency',
     noun: 'tax efficiency',
-    defaultStep: 3,
+    cardDescription: 'How much should local tax treatment influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Tax burden won't influence your score" },
       { badge: 'Low concern', sub: "I'll work with the local situation" },
@@ -106,7 +123,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'file-invoice',
     label: 'Healthcare insurance cost',
     noun: 'affordable healthcare insurance',
-    defaultStep: 3,
+    cardDescription: 'How much should private insurance cost influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Insurance cost won't affect score" },
       { badge: 'Minor', sub: 'I have coverage sorted already' },
@@ -127,7 +145,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'shield-check',
     label: 'Safety',
     noun: 'safety',
-    defaultStep: 5,
+    cardDescription: 'How important is personal safety when comparing destinations?',
+    defaultStep: 10,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Safety won't influence your score" },
       { badge: 'Minor concern', sub: "I'm comfortable in most environments" },
@@ -142,7 +161,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'heart-rate-monitor',
     label: 'Healthcare quality',
     noun: 'healthcare quality',
-    defaultStep: 4,
+    cardDescription: 'How much should hospital and care quality influence your scores?',
+    defaultStep: 8,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Healthcare won't influence your score" },
       { badge: 'Low concern', sub: 'I maintain private coverage' },
@@ -157,7 +177,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'wind',
     label: 'Air quality',
     noun: 'clean air and low pollution',
-    defaultStep: 3,
+    cardDescription: 'How much should air pollution influence your destination scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Air quality won't affect your score" },
       { badge: 'Minor', sub: 'I can manage in most environments' },
@@ -175,7 +196,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'alert-triangle',
     label: 'Natural disaster risk',
     noun: 'low natural disaster risk',
-    defaultStep: 3,
+    cardDescription: 'How much should earthquake, flood, or hurricane risk matter?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Disaster risk won't affect score" },
       { badge: 'Minor', sub: 'I accept some natural risk' },
@@ -193,7 +215,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'sun',
     label: 'Climate',
     noun: 'climate',
-    defaultStep: 2,
+    cardDescription: 'How much should weather and temperature influence your scores?',
+    defaultStep: 4,
     levels: buildLevels(
       { badge: 'No preference', sub: "Climate won't influence your score" },
       { badge: 'Slight preference', sub: 'Mildly prefer comfortable weather' },
@@ -208,7 +231,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'building-bank',
     label: 'Political stability',
     noun: 'political stability and governance',
-    defaultStep: 3,
+    cardDescription: 'How much should political stability influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Political climate won't affect your score" },
       { badge: 'Minor', sub: 'I can adapt to some instability' },
@@ -229,7 +253,9 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'scale',
     label: 'Social & religious laws',
     noun: 'social freedom and secular laws',
-    defaultStep: 3,
+    cardDescription:
+      'How much should social norms, alcohol access, and personal freedoms influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Social laws won't affect score" },
       { badge: 'Minor', sub: 'I can adapt to most social environments' },
@@ -253,7 +279,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'message-language',
     label: 'English spoken',
     noun: 'English being spoken',
-    defaultStep: 3,
+    cardDescription: 'How much should English availability influence your daily-life scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Language won't influence score" },
       { badge: 'Nice to have', sub: 'A little English goes a long way' },
@@ -268,7 +295,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'users',
     label: 'Expat community',
     noun: 'a strong expat community',
-    defaultStep: 3,
+    cardDescription: 'How much should expat community size influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Expat presence won't influence score" },
       { badge: 'Minor bonus', sub: 'A small expat scene is a nice-to-have' },
@@ -283,7 +311,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'id-badge',
     label: 'Easy residency',
     noun: 'easy residency and visa access',
-    defaultStep: 3,
+    cardDescription: 'How much should visa and residency paths influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Visa requirements won't influence score" },
       { badge: 'Minor', sub: 'Some paperwork is fine' },
@@ -304,7 +333,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'walk',
     label: 'Walkability',
     noun: 'walkability',
-    defaultStep: 3,
+    cardDescription: 'How much should walkable neighborhoods influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Walkability won't affect score" },
       { badge: 'Minor', sub: "I'm fine driving or using transit" },
@@ -319,7 +349,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'bus',
     label: 'Public transportation',
     noun: 'reliable public transportation',
-    defaultStep: 3,
+    cardDescription: 'How much should public transit quality influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Transit won't affect your score" },
       { badge: 'Minor', sub: "I'll likely have a car or use taxis" },
@@ -337,7 +368,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'wifi',
     label: 'Internet & connectivity',
     noun: 'fast and reliable internet',
-    defaultStep: 3,
+    cardDescription: 'How much should internet quality influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Connectivity won't affect score" },
       { badge: 'Minor', sub: 'Basic internet is enough for me' },
@@ -352,7 +384,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'tools-kitchen-2',
     label: 'Food & dining',
     noun: 'food and dining culture',
-    defaultStep: 3,
+    cardDescription: 'How much should food and dining culture influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Food scene won't affect score" },
       { badge: 'Minor', sub: 'I eat simply and am happy anywhere' },
@@ -367,7 +400,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'plane',
     label: 'Distance from home',
     noun: 'proximity to the US for family visits',
-    defaultStep: 3,
+    cardDescription: 'How much should flight time back to the US influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Distance won't affect your score" },
       { badge: 'Minor', sub: "I don't mind long flights occasionally" },
@@ -385,7 +419,8 @@ export const PREFERENCE_FACTOR_DEFINITIONS: Record<PreferenceFactorId, Preferenc
     icon: 'language',
     label: 'Language learning curve',
     noun: 'an approachable language barrier',
-    defaultStep: 3,
+    cardDescription: 'How much should language difficulty influence your scores?',
+    defaultStep: 6,
     levels: buildLevels(
       { badge: 'Not a factor', sub: "Language difficulty won't affect your score" },
       { badge: 'Minor', sub: 'I enjoy a language challenge' },
@@ -411,13 +446,18 @@ export function getFactorDefinition(id: PreferenceFactorId): PreferenceFactorDef
 }
 
 export function getFactorLevelCopy(id: PreferenceFactorId, step: PreferenceStep): PreferenceLevelCopy {
-  return PREFERENCE_FACTOR_DEFINITIONS[id].levels[step] ?? PREFERENCE_FACTOR_DEFINITIONS[id].levels[0]
+  const bandIndex = valueToBandIndex(step)
+  return PREFERENCE_FACTOR_DEFINITIONS[id].levels[bandIndex] ?? PREFERENCE_FACTOR_DEFINITIONS[id].levels[0]
 }
 
-export type PreferenceStepClass = `step-${PreferenceStep}`
+export function getFactorBands(id: PreferenceFactorId): PriorityBand[] {
+  return bandsFromLevels(PREFERENCE_FACTOR_DEFINITIONS[id].levels)
+}
+
+export type PreferenceStepClass = `step-${0 | 1 | 2 | 3 | 4 | 5}`
 
 export function preferenceStepClass(step: PreferenceStep): PreferenceStepClass {
-  return `step-${step}`
+  return `step-${valueToBandIndex(step)}`
 }
 
 export function truncateHelper(text: string, maxLen = 44): string {

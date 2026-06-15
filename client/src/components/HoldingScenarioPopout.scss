@@ -32,20 +32,7 @@
   box-shadow: 0 -4px 12px -2px rgb(28 43 58 / 0.1);
 }
 
-.holding-scenario-heroui-popover.popover,
-.holding-scenario-heroui-popover {
-  max-width: 600px;
-  width: min(600px, calc(100vw - 20px));
-  padding: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-  /* HeroUI primary buttons use --color-accent; map to app teal tokens */
-  --color-accent: var(--accent);
-  --color-accent-hover: color-mix(in srgb, var(--accent) 88%, #000);
-  --color-accent-foreground: #fff;
-}
+/* HeroUI popover chrome — see holdingScenario/HoldingScenarioRowPopout.scss */
 
 .holding-scenario-popout--heroui-dialog.popover__dialog {
   margin: 0;

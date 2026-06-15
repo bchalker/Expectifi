@@ -8,7 +8,7 @@ import type {
   MapFilters,
 } from "../../lib/whereToRetire/cityMapScoring";
 import type { RetirementPreferences } from "../../types/preferences";
-import { buildBudgetBreakdownDisplay } from "../../utils/costOfLiving";
+import { buildBudgetBreakdownDisplay, DEFAULT_LIFESTYLE } from "../../utils/costOfLiving";
 import { CityDetailPanel } from "./cityDetail/CityDetailPanel";
 import "./RetirementDestinationPanel.scss";
 
@@ -25,7 +25,8 @@ export type DestinationListNav = {
 type Props = {
   scored: ScoredMapCity | null;
   monthlyIncome: number;
-  mapFilters: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
+  planMonthlyIncome: number;
+  mapFilters: Pick<MapFilters, "lifestyle">;
   preferences: RetirementPreferences;
   open: boolean;
   onClose: () => void;
@@ -35,6 +36,7 @@ type Props = {
 export function RetirementDestinationPanel({
   scored,
   monthlyIncome,
+  planMonthlyIncome,
   mapFilters,
   preferences,
   open,
@@ -158,8 +160,11 @@ export function RetirementDestinationPanel({
   }, [open, onClose]);
 
   const budgetBreakdown = useMemo(
-    () => (scored ? buildBudgetBreakdownDisplay(scored.city) : null),
-    [scored],
+    () =>
+      scored
+        ? buildBudgetBreakdownDisplay(scored.city, mapFilters.lifestyle ?? DEFAULT_LIFESTYLE)
+        : null,
+    [scored, mapFilters.lifestyle],
   );
 
   if (!scored || !budgetBreakdown) return null;
@@ -209,6 +214,7 @@ export function RetirementDestinationPanel({
         <CityDetailPanel
           scored={scored}
           monthlyIncome={monthlyIncome}
+          planMonthlyIncome={planMonthlyIncome}
           mapFilters={mapFilters}
           preferences={preferences}
           budgetBreakdown={budgetBreakdown}

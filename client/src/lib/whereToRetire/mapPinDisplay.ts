@@ -151,10 +151,10 @@ export function resolveMapPinDisplay(
 }
 
 export const SCORE_PIN_LEGEND: MapPinLegendItem[] = [
-  { bandClass: 'excellent', color: '#22c55e', label: 'Excellent' },
-  { bandClass: 'good', color: '#0d9488', label: 'Good' },
-  { bandClass: 'moderate', color: '#f59e0b', label: 'Moderate' },
-  { bandClass: 'poor', color: '#ef4444', label: 'Poor' },
+  { bandClass: 'excellent', color: '#1E8E47', label: 'Excellent' },
+  { bandClass: 'good', color: '#27b95d', label: 'Good' },
+  { bandClass: 'moderate', color: '#f1a841', label: 'Moderate' },
+  { bandClass: 'poor', color: '#BF3A2B', label: 'Poor' },
 ]
 
 export const BUDGET_PIN_LEGEND: MapPinLegendItem[] = [

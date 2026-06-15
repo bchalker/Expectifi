@@ -1,15 +1,17 @@
 import { forwardRef } from 'react'
-import { IconAdjustmentsHorizontal } from '@tabler/icons-react'
+import { IconAdjustmentsHorizontal, IconX } from '@tabler/icons-react'
+import './WtrMapToolButton.scss'
 
 type Props = {
   active: boolean
   activeFilterCount: number
   filtersOpen: boolean
   onToggle: () => void
+  compact?: boolean
 }
 
 export const WtrMapFilterButton = forwardRef<HTMLButtonElement, Props>(function WtrMapFilterButton(
-  { active, activeFilterCount, filtersOpen, onToggle },
+  { active, activeFilterCount, filtersOpen, onToggle, compact = false },
   ref,
 ) {
   return (
@@ -17,9 +19,10 @@ export const WtrMapFilterButton = forwardRef<HTMLButtonElement, Props>(function 
       ref={ref}
       type="button"
       className={[
-        'where-to-retire__filter-btn',
-        filtersOpen && 'where-to-retire__filter-btn--active',
-        active && 'where-to-retire__filter-btn--has-active',
+        'wtr-map-tool-btn',
+        compact && 'wtr-map-tool-btn--compact',
+        filtersOpen && 'wtr-map-tool-btn--active',
+        active && 'wtr-map-tool-btn--has-active',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -34,9 +37,32 @@ export const WtrMapFilterButton = forwardRef<HTMLButtonElement, Props>(function 
       }
       onClick={onToggle}
     >
-      <IconAdjustmentsHorizontal size={20} stroke={1.5} aria-hidden />
-      {activeFilterCount > 0 ? (
-        <span className="where-to-retire__filter-btn-dot" aria-hidden />
+      <span className="wtr-map-tool-btn__icon-stack" aria-hidden>
+        <IconAdjustmentsHorizontal
+          size={compact ? 16 : 20}
+          stroke={1.5}
+          className={[
+            'wtr-map-tool-btn__icon',
+            'wtr-map-tool-btn__icon--filter',
+            filtersOpen && 'wtr-map-tool-btn__icon--hidden',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        />
+        <IconX
+          size={compact ? 16 : 20}
+          stroke={1.5}
+          className={[
+            'wtr-map-tool-btn__icon',
+            'wtr-map-tool-btn__icon--close',
+            !filtersOpen && 'wtr-map-tool-btn__icon--hidden',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        />
+      </span>
+      {activeFilterCount > 0 && !filtersOpen ? (
+        <span className="wtr-map-tool-btn__dot" aria-hidden />
       ) : null}
     </button>
   )

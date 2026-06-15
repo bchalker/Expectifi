@@ -175,6 +175,12 @@ $tax-summary-sidebar-shadow-detail-open:
     overflow: hidden;
   }
 
+  .section--tax-summary--where-to-retire--drawer-open
+    .section--tax-summary__income-layout
+    > .portfolio-accounts-reveal {
+    overflow: visible;
+  }
+
   .section--tax-summary--where-to-retire .section--tax-summary__sidebar {
     grid-column: 2 / 3;
     align-self: stretch;

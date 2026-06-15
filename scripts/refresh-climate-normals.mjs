@@ -1,25 +1,20 @@
 #!/usr/bin/env node
 /**
- * Pre-fetch Open-Meteo climate normals for map/scoring cities.
+ * Pre-fetch NASA POWER climatology normals for map/scoring cities.
  * Run: node scripts/refresh-climate-normals.mjs [options]
  *
  * Options:
  *   --resume          Skip cities that already have valid normals in the output file
- *   --max-new=N       Fetch at most N cities this run (daily cron uses 20)
+ *   --max-new=N       Fetch at most N cities this run
  *   --limit=N         Process only first N cities from the map set (debug)
  *   --key=city|country  Single city only
  *
  * Uses bundled lat/lng from city-coordinates.json (no geocoding).
  * Output: client/src/data/climate-normals.json
  *
- * Scope (e): 2011-01-01–2020-12-31, 3 daily variables (no precipitation_sum).
- * Open-Meteo weighted-call estimate per city:
- *   published formula ≈ 78  (1 loc × 3653 days / 14 × 3 vars / 10)
- *   empirical scale   ≈ 303 (proportional to full 1990–2020 / 4-var ~1250 baseline)
- * Free tier 10k/day → ~33 cities/day empirical, ~127/day by formula.
- * Daily cron uses --max-new=20 for backoff headroom.
- *
- * Existing entries at other scopes (e.g. 1990–2020 with precip) are kept by --resume.
+ * Source: NASA POWER Climatology API (MERRA-2), custom period 2011–2020.
+ * One HTTP request per city (~1s + 250ms throttle → full ~922-city run ~16 min).
+ * Use T2M_MAX_AVG / T2M_MIN_AVG (daily-mean highs/lows), not T2M_MAX/T2M_MIN extremes.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -31,23 +26,21 @@ const CSV_PATH = path.join(DATA_DIR, 'cost-of-living.csv')
 const COORDS_PATH = path.join(DATA_DIR, 'city-coordinates.json')
 const OUTPUT_PATH = path.join(DATA_DIR, 'climate-normals.json')
 
-const CLIMATE_API_BASE = process.env.OPEN_METEO_API_KEY
-  ? 'https://customer-climate-api.open-meteo.com/v1/climate'
-  : 'https://climate-api.open-meteo.com/v1/climate'
+const NASA_API_BASE = 'https://power.larc.nasa.gov/api/temporal/climatology/point'
+const NASA_PARAMS = 'T2M,T2M_MAX_AVG,T2M_MIN_AVG,RH2M,PRECTOTCORR'
+const SOURCE_START = '2011'
+const SOURCE_END = '2020'
+const SOURCE_PERIOD = '2011-2020'
+const SOURCE_NAME = 'nasa_power'
+const SCOPE_VARIABLES = ['T2M', 'T2M_MAX_AVG', 'T2M_MIN_AVG', 'RH2M', 'PRECTOTCORR']
 
 const THROTTLE_MS = 250
 const MAX_RETRIES = 4
 const RETRY_BASE_MS = 15_000
 
-const START_DATE = '2011-01-01'
-const END_DATE = '2020-12-31'
-const DAILY_VARS =
-  'temperature_2m_max,temperature_2m_min,relative_humidity_2m_mean'
-const SCOPE_VARIABLES = ['temp_max', 'temp_min', 'humidity']
-const SOURCE_PERIOD = '2011-2020'
-const SCOPE_DAYS = 3653
-
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_KEYS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 /** Mirrors EXCLUDED_COUNTRIES in client/src/utils/costOfLiving.ts */
 const EXCLUDED_COUNTRIES = new Set(
@@ -83,9 +76,12 @@ function cityKey(city, country) {
 }
 
 function isValidClimate(climate) {
-  if (!climate?.monthly?.length) return false
+  if (!climate?.monthly?.length || climate.monthly.length !== 12) return false
   return climate.monthly.every(
-    (month) => Number.isFinite(month.avgHighC) && Number.isFinite(month.avgLowC),
+    (month) =>
+      Number.isFinite(month.avgHighC) &&
+      Number.isFinite(month.avgLowC) &&
+      Number.isFinite(month.avgPrecipMm),
   )
 }
 
@@ -187,84 +183,56 @@ function deriveClimateLabel(annualAvgTempC, summerAvgTempC, winterAvgTempC, annu
   return 'Four seasons'
 }
 
+function isFiniteNumber(value) {
+  return value != null && Number.isFinite(value)
+}
+
 /**
- * Duplicated from aggregateClimate() in client/src/lib/api/openMeteo.ts.
- * Scope (e): no precipitation_sum — avgPrecipMm omitted from monthly rows.
+ * Map NASA POWER climatology JSON to CityClimate-compatible object.
+ * PRECTOTCORR is mm/day (mean daily precip), matching Open-Meteo daily averages.
  */
-function aggregateClimate(daily, lat, { includePrecip = false } = {}) {
-  const times = daily.time ?? []
-  const highs = daily.temperature_2m_max ?? []
-  const lows = daily.temperature_2m_min ?? []
-  const precips = daily.precipitation_sum ?? []
-  const humidities = daily.relative_humidity_2m_mean ?? []
-  if (!times.length) return null
-
-  const monthBuckets = Array.from({ length: 12 }, () => ({
-    highSum: 0,
-    lowSum: 0,
-    precipSum: 0,
-    humiditySum: 0,
-    humidityCount: 0,
-    count: 0,
-  }))
-
-  let annualTempSum = 0
-  let annualTempCount = 0
-  let annualPrecipSum = 0
-  let annualHumiditySum = 0
-  let annualHumidityCount = 0
-
-  for (let i = 0; i < times.length; i += 1) {
-    const high = highs[i]
-    const low = lows[i]
-    const precip = includePrecip ? (precips[i] ?? 0) : 0
-    const humidity = humidities[i]
-    if (high == null || low == null || !Number.isFinite(high) || !Number.isFinite(low)) continue
-
-    const month = Number(times[i].slice(5, 7)) - 1
-    if (month < 0 || month > 11) continue
-
-    monthBuckets[month].highSum += high
-    monthBuckets[month].lowSum += low
-    if (includePrecip) {
-      monthBuckets[month].precipSum += precip
-    }
-    monthBuckets[month].count += 1
-
-    if (humidity != null && Number.isFinite(humidity)) {
-      monthBuckets[month].humiditySum += humidity
-      monthBuckets[month].humidityCount += 1
-      annualHumiditySum += humidity
-      annualHumidityCount += 1
-    }
-
-    annualTempSum += (high + low) / 2
-    annualTempCount += 1
-    if (includePrecip) {
-      annualPrecipSum += precip
-    }
+function mapFromNasaPower(json, lat) {
+  const p = json?.properties?.parameter
+  if (!p?.T2M_MAX_AVG || !p.T2M_MIN_AVG || !p.PRECTOTCORR || !p.RH2M || !p.T2M) {
+    return null
   }
 
-  if (!annualTempCount) return null
-
-  const monthly = monthBuckets.map((bucket, index) => {
-    const row = {
+  const monthly = MONTH_KEYS.map((key, index) => {
+    const avgHighC = p.T2M_MAX_AVG[key]
+    const avgLowC = p.T2M_MIN_AVG[key]
+    const avgPrecipMm = p.PRECTOTCORR[key]
+    const humidity = p.RH2M[key]
+    if (
+      !isFiniteNumber(avgHighC) ||
+      !isFiniteNumber(avgLowC) ||
+      !isFiniteNumber(avgPrecipMm) ||
+      !isFiniteNumber(humidity)
+    ) {
+      return null
+    }
+    return {
       month: index + 1,
       monthLabel: MONTH_LABELS[index],
-      avgHighC: bucket.count ? bucket.highSum / bucket.count : 0,
-      avgLowC: bucket.count ? bucket.lowSum / bucket.count : 0,
-      avgHumidityPct:
-        bucket.humidityCount > 0
-          ? Math.round(bucket.humiditySum / bucket.humidityCount)
-          : undefined,
+      avgHighC,
+      avgLowC,
+      avgPrecipMm,
+      avgHumidityPct: Math.round(humidity),
     }
-    if (includePrecip && bucket.count) {
-      row.avgPrecipMm = bucket.precipSum / bucket.count
-    }
-    return row
   })
 
-  const annualAvgTempC = annualTempSum / annualTempCount
+  if (monthly.some((row) => row == null)) return null
+
+  const annualAvgTempC = p.T2M.ANN
+  const annualAvgHumidityPct = Math.round(p.RH2M.ANN)
+  if (!isFiniteNumber(annualAvgTempC) || !isFiniteNumber(annualAvgHumidityPct)) {
+    return null
+  }
+
+  const annualPrecipMm = MONTH_KEYS.reduce(
+    (sum, key, index) => sum + p.PRECTOTCORR[key] * DAYS_IN_MONTH[index],
+    0,
+  )
+
   const summerSet = new Set(summerMonths(lat))
   const winterSet = new Set(winterMonths(lat))
 
@@ -282,59 +250,44 @@ function aggregateClimate(daily, lat, { includePrecip = false } = {}) {
     ? winterTemps.reduce((a, b) => a + b, 0) / winterTemps.length
     : annualAvgTempC
 
-  let wettestMonth = '—'
-  let driestMonth = '—'
-  if (includePrecip) {
-    const wettest = [...monthly].sort((a, b) => (b.avgPrecipMm ?? 0) - (a.avgPrecipMm ?? 0))[0]
-    const driest = [...monthly].sort((a, b) => (a.avgPrecipMm ?? 0) - (b.avgPrecipMm ?? 0))[0]
-    wettestMonth = wettest?.monthLabel ?? '—'
-    driestMonth = driest?.monthLabel ?? '—'
-  }
+  const wettest = [...monthly].sort((a, b) => b.avgPrecipMm - a.avgPrecipMm)[0]
+  const driest = [...monthly].sort((a, b) => a.avgPrecipMm - b.avgPrecipMm)[0]
 
-  const climate = {
+  return {
     monthly,
     annualAvgTempC,
-    annualAvgHumidityPct:
-      annualHumidityCount > 0 ? Math.round(annualHumiditySum / annualHumidityCount) : null,
+    annualAvgHumidityPct,
+    annualPrecipMm,
     summerAvgTempC,
     winterAvgTempC,
-    wettestMonth,
-    driestMonth,
+    wettestMonth: wettest?.monthLabel ?? '—',
+    driestMonth: driest?.monthLabel ?? '—',
     climateLabel: deriveClimateLabel(
       annualAvgTempC,
       summerAvgTempC,
       winterAvgTempC,
-      annualPrecipSum,
+      annualPrecipMm,
     ),
     source_period: SOURCE_PERIOD,
     variables: [...SCOPE_VARIABLES],
   }
-
-  if (includePrecip) {
-    climate.annualPrecipMm = annualPrecipSum
-  }
-
-  return climate
 }
 
 async function fetchCityClimate(lat, lng) {
   const params = new URLSearchParams({
-    latitude: String(lat),
+    parameters: NASA_PARAMS,
+    community: 'AG',
     longitude: String(lng),
-    models: 'EC_Earth3P_HR',
-    daily: DAILY_VARS,
-    start_date: START_DATE,
-    end_date: END_DATE,
+    latitude: String(lat),
+    start: SOURCE_START,
+    end: SOURCE_END,
+    format: 'JSON',
   })
-
-  if (process.env.OPEN_METEO_API_KEY) {
-    params.set('apikey', process.env.OPEN_METEO_API_KEY)
-  }
 
   let lastError = 'unknown error'
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
-    const res = await fetch(`${CLIMATE_API_BASE}?${params}`)
+    const res = await fetch(`${NASA_API_BASE}?${params}`)
 
     if (res.status === 429) {
       lastError = 'rate limit (429)'
@@ -349,20 +302,26 @@ async function fetchCityClimate(lat, lng) {
       return { climate: null, error: lastError, status: 429 }
     }
 
-    const json = await res.json()
-
-    if (!res.ok || json.error) {
-      lastError = json.reason ?? `HTTP ${res.status}`
+    let json
+    try {
+      json = await res.json()
+    } catch {
+      lastError = 'invalid JSON response'
       return { climate: null, error: lastError, status: res.status }
     }
 
-    if (!json.daily) {
-      return { climate: null, error: 'response missing daily block', status: res.status }
+    if (!res.ok) {
+      lastError = json?.message ?? json?.reason ?? `HTTP ${res.status}`
+      return { climate: null, error: lastError, status: res.status }
     }
 
-    const climate = aggregateClimate(json.daily, lat, { includePrecip: false })
+    if (!json?.properties?.parameter) {
+      return { climate: null, error: 'response missing properties.parameter', status: res.status }
+    }
+
+    const climate = mapFromNasaPower(json, lat)
     if (!isValidClimate(climate)) {
-      return { climate: null, error: 'aggregation produced empty monthly data', status: res.status }
+      return { climate: null, error: 'mapping produced invalid monthly data', status: res.status }
     }
 
     return { climate, error: null, status: res.status }
@@ -386,26 +345,27 @@ function printClimateSummary(key, climate) {
   const jan = climate.monthly.find((m) => m.month === 1)
   console.log('')
   console.log(`Validation summary for ${key}:`)
-  console.log(`  HTTP aggregated OK — source_period=${climate.source_period}`)
+  console.log(`  source=${SOURCE_NAME} period=${climate.source_period}`)
   console.log(`  variables=${JSON.stringify(climate.variables)}`)
   console.log(`  annualAvgTempC=${climate.annualAvgTempC.toFixed(2)}`)
   console.log(`  annualAvgHumidityPct=${climate.annualAvgHumidityPct}`)
+  console.log(`  annualPrecipMm=${climate.annualPrecipMm.toFixed(1)}`)
   console.log(`  summerAvgTempC=${climate.summerAvgTempC.toFixed(2)}`)
   console.log(`  winterAvgTempC=${climate.winterAvgTempC.toFixed(2)}`)
   if (july) {
     console.log(
-      `  July avgHighC=${july.avgHighC.toFixed(2)} avgLowC=${july.avgLowC.toFixed(2)} humidity=${july.avgHumidityPct ?? '—'}`,
+      `  July avgHighC=${july.avgHighC.toFixed(2)} avgLowC=${july.avgLowC.toFixed(2)} humidity=${july.avgHumidityPct} precip=${july.avgPrecipMm.toFixed(2)} mm/day`,
     )
   }
   if (jan) {
     console.log(
-      `  Jan avgHighC=${jan.avgHighC.toFixed(2)} avgLowC=${jan.avgLowC.toFixed(2)} humidity=${jan.avgHumidityPct ?? '—'}`,
+      `  Jan avgHighC=${jan.avgHighC.toFixed(2)} avgLowC=${jan.avgLowC.toFixed(2)} humidity=${jan.avgHumidityPct} precip=${jan.avgPrecipMm.toFixed(2)} mm/day`,
     )
   }
-  console.log(`  monthly avgPrecipMm present: ${climate.monthly.some((m) => m.avgPrecipMm != null)}`)
 }
 
 async function main() {
+  const runStarted = Date.now()
   const { limit, singleKey, resume, maxNew } = parseCliArgs(process.argv.slice(2))
   const coords = JSON.parse(fs.readFileSync(COORDS_PATH, 'utf8'))
   const existing = readExistingOutput()
@@ -432,16 +392,15 @@ async function main() {
   }
 
   const generated = currentGeneratedStamp()
-  const cities = { ...existingCities }
+  const cities = resume ? { ...existingCities } : {}
   let fetched = 0
   let newValid = 0
   let newFailed = 0
+  const failures = []
 
+  console.log(`Climate API: ${NASA_API_BASE}`)
   console.log(
-    `Climate API: ${CLIMATE_API_BASE}${process.env.OPEN_METEO_API_KEY ? ' (customer key)' : ' (free tier)'}`,
-  )
-  console.log(
-    `Scope: ${SOURCE_PERIOD}, vars=${DAILY_VARS}, ~${SCOPE_DAYS} days (~78 formula / ~303 empirical weighted calls/city)`,
+    `Source: ${SOURCE_NAME}, period=${SOURCE_PERIOD}, params=${NASA_PARAMS}`,
   )
   console.log(
     `Fetching ${targets.length} cities (throttle ${THROTTLE_MS}ms, resume=${resume}, max-new=${maxNew ?? 'none'})...`,
@@ -467,13 +426,16 @@ async function main() {
         }
       } else {
         newFailed += 1
+        failures.push({ key, error: error ?? 'empty response' })
         console.log(`FAIL  [${i + 1}/${targets.length}] ${key} — ${error ?? 'empty response'}`)
       }
     } catch (err) {
       fetched += 1
       cities[key] = null
       newFailed += 1
-      console.log(`FAIL  [${i + 1}/${targets.length}] ${key} — ${err?.message ?? err}`)
+      const message = err?.message ?? String(err)
+      failures.push({ key, error: message })
+      console.log(`FAIL  [${i + 1}/${targets.length}] ${key} — ${message}`)
     }
 
     if (i < targets.length - 1) {
@@ -482,22 +444,24 @@ async function main() {
   }
 
   const totals = countValid(cities)
+  const elapsedSec = ((Date.now() - runStarted) / 1000).toFixed(1)
   const dataset = {
     metadata: {
       generated,
-      source: 'Open-Meteo',
-      default_source_period: SOURCE_PERIOD,
+      source: SOURCE_NAME,
+      period: SOURCE_PERIOD,
       default_variables: [...SCOPE_VARIABLES],
-      model: 'EC_Earth3P_HR',
+      reanalysis: 'MERRA-2',
       coordinates: 'city-coordinates.json (bundled lat/lng, no geocoding)',
-      weighted_calls_per_city_formula: Math.round((SCOPE_DAYS / 14) * (SCOPE_VARIABLES.length / 10)),
-      weighted_calls_per_city_empirical: 303,
+      requests_per_city: 1,
+      throttle_ms: THROTTLE_MS,
       total_cities: Object.keys(cities).length,
       valid_count: totals.valid,
       null_count: totals.nullCount,
       last_run_fetched: fetched,
       last_run_valid: newValid,
       last_run_failed: newFailed,
+      last_run_elapsed_sec: Number(elapsedSec),
     },
     cities,
   }
@@ -507,14 +471,16 @@ async function main() {
   const sizeKb = Math.round(fs.statSync(OUTPUT_PATH).size / 1024)
   console.log('')
   console.log(
-    `Summary: this_run valid=${newValid}, failed=${newFailed}, fetched=${fetched}; file totals valid=${totals.valid}, null=${totals.nullCount}, size=${sizeKb}KB, file=${OUTPUT_PATH}`,
+    `Summary: this_run valid=${newValid}, failed=${newFailed}, fetched=${fetched}, elapsed=${elapsedSec}s`,
   )
-
-  if (newFailed > 0 && !process.env.OPEN_METEO_API_KEY) {
-    console.log('')
-    console.log(
-      'Tip: scope (e) ≈ ~303 empirical weighted calls/city (~33 cities/day). Re-run with --resume --max-new=20 daily.',
-    )
+  console.log(
+    `File totals: valid=${totals.valid}, null=${totals.nullCount}, size=${sizeKb}KB, path=${OUTPUT_PATH}`,
+  )
+  if (failures.length) {
+    console.log('Failures:')
+    for (const f of failures) {
+      console.log(`  ${f.key}: ${f.error}`)
+    }
   }
 }
 

@@ -1,20 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { AppToast } from "../components/ui/AppToast";
 import { PreferencesWizardModal } from "../components/preferences/PreferencesWizardModal";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
 import { WtrFiltersSidebar } from "../components/whereToRetire/WtrFiltersSidebar";
-import { RetirementMapFilters } from "../components/whereToRetire/RetirementMapFilters";
+import type { MapOptionsPanelTab } from "../components/whereToRetire/RetirementMapFilters";
 import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
 import {
   ALL_DESTINATION_REGIONS,
+  buildLifestyleInputs,
   countActiveMapFilters,
-  countMapCityVisibility,
+  DEFAULT_BUDGET_PREFERENCES,
   DEFAULT_MAP_FILTERS,
   type MapFilters,
 } from "../lib/whereToRetire/cityMapScoring";
+import {
+  loadBudgetPreferences,
+  saveBudgetPreferences,
+} from "../lib/whereToRetire/storage";
 import {
   clampExplorationIncome,
   defaultExplorationIncome,
@@ -46,8 +50,7 @@ export function WhereToRetire({ c }: Props) {
   const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(
     () => !hasRetirementPreferences(),
   );
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastVisible, setToastVisible] = useState(false);
+  const [prefsUpdatedFlash, setPrefsUpdatedFlash] = useState(false);
   const [explorationIncome, setExplorationIncome] = useState(() => {
     const stashed = readStashedWtrExplorationIncome();
     if (stashed != null)
@@ -58,31 +61,58 @@ export function WhereToRetire({ c }: Props) {
     () => resolveExplorationIncome(grossMonthlyIncome, explorationIncome),
     [grossMonthlyIncome, explorationIncome],
   );
-  const [mapFilters, setMapFilters] = useState<MapFilters>(() => ({
-    ...DEFAULT_MAP_FILTERS,
-    regions: [...ALL_DESTINATION_REGIONS],
-  }));
+  const [mapFilters, setMapFilters] = useState<MapFilters>(() => {
+    const savedBudget = loadBudgetPreferences();
+    const budgetPreferences = savedBudget ?? DEFAULT_BUDGET_PREFERENCES;
+    return {
+      ...DEFAULT_MAP_FILTERS,
+      regions: [...ALL_DESTINATION_REGIONS],
+      budgetPreferences,
+      lifestyle: buildLifestyleInputs(budgetPreferences),
+    };
+  });
   const { pinColorView, handlePinColorViewChange } = useWtrMapPinColorView(
     mapFilters,
     setMapFilters,
   );
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<MapOptionsPanelTab>("filters");
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+
+  const notifyMapLayout = useCallback(() => {
+    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    notifyMapLayout();
+  }, [notifyMapLayout]);
+
+  const openDrawerTab = useCallback(
+    (tab: MapOptionsPanelTab) => {
+      setDrawerTab(tab);
+      setDrawerOpen(true);
+      notifyMapLayout();
+    },
+    [notifyMapLayout],
+  );
+
+  const handleMapFiltersChange = useCallback(
+    (next: MapFilters | ((prev: MapFilters) => MapFilters)) => {
+      setMapFilters((prev) => {
+        const resolved = typeof next === "function" ? next(prev) : next;
+        saveBudgetPreferences(resolved.budgetPreferences);
+        return resolved;
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
   }, [grossMonthlyIncome]);
-
-  const visibilityCounts = useMemo(
-    () =>
-      countMapCityVisibility(
-        mapExplorationIncome,
-        mapFilters,
-        storage.excludedCountries,
-      ),
-    [mapExplorationIncome, mapFilters, storage.excludedCountries],
-  );
 
   const activeFilterCount = useMemo(
     () =>
@@ -100,28 +130,25 @@ export function WhereToRetire({ c }: Props) {
   );
 
   const toggleFiltersPanel = useCallback(() => {
-    setFiltersOpen((open) => !open);
-    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
-  }, []);
+    if (drawerOpen) {
+      closeDrawer();
+      return;
+    }
+    openDrawerTab("filters");
+  }, [drawerOpen, closeDrawer, openDrawerTab]);
 
   useEffect(() => {
-    if (!filtersOpen) return;
+    if (!drawerOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setFiltersOpen(false);
+      if (event.key === "Escape") closeDrawer();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [filtersOpen]);
+  }, [drawerOpen, closeDrawer]);
 
   useEffect(() => {
-    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-    const id = window.setTimeout(
-      () => window.dispatchEvent(new Event("resize")),
-      340,
-    );
-    return () => window.clearTimeout(id);
-  }, [filtersOpen]);
+    notifyMapLayout();
+  }, [drawerOpen, notifyMapLayout]);
 
   const clearCompare = useCallback(() => {
     setCompareIds([]);
@@ -132,18 +159,14 @@ export function WhereToRetire({ c }: Props) {
     setCompareIds((prev) => prev.filter((id) => id !== cityId));
   }, []);
 
-  const showPreferencesToast = useCallback((message: string) => {
-    setToastMessage(message);
-    setToastVisible(true);
-  }, []);
-
   const handlePreferencesComplete = useCallback(
     (next: typeof prefs) => {
       setPrefs(next);
       setPreferencesWizardOpen(false);
-      showPreferencesToast("Map scored for your priorities");
+      setPrefsUpdatedFlash(true);
+      window.setTimeout(() => setPrefsUpdatedFlash(false), 4200);
     },
-    [setPrefs, showPreferencesToast],
+    [setPrefs],
   );
 
   useEffect(() => {
@@ -163,13 +186,23 @@ export function WhereToRetire({ c }: Props) {
   return (
     <div className="where-to-retire">
       <div className="main main--has-hero main--where-to-retire">
-        <div className="section section--tax-summary section--tax-summary--where-to-retire">
+        <div
+          className={[
+            "section",
+            "section--tax-summary",
+            "section--tax-summary--where-to-retire",
+            drawerOpen && "section--tax-summary--where-to-retire--drawer-open",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <div className="section--tax-summary__income-layout">
             <div
               className={[
                 "portfolio-accounts-reveal",
                 "portfolio-accounts-reveal--in",
                 "where-to-retire__main",
+                drawerOpen && "where-to-retire__main--drawer-open",
                 viewMode === "compare" && "where-to-retire__main--compare-open",
               ]
                 .filter(Boolean)
@@ -190,16 +223,25 @@ export function WhereToRetire({ c }: Props) {
                 <div className="where-to-retire__map-stage">
                   <RetirementMapExplorer
                     explorationIncome={mapExplorationIncome}
+                    planMonthlyIncome={grossMonthlyIncome}
                     filters={mapFilters}
                     preferences={prefs}
-                    onFiltersChange={setMapFilters}
+                    onFiltersChange={handleMapFiltersChange}
                     pinColorView={pinColorView}
                     excludedCountries={storage.excludedCountries}
                     isFavoritedCity={storage.isFavoritedCity}
                     onToggleFavoriteCity={storage.toggleFavoriteCity}
                     favoriteCities={storage.favoriteCities}
-                    filtersOpen={filtersOpen}
-                    onFiltersOpenChange={setFiltersOpen}
+                    filtersOpen={drawerOpen}
+                    onFiltersOpenChange={(open) => {
+                      if (!open) closeDrawer();
+                    }}
+                    drawerTab={drawerTab}
+                    onDrawerTabChange={setDrawerTab}
+                    onAddExcludedCountry={storage.addExcludedCountry}
+                    onRemoveExcludedCountry={storage.removeExcludedCountry}
+                    onClearExcludedCountries={storage.clearExcludedCountries}
+                    onRemoveFavorite={storage.removeFavoriteCity}
                     compareIds={compareIds}
                     compareOverlayOpen={viewMode === "compare"}
                     explorerViewMode={viewMode === "compare" ? "compare" : "map"}
@@ -246,29 +288,19 @@ export function WhereToRetire({ c }: Props) {
                 planMonthlyIncome={grossMonthlyIncome}
                 explorationIncome={explorationIncome}
                 onExplorationIncomeChange={setExplorationIncome}
-                visibilityCounts={visibilityCounts}
                 pinColorView={pinColorView}
                 onPinColorViewChange={handlePinColorViewChange}
                 filters={mapFilters}
-                onFiltersChange={setMapFilters}
+                onFiltersChange={handleMapFiltersChange}
                 activeFilterCount={activeFilterCount}
-                filtersOpen={filtersOpen}
+                filtersOpen={drawerOpen}
                 onToggleFilters={toggleFiltersPanel}
                 filterButtonRef={filterButtonRef}
+                onOpenBudgetTab={() => openDrawerTab("budget")}
                 onOpenPreferences={() => setPreferencesWizardOpen(true)}
-              />
-              <RetirementMapFilters
-                open={filtersOpen}
-                onClose={() => setFiltersOpen(false)}
-                filters={mapFilters}
-                onChange={setMapFilters}
-                monthlyIncome={mapExplorationIncome}
-                excludedCountries={storage.excludedCountries}
-                favoriteCities={storage.favoriteCities}
-                onAddExcludedCountry={storage.addExcludedCountry}
-                onRemoveExcludedCountry={storage.removeExcludedCountry}
-                onClearExcludedCountries={storage.clearExcludedCountries}
-                onRemoveFavorite={storage.removeFavoriteCity}
+                onClosePreferences={() => setPreferencesWizardOpen(false)}
+                preferencesOpen={preferencesWizardOpen}
+                preferencesUpdatedFlash={prefsUpdatedFlash}
               />
             </div>
           </div>
@@ -280,11 +312,7 @@ export function WhereToRetire({ c }: Props) {
         onClose={() => setPreferencesWizardOpen(false)}
         initialValues={prefs}
         onComplete={handlePreferencesComplete}
-      />
-      <AppToast
-        message={toastMessage}
-        visible={toastVisible}
-        onDismiss={() => setToastVisible(false)}
+        placement="map-rail"
       />
     </div>
   );

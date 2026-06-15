@@ -46,6 +46,7 @@ export function BudgetExplorationHero({
     planMonthlyIncome,
     explorationIncome,
   )
+  const thumbIncome = atProjected ? planMonthlyIncome : mapIncome
 
   const introBlock = section === 'intro' ? (
     <>
@@ -128,6 +129,14 @@ export function BudgetExplorationHero({
                 <span className="wtr-budget-hero__plan-mark" aria-hidden />
               </button>
             </Tooltip>
+          </div>
+          <div
+            className="wtr-budget-hero__thumb-value-wrap"
+            style={{ left: `${fillWidth}%` }}
+          >
+            <span className="wtr-budget-hero__thumb-value tabular-nums">
+              {fmtMon(thumbIncome)}
+            </span>
           </div>
           <input
             type="range"

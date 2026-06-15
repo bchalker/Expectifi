@@ -26,7 +26,7 @@ button.app-btn[data-slot='button'][data-disabled='true'] {
 }
 
 button.app-btn--md[data-slot='button'] {
-  min-height: 2.5rem;
+  // min-height: 2.5rem;
   padding: var(--space-2) /* review: was 0.45rem */ var(--space-4) /* review: was 0.9rem */;
   font-size: var(--text-sm);
 }

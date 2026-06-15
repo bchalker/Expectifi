@@ -89,6 +89,29 @@ const SEASON_LABELS: Record<SeasonKey, string> = {
   fall: 'Fall',
 }
 
+/** Calendar month (1–12) → season for hemisphere at `lat`. */
+export function seasonForMonth(month: number, lat: number): SeasonKey {
+  const map = lat < 0 ? SH_SEASON_MONTHS : NH_SEASON_MONTHS
+  for (const season of ['winter', 'spring', 'summer', 'fall'] as SeasonKey[]) {
+    if (map[season].includes(month)) return season
+  }
+  return 'winter'
+}
+
+/** 0-based month column indices after which to draw a season divider (between i and i+1). */
+export function seasonDividerAfterIndices(lat: number): number[] {
+  const indices: number[] = []
+  for (let i = 0; i < 11; i += 1) {
+    if (seasonForMonth(i + 1, lat) !== seasonForMonth(i + 2, lat)) {
+      indices.push(i)
+    }
+  }
+  if (seasonForMonth(12, lat) !== seasonForMonth(1, lat)) {
+    indices.push(11)
+  }
+  return indices
+}
+
 const CATEGORY_DESCRIPTIONS: Record<
   ClimateNotesCategory,
   (climate: CityClimate, humidity: number | null) => string

@@ -1,7 +1,11 @@
+import type { BudgetPreferences } from '../../utils/costOfLiving'
+import { DEFAULT_BUDGET_PREFERENCES } from '../../utils/costOfLiving'
+
 const DESTINATIONS_KEY = 'wtr-destinations'
 const LEGACY_DESTINATIONS_KEY = 'where-to-retire-destinations'
 const COST_PREFIX = 'where-to-retire-cost:'
 const INCOME_OVERRIDE_KEY = 'wtr-income-override'
+const BUDGET_PREFERENCES_KEY = 'wtr-budget-preferences'
 
 export type StoredDestinationState = {
   keys: string[]
@@ -142,12 +146,35 @@ export function saveIncomeOverride(value: number | null): void {
   localStorage.setItem(INCOME_OVERRIDE_KEY, String(Math.round(value)))
 }
 
+function normalizeBudgetPreferences(raw: BudgetPreferences): BudgetPreferences {
+  return { ...DEFAULT_BUDGET_PREFERENCES, ...raw }
+}
+
+export function loadBudgetPreferences(): BudgetPreferences | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(BUDGET_PREFERENCES_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as BudgetPreferences
+    if (!parsed || typeof parsed !== 'object') return null
+    return normalizeBudgetPreferences(parsed)
+  } catch {
+    return null
+  }
+}
+
+export function saveBudgetPreferences(prefs: BudgetPreferences): void {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(BUDGET_PREFERENCES_KEY, JSON.stringify(prefs))
+}
+
 export function clearGuestWhereToRetireStorage(): void {
   if (typeof window === 'undefined') return
   try {
     localStorage.removeItem(DESTINATIONS_KEY)
     localStorage.removeItem(LEGACY_DESTINATIONS_KEY)
     localStorage.removeItem(INCOME_OVERRIDE_KEY)
+    localStorage.removeItem(BUDGET_PREFERENCES_KEY)
     localStorage.removeItem('wtr-preferences')
     localStorage.removeItem('retirement_preferences')
     const keysToRemove: string[] = []

@@ -1,5 +1,29 @@
 // Badge / pill colors by preference step (WCAG-friendly pairs).
 
+@mixin pref-description-step-0 {
+  color: var(--color-text-secondary, #6b7280);
+}
+
+@mixin pref-description-step-1 {
+  @include pref-description-step-0;
+}
+
+@mixin pref-description-step-2 {
+  @include pref-description-step-0;
+}
+
+@mixin pref-description-step-3 {
+  color: var(--color-text-warning, #b45309);
+}
+
+@mixin pref-description-step-4 {
+  color: var(--color-text-success, #15803d);
+}
+
+@mixin pref-description-step-5 {
+  color: #166534;
+}
+
 @mixin pref-badge-step-0 {
   background: var(--color-background-secondary, #f3f4f6);
   color: var(--color-text-secondary, #6b7280);

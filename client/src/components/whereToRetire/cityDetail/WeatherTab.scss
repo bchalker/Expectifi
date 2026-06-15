@@ -257,44 +257,6 @@
   color: var(--text-muted);
 }
 
-.wtr-weather-tab__section-label {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.wtr-weather-tab__season-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.wtr-weather-tab__season-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  padding: var(--space-4);
-  border-radius: var(--radius-lg, 12px);
-  background: var(--color-card);
-  border: 1px solid var(--border);
-}
-
-.wtr-weather-tab__season-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.wtr-weather-tab__season-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
 
 .wtr-weather-tab__season-icon {
   display: inline-flex;
@@ -316,31 +278,6 @@
   color: var(--amber2);
 }
 
-.wtr-weather-tab__season-name {
-  margin: 0;
-  min-width: 0;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--text);
-}
-
-.wtr-weather-tab__season-temp {
-  margin: 0;
-  font-size: var(--text-base);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
-  color: var(--text);
-  line-height: 1.2;
-}
-
-.wtr-weather-tab__season-desc {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.4;
-  color: var(--text-muted);
-}
 
 .wtr-weather-tab__season-tag {
   flex-shrink: 0;
@@ -380,8 +317,7 @@
 .wtr-weather-tab--loading .wtr-weather-tab__skeleton-title,
 .wtr-weather-tab--loading .wtr-weather-tab__skeleton-summary,
 .wtr-weather-tab--loading .wtr-weather-tab__skeleton-chart,
-.wtr-weather-tab--loading .wtr-weather-tab__skeleton-metrics span,
-.wtr-weather-tab--loading .wtr-weather-tab__skeleton-seasons span {
+.wtr-weather-tab--loading .wtr-weather-tab__skeleton-metrics span {
   border-radius: var(--radius-lg, 12px);
   background: linear-gradient(
     90deg,
@@ -413,16 +349,6 @@
 
 .wtr-weather-tab__skeleton-metrics span {
   height: 3.5rem;
-}
-
-.wtr-weather-tab__skeleton-seasons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-}
-
-.wtr-weather-tab__skeleton-seasons span {
-  height: 6rem;
 }
 
 @keyframes wtr-weather-shimmer {

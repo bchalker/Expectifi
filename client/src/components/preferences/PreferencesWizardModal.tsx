@@ -1,15 +1,27 @@
 import { CloseButton } from '@heroui/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useBottomSheetDrag } from '../../hooks/useBottomSheetDrag'
+import { useIsMobileBottomSheet } from '../../hooks/useMobileBottomSheet'
+import { OnboardingProgressSteps } from '../OnboardingProgressSteps'
+import { BottomSheetHandle } from '../ui/BottomSheetHandle'
 import {
   hasRetirementPreferences,
   markDestinationPrefsOverlayOpened,
   type RetirementPreferences,
 } from '../../types/preferences'
-import { PreferencesWizard, type PreferencesWizardMode } from './PreferencesWizard'
+import { WIZARD_STEP_LABELS } from '../../utils/preferenceFactors'
+import {
+  PreferencesWizard,
+  PREFERENCES_WIZARD_STEP_COUNT,
+  type PreferencesWizardMode,
+} from './PreferencesWizard'
 import './PreferencesWizard.scss'
 
 const FADE_MS = 280
+const SLIDE_MS = 320
+
+export type PreferencesWizardPlacement = 'center' | 'map-rail'
 
 function prefersReducedMotion(): boolean {
   return (
@@ -25,6 +37,7 @@ type Props = {
   onComplete: (prefs: RetirementPreferences) => void
   mode?: PreferencesWizardMode
   allowDismiss?: boolean
+  placement?: PreferencesWizardPlacement
 }
 
 export function PreferencesWizardModal({
@@ -34,10 +47,34 @@ export function PreferencesWizardModal({
   onComplete,
   mode = 'stepped',
   allowDismiss,
+  placement = 'center',
 }: Props) {
+  const isMapRail = placement === 'map-rail'
+  const isMobileSheet = useIsMobileBottomSheet() && isMapRail
+  const panelRef = useRef<HTMLElement>(null)
   const [mounted, setMounted] = useState(open)
   const [visible, setVisible] = useState(open && prefersReducedMotion())
+  const [wizardStep, setWizardStep] = useState(1)
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null)
   const canDismiss = allowDismiss ?? hasRetirementPreferences()
+  const closeMs = isMapRail ? SLIDE_MS : FADE_MS
+
+  const {
+    isDragging,
+    panelStyle,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useBottomSheetDrag({
+    enabled: isMobileSheet,
+    open: visible,
+    panelRef,
+    onDismiss: onClose,
+  })
+
+  useEffect(() => {
+    if (open) setWizardStep(1)
+  }, [open])
 
   useEffect(() => {
     if (open) {
@@ -67,53 +104,166 @@ export function PreferencesWizardModal({
     }
 
     setVisible(false)
-    const timeout = window.setTimeout(() => setMounted(false), FADE_MS)
+    const timeout = window.setTimeout(() => setMounted(false), closeMs)
     return () => window.clearTimeout(timeout)
-  }, [open, mounted])
+  }, [open, mounted, closeMs])
 
-  const handleOverlayTransitionEnd = useCallback(
-    (e: React.TransitionEvent<HTMLDivElement>) => {
+  useEffect(() => {
+    if (!mounted || typeof document === 'undefined') {
+      setPortalRoot(null)
+      return
+    }
+
+    if (isMapRail && !isMobileSheet) {
+      setPortalRoot(
+        (document.querySelector('.wtr-explorer__map-row') as HTMLElement | null) ??
+          document.body,
+      )
+      return
+    }
+
+    setPortalRoot(document.body)
+  }, [mounted, isMapRail, isMobileSheet])
+
+  useEffect(() => {
+    if (!visible || !canDismiss) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [visible, canDismiss, onClose])
+
+  const handlePanelTransitionEnd = useCallback(
+    (e: React.TransitionEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return
-      if (e.propertyName !== 'opacity') return
+      const endProperty = isMapRail ? 'transform' : 'opacity'
+      if (e.propertyName !== endProperty) return
       if (open || visible) return
       setMounted(false)
     },
-    [open, visible],
+    [isMapRail, open, visible],
   )
 
-  if (!mounted) return null
+  if (!mounted || !portalRoot) return null
 
-  return createPortal(
+  const panelContent = (
+    <div className="pref-wizard-modal__panel">
+      <header
+        className={[
+          'pref-wizard-modal__header',
+          mode === 'stepped' && 'pref-wizard-modal__header--stepped',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {mode === 'stepped' ? (
+          <OnboardingProgressSteps
+            activeIndex={wizardStep - 1}
+            totalSteps={PREFERENCES_WIZARD_STEP_COUNT}
+            className="pref-wizard-modal__progress"
+            ariaLabel={`Step ${wizardStep} of ${PREFERENCES_WIZARD_STEP_COUNT}`}
+          />
+        ) : null}
+        <div
+          className={[
+            'pref-wizard-modal__title-stack',
+            canDismiss && 'pref-wizard-modal__title-stack--with-close',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <h2 className="pref-wizard-modal__title" id="pref-wizard-modal-title">
+            {mode === 'stepped'
+              ? `Step ${wizardStep} of ${PREFERENCES_WIZARD_STEP_COUNT} — ${WIZARD_STEP_LABELS[wizardStep]}`
+              : 'Set your retirement priorities'}
+          </h2>
+          <p className="pref-wizard-modal__helper">
+            {mode === 'stepped' && wizardStep === 4
+              ? 'For these, only activate those you want weighted in the results.'
+              : 'The more honest you are, the more useful your results.'}
+          </p>
+        </div>
+        {canDismiss ? (
+          <CloseButton
+            className={[
+              'pref-wizard-modal__close',
+              isMapRail && 'panel-close-btn',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            aria-label="Close preferences"
+            onPress={onClose}
+          />
+        ) : null}
+      </header>
+      <PreferencesWizard
+        mode={mode}
+        initialValues={initialValues}
+        onComplete={onComplete}
+        progressPlacement="external"
+        onWizardStepChange={setWizardStep}
+      />
+    </div>
+  )
+
+  const modal = isMapRail ? (
+    <>
+      {!isMobileSheet && visible ? (
+        <button
+          type="button"
+          className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
+          aria-label="Close preferences"
+          onClick={onClose}
+        />
+      ) : null}
+      {isMobileSheet && visible ? (
+        <div
+          className="mobile-bottom-sheet-backdrop mobile-bottom-sheet-backdrop--open"
+          onClick={onClose}
+          aria-hidden
+        />
+      ) : null}
+      <aside
+        ref={panelRef}
+        className={[
+          'pref-wizard-modal',
+          'pref-wizard-modal--map-rail',
+          isMobileSheet && 'pref-wizard-modal--mobile-sheet',
+          visible && 'pref-wizard-modal--visible',
+          isDragging && 'mobile-bottom-sheet-panel--dragging',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={isMobileSheet ? panelStyle : undefined}
+        role="dialog"
+        aria-modal={isMobileSheet}
+        aria-labelledby="pref-wizard-modal-title"
+        onTransitionEnd={handlePanelTransitionEnd}
+      >
+        {isMobileSheet ? (
+          <BottomSheetHandle
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        ) : null}
+        {panelContent}
+      </aside>
+    </>
+  ) : (
     <div
       className={['pref-wizard-modal', visible && 'pref-wizard-modal--visible']
         .filter(Boolean)
         .join(' ')}
       role="dialog"
       aria-modal="true"
-      aria-label="Retirement preferences"
-      onTransitionEnd={handleOverlayTransitionEnd}
+      aria-labelledby="pref-wizard-modal-title"
+      onTransitionEnd={handlePanelTransitionEnd}
     >
-      <div className="pref-wizard-modal__panel">
-        <div className="pref-wizard-modal__header">
-          <div className="pref-wizard-modal__header-copy">
-            <h2 className="pref-wizard-modal__title">Set your retirement priorities</h2>
-            <p className="pref-wizard-modal__helper">
-              Your answers personalize how every city is scored — the more honest you are, the more
-              useful your results. You can always update these in Settings → Travel Priorities as your
-              plans or priorities change.
-            </p>
-          </div>
-          {canDismiss ? (
-            <CloseButton aria-label="Close preferences" onPress={onClose} />
-          ) : null}
-        </div>
-        <PreferencesWizard
-          mode={mode}
-          initialValues={initialValues}
-          onComplete={onComplete}
-        />
-      </div>
-    </div>,
-    document.body,
+      {panelContent}
+    </div>
   )
+
+  return createPortal(modal, portalRoot)
 }

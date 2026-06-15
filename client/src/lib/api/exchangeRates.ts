@@ -1,4 +1,5 @@
 import { readApiCache, writeApiCache } from './apiCache'
+import { apiFetchJson } from '../api'
 
 const NAMESPACE = 'exchangerate'
 
@@ -34,11 +35,14 @@ export type OpenErApiLatest = {
   updatedUtc: string
 }
 
+export type ExchangeRateSource = 'wise' | 'open-er-api'
+
 export type LocalCurrencyInfo = {
   currencyCode: string
   currencyName: string
   rate: number
   updatedUtc: string
+  source: ExchangeRateSource
 }
 
 const OPEN_ER_API_URL = 'https://open.er-api.com/v6/latest/USD'
@@ -154,6 +158,34 @@ export async function getOpenErApiLatest(): Promise<OpenErApiLatest | null> {
   return fetchOpenErApiLatestAll()
 }
 
+async function fetchServerUsdRate(currencyCode: string): Promise<LocalCurrencyInfo | null> {
+  const sym = currencyCode.toUpperCase()
+  try {
+    const data = await apiFetchJson<{
+      ok: boolean
+      quote?: {
+        currencyCode: string
+        rate: number
+        source: ExchangeRateSource
+        updatedUtc: string
+      }
+    }>(`/api/exchange-rates/${encodeURIComponent(sym)}`)
+
+    const quote = data.quote
+    if (!data.ok || !quote || typeof quote.rate !== 'number' || quote.rate <= 0) return null
+
+    return {
+      currencyCode: sym,
+      currencyName: getCurrencyDisplayName(sym),
+      rate: quote.rate,
+      updatedUtc: quote.updatedUtc,
+      source: quote.source,
+    }
+  } catch {
+    return null
+  }
+}
+
 /** Spot rate and currency name for a non-USD currency code. */
 export async function getLocalCurrencyInfo(
   currencyCode: string,
@@ -161,18 +193,31 @@ export async function getLocalCurrencyInfo(
   const sym = currencyCode.toUpperCase()
   if (!sym || sym === 'USD') return null
 
+  const cacheKey = `local-v2-${sym}`
+  const cached = readApiCache<LocalCurrencyInfo>(NAMESPACE, cacheKey)
+  if (cached?.rate) return cached
+
+  const fromServer = await fetchServerUsdRate(sym)
+  if (fromServer) {
+    writeApiCache(NAMESPACE, cacheKey, fromServer)
+    return fromServer
+  }
+
   const latest = await fetchOpenErApiLatestAll()
   if (!latest) return null
 
   const rate = latest.rates[sym]
   if (typeof rate !== 'number' || rate <= 0) return null
 
-  return {
+  const fallback: LocalCurrencyInfo = {
     currencyCode: sym,
     currencyName: getCurrencyDisplayName(sym),
     rate,
     updatedUtc: latest.updatedUtc,
+    source: 'open-er-api',
   }
+  writeApiCache(NAMESPACE, cacheKey, fallback)
+  return fallback
 }
 
 /** USD vs local currency — Frankfurter history when supported, else open.er-api spot rate. */
@@ -211,4 +256,19 @@ export function formatUsdToLocalRate(rate: number, currencyCode: string): string
   if (rate >= 100) return rate.toLocaleString(undefined, { maximumFractionDigits: 1 })
   if (rate >= 10) return rate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   return rate.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 4 })
+}
+
+/** USD amount converted to local currency for display (e.g. monthly income). */
+export function formatUsdToLocalAmount(amount: number, currencyCode: string): string {
+  const code = currencyCode.toUpperCase()
+  if (code === 'JPY' || code === 'VND' || code === 'KRW' || code === 'IDR') {
+    return Math.round(amount).toLocaleString(undefined, { maximumFractionDigits: 0 })
+  }
+  if (amount >= 1000) {
+    return Math.round(amount).toLocaleString(undefined, { maximumFractionDigits: 0 })
+  }
+  if (amount >= 100) {
+    return amount.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  }
+  return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }

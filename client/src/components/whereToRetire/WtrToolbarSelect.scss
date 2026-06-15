@@ -13,8 +13,8 @@
   display: inline-flex;
   align-items: center;
   width: 100%;
-  min-height: 2.75rem;
-  padding: var(--space-2) /* review: was 0.45rem */ var(--space-6) var(--space-2) /* review: was 0.45rem */ var(--space-3);
+  // min-height: 2.75rem;
+ padding: var(--space-2) /* review: was 0.45rem */ var(--space-6) var(--space-2) /* review: was 0.45rem */ var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--surface);

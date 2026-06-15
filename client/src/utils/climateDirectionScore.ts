@@ -163,6 +163,41 @@ function scoreCoolMild(metrics: ClimateMetrics): number {
   return clampScore(score)
 }
 
+const TEMP_RANGE_TOLERANCE_F = 2.5
+
+function celsiusToFahrenheit(c: number): number {
+  return (c * 9) / 5 + 32
+}
+
+function cityAnnualAvgTempF(climate: CityClimate): number {
+  const metrics = extractClimateMetrics(climate)
+  return celsiusToFahrenheit(metrics.avgTempC)
+}
+
+/** Temperature-range climate score (0–100) using per-city annual average °F. */
+export function computeClimateTemperatureRangeScore(
+  climate: CityClimate,
+  minF: number,
+  maxF: number,
+): number {
+  if (!climate.monthly.length) return 50
+
+  const orderedMin = Math.min(minF, maxF)
+  const orderedMax = Math.max(minF, maxF)
+  const cityTempF = cityAnnualAvgTempF(climate)
+
+  if (cityTempF >= orderedMin && cityTempF <= orderedMax) return 100
+
+  const distance =
+    cityTempF < orderedMin ? orderedMin - cityTempF : cityTempF - orderedMax
+
+  if (distance <= TEMP_RANGE_TOLERANCE_F) {
+    return clampScore(100 - (distance / TEMP_RANGE_TOLERANCE_F) * 15)
+  }
+
+  return clampScore(70 - (distance - TEMP_RANGE_TOLERANCE_F) * 6)
+}
+
 /** Direction-aware climate score (0–100). Returns 50 when direction is none. */
 export function computeClimateDirectionScore(
   climate: CityClimate,

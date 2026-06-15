@@ -40,6 +40,8 @@ import { installPlaidRoutes, logPlaidConfigAtStartup } from './plaidRoutes.js'
 import { installContactRoutes } from './contactRoutes.js'
 import { logContactMailConfigAtStartup } from './contactMail.js'
 import { installDevRoutes } from './devRoutes.js'
+import { installExchangeRateRoutes } from './exchangeRateRoutes.js'
+import { logWiseConfigAtStartup } from './wiseExchangeRates.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -74,6 +76,8 @@ installCsvImportRoutes(app, readSessionUser)
 installPlanStateRoutes(app, readSessionUser)
 installContactRoutes(app, readSessionUser)
 installDevRoutes(app)
+installExchangeRateRoutes(app)
+logWiseConfigAtStartup()
 
 function normalizeDisplayNameInput(raw: unknown): string | null {
   if (typeof raw !== 'string') return null

@@ -3,6 +3,16 @@ import type {
   DailyLifeFactorId,
   RetirementPreferences,
 } from '../types/preferences'
+import {
+  formatClimateTempRange,
+  isClimateTempRangeUnset,
+} from '../types/preferences'
+import {
+  isPreferenceDealbreaker,
+  isPreferenceHighPriority,
+  isPreferenceImportant,
+  isPreferenceMinor,
+} from './preferenceBands'
 import { ALL_CORE_KEYS, PREFERENCE_FACTOR_DEFINITIONS } from './preferenceFactors'
 
 type ActiveFactor = {
@@ -53,32 +63,26 @@ function collectActiveFactors(prefs: RetirementPreferences): ActiveFactor[] {
 }
 
 function climateAddendum(prefs: RetirementPreferences): string | null {
-  if (prefs.climate < 2 || prefs.climatePreference === 'none') return null
-  switch (prefs.climatePreference) {
-    case 'warm_dry':
-      return "You're drawn to warm, dry climates like the Mediterranean."
-    case 'four_seasons':
-      return 'You prefer a destination with distinct seasons.'
-    case 'cool_mild':
-      return 'Cooler, greener climates appeal to you most.'
-    default:
-      return null
+  if (prefs.climate < 4 || isClimateTempRangeUnset(prefs.climateTempMinF, prefs.climateTempMaxF)) {
+    return null
   }
+  return `You prefer average temperatures around ${formatClimateTempRange(
+    prefs.climateTempMinF,
+    prefs.climateTempMaxF,
+  )}.`
 }
 
 export function buildNarrative(prefs: RetirementPreferences): string {
   const factors = collectActiveFactors(prefs)
-  const dealbreakerFactors = factors.filter((f) => f.step === 5 && !f.isDaily)
-  const topPriorityFactors = factors.filter((f) => f.step === 4 && !f.isDaily)
-  const importantFactors = factors.filter((f) => f.step === 3 && !f.isDaily)
-  const minorFactors = factors.filter(
-    (f) => (f.step === 1 || f.step === 2) && !f.isDaily,
-  )
+  const dealbreakerFactors = factors.filter((f) => isPreferenceDealbreaker(f.step) && !f.isDaily)
+  const topPriorityFactors = factors.filter((f) => isPreferenceHighPriority(f.step) && !f.isDaily)
+  const importantFactors = factors.filter((f) => isPreferenceImportant(f.step) && !f.isDaily)
+  const minorFactors = factors.filter((f) => isPreferenceMinor(f.step) && !f.isDaily)
   const ignoredFactors = factors.filter((f) => f.step === 0 && !f.isDaily)
-  const dailyImportantFactors = factors.filter((f) => f.isDaily && f.step >= 3)
-  const dailyMinorFactors = factors.filter(
-    (f) => f.isDaily && (f.step === 1 || f.step === 2),
+  const dailyImportantFactors = factors.filter(
+    (f) => f.isDaily && (isPreferenceImportant(f.step) || isPreferenceHighPriority(f.step) || isPreferenceDealbreaker(f.step)),
   )
+  const dailyMinorFactors = factors.filter((f) => f.isDaily && isPreferenceMinor(f.step))
 
   const higherTierCount =
     (dealbreakerFactors.length > 0 ? 1 : 0) +

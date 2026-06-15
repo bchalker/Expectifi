@@ -8,7 +8,6 @@ import type {
 import {
   aggregateRowHasAccountBreakdown,
   breakdownAggregateByAccount,
-  normalizeImportSymbol,
 } from "../lib/positionsCsv";
 import { formatHoldingDescription } from "../lib/holdingsDisplay";
 import { truncateForHoldingsTable } from "../lib/holdingDisplay";
@@ -55,16 +54,10 @@ type Props = {
   combinedLines: boolean;
   /** Full merged import rows (for return model ids). */
   importedPositionRows: ImportedPositionRow[];
-  /** Dashboard only: enables Scenario column + slide panel (parent hosts panel). */
+  /** Dashboard only: enables scenario popout on each row. */
   scenarioBundle?: HoldingsScenarioBundle | null;
   /** Tax bucket for account-level scenario inheritance in this table. */
   accountScenarioBucket?: AccountScenarioBucketId;
-  /** Which ticker’s scenario sheet is open (symbol display key, matches row `symbol`). */
-  activeScenarioSymbol?: string | null;
-  onScenarioOpen?: (payload: {
-    symbol: string;
-    contributingRows: ImportedPositionRow[];
-  }) => void;
 };
 
 function modelsForAggregateRow(
@@ -81,11 +74,6 @@ type HoldingGroupProps = {
   accountScenarioBucket?: AccountScenarioBucketId;
   mergedModels: PositionReturnModel[];
   h: number;
-  activeScenarioSymbol?: string | null;
-  onScenarioOpen?: (payload: {
-    symbol: string;
-    contributingRows: ImportedPositionRow[];
-  }) => void;
   showMergedTickerNote: boolean;
 };
 
@@ -95,8 +83,6 @@ function AggregatedHoldingGroup({
   accountScenarioBucket,
   mergedModels,
   h,
-  activeScenarioSymbol,
-  onScenarioOpen,
   showMergedTickerNote,
 }: HoldingGroupProps) {
   const hasBreakdown = aggregateRowHasAccountBreakdown(r);
@@ -160,16 +146,6 @@ function AggregatedHoldingGroup({
         ? scenarioColumnShortLabel(displayChoice, customDec)
         : HOLDING_SCENARIO_PLACEHOLDER_LABEL;
   const rowKey = r.symbol;
-  const rowActive =
-    activeScenarioSymbol != null &&
-    normalizeImportSymbol(activeScenarioSymbol).toUpperCase() ===
-      normalizeImportSymbol(rowKey).toUpperCase();
-
-  const openScenario = () =>
-    onScenarioOpen?.({
-      symbol: r.symbol,
-      contributingRows: r.contributingRows,
-    });
 
   const descNode = showTip ? (
     <Tooltip content={fullDesc} placement="top">
@@ -198,6 +174,8 @@ function AggregatedHoldingGroup({
 
   const scenarioProps = scenarioBundle
     ? {
+        symbol: r.symbol,
+        contributingRows: r.contributingRows,
         label,
         common: displayChoice,
         variant: (rateSource === "custom" ? "badge" : "outline") as
@@ -208,8 +186,6 @@ function AggregatedHoldingGroup({
           rateSource === "account" && accountInheritChoice !== "default"
             ? accountInheritChoice
             : null,
-        rowActive,
-        onOpen: openScenario,
         rateSource,
         overridesAccountScenario,
       }
@@ -248,7 +224,6 @@ function AggregatedHoldingGroup({
   return (
     <div className="holdings-symbol-group">
       <HoldingsSymbolCard
-        scenarioActive={rowActive}
         symbol={r.symbol}
         description={descNode}
         currentValue={r.currentValue}
@@ -268,8 +243,6 @@ export function AggregatedHoldingsTable({
   importedPositionRows,
   scenarioBundle,
   accountScenarioBucket,
-  activeScenarioSymbol,
-  onScenarioOpen,
 }: Props) {
   const mergedModels = useMemo(() => {
     if (!scenarioBundle) return [] as PositionReturnModel[];
@@ -313,8 +286,6 @@ export function AggregatedHoldingsTable({
             accountScenarioBucket={accountScenarioBucket}
             mergedModels={mergedModels}
             h={h}
-            activeScenarioSymbol={activeScenarioSymbol}
-            onScenarioOpen={onScenarioOpen}
             showMergedTickerNote={showCombinedNote}
           />
         ))}

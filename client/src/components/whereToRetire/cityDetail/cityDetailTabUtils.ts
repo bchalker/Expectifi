@@ -1,6 +1,12 @@
 import type { CSSProperties } from 'react'
 import { findOnboardingRegion, type OnboardingRegionId } from '../../../lib/onboardingRegions'
-import { formatUsd } from '../../../utils/costOfLiving'
+import {
+  calculateMonthlyBudget,
+  DEFAULT_LIFESTYLE,
+  formatUsd,
+  getAllMapCities,
+  type CityData,
+} from '../../../utils/costOfLiving'
 import { getQualityOfLifeData, qolNormalizedFromIndex } from '../../../utils/qualityOfLife'
 
 export const MISSING_FIELD_TEXT = 'Not reported'
@@ -139,8 +145,36 @@ export function indexBarScaleMax(value: number, benchmark: number, floor = 100):
   return Math.max(floor, value, benchmark)
 }
 
+let usBenchmarkBudgetCache: number | null = null
+
+/** Median monthly living-cost budget across US cities in our dataset (same formula as destination budgets). */
+export function usBenchmarkMonthlyBudget(): number {
+  if (usBenchmarkBudgetCache != null) return usBenchmarkBudgetCache
+  const budgets = getAllMapCities()
+    .filter((city) => city.country === 'United States')
+    .map((city) => calculateMonthlyBudget(city, DEFAULT_LIFESTYLE).total)
+    .filter((budget) => budget > 0)
+    .sort((a, b) => a - b)
+  usBenchmarkBudgetCache = budgets[Math.floor(budgets.length / 2)] ?? 2500
+  return usBenchmarkBudgetCache
+}
+
+/**
+ * How far US income stretches in this city vs a typical US city.
+ * Uses city-level Numbeo budget components — not the exchange rate.
+ */
+export function purchasingPowerMultiplierForCity(city: CityData): number | null {
+  const cityBudget = calculateMonthlyBudget(city, DEFAULT_LIFESTYLE).total
+  if (cityBudget <= 0) return null
+  const benchmark = usBenchmarkMonthlyBudget()
+  return Number((benchmark / cityBudget).toFixed(1))
+}
+
+/** @deprecated Prefer purchasingPowerMultiplierForCity — kept for country-only contexts. */
 export function usPurchasingPowerMultiplier(colIndex: number): number {
-  return Number((100 / colIndex).toFixed(1))
+  const usCol = getColIndexForCountry('United States')
+  const baseline = usCol != null && usCol > 0 ? usCol : 100
+  return Number((baseline / colIndex).toFixed(1))
 }
 
 export function dollarStrengthBand(multiplier: number): DollarStrengthBand {

@@ -1,0 +1,8 @@
+.fading-text {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.fading-text--visible {
+  opacity: 1;
+}

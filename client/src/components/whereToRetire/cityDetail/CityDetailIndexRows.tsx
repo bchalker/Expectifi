@@ -1,5 +1,7 @@
 import { useUserLocale } from '../../../context/UserLocaleContext'
 import { Tooltip } from '../../Tooltip'
+import { AppChip } from '../../ui/AppChip'
+import { wtrIndexBandChipColor } from '../../../lib/whereToRetire/wtrChipColors'
 import {
   formatQoLIndex,
   getQualityOfLifeData,
@@ -56,16 +58,12 @@ function IndexComparisonRow({
 }) {
   return (
     <div className="wtr-city-detail-index-card__comparison-row">
-      <span
-        className={[
-          'wtr-city-detail-index-card__pill',
-          band ? `wtr-city-detail-index-card__pill--${band}` : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
+      <AppChip
+        color={band ? wtrIndexBandChipColor(band) : 'default'}
+        variant="soft"
       >
         {comparison.pillLabel}
-      </span>
+      </AppChip>
       <span className="wtr-city-detail-index-card__comparison-text">
         {comparison.suffixBeforeBenchmark}
         <Tooltip
@@ -85,11 +83,21 @@ function IndexComparisonRow({
 function IndexTierRow({ label, band }: { label: string; band: QoLOverallBand }) {
   return (
     <div className="wtr-city-detail-index-card__tier-row">
-      <span className={`wtr-city-detail-index-card__pill wtr-city-detail-index-card__pill--${band}`}>
+      <AppChip color={wtrIndexBandChipColor(band)} variant="soft">
         {label}
-      </span>
+      </AppChip>
     </div>
   )
+}
+
+const INDEX_BAR_GOOD_BANDS = new Set<string>(['affordable', 'excellent', 'above-average'])
+const INDEX_BAR_MID_BANDS = new Set<string>(['moderate', 'average'])
+
+function indexBarFillTone(band: ColIndexBand | QoLOverallBand | null): 'good' | 'mid' | 'bad' | 'neutral' {
+  if (!band) return 'neutral'
+  if (INDEX_BAR_GOOD_BANDS.has(band)) return 'good'
+  if (INDEX_BAR_MID_BANDS.has(band)) return 'mid'
+  return 'bad'
 }
 
 function CityDetailIndexCard({
@@ -114,6 +122,7 @@ function CityDetailIndexCard({
   const fillPct = showBar ? Math.min(100, (value / scaleMax) * 100) : 0
   const markerPct =
     showBar && usesHomeBenchmark ? Math.min(100, (benchmark / scaleMax) * 100) : null
+  const fillTone = indexBarFillTone(band)
 
   return (
     <article
@@ -137,7 +146,10 @@ function CityDetailIndexCard({
       {showBar ? (
         <div className="wtr-city-detail-index-card__bar-wrap">
           <div
-            className="wtr-city-detail-index-card__track"
+            className={[
+              'wtr-city-detail-index-card__track',
+              `wtr-city-detail-index-card__track--${fillTone}`,
+            ].join(' ')}
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={scaleMax}
@@ -145,7 +157,10 @@ function CityDetailIndexCard({
             aria-label={`${label}: ${displayValue}`}
           >
             <div
-              className="wtr-city-detail-index-card__fill"
+              className={[
+                'wtr-city-detail-index-card__fill',
+                `wtr-city-detail-index-card__fill--${fillTone}`,
+              ].join(' ')}
               style={{ width: `${fillPct}%` }}
             />
           </div>

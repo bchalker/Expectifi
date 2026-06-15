@@ -6,11 +6,14 @@ import {
   type RetirementFitResult,
 } from '../retirementFormulas'
 import type { RetirementCityRecord } from '../retirementDestinations'
-import { formatUsd } from '../../utils/costOfLiving'
-import type { MapFilters, ScoredMapCity } from './cityMapScoring'
+import {
+  calculateMonthlyBudget,
+  getCityData,
+  type CityData,
+} from '../../utils/costOfLiving'
+import { resolveMapLifestyle, type MapFilters, type ScoredMapCity } from './cityMapScoring'
 import { lookupRetirementCity } from './retirementCityLookup'
-
-export const DEFAULT_HEALTH_INS_MONTHLY_USD = 200
+import { formatUsd } from '../../utils/costOfLiving'
 
 export type MapIncomeFitDisplay = {
   taxLabel: string
@@ -20,36 +23,33 @@ export type MapIncomeFitDisplay = {
 }
 
 export function calcMapIncomeFit(
+  mapCity: CityData,
   record: RetirementCityRecord,
   grossMonthly: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): RetirementFitResult {
-  const healthUsd = filters.includeHealthIns ? filters.healthInsMonthlyUsd : 0
-  return calcFit(record, grossMonthly, filters.includeHealthIns, healthUsd)
+  return calcFit(mapCity, record, grossMonthly, resolveMapLifestyle(filters))
 }
 
 export function monthlyOutflowForMapCity(
   scored: ScoredMapCity,
-  monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  _monthlyIncome: number,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): number {
-  const record = lookupRetirementCity(scored.city.city, scored.city.country)
-  if (record) {
-    return calcMapIncomeFit(record, monthlyIncome, filters).trueCOL
-  }
-  return scored.monthlyBudget
+  return calculateMonthlyBudget(scored.city, resolveMapLifestyle(filters)).total
 }
 
 export function mapIncomeFitDisplayForCity(
   city: string,
   country: string,
   monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): MapIncomeFitDisplay | null {
   const record = lookupRetirementCity(city, country)
-  if (!record) return null
+  const mapCity = getCityData(city, country)
+  if (!record || !mapCity) return null
 
-  const fit = calcMapIncomeFit(record, monthlyIncome, filters)
+  const fit = calcMapIncomeFit(mapCity, record, monthlyIncome, filters)
   const displayTaxRate = getEffectiveTaxRate(record.country_iso)
 
   return {
@@ -65,10 +65,10 @@ export function mapIncomeFitDisplayForCity(
 export function passesVisaQualifyingMapFilter(
   scored: ScoredMapCity,
   monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd' | 'visaQualifyingOnly'>,
+  filters: Pick<MapFilters, 'lifestyle' | 'visaQualifyingOnly'>,
 ): boolean {
   if (!filters.visaQualifyingOnly) return true
   const record = lookupRetirementCity(scored.city.city, scored.city.country)
   if (!record) return false
-  return calcMapIncomeFit(record, monthlyIncome, filters).visaQualifies
+  return calcMapIncomeFit(scored.city, record, monthlyIncome, filters).visaQualifies
 }

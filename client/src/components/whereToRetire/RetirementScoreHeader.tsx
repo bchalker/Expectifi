@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { ScoreMeterRow } from "../ui/ScoreMeterRow";
+import { AppChip } from "../ui/AppChip";
 import type { RetirementScoreBand } from "../../utils/retirementScore";
 import "./RetirementScoreHeader.scss";
 
@@ -81,12 +82,14 @@ export function RetirementScoreHeader({
             %
           </span>
         </p>
-        <span
-          className="wtr-score-header__panel-band-pill"
+        <AppChip
+          className="wtr-score-header__panel-band-chip"
+          variant="primary"
+          color="default"
           style={{ background: bandColor }}
         >
           {pillLabel}
-        </span>
+        </AppChip>
       </div>
     </div>
   );

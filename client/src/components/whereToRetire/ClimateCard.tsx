@@ -3,14 +3,18 @@ import { IconSun } from '@tabler/icons-react'
 import type { CityClimate } from '../../lib/api/openMeteo'
 import { formatTemp } from '../../lib/api/openMeteo'
 import type { ClimatePreferenceDirection, PreferenceStep } from '../../types/preferences'
+import { deriveClimateDetail } from '../../utils/climateDetail'
 import { deriveClimateNotes } from '../../utils/climateNotes'
 import { ClimateMonthlyChart } from './ClimateMonthlyChart'
 import './ClimateCard.scss'
 
 type Props = {
   climate: CityClimate | null
+  lat?: number
   climatePreferenceStep?: PreferenceStep
   climatePreferenceDirection?: ClimatePreferenceDirection
+  climateTempMinF?: number
+  climateTempMaxF?: number
   loading: boolean
   failed: boolean
   staggerClassName?: string
@@ -51,8 +55,11 @@ function StaggerSection({
 
 export function ClimateCard({
   climate,
+  lat = 0,
   climatePreferenceStep = 0,
   climatePreferenceDirection = 'none',
+  climateTempMinF,
+  climateTempMaxF,
   loading,
   failed,
   staggerClassName,
@@ -62,9 +69,25 @@ export function ClimateCard({
   const climateNotes = useMemo(
     () =>
       climate
-        ? deriveClimateNotes(climate, climatePreferenceStep, climatePreferenceDirection)
+        ? deriveClimateNotes(
+            climate,
+            climatePreferenceStep,
+            climatePreferenceDirection,
+            climateTempMinF,
+            climateTempMaxF,
+          )
         : null,
-    [climate, climatePreferenceStep, climatePreferenceDirection],
+    [
+      climate,
+      climatePreferenceStep,
+      climatePreferenceDirection,
+      climateTempMinF,
+      climateTempMaxF,
+    ],
+  )
+  const climateDetail = useMemo(
+    () => (climate ? deriveClimateDetail(climate, lat) : null),
+    [climate, lat],
   )
 
   if (failed) {
@@ -175,7 +198,14 @@ export function ClimateCard({
       ) : null}
 
       <div {...staggerSectionProps(2, 'wtr-climate-card__chart', staggerClassName, staggerStyle)}>
-        <ClimateMonthlyChart monthly={climate.monthly} />
+        <ClimateMonthlyChart
+          monthly={climate.monthly}
+          lat={lat}
+          seasons={climateDetail?.seasons ?? []}
+          tempUnit={tempUnit}
+          climatePreferenceStep={climatePreferenceStep}
+          climatePreferenceDirection={climatePreferenceDirection}
+        />
       </div>
 
       <dl {...staggerSectionProps(3, 'wtr-climate-card__stats', staggerClassName, staggerStyle)}>

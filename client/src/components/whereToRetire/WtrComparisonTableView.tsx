@@ -17,6 +17,7 @@ import './DestinationPeopleCultureTab.scss'
 import { scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { getAllMapCities, type MapCity } from '../../utils/costOfLiving'
 import { CountryFlag } from '../ui/CountryFlag'
+import { AppChip } from '../ui/AppChip'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
 import './WtrComparisonTableView.scss'
 
@@ -127,14 +128,14 @@ function CityColumnHeader({
     >
       {onRemove ? (
         <div className="wtr-compare-table__col-remove-slide">
-          <button
-            type="button"
-            className="wtr-compare-table__col-remove-pill"
+          <AppChip
+            color="danger"
+            variant="soft"
             onClick={onRemove}
             aria-label={`Remove ${mapCity?.city ?? 'city'} from comparison`}
           >
             Remove
-          </button>
+          </AppChip>
         </div>
       ) : null}
 

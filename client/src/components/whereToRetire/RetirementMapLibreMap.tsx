@@ -1,69 +1,75 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { createRoot, type Root } from 'react-dom/client'
-import maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
-import type { MapFilters, ScoredMapCity } from '../../lib/whereToRetire/cityMapScoring'
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import type {
+  MapFilters,
+  ScoredMapCity,
+} from "../../lib/whereToRetire/cityMapScoring";
 import {
   toggleExpatCommunityTier,
   type ExpatLegendTierId,
-} from '../../lib/whereToRetire/cityMapScoring'
+} from "../../lib/whereToRetire/cityMapScoring";
 import {
   resolveMapPinDisplay,
   type MapPinColorView,
   type MapPinDisplay,
-} from '../../lib/whereToRetire/mapPinDisplay'
-import { WtrMapPinLegend } from './WtrMapPinLegend'
-import { WtrMapPinTooltip } from './WtrMapPinTooltip'
-import './RetirementMapLibreMap.scss'
-import './WtrMapPinLegend.scss'
-import './WtrMapPinTooltip.scss'
+} from "../../lib/whereToRetire/mapPinDisplay";
+import { WtrMapPinLegend } from "./WtrMapPinLegend";
+import { WtrMapPinTooltip } from "./WtrMapPinTooltip";
+import "./RetirementMapLibreMap.scss";
+import "./WtrMapPinLegend.scss";
+import "./WtrMapPinTooltip.scss";
 
-const BOUNDS_EASE_DURATION_MS = 900
-const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/bright'
+const BOUNDS_EASE_DURATION_MS = 900;
+const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/bright";
 
 type Props = {
-  destinations: ScoredMapCity[]
-  monthlyIncome: number
-  pinColorView: MapPinColorView
-  filters: MapFilters
-  onFiltersChange: (filters: MapFilters) => void
-  favoritedKeySet: ReadonlySet<string>
-  selectedId: string | null
+  destinations: ScoredMapCity[];
+  monthlyIncome: number;
+  pinColorView: MapPinColorView;
+  filters: MapFilters;
+  onFiltersChange: (filters: MapFilters) => void;
+  favoritedKeySet: ReadonlySet<string>;
+  selectedId: string | null;
   /** When true, emphasize the selected pin; map camera does not move with the detail panel. */
-  detailPanelOpen: boolean
-  fitKey: string
-  onSelect: (id: string) => void
-}
+  detailPanelOpen: boolean;
+  fitKey: string;
+  onSelect: (id: string) => void;
+};
 
 type MarkerEntry = {
-  marker: maplibregl.Marker
-  pinEl: HTMLSpanElement
-  popup: maplibregl.Popup
-  popupContainer: HTMLDivElement
-  popupRoot: Root | null
-  cityId: string
-}
+  marker: maplibregl.Marker;
+  pinEl: HTMLSpanElement;
+  popup: maplibregl.Popup;
+  popupContainer: HTMLDivElement;
+  popupRoot: Root | null;
+  cityId: string;
+};
 
-function detailFocusId(selectedId: string | null, detailPanelOpen: boolean): string | null {
-  return detailPanelOpen && selectedId ? selectedId : null
+function detailFocusId(
+  selectedId: string | null,
+  detailPanelOpen: boolean,
+): string | null {
+  return detailPanelOpen && selectedId ? selectedId : null;
 }
 
 function prefersReducedMotion(): boolean {
   return (
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  )
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 function whenMapReady(map: maplibregl.Map, run: () => void): () => void {
   if (map.isStyleLoaded()) {
-    run()
-    return () => {}
+    run();
+    return () => {};
   }
-  map.once('load', run)
+  map.once("load", run);
   return () => {
-    map.off('load', run)
-  }
+    map.off("load", run);
+  };
 }
 
 function applyPinDisplay(
@@ -73,32 +79,32 @@ function applyPinDisplay(
   focusId: string | null,
   cityId: string,
 ) {
-  const isFocused = cityId === focusId
+  const isFocused = cityId === focusId;
   pinEl.className = [
-    'wtr-map-pin',
+    "wtr-map-pin",
     `wtr-map-pin--${display.bandClass}`,
-    isFocused && 'wtr-map-pin--selected',
-    isFocused && 'wtr-map-pin--detail',
+    isFocused && "wtr-map-pin--selected",
+    isFocused && "wtr-map-pin--detail",
   ]
     .filter(Boolean)
-    .join(' ')
-  pinEl.style.width = `${sizePx}px`
-  pinEl.style.height = `${sizePx}px`
-  pinEl.style.background = display.pinColor
-  pinEl.dataset.cityId = cityId
+    .join(" ");
+  pinEl.style.width = `${sizePx}px`;
+  pinEl.style.height = `${sizePx}px`;
+  pinEl.style.background = display.pinColor;
+  pinEl.dataset.cityId = cityId;
 }
 
 function syncPinSelection(mapContainer: HTMLElement, focusId: string | null) {
-  mapContainer.querySelectorAll<HTMLElement>('.wtr-map-pin').forEach((el) => {
-    const id = el.getAttribute('data-city-id')
-    const isFocused = id != null && id === focusId
-    el.classList.toggle('wtr-map-pin--selected', isFocused)
-    el.classList.toggle('wtr-map-pin--detail', isFocused)
-    const markerHost = el.closest('.maplibregl-marker') as HTMLElement | null
+  mapContainer.querySelectorAll<HTMLElement>(".wtr-map-pin").forEach((el) => {
+    const id = el.getAttribute("data-city-id");
+    const isFocused = id != null && id === focusId;
+    el.classList.toggle("wtr-map-pin--selected", isFocused);
+    el.classList.toggle("wtr-map-pin--detail", isFocused);
+    const markerHost = el.closest(".maplibregl-marker") as HTMLElement | null;
     if (markerHost) {
-      markerHost.style.zIndex = isFocused ? '2' : ''
+      markerHost.style.zIndex = isFocused ? "2" : "";
     }
-  })
+  });
 }
 
 export function RetirementMapLibreMap({
@@ -113,27 +119,30 @@ export function RetirementMapLibreMap({
   fitKey,
   onSelect,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
-  const markersRef = useRef(new Map<string, MarkerEntry>())
-  const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>())
-  const destinationsRef = useRef(destinations)
-  const onSelectRef = useRef(onSelect)
-  const prevFocusIdForBoundsRef = useRef<string | null>(null)
-  const prevFitKeyRef = useRef(fitKey)
-  const hasAutoFitRef = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef(new Map<string, MarkerEntry>());
+  const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>());
+  const destinationsRef = useRef(destinations);
+  const onSelectRef = useRef(onSelect);
+  const prevFocusIdForBoundsRef = useRef<string | null>(null);
+  const prevFitKeyRef = useRef(fitKey);
+  const hasAutoFitRef = useRef(false);
 
   const handleToggleExpatTier = useCallback(
     (tier: ExpatLegendTierId) => {
       onFiltersChange({
         ...filters,
-        expatCommunityTiers: toggleExpatCommunityTier(filters.expatCommunityTiers, tier),
-      })
+        expatCommunityTiers: toggleExpatCommunityTier(
+          filters.expatCommunityTiers,
+          tier,
+        ),
+      });
     },
     [filters, onFiltersChange],
-  )
+  );
 
-  const focusId = detailFocusId(selectedId, detailPanelOpen)
+  const focusId = detailFocusId(selectedId, detailPanelOpen);
 
   const pinDisplays = useMemo(
     () =>
@@ -141,22 +150,22 @@ export function RetirementMapLibreMap({
         destinations.map((item) => {
           const isFavorite = favoritedKeySet.has(
             `${item.city.city}\u0001${item.city.country}`,
-          )
+          );
           return [
             item.city.id,
             resolveMapPinDisplay(item, pinColorView, monthlyIncome, isFavorite),
-          ]
+          ];
         }),
       ),
     [destinations, monthlyIncome, pinColorView, favoritedKeySet],
-  )
+  );
 
-  pinDisplaysRef.current = pinDisplays
-  destinationsRef.current = destinations
-  onSelectRef.current = onSelect
+  pinDisplaysRef.current = pinDisplays;
+  destinationsRef.current = destinations;
+  onSelectRef.current = onSelect;
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return
+    if (!containerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
@@ -166,114 +175,124 @@ export function RetirementMapLibreMap({
       minZoom: 2,
       maxZoom: 8,
       attributionControl: { compact: true },
-    })
+    });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
+    map.addControl(
+      new maplibregl.NavigationControl({ showCompass: false }),
+      "top-left",
+    );
 
-    mapRef.current = map
+    mapRef.current = map;
 
     return () => {
       markersRef.current.forEach((entry) => {
-        entry.popupRoot?.unmount()
-        entry.marker.remove()
-      })
-      markersRef.current.clear()
-      map.remove()
-      mapRef.current = null
-    }
-  }, [])
+        entry.popupRoot?.unmount();
+        entry.marker.remove();
+      });
+      markersRef.current.clear();
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
-    const map = mapRef.current
-    const container = containerRef.current
-    if (!map || !container) return
+    const map = mapRef.current;
+    const container = containerRef.current;
+    if (!map || !container) return;
 
-    let resizeTimer: number | undefined
+    let resizeTimer: number | undefined;
 
     const resize = () => {
-      if (resizeTimer != null) window.clearTimeout(resizeTimer)
+      if (resizeTimer != null) window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
-        map.resize()
-      }, 100)
-    }
+        map.resize();
+      }, 100);
+    };
 
-    resize()
+    resize();
 
-    const host = container.parentElement
+    const host = container.parentElement;
     const ro =
-      host && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null
-    if (host && ro) ro.observe(host)
+      host && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(resize)
+        : null;
+    if (host && ro) ro.observe(host);
 
-    window.addEventListener('resize', resize)
+    window.addEventListener("resize", resize);
     return () => {
-      if (resizeTimer != null) window.clearTimeout(resizeTimer)
-      ro?.disconnect()
-      window.removeEventListener('resize', resize)
-    }
-  }, [])
+      if (resizeTimer != null) window.clearTimeout(resizeTimer);
+      ro?.disconnect();
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
+    const map = mapRef.current;
+    if (!map) return;
 
-    const nextIds = new Set(destinations.map((item) => item.city.id))
+    const nextIds = new Set(destinations.map((item) => item.city.id));
 
     for (const [cityId, entry] of markersRef.current) {
-      if (nextIds.has(cityId)) continue
-      entry.popupRoot?.unmount()
-      entry.marker.remove()
-      markersRef.current.delete(cityId)
+      if (nextIds.has(cityId)) continue;
+      entry.popupRoot?.unmount();
+      entry.marker.remove();
+      markersRef.current.delete(cityId);
     }
 
     destinations.forEach((item) => {
-      const display = pinDisplays.get(item.city.id)
-      if (!display) return
+      const display = pinDisplays.get(item.city.id);
+      if (!display) return;
 
-      const cityId = item.city.id
-      let entry = markersRef.current.get(cityId)
+      const cityId = item.city.id;
+      let entry = markersRef.current.get(cityId);
       if (!entry) {
-        const pinEl = document.createElement('span')
-        const host = document.createElement('div')
-        host.className = 'wtr-map-pin-host'
-        host.appendChild(pinEl)
+        const pinEl = document.createElement("span");
+        const host = document.createElement("div");
+        host.className = "wtr-map-pin-host";
+        host.appendChild(pinEl);
 
-        const popupContainer = document.createElement('div')
+        const popupContainer = document.createElement("div");
         const popup = new maplibregl.Popup({
           closeButton: false,
           closeOnClick: false,
           closeOnMove: false,
           offset: [0, -6],
-          className: 'wtr-pin-tooltip-host',
-        }).setDOMContent(popupContainer)
+          className: "wtr-pin-tooltip-host",
+        }).setDOMContent(popupContainer);
 
-        host.addEventListener('click', () => {
-          onSelectRef.current(cityId)
-        })
+        host.addEventListener("click", () => {
+          onSelectRef.current(cityId);
+        });
 
-        host.addEventListener('mouseenter', () => {
-          const scored = destinationsRef.current.find((d) => d.city.id === cityId)
-          const currentDisplay = pinDisplaysRef.current.get(cityId)
-          if (!scored || !currentDisplay) return
+        host.addEventListener("mouseenter", () => {
+          const scored = destinationsRef.current.find(
+            (d) => d.city.id === cityId,
+          );
+          const currentDisplay = pinDisplaysRef.current.get(cityId);
+          if (!scored || !currentDisplay) return;
 
-          const markerEntry = markersRef.current.get(cityId)
-          if (!markerEntry) return
+          const markerEntry = markersRef.current.get(cityId);
+          if (!markerEntry) return;
 
           if (!markerEntry.popupRoot) {
-            markerEntry.popupRoot = createRoot(popupContainer)
+            markerEntry.popupRoot = createRoot(popupContainer);
           }
           markerEntry.popupRoot.render(
             <WtrMapPinTooltip scored={scored} display={currentDisplay} />,
-          )
-          popup.setLngLat([scored.city.lng, scored.city.lat]).addTo(map)
-        })
+          );
+          popup.setLngLat([scored.city.lng, scored.city.lat]).addTo(map);
+        });
 
-        host.addEventListener('mouseleave', () => {
-          popup.remove()
-        })
+        host.addEventListener("mouseleave", () => {
+          popup.remove();
+        });
 
-        const marker = new maplibregl.Marker({ element: host, anchor: 'center' })
+        const marker = new maplibregl.Marker({
+          element: host,
+          anchor: "center",
+        })
           .setLngLat([item.city.lng, item.city.lat])
-          .addTo(map)
+          .addTo(map);
 
         entry = {
           marker,
@@ -282,40 +301,40 @@ export function RetirementMapLibreMap({
           popupContainer,
           popupRoot: null,
           cityId,
-        }
-        markersRef.current.set(cityId, entry)
+        };
+        markersRef.current.set(cityId, entry);
       } else {
-        entry.marker.setLngLat([item.city.lng, item.city.lat])
+        entry.marker.setLngLat([item.city.lng, item.city.lat]);
       }
 
-      applyPinDisplay(entry.pinEl, display, item.pinSizePx, focusId, cityId)
-    })
-  }, [destinations, pinDisplays, focusId])
+      applyPinDisplay(entry.pinEl, display, item.pinSizePx, focusId, cityId);
+    });
+  }, [destinations, pinDisplays, focusId]);
 
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
+    const map = mapRef.current;
+    if (!map) return;
 
-    const prevFocus = prevFocusIdForBoundsRef.current
-    prevFocusIdForBoundsRef.current = focusId
+    const prevFocus = prevFocusIdForBoundsRef.current;
+    prevFocusIdForBoundsRef.current = focusId;
 
-    if (focusId) return
+    if (focusId) return;
 
-    const panelJustClosed = prevFocus != null
-    if (panelJustClosed) return
+    const panelJustClosed = prevFocus != null;
+    if (panelJustClosed) return;
 
-    const filtersChanged = fitKey !== prevFitKeyRef.current
-    prevFitKeyRef.current = fitKey
+    const filtersChanged = fitKey !== prevFitKeyRef.current;
+    prevFitKeyRef.current = fitKey;
 
-    if (hasAutoFitRef.current && !panelJustClosed && !filtersChanged) return
-    hasAutoFitRef.current = true
+    if (hasAutoFitRef.current && !panelJustClosed && !filtersChanged) return;
+    hasAutoFitRef.current = true;
 
     return whenMapReady(map, () => {
-      const reduced = prefersReducedMotion()
-      const duration = reduced ? 0 : BOUNDS_EASE_DURATION_MS
-      const visibleDestinations = destinationsRef.current
+      const reduced = prefersReducedMotion();
+      const duration = reduced ? 0 : BOUNDS_EASE_DURATION_MS;
+      const visibleDestinations = destinationsRef.current;
 
-      map.stop()
+      map.stop();
 
       if (!visibleDestinations.length) {
         map.easeTo({
@@ -323,67 +342,81 @@ export function RetirementMapLibreMap({
           zoom: 2,
           duration: reduced ? 0 : BOUNDS_EASE_DURATION_MS * 0.85,
           essential: true,
-        })
-        return
+        });
+        return;
       }
 
-      const bounds = new maplibregl.LngLatBounds()
+      const bounds = new maplibregl.LngLatBounds();
       visibleDestinations.forEach((item) => {
-        bounds.extend([item.city.lng, item.city.lat])
-      })
+        bounds.extend([item.city.lng, item.city.lat]);
+      });
 
       map.fitBounds(bounds, {
         padding: 40,
         duration,
         maxZoom: 6,
         essential: true,
-      })
-    })
-  }, [fitKey, focusId])
+      });
+    });
+  }, [fitKey, focusId]);
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container = containerRef.current;
+    if (!container) return;
 
-    const id = window.setTimeout(() => syncPinSelection(container, focusId), 0)
-    return () => window.clearTimeout(id)
-  }, [focusId, destinations.length])
+    const id = window.setTimeout(() => syncPinSelection(container, focusId), 0);
+    return () => window.clearTimeout(id);
+  }, [focusId, destinations.length]);
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container = containerRef.current;
+    if (!container) return;
 
-    let clearEnter: number | undefined
+    let clearEnter: number | undefined;
 
     const id = window.setTimeout(() => {
-      if (destinations.length > 0 && !container.querySelector('.wtr-map-pin')) return
+      if (destinations.length > 0 && !container.querySelector(".wtr-map-pin"))
+        return;
 
-      container.classList.remove('wtr-maplibre-map--pins-enter')
-      void container.offsetHeight
-      container.classList.add('wtr-maplibre-map--pins-enter')
+      container.classList.remove("wtr-maplibre-map--pins-enter");
+      void container.offsetHeight;
+      container.classList.add("wtr-maplibre-map--pins-enter");
       clearEnter = window.setTimeout(() => {
-        container.classList.remove('wtr-maplibre-map--pins-enter')
-      }, 450)
-    }, 50)
+        container.classList.remove("wtr-maplibre-map--pins-enter");
+      }, 450);
+    }, 50);
 
     return () => {
-      window.clearTimeout(id)
-      if (clearEnter != null) window.clearTimeout(clearEnter)
-      container.classList.remove('wtr-maplibre-map--pins-enter')
-    }
-  }, [fitKey, destinations.length])
+      window.clearTimeout(id);
+      if (clearEnter != null) window.clearTimeout(clearEnter);
+      container.classList.remove("wtr-maplibre-map--pins-enter");
+    };
+  }, [fitKey, destinations.length]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
       destinations.forEach((item) => {
-        const entry = markersRef.current.get(item.city.id)
-        const display = pinDisplays.get(item.city.id)
-        if (!entry || !display) return
-        applyPinDisplay(entry.pinEl, display, item.pinSizePx, focusId, item.city.id)
-      })
-    }, 0)
-    return () => window.clearTimeout(id)
-  }, [destinations, monthlyIncome, pinColorView, favoritedKeySet, pinDisplays, focusId])
+        const entry = markersRef.current.get(item.city.id);
+        const display = pinDisplays.get(item.city.id);
+        if (!entry || !display) return;
+        applyPinDisplay(
+          entry.pinEl,
+          display,
+          item.pinSizePx,
+          focusId,
+          item.city.id,
+        );
+      });
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [
+    destinations,
+    monthlyIncome,
+    pinColorView,
+    favoritedKeySet,
+    pinDisplays,
+    focusId,
+  ]);
 
   return (
     <div className="wtr-maplibre-map">
@@ -393,11 +426,11 @@ export function RetirementMapLibreMap({
           variant="overlay"
           activeExpatTiers={filters.expatCommunityTiers}
           onToggleExpatTier={
-            pinColorView === 'expat' ? handleToggleExpatTier : undefined
+            pinColorView === "expat" ? handleToggleExpatTier : undefined
           }
         />
       </div>
       <div ref={containerRef} className="wtr-maplibre-map__canvas" />
     </div>
-  )
+  );
 }

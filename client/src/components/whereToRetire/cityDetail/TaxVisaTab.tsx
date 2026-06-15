@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import {
   getTaxVisaData,
+  TAX_RATE_HOME_COUNTRY_NOTE,
   TAX_VISA_FOREIGN_INCOME_NOTE,
   TAX_VISA_TAB_DISCLAIMER_BODY,
   TAX_VISA_UNAVAILABLE_MESSAGE,
@@ -56,7 +57,11 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
         className="wtr-city-detail__cards wtr-tax-visa-tab__cards"
         {...staggerSectionProps(0, 'wtr-tax-visa-tab__cards', staggerClassName, staggerStyle)}
       >
-        <TaxInfoCard title="Tax rate" value={formatTextField(data.tax_rate_label)} />
+        <TaxInfoCard
+          title="Tax rate"
+          value={formatTextField(data.tax_rate_label)}
+          note={TAX_RATE_HOME_COUNTRY_NOTE}
+        />
         <TaxInfoCard
           title="Tax on foreign income"
           value={formatTextField(data.tax_summary)}

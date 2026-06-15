@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { getMapCountryCatalog } from '../../lib/whereToRetire/mapCountryCatalog'
 import { CountryFlag } from '../ui/CountryFlag'
+import { AppChip } from '../ui/AppChip'
 import { WtrExcludeCountryIcon } from './WtrExcludeCountryIcon'
 import './WtrMapFiltersExcludeTab.scss'
 
@@ -115,10 +116,11 @@ export function WtrMapFiltersExcludeTab({
               {excludedCountries.map((name) => {
                 const meta = countryMeta.get(name)
                 return (
-                  <button
+                  <AppChip
                     key={name}
-                    type="button"
-                    className="wtr-map-exclude__pill"
+                    className="app-chip--exclude"
+                    variant="secondary"
+                    color="default"
                     onClick={() => onRemoveExcludedCountry(name)}
                     aria-label={`Remove ${name} from exclusions`}
                   >
@@ -129,7 +131,7 @@ export function WtrMapFiltersExcludeTab({
                     <span className="wtr-map-exclude__pill-x" aria-hidden>
                       ×
                     </span>
-                  </button>
+                  </AppChip>
                 )
               })}
             </div>

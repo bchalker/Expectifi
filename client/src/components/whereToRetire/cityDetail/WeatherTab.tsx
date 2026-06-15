@@ -1,39 +1,21 @@
-import { useMemo, useState, type ComponentType } from 'react'
-import { IconCloudRain, IconStethoscope, IconSun, IconWind } from '@tabler/icons-react'
+import { useMemo, useState } from 'react'
+import { IconStethoscope } from '@tabler/icons-react'
 import type { CityClimate } from '../../../lib/api/openMeteo'
 import { formatTemp } from '../../../lib/api/openMeteo'
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import { deriveClimateNotes } from '../../../utils/climateNotes'
-import { deriveClimateDetail, formatTempRange, type SeasonKey } from '../../../utils/climateDetail'
+import { deriveClimateDetail } from '../../../utils/climateDetail'
 import { ClimateMonthlyChart } from '../ClimateMonthlyChart'
+import { MonthlyPrecipChart } from '../MonthlyPrecipChart'
 import { staggerSectionProps, type CityDetailTabStaggerProps } from './cityDetailTabUtils'
 import './WeatherTab.scss'
-
-type TablerIconProps = {
-  size?: number | string
-  stroke?: number | string
-}
-
-const SEASON_ICONS: Record<SeasonKey, ComponentType<TablerIconProps>> = {
-  winter: IconCloudRain,
-  spring: IconWind,
-  summer: IconSun,
-  fall: IconWind,
-}
-
-function SeasonIcon({ season }: { season: SeasonKey }) {
-  const Icon = SEASON_ICONS[season]
-  return (
-    <span className={`wtr-weather-tab__season-icon wtr-weather-tab__season-icon--${season}`} aria-hidden>
-      <Icon size={18} stroke={1.5} />
-    </span>
-  )
-}
 
 type Props = CityDetailTabStaggerProps & {
   climate: CityClimate | null
   climatePreferenceStep: PreferenceStep
   climatePreferenceDirection: RetirementPreferences['climatePreference']
+  climateTempMinF?: number
+  climateTempMaxF?: number
   lat: number
   loading: boolean
   failed: boolean
@@ -77,12 +59,7 @@ function WeatherSkeleton({
         <span />
       </div>
       <div {...staggerSectionProps(3, 'wtr-weather-tab__skeleton-chart', staggerClassName, staggerStyle)} />
-      <div {...staggerSectionProps(4, 'wtr-weather-tab__skeleton-seasons', staggerClassName, staggerStyle)}>
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
+      <div {...staggerSectionProps(4, 'wtr-weather-tab__skeleton-chart', staggerClassName, staggerStyle)} />
     </article>
   )
 }
@@ -121,6 +98,8 @@ export function WeatherTab({
   climate,
   climatePreferenceStep,
   climatePreferenceDirection,
+  climateTempMinF,
+  climateTempMaxF,
   lat,
   loading,
   failed,
@@ -137,9 +116,15 @@ export function WeatherTab({
   const climateNotes = useMemo(
     () =>
       climate
-        ? deriveClimateNotes(climate, climatePreferenceStep, climatePreferenceDirection)
+        ? deriveClimateNotes(
+            climate,
+            climatePreferenceStep,
+            climatePreferenceDirection,
+            climateTempMinF,
+            climateTempMaxF,
+          )
         : null,
-    [climate, climatePreferenceStep, climatePreferenceDirection],
+    [climate, climatePreferenceStep, climatePreferenceDirection, climateTempMinF, climateTempMaxF],
   )
 
   if (failed) {
@@ -286,40 +271,37 @@ export function WeatherTab({
           <h3 id="wtr-weather-chart-heading" className="wtr-weather-tab__panel-title">
             Monthly temperatures
           </h3>
-          <ClimateMonthlyChart monthly={climate.monthly} />
+          <ClimateMonthlyChart
+            monthly={climate.monthly}
+            lat={lat}
+            seasons={detail.seasons}
+            tempUnit={tempUnit}
+            climatePreferenceStep={climatePreferenceStep}
+            climatePreferenceDirection={climatePreferenceDirection}
+          />
           <p className="wtr-weather-tab__chart-note">
             Avg highs {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
             {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} · climate normals
-            1990–2020 (Open-Meteo)
+            2011–2020 (NASA POWER)
           </p>
         </section>
 
         <section
-          aria-labelledby="wtr-weather-seasons-heading"
-          {...staggerSectionProps(staggerIdx++, 'wtr-weather-tab__seasons', staggerClassName, staggerStyle)}
+          aria-labelledby="wtr-weather-precip-heading"
+          {...staggerSectionProps(
+            staggerIdx++,
+            'wtr-weather-tab__panel wtr-weather-tab__chart-card',
+            staggerClassName,
+            staggerStyle,
+          )}
         >
-          <h3 id="wtr-weather-seasons-heading" className="wtr-weather-tab__section-label">
-            Seasonal breakdown
+          <h3 id="wtr-weather-precip-heading" className="wtr-weather-tab__panel-title">
+            Monthly precipitation
           </h3>
-          <div className="wtr-weather-tab__season-grid">
-            {detail.seasons.map((season) => (
-              <article key={season.season} className="wtr-weather-tab__season-card">
-                <div className="wtr-weather-tab__season-head">
-                  <div className="wtr-weather-tab__season-title">
-                    <SeasonIcon season={season.season} />
-                    <h4 className="wtr-weather-tab__season-name">{season.seasonLabel}</h4>
-                  </div>
-                  <span className={`wtr-weather-tab__season-tag wtr-weather-tab__season-tag--${season.tagTone}`}>
-                    {season.tagLabel}
-                  </span>
-                </div>
-                <p className="wtr-weather-tab__season-temp tabular-nums">
-                  {formatTempRange(season.tempLowC, season.tempHighC, tempUnit)}
-                </p>
-                <p className="wtr-weather-tab__season-desc">{season.description}</p>
-              </article>
-            ))}
-          </div>
+          <MonthlyPrecipChart monthly={climate.monthly} />
+          <p className="wtr-weather-tab__chart-note">
+            Monthly totals from daily averages · climate normals 2011–2020 (NASA POWER)
+          </p>
         </section>
       </article>
     </div>

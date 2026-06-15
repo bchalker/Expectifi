@@ -1,8 +1,13 @@
 import type { CityClimate } from '../lib/api/openMeteo'
 import type { ClimatePreferenceDirection, PreferenceStep } from '../types/preferences'
 import {
+  formatClimateTempRange,
+  isClimateTempRangeUnset,
+} from '../types/preferences'
+import {
   collectDirectionMismatchIssues,
   computeClimateDirectionScore,
+  computeClimateTemperatureRangeScore,
   extractClimateMetrics,
 } from './climateDirectionScore'
 import { climateDirectionShortLabel } from './climatePreferenceCopy'
@@ -59,8 +64,8 @@ const CLIMATE_TYPE_COPY: Record<
 
 function fitToneFor(score: number, step: PreferenceStep): ClimateNotesFitTone {
   if (step === 0) return 'muted'
-  if (step >= 4 && score < 45) return 'danger'
-  if (step >= 3 && score < 50) return 'danger'
+  if (step >= 8 && score < 45) return 'danger'
+  if (step >= 5 && score < 50) return 'danger'
   if (score >= 75) return 'success'
   if (score >= 55) return 'warning'
   return 'danger'
@@ -74,18 +79,13 @@ function issueSuffix(issues: string[]): string {
 function preferenceFitCopy(
   score: number,
   step: PreferenceStep,
-  direction: ClimatePreferenceDirection,
+  directionLabel: string,
   issues: string[],
 ): string {
   const suffix = issueSuffix(issues)
   const scoreLabel = `${score}/100`
-  const directionLabel = climateDirectionShortLabel(direction)
 
-  if (direction === 'none') {
-    return `Climate direction is neutral (${scoreLabel}) — only your weight setting affects scoring.`
-  }
-
-  if (step >= 5) {
+  if (step >= 10) {
     if (score >= 70) {
       return `Strong match (${scoreLabel}) for your ${directionLabel} preference at non-negotiable weight.`
     }
@@ -95,7 +95,7 @@ function preferenceFitCopy(
     return `Poor fit (${scoreLabel}) for your ${directionLabel} preference${suffix}. Climate is a dealbreaker in your settings.`
   }
 
-  if (step >= 4) {
+  if (step >= 8) {
     if (score >= 70) {
       return `Good fit (${scoreLabel}) for your ${directionLabel} preference${suffix}.`
     }
@@ -105,7 +105,7 @@ function preferenceFitCopy(
     return `Weak fit (${scoreLabel}) for your ${directionLabel} preference${suffix}.`
   }
 
-  if (step >= 3) {
+  if (step >= 5) {
     if (score >= 65) {
       return `Comfortable fit (${scoreLabel}) for your ${directionLabel} preference${suffix}.`
     }
@@ -123,19 +123,35 @@ function matchSummaryFromFitCopy(fitCopy: string): string {
   return fitCopy.replace(/\s*\(\d+\/100\)/g, '')
 }
 
-/** Plain-language climate notes tied to direction + weight preferences. */
+/** Plain-language climate notes tied to temperature range + weight preferences. */
 export function deriveClimateNotes(
   climate: CityClimate,
   climatePreferenceStep: PreferenceStep = 0,
   climatePreferenceDirection: ClimatePreferenceDirection = 'none',
+  climateTempMinF?: number,
+  climateTempMaxF?: number,
 ): ClimateNotesResult | null {
   if (!climate.monthly.length) return null
 
   const category = classifyClimateType(climate)
   const typeCopy = category ? CLIMATE_TYPE_COPY[category] : null
-  const score = computeClimateDirectionScore(climate, climatePreferenceDirection)
+  const usesTempRange =
+    climateTempMinF != null &&
+    climateTempMaxF != null &&
+    !isClimateTempRangeUnset(climateTempMinF, climateTempMaxF)
+
+  const score = usesTempRange
+    ? computeClimateTemperatureRangeScore(climate, climateTempMinF, climateTempMaxF)
+    : computeClimateDirectionScore(climate, climatePreferenceDirection)
+
   const metrics = extractClimateMetrics(climate)
-  const issues = collectDirectionMismatchIssues(metrics, climatePreferenceDirection)
+  const issues = usesTempRange
+    ? []
+    : collectDirectionMismatchIssues(metrics, climatePreferenceDirection)
+
+  const directionLabel = usesTempRange
+    ? formatClimateTempRange(climateTempMinF, climateTempMaxF)
+    : climateDirectionShortLabel(climatePreferenceDirection)
 
   if (climatePreferenceStep === 0) {
     if (typeCopy) {
@@ -163,7 +179,7 @@ export function deriveClimateNotes(
   const fitCopy = preferenceFitCopy(
     score,
     climatePreferenceStep,
-    climatePreferenceDirection,
+    directionLabel,
     issues,
   )
   const typeLead = typeCopy ? `${typeCopy.categoryLabel}: ${typeCopy.climateNotes}. ` : ''

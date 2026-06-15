@@ -1,6 +1,7 @@
-import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, useCallback, type ReactNode } from 'react'
 import { AppOverlayScrollbars } from '../../ui/AppOverlayScrollbars'
 import { AppSelect } from '../../ui/AppSelect'
+import { useRetirementExclusions } from '../../../hooks/useRetirementExclusions'
 import {
   IconChartBar,
   IconCoins,
@@ -12,13 +13,14 @@ import {
 } from '@tabler/icons-react'
 import { useCityClimate } from '../../../hooks/useCityClimate'
 import type { MapFilters, ScoredMapCity } from '../../../lib/whereToRetire/cityMapScoring'
-import { monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScoring'
+import { DEFAULT_LIFESTYLE, monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScoring'
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import type { BudgetBreakdownDisplay } from '../../../utils/costOfLiving'
 import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from '../../../utils/demographics'
 import { EXPAT_TAB_SOURCE_FOOTER } from '../../../utils/expatInfo'
 import { getQualityOfLifeData, QOL_WORLD_BANK_PROXY_NOTE } from '../../../utils/qualityOfLife'
 import { getTaxVisaScopeLabel } from '../../../utils/taxVisa'
+import { getCityClimateNormals } from '../../../utils/climateNormals'
 import { calculateRetirementScore } from '../../../utils/retirementScore'
 import type { DestinationListNav } from '../RetirementDestinationPanel'
 import { WtrCityListPagination } from '../WtrCityListPagination'
@@ -159,6 +161,7 @@ function CityDetailTabSelect({
 
 type CityDetailPanelBodyProps = {
   scored: ScoredMapCity
+  planMonthlyIncome: number
   budgetBreakdown: BudgetBreakdownDisplay
   mobileSheet: boolean
   listNav: DestinationListNav | null
@@ -166,10 +169,13 @@ type CityDetailPanelBodyProps = {
   onActiveTabChange: (tab: CityDetailTab) => void
   climatePreferenceStep: PreferenceStep
   climatePreferenceDirection: RetirementPreferences['climatePreference']
+  climateTempMinF: number
+  climateTempMaxF: number
 }
 
 function CityDetailPanelBody({
   scored,
+  planMonthlyIncome,
   budgetBreakdown,
   mobileSheet,
   listNav,
@@ -177,6 +183,8 @@ function CityDetailPanelBody({
   onActiveTabChange,
   climatePreferenceStep,
   climatePreferenceDirection,
+  climateTempMinF,
+  climateTempMaxF,
 }: CityDetailPanelBodyProps) {
   const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab)
   const {
@@ -227,6 +235,7 @@ function CityDetailPanelBody({
         return (
           <CostOfLivingTab
             city={scored.city}
+            planMonthlyIncome={planMonthlyIncome}
             budgetBreakdown={budgetBreakdown}
           />
         )
@@ -236,6 +245,8 @@ function CityDetailPanelBody({
             climate={climate}
             climatePreferenceStep={climatePreferenceStep}
             climatePreferenceDirection={climatePreferenceDirection}
+            climateTempMinF={climateTempMinF}
+            climateTempMaxF={climateTempMaxF}
             lat={city.lat}
             loading={climateLoading}
             failed={climateFailed}
@@ -369,7 +380,8 @@ function CityDetailPanelBody({
 export type CityDetailPanelProps = {
   scored: ScoredMapCity
   monthlyIncome: number
-  mapFilters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>
+  planMonthlyIncome: number
+  mapFilters: Pick<MapFilters, 'lifestyle'>
   preferences: RetirementPreferences
   budgetBreakdown: BudgetBreakdownDisplay
   listNav: DestinationListNav | null
@@ -381,6 +393,7 @@ export type CityDetailPanelProps = {
 export function CityDetailPanel({
   scored,
   monthlyIncome,
+  planMonthlyIncome,
   mapFilters,
   preferences,
   budgetBreakdown,
@@ -390,11 +403,17 @@ export function CityDetailPanel({
 }: CityDetailPanelProps) {
   const { city } = scored
   const [activeTab, setActiveTab] = useState<CityDetailTab>('col')
-  const { climate } = useCityClimate(scored.city)
+  const { excludedCountries, addExcludedCountry } = useRetirementExclusions()
+  const countryExcluded = excludedCountries.includes(city.country)
 
   const panelMonthlyBudget = useMemo(
-    () => monthlyBudgetForScoring(scored.city, mapFilters),
-    [scored.city, mapFilters],
+    () => monthlyBudgetForScoring(scored.city, mapFilters.lifestyle ?? DEFAULT_LIFESTYLE),
+    [scored.city, mapFilters.lifestyle],
+  )
+
+  const headerClimateNormals = useMemo(
+    () => getCityClimateNormals(city.city, city.country),
+    [city.city, city.country],
   )
 
   const headerScore = useMemo(
@@ -405,12 +424,26 @@ export function CityDetailPanel({
         scored.city,
         city.country,
         preferences,
-        { climate },
+        { climate: headerClimateNormals },
       ),
-    [monthlyIncome, panelMonthlyBudget, scored.city, city.country, preferences, climate],
+    [
+      monthlyIncome,
+      panelMonthlyBudget,
+      scored.city,
+      city.country,
+      preferences,
+      headerClimateNormals,
+    ],
   )
 
   const monthlySurplus = Math.max(0, monthlyIncome - panelMonthlyBudget)
+
+  const onExcludeCountry = useCallback(() => {
+    if (!countryExcluded) {
+      addExcludedCountry(city.country)
+      onClose()
+    }
+  }, [addExcludedCountry, city.country, countryExcluded, onClose])
 
   const headerProps = useMemo(
     () => ({
@@ -421,6 +454,8 @@ export function CityDetailPanel({
       headerScore,
       onClose,
       showClose: !mobileSheet,
+      onExcludeCountry,
+      countryExcluded,
     }),
     [
       city.city,
@@ -430,6 +465,8 @@ export function CityDetailPanel({
       headerScore,
       onClose,
       mobileSheet,
+      onExcludeCountry,
+      countryExcluded,
     ],
   )
 
@@ -439,6 +476,7 @@ export function CityDetailPanel({
       <CityDetailPanelBody
         key={city.id}
         scored={scored}
+        planMonthlyIncome={planMonthlyIncome}
         budgetBreakdown={budgetBreakdown}
         mobileSheet={mobileSheet}
         listNav={listNav}
@@ -446,6 +484,8 @@ export function CityDetailPanel({
         onActiveTabChange={setActiveTab}
         climatePreferenceStep={preferences.climate}
         climatePreferenceDirection={preferences.climatePreference}
+        climateTempMinF={preferences.climateTempMinF}
+        climateTempMaxF={preferences.climateTempMaxF}
       />
     </div>
   )

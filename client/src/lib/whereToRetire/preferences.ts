@@ -18,6 +18,7 @@ export {
   DEFAULT_PREFERENCES,
   RETIREMENT_WIZARD_CONFIG,
   STEP_WEIGHTS,
+  preferenceWeight,
   loadRetirementPreferences,
   saveRetirementPreferences,
   hasRetirementPreferences,

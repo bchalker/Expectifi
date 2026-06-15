@@ -10,7 +10,7 @@ import './WtrMapFiltersFavoritesTab.scss'
 type Props = {
   favoriteCities: FavoriteCityEntry[]
   monthlyIncome: number
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>
+  filters: Pick<MapFilters, 'lifestyle'>
   onRemoveFavorite: (city: string, country: string) => void
 }
 

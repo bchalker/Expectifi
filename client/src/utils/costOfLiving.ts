@@ -14,20 +14,41 @@ export type CityData = {
   wine_bottle_midrange: number
   milk_1L: number
   bread_500g: number
+  rice_1kg: number
   eggs_12: number
+  cheese_1kg: number
   chicken_1kg: number
+  beef_1kg: number
+  apples_1kg: number
+  banana_1kg: number
+  oranges_1kg: number
+  tomato_1kg: number
+  potato_1kg: number
+  onion_1kg: number
+  lettuce: number
+  water_1_5L_bottle: number
+  domestic_beer_bottle: number
+  transport_one_way_ticket: number
   transport_monthly_pass: number
+  taxi_start: number
+  taxi_per_km: number
+  mobile_plan_monthly_usd: number
   mobile_tariff_per_min: number
   tennis_court_1hr: number
   utilities_monthly_85m2: number
   internet_60mbps_monthly: number
   rent_1br_outside_centre: number
   rent_1br_city_centre: number
+  rent_3br_city_centre: number
   rent_3br_outside_centre: number
   avg_monthly_net_salary: number
   gym_monthly: number
   cinema_ticket: number
   gasoline_1L: number
+  jeans_levis: number
+  summer_dress: number
+  nike_running_shoes: number
+  mens_leather_shoes: number
   data_quality: number
 }
 
@@ -49,20 +70,41 @@ const CITY_DATA_FIELDS: (keyof CityData)[] = [
   'wine_bottle_midrange',
   'milk_1L',
   'bread_500g',
+  'rice_1kg',
   'eggs_12',
+  'cheese_1kg',
   'chicken_1kg',
+  'beef_1kg',
+  'apples_1kg',
+  'banana_1kg',
+  'oranges_1kg',
+  'tomato_1kg',
+  'potato_1kg',
+  'onion_1kg',
+  'lettuce',
+  'water_1_5L_bottle',
+  'domestic_beer_bottle',
+  'transport_one_way_ticket',
   'transport_monthly_pass',
+  'taxi_start',
+  'taxi_per_km',
+  'mobile_plan_monthly_usd',
   'mobile_tariff_per_min',
   'tennis_court_1hr',
   'utilities_monthly_85m2',
   'internet_60mbps_monthly',
   'rent_1br_outside_centre',
   'rent_1br_city_centre',
+  'rent_3br_city_centre',
   'rent_3br_outside_centre',
   'avg_monthly_net_salary',
   'gym_monthly',
   'cinema_ticket',
   'gasoline_1L',
+  'jeans_levis',
+  'summer_dress',
+  'nike_running_shoes',
+  'mens_leather_shoes',
   'data_quality',
 ]
 
@@ -201,122 +243,407 @@ export function getAllMapCities(): MapCity[] {
   return cachedMapCities
 }
 
-export const BUDGET_CATEGORY_KEYS = ['rent', 'food', 'transport', 'utilitiesInternet'] as const
+export type HousingTier =
+  | '1br_outside'
+  | '1br_centre'
+  | '3br_outside'
+  | '3br_centre'
 
-export type BudgetCategoryKey = (typeof BUDGET_CATEGORY_KEYS)[number]
-
-export type MonthlyBudgetComponents = {
-  rent: number
-  food: number
-  transport: number
-  utilitiesInternet: number
+export interface LifestyleInputs {
+  diningCasualPerWeek: number
+  diningNicePerMonth: number
+  coffeeShopPerWeek: number
+  beerHomePerWeek: number
+  beerOutPerWeek: number
+  winePerMonth: number
+  gym: boolean
+  cinemaPerMonth: number
+  taxiRidesPerMonth: number
+  housing: HousingTier
+  healthInsuranceMonthlyUsd: number
+  includeSpouse: boolean
+  includeMobile: boolean
+  includeClothing: boolean
+  includeIncidentals: boolean
+  clothingMultiplier: number
+  incidentalsPct: number
 }
 
-export function getMonthlyBudgetComponents(city: CityData): MonthlyBudgetComponents {
+export interface BudgetBreakdown {
+  rent: number
+  groceries: number
+  dining: number
+  alcohol: number
+  transport: number
+  utilities: number
+  mobile: number
+  leisure: number
+  clothing: number
+  incidentals: number
+  healthInsurance: number
+  total: number
+}
+
+export type Intensity = 'lean' | 'typical' | 'comfortable'
+
+/**
+ * Magnitudes used WHEN a category is included. Intensity no longer means
+ * "on/off" — that's a separate per-category boolean. Intensity means "if
+ * you do this, how often/how much."
+ */
+export const INTENSITY_TABLE: Record<
+  Intensity,
+  {
+    diningCasualPerWeek: number
+    diningNicePerMonth: number
+    coffeeShopPerWeek: number
+    beerHomePerWeek: number
+    beerOutPerWeek: number
+    winePerMonth: number
+    cinemaPerMonth: number
+    taxiRidesPerMonth: number
+    clothingMultiplier: number
+    incidentalsPct: number
+  }
+> = {
+  lean: {
+    diningCasualPerWeek: 1,
+    diningNicePerMonth: 0.5,
+    coffeeShopPerWeek: 1,
+    beerHomePerWeek: 2,
+    beerOutPerWeek: 1,
+    winePerMonth: 1,
+    cinemaPerMonth: 1,
+    taxiRidesPerMonth: 1,
+    clothingMultiplier: 0.5,
+    incidentalsPct: 0.05,
+  },
+  typical: {
+    diningCasualPerWeek: 2,
+    diningNicePerMonth: 1,
+    coffeeShopPerWeek: 2,
+    beerHomePerWeek: 2,
+    beerOutPerWeek: 1,
+    winePerMonth: 2,
+    cinemaPerMonth: 2,
+    taxiRidesPerMonth: 2,
+    clothingMultiplier: 1,
+    incidentalsPct: 0.08,
+  },
+  comfortable: {
+    diningCasualPerWeek: 4,
+    diningNicePerMonth: 4,
+    coffeeShopPerWeek: 5,
+    beerHomePerWeek: 3,
+    beerOutPerWeek: 3,
+    winePerMonth: 6,
+    cinemaPerMonth: 4,
+    taxiRidesPerMonth: 8,
+    clothingMultiplier: 1.75,
+    incidentalsPct: 0.12,
+  },
+}
+
+/** Annual clothing replacement basket — divided by 12 in calculateMonthlyBudget. */
+export const CLOTHING_BASKET: Record<string, number> = {
+  jeans_levis: 2,
+  summer_dress: 1,
+  nike_running_shoes: 1,
+  mens_leather_shoes: 0.5,
+}
+
+/**
+ * User-facing budget panel state. This is what gets persisted/serialized —
+ * NOT LifestyleInputs (that's derived).
+ */
+export interface BudgetPreferences {
+  intensity: Intensity
+  includeCasualDining: boolean
+  includeUpscaleDining: boolean
+  includeCoffee: boolean
+  includeAlcohol: boolean
+  includeGym: boolean
+  includeCinema: boolean
+  includeTaxi: boolean
+  includeMobile: boolean
+  includeClothing: boolean
+  includeIncidentals: boolean
+  housing: HousingTier
+  includeHealthInsurance: boolean
+  healthInsuranceMonthlyUsd: number
+  includeSpouse: boolean
+}
+
+export const DEFAULT_BUDGET_PREFERENCES: BudgetPreferences = {
+  intensity: 'typical',
+  includeCasualDining: true,
+  includeUpscaleDining: true,
+  includeCoffee: true,
+  includeAlcohol: true,
+  includeGym: true,
+  includeCinema: true,
+  includeTaxi: true,
+  includeMobile: true,
+  includeClothing: true,
+  includeIncidentals: true,
+  housing: '1br_outside',
+  includeHealthInsurance: true,
+  healthInsuranceMonthlyUsd: 250,
+  includeSpouse: false,
+}
+
+/** Derives the flat calculator input from panel state. */
+export function buildLifestyleInputs(prefs: BudgetPreferences): LifestyleInputs {
+  const v = INTENSITY_TABLE[prefs.intensity]
   return {
-    rent: city.rent_1br_outside_centre,
-    food: Math.round(city.meal_inexpensive_restaurant * 45),
-    transport: city.transport_monthly_pass,
-    utilitiesInternet: city.utilities_monthly_85m2 + city.internet_60mbps_monthly,
+    diningCasualPerWeek: prefs.includeCasualDining ? v.diningCasualPerWeek : 0,
+    diningNicePerMonth: prefs.includeUpscaleDining ? v.diningNicePerMonth : 0,
+    coffeeShopPerWeek: prefs.includeCoffee ? v.coffeeShopPerWeek : 0,
+    beerHomePerWeek: prefs.includeAlcohol ? v.beerHomePerWeek : 0,
+    beerOutPerWeek: prefs.includeAlcohol ? v.beerOutPerWeek : 0,
+    winePerMonth: prefs.includeAlcohol ? v.winePerMonth : 0,
+    gym: prefs.includeGym,
+    cinemaPerMonth: prefs.includeCinema ? v.cinemaPerMonth : 0,
+    taxiRidesPerMonth: prefs.includeTaxi ? v.taxiRidesPerMonth : 0,
+    housing: prefs.housing,
+    healthInsuranceMonthlyUsd: prefs.includeHealthInsurance
+      ? prefs.healthInsuranceMonthlyUsd
+      : 0,
+    includeSpouse: prefs.includeSpouse,
+    includeMobile: prefs.includeMobile,
+    includeClothing: prefs.includeClothing,
+    includeIncidentals: prefs.includeIncidentals,
+    clothingMultiplier: v.clothingMultiplier,
+    incidentalsPct: v.incidentalsPct,
   }
 }
 
-export function calculateMonthlyBudget(city: CityData): number {
-  const components = getMonthlyBudgetComponents(city)
-  return Math.round(
-    components.rent + components.food + components.transport + components.utilitiesInternet,
+export const DEFAULT_LIFESTYLE: LifestyleInputs = buildLifestyleInputs(
+  DEFAULT_BUDGET_PREFERENCES,
+)
+
+export function budgetPreferencesEqual(
+  a: BudgetPreferences,
+  b: BudgetPreferences,
+): boolean {
+  return (Object.keys(a) as (keyof BudgetPreferences)[]).every(
+    (key) => a[key] === b[key],
   )
 }
 
-export type BudgetBarPercents = {
-  rent: number
-  food: number
-  transport: number
-  utilitiesInternet: number
-  /** Rounding gap when four category % sum to less than 100 (typically 0–3%). */
+const WEEKS_PER_MONTH = 4.33
+
+const GROCERY_BASKET: Record<string, number> = {
+  milk_1L: 6,
+  bread_500g: 6,
+  rice_1kg: 1.5,
+  eggs_12: 2,
+  cheese_1kg: 0.75,
+  chicken_1kg: 2.5,
+  beef_1kg: 1,
+  apples_1kg: 2,
+  banana_1kg: 2,
+  oranges_1kg: 1.5,
+  tomato_1kg: 2,
+  potato_1kg: 2,
+  onion_1kg: 1,
+  lettuce: 3,
+  water_1_5L_bottle: 4,
+}
+
+const RENT_FIELD: Record<HousingTier, keyof CityData> = {
+  '1br_outside': 'rent_1br_outside_centre',
+  '1br_centre': 'rent_1br_city_centre',
+  '3br_outside': 'rent_3br_outside_centre',
+  '3br_centre': 'rent_3br_city_centre',
+}
+
+const TRANSPORT_PASS_FALLBACK_RIDES_PER_MONTH = 40
+const MOBILE_PLAN_FALLBACK_USD = 20
+
+export function calculateMonthlyBudget(
+  city: CityData,
+  lifestyle: LifestyleInputs,
+): BudgetBreakdown {
+  const n = (key: keyof CityData, fallback = 0): number => {
+    const v = Number(city[key])
+    return Number.isFinite(v) && v > 0 ? v : fallback
+  }
+
+  const adults = lifestyle.includeSpouse ? 2 : 1
+
+  const rent = n(RENT_FIELD[lifestyle.housing], n('rent_1br_outside_centre'))
+
+  const groceryMultiplier = lifestyle.includeSpouse ? 1.6 : 1
+  const baseGroceries = Object.entries(GROCERY_BASKET).reduce(
+    (sum, [key, qty]) => sum + n(key as keyof CityData) * qty,
+    0,
+  )
+  const groceries = baseGroceries * groceryMultiplier
+
+  const casualMealsPerMonth = lifestyle.diningCasualPerWeek * WEEKS_PER_MONTH
+  const coffeesPerMonth = lifestyle.coffeeShopPerWeek * WEEKS_PER_MONTH
+  const dining =
+    casualMealsPerMonth * n('meal_inexpensive_restaurant') * adults +
+    coffeesPerMonth * n('cappuccino') * adults +
+    (lifestyle.diningCasualPerWeek > 0 ? 2 * n('mcmeal') * adults : 0) +
+    lifestyle.diningNicePerMonth * n('meal_midrange_restaurant_for2')
+
+  const alcohol =
+    lifestyle.beerHomePerWeek * WEEKS_PER_MONTH * n('domestic_beer_bottle') * adults +
+    lifestyle.beerOutPerWeek * WEEKS_PER_MONTH * n('domestic_beer_draught') * adults +
+    lifestyle.winePerMonth * n('wine_bottle_midrange')
+
+  const passPrice = n('transport_monthly_pass')
+  const passCost =
+    passPrice > 0
+      ? passPrice
+      : n('transport_one_way_ticket') * TRANSPORT_PASS_FALLBACK_RIDES_PER_MONTH
+  const transport =
+    passCost * adults +
+    lifestyle.taxiRidesPerMonth * (n('taxi_start') + 5 * n('taxi_per_km'))
+
+  const utilities = n('utilities_monthly_85m2') + n('internet_60mbps_monthly')
+  const mobile = lifestyle.includeMobile
+    ? n('mobile_plan_monthly_usd', MOBILE_PLAN_FALLBACK_USD) * adults
+    : 0
+
+  const leisure =
+    (lifestyle.gym ? n('gym_monthly') * adults : 0) +
+    lifestyle.cinemaPerMonth * n('cinema_ticket') * adults
+
+  const annualClothingCost = Object.entries(CLOTHING_BASKET).reduce(
+    (sum, [key, qty]) => sum + n(key as keyof CityData) * qty,
+    0,
+  )
+  const clothing = lifestyle.includeClothing
+    ? (annualClothingCost / 12) * lifestyle.clothingMultiplier * adults
+    : 0
+
+  const healthInsurance = lifestyle.healthInsuranceMonthlyUsd * adults
+
+  const coreSubtotal =
+    rent + groceries + dining + alcohol + transport + utilities + mobile + leisure
+  const incidentals = lifestyle.includeIncidentals
+    ? coreSubtotal * lifestyle.incidentalsPct
+    : 0
+
+  const total = Math.round(coreSubtotal + clothing + incidentals + healthInsurance)
+
+  return {
+    rent: Math.round(rent),
+    groceries: Math.round(groceries),
+    dining: Math.round(dining),
+    alcohol: Math.round(alcohol),
+    transport: Math.round(transport),
+    utilities: Math.round(utilities),
+    mobile: Math.round(mobile),
+    leisure: Math.round(leisure),
+    clothing: Math.round(clothing),
+    incidentals: Math.round(incidentals),
+    healthInsurance: Math.round(healthInsurance),
+    total,
+  }
+}
+
+export function lifestylesEqual(a: LifestyleInputs, b: LifestyleInputs): boolean {
+  return (Object.keys(a) as (keyof LifestyleInputs)[]).every((key) => a[key] === b[key])
+}
+
+export const BUDGET_BAR_CATEGORY_KEYS = [
+  'rent',
+  'foodAndDrink',
+  'transport',
+  'utilitiesAndMobile',
+  'lifestyle',
+  'healthInsurance',
+  'incidentals',
+] as const
+
+export type BudgetBarCategoryKey = (typeof BUDGET_BAR_CATEGORY_KEYS)[number]
+
+export type BudgetBarPercents = Record<BudgetBarCategoryKey, number> & {
+  /** Rounding gap when category % sum to less than 100 (typically 0–3%). */
   remaining: number
 }
 
 export type BudgetBreakdownDisplay = {
   total: number
-  components: MonthlyBudgetComponents
+  breakdown: BudgetBreakdown
   barPercents: BudgetBarPercents
+}
+
+function budgetBarAmounts(breakdown: BudgetBreakdown): Record<BudgetBarCategoryKey, number> {
+  return {
+    rent: breakdown.rent,
+    foodAndDrink: breakdown.groceries + breakdown.dining + breakdown.alcohol,
+    transport: breakdown.transport,
+    utilitiesAndMobile: breakdown.utilities + breakdown.mobile,
+    lifestyle: breakdown.leisure + breakdown.mobile + breakdown.clothing,
+    healthInsurance: breakdown.healthInsurance,
+    incidentals: breakdown.incidentals,
+  }
 }
 
 /** Bar + legend: each category % = round(value / total × 100); remaining absorbs under-100 rounding only. */
 export function buildBudgetBarPercents(
-  components: MonthlyBudgetComponents,
+  breakdown: BudgetBreakdown,
   total: number,
 ): BudgetBarPercents {
+  const amounts = budgetBarAmounts(breakdown)
   if (total <= 0) {
-    return { rent: 0, food: 0, transport: 0, utilitiesInternet: 0, remaining: 0 }
+    return {
+      rent: 0,
+      foodAndDrink: 0,
+      transport: 0,
+      utilitiesAndMobile: 0,
+      lifestyle: 0,
+      healthInsurance: 0,
+      incidentals: 0,
+      remaining: 0,
+    }
   }
 
-  const entries: { key: BudgetCategoryKey; amount: number; pct: number }[] = BUDGET_CATEGORY_KEYS.map(
-    (key) => ({
-      key,
-      amount: components[key],
-      pct: Math.round((components[key] / total) * 100),
-    }),
-  )
+  const entries = BUDGET_BAR_CATEGORY_KEYS.map((key) => ({
+    key,
+    amount: amounts[key],
+    pct: Math.round((amounts[key] / total) * 100),
+  }))
 
-  let sumFour = entries.reduce((sum, entry) => sum + entry.pct, 0)
-  let remaining = Math.max(0, 100 - sumFour)
+  let sumPct = entries.reduce((sum, entry) => sum + entry.pct, 0)
+  let remaining = Math.max(0, 100 - sumPct)
 
-  if (sumFour > 100) {
-    const excess = sumFour - 100
+  if (sumPct > 100) {
+    const excess = sumPct - 100
     const largest = entries.reduce((best, entry) => (entry.amount > best.amount ? entry : best))
     largest.pct -= excess
-    sumFour -= excess
+    sumPct -= excess
     remaining = 0
   }
 
-  const barPercents: BudgetBarPercents = {
-    rent: entries.find((e) => e.key === 'rent')!.pct,
-    food: entries.find((e) => e.key === 'food')!.pct,
-    transport: entries.find((e) => e.key === 'transport')!.pct,
-    utilitiesInternet: entries.find((e) => e.key === 'utilitiesInternet')!.pct,
-    remaining,
+  const barPercents = {} as BudgetBarPercents
+  for (const entry of entries) {
+    barPercents[entry.key] = entry.pct
   }
-
-  if (import.meta.env.DEV) {
-    console.log('[WTR budget bar]', {
-      total,
-      rent: components.rent,
-      food: components.food,
-      transport: components.transport,
-      utilitiesInternet: components.utilitiesInternet,
-      rentPct: barPercents.rent,
-      foodPct: barPercents.food,
-      transportPct: barPercents.transport,
-      utilitiesPct: barPercents.utilitiesInternet,
-      remainingPct: barPercents.remaining,
-      sumOfFour: barPercents.rent + barPercents.food + barPercents.transport + barPercents.utilitiesInternet,
-      sumWithRemaining:
-        barPercents.rent +
-        barPercents.food +
-        barPercents.transport +
-        barPercents.utilitiesInternet +
-        barPercents.remaining,
-    })
-  }
-
+  barPercents.remaining = remaining
   return barPercents
 }
 
-export function buildBudgetBreakdownDisplay(city: CityData): BudgetBreakdownDisplay {
-  const components = getMonthlyBudgetComponents(city)
-  const total = calculateMonthlyBudget(city)
+export function buildBudgetBreakdownDisplay(
+  city: CityData,
+  lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
+): BudgetBreakdownDisplay {
+  const breakdown = calculateMonthlyBudget(city, lifestyle)
 
   return {
-    total,
-    components,
-    barPercents: buildBudgetBarPercents(components, total),
+    total: breakdown.total,
+    breakdown,
+    barPercents: buildBudgetBarPercents(breakdown, breakdown.total),
   }
 }
 
 export function calculateAffordabilityScore(city: CityData, monthlyIncome: number): number {
-  const budget = calculateMonthlyBudget(city)
+  const budget = calculateMonthlyBudget(city, DEFAULT_LIFESTYLE).total
   if (budget <= 0 || monthlyIncome <= 0) return 0
   return Math.min(100, Math.round((monthlyIncome / budget) * 60))
 }

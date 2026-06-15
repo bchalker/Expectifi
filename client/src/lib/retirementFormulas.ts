@@ -1,4 +1,10 @@
 import type { RetirementCityRecord } from './retirementDestinations'
+import {
+  calculateMonthlyBudget,
+  DEFAULT_LIFESTYLE,
+  type CityData,
+  type LifestyleInputs,
+} from '../utils/costOfLiving'
 
 /**
  * Effective local tax rate on gross retirement income for US expat planning.
@@ -124,25 +130,23 @@ export type RetirementFitResult = {
 }
 
 export function calcFit(
-  city: RetirementCityRecord,
+  budgetCity: CityData,
+  catalog: RetirementCityRecord,
   grossMonthly: number,
-  includeHealthIns: boolean,
-  /** When set and `includeHealthIns` is true, overrides per-city health insurance estimate. */
-  healthInsMonthlyUsd?: number,
+  lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
 ): RetirementFitResult {
-  const taxRate = getEffectiveTaxRate(city.country_iso)
+  const taxRate = getEffectiveTaxRate(catalog.country_iso)
   const taxAmount = grossMonthly * taxRate
   const netIncome = grossMonthly - taxAmount
 
-  const healthAdj = includeHealthIns
-    ? (healthInsMonthlyUsd ?? city.col_computed.health_insurance_est)
-    : 0
-  const trueCOL = city.col_computed.base_monthly + healthAdj
+  const breakdown = calculateMonthlyBudget(budgetCity, lifestyle)
+  const trueCOL = breakdown.total
+  const healthAdj = breakdown.healthInsurance
 
   const surplus = netIncome - trueCOL
   const visaQualifies =
-    city.visa.income_requirement_monthly_usd === 0 ||
-    netIncome >= city.visa.income_requirement_monthly_usd
+    catalog.visa.income_requirement_monthly_usd === 0 ||
+    netIncome >= catalog.visa.income_requirement_monthly_usd
 
   return {
     taxRate,
@@ -153,10 +157,10 @@ export function calcFit(
     surplus,
     visaQualifies,
     lineItems: {
-      rent: city.col.rent_1br_outside,
-      utilities: city.col.utilities,
-      transport: city.col.transport_monthly,
-      meals: city.col_computed.meals_45x,
+      rent: breakdown.rent,
+      utilities: breakdown.utilities + breakdown.mobile,
+      transport: breakdown.transport,
+      meals: breakdown.groceries + breakdown.dining + breakdown.alcohol,
       healthIns: healthAdj,
     },
   }
@@ -173,12 +177,13 @@ const ENG_SCORE_MAP: Record<string, number> = {
 }
 
 export function calcFitScore(
-  city: RetirementCityRecord,
+  budgetCity: CityData,
+  catalog: RetirementCityRecord,
   grossMonthly: number,
-  includeHealthIns = true,
+  lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
 ): number {
-  const fit = calcFit(city, grossMonthly, includeHealthIns)
-  const qol = city.quality_of_life
+  const fit = calcFit(budgetCity, catalog, grossMonthly, lifestyle)
+  const qol = catalog.quality_of_life
 
   const surplusRatio = Math.max(0, Math.min(fit.surplus / grossMonthly, 0.5))
   const surplusScore = surplusRatio * 80
@@ -186,7 +191,7 @@ export function calcFitScore(
   const qolScore = qol.index ? Math.min((qol.index / 220) * 25, 25) : 10
   const healthScore = qol.healthcare ? (qol.healthcare / 100) * 15 : 8
   const visaScore = fit.visaQualifies ? 10 : 0
-  const engScore = ENG_SCORE_MAP[city.english_proficiency] ?? 3
+  const engScore = ENG_SCORE_MAP[catalog.english_proficiency] ?? 3
 
   return Math.round(surplusScore + qolScore + healthScore + visaScore + engScore)
 }

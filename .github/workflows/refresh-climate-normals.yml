@@ -1,8 +1,8 @@
 name: Refresh climate normals
 
+# Full ~922-city NASA POWER refresh takes ~16 minutes (one request/city).
+# Daily cron was removed — Open-Meteo needed ~33 cities/day due to weighted-call limits.
 on:
-  schedule:
-    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Refresh climate normals
-        run: node scripts/refresh-climate-normals.mjs --resume --max-new=20
+      - name: Refresh climate normals (full NASA POWER run)
+        run: node scripts/refresh-climate-normals.mjs
 
       - name: Commit and push if changed
         run: |
@@ -31,6 +31,6 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add client/src/data/climate-normals.json
-            git commit -m "chore: refresh climate normals from Open-Meteo"
+            git commit -m "chore: refresh climate normals from NASA POWER"
             git push
           fi

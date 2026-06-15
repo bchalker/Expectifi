@@ -43,6 +43,10 @@ const dataset = taxVisaDataset as TaxVisaDatasetFile
 export const TAX_VISA_FOREIGN_INCOME_NOTE =
   'US citizens remain subject to IRS filing requirements on worldwide income regardless of local tax rules.'
 
+/** Explains headline tax rate for US / Canadian retirees (shown under Tax rate card). */
+export const TAX_RATE_HOME_COUNTRY_NOTE =
+  'The rate shown is the host country’s income tax on local earnings — not an extra US or Canadian tax on top of what you already owe at home. US citizens must still file with the IRS on worldwide income; you may offset host-country tax via the Foreign Tax Credit or treaty rules. Canadian residents report foreign income to CRA and can usually claim a foreign tax credit for tax paid abroad. This app does not model your full home-country liability — consult a cross-border tax advisor.'
+
 /** Body after the bold "Sources:" lead-in in the Tax & Visa tab footer. */
 export const TAX_VISA_TAB_DISCLAIMER_BODY =
   'IRS, Greenback Tax Services, International Living, US State Department. Educational estimates only — not tax, legal, or immigration advice. Rules change frequently. Verify with a qualified professional before relocating.'

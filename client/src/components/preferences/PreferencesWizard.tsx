@@ -1,10 +1,12 @@
 import { IconUserCircle } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { OnboardingProgressSteps } from '../OnboardingProgressSteps'
 import { AppButton } from '../ui/AppButton'
 import { AppOverlayScrollbars } from '../ui/AppOverlayScrollbars'
 import {
   createDailyLifeFactor,
   DEFAULT_PREFERENCES,
+  normalizeRetirementPreferences,
   RETIREMENT_WIZARD_CONFIG,
   saveRetirementPreferences,
   type CorePreferenceKey,
@@ -20,27 +22,29 @@ import {
   STEP_3_LIFESTYLE,
   STEP_4_DAILY,
   WIZARD_STEP_LABELS,
+  wizardStepForFactor,
   type PreferenceFactorId,
-  type PreferencePopoverId,
-  preferenceDirectionPopoverId,
 } from '../../utils/preferenceFactors'
 import { PreferenceFactorRow } from './PreferenceFactorRow'
 import { PreferenceReviewRow } from './PreferenceReviewRow'
 import './PreferencesWizard.scss'
 
 export type PreferencesWizardMode = 'stepped' | 'settings'
+export type PreferencesWizardProgressPlacement = 'inline' | 'external'
 
 type Props = {
   config?: WizardConfig
   initialValues?: RetirementPreferences
   mode?: PreferencesWizardMode
+  progressPlacement?: PreferencesWizardProgressPlacement
+  onWizardStepChange?: (step: number) => void
   onChange?: (prefs: RetirementPreferences) => void
   onComplete?: (prefs: RetirementPreferences) => void
   onSkip?: () => void
   onRetake?: () => void
 }
 
-const TOTAL_STEPS = 5
+export const PREFERENCES_WIZARD_STEP_COUNT = 5
 
 function reviewActiveFactors(prefs: RetirementPreferences) {
   const core = (
@@ -68,20 +72,27 @@ export function PreferencesWizard({
   config = RETIREMENT_WIZARD_CONFIG,
   initialValues,
   mode = 'stepped',
+  progressPlacement = 'inline',
+  onWizardStepChange,
   onChange,
   onComplete,
   onSkip,
   onRetake,
 }: Props) {
-  const [prefs, setPrefs] = useState<RetirementPreferences>(
-    () => initialValues ?? { ...DEFAULT_PREFERENCES, dailyLife: [] },
+  const [prefs, setPrefs] = useState<RetirementPreferences>(() =>
+    normalizeRetirementPreferences(initialValues ?? { ...DEFAULT_PREFERENCES, dailyLife: [] }),
   )
   const [wizardStep, setWizardStep] = useState(1)
-  const [openPopoverId, setOpenPopoverId] = useState<PreferencePopoverId | null>(null)
 
   useEffect(() => {
-    if (initialValues) setPrefs(initialValues)
+    if (initialValues) setPrefs(normalizeRetirementPreferences(initialValues))
   }, [initialValues])
+
+  useEffect(() => {
+    if (mode === 'stepped') onWizardStepChange?.(wizardStep)
+  }, [mode, onWizardStepChange, wizardStep])
+
+  const showInlineProgress = mode === 'stepped' && progressPlacement === 'inline'
 
   const updatePrefs = useCallback(
     (updater: (prev: RetirementPreferences) => RetirementPreferences) => {
@@ -101,9 +112,9 @@ export function PreferencesWizard({
     [updatePrefs],
   )
 
-  const setClimatePreference = useCallback(
-    (climatePreference: RetirementPreferences['climatePreference']) => {
-      updatePrefs((prev) => ({ ...prev, climatePreference }))
+  const setClimateTempRange = useCallback(
+    (climateTempMinF: number, climateTempMaxF: number) => {
+      updatePrefs((prev) => ({ ...prev, climateTempMinF, climateTempMaxF }))
     },
     [updatePrefs],
   )
@@ -137,18 +148,13 @@ export function PreferencesWizard({
           dailyLife: prev.dailyLife.filter((entry) => entry.factor !== factor),
         }
       })
-      if (!nextEnabled) {
-        setOpenPopoverId((current) =>
-          current === factor || current === preferenceDirectionPopoverId(factor) ? null : current,
-        )
-      }
     },
     [updatePrefs],
   )
 
   const getDailyStep = useCallback(
     (factor: DailyLifeFactorId): PreferenceStep => {
-      return prefs.dailyLife.find((entry) => entry.factor === factor)?.step ?? 3
+      return prefs.dailyLife.find((entry) => entry.factor === factor)?.step ?? 6
     },
     [prefs.dailyLife],
   )
@@ -171,18 +177,15 @@ export function PreferencesWizard({
     setWizardStep(5)
   }
 
-  const progressPct = (wizardStep / TOTAL_STEPS) * 100
-
   const renderCoreRow = (key: CorePreferenceKey) => (
     <PreferenceFactorRow
       key={key}
       factorId={key}
       step={prefs[key]}
-      openPopoverId={openPopoverId}
-      onPopoverChange={setOpenPopoverId}
       onStepChange={(step) => setCoreStep(key, step)}
-      climatePreference={key === 'climate' ? prefs.climatePreference : undefined}
-      onClimatePreferenceChange={key === 'climate' ? setClimatePreference : undefined}
+      climateTempMinF={key === 'climate' ? prefs.climateTempMinF : undefined}
+      climateTempMaxF={key === 'climate' ? prefs.climateTempMaxF : undefined}
+      onClimateTempChange={key === 'climate' ? setClimateTempRange : undefined}
       readOnly={mode === 'stepped' && wizardStep === 5}
     />
   )
@@ -197,8 +200,6 @@ export function PreferencesWizard({
         withEnableToggle
         enabled={enabled}
         onEnabledChange={(next) => setDailyFactorEnabled(factor, next)}
-        openPopoverId={openPopoverId}
-        onPopoverChange={setOpenPopoverId}
         onStepChange={(step) => setDailyStep(factor, step)}
         readOnly={mode === 'stepped' && wizardStep === 5}
       />
@@ -220,6 +221,8 @@ export function PreferencesWizard({
     </section>
   )
 
+  const canReviewNavigate = mode === 'stepped' && wizardStep === 5
+
   const renderReviewList = () => (
     <div className="pref-wizard__review-list">
       {reviewFactors.core.map(({ id, step }) => (
@@ -227,14 +230,29 @@ export function PreferencesWizard({
           key={id}
           factorId={id}
           step={step}
-          climatePreference={id === 'climate' ? prefs.climatePreference : undefined}
+          climateTempMinF={id === 'climate' ? prefs.climateTempMinF : undefined}
+          climateTempMaxF={id === 'climate' ? prefs.climateTempMaxF : undefined}
+          onNavigate={
+            canReviewNavigate
+              ? (factorId) => setWizardStep(wizardStepForFactor(factorId))
+              : undefined
+          }
         />
       ))}
       {reviewFactors.daily.length > 0 ? (
         <>
           <div className="pref-wizard__review-divider" aria-hidden />
           {reviewFactors.daily.map(({ id, step }) => (
-            <PreferenceReviewRow key={id} factorId={id} step={step} />
+            <PreferenceReviewRow
+              key={id}
+              factorId={id}
+              step={step}
+              onNavigate={
+                canReviewNavigate
+                  ? (factorId) => setWizardStep(wizardStepForFactor(factorId))
+                  : undefined
+              }
+            />
           ))}
         </>
       ) : null}
@@ -292,6 +310,7 @@ export function PreferencesWizard({
     'pref-wizard',
     mode === 'stepped' && 'pref-wizard--stepped',
     showSteppedNav && 'pref-wizard--with-nav',
+    progressPlacement === 'external' && 'pref-wizard--external-progress',
     mode === 'settings' && 'pref-wizard--settings',
   ]
     .filter(Boolean)
@@ -299,19 +318,17 @@ export function PreferencesWizard({
 
   return (
     <div className={rootClassName}>
-      {mode === 'stepped' ? (
+      {showInlineProgress ? (
         <header className="pref-wizard__progress">
-          <div
-            className="pref-wizard__progress-bar"
-            role="progressbar"
-            aria-valuenow={wizardStep}
-            aria-valuemin={1}
-            aria-valuemax={TOTAL_STEPS}
-          >
-            <span className="pref-wizard__progress-fill" style={{ width: `${progressPct}%` }} />
-          </div>
+          <OnboardingProgressSteps
+            activeIndex={wizardStep - 1}
+            totalSteps={PREFERENCES_WIZARD_STEP_COUNT}
+            className="pref-wizard__progress-dots"
+            ariaLabel={`Step ${wizardStep} of ${PREFERENCES_WIZARD_STEP_COUNT}`}
+          />
           <p className="pref-wizard__progress-label">
-            Step {wizardStep} of {TOTAL_STEPS} — {WIZARD_STEP_LABELS[wizardStep]}
+            Step {wizardStep} of {PREFERENCES_WIZARD_STEP_COUNT} —{' '}
+            {WIZARD_STEP_LABELS[wizardStep]}
           </p>
         </header>
       ) : null}

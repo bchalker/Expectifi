@@ -1,59 +1,25 @@
 import { IconX } from '@tabler/icons-react'
-import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { CalculatorInputs } from '../lib/computeResults'
-import { isMoneyMarketImportRow, normalizeImportSymbol, type ImportedPositionRow } from '../lib/positionsCsv'
-import {
-  applyScenarioUiChoice,
-  horizonClamp,
-  inferCommonScenarioChoiceForModels,
-  inferScenarioUiChoice,
-  isOutlookScenarioChoice,
-  mergePatchPositionModelsIntoInputs,
-  OUTLOOK_SCENARIO_TILES,
-  type OutlookScenarioChoice,
-  type ScenarioUiChoice,
-  SCENARIO_MIXED,
-} from '../lib/holdingScenarioApply'
-import {
-  blendedRateForDashboardPositionId,
-  computeMergedDashboardPositionModels,
-  countImportedLinesMatchingTickerKeys,
-  mergedDashboardModelsForTickerKeys,
-  tickerKeySetFromImportedRows,
-} from '../lib/mergedDashboardPositionModels'
+import type { ImportedPositionRow } from '../lib/positionsCsv'
 import {
   decimalToPct,
-  modelingCalendarYears,
-  padYearlyReturns,
   pctToDecimal,
-  ratesMatchScenario,
-  type PositionReturnModel,
 } from '../lib/positionReturnModel'
-import { HoldingScenarioIntentTabs, type ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
+import { useHoldingScenarioState } from '../hooks/useHoldingScenarioState'
+import type { ScenarioIntentTabId } from './HoldingScenarioIntentTabs'
 import { HoldingScenarioPanelFooter } from './HoldingScenarioPanelFooter'
+import { ScenarioPerYearGrid } from './ScenarioPerYearGrid'
+import { AccountScenarioOutlookGrid } from './accountScenario/AccountScenarioOutlookGrid'
+import { AccountScenarioPopoutCustomRate } from './accountScenario/AccountScenarioPopoutCustomRate'
+import './accountScenario/AccountScenarioPopout.scss'
 import './HoldingScenarioPopout.scss'
 
-function showScenarioOverrideYears(m: PositionReturnModel, horizon: number): boolean {
-  const h = horizonClamp(horizon)
-  return (
-    m.returnMode === 'scenario' &&
-    m.scenario != null &&
-    !ratesMatchScenario(m.scenario, padYearlyReturns(m.yearlyReturns, h, m.flatRate), h)
-  )
-}
-
-export type HoldingScenarioPanelProps = {
-  onClose: () => void
-  contributingRows: ImportedPositionRow[]
-  importedPositionRows: ImportedPositionRow[]
-  inputs: CalculatorInputs
-  setInputs: (p: Partial<CalculatorInputs>) => void
-  yearsToRetirement: number
-  retirementCalendarYear: number
-  retRate: number
-  brkRate: number
-}
+const TABS: { id: ScenarioIntentTabId; label: string }[] = [
+  { id: 'outlook', label: 'Market outlook' },
+  { id: 'custom', label: 'Custom rate' },
+  { id: 'peryear', label: 'Per year' },
+]
 
 export function parseScenarioPct(raw: string): number {
   const v = parseFloat((raw || '').replace(/,/g, ''))
@@ -69,12 +35,6 @@ function clampPct(n: number): number {
 }
 
 const YEAR_PCT_STEP = 0.5
-
-function intentFromScenarioChoice(choice: ScenarioUiChoice): ScenarioIntentTabId {
-  if (choice === 'peryear') return 'peryear'
-  if (choice === 'custom') return 'custom'
-  return 'outlook'
-}
 
 /** Plain percent text field; syncs when `rateDecimal` changes from outside. */
 export function HoldingYearPctField({
@@ -140,11 +100,26 @@ export function HoldingYearPctField({
   )
 }
 
-export { OutlookMarketTabs } from './HoldingScenarioIntentTabs'
+export type HoldingScenarioPopoutProps = {
+  contributingRows: ImportedPositionRow[]
+  importedPositionRows: ImportedPositionRow[]
+  inputs: CalculatorInputs
+  setInputs: (p: Partial<CalculatorInputs>) => void
+  yearsToRetirement: number
+  retirementCalendarYear: number
+  retRate: number
+  brkRate: number
+  initialTab?: ScenarioIntentTabId
+  onClose: () => void
+  /** Inside HeroUI Popover — chrome comes from popover shell. */
+  variant?: 'standalone' | 'heroui'
+}
 
-/** Return scenario editor body (slide panel / popover). */
-export function HoldingScenarioPanel({
-  onClose,
+/** @deprecated Use HoldingScenarioPopout — kept for import sites during migration. */
+export type HoldingScenarioPanelProps = HoldingScenarioPopoutProps
+
+/** Return scenario editor — matches account scenario popout layout. */
+export function HoldingScenarioPopout({
   contributingRows,
   importedPositionRows,
   inputs,
@@ -153,233 +128,133 @@ export function HoldingScenarioPanel({
   retirementCalendarYear,
   retRate,
   brkRate,
-}: HoldingScenarioPanelProps) {
-  const h = horizonClamp(yearsToRetirement)
-  const calY = retirementCalendarYear
-
-  const merged = useMemo(
-    () => computeMergedDashboardPositionModels(inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear),
-    [inputs, importedPositionRows, yearsToRetirement, retirementCalendarYear],
-  )
-
-  const symbolKeys = useMemo(() => tickerKeySetFromImportedRows(contributingRows), [contributingRows])
-
-  const scenarioTickerLabel = useMemo(() => {
-    const keys = [...symbolKeys].filter(Boolean).sort((a, b) => a.localeCompare(b))
-    if (keys.length === 1) return keys[0]!
-    if (keys.length > 1) return keys.join(', ')
-    const row = contributingRows[0]
-    return row ? normalizeImportSymbol(row.symbol).toUpperCase() : ''
-  }, [symbolKeys, contributingRows])
-
-  const showMoneyMarketNotice = useMemo(() => contributingRows.some(isMoneyMarketImportRow), [contributingRows])
-
-  const targets = useMemo(() => {
-    const list = mergedDashboardModelsForTickerKeys(merged, symbolKeys)
-    return [...list].sort((a, b) => a.id.localeCompare(b.id))
-  }, [merged, symbolKeys])
-
-  const importLineCountForSymbol = useMemo(
-    () => countImportedLinesMatchingTickerKeys(importedPositionRows, symbolKeys),
-    [importedPositionRows, symbolKeys],
-  )
-
-  const commonChoice = useMemo(
-    () =>
-      targets.length
-        ? inferCommonScenarioChoiceForModels(targets, h, (m) => blendedRateForDashboardPositionId(m.id, retRate, brkRate))
-        : SCENARIO_MIXED,
-    [targets, h, retRate, brkRate],
-  )
-
-  const resolvedChoice = commonChoice === SCENARIO_MIXED ? 'default' : commonChoice
-
-  const [draftPct, setDraftPct] = useState(() => {
-    const first = targets[0]
-    if (first) {
-      const pmBlend = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
-      const ch = inferScenarioUiChoice(first, pmBlend, h)
-      if (ch === 'custom') return String(decimalToPct(first.flatRate))
-      return String(decimalToPct(pmBlend))
-    }
-    return String(decimalToPct(retRate))
+  initialTab,
+  onClose,
+  variant = 'standalone',
+}: HoldingScenarioPopoutProps) {
+  const state = useHoldingScenarioState({
+    contributingRows,
+    inputs,
+    setInputs,
+    importedPositionRows,
+    yearsToRetirement,
+    retirementCalendarYear,
+    retRate,
+    brkRate,
+    initialTab,
   })
-  const [uiChoice, setUiChoice] = useState<ScenarioUiChoice>('default')
-  const [activeTab, setActiveTab] = useState<ScenarioIntentTabId>('outlook')
 
-  useEffect(() => {
-    setUiChoice(resolvedChoice)
-    setActiveTab(intentFromScenarioChoice(resolvedChoice))
-  }, [resolvedChoice])
-
-  useEffect(() => {
-    const first = targets[0]
-    if (!first) return
-    const blended = blendedRateForDashboardPositionId(first.id, retRate, brkRate)
-    const ch = inferScenarioUiChoice(first, blended, h)
-    if (ch === 'custom') {
-      setDraftPct(String(decimalToPct(first.flatRate)))
-    }
-  }, [targets, h, retRate, brkRate])
-
-  const patchAll = useCallback(
-    (choice: ScenarioUiChoice, customPct: number, yearly?: number[]) => {
-      if (!targets.length) return
-      const patched = targets.map((m) =>
-        applyScenarioUiChoice(m, choice, blendedRateForDashboardPositionId(m.id, retRate, brkRate), h, customPct, yearly),
-      )
-      setInputs({ positionReturnModels: mergePatchPositionModelsIntoInputs(inputs, patched) })
-    },
-    [h, inputs, retRate, brkRate, setInputs, targets],
-  )
-
-  const primaryModel = targets[0]
-
-  const clearToGlobalRate = useCallback(() => {
-    setUiChoice('default')
-    patchAll('default', 0)
-  }, [patchAll])
-
-  const onNoScenario = useCallback(() => {
-    clearToGlobalRate()
+  const onNoScenario = () => {
+    state.clearToGlobalRate()
     onClose()
-  }, [clearToGlobalRate, onClose])
-
-  const onSelectOutlookTile = useCallback(
-    (choice: OutlookScenarioChoice) => {
-      setUiChoice(choice)
-      patchAll(choice, 0)
-    },
-    [patchAll],
-  )
-
-  const onTabChange = useCallback(
-    (tab: ScenarioIntentTabId) => {
-      setActiveTab(tab)
-      if (tab === 'outlook') {
-        return
-      } else if (tab === 'custom') {
-        setUiChoice('custom')
-        patchAll('custom', parsePct(draftPct))
-      } else if (tab === 'peryear') {
-        setUiChoice('peryear')
-        patchAll('peryear', 0)
-      }
-    },
-    [draftPct, patchAll],
-  )
-
-  const patchYearRates = useCallback(
-    (nextRates: number[]) => {
-      if (!targets.length) return
-      const patched = targets.map((m) => {
-        const blended = blendedRateForDashboardPositionId(m.id, retRate, brkRate)
-        const padded = padYearlyReturns(nextRates, h, blended)
-        return applyScenarioUiChoice(m, 'peryear', blended, h, 0, padded)
-      })
-      setInputs({ positionReturnModels: mergePatchPositionModelsIntoInputs(inputs, patched) })
-    },
-    [h, inputs, retRate, brkRate, setInputs, targets],
-  )
-
-  const globalBlended = targets[0]
-    ? blendedRateForDashboardPositionId(targets[0].id, retRate, brkRate)
-    : retRate
-  const nHoldings = importLineCountForSymbol
-
-  const outlookPreviewValue = useMemo(
-    () => targets.reduce((sum, m) => sum + (m.currentValue > 0 ? m.currentValue : 0), 0),
-    [targets],
-  )
-
-  const outlookTiles = OUTLOOK_SCENARIO_TILES
-
-  const outlookSelection = isOutlookScenarioChoice(uiChoice) ? uiChoice : null
-
-  const yearGrid =
-    primaryModel && activeTab === 'peryear' && (uiChoice === 'peryear' || showScenarioOverrideYears(primaryModel, h)) ? (
-      <div className="holding-scenario-intent__year-grid">
-        {modelingCalendarYears(calY, h).map((y, i) => {
-          const rates = padYearlyReturns(primaryModel.yearlyReturns, h, primaryModel.flatRate)
-          return (
-            <div key={y} className="holding-scenario-intent__year-item">
-              <span className="holding-scenario-popout__year-key">{y}</span>
-              <HoldingYearPctField
-                calendarYear={y}
-                rateDecimal={rates[i] ?? 0}
-                onCommitDecimal={(dec) => {
-                  const next = [...rates]
-                  next[i] = dec
-                  patchYearRates(next)
-                }}
-              />
-            </div>
-          )
-        })}
-      </div>
-    ) : null
+  }
 
   return (
-    <div className="holding-scenario-popout holding-scenario-popout--panel">
-      <header className="holding-scenario-popout__head">
-        <div className="holding-scenario-popout__head-stack">
-          <div className="holding-scenario-popout__head-row">
-            <h2 className="holding-scenario-popout__title" id="holding-scenario-panel-title">
-              How would you like to set{' '}
-              <span className="holding-scenario-popout__title-ticker">{scenarioTickerLabel || 'this ticker'}</span>{' '}
-              growth?
-            </h2>
-            <button type="button" className="holding-scenario-popout__close panel-close-btn" onClick={onClose} aria-label="Close">
-              <IconX size={14} stroke={1.5} aria-hidden />
-            </button>
-          </div>
-          {showMoneyMarketNotice ? (
-            <p className="holding-scenario-popout__head-subtext" role="note">
-              Money market funds are pretty stable but won't move the needle much on returns, so scenario modeling isn't really useful here — but you can have at it if you want!
-            </p>
-          ) : null}
-          {nHoldings > 1 ? (
-            <p className="holding-scenario-popout__head-subtext" role="note">
-              This will apply to the <strong>{nHoldings}</strong> holdings of this ticker across your accounts.
-            </p>
-          ) : null}
+    <div
+      className={[
+        'account-scenario-popout',
+        variant === 'heroui' && 'account-scenario-popout--heroui-inner',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      role={variant === 'standalone' ? 'dialog' : undefined}
+      aria-labelledby="holding-scenario-popout-title"
+    >
+      <header className="account-scenario-popout__head">
+        <div className="account-scenario-popout__head-text">
+          <p className="account-scenario-popout__eyebrow">Holding scenario</p>
+          <h2 className="account-scenario-popout__title" id="holding-scenario-popout-title">
+            {state.scenarioTickerLabel || 'This holding'}
+          </h2>
         </div>
+        <button
+          type="button"
+          className="account-scenario-popout__close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <IconX size={14} stroke={1.5} aria-hidden />
+        </button>
       </header>
-      <div className="holding-scenario-popout__body">
-        <AppOverlayScrollbars className="holding-scenario-popout__scroll" defer={false}>
-          <div className="holding-scenario-popout__scroll-inner">
-            <div className="holding-scenario-popout__intent-stack">
-              <HoldingScenarioIntentTabs
-                variant="holding"
-                activeTab={activeTab}
-                onTabChange={onTabChange}
-                outlookValue={outlookSelection}
-                onOutlookChange={onSelectOutlookTile}
-                outlookTiles={outlookTiles}
-                globalBlended={globalBlended}
-                outlookHorizon={h}
-                outlookPreviewCurrentValue={outlookPreviewValue}
-                draftPct={draftPct}
-                onDraftPctChange={(s) => {
-                  setDraftPct(s)
-                  patchAll('custom', parsePct(s))
-                }}
-                onDraftPctBlur={() => {
-                  const nextPct = clampPct(parsePct(draftPct))
-                  setDraftPct(String(nextPct))
-                  patchAll('custom', nextPct)
-                }}
-                yearGrid={yearGrid}
-              />
-            </div>
-          </div>
-        </AppOverlayScrollbars>
+
+      <div className="account-scenario-popout__tabs" role="tablist" aria-label="Scenario type">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={state.activeTab === tab.id}
+            className={[
+              'account-scenario-popout__tab',
+              state.activeTab === tab.id && 'account-scenario-popout__tab--active',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => state.onTabChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      <div className="account-scenario-popout__body">
+        {state.showMoneyMarketNotice ? (
+          <p className="account-scenario-popout__conflict-text holding-scenario-popout__notice" role="note">
+            Money market funds are pretty stable but won&apos;t move the needle much on returns, so scenario
+            modeling isn&apos;t really useful here — but you can have at it if you want!
+          </p>
+        ) : null}
+        {state.importLineCountForSymbol > 1 ? (
+          <p className="account-scenario-popout__conflict-text holding-scenario-popout__notice" role="note">
+            This will apply to the <strong>{state.importLineCountForSymbol}</strong> holdings of this ticker
+            across your accounts.
+          </p>
+        ) : null}
+
+        {state.activeTab === 'outlook' ? (
+          <AccountScenarioOutlookGrid
+            horizon={state.h}
+            selection={state.outlookSelection}
+            onSelect={state.onSelectOutlookTile}
+          />
+        ) : null}
+
+        {state.activeTab === 'custom' ? (
+          <AccountScenarioPopoutCustomRate
+            draftPct={state.draftPct}
+            onDraftPctChange={(value) => {
+              state.setDraftPct(value)
+              state.patchAll('custom', state.parseScenarioPct(value))
+            }}
+            onDraftPctBlur={() => {
+              const nextPct = state.clampPct(state.parseScenarioPct(state.draftPct))
+              state.setDraftPct(String(nextPct))
+              state.patchAll('custom', nextPct)
+            }}
+          />
+        ) : null}
+
+        {state.activeTab === 'peryear' && state.showPerYearGrid && state.primaryModel ? (
+          <ScenarioPerYearGrid
+            className="scenario-per-year-grid--popout"
+            retirementCalendarYear={state.calY}
+            yearsToRetirement={state.yearsToRetirement}
+            globalBlended={state.globalBlended}
+            yearlyReturns={state.primaryModel.yearlyReturns}
+            onPatchRates={state.patchYearRates}
+          />
+        ) : null}
+      </div>
+
       <HoldingScenarioPanelFooter
-        hasScenario={resolvedChoice !== 'default'}
+        className="account-scenario-popout__foot"
+        hasScenario={state.resolvedChoice !== 'default'}
         onNoScenario={onNoScenario}
         onDone={onClose}
       />
     </div>
   )
 }
+
+/** @deprecated Use HoldingScenarioPopout */
+export const HoldingScenarioPanel = HoldingScenarioPopout

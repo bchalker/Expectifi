@@ -43,6 +43,18 @@
   background: var(--color-teal-mid);
 }
 
+.wtr-col-budget-bar__segment--lifestyle {
+  background: #8b6bb8;
+}
+
+.wtr-col-budget-bar__segment--health {
+  background: #c96b8a;
+}
+
+.wtr-col-budget-bar__segment--misc {
+  background: color-mix(in srgb, var(--text-muted) 55%, var(--surface2));
+}
+
 .wtr-col-budget-bar__segment--remaining {
   background: color-mix(in srgb, var(--text-muted) 28%, var(--surface2));
 }
@@ -83,6 +95,18 @@
 
 .wtr-col-budget-bar__dot--utilities {
   background: var(--color-teal-mid);
+}
+
+.wtr-col-budget-bar__dot--lifestyle {
+  background: #8b6bb8;
+}
+
+.wtr-col-budget-bar__dot--health {
+  background: #c96b8a;
+}
+
+.wtr-col-budget-bar__dot--misc {
+  background: color-mix(in srgb, var(--text-muted) 55%, var(--surface2));
 }
 
 .wtr-col-budget-bar__dot--remaining {

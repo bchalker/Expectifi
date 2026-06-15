@@ -111,6 +111,28 @@
   box-sizing: border-box;
 }
 
+.where-to-retire__main--drawer-open .where-to-retire__main-panel-back,
+.section--tax-summary--where-to-retire--drawer-open .where-to-retire__main-panel-back {
+  position: relative;
+  z-index: 0;
+}
+
+.where-to-retire__main--drawer-open,
+.section--tax-summary--where-to-retire--drawer-open .where-to-retire__main {
+  overflow: visible;
+}
+
+.where-to-retire__main--drawer-open .where-to-retire__main-panel-map,
+.section--tax-summary--where-to-retire--drawer-open .where-to-retire__main-panel-map {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.where-to-retire__main--drawer-open .wtr-explorer__drawer-backdrop {
+  z-index: 18;
+}
+
 @media (max-width: 680px) {
   .section--tax-summary--where-to-retire .where-to-retire__main-panel-back {
     width: calc(100% + 2 * var(--space-2));
@@ -259,80 +281,6 @@
   overflow: hidden;
 }
 
-.where-to-retire__filter-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  box-sizing: border-box;
-  box-shadow: none;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.where-to-retire__filter-btn:hover:not(.where-to-retire__filter-btn--active):not(
-    .where-to-retire__filter-btn--has-active
-  ) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  color: var(--text);
-}
-
-.where-to-retire__filter-btn--active,
-.where-to-retire__filter-btn--has-active {
-  z-index: 1;
-  background: #fff;
-  color: var(--color-teal-dark);
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
-
-.where-to-retire__filter-btn--active svg,
-.where-to-retire__filter-btn--has-active svg {
-  color: inherit;
-}
-
-.where-to-retire__filter-btn--active:hover,
-.where-to-retire__filter-btn--has-active:hover {
-  border-color: color-mix(in srgb, var(--color-teal-dark) 25%, var(--border));
-  background: #fff;
-  color: var(--color-teal-dark);
-  box-shadow: rgba(17, 12, 46, 0.18) 0px 48px 100px 0px;
-}
-
-.where-to-retire__filter-btn--has-active .where-to-retire__filter-btn-dot {
-  background: var(--accent-green);
-  border: 2px solid #fff;
-}
-
-.where-to-retire__filter-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.where-to-retire__filter-btn-dot {
-  position: absolute;
-  top: 0.1rem;
-  right: 0.1rem;
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 999px;
-  background: var(--accent-green);
-  // border: 2px solid #fff;
-  pointer-events: none;
-}
-
 .where-to-retire__view-bar--panel {
   justify-content: flex-end;
 }
@@ -476,18 +424,6 @@
 .where-to-retire__sidebar .wtr-filters-sidebar {
   flex: 1 1 auto;
   min-height: 0;
-}
-
-@media (min-width: 769px) {
-  .where-to-retire__sidebar .wtr-map-filters--side:not(.wtr-map-filters--mobile-sheet) {
-    width: 100%;
-    z-index: 20;
-    box-shadow: -4px 0 18px color-mix(in srgb, var(--text) 12%, transparent);
-  }
-
-  .where-to-retire__sidebar .wtr-map-filters--side:not(.wtr-map-filters--mobile-sheet) .wtr-map-filters__inner {
-    width: 100%;
-  }
 }
 
 /* Mobile WTR list layout — must follow desktop flex/overflow rules above. */

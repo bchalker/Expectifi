@@ -1,0 +1,207 @@
+.temperature-range-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.temperature-range-gauge--disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.temperature-range-gauge__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.temperature-range-gauge__heading-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.temperature-range-gauge__heading-value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+
+.temperature-range-gauge__rail {
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.temperature-range-gauge__track-column {
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+.temperature-range-gauge__track-wrap {
+  --temp-range-track-h: 4px;
+  --temp-range-thumb: 18px;
+  --temp-range-hit: 24px;
+  --temp-range-thumb-nudge: -1px;
+  --temp-range-split: 50%;
+  --temp-track-cold: var(--sky-blue-d3);
+  --temp-track-cool: var(--sky-blue-d1);
+  --temp-track-comfort: var(--green3);
+  --temp-track-warm: var(--amber3);
+  --temp-track-hot: color-mix(in srgb, var(--amber1) 45%, var(--red2));
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+  height: var(--temp-range-hit);
+  isolation: isolate;
+}
+
+.temperature-range-gauge__track {
+  position: absolute;
+  left: calc(var(--temp-range-thumb) / 2);
+  right: calc(var(--temp-range-thumb) / 2);
+  top: 50%;
+  z-index: 0;
+  height: var(--temp-range-track-h);
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--temp-track-cold) 0%,
+    var(--temp-track-cool) 20%,
+    var(--temp-track-comfort) 48%,
+    var(--temp-track-warm) 76%,
+    var(--temp-track-hot) 100%
+  );
+  pointer-events: none;
+}
+
+.temperature-range-gauge__track-shade {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  height: var(--temp-range-track-h);
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  pointer-events: none;
+}
+
+.temperature-range-gauge__track-shade--left {
+  left: calc(var(--temp-range-thumb) / 2);
+}
+
+.temperature-range-gauge__track-shade--right {
+  right: calc(var(--temp-range-thumb) / 2);
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: var(--temp-range-hit);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input--min:not(
+    .temperature-range-gauge__input--dragging
+  ) {
+  z-index: 6;
+  clip-path: inset(-100% calc(100% - var(--temp-range-split)) -100% 0);
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input--max:not(
+    .temperature-range-gauge__input--dragging
+  ) {
+  z-index: 7;
+  clip-path: inset(-100% 0 -100% var(--temp-range-split));
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input--dragging {
+  z-index: 8;
+  clip-path: none;
+}
+
+.temperature-range-gauge__input:disabled {
+  cursor: not-allowed;
+}
+
+.temperature-range-gauge__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input::-webkit-slider-runnable-track {
+  height: var(--temp-range-track-h);
+  margin-top: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input::-moz-range-track {
+  height: var(--temp-range-track-h);
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: var(--temp-range-thumb);
+  height: var(--temp-range-thumb);
+  margin-top: calc(
+    (var(--temp-range-track-h) - var(--temp-range-thumb)) / 2 + var(--temp-range-thumb-nudge)
+  );
+  border: 2px solid var(--border-strong, var(--border));
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(28 43 58 / 0.18);
+  cursor: pointer;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--temp-range-thumb);
+  height: var(--temp-range-thumb);
+  border: 2px solid var(--border-strong, var(--border));
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(28 43 58 / 0.18);
+  cursor: pointer;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.temperature-range-gauge input[type='range'].temperature-range-gauge__input:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

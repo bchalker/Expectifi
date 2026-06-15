@@ -4,6 +4,8 @@ import {
   SCENARIO_MIXED,
   type ScenarioUiChoice,
 } from '../lib/holdingScenarioApply'
+import type { ImportedPositionRow } from '../lib/positionsCsv'
+import { useScenarioPopout } from '../context/ScenarioPopoutContext'
 import { fmt } from '../utils/format'
 import { HoldingsBreakdownPopout } from './HoldingsBreakdownPopout'
 import { PortfolioScenarioCell } from './PortfolioScenarioCell'
@@ -19,6 +21,8 @@ export {
 } from './HoldingsScenarioTrigger'
 
 export type HoldingsSymbolCardScenarioProps = {
+  symbol: string
+  contributingRows: ImportedPositionRow[]
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
   variant: HoldingsScenarioTriggerVariant
@@ -26,14 +30,11 @@ export type HoldingsSymbolCardScenarioProps = {
   inheritAccent?: ScenarioUiChoice | null
   /** Holding rows: show when holding scenario diverges from account scenario. */
   overridesAccountScenario?: boolean
-  rowActive: boolean
-  onOpen: () => void
   rateSource?: HoldingReturnRateSource
 }
 
 export type HoldingsSymbolCardProps = {
   className?: string
-  scenarioActive?: boolean
   symbol: string
   description: ReactNode
   currentValue: number
@@ -45,7 +46,6 @@ export type HoldingsSymbolCardProps = {
 
 export function HoldingsSymbolCard({
   className = '',
-  scenarioActive = false,
   symbol,
   description,
   currentValue,
@@ -54,6 +54,8 @@ export function HoldingsSymbolCard({
   breakdownNote = null,
   breakdown = null,
 }: HoldingsSymbolCardProps) {
+  const { isHoldingScenarioOpen } = useScenarioPopout()
+  const scenarioActive = isHoldingScenarioOpen(symbol)
   const [breakdownOpen, setBreakdownOpen] = useState(false)
   const breakdownPanelId = useId()
   const breakdownToggleRef = useRef<HTMLButtonElement>(null)
@@ -170,14 +172,14 @@ export function HoldingsSymbolCardScenarioPanel({
     <div className="holdings-symbol-card__scenario">
       <PortfolioScenarioCell
         layout="holding"
+        symbol={scenario.symbol}
+        contributingRows={scenario.contributingRows}
         label={scenario.label}
         common={scenario.common}
         variant={scenario.variant}
         inheritAccent={scenario.inheritAccent}
         rateSource={scenario.rateSource}
         overridesAccountScenario={scenario.overridesAccountScenario}
-        rowActive={scenario.rowActive}
-        onOpen={scenario.onOpen}
       />
     </div>
   )

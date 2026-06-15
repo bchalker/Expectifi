@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { CloseButton } from '@heroui/react'
-import { IconPlus, IconThumbUpFilled } from '@tabler/icons-react'
+import { IconForbid, IconPlus, IconThumbUpFilled } from '@tabler/icons-react'
 import {
   formatUsd,
 } from '../../../utils/costOfLiving'
@@ -8,6 +8,8 @@ import { getFitScoreColors } from '../../../utils/fitScore'
 import { scoreDetailBandFromScore } from '../../../utils/retirementScore'
 import type { RetirementScoreResult } from '../../../utils/retirementScore'
 import { CountryFlag } from '../../ui/CountryFlag'
+import { Tooltip } from '../../Tooltip'
+import { EXCLUDE_COUNTRY_TOOLTIP } from '../WtrExcludeCountryIcon'
 
 export type CityDetailPanelHeaderProps = {
   cityName: string
@@ -17,6 +19,8 @@ export type CityDetailPanelHeaderProps = {
   headerScore: RetirementScoreResult
   onClose?: () => void
   showClose?: boolean
+  onExcludeCountry?: () => void
+  countryExcluded?: boolean
 }
 
 export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
@@ -27,6 +31,8 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
   headerScore,
   onClose,
   showClose = true,
+  onExcludeCountry,
+  countryExcluded = false,
 }: CityDetailPanelHeaderProps) {
   const fitScore = Math.max(0, Math.min(100, Math.round(headerScore.displayScore)))
   const { band: scoreBand, label: scoreBandLabel } = scoreDetailBandFromScore(fitScore)
@@ -68,6 +74,41 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
           <div className="wtr-city-detail__country-line">
             <CountryFlag country={country} size="s" className="wtr-city-detail__flag" />
             <p className="wtr-city-detail__country">{country}</p>
+            {onExcludeCountry ? (
+              <Tooltip
+                content={
+                  countryExcluded
+                    ? `${country} is excluded from results`
+                    : EXCLUDE_COUNTRY_TOOLTIP
+                }
+                placement="bottom"
+                triggerClassName="wtr-city-detail__country-forbid-tip"
+              >
+                <span
+                  className={[
+                    'wtr-city-detail__country-forbid',
+                    countryExcluded && 'wtr-city-detail__country-forbid--active',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-label={
+                    countryExcluded
+                      ? `${country} is excluded from results`
+                      : EXCLUDE_COUNTRY_TOOLTIP
+                  }
+                  onClick={
+                    countryExcluded
+                      ? undefined
+                      : (e) => {
+                          e.stopPropagation()
+                          onExcludeCountry()
+                        }
+                  }
+                >
+                  <IconForbid size={16} stroke={1.5} aria-hidden />
+                </span>
+              </Tooltip>
+            ) : null}
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import {
   computeClimateDirectionScore,
+  computeClimateTemperatureRangeScore,
   extractClimateMetrics,
 } from './climateDirectionScore'
 import type { CityClimate } from '../lib/api/openMeteo'
@@ -13,7 +14,8 @@ import {
 } from './countryPreferenceData'
 import {
   DEFAULT_PREFERENCES,
-  STEP_WEIGHTS,
+  isClimateTempRangeUnset,
+  preferenceWeight,
   type PreferenceStep,
   type RetirementPreferences,
 } from '../types/preferences'
@@ -43,10 +45,10 @@ const PIN_BAND_THRESHOLDS = {
 } as const
 
 const PIN_BAND_COLORS: Record<RetirementScoreBand, string> = {
-  excellent: '#22c55e',
-  good: '#0d9488',
-  moderate: '#f59e0b',
-  poor: '#ef4444',
+  excellent: '#1E8E47',
+  good: '#27b95d',
+  moderate: '#f1a841',
+  poor: '#BF3A2B',
 }
 
 const FLAT_TERRITORIAL_COUNTRIES = new Set([
@@ -149,12 +151,23 @@ function incomeTaxHaircut(country: string, estimatedTaxRate: number): number {
 
 function computeClimateScore(
   climateStep: PreferenceStep,
+  climateTempMinF: number,
+  climateTempMaxF: number,
   climatePreference: RetirementPreferences['climatePreference'],
   climate: CityClimate | null | undefined,
 ): number {
-  if (climatePreference === 'none' || climateStep === 0) return 50
+  if (climateStep === 0) return 50
   if (!climate?.monthly?.length) return INDEX_FALLBACK_SCORE
-  return computeClimateDirectionScore(climate, climatePreference)
+
+  if (!isClimateTempRangeUnset(climateTempMinF, climateTempMaxF)) {
+    return computeClimateTemperatureRangeScore(climate, climateTempMinF, climateTempMaxF)
+  }
+
+  if (climatePreference !== 'none') {
+    return computeClimateDirectionScore(climate, climatePreference)
+  }
+
+  return 50
 }
 
 function buildWeightedScore(factorScores: { score: number; weight: number }[]): number {
@@ -164,16 +177,16 @@ function buildWeightedScore(factorScores: { score: number; weight: number }[]): 
   if (totalWeight === 0) {
     const fallback = DEFAULT_PREFERENCES
     factors = [
-      { score: factors[0]?.score ?? 50, weight: STEP_WEIGHTS[fallback.affordability] },
-      { score: factors[1]?.score ?? 50, weight: STEP_WEIGHTS[fallback.taxEfficiency] },
-      { score: factors[2]?.score ?? 50, weight: STEP_WEIGHTS[fallback.healthcareCost] },
-      { score: factors[3]?.score ?? 50, weight: STEP_WEIGHTS[fallback.safety] },
-      { score: factors[4]?.score ?? 50, weight: STEP_WEIGHTS[fallback.healthcareQuality] },
-      { score: factors[5]?.score ?? 50, weight: STEP_WEIGHTS[fallback.airQuality] },
-      { score: factors[6]?.score ?? 50, weight: STEP_WEIGHTS[fallback.disasterRisk] },
-      { score: factors[7]?.score ?? 50, weight: STEP_WEIGHTS[fallback.climate] },
-      { score: factors[8]?.score ?? 50, weight: STEP_WEIGHTS[fallback.politicalStability] },
-      { score: factors[9]?.score ?? 50, weight: STEP_WEIGHTS[fallback.socialLaws] },
+      { score: factors[0]?.score ?? 50, weight: preferenceWeight(fallback.affordability) },
+      { score: factors[1]?.score ?? 50, weight: preferenceWeight(fallback.taxEfficiency) },
+      { score: factors[2]?.score ?? 50, weight: preferenceWeight(fallback.healthcareCost) },
+      { score: factors[3]?.score ?? 50, weight: preferenceWeight(fallback.safety) },
+      { score: factors[4]?.score ?? 50, weight: preferenceWeight(fallback.healthcareQuality) },
+      { score: factors[5]?.score ?? 50, weight: preferenceWeight(fallback.airQuality) },
+      { score: factors[6]?.score ?? 50, weight: preferenceWeight(fallback.disasterRisk) },
+      { score: factors[7]?.score ?? 50, weight: preferenceWeight(fallback.climate) },
+      { score: factors[8]?.score ?? 50, weight: preferenceWeight(fallback.politicalStability) },
+      { score: factors[9]?.score ?? 50, weight: preferenceWeight(fallback.socialLaws) },
       ...factors.slice(10),
     ]
     totalWeight = factors.reduce((sum, f) => sum + f.weight, 0)
@@ -201,35 +214,35 @@ function applyHardCaps(
   const warnings: string[] = []
   const fields = getCountryPreferenceFields(country)
 
-  if (prefs.safety === 5 && safetyScore < 35) {
+  if (prefs.safety >= 10 && safetyScore < 35) {
     capped = Math.min(capped, 44)
     warnings.push('⚠ Safety below your non-negotiable threshold')
-  } else if (prefs.safety === 4 && safetyScore < 35) {
+  } else if (prefs.safety >= 8 && safetyScore < 35) {
     capped = Math.min(capped, 54)
     warnings.push('⚠ High crime rates reported')
   }
 
-  if (prefs.healthcareQuality === 5 && healthcareQualityScore < 35) {
+  if (prefs.healthcareQuality >= 10 && healthcareQualityScore < 35) {
     capped = Math.min(capped, 44)
     warnings.push('⚠ Healthcare below your non-negotiable threshold')
   }
 
-  if (prefs.airQuality === 5 && qolData?.pollution_index != null && qolData.pollution_index > 80) {
+  if (prefs.airQuality >= 10 && qolData?.pollution_index != null && qolData.pollution_index > 80) {
     capped = Math.min(capped, 59)
     warnings.push('⚠ Air quality below your non-negotiable threshold')
   }
 
-  if (prefs.socialLaws === 5 && socialLawsScore < 30) {
+  if (prefs.socialLaws >= 10 && socialLawsScore < 30) {
     capped = Math.min(capped, 44)
     warnings.push('⚠ Social laws conflict with your non-negotiable preferences')
   }
 
-  if (prefs.disasterRisk === 5 && disasterScore < 25) {
+  if (prefs.disasterRisk >= 10 && disasterScore < 25) {
     capped = Math.min(capped, 54)
     warnings.push('⚠ Natural disaster risk above your threshold')
   }
 
-  if (prefs.healthcareCost === 5) {
+  if (prefs.healthcareCost >= 10) {
     const annualInsurance = fields.estimated_expat_insurance_usd ?? 3000
     const pct = monthlyIncome > 0 ? (annualInsurance / 12 / monthlyIncome) * 100 : 0
     if (pct > 15) {
@@ -238,15 +251,25 @@ function applyHardCaps(
     }
   }
 
-  if (climate?.monthly?.length && prefs.climate >= 4) {
+  if (climate?.monthly?.length && prefs.climate >= 8) {
     const metrics = extractClimateMetrics(climate)
+    const usesTempRange = !isClimateTempRangeUnset(prefs.climateTempMinF, prefs.climateTempMaxF)
 
-    if (prefs.climatePreference === 'warm_dry' && metrics.avgHumidityPct != null && metrics.avgHumidityPct > 80) {
+    if (
+      !usesTempRange &&
+      prefs.climatePreference === 'warm_dry' &&
+      metrics.avgHumidityPct != null &&
+      metrics.avgHumidityPct > 80
+    ) {
       capped = Math.min(capped, 74)
       warnings.push('⚠ Tropical humidity conflicts with your warm & dry preference')
     }
 
-    if (prefs.climatePreference === 'four_seasons' && metrics.minMonthlyAvgC > 18) {
+    if (
+      !usesTempRange &&
+      prefs.climatePreference === 'four_seasons' &&
+      metrics.minMonthlyAvgC > 18
+    ) {
       capped = Math.min(capped, 69)
       warnings.push('⚠ Tropical climate conflicts with your four seasons preference')
     }
@@ -257,7 +280,7 @@ function applyHardCaps(
     warnings.push('⚠ High pollution reported')
   }
 
-  if (prefs.climate === 5 && climateScore < 35) {
+  if (prefs.climate >= 10 && climateScore < 35) {
     capped = Math.min(capped, 44)
     warnings.push('⚠ Climate comfort below your non-negotiable threshold')
   }
@@ -304,6 +327,8 @@ export function calculateRetirementScore(
   const healthcareCostScore = computeHealthcareCostScore(resolvedCountry, monthlyIncome)
   const climateScore = computeClimateScore(
     resolvedPrefs.climate,
+    resolvedPrefs.climateTempMinF,
+    resolvedPrefs.climateTempMaxF,
     resolvedPrefs.climatePreference,
     climate,
   )
@@ -318,19 +343,19 @@ export function calculateRetirementScore(
   ) as Record<string, number>
 
   const factors = [
-    { score: incomeFitScore, weight: STEP_WEIGHTS[resolvedPrefs.affordability] },
-    { score: taxScore, weight: STEP_WEIGHTS[resolvedPrefs.taxEfficiency] },
-    { score: healthcareCostScore, weight: STEP_WEIGHTS[resolvedPrefs.healthcareCost] },
-    { score: safetyScore, weight: STEP_WEIGHTS[resolvedPrefs.safety] },
-    { score: healthcareQualityScore, weight: STEP_WEIGHTS[resolvedPrefs.healthcareQuality] },
-    { score: airQualityScore, weight: STEP_WEIGHTS[resolvedPrefs.airQuality] },
-    { score: disasterScore, weight: STEP_WEIGHTS[resolvedPrefs.disasterRisk] },
-    { score: climateScore, weight: STEP_WEIGHTS[resolvedPrefs.climate] },
-    { score: politicalStabilityScore, weight: STEP_WEIGHTS[resolvedPrefs.politicalStability] },
-    { score: socialLawsScore, weight: STEP_WEIGHTS[resolvedPrefs.socialLaws] },
+    { score: incomeFitScore, weight: preferenceWeight(resolvedPrefs.affordability) },
+    { score: taxScore, weight: preferenceWeight(resolvedPrefs.taxEfficiency) },
+    { score: healthcareCostScore, weight: preferenceWeight(resolvedPrefs.healthcareCost) },
+    { score: safetyScore, weight: preferenceWeight(resolvedPrefs.safety) },
+    { score: healthcareQualityScore, weight: preferenceWeight(resolvedPrefs.healthcareQuality) },
+    { score: airQualityScore, weight: preferenceWeight(resolvedPrefs.airQuality) },
+    { score: disasterScore, weight: preferenceWeight(resolvedPrefs.disasterRisk) },
+    { score: climateScore, weight: preferenceWeight(resolvedPrefs.climate) },
+    { score: politicalStabilityScore, weight: preferenceWeight(resolvedPrefs.politicalStability) },
+    { score: socialLawsScore, weight: preferenceWeight(resolvedPrefs.socialLaws) },
     ...resolvedPrefs.dailyLife.map((entry) => ({
       score: dailyLifeScores[entry.factor] ?? INDEX_FALLBACK_SCORE,
-      weight: STEP_WEIGHTS[entry.step],
+      weight: preferenceWeight(entry.step),
     })),
   ]
 

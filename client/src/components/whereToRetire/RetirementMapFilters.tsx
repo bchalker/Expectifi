@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   Button,
@@ -10,10 +10,11 @@ import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
 import { useIsMobileBottomSheet } from "../../hooks/useMobileBottomSheet";
 import {
   ALL_DESTINATION_REGIONS,
+  applyMapFiltersBudgetPreferences,
   countActiveMapFilters,
-  DEFAULT_HEALTH_INS_MONTHLY_USD,
   DEFAULT_MAP_FILTERS,
   DIRECT_FLIGHT_ORIGIN_OPTIONS,
+  buildLifestyleInputs,
   hasNonDefaultMapFilters,
   resolveWhereToLook,
   type ClimateFilter,
@@ -35,9 +36,17 @@ import {
   WtrFilterToggleBox,
 } from "./WtrFilterFieldChrome";
 import { WtrMinRetirementScoreSlider } from "./WtrMinRetirementScoreSlider";
+import { WtrBudgetTabContent } from "./WtrBudgetTabContent";
+import { budgetPreferencesEqual, DEFAULT_BUDGET_PREFERENCES } from "../../utils/costOfLiving";
 import "./RetirementMapFilters.scss";
+import "./BudgetPanel.scss";
 
-type FilterPanelTab = "filters" | "exclude" | "favorites" | "display";
+export type MapOptionsPanelTab =
+  | "filters"
+  | "exclude"
+  | "favorites"
+  | "display"
+  | "budget";
 
 const FOREIGN_TAX_SEGMENTS: { id: ForeignTaxFilter; label: string }[] = [
   { id: "any", label: "Any" },
@@ -212,12 +221,6 @@ function DirectFlightOriginEmbedded({ filters, onChange }: FilterChangeProps) {
   );
 }
 
-function parseHealthInsUsd(raw: string): number {
-  const n = parseFloat(raw.replace(/,/g, "").trim());
-  if (!Number.isFinite(n) || n < 0) return DEFAULT_HEALTH_INS_MONTHLY_USD;
-  return Math.round(n);
-}
-
 function FilterGroupCard({
   title,
   subtitle,
@@ -238,58 +241,6 @@ function FilterGroupCard({
       ) : null}
       <div className="wtr-map-filters__group-stack">{children}</div>
     </section>
-  );
-}
-
-function HealthInsuranceEstimateField({ filters, onChange }: FilterChangeProps) {
-  const [healthDraft, setHealthDraft] = useState(() =>
-    String(Math.round(filters.healthInsMonthlyUsd)),
-  );
-
-  useEffect(() => {
-    setHealthDraft(String(Math.round(filters.healthInsMonthlyUsd)));
-  }, [filters.healthInsMonthlyUsd]);
-
-  const healthEmbedded = (
-    <label className="wtr-map-filters__health-amount-inline">
-      <span className="wtr-map-filters__toggle-field-label">Est.</span>
-      <span className="wtr-map-filters__health-amount-prefix" aria-hidden>
-        $
-      </span>
-      <input
-        type="text"
-        inputMode="decimal"
-        className="wtr-map-filters__health-amount-input"
-        aria-label="Monthly health insurance estimate"
-        value={healthDraft}
-        onChange={(e) => setHealthDraft(e.target.value)}
-        onBlur={() => {
-          const next = parseHealthInsUsd(healthDraft);
-          setHealthDraft(String(next));
-          onChange({ ...filters, healthInsMonthlyUsd: next });
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.currentTarget.blur();
-          }
-        }}
-      />
-      <span className="wtr-map-filters__health-amount-suffix">/mo</span>
-    </label>
-  );
-
-  return (
-    <WtrFilterToggleBox
-      label="Include health insurance est."
-      pressed={filters.includeHealthIns}
-      onToggle={() =>
-        onChange({
-          ...filters,
-          includeHealthIns: !filters.includeHealthIns,
-        })
-      }
-      embedded={healthEmbedded}
-    />
   );
 }
 
@@ -349,7 +300,6 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
       </FilterGroupCard>
 
       <FilterGroupCard title="Healthcare">
-        <HealthInsuranceEstimateField filters={filters} onChange={onChange} />
         <WtrFilterSegmentedRow
           label="Healthcare"
           ariaLabel="Healthcare quality"
@@ -407,6 +357,8 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
 type PanelProps = FilterChangeProps & {
   open: boolean;
   onClose: () => void;
+  activeTab: MapOptionsPanelTab;
+  onActiveTabChange: (tab: MapOptionsPanelTab) => void;
   monthlyIncome: number;
   excludedCountries: string[];
   favoriteCities: FavoriteCityEntry[];
@@ -416,16 +368,19 @@ type PanelProps = FilterChangeProps & {
   onRemoveFavorite: (city: string, country: string) => void;
 };
 
-const FILTER_PANEL_TABS: { id: FilterPanelTab; label: string }[] = [
+const FILTER_PANEL_TABS: { id: MapOptionsPanelTab; label: string }[] = [
   { id: "filters", label: "Filters" },
-  { id: "exclude", label: "Exclude" },
+  { id: "exclude", label: "Excluded" },
   { id: "favorites", label: "Favorites" },
   { id: "display", label: "Display" },
+  { id: "budget", label: "Budget" },
 ];
 
 export function RetirementMapFilters({
   open,
   onClose,
+  activeTab,
+  onActiveTabChange,
   filters,
   onChange,
   monthlyIncome,
@@ -438,10 +393,22 @@ export function RetirementMapFilters({
 }: PanelProps) {
   const isMobileSheet = useIsMobileBottomSheet();
   const panelRef = useRef<HTMLElement>(null);
-  const [activeTab, setActiveTab] = useState<FilterPanelTab>("filters");
   const activeCount = countActiveMapFilters(filters);
-  const showClear = hasNonDefaultMapFilters(filters);
-  const excludeTabActive = excludedCountries.length > 0;
+  const showClearFilters = hasNonDefaultMapFilters(filters);
+  const showClearBudget = !budgetPreferencesEqual(
+    filters.budgetPreferences,
+    DEFAULT_BUDGET_PREFERENCES,
+  );
+
+  const panelTabs = useMemo(
+    () =>
+      FILTER_PANEL_TABS.map((tab) =>
+        tab.id === "exclude" && excludedCountries.length > 0
+          ? { ...tab, label: `Excluded (${excludedCountries.length})` }
+          : tab,
+      ),
+    [excludedCountries.length],
+  );
 
   const {
     isDragging,
@@ -460,7 +427,13 @@ export function RetirementMapFilters({
     onChange({
       ...DEFAULT_MAP_FILTERS,
       regions: [...ALL_DESTINATION_REGIONS],
+      budgetPreferences: filters.budgetPreferences,
+      lifestyle: buildLifestyleInputs(filters.budgetPreferences),
     });
+  };
+
+  const clearBudget = () => {
+    onChange(applyMapFiltersBudgetPreferences(filters, DEFAULT_BUDGET_PREFERENCES));
   };
 
   const panel = (
@@ -479,14 +452,14 @@ export function RetirementMapFilters({
         className={[
           "wtr-map-filters",
           "wtr-map-filters--panel",
-          "wtr-map-filters--side",
+          isMobileSheet ? "wtr-map-filters--side" : "wtr-map-filters--map-rail",
           isMobileSheet && "wtr-map-filters--mobile-sheet",
           isDragging && "mobile-bottom-sheet-panel--dragging",
           open && "wtr-map-filters--open",
         ]
           .filter(Boolean)
           .join(" ")}
-        aria-label="Map filters"
+        aria-label="Filters"
         aria-hidden={!open}
       >
         {isMobileSheet ? (
@@ -499,14 +472,9 @@ export function RetirementMapFilters({
       <div className="wtr-map-filters__inner">
       <header className="wtr-map-filters__head">
         <div className="wtr-map-filters__head-copy">
-          <h2 className="wtr-map-filters__head-title">Map options</h2>
+          <h2 className="wtr-map-filters__head-title">Filters</h2>
           {activeTab === "filters" && activeCount > 0 ? (
             <p className="wtr-map-filters__head-active">{activeCount} active</p>
-          ) : null}
-          {activeTab === "exclude" && excludeTabActive ? (
-            <p className="wtr-map-filters__head-active">
-              {excludedCountries.length} excluded
-            </p>
           ) : null}
           {activeTab === "favorites" && favoriteCities.length > 0 ? (
             <p className="wtr-map-filters__head-active">
@@ -522,7 +490,7 @@ export function RetirementMapFilters({
         role="tablist"
         aria-label="Filter panel sections"
       >
-        {FILTER_PANEL_TABS.map((tab) => (
+        {panelTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -534,7 +502,7 @@ export function RetirementMapFilters({
               .filter(Boolean)
               .join(" ")}
             aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => onActiveTabChange(tab.id)}
           >
             {tab.label}
           </button>
@@ -570,10 +538,14 @@ export function RetirementMapFilters({
               Min QoL, language, and flight filters coming soon.
             </p>
           ) : null}
+
+          {activeTab === "budget" ? (
+            <WtrBudgetTabContent filters={filters} onChange={onChange} />
+          ) : null}
         </div>
       </div>
 
-      {activeTab === "filters" && showClear ? (
+      {activeTab === "filters" && showClearFilters ? (
         <footer className="wtr-map-filters__footer">
           <Button
             variant="ghost"
@@ -582,6 +554,19 @@ export function RetirementMapFilters({
             onPress={clearFilters}
           >
             Clear filters
+          </Button>
+        </footer>
+      ) : null}
+
+      {activeTab === "budget" && showClearBudget ? (
+        <footer className="wtr-map-filters__footer">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="wtr-map-filters__clear"
+            onPress={clearBudget}
+          >
+            Reset to typical
           </Button>
         </footer>
       ) : null}

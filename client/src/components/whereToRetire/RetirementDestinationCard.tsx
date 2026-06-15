@@ -15,7 +15,9 @@ import {
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
 import { getFitScoreColors } from "../../utils/fitScore";
+import { AppChip } from "../ui/AppChip";
 import { CountryFlag } from "../ui/CountryFlag";
+import { wtrTaxChipColor } from "../../lib/whereToRetire/wtrChipColors";
 import {
   formatEstimatedAmericans,
   getExpatDestinationInfo,
@@ -35,7 +37,7 @@ type Props = {
   active: boolean;
   staggerIndex?: number;
   incomeFit?: MapIncomeFitDisplay | null;
-  mapFilters?: Pick<MapFilters, "includeHealthIns" | "healthInsMonthlyUsd">;
+  mapFilters?: Pick<MapFilters, "lifestyle">;
   onSelect: () => void;
   isFavorited?: boolean;
   onToggleFavorite?: () => void;
@@ -68,12 +70,15 @@ export function RetirementDestinationCard({
       ? formatEstimatedAmericans(expatInfo.estimated_americans)
       : null;
 
-  const monthlyCost =
-    pinColorView === "budget" && mapFilters
-      ? monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters)
-      : null;
+  const monthlyCost = mapFilters
+    ? monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters)
+    : scored.monthlyBudget;
   const monthlySurplus =
     monthlyCost != null ? Math.max(0, monthlyIncome - monthlyCost) : null;
+  const showMonthlyStat =
+    (pinColorView === "budget" || pinColorView === "score") &&
+    monthlyCost != null &&
+    Number.isFinite(monthlyCost);
 
   const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -149,12 +154,15 @@ export function RetirementDestinationCard({
               </span>
             </div>
 
-            {pinColorView === "budget" && monthlyCost != null ? (
+            {showMonthlyStat ? (
               <span className="wtr-dest-card__budget-stat">
                 <span className="wtr-dest-card__budget-amount tabular-nums">
                   {formatUsd(monthlyCost)}
+                  <span className="wtr-dest-card__budget-suffix">/mo</span>
                 </span>
-                {monthlySurplus != null && monthlySurplus > 0 ? (
+                {pinColorView === "budget" &&
+                monthlySurplus != null &&
+                monthlySurplus > 0 ? (
                   <span className="wtr-dest-card__budget-surplus tabular-nums">
                     + {formatUsd(monthlySurplus)}
                   </span>
@@ -181,14 +189,15 @@ export function RetirementDestinationCard({
 
           {incomeFit ? (
             <div className="wtr-dest-card__meta">
-              <span
+              <AppChip
                 className={[
-                  "wtr-dest-card__meta-pill",
-                  "wtr-dest-card__meta-pill--visa",
-                  incomeFit.visaQualifies && "wtr-dest-card__meta-pill--visa-friendly",
+                  "app-chip--visa",
+                  incomeFit.visaQualifies && "app-chip--visa-friendly",
                 ]
                   .filter(Boolean)
                   .join(" ")}
+                variant="secondary"
+                color={incomeFit.visaQualifies ? "success" : "default"}
               >
                 {incomeFit.visaQualifies ? (
                   <IconCheck
@@ -199,18 +208,13 @@ export function RetirementDestinationCard({
                   />
                 ) : null}
                 {incomeFit.visaLabel}
-              </span>
-              <span
-                className={[
-                  "wtr-dest-card__meta-pill",
-                  "wtr-dest-card__meta-pill--tax",
-                  `wtr-dest-card__meta-pill--tax-${incomeFit.taxTone}`,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+              </AppChip>
+              <AppChip
+                color={wtrTaxChipColor(incomeFit.taxTone)}
+                variant="soft"
               >
                 {incomeFit.taxLabel}
-              </span>
+              </AppChip>
             </div>
           ) : null}
 

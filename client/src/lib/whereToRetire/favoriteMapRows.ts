@@ -4,8 +4,8 @@ import {
   taxBadgeTone,
 } from '../retirementFormulas'
 import type { FavoriteCityEntry } from '../retirementStorage'
-import type { MapFilters } from './cityMapScoring'
 import { calcMapIncomeFit } from './mapIncomeFit'
+import { resolveMapLifestyle, type MapFilters } from './cityMapScoring'
 import { lookupRetirementCity } from './retirementCityLookup'
 import {
   calculateMonthlyBudget,
@@ -52,31 +52,31 @@ function resolveFavoriteIso(
 function favoriteSurplusAndTax(
   entry: FavoriteCityEntry,
   monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): { surplus: number; taxRate: number } {
+  const mapCity = lookupMapCity(entry.city, entry.country)
   const record = lookupRetirementCity(entry.city, entry.country)
-  if (record) {
-    const fit = calcMapIncomeFit(record, monthlyIncome, filters)
+  if (record && mapCity) {
+    const fit = calcMapIncomeFit(mapCity, record, monthlyIncome, filters)
     return { surplus: fit.surplus, taxRate: fit.taxRate }
   }
 
-  const mapCity = lookupMapCity(entry.city, entry.country)
   const iso = resolveFavoriteIso(entry)
   const taxRate = getEffectiveTaxRate(iso)
   if (!mapCity) {
     return { surplus: 0, taxRate }
   }
 
-  const budget = calculateMonthlyBudget(mapCity)
-  const health = filters.includeHealthIns ? filters.healthInsMonthlyUsd : 0
+  const lifestyle = resolveMapLifestyle(filters)
+  const budget = calculateMonthlyBudget(mapCity, lifestyle).total
   const netIncome = monthlyIncome * (1 - taxRate)
-  return { surplus: netIncome - budget - health, taxRate }
+  return { surplus: netIncome - budget, taxRate }
 }
 
 export function buildFavoriteMapRows(
   favorites: FavoriteCityEntry[],
   monthlyIncome: number,
-  filters: Pick<MapFilters, 'includeHealthIns' | 'healthInsMonthlyUsd'>,
+  filters: Pick<MapFilters, 'lifestyle'>,
 ): FavoriteMapRow[] {
   const rows: FavoriteMapRow[] = []
 

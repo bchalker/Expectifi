@@ -1,5 +1,6 @@
 import {
   calculateMonthlyBudget,
+  DEFAULT_LIFESTYLE,
   getAllMapCities,
   type MapCity,
 } from '../../utils/costOfLiving'
@@ -54,7 +55,7 @@ export function computeBudgetExplorationStats(monthlyIncome: number): BudgetExpl
   const affordable = all
     .map((city) => ({
       city,
-      monthlyBudget: calculateMonthlyBudget(city),
+      monthlyBudget: calculateMonthlyBudget(city, DEFAULT_LIFESTYLE).total,
     }))
     .filter((row) => row.monthlyBudget <= monthlyIncome)
 

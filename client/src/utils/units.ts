@@ -19,6 +19,20 @@ export function monthlyFoodEstimate(mealInexpensiveRestaurant: number): number {
   return Math.round(mealInexpensiveRestaurant * 45)
 }
 
+/** Monthly grocery staples: milk, bread, eggs, chicken at typical household volumes. */
+export function monthlyGroceryEstimate(
+  milk1L: number,
+  bread500g: number,
+  eggs12: number,
+  chicken1kg: number,
+): number {
+  const milk = Number.isFinite(milk1L) ? milk1L * 4 : 0
+  const bread = Number.isFinite(bread500g) ? bread500g * 8 : 0
+  const eggs = Number.isFinite(eggs12) ? eggs12 * 4 : 0
+  const chicken = Number.isFinite(chicken1kg) ? chicken1kg * 2 : 0
+  return Math.round(milk + bread + eggs + chicken)
+}
+
 export function rentCardHeaderSubtitle(): string {
   return '1BR (outside center)'
 }

@@ -517,7 +517,8 @@ export function OnboardingOverlay({
       <div className="onboarding-overlay__panel">
         <header className="onboarding-overlay__header">
           <OnboardingProgressSteps
-            activeStep={step}
+            activeIndex={(['profile', 'contributions', 'goals'] as const).indexOf(step)}
+            totalSteps={3}
             className="onboarding-overlay__progress"
           />
           {headerTitle ? (

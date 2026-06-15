@@ -1,6 +1,8 @@
 import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
 import type { MapIncomeFitDisplay } from '../../lib/whereToRetire/mapIncomeFit'
-import './RetirementFitCalculator.scss'
+import { AppChip } from '../ui/AppChip'
+import { wtrTaxChipColor } from '../../lib/whereToRetire/wtrChipColors'
+import './WtrIncomeFitBadges.scss'
 
 type Props = {
   fit: MapIncomeFitDisplay
@@ -10,35 +12,34 @@ type Props = {
   part?: 'tax' | 'visa'
 }
 
-/** Tax + visa pills shared by map list cards and income-fit cards. */
+/** Tax + visa chips shared by map list cards and income-fit cards. */
 export function WtrIncomeFitBadges({ fit, className, variant = 'inline', part }: Props) {
   if (variant === 'list') {
     if (part === 'tax') {
       return (
-        <span
-          className={[
-            'wtr-dest-card__tax-pill',
-            `wtr-dest-card__tax-pill--${fit.taxTone}`,
-            className,
-          ]
-            .filter(Boolean)
-            .join(' ')}
+        <AppChip
+          className={className}
+          color={wtrTaxChipColor(fit.taxTone)}
+          variant="soft"
         >
           {fit.taxLabel}
-        </span>
+        </AppChip>
       )
     }
 
     if (part === 'visa') {
       return (
-        <span
+        <AppChip
           className={[
             'wtr-dest-card__visa-inline',
-            fit.visaQualifies && 'wtr-dest-card__visa-inline--friendly',
+            'app-chip--visa',
+            fit.visaQualifies && 'app-chip--visa-friendly',
             className,
           ]
             .filter(Boolean)
             .join(' ')}
+          variant="secondary"
+          color={fit.visaQualifies ? 'success' : 'default'}
         >
           <IconArrowNarrowRightDashed
             className="wtr-dest-card__visa-inline-icon"
@@ -47,7 +48,7 @@ export function WtrIncomeFitBadges({ fit, className, variant = 'inline', part }:
             aria-hidden
           />
           {fit.visaLabel}
-        </span>
+        </AppChip>
       )
     }
 
@@ -56,20 +57,15 @@ export function WtrIncomeFitBadges({ fit, className, variant = 'inline', part }:
 
   return (
     <div className={['wtr-fit-card__badges', className].filter(Boolean).join(' ')}>
-      <span className={`wtr-fit-card__badge wtr-fit-card__badge--tax-${fit.taxTone}`}>
+      <AppChip color={wtrTaxChipColor(fit.taxTone)} variant="soft">
         {fit.taxLabel}
-      </span>
-      <span
-        className={[
-          'wtr-fit-card__badge',
-          'wtr-fit-card__badge--visa',
-          !fit.visaQualifies && 'wtr-fit-card__badge--visa-fail',
-        ]
-          .filter(Boolean)
-          .join(' ')}
+      </AppChip>
+      <AppChip
+        variant="soft"
+        color={fit.visaQualifies ? 'accent' : 'danger'}
       >
         {fit.visaLabel}
-      </span>
+      </AppChip>
     </div>
   )
 }

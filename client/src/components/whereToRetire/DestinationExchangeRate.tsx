@@ -2,21 +2,26 @@ import { useMemo, type CSSProperties } from 'react'
 import {
   IconArrowsExchange,
 } from '@tabler/icons-react'
-import { formatUsdToLocalRate } from '../../lib/api/exchangeRates'
+import {
+  formatUsdToLocalAmount,
+  formatUsdToLocalRate,
+} from '../../lib/api/exchangeRates'
 import { useDestinationLiveData } from '../../hooks/useDestinationLiveData'
 import { countryToCurrencyCode, type MapCity } from '../../utils/costOfLiving'
+import { fmt } from '../../utils/format'
 import { Tooltip } from '../Tooltip'
 import {
   DOLLAR_STRENGTH_LABELS,
   dollarStrengthBand,
-  getColIndexForCountry,
-  usPurchasingPowerMultiplier,
+  purchasingPowerMultiplierForCity,
 } from './cityDetail/cityDetailTabUtils'
 import './DestinationExchangeRate.scss'
 import '../Tooltip.scss'
 
 type Props = {
   city: MapCity
+  /** Expectifi projected monthly income — not the exploration slider value. */
+  planMonthlyIncome?: number
   variant?: 'card' | 'compact'
   className?: string
   staggerClassName?: string
@@ -38,8 +43,14 @@ function staggerProps(
   }
 }
 
+function formatPurchasingPowerMultiplier(multiplier: number): string {
+  const rounded = Number(multiplier.toFixed(1))
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded)
+}
+
 export function DestinationExchangeRate({
   city,
+  planMonthlyIncome = 0,
   variant = 'card',
   className,
   staggerClassName,
@@ -50,12 +61,11 @@ export function DestinationExchangeRate({
   const isUsd = !currencyCode || currencyCode === 'USD'
 
   const purchasingMeta = useMemo(() => {
-    const colIndex = getColIndexForCountry(city.country)
-    if (colIndex == null || colIndex <= 0) return null
-    const multiplier = usPurchasingPowerMultiplier(colIndex)
+    const multiplier = purchasingPowerMultiplierForCity(city)
+    if (multiplier == null || multiplier <= 0) return null
     const band = dollarStrengthBand(multiplier)
     return { multiplier, band }
-  }, [city.country])
+  }, [city.id])
 
   const rootClass = [
     'wtr-exchange-rate',
@@ -80,6 +90,11 @@ export function DestinationExchangeRate({
         <p className="wtr-exchange-rate__copy">
           Prices and budget estimates are in US dollars. This destination uses the US dollar.
         </p>
+        {planMonthlyIncome > 0 ? (
+          <p className="wtr-exchange-rate__income-rate tabular-nums">
+            {fmt(planMonthlyIncome)}/mo budget in USD
+          </p>
+        ) : null}
       </section>
     )
   }
@@ -101,6 +116,15 @@ export function DestinationExchangeRate({
   }
 
   const rateLabel = `1 USD ≈ ${formatUsdToLocalRate(currency.rate, currency.currencyCode)} ${currency.currencyCode}`
+  const localMonthlyIncome =
+    planMonthlyIncome > 0
+      ? planMonthlyIncome * currency.rate
+      : null
+  const incomeLabel =
+    localMonthlyIncome != null
+      ? `${fmt(planMonthlyIncome)} ≈ ${formatUsdToLocalAmount(localMonthlyIncome, currency.currencyCode)} ${currency.currencyCode}`
+      : null
+  const wiseTransferUrl = `https://wise.com/send/?sourceCurrency=USD&targetCurrency=${encodeURIComponent(currency.currencyCode)}`
 
   if (variant === 'compact') {
     return (
@@ -113,8 +137,8 @@ export function DestinationExchangeRate({
 
   return (
     <section className={rootClass} aria-label="Exchange rate vs US dollar" {...staggerProps(staggerClassName, staggerStyle, 0)}>
-      <div className="wtr-exchange-rate__layout">
-        <div className="wtr-exchange-rate__primary">
+      <div className="wtr-exchange-rate__top">
+        <div className="wtr-exchange-rate__rates">
           <p className="wtr-exchange-rate__rate-row">
             <Tooltip
               placement="top"
@@ -123,32 +147,82 @@ export function DestinationExchangeRate({
               closeDelay={80}
               content={
                 <>
-                  Spot rate, updated daily.
+                  Mid-market rate from Wise, updated frequently.
                   <br />
-                  Not a quote for transfers.
+                  Illustrative only — not a transfer quote.
+                  {currency.source === 'wise' ? (
+                    <>
+                      <br />
+                      <a
+                        href={wiseTransferUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="wtr-exchange-rate__wise-link"
+                      >
+                        Send with Wise
+                      </a>
+                    </>
+                  ) : null}
                 </>
               }
             >
-              <span className="wtr-exchange-rate__rate font-sm tabular-nums">{rateLabel}</span>
+              <span className="wtr-exchange-rate__spot-rate tabular-nums">{rateLabel}</span>
             </Tooltip>
           </p>
-          <p className="wtr-exchange-rate__subtitle font-xs">
-            {currency.currencyName}
-            {purchasingMeta ? (
-              <>
-                {' · '}
-                <span className="tabular-nums">
-                  {purchasingMeta.multiplier}× your US purchasing power
-                </span>
-              </>
-            ) : null}
-          </p>
+          {incomeLabel ? (
+            <p className="wtr-exchange-rate__income-rate tabular-nums">{incomeLabel}</p>
+          ) : null}
         </div>
+        {purchasingMeta ? (
+          <Tooltip
+            placement="top"
+            showArrow
+            delay={250}
+            closeDelay={80}
+            content={
+              <>
+                Living-cost comparison for {city.city} vs a typical US city in our data.
+                <br />
+                The exchange rate above is the same for all countries using {currency.currencyCode}.
+              </>
+            }
+          >
+            <span
+              className={[
+                'wtr-exchange-rate__power-badge',
+                `wtr-exchange-rate__power-badge--${purchasingMeta.band}`,
+              ].join(' ')}
+            >
+              {formatPurchasingPowerMultiplier(purchasingMeta.multiplier)}x your US purchasing power
+            </span>
+          </Tooltip>
+        ) : null}
+      </div>
+      <div className="wtr-exchange-rate__footer">
+        <p className="wtr-exchange-rate__attribution">
+          {currency.currencyName}
+          {currency.source === 'wise' ? (
+            <>
+              {' · '}
+              <span className="wtr-exchange-rate__attribution-source">
+                Rates provided via{' '}
+                <a
+                  href={wiseTransferUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="wtr-exchange-rate__wise-link"
+                >
+                  Wise
+                </a>
+              </span>
+            </>
+          ) : null}
+        </p>
         {purchasingMeta ? (
           <span
             className={[
-              'wtr-exchange-rate__strength-badge',
-              `wtr-exchange-rate__strength-badge--${purchasingMeta.band}`,
+              'wtr-exchange-rate__strength-label',
+              `wtr-exchange-rate__strength-label--${purchasingMeta.band}`,
             ].join(' ')}
           >
             {DOLLAR_STRENGTH_LABELS[purchasingMeta.band]}
