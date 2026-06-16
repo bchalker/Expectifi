@@ -12,6 +12,10 @@ import {
   type StoredManualAccounts,
 } from '../manualAccountEntries'
 import { isSessionOnboardingComplete, resetAnonymousEphemeralSessionOnBoot } from '../sessionFlags'
+import {
+  loadPersistedAccountIncomeUiFields,
+  mergeIncomeUiFields,
+} from '../accountIncomeStorage'
 import { profileToCalculatorPatch } from '../userProfileStorage'
 import { loadPlanAccounts, planAccountsHaveBalances } from './accounts'
 import { hasSavePlanBeenAccepted, loadMeta } from './meta'
@@ -108,6 +112,10 @@ function hydratePlanStateForTier(
     }
     inputs = mergeManualAccountsIntoInputs(inputs, accounts)
     inputs = applyImportedBalanceOverrides(inputs)
+    const incomeUi = loadPersistedAccountIncomeUiFields()
+    if (incomeUi) {
+      ui = { ...ui, ...mergeIncomeUiFields(ui, incomeUi) }
+    }
   } else if (profile) {
     inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
   }

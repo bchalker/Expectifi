@@ -13,14 +13,23 @@ function motionMs(defaultMs: number) {
  * Eases the displayed scalar toward `target` when it changes (e.g. slider-driven recomputes).
  * Cancels in-flight animation if `target` changes again.
  */
-export function useAnimatedScalar(target: number, defaultDurationMs = 420) {
+export function useAnimatedScalar(
+  target: number,
+  defaultDurationMs = 420,
+  options?: { animate?: boolean },
+) {
   const [display, setDisplay] = useState(target)
   const displayRef = useRef(display)
   displayRef.current = display
+  const animate = options?.animate !== false
 
   useEffect(() => {
     if (!Number.isFinite(target)) {
       setDisplay(0)
+      return
+    }
+    if (!animate) {
+      setDisplay(target)
       return
     }
     const ms = motionMs(defaultDurationMs)
@@ -42,7 +51,7 @@ export function useAnimatedScalar(target: number, defaultDurationMs = 420) {
     }
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [target, defaultDurationMs])
+  }, [target, defaultDurationMs, animate])
 
   return display
 }

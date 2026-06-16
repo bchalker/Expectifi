@@ -1,4 +1,9 @@
 import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
   useAnimatedScalar,
 } from "../hooks/useAnimatedScalar";
 import {
@@ -44,6 +49,8 @@ type Props = {
   marketScenarioRetRate?: number;
   yearsToRetirement?: number;
   className?: string;
+  /** When false, hero numbers snap to target (boot hydrate) instead of counting up. */
+  valuesReady?: boolean;
   /** Suffix for tab/panel ids when rendering a second instance (e.g. in .main). */
   instanceId?: string;
 };
@@ -68,10 +75,22 @@ export function SubHeader({
   marketScenarioRetRate = 0,
   yearsToRetirement = 1,
   className,
+  valuesReady = true,
   instanceId,
 }: Props) {
-  const grossAnim = useAnimatedScalar(grossMon);
-  const totalFvAnim = useAnimatedScalar(totalFV);
+  const mountedPhaseRef = useRef<Phase | null>(null);
+  const [phaseEntryGen, setPhaseEntryGen] = useState(0);
+
+  useEffect(() => {
+    if (mountedPhaseRef.current !== null && mountedPhaseRef.current !== phase) {
+      setPhaseEntryGen((gen) => gen + 1);
+    }
+    mountedPhaseRef.current = phase;
+  }, [phase]);
+
+  const animatePhaseEntry = phaseEntryGen > 0;
+  const grossAnim = useAnimatedScalar(grossMon, 420, { animate: valuesReady });
+  const totalFvAnim = useAnimatedScalar(totalFV, 420, { animate: valuesReady });
 
   const incomePhase = phase === "income";
   const showGuaranteedIncomeRetirementNote =
@@ -145,8 +164,18 @@ export function SubHeader({
             </div>
 
             <div className="subheader-estimate__center">
-              <div key={phase} className="subheader-estimate__swap">
-                <div className="subheader-estimate__value subheader-estimate__value--enter">
+              <div
+                key={animatePhaseEntry ? `${phase}-${phaseEntryGen}` : "initial"}
+                className="subheader-estimate__swap"
+              >
+                <div
+                  className={[
+                    "subheader-estimate__value",
+                    animatePhaseEntry && "subheader-estimate__value--enter",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
                   <span className="subheader-estimate__value-num">
                     {incomePhase ? fmt(grossAnim) : fmt(totalFvAnim)}
                   </span>
@@ -159,7 +188,7 @@ export function SubHeader({
                     className={[
                       "font-xs",
                       "subheader-market-scenario-pill",
-                      "subheader-estimate__note--enter",
+                      animatePhaseEntry && "subheader-estimate__note--enter",
                       marketScenarioPillClass,
                     ]
                       .filter(Boolean)

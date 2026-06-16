@@ -71,6 +71,8 @@ import {
 import { hydrateAppSnapshot } from "./lib/appSnapshot";
 import {
   clearIncomeUiSnap,
+  incomeUiFieldsHaveData,
+  loadPersistedAccountIncomeUiFields,
   mergeHydratedCalculatorUi,
   saveIncomeUiSnap,
 } from "./lib/accountIncomeStorage";
@@ -282,6 +284,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const welcomeBlockedRef = useRef(peekForceOnboardingSession());
   const syncedAuthUserIdRef = useRef<string | null>(null);
   const hydrationBootSyncedRef = useRef(false);
+  const planPersistReadyRef = useRef(false);
+  const isHydratedRef = useRef(isHydrated);
+  isHydratedRef.current = isHydrated;
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [onboardingMountKey, setOnboardingMountKey] = useState(0);
@@ -447,6 +452,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
     setUiState((s) => ({ ...s, ...p }));
   }, []);
 
+  useEffect(() => {
+    if (isHydrated) return;
+    hydrationBootSyncedRef.current = false;
+    planPersistReadyRef.current = false;
+  }, [isHydrated]);
+
   /** Apply boot hydration to React state (refresh + sign-in). Avoids persisting empty defaults over saved income UI. */
   useEffect(() => {
     if (!isHydrated || authLoading) return;
@@ -459,11 +470,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setUiState(resolvedUi);
       setPhase(resolvedPhase);
       setActivePreset(hydration.activePreset);
+      planPersistReadyRef.current = true;
     };
 
     if (userId && syncedAuthUserIdRef.current !== userId) {
       syncedAuthUserIdRef.current = userId;
       hydrationBootSyncedRef.current = true;
+      planPersistReadyRef.current = false;
       applyHydration();
       setPositionsImportRev((n) => n + 1);
       return;
@@ -474,6 +487,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
     if (!hydrationBootSyncedRef.current) {
       hydrationBootSyncedRef.current = true;
+      planPersistReadyRef.current = false;
       applyHydration();
     }
   }, [
@@ -549,7 +563,19 @@ export default function App({ initialAuthModal = null }: AppProps) {
   useEffect(() => {
     if (!isHydrated || authLoading) return;
     if (!hydrationBootSyncedRef.current) return;
+    if (!planPersistReadyRef.current) return;
     if (user && syncedAuthUserIdRef.current !== user.id) return;
+
+    const uiIncome = {
+      accountIncomeFunds: ui.accountIncomeFunds,
+      accountIncomeStrategies: ui.accountIncomeStrategies,
+      accountWithdrawRates: ui.accountWithdrawRates,
+    };
+    if (!incomeUiFieldsHaveData(uiIncome)) {
+      const stored = loadPersistedAccountIncomeUiFields();
+      if (incomeUiFieldsHaveData(stored)) return;
+    }
+
     const id = window.setTimeout(() => {
       saveCalculatorPhaseSnap(phase);
       saveIncomeUiSnap(ui);
@@ -613,6 +639,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
   /** After server plan-state hydrate, refresh session UI and derived local-only state. */
   useEffect(() => {
     const onServerHydrated = () => {
+      if (!isHydratedRef.current) return;
       const session = loadPlanSession();
       const hydrated = session
         ? hydrateAppSnapshot(session, defaultCalculatorInputs)
@@ -1123,6 +1150,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     marketScenarioActive: resolveMarketScenarioActive(inputs),
     marketScenarioRetRate: inputs.retRate,
     yearsToRetirement: cDisplay.yearsToRetirement,
+    valuesReady: isHydrated,
   } as const;
 
   const goalBarProps = {

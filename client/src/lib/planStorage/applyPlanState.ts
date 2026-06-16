@@ -72,7 +72,7 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
     )
     window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
   }
-  if (payload.accountIncomeUi) {
+  if (payload.accountIncomeUi && incomeUiFieldsHaveData(payload.accountIncomeUi)) {
     const normalized = migrateIncomeUiFields(payload.accountIncomeUi as IncomeUiFields)
     saveIncomeUiSnap(normalized, { skipServerSync: true, skipTouchSavedAt: true })
     const session = loadPlanSession()
