@@ -628,19 +628,6 @@
   gap: var(--space-6);
 }
 
-.wtr-dest-panel__col-extras {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2) /* review: was 0.45rem */;
-}
-
-.wtr-dest-panel__col-extras-note {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.3;
-  color: var(--text-muted);
-}
-
 .wtr-dest-panel__cards {
   display: grid;
   grid-template-columns: 1fr;

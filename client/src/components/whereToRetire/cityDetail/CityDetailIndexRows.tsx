@@ -1,6 +1,7 @@
 import { useUserLocale } from '../../../context/UserLocaleContext'
 import { Tooltip } from '../../Tooltip'
 import { AppChip } from '../../ui/AppChip'
+import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { wtrIndexBandChipColor } from '../../../lib/whereToRetire/wtrChipColors'
 import {
   formatQoLIndex,
@@ -125,7 +126,8 @@ function CityDetailIndexCard({
   const fillTone = indexBarFillTone(band)
 
   return (
-    <article
+    <DetailPanelCard
+      as="article"
       className={[
         'wtr-city-detail-index-card',
         band ? `wtr-city-detail-index-card--${band}` : 'wtr-city-detail-index-card--unavailable',
@@ -181,7 +183,7 @@ function CityDetailIndexCard({
       ) : comparison ? (
         <IndexComparisonRow comparison={comparison} band={band as ColIndexBand | null} tooltip={tooltip} />
       ) : null}
-    </article>
+    </DetailPanelCard>
   )
 }
 

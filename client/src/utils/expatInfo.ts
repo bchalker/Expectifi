@@ -29,6 +29,12 @@ export type ExpatCountryData = {
   cost_note: string
   language_barrier: string
   healthcare_expat: string
+  community_why?: string
+  expat_vibe_why?: string
+  language_barrier_why?: string
+  healthcare_expat_why?: string
+  cost_note_why?: string
+  panel_heads_up?: string
 }
 
 type ExpatInfoDatasetFile = {
@@ -47,6 +53,15 @@ export const EXPAT_TAB_SOURCE_FOOTER =
 
 export const EXPAT_UNAVAILABLE_MESSAGE =
   'Expat community data not yet available for this destination. Try searching expat groups on Facebook for current community information.'
+
+export function defaultExpatPanelHeadsUp(): string {
+  return 'Community size, costs, and group activity change quickly — check recent forum posts and talk to people on the ground before you sign a lease or sell your home.'
+}
+
+export function getExpatPanelHeadsUp(data: ExpatCountryData | null): string {
+  if (data?.panel_heads_up?.trim()) return data.panel_heads_up.trim()
+  return defaultExpatPanelHeadsUp()
+}
 
 /** Country-level expat data (keys match `city.country`, e.g. "Portugal"). */
 export function getExpatInfo(country: string): ExpatCountryData | null {

@@ -246,17 +246,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-5);
-  // border: 1px solid var(--border);
-  border-radius: var(--space-2);
-  background: var(--color-card, var(--surface));
-  background: #f9f9f9;
   box-sizing: border-box;
 }
 
 .wtr-city-detail__col-budget-group .wtr-city-detail__cards {
   border-top: none;
   padding-top: 0;
+}
+
+.wtr-city-detail__col-groceries {
+  width: 100%;
 }
 
 .wtr-city-detail__col-budget-footnote {
@@ -290,6 +289,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+
 }
 
 .wtr-city-detail__tab-scroll {
@@ -349,7 +349,7 @@ all .3s ease;
 }
 
 .wtr-city-detail__tabpanel {
-  --wtr-tabpanel-pad: var(--space-5);
+  --wtr-tabpanel-pad: var(--space-4);
 
   display: flex;
   flex-direction: column;
@@ -477,19 +477,6 @@ all .3s ease;
   border-radius: var(--space-2);
 }
 
-.wtr-city-detail__col-extras {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.wtr-city-detail__col-extras-note {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.3;
-  color: var(--text-muted);
-}
-
 .wtr-city-detail__footer {
   grid-column: 1 / -1;
   flex-shrink: 0;
@@ -586,6 +573,9 @@ all .3s ease;
   min-width: 0;
   opacity: 0;
   transition: opacity 0.22s ease-out;
+  padding: var(--space-4);
+  background: #f9f9f9;
+  border-radius: var(--space-2);
 }
 
 .wtr-city-detail__tab-fade--in {

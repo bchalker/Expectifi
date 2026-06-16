@@ -64,11 +64,48 @@ export function interpretSafety(score: number): string {
   return 'High crime rates reported'
 }
 
+export type HealthcareBand = 'limited' | 'basic' | 'good' | 'world-class'
+
+export const HEALTHCARE_BAND_SEGMENTS: {
+  band: HealthcareBand
+  label: string
+}[] = [
+  { band: 'limited', label: 'Limited' },
+  { band: 'basic', label: 'Basic' },
+  { band: 'good', label: 'Good' },
+  { band: 'world-class', label: 'World-class' },
+]
+
+export function healthcareBand(score: number): { band: HealthcareBand; label: string } {
+  if (score >= 75) return { band: 'world-class', label: 'World-class' }
+  if (score >= 55) return { band: 'good', label: 'Good' }
+  if (score >= 40) return { band: 'basic', label: 'Basic' }
+  return { band: 'limited', label: 'Limited' }
+}
+
 export function interpretHealthcare(score: number): string {
   if (score >= 75) return 'World-class healthcare'
   if (score >= 55) return 'Good quality care available'
   if (score >= 40) return 'Basic care available, private recommended'
   return 'Limited healthcare, insurance essential'
+}
+
+/** Score-band guidance for the QoL healthcare card (v1 — templated only). */
+export function healthcareBandDescription(score: number): string {
+  if (score >= 75) {
+    return "You're looking at care that rivals what you'd expect in the US or Western Europe — important if you have ongoing conditions and want to avoid medevac trips home."
+  }
+  if (score >= 55) {
+    return "Solid hospitals and specialists in cities; you'll want private insurance and a clear plan for which city you'd use for serious care."
+  }
+  if (score >= 40) {
+    return 'Routine care is workable, but research which private hospitals expats use and keep insurance comprehensive for anything complex.'
+  }
+  return "Treat international insurance as non-negotiable and know where you'd go for emergencies — this score is a flag to dig deeper, not a green light."
+}
+
+export function formatHealthcareSourceLabel(source: QualityOfLifeSource): string {
+  return source === 'numbeo_2024' ? 'Numbeo 2024' : 'Estimated'
 }
 
 export function interpretClimate(score: number): string {

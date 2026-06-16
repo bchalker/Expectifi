@@ -5,6 +5,7 @@ import { formatTemp } from '../../../lib/api/openMeteo'
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import { deriveClimateNotes } from '../../../utils/climateNotes'
 import { deriveClimateDetail } from '../../../utils/climateDetail'
+import { DetailPanelCard, DetailPanelCardTitle } from '../../ui/DetailPanelCard'
 import { ClimateMonthlyChart } from '../ClimateMonthlyChart'
 import { MonthlyPrecipChart } from '../MonthlyPrecipChart'
 import { staggerSectionProps, type CityDetailTabStaggerProps } from './cityDetailTabUtils'
@@ -159,7 +160,6 @@ export function WeatherTab({
       : detail.description
   const showFitScore = climateNotes?.climateScore != null && climatePreferenceStep > 0
   const summaryCardClassName = [
-    'wtr-weather-tab__panel',
     'wtr-weather-tab__summary-card',
     climateNotes?.fitTone && climateNotes.fitTone !== 'muted'
       ? `wtr-weather-tab__summary-card--${climateNotes.fitTone}`
@@ -197,7 +197,7 @@ export function WeatherTab({
           </div>
         </div>
 
-        <section
+        <DetailPanelCard
           aria-label="Climate match summary"
           {...staggerSectionProps(staggerIdx++, summaryCardClassName, staggerClassName, staggerStyle)}
         >
@@ -220,13 +220,13 @@ export function WeatherTab({
               {retireeNote.body}
             </p>
           </div>
-        </section>
+        </DetailPanelCard>
 
-        <section
+        <DetailPanelCard
           aria-label="Climate averages"
           {...staggerSectionProps(
             staggerIdx++,
-            'wtr-weather-tab__panel wtr-weather-tab__metrics-card',
+            'wtr-weather-tab__metrics-card',
             staggerClassName,
             staggerStyle,
           )}
@@ -257,20 +257,20 @@ export function WeatherTab({
               secondary={detail.metrics.rainyMonthRange}
             />
           </div>
-        </section>
+        </DetailPanelCard>
 
-        <section
+        <DetailPanelCard
           aria-labelledby="wtr-weather-chart-heading"
           {...staggerSectionProps(
             staggerIdx++,
-            'wtr-weather-tab__panel wtr-weather-tab__chart-card',
+            'wtr-weather-tab__chart-card',
             staggerClassName,
             staggerStyle,
           )}
         >
-          <h3 id="wtr-weather-chart-heading" className="wtr-weather-tab__panel-title">
+          <DetailPanelCardTitle id="wtr-weather-chart-heading">
             Monthly temperatures
-          </h3>
+          </DetailPanelCardTitle>
           <ClimateMonthlyChart
             monthly={climate.monthly}
             lat={lat}
@@ -284,25 +284,25 @@ export function WeatherTab({
             {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} · climate normals
             2011–2020 (NASA POWER)
           </p>
-        </section>
+        </DetailPanelCard>
 
-        <section
+        <DetailPanelCard
           aria-labelledby="wtr-weather-precip-heading"
           {...staggerSectionProps(
             staggerIdx++,
-            'wtr-weather-tab__panel wtr-weather-tab__chart-card',
+            'wtr-weather-tab__chart-card',
             staggerClassName,
             staggerStyle,
           )}
         >
-          <h3 id="wtr-weather-precip-heading" className="wtr-weather-tab__panel-title">
+          <DetailPanelCardTitle id="wtr-weather-precip-heading">
             Monthly precipitation
-          </h3>
+          </DetailPanelCardTitle>
           <MonthlyPrecipChart monthly={climate.monthly} />
           <p className="wtr-weather-tab__chart-note">
             Monthly totals from daily averages · climate normals 2011–2020 (NASA POWER)
           </p>
-        </section>
+        </DetailPanelCard>
       </article>
     </div>
   )

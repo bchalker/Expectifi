@@ -1,5 +1,6 @@
 import { useMemo, type CSSProperties } from 'react'
 import { IconBulb } from '@tabler/icons-react'
+import { DetailPanelCard } from '../ui/DetailPanelCard'
 import {
   formatAirlinesList,
   formatDirectUsCityDisplay,
@@ -143,7 +144,8 @@ function AirportRow({
   showPrimaryBadge: boolean
 }) {
   return (
-    <li
+    <DetailPanelCard
+      as="li"
       className={[
         'wtr-getting-there__airport',
         isPrimary && showPrimaryBadge && 'wtr-getting-there__airport--primary',
@@ -161,7 +163,7 @@ function AirportRow({
         <span className="wtr-getting-there__airport-city">{airport.city}</span>
         <span className="wtr-getting-there__airport-code tabular-nums">{airport.code}</span>
       </footer>
-    </li>
+    </DetailPanelCard>
   )
 }
 

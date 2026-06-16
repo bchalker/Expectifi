@@ -11,6 +11,11 @@ export type ColCategoryRowLine = {
   note?: string
 }
 
+export type ColCategoryRowGroup = {
+  title: string
+  rows: ColCategoryRowLine[]
+}
+
 type HeroCardProps = {
   variant: 'hero'
   title: string
@@ -18,7 +23,8 @@ type HeroCardProps = {
   headerSubtitle?: string
   headerAmount?: string
   panelTitle?: string
-  rows: ColCategoryRowLine[]
+  rows?: ColCategoryRowLine[]
+  rowGroups?: ColCategoryRowGroup[]
   footerPill?: ReactNode
   /** Renders before the row at `insertBeforeRowIndex` with dashed divider below. */
   insertBeforeRowIndex?: number
@@ -41,37 +47,63 @@ export function ColCategoryCard(
 ) {
   const { title, icon, className, style } = props
 
-  const renderRows = () => (
-    <dl className="wtr-col-category-card__rows">
-      {props.variant === 'hero'
-        ? props.rows.map((row, rowIndex) => (
-            <Fragment key={row.label}>
-              {props.insertBlock != null &&
-              props.insertBeforeRowIndex != null &&
-              rowIndex === props.insertBeforeRowIndex ? (
-                <div className="wtr-col-category-card__insert-block">{props.insertBlock}</div>
-              ) : null}
-              <div
-                className={[
-                  'wtr-col-category-card__row',
-                  row.value == null && 'wtr-col-category-card__row--label-only',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <dt className="wtr-col-category-card__row-label">
-                  <span>{row.label}</span>
-                  {row.note ? <span className="wtr-col-category-card__row-note">{row.note}</span> : null}
-                </dt>
-                {row.value != null ? (
-                  <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
-                ) : null}
-              </div>
-            </Fragment>
-          ))
-        : null}
-    </dl>
-  )
+  const renderRowLines = (rows: ColCategoryRowLine[], keyPrefix: string) =>
+    rows.map((row, rowIndex) => (
+      <Fragment key={`${keyPrefix}-${row.label}`}>
+        {props.variant === 'hero' &&
+        props.insertBlock != null &&
+        props.insertBeforeRowIndex != null &&
+        rowIndex === props.insertBeforeRowIndex ? (
+          <div className="wtr-col-category-card__insert-block">{props.insertBlock}</div>
+        ) : null}
+        <div
+          className={[
+            'wtr-col-category-card__row',
+            row.value == null && 'wtr-col-category-card__row--label-only',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <dt className="wtr-col-category-card__row-label">
+            <span>{row.label}</span>
+            {row.note ? (
+              <span className="wtr-col-category-card__row-note">{row.note}</span>
+            ) : null}
+          </dt>
+          {row.value != null ? (
+            <dd className="wtr-col-category-card__row-value tabular-nums">{row.value}</dd>
+          ) : null}
+        </div>
+      </Fragment>
+    ))
+
+  const renderRowGroups = () => {
+    if (props.variant !== 'hero' || props.rowGroups == null) return null
+    return props.rowGroups.map((group) => (
+      <div
+        key={group.title}
+        className={[
+          'wtr-col-category-card__group',
+          props.footerPill == null && 'wtr-col-category-card__group--no-footer',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <p className="wtr-col-category-card__group-title">{group.title}</p>
+        <dl className="wtr-col-category-card__rows">{renderRowLines(group.rows, group.title)}</dl>
+      </div>
+    ))
+  }
+
+  const renderRows = () => {
+    if (props.variant !== 'hero') return null
+    if (props.rowGroups != null) return renderRowGroups()
+    return (
+      <dl className="wtr-col-category-card__rows">
+        {renderRowLines(props.rows ?? [], 'row')}
+      </dl>
+    )
+  }
 
   return (
     <article className={['wtr-col-category-card', className].filter(Boolean).join(' ')} style={style}>
@@ -97,19 +129,23 @@ export function ColCategoryCard(
           </header>
 
           <div className="wtr-col-category-card__body">
-            <div
-              className={[
-                'wtr-col-category-card__group',
-                props.footerPill == null && 'wtr-col-category-card__group--no-footer',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {props.panelTitle ? (
-                <p className="wtr-col-category-card__group-title">{props.panelTitle}</p>
-              ) : null}
-              {renderRows()}
-            </div>
+            {props.rowGroups == null ? (
+              <div
+                className={[
+                  'wtr-col-category-card__group',
+                  props.footerPill == null && 'wtr-col-category-card__group--no-footer',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {props.panelTitle ? (
+                  <p className="wtr-col-category-card__group-title">{props.panelTitle}</p>
+                ) : null}
+                {renderRows()}
+              </div>
+            ) : (
+              renderRows()
+            )}
             {props.footerPill != null ? (
               <div className="wtr-col-category-card__footer-pill">
                 {typeof props.footerPill === 'string' ? (

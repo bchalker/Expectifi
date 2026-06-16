@@ -2,380 +2,918 @@
   "metadata": {
     "last_updated": "2026-05",
     "disclaimer": "Expat community information is approximate and changes over time. Verify current conditions through expat forums and recent reports.",
-    "sources": ["Internations", "Expat.com", "Facebook expat groups", "Nomad List", "InterNations Expat Insider 2024"]
+    "sources": [
+      "Internations",
+      "Expat.com",
+      "Facebook expat groups",
+      "Nomad List",
+      "InterNations Expat Insider 2024"
+    ]
   },
   "countries": {
     "Portugal": {
       "community_size": "Large",
       "estimated_americans": "80,000+",
-      "popular_areas": ["Lisbon (Príncipe Real, Alfama)", "Porto (Bonfim, Foz)", "Algarve (Lagos, Cascais)", "Silver Coast (Óbidos area)"],
+      "popular_areas": [
+        "Lisbon (Príncipe Real, Alfama)",
+        "Porto (Bonfim, Foz)",
+        "Algarve (Lagos, Cascais)",
+        "Silver Coast (Óbidos area)"
+      ],
       "expat_vibe": "One of the most welcoming expat destinations in Europe. Large English-speaking community. Many digital nomads and retirees. Portuguese people generally warm toward Americans.",
-      "facebook_groups": ["Americans in Portugal", "Expats in Lisbon", "Expats in Porto"],
-      "forums": ["portugalist.com", "r/expats Portugal"],
+      "facebook_groups": [
+        "Americans in Portugal",
+        "Expats in Lisbon",
+        "Expats in Porto"
+      ],
+      "forums": [
+        "portugalist.com",
+        "r/expats Portugal"
+      ],
       "internations_chapter": true,
       "cost_note": "Expats report costs rising significantly since 2020 due to influx. Budget 20-30% more than published averages in Lisbon and Porto. Algarve and interior towns still affordable.",
       "language_barrier": "Low in cities. English widely spoken in Lisbon and tourist areas. Interior Portugal requires some Portuguese.",
-      "healthcare_expat": "Private health insurance required for visa. Expats typically use private clinics. Public SNS accessible after residency."
+      "healthcare_expat": "Private health insurance required for visa. Expats typically use private clinics. Public SNS accessible after residency.",
+      "community_why": "You will not feel alone here because there is already a deep American and international support network. The downside is that the most expat-friendly neighborhoods now move fast and can feel crowded.",
+      "expat_vibe_why": "You get a social, walkable lifestyle with plenty of people in the same life stage. If you only stay in expat circles, your world can shrink faster than you expect.",
+      "language_barrier_why": "You can handle daily life in English in Lisbon, Porto, and much of the Algarve. Your quality of life drops in local offices and small towns unless you learn practical Portuguese.",
+      "healthcare_expat_why": "Private care is reliable and usually easier to navigate than the US system for routine needs. Wait times and paperwork still show up, so expect some friction when you first arrive.",
+      "cost_note_why": "Portugal can still work on a retiree budget, but top coastal markets are not cheap anymore. You need to price in post-2020 rent inflation instead of relying on old expat blog numbers."
     },
     "Spain": {
       "community_size": "Very Large",
       "estimated_americans": "300,000+",
-      "popular_areas": ["Barcelona (Eixample, Gràcia)", "Madrid (Salamanca, Malasaña)", "Valencia (Ruzafa)", "Málaga (historic center)", "Costa del Sol"],
+      "popular_areas": [
+        "Barcelona (Eixample, Gràcia)",
+        "Madrid (Salamanca, Malasaña)",
+        "Valencia (Ruzafa)",
+        "Málaga (historic center)",
+        "Costa del Sol"
+      ],
       "expat_vibe": "Massive established expat community especially British. American community growing rapidly. Vibrant social scene. Easy to meet other expats. Spanish people sociable but expats can stay in expat bubbles.",
-      "facebook_groups": ["Americans in Spain", "Expats in Barcelona", "Expats in Madrid", "Expats in Valencia"],
-      "forums": ["spainexpat.com", "r/SpainExpats", "expatica.com/es"],
+      "facebook_groups": [
+        "Americans in Spain",
+        "Expats in Barcelona",
+        "Expats in Madrid",
+        "Expats in Valencia"
+      ],
+      "forums": [
+        "spainexpat.com",
+        "r/SpainExpats",
+        "expatica.com/es"
+      ],
       "internations_chapter": true,
       "cost_note": "Barcelona and Madrid have seen significant cost increases. Valencia and southern cities still affordable. Published averages roughly accurate outside major cities.",
       "language_barrier": "Moderate. English in tourist areas but daily life requires Spanish. Younger population speaks English well.",
-      "healthcare_expat": "Private insurance required for NLV visa. Excellent private hospitals. Public system accessible after residency registration."
+      "healthcare_expat": "Private insurance required for NLV visa. Excellent private hospitals. Public system accessible after residency registration.",
+      "community_why": "You will find huge established expat hubs quickly, especially in Madrid, Barcelona, Valencia, and the Costa zones. The tradeoff is that popular expat districts can feel transient and expensive.",
+      "expat_vibe_why": "Your social options are excellent and it is easy to build a routine around food, walking, and public life. If you avoid local Spanish life, it can feel like long-term tourism instead of a real home.",
+      "language_barrier_why": "You can get by in English in tourist-heavy areas, but daily admin still expects Spanish. Your stress level drops a lot once you can manage appointments and paperwork in Spanish.",
+      "healthcare_expat_why": "Care quality is strong, and private insurance gives you a smoother early landing. You still need to budget for policy requirements tied to visa renewals.",
+      "cost_note_why": "Outside headline cities, value is still strong for Europe. In Barcelona and Madrid, housing pressure can erase the \"cheap Spain\" assumption quickly."
     },
     "Italy": {
       "community_size": "Large",
       "estimated_americans": "100,000+",
-      "popular_areas": ["Florence (Oltrarno, Santo Spirito)", "Rome (Trastevere, Prati)", "Milan (Navigli)", "Puglia", "Sicily (Taormina area)", "Lake Como"],
+      "popular_areas": [
+        "Florence (Oltrarno, Santo Spirito)",
+        "Rome (Trastevere, Prati)",
+        "Milan (Navigli)",
+        "Puglia",
+        "Sicily (Taormina area)",
+        "Lake Como"
+      ],
       "expat_vibe": "Strong American expat community especially in Florence and Rome. Many retirees drawn by 7% flat tax in southern villages. Italian bureaucracy notorious but expats navigate it. Warm culture once you're in.",
-      "facebook_groups": ["Americans in Italy", "Expats in Florence", "Expats in Rome", "Americans Buying Property in Italy"],
-      "forums": ["italyexpat.com", "r/ItalyExpats", "expatica.com/it"],
+      "facebook_groups": [
+        "Americans in Italy",
+        "Expats in Florence",
+        "Expats in Rome",
+        "Americans Buying Property in Italy"
+      ],
+      "forums": [
+        "italyexpat.com",
+        "r/ItalyExpats",
+        "expatica.com/it"
+      ],
       "internations_chapter": true,
       "cost_note": "Published averages reasonably accurate outside Rome and Milan. Southern Italy significantly cheaper. 7% tax regime towns are very affordable.",
       "language_barrier": "Moderate to High. English limited outside tourist areas. Italian language essential for daily life outside major cities.",
-      "healthcare_expat": "Private insurance required for visa. Italy has excellent private and public healthcare. Expats typically use private clinics initially."
+      "healthcare_expat": "Private insurance required for visa. Italy has excellent private and public healthcare. Expats typically use private clinics initially.",
+      "community_why": "You will find strong American and international communities in Rome, Florence, and parts of the south. The catch is that official processes often take patience and repeat visits.",
+      "expat_vibe_why": "Life can feel deeply rewarding if you care about food culture and slower daily rhythms. It becomes frustrating fast if you expect US-style speed from institutions.",
+      "language_barrier_why": "English helps in tourist-heavy zones, but daily life still leans hard on Italian. Even basic Italian dramatically improves your housing and bureaucracy outcomes.",
+      "healthcare_expat_why": "Healthcare quality is generally very good, and many expats are happy once settled. The hard part is learning where to go and how to navigate regional systems.",
+      "cost_note_why": "You can keep costs reasonable outside Milan and central Rome. Prime historic areas and top destinations now price more like major international cities."
     },
     "Greece": {
       "community_size": "Moderate",
       "estimated_americans": "30,000+",
-      "popular_areas": ["Athens (Kolonaki, Kifissia)", "Crete (Chania, Heraklion)", "Corfu", "Rhodes", "Thessaloniki"],
+      "popular_areas": [
+        "Athens (Kolonaki, Kifissia)",
+        "Crete (Chania, Heraklion)",
+        "Corfu",
+        "Rhodes",
+        "Thessaloniki"
+      ],
       "expat_vibe": "Growing expat scene attracted by 7% flat tax program. Less established than Spain or Portugal but growing rapidly. Greek people warm and hospitable. Laid-back Mediterranean lifestyle.",
-      "facebook_groups": ["Expats in Greece", "Americans in Athens", "Expats in Crete"],
-      "forums": ["expatica.com/gr", "r/greece expats"],
+      "facebook_groups": [
+        "Expats in Greece",
+        "Americans in Athens",
+        "Expats in Crete"
+      ],
+      "forums": [
+        "expatica.com/gr",
+        "r/greece expats"
+      ],
       "internations_chapter": true,
       "cost_note": "Athens costs rising. Islands more expensive in summer, affordable off-season. Thessaloniki excellent value. Budget 15% above published averages in Athens.",
       "language_barrier": "Moderate. English widely spoken in tourist areas and among educated population. Daily life in smaller towns requires Greek.",
-      "healthcare_expat": "Private insurance required for visa. Good private hospitals in Athens. Private clinics widely used by expats."
+      "healthcare_expat": "Private insurance required for visa. Good private hospitals in Athens. Private clinics widely used by expats.",
+      "community_why": "You will find welcoming expat pockets in Athens, Crete, and major islands. Smaller communities mean fewer hand-holding resources once you leave popular areas.",
+      "expat_vibe_why": "You get a laid-back Mediterranean pace with genuinely warm local hospitality. Seasonal island dynamics can make social and practical life swing wildly during the year.",
+      "language_barrier_why": "English is common in tourism and city centers, so early transition is manageable. Everyday problem-solving still gets easier when you learn basic Greek.",
+      "healthcare_expat_why": "Private clinics in major centers are a practical path for most expats. On smaller islands, specialist access can be limited and may require travel.",
+      "cost_note_why": "Good value is still possible compared with much of Western Europe. Island popularity and summer demand can push housing and services much higher than expected."
     },
     "France": {
       "community_size": "Very Large",
       "estimated_americans": "150,000+",
-      "popular_areas": ["Paris (Marais, Montmartre, Saint-Germain)", "Nice", "Lyon", "Bordeaux", "Provence (Aix, Luberon)", "Dordogne"],
+      "popular_areas": [
+        "Paris (Marais, Montmartre, Saint-Germain)",
+        "Nice",
+        "Lyon",
+        "Bordeaux",
+        "Provence (Aix, Luberon)",
+        "Dordogne"
+      ],
       "expat_vibe": "One of the most popular destinations for American expats globally. Large established community. The American Church in Paris is a famous expat hub. French can be reserved but warm once relationships form. Bureaucracy challenging.",
-      "facebook_groups": ["Americans in France", "Expats in Paris", "Americans in Provence"],
-      "forums": ["frenchentree.com", "r/expats France", "fusac.fr"],
+      "facebook_groups": [
+        "Americans in France",
+        "Expats in Paris",
+        "Americans in Provence"
+      ],
+      "forums": [
+        "frenchentree.com",
+        "r/expats France",
+        "fusac.fr"
+      ],
       "internations_chapter": true,
       "cost_note": "Paris very expensive. Regions significantly more affordable. South of France popular but summer rental prices extreme. Lyon excellent value city.",
       "language_barrier": "Moderate to High. French expected in daily life. English in Paris and tourist areas. Rural France requires French.",
-      "healthcare_expat": "Excellent healthcare once enrolled in system. Private insurance required initially. Expats generally very happy with French healthcare quality."
+      "healthcare_expat": "Excellent healthcare once enrolled in system. Private insurance required initially. Expats generally very happy with French healthcare quality.",
+      "community_why": "You will find long-standing expat infrastructure, especially in Paris and popular regional hubs. The downside is that easy-entry neighborhoods are often the most expensive and competitive.",
+      "expat_vibe_why": "You can build a high-quality daily routine with great transit, food, and culture. If you resist local norms, France can feel colder than it actually is.",
+      "language_barrier_why": "You can survive in English in parts of Paris and big cities, but administration runs in French. Your experience improves sharply once you can handle French phone calls and forms.",
+      "healthcare_expat_why": "Healthcare quality is a major strength and often a reason retirees stay long term. Early setup can be document-heavy, so expect a slower onboarding phase.",
+      "cost_note_why": "France can be very manageable outside elite city centers and peak tourist zones. Paris and premium southern markets can burn through budget faster than planned."
     },
     "Mexico": {
       "community_size": "Enormous",
       "estimated_americans": "1,500,000+",
-      "popular_areas": ["San Miguel de Allende", "Puerto Vallarta", "Mérida", "Oaxaca", "Mexico City (Roma, Condesa)", "Lake Chapala / Ajijic", "Playa del Carmen"],
+      "popular_areas": [
+        "San Miguel de Allende",
+        "Puerto Vallarta",
+        "Mérida",
+        "Oaxaca",
+        "Mexico City (Roma, Condesa)",
+        "Lake Chapala / Ajijic",
+        "Playa del Carmen"
+      ],
       "expat_vibe": "Largest American expat community in the world. Highly established infrastructure for expats. Easy transition for Americans. Some areas feel like American enclaves. Lake Chapala/Ajijic specifically known as top retirement community.",
-      "facebook_groups": ["Americans in Mexico", "Expats in San Miguel", "Lake Chapala Expats", "Mérida Expats"],
-      "forums": ["mexconnect.com", "r/expats Mexico", "expatsinmexico.com"],
+      "facebook_groups": [
+        "Americans in Mexico",
+        "Expats in San Miguel",
+        "Lake Chapala Expats",
+        "Mérida Expats"
+      ],
+      "forums": [
+        "mexconnect.com",
+        "r/expats Mexico",
+        "expatsinmexico.com"
+      ],
       "internations_chapter": true,
       "cost_note": "San Miguel de Allende has become expensive due to expat demand. Lake Chapala and Mérida still affordable. Mexico City Roma/Condesa area prices comparable to mid-US cities.",
       "language_barrier": "Low in expat areas. English widely spoken in expat communities. Spanish helpful for authentic experience and areas outside expat zones.",
-      "healthcare_expat": "Excellent private healthcare at 20-30% of US cost. Many US expats specifically cite healthcare as a major draw. IMSS public system also accessible."
+      "healthcare_expat": "Excellent private healthcare at 20-30% of US cost. Many US expats specifically cite healthcare as a major draw. IMSS public system also accessible.",
+      "community_why": "You will find one of the largest American retiree networks in the world, so setup help is easy to find. The downside is that popular expat towns can feel saturated and less local each year.",
+      "expat_vibe_why": "You can choose between beach, colonial, and urban lifestyles without losing access to familiar expat services. Some areas feel like bubbles, so intentional local integration matters.",
+      "language_barrier_why": "You can live comfortably in English in major expat hubs. Spanish still becomes essential when you deal with government offices or local healthcare systems.",
+      "healthcare_expat_why": "Private healthcare is a real advantage for cost and access compared with the US. Quality varies by city, so choose location with healthcare depth in mind.",
+      "cost_note_why": "Mexico can still deliver strong value, especially outside premium enclaves. In high-demand expat markets, housing costs now look closer to mid-tier US metros."
     },
     "Colombia": {
       "community_size": "Large",
       "estimated_americans": "60,000+",
-      "popular_areas": ["Medellín (El Poblado, Laureles)", "Bogotá (Chapinero, Usaquén)", "Cartagena", "Santa Marta", "Cali"],
+      "popular_areas": [
+        "Medellín (El Poblado, Laureles)",
+        "Bogotá (Chapinero, Usaquén)",
+        "Cartagena",
+        "Santa Marta",
+        "Cali"
+      ],
       "expat_vibe": "Medellín is one of the hottest expat destinations globally. Transformed from notorious past to vibrant cosmopolitan city. El Poblado feels very international. Young energy. Mix of digital nomads and retirees. Colombians warm and welcoming.",
-      "facebook_groups": ["Expats in Medellín", "Expats in Colombia", "Americans in Bogotá"],
-      "forums": ["r/medellin", "r/expats Colombia", "colombiaone.com"],
+      "facebook_groups": [
+        "Expats in Medellín",
+        "Expats in Colombia",
+        "Americans in Bogotá"
+      ],
+      "forums": [
+        "r/medellin",
+        "r/expats Colombia",
+        "colombiaone.com"
+      ],
       "internations_chapter": true,
       "cost_note": "El Poblado in Medellín has gentrified significantly. Laureles neighborhood better value. Published averages still roughly accurate outside tourist areas.",
       "language_barrier": "Moderate. English in expat areas of Medellín and Bogotá. Spanish required for daily life outside expat zones.",
-      "healthcare_expat": "Excellent and affordable private healthcare. Medellín internationally recognized for medical tourism. Private insurance recommended."
+      "healthcare_expat": "Excellent and affordable private healthcare. Medellín internationally recognized for medical tourism. Private insurance recommended.",
+      "community_why": "You will find active expat scenes in Medellin and Bogota with strong peer support. Outside those hubs, practical support can thin out quickly.",
+      "expat_vibe_why": "You get high energy, social cities, and a younger international mix than many retiree destinations. Some neighborhoods are changing fast, so vibe and safety can vary block by block.",
+      "language_barrier_why": "English works in some expat-heavy zones but not reliably in daily life. Functional Spanish is one of the biggest quality-of-life upgrades you can make here.",
+      "healthcare_expat_why": "Private healthcare in major cities is often excellent value and a core reason expats stay. You still need to be selective about providers and insurance coverage.",
+      "cost_note_why": "Costs remain attractive compared with many North American cities. Prime expat neighborhoods have risen enough that you need current local pricing, not old guides."
     },
     "Panama": {
       "community_size": "Large",
       "estimated_americans": "25,000+",
-      "popular_areas": ["Panama City (Casco Viejo, El Cangrejo)", "Boquete", "Coronado", "Bocas del Toro", "Pedasi"],
-      "expat_vibe": "Purpose-built retirement infrastructure via Pensionado program. Casco Viejo has vibrant expat scene. Boquete in the highlands is very popular with US retirees. Dollar economy makes transition easy. English widely spoken in business areas.",
-      "facebook_groups": ["Expats in Panama", "Boquete Expats", "Americans in Panama City"],
-      "forums": ["r/expats Panama", "liveandretirepanama.com"],
+      "popular_areas": [
+        "Panama City (Casco Viejo, El Cangrejo, Albrook)",
+        "Boquete",
+        "Bocas del Toro",
+        "Coronado beach"
+      ],
+      "expat_vibe": "One of the most purpose-built retirement destinations. Pensionado program is world's best retiree visa. Dollar economy removes currency stress. Casco Viejo vibrant historic district. Boquete cool mountain town beloved by retirees.",
+      "facebook_groups": [
+        "Expats in Panama",
+        "Boquete Expats",
+        "Pensionado Panama"
+      ],
+      "forums": [
+        "liveandretirepanama.com",
+        "r/Panama expats"
+      ],
       "internations_chapter": true,
-      "cost_note": "Panama City prices comparable to mid-tier US city. Boquete and interior significantly cheaper. Pensionado discounts meaningful savings on daily expenses.",
-      "language_barrier": "Low in expat areas and business districts. Spanish helpful outside Panama City.",
-      "healthcare_expat": "Good private hospitals in Panama City. JCI-accredited facilities. Medical tourism destination. Private insurance recommended."
+      "cost_note": "Panama City costs risen but Pensionado discounts help. Boquete still very affordable. Overall good value especially with 25% restaurant discount.",
+      "language_barrier": "Low in expat areas. Dollar economy familiar. English widely spoken in business areas and expat zones.",
+      "healthcare_expat": "Good hospitals in Panama City. JCI-accredited. Medical tourism growing. Private insurance recommended.",
+      "community_why": "You will find a mature retiree ecosystem built around the Pensionado pathway and long-time expat hubs. The same hotspots can feel insular if you want deeper local integration.",
+      "expat_vibe_why": "Life is straightforward for US retirees because of the dollar economy and familiar services. You can end up in a comfort bubble unless you make deliberate local connections.",
+      "language_barrier_why": "English works well in many expat and business areas, especially in Panama City. Spanish still matters for smoother day-to-day life outside those zones.",
+      "healthcare_expat_why": "Panama City offers strong private care with good specialist depth for the region. Quality and convenience drop in smaller towns, so location choice is key.",
+      "cost_note_why": "Panama can be good value if you use interior or secondary markets. Prime city and beach areas can be much pricier than people assume from older retiree writeups."
     },
     "Costa Rica": {
       "community_size": "Large",
       "estimated_americans": "80,000+",
-      "popular_areas": ["San José (Escazú, Santa Ana)", "Manuel Antonio", "Tamarindo", "Nosara", "Arenal / La Fortuna", "Central Valley"],
+      "popular_areas": [
+        "San José (Escazú, Santa Ana)",
+        "Manuel Antonio",
+        "Tamarindo",
+        "Nosara",
+        "Arenal / La Fortuna",
+        "Central Valley"
+      ],
       "expat_vibe": "One of the most established retirement destinations. Pura Vida culture. Very welcoming to Americans. Excellent expat infrastructure. ARCR (Association of Residents of Costa Rica) is a major resource. Safe, stable democracy.",
-      "facebook_groups": ["Expats in Costa Rica", "Americans in Costa Rica", "ARCR Members"],
-      "forums": ["costaricaexpats.com", "r/CostaRica expats", "arcr.cr"],
+      "facebook_groups": [
+        "Expats in Costa Rica",
+        "Americans in Costa Rica",
+        "ARCR Members"
+      ],
+      "forums": [
+        "costaricaexpats.com",
+        "r/CostaRica expats",
+        "arcr.cr"
+      ],
       "internations_chapter": true,
       "cost_note": "Escazú and Santa Ana (San José suburbs) expensive and American-feeling. Pacific coast towns pricier. Central Valley inland towns excellent value.",
       "language_barrier": "Low in expat areas. English widely spoken. Spanish helpful for authentic integration.",
-      "healthcare_expat": "Excellent CAJA public system accessible after residency. Private clinics widely used. Healthcare quality among best in Latin America."
+      "healthcare_expat": "Excellent CAJA public system accessible after residency. Private clinics widely used. Healthcare quality among best in Latin America.",
+      "community_why": "You will find a long-established American retiree community with abundant relocation resources. Popular expat corridors can feel less local and more competitive than expected.",
+      "expat_vibe_why": "The pace is calmer and wellness-focused, which many retirees love. If you expect US-level service speed everywhere, daily errands can test your patience.",
+      "language_barrier_why": "English is common in tourist and expat zones, so transition is usually gentle. Spanish becomes important once you move beyond expat infrastructure.",
+      "healthcare_expat_why": "Healthcare access is a major plus, with both public and private pathways used by expats. Specialist timelines and logistics can still vary by region.",
+      "cost_note_why": "Costa Rica is no longer \"cheap tropical living\" in many high-demand areas. You can still control costs, but location choice matters more than ever."
     },
     "Thailand": {
       "community_size": "Very Large",
       "estimated_americans": "60,000+",
-      "popular_areas": ["Chiang Mai (Nimman area)", "Bangkok (Sukhumvit, Silom)", "Phuket", "Hua Hin", "Koh Samui", "Pattaya"],
+      "popular_areas": [
+        "Chiang Mai (Nimman area)",
+        "Bangkok (Sukhumvit, Silom)",
+        "Phuket",
+        "Hua Hin",
+        "Koh Samui",
+        "Pattaya"
+      ],
       "expat_vibe": "Massive global expat community. Chiang Mai is legendary for digital nomads and retirees. Bangkok world-class city at affordable prices. Extremely welcoming culture. Buddhist values create peaceful environment. Large retiree community especially in Hua Hin and Pattaya.",
-      "facebook_groups": ["Expats in Chiang Mai", "Bangkok Expats", "Americans in Thailand", "Retire in Thailand"],
-      "forums": ["thaivisa.com (now VisaGuide)", "r/ThailandExpats", "chiangmaiexpats.com"],
+      "facebook_groups": [
+        "Expats in Chiang Mai",
+        "Bangkok Expats",
+        "Americans in Thailand",
+        "Retire in Thailand"
+      ],
+      "forums": [
+        "thaivisa.com (now VisaGuide)",
+        "r/ThailandExpats",
+        "chiangmaiexpats.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Nimman area Chiang Mai gentrified but still affordable. Bangkok Sukhumvit varied — some areas very expensive. Published averages reasonable for non-luxury lifestyle.",
       "language_barrier": "Low in expat areas. English in tourist zones and expat neighborhoods. Thai language helpful for authentic daily life.",
-      "healthcare_expat": "World-class private hospitals at 20-40% of US cost. Bangkok Hospital and Bumrungrad are internationally renowned. Health insurance required for O-A visa."
+      "healthcare_expat": "World-class private hospitals at 20-40% of US cost. Bangkok Hospital and Bumrungrad are internationally renowned. Health insurance required for O-A visa.",
+      "community_why": "You will find large, active expat communities in Bangkok, Chiang Mai, and coastal retiree hubs. In very expat-heavy zones, turnover can make deeper friendships harder.",
+      "expat_vibe_why": "Daily life is convenient, social, and often very comfortable on a retiree budget. Visa rules and policy shifts can create background uncertainty you should plan for.",
+      "language_barrier_why": "You can manage a lot in English in core expat and tourism areas. Outside those zones, language gaps can slow down healthcare, housing, and official tasks.",
+      "healthcare_expat_why": "Private hospitals are a real strength and often deliver excellent value for quality. Long-term peace of mind still depends on insurance and a clear serious-care plan.",
+      "cost_note_why": "Thailand can deliver strong value, especially away from luxury districts. Premium neighborhoods and island hotspots can run much higher than headline averages."
     },
     "Malaysia": {
       "community_size": "Large",
       "estimated_americans": "15,000+",
-      "popular_areas": ["Kuala Lumpur (Mont Kiara, Bangsar)", "Penang (Georgetown)", "Johor Bahru", "Kota Kinabalu"],
+      "popular_areas": [
+        "Kuala Lumpur (Mont Kiara, Bangsar)",
+        "Penang (Georgetown)",
+        "Johor Bahru",
+        "Kota Kinabalu"
+      ],
       "expat_vibe": "Very expat-friendly. English is widely spoken making it easiest Asian country for English-speaking expats. MM2H program designed specifically for long-term residents. Multi-cultural society means expats blend in easily. Penang especially popular for retirees.",
-      "facebook_groups": ["Expats in Malaysia", "MM2H Members", "Expats in Penang", "Americans in KL"],
-      "forums": ["r/malaysia expats", "expatsinmalaysia.com", "mm2h.gov.my"],
+      "facebook_groups": [
+        "Expats in Malaysia",
+        "MM2H Members",
+        "Expats in Penang",
+        "Americans in KL"
+      ],
+      "forums": [
+        "r/malaysia expats",
+        "expatsinmalaysia.com",
+        "mm2h.gov.my"
+      ],
       "internations_chapter": true,
       "cost_note": "Mont Kiara KL is expensive expat enclave. Penang excellent value. Published averages accurate for mid-range lifestyle.",
       "language_barrier": "Very Low. English is an official language. All signage and business in English. Easiest Asian destination for English speakers.",
-      "healthcare_expat": "World-class private hospitals. English-speaking doctors. Very affordable private healthcare. Penang Medical Centre internationally known."
+      "healthcare_expat": "World-class private hospitals. English-speaking doctors. Very affordable private healthcare. Penang Medical Centre internationally known.",
+      "community_why": "You will find a diverse expat mix and strong long-stay culture, especially in Kuala Lumpur and Penang. Some districts are so expat-focused that local integration takes extra effort.",
+      "expat_vibe_why": "Your daily life can be very easy thanks to multilingual services and modern infrastructure. Program rules and tier requirements can shift, so paperwork awareness matters.",
+      "language_barrier_why": "English usage is a major advantage and lowers transition friction immediately. You still benefit from basic local language familiarity outside expat-heavy settings.",
+      "healthcare_expat_why": "Private healthcare quality is consistently strong and widely cited by retirees. You still need a disciplined insurance strategy for long-term certainty.",
+      "cost_note_why": "Malaysia remains strong value relative to many developed markets. Top condo zones in KL can creep up enough to surprise first-time movers."
     },
     "Vietnam": {
       "community_size": "Large",
       "estimated_americans": "15,000+",
-      "popular_areas": ["Ho Chi Minh City (District 2/Thao Dien)", "Hanoi (Tay Ho)", "Da Nang", "Hoi An", "Nha Trang"],
+      "popular_areas": [
+        "Ho Chi Minh City (District 2/Thao Dien)",
+        "Hanoi (Tay Ho)",
+        "Da Nang",
+        "Hoi An",
+        "Nha Trang"
+      ],
       "expat_vibe": "Rapidly growing expat scene especially Da Nang and Hoi An. HCMC District 2 has established international community. Vietnamese people warm and entrepreneurial. Young energy. Growing English proficiency especially among younger Vietnamese.",
-      "facebook_groups": ["Expats in Vietnam", "Expats in Da Nang", "Americans in Saigon", "Hoi An Expats"],
-      "forums": ["r/VietnamExpats", "expat.com/vietnam"],
+      "facebook_groups": [
+        "Expats in Vietnam",
+        "Expats in Da Nang",
+        "Americans in Saigon",
+        "Hoi An Expats"
+      ],
+      "forums": [
+        "r/VietnamExpats",
+        "expat.com/vietnam"
+      ],
       "internations_chapter": true,
       "cost_note": "Thao Dien HCMC has become expensive. Da Nang still very affordable. Published averages slightly below actual expat lifestyle costs.",
       "language_barrier": "Moderate. English in expat areas and tourist zones. Vietnamese language needed for authentic daily life outside expat areas.",
-      "healthcare_expat": "International hospitals in HCMC and Hanoi. Limited in Da Nang. Private insurance essential. Bangkok preferred for serious procedures."
+      "healthcare_expat": "International hospitals in HCMC and Hanoi. Limited in Da Nang. Private insurance essential. Bangkok preferred for serious procedures.",
+      "community_why": "You will find growing expat clusters in Ho Chi Minh City, Hanoi, Da Nang, and Hoi An. Outside major hubs, support networks are still thinner than in older retiree markets.",
+      "expat_vibe_why": "You get energetic cities, strong food culture, and a relatively low day-to-day burn rate. Rapid urban change can make neighborhoods feel unstable from year to year.",
+      "language_barrier_why": "English works in many expat-facing businesses, especially in major districts. Daily tasks still get much easier when you learn key Vietnamese basics.",
+      "healthcare_expat_why": "Major-city international hospitals can handle most needs reasonably well. For complex cases, many expats still keep regional backup options in mind.",
+      "cost_note_why": "Vietnam can be very cost-effective if you choose neighborhoods carefully. Premium expat districts have risen enough that \"ultra-cheap\" assumptions can miss reality."
     },
     "Philippines": {
       "community_size": "Very Large",
       "estimated_americans": "250,000+",
-      "popular_areas": ["Manila (BGC, Makati)", "Cebu City", "Davao", "Dumaguete", "Tagaytay", "Palawan"],
+      "popular_areas": [
+        "Manila (BGC, Makati)",
+        "Cebu City",
+        "Davao",
+        "Dumaguete",
+        "Tagaytay",
+        "Palawan"
+      ],
       "expat_vibe": "Largest English-speaking Asian retirement destination. American cultural influence very strong. Filipino people exceptionally warm toward Americans. SRRV program well established. Dumaguete called 'city of gentle people' popular with retirees. BGC Manila feels like US suburb.",
-      "facebook_groups": ["Americans in the Philippines", "Expats in Cebu", "Retire in Philippines", "Dumaguete Expats"],
-      "forums": ["philippinesexpat.com", "r/Philippines expats", "pra.gov.ph"],
+      "facebook_groups": [
+        "Americans in the Philippines",
+        "Expats in Cebu",
+        "Retire in Philippines",
+        "Dumaguete Expats"
+      ],
+      "forums": [
+        "philippinesexpat.com",
+        "r/Philippines expats",
+        "pra.gov.ph"
+      ],
       "internations_chapter": true,
       "cost_note": "BGC Manila expensive for Philippines. Provincial cities very affordable. Published averages accurate outside Manila premium areas.",
       "language_barrier": "None. English is an official language. All signage, business, education in English. Most natural English-speaking transition of any Asian country.",
-      "healthcare_expat": "Good hospitals in Manila and Cebu. English-speaking doctors. Private insurance recommended. Medical tourism growing."
+      "healthcare_expat": "Good hospitals in Manila and Cebu. English-speaking doctors. Private insurance recommended. Medical tourism growing.",
+      "community_why": "You will find a large American-linked retiree community and culturally familiar social environment. In some hotspots, infrastructure and service consistency can lag behind demand.",
+      "expat_vibe_why": "The social transition is often easier here than almost anywhere in Asia because of language and cultural overlap. Your experience varies a lot by city quality and local logistics.",
+      "language_barrier_why": "English fluency is a major strength and reduces daily friction quickly. Regional differences still matter, so local context can affect communication quality.",
+      "healthcare_expat_why": "Major urban centers provide practical private-care options for many retirees. Outside top cities, provider depth can narrow, so location planning is critical.",
+      "cost_note_why": "The Philippines can still be budget-friendly, especially outside premium districts. Manila high-end zones can erase much of the expected savings."
     },
     "Indonesia": {
       "community_size": "Very Large",
       "estimated_americans": "10,000+ (Bali focused)",
-      "popular_areas": ["Bali (Canggu, Ubud, Seminyak)", "Jakarta (Kemang, Menteng)"],
+      "popular_areas": [
+        "Bali (Canggu, Ubud, Seminyak)",
+        "Jakarta (Kemang, Menteng)"
+      ],
       "expat_vibe": "Bali is the global capital of the digital nomad and expat lifestyle. Canggu especially has massive international community. Ubud more spiritual and artistic. Seminyak upscale beach. Bali expat community is enormous relative to the island's size.",
-      "facebook_groups": ["Bali Expats", "Canggu Community", "Americans in Bali", "Ubud Community Board"],
-      "forums": ["r/bali", "r/digitalnomad Bali", "expat.com/indonesia"],
+      "facebook_groups": [
+        "Bali Expats",
+        "Canggu Community",
+        "Americans in Bali",
+        "Ubud Community Board"
+      ],
+      "forums": [
+        "r/bali",
+        "r/digitalnomad Bali",
+        "expat.com/indonesia"
+      ],
       "internations_chapter": true,
       "cost_note": "Canggu has become expensive by SE Asian standards due to expat demand. Ubud better value. Away from tourist areas Indonesia very affordable.",
       "language_barrier": "Low in Bali tourist areas. English in Canggu and Seminyak almost universal. Indonesian/Bahasa helpful outside expat zones.",
-      "healthcare_expat": "BIMC and Siloam hospitals in Bali international standard. Private insurance essential. Bangkok or Singapore for serious procedures."
+      "healthcare_expat": "BIMC and Siloam hospitals in Bali international standard. Private insurance essential. Bangkok or Singapore for serious procedures.",
+      "community_why": "You will find very strong expat density in Bali and selected urban hubs. Outside those clusters, expat support is thinner and processes can feel harder to navigate.",
+      "expat_vibe_why": "You can build an appealing lifestyle with strong wellness and social scenes, especially in Bali. Popular areas can become crowded and trend-driven quickly.",
+      "language_barrier_why": "English is common in major expat zones but not universal beyond them. Basic Bahasa skills help a lot when you handle local services and contracts.",
+      "healthcare_expat_why": "Routine private care can work well in key centers used by expats. For higher-complexity care, many residents still maintain regional contingency plans.",
+      "cost_note_why": "Indonesia can be inexpensive outside top expat enclaves. In Bali hotspots, rents and service prices have climbed sharply with demand."
     },
     "Georgia": {
       "community_size": "Large and rapidly growing",
       "estimated_americans": "5,000+",
-      "popular_areas": ["Tbilisi (Vake, Vera, Old Town)", "Batumi", "Gudauri (ski)"],
+      "popular_areas": [
+        "Tbilisi (Vake, Vera, Old Town)",
+        "Batumi",
+        "Gudauri (ski)"
+      ],
       "expat_vibe": "Exploded since 2022 as major destination for remote workers and expats seeking territorial tax system. Very welcoming culture with famous Georgian hospitality. Young creative scene in Tbilisi. One of the fastest growing expat communities globally.",
-      "facebook_groups": ["Expats in Georgia", "Tbilisi Expats", "Americans in Georgia (country)"],
-      "forums": ["r/tbilisi", "expat.com/georgia"],
+      "facebook_groups": [
+        "Expats in Georgia",
+        "Tbilisi Expats",
+        "Americans in Georgia (country)"
+      ],
+      "forums": [
+        "r/tbilisi",
+        "expat.com/georgia"
+      ],
       "internations_chapter": true,
       "cost_note": "Prices risen significantly since 2022 influx but still very affordable. Vake neighborhood most expat-concentrated and pricier. Overall still excellent value.",
       "language_barrier": "Moderate. English growing rapidly especially in Tbilisi among younger population. Georgian script challenging. Russian spoken by older generation.",
-      "healthcare_expat": "Private clinics in Tbilisi improving rapidly. Private insurance strongly recommended. Turkey or Europe for serious procedures."
+      "healthcare_expat": "Private clinics in Tbilisi improving rapidly. Private insurance strongly recommended. Turkey or Europe for serious procedures.",
+      "community_why": "You will find a fast-growing international crowd, especially in Tbilisi. Rapid growth means community depth varies and the scene can feel temporary.",
+      "expat_vibe_why": "Georgia gives you a low-cost, high-flexibility lifestyle with a creative social mix. Systems are still maturing, so consistency is not always there yet.",
+      "language_barrier_why": "English is improving quickly in expat-facing areas, but it is not universal. Daily life outside central districts gets easier with even basic Georgian or Russian awareness.",
+      "healthcare_expat_why": "Private care access has improved and can cover routine needs at reasonable cost. For complex care, many expats still plan for treatment abroad.",
+      "cost_note_why": "Georgia can still be excellent value compared with most European alternatives. Since 2022, top neighborhoods are no longer as cheap as older guides suggest."
     },
     "Japan": {
       "community_size": "Moderate",
       "estimated_americans": "60,000+",
-      "popular_areas": ["Tokyo (Minato, Shibuya, Nakameguro)", "Osaka (Namba, Shinsaibashi)", "Kyoto", "Fukuoka", "Hiroshima"],
+      "popular_areas": [
+        "Tokyo (Minato, Shibuya, Nakameguro)",
+        "Osaka (Namba, Shinsaibashi)",
+        "Kyoto",
+        "Fukuoka",
+        "Hiroshima"
+      ],
       "expat_vibe": "Unique, fascinating culture but one of harder countries to integrate. Japanese society can be reserved toward foreigners initially. Once accepted incredibly warm. Tokyo has large expat community with good infrastructure. Fukuoka growing as expat destination.",
-      "facebook_groups": ["Expats in Japan", "Americans in Tokyo", "Foreigners in Osaka"],
-      "forums": ["r/japanlife", "tokyocheapo.com", "realestate.co.jp expats"],
+      "facebook_groups": [
+        "Expats in Japan",
+        "Americans in Tokyo",
+        "Foreigners in Osaka"
+      ],
+      "forums": [
+        "r/japanlife",
+        "tokyocheapo.com",
+        "realestate.co.jp expats"
+      ],
       "internations_chapter": true,
       "cost_note": "Tokyo expensive but comparable to major US cities. Osaka significantly cheaper. Rural Japan very affordable. Published averages accurate.",
       "language_barrier": "High. Japanese language essential for daily life outside tourist zones. English signage in major cities but daily transactions require Japanese.",
-      "healthcare_expat": "World-class healthcare. Universal coverage for residents. English-speaking doctors in major cities. Private insurance recommended initially."
+      "healthcare_expat": "World-class healthcare. Universal coverage for residents. English-speaking doctors in major cities. Private insurance recommended initially.",
+      "community_why": "You will find established expat communities in Tokyo and other major metros, but social circles can take time to build. Outside big cities, finding your people may feel slower.",
+      "expat_vibe_why": "You get safety, reliability, and world-class urban infrastructure. The lifestyle is rewarding, but cultural and procedural expectations can feel rigid at first.",
+      "language_barrier_why": "You can navigate some city life in English, especially in major hubs. Long-term comfort rises dramatically if you can handle everyday Japanese interactions.",
+      "healthcare_expat_why": "Healthcare quality is excellent and a major long-term advantage once you are integrated. Early navigation can be challenging without language support.",
+      "cost_note_why": "Japan is not uniformly expensive, and many cities are manageable on a disciplined budget. Prime central Tokyo living can still rival major global capitals."
     },
     "South Korea": {
       "community_size": "Moderate",
       "estimated_americans": "55,000+",
-      "popular_areas": ["Seoul (Itaewon, Gangnam, Mapo)", "Busan", "Jeju Island"],
+      "popular_areas": [
+        "Seoul (Itaewon, Gangnam, Mapo)",
+        "Busan",
+        "Jeju Island"
+      ],
       "expat_vibe": "Itaewon historically the expat hub though declining. Mapo and Hongdae more vibrant. K-culture driving new wave of younger expats. Korean society modern and efficient. Growing English proficiency. Jeju Island popular for lifestyle seekers.",
-      "facebook_groups": ["Expats in Seoul", "Americans in Korea", "Foreigners in Busan"],
-      "forums": ["r/korea expats", "koreabridge.net"],
+      "facebook_groups": [
+        "Expats in Seoul",
+        "Americans in Korea",
+        "Foreigners in Busan"
+      ],
+      "forums": [
+        "r/korea expats",
+        "koreabridge.net"
+      ],
       "internations_chapter": true,
       "cost_note": "Seoul Gangnam very expensive. Other areas reasonable. Published averages accurate for mid-range lifestyle.",
       "language_barrier": "Moderate. English in business and expat areas. Korean language very helpful for daily life. Younger Koreans increasingly English-proficient.",
-      "healthcare_expat": "World-class affordable healthcare. Universal system for residents. English-speaking doctors in major hospitals. Very positive expat reviews."
+      "healthcare_expat": "World-class affordable healthcare. Universal system for residents. English-speaking doctors in major hospitals. Very positive expat reviews.",
+      "community_why": "You will find active expat pockets in Seoul and selected cities, with younger international communities growing. Outside those pockets, support resources can be more limited.",
+      "expat_vibe_why": "Life can be highly convenient and modern with strong transit and service infrastructure. Social integration can feel hard if you stay only in foreigner-heavy enclaves.",
+      "language_barrier_why": "English access is improving, especially in urban professional areas. Daily errands still get much easier if you can handle basic Korean.",
+      "healthcare_expat_why": "Healthcare quality is excellent and usually efficient in major cities. Communication comfort can vary by provider unless you use expat-oriented clinics.",
+      "cost_note_why": "Seoul can be expensive depending on district and housing expectations. Outside premium neighborhoods, value is usually much better."
     },
     "Uruguay": {
       "community_size": "Small but growing",
       "estimated_americans": "5,000+",
-      "popular_areas": ["Montevideo (Pocitos, Punta Carretas)", "Punta del Este", "Colonia del Sacramento", "José Ignacio"],
+      "popular_areas": [
+        "Montevideo (Pocitos, Punta Carretas)",
+        "Punta del Este",
+        "Colonia del Sacramento",
+        "José Ignacio"
+      ],
       "expat_vibe": "South America's most stable and progressive country. Small but quality expat community. Montevideo sophisticated and European-feeling. Punta del Este glamorous beach resort. Very safe. Strong rule of law. Best governance in Latin America.",
-      "facebook_groups": ["Expats in Uruguay", "Americans in Montevideo"],
-      "forums": ["r/uruguay expats", "expatsinuruguay.com"],
+      "facebook_groups": [
+        "Expats in Uruguay",
+        "Americans in Montevideo"
+      ],
+      "forums": [
+        "r/uruguay expats",
+        "expatsinuruguay.com"
+      ],
       "internations_chapter": true,
       "cost_note": "More expensive than regional neighbors but for good reason. Punta del Este extremely expensive especially in summer. Montevideo reasonably priced.",
       "language_barrier": "Moderate. Spanish required. Less English than Argentina. Worth learning Spanish for Uruguay.",
-      "healthcare_expat": "Good private mutualistas (healthcare cooperatives). Very affordable quality care. Private insurance recommended."
-    },
-    "Panama": {
-      "community_size": "Large",
-      "estimated_americans": "25,000+",
-      "popular_areas": ["Panama City (Casco Viejo, El Cangrejo, Albrook)", "Boquete", "Bocas del Toro", "Coronado beach"],
-      "expat_vibe": "One of the most purpose-built retirement destinations. Pensionado program is world's best retiree visa. Dollar economy removes currency stress. Casco Viejo vibrant historic district. Boquete cool mountain town beloved by retirees.",
-      "facebook_groups": ["Expats in Panama", "Boquete Expats", "Pensionado Panama"],
-      "forums": ["liveandretirepanama.com", "r/Panama expats"],
-      "internations_chapter": true,
-      "cost_note": "Panama City costs risen but Pensionado discounts help. Boquete still very affordable. Overall good value especially with 25% restaurant discount.",
-      "language_barrier": "Low in expat areas. Dollar economy familiar. English widely spoken in business areas and expat zones.",
-      "healthcare_expat": "Good hospitals in Panama City. JCI-accredited. Medical tourism growing. Private insurance recommended."
+      "healthcare_expat": "Good private mutualistas (healthcare cooperatives). Very affordable quality care. Private insurance recommended.",
+      "community_why": "You will find a smaller but stable expat network, especially around Montevideo and coastal areas. Because the community is smaller, specialized expat services can be less abundant.",
+      "expat_vibe_why": "You get a calmer pace and strong institutional stability that many retirees value. If you want nonstop social energy, it can feel quieter than larger expat markets.",
+      "language_barrier_why": "English support exists but is limited outside expat-friendly circles. Spanish is important for smoother healthcare, housing, and everyday life.",
+      "healthcare_expat_why": "Private healthcare options are generally solid and practical for retirees. As in any smaller market, provider choice can be narrower than in giant capitals.",
+      "cost_note_why": "Uruguay costs more than many Latin American peers, but that often reflects stability and services. You need to budget accordingly rather than assuming regional pricing."
     },
     "Ecuador": {
       "community_size": "Large",
       "estimated_americans": "15,000+",
-      "popular_areas": ["Cuenca (El Centro, Gringolandia area)", "Quito (La Floresta, Cumbayá)", "Cotacachi", "Vilcabamba", "Manta coast"],
+      "popular_areas": [
+        "Cuenca (El Centro, Gringolandia area)",
+        "Quito (La Floresta, Cumbayá)",
+        "Cotacachi",
+        "Vilcabamba",
+        "Manta coast"
+      ],
       "expat_vibe": "Cuenca has one of Latin America's highest concentrations of American retirees relative to population. Nicknamed Gringolandia in parts. Very established expat infrastructure. Dollar economy. Spring-like climate year-round. Active expat social scene.",
-      "facebook_groups": ["Cuenca Expats", "Americans in Ecuador", "Gringos in Cuenca"],
-      "forums": ["cuencahighlife.com", "r/ecuador expats"],
+      "facebook_groups": [
+        "Cuenca Expats",
+        "Americans in Ecuador",
+        "Gringos in Cuenca"
+      ],
+      "forums": [
+        "cuencahighlife.com",
+        "r/ecuador expats"
+      ],
       "internations_chapter": true,
       "cost_note": "Cuenca costs rising due to expat demand but still very affordable by US standards. Published averages slightly below actual expat lifestyle.",
       "language_barrier": "Low in Cuenca expat areas. Spanish helpful but many services cater to English speakers in expat zones.",
-      "healthcare_expat": "Good private hospitals in Cuenca at very low cost. Clinica Santa Inés popular with expats. Private insurance recommended."
+      "healthcare_expat": "Good private hospitals in Cuenca at very low cost. Clinica Santa Inés popular with expats. Private insurance recommended.",
+      "community_why": "You will find long-running expat communities, especially in Cuenca, with lots of peer guidance. In less established towns, support can drop off quickly.",
+      "expat_vibe_why": "Daily life can be comfortable and community-oriented at a slower pace. Local conditions and infrastructure vary more by city than newcomers expect.",
+      "language_barrier_why": "English support is decent in key expat hubs. Spanish still becomes essential once you move beyond those neighborhoods.",
+      "healthcare_expat_why": "Private care in core expat cities can be a strong value proposition. Quality and specialty access become less predictable in smaller markets.",
+      "cost_note_why": "Ecuador can still be one of the better value options in the region. Rising demand in top expat zones means current local rent data matters a lot."
     },
     "Malta": {
       "community_size": "Large relative to island size",
       "estimated_americans": "2,000+",
-      "popular_areas": ["Valletta", "Sliema", "St. Julian's", "Gozo island"],
+      "popular_areas": [
+        "Valletta",
+        "Sliema",
+        "St. Julian's",
+        "Gozo island"
+      ],
       "expat_vibe": "English-speaking EU island makes for very easy transition. Large British expat community. Small enough that expats know each other. Active social scene. Mediterranean lifestyle. EU passport pathway appealing.",
-      "facebook_groups": ["Expats in Malta", "Americans in Malta", "Malta Expat Community"],
-      "forums": ["r/malta expats", "expatsinmalta.com"],
+      "facebook_groups": [
+        "Expats in Malta",
+        "Americans in Malta",
+        "Malta Expat Community"
+      ],
+      "forums": [
+        "r/malta expats",
+        "expatsinmalta.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Small island means limited housing supply. Prices rising. Gozo cheaper than Malta main island. Published averages accurate.",
       "language_barrier": "None. English is an official language. All business, government, and daily life in English.",
-      "healthcare_expat": "Good public and private healthcare. English-speaking throughout. Private insurance recommended for faster access."
+      "healthcare_expat": "Good public and private healthcare. English-speaking throughout. Private insurance recommended for faster access.",
+      "community_why": "You will find a very international population relative to island size, so social entry is easy. The small market means everyone competes for similar housing and services.",
+      "expat_vibe_why": "The lifestyle is convenient, English-friendly, and socially active. Island scale can feel limiting if you want more space or variety.",
+      "language_barrier_why": "English is a major advantage, so your transition friction is low from day one. Local nuances still matter in long-term relationships and bureaucracy.",
+      "healthcare_expat_why": "Healthcare quality is generally strong and communication is easy in English. Capacity is finite on a small island, so timing can matter.",
+      "cost_note_why": "Malta often costs more than people expect for its size, especially for housing. You can keep value high by being strategic on neighborhood and seasonality."
     },
     "Cyprus": {
       "community_size": "Very Large relative to island size",
       "estimated_americans": "3,000+",
-      "popular_areas": ["Limassol", "Paphos (expat favorite)", "Larnaca", "Nicosia"],
+      "popular_areas": [
+        "Limassol",
+        "Paphos (expat favorite)",
+        "Larnaca",
+        "Nicosia"
+      ],
       "expat_vibe": "Major British expat destination. English spoken everywhere due to British colonial history. Large Russian community also present. Paphos especially popular with retirees. Mediterranean lifestyle, good weather, EU membership.",
-      "facebook_groups": ["Expats in Cyprus", "British in Cyprus", "Paphos Expats"],
-      "forums": ["r/cyprus expats", "expatsinmalta.com"],
+      "facebook_groups": [
+        "Expats in Cyprus",
+        "British in Cyprus",
+        "Paphos Expats"
+      ],
+      "forums": [
+        "r/cyprus expats",
+        "expatsinmalta.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Limassol most expensive. Paphos better value. Published averages accurate.",
       "language_barrier": "None effectively. English universally spoken across the island.",
-      "healthcare_expat": "Good private hospitals. English-speaking. EU standard. Private insurance recommended."
+      "healthcare_expat": "Good private hospitals. English-speaking. EU standard. Private insurance recommended.",
+      "community_why": "You will find a mature expat ecosystem with long-standing British and international communities. In peak expat zones, housing competition can be intense.",
+      "expat_vibe_why": "Life is relaxed and climate-driven, with plenty of familiar social options. Some areas can feel seasonal, so rhythm changes across the year.",
+      "language_barrier_why": "English is widely used, making transition relatively smooth for retirees. You still benefit from local language basics when dealing with official matters.",
+      "healthcare_expat_why": "Private healthcare is accessible and generally dependable for routine care. Specialist access may vary by region, so city choice matters.",
+      "cost_note_why": "Cyprus can offer good value compared with parts of Western Europe. Prime coastal and expat-heavy towns can still price much higher than expected."
     },
     "Argentina": {
       "community_size": "Large",
       "estimated_americans": "25,000+",
-      "popular_areas": ["Buenos Aires (Palermo, Recoleta, San Telmo)", "Mendoza", "Bariloche", "Córdoba"],
+      "popular_areas": [
+        "Buenos Aires (Palermo, Recoleta, San Telmo)",
+        "Mendoza",
+        "Bariloche",
+        "Córdoba"
+      ],
       "expat_vibe": "Buenos Aires is the Paris of South America. Sophisticated European-style city at very affordable dollar prices. Large existing expat community. Tango, steak, wine culture. Economic volatility is the main challenge but dollar earners benefit from it.",
-      "facebook_groups": ["Expats in Buenos Aires", "Americans in Argentina", "BA Expats"],
-      "forums": ["r/argentina expats", "buenosairesexpats.com"],
+      "facebook_groups": [
+        "Expats in Buenos Aires",
+        "Americans in Argentina",
+        "BA Expats"
+      ],
+      "forums": [
+        "r/argentina expats",
+        "buenosairesexpats.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Dollar earners get exceptional value due to exchange rate situation. Published peso-based averages misleading — dollar cost of living extremely low. Check current blue rate.",
       "language_barrier": "Moderate. Spanish required but Buenos Aires has large English-speaking community. Italian influence means some similarities.",
-      "healthcare_expat": "Excellent private healthcare in Buenos Aires at very low dollar cost. Expats frequently cite healthcare quality as a major draw."
+      "healthcare_expat": "Excellent private healthcare in Buenos Aires at very low dollar cost. Expats frequently cite healthcare quality as a major draw.",
+      "community_why": "You will find active international communities, especially in Buenos Aires. Economic instability means expat planning conversations can shift quickly.",
+      "expat_vibe_why": "The lifestyle can be rich, social, and culturally rewarding at a favorable dollar cost. Volatility is the real downside, so flexibility is part of the package.",
+      "language_barrier_why": "You can find English-speaking circles in core expat neighborhoods. Daily life quality improves significantly once you can operate in Spanish.",
+      "healthcare_expat_why": "Private healthcare in major cities is a consistent strength for value and quality. You still need to verify provider reliability in your specific area.",
+      "cost_note_why": "Argentina can deliver strong purchasing power for dollar-based retirees. Currency and policy swings mean your budget assumptions need regular updates."
     },
     "United Arab Emirates": {
       "community_size": "Enormous",
       "estimated_americans": "50,000+",
-      "popular_areas": ["Dubai (Marina, JBR, Downtown, Emirates Hills)", "Abu Dhabi (Al Reem, Saadiyat)"],
+      "popular_areas": [
+        "Dubai (Marina, JBR, Downtown, Emirates Hills)",
+        "Abu Dhabi (Al Reem, Saadiyat)"
+      ],
       "expat_vibe": "90% of UAE population are expats making it the world's most expat-dominant country. Very international society. Every nationality represented. English universally spoken. Ultra-modern infrastructure. High income, high cost, zero income tax.",
-      "facebook_groups": ["Expats in Dubai", "Americans in UAE", "Dubai Expat Community"],
-      "forums": ["r/dubai expats", "expatwoman.com/dubai"],
+      "facebook_groups": [
+        "Expats in Dubai",
+        "Americans in UAE",
+        "Dubai Expat Community"
+      ],
+      "forums": [
+        "r/dubai expats",
+        "expatwoman.com/dubai"
+      ],
       "internations_chapter": true,
       "cost_note": "High cost of living but zero income tax. Published averages accurate. Housing is the main expense.",
       "language_barrier": "None. English is the language of business and daily life in Dubai. Arabic not required.",
-      "healthcare_expat": "World-class private hospitals. Insurance required. Very expensive but excellent quality."
+      "healthcare_expat": "World-class private hospitals. Insurance required. Very expensive but excellent quality.",
+      "community_why": "You will find one of the world's most international resident mixes, so building an expat network is easy. The community can be transient, so relationships sometimes cycle quickly.",
+      "expat_vibe_why": "Daily life is convenient, modern, and highly service-oriented. The pace can feel intense, and long-term belonging can be harder than short-term comfort.",
+      "language_barrier_why": "English works almost everywhere in day-to-day expat life. Arabic still helps for deeper cultural integration and some official interactions.",
+      "healthcare_expat_why": "Healthcare quality is high with strong private infrastructure. The downside is cost, so robust insurance is not optional.",
+      "cost_note_why": "You trade tax advantages for a high housing and service baseline. Budget misses usually come from underestimating lifestyle inflation in Dubai or Abu Dhabi."
     },
     "United Kingdom": {
       "community_size": "Very Large",
       "estimated_americans": "140,000+",
-      "popular_areas": ["London (Notting Hill, Kensington, Shoreditch)", "Edinburgh", "Bath", "Cotswolds", "Cornwall"],
+      "popular_areas": [
+        "London (Notting Hill, Kensington, Shoreditch)",
+        "Edinburgh",
+        "Bath",
+        "Cotswolds",
+        "Cornwall"
+      ],
       "expat_vibe": "Most natural transition for Americans due to language and cultural similarities. London massive international city. Easy practical life. NHS healthcare highly regarded. No culture shock. Expensive but familiar.",
-      "facebook_groups": ["Americans in London", "Americans in the UK", "US Expats in Britain"],
-      "forums": ["r/expats UK", "expatforum.com/uk"],
+      "facebook_groups": [
+        "Americans in London",
+        "Americans in the UK",
+        "US Expats in Britain"
+      ],
+      "forums": [
+        "r/expats UK",
+        "expatforum.com/uk"
+      ],
       "internations_chapter": true,
       "cost_note": "London very expensive — among world's priciest cities. Regional UK significantly more affordable. Bath, Edinburgh, Manchester good alternatives.",
       "language_barrier": "None. Same language though some vocabulary differences.",
-      "healthcare_expat": "NHS available to legal residents. Private insurance for faster access. High quality throughout."
+      "healthcare_expat": "NHS available to legal residents. Private insurance for faster access. High quality throughout.",
+      "community_why": "You will find a large and established American community, especially in London and major cities. The biggest downside is that prime areas can be financially brutal.",
+      "expat_vibe_why": "Cultural familiarity makes day one easier than many alternatives. That comfort can hide the need to adapt to different systems and cost structures.",
+      "language_barrier_why": "Language transition is straightforward for most US retirees. Regional accents and administrative language can still take adjustment.",
+      "healthcare_expat_why": "Healthcare access is a core quality-of-life anchor once residency is in place. Many expats still choose supplemental private options for speed.",
+      "cost_note_why": "Outside London, the UK can be much more manageable than people assume. In London and nearby commuter belts, housing can dominate your budget."
     },
     "Germany": {
       "community_size": "Very Large",
       "estimated_americans": "100,000+",
-      "popular_areas": ["Berlin (Prenzlauer Berg, Mitte, Kreuzberg)", "Munich (Schwabing)", "Hamburg", "Frankfurt", "Cologne"],
+      "popular_areas": [
+        "Berlin (Prenzlauer Berg, Mitte, Kreuzberg)",
+        "Munich (Schwabing)",
+        "Hamburg",
+        "Frankfurt",
+        "Cologne"
+      ],
       "expat_vibe": "Berlin especially has massive international expat scene. Very liberal and creative city. English widely spoken. German efficiency makes practical life easy. Good public transport. Strong social services.",
-      "facebook_groups": ["Expats in Berlin", "Americans in Germany", "Expats in Munich"],
-      "forums": ["r/germany expats", "expatica.com/de", "toytowngermany.com"],
+      "facebook_groups": [
+        "Expats in Berlin",
+        "Americans in Germany",
+        "Expats in Munich"
+      ],
+      "forums": [
+        "r/germany expats",
+        "expatica.com/de",
+        "toytowngermany.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Berlin affordable by major city standards. Munich expensive. Hamburg mid-range. Published averages accurate.",
       "language_barrier": "Moderate. German helpful for daily life. English widely spoken especially in Berlin. Younger Germans generally English-proficient.",
-      "healthcare_expat": "World-class healthcare system. Insurance mandatory. Excellent standard of care."
+      "healthcare_expat": "World-class healthcare system. Insurance mandatory. Excellent standard of care.",
+      "community_why": "You will find major expat communities in Berlin, Munich, Hamburg, and Frankfurt. In smaller cities, social entry can be slower and more local-language dependent.",
+      "expat_vibe_why": "Life is organized, efficient, and practical, which many retirees appreciate. If you prefer loose systems, the structure can feel rigid.",
+      "language_barrier_why": "English is common in large cities and international workplaces. Administrative life still gets easier once you can handle basic German.",
+      "healthcare_expat_why": "Healthcare quality is consistently strong and usually a major plus. Insurance rules and paperwork can feel complex at first.",
+      "cost_note_why": "Germany can offer good value outside the most in-demand neighborhoods. Munich and top-tier city centers can be expensive by European standards."
     },
     "Australia": {
       "community_size": "Very Large",
       "estimated_americans": "100,000+",
-      "popular_areas": ["Sydney (Bondi, Manly, Inner West)", "Melbourne (St Kilda, Fitzroy)", "Brisbane", "Perth", "Byron Bay", "Gold Coast"],
+      "popular_areas": [
+        "Sydney (Bondi, Manly, Inner West)",
+        "Melbourne (St Kilda, Fitzroy)",
+        "Brisbane",
+        "Perth",
+        "Byron Bay",
+        "Gold Coast"
+      ],
       "expat_vibe": "Very easy transition for Americans. English, similar culture, outdoor lifestyle. Sydney and Melbourne world-class cities. High quality of life. Expensive but wages are also high. Limited retirement visa pathway is the main challenge.",
-      "facebook_groups": ["Americans in Australia", "Expats in Sydney", "US Expats in Melbourne"],
-      "forums": ["r/australia expats", "expatfocus.com/australia"],
+      "facebook_groups": [
+        "Americans in Australia",
+        "Expats in Sydney",
+        "US Expats in Melbourne"
+      ],
+      "forums": [
+        "r/australia expats",
+        "expatfocus.com/australia"
+      ],
       "internations_chapter": true,
       "cost_note": "Expensive by global standards. Sydney and Melbourne comparable to major US cities. Brisbane and Perth more affordable. Published averages accurate.",
       "language_barrier": "None. English native. Some slang differences.",
-      "healthcare_expat": "Medicare access for permanent residents. Private insurance recommended. World-class healthcare system."
+      "healthcare_expat": "Medicare access for permanent residents. Private insurance recommended. World-class healthcare system.",
+      "community_why": "You will find very established international communities in major coastal cities. The challenge is less social and more visa pathway complexity for long-term stays.",
+      "expat_vibe_why": "Lifestyle quality is high with strong outdoor culture and familiar norms for Americans. Distance from family and long travel times can become a real emotional cost.",
+      "language_barrier_why": "Language transition is essentially seamless for US retirees. Local terminology and systems still require a short adjustment period.",
+      "healthcare_expat_why": "Healthcare quality is excellent and dependable in major population centers. Eligibility and private cover choices need early planning based on your status.",
+      "cost_note_why": "Australia is a high-cost destination in core cities, especially for housing. Value improves outside top metro neighborhoods, but it is rarely a bargain market."
     },
     "New Zealand": {
       "community_size": "Large relative to population",
       "estimated_americans": "15,000+",
-      "popular_areas": ["Auckland", "Wellington", "Queenstown", "Christchurch", "Nelson / Marlborough"],
+      "popular_areas": [
+        "Auckland",
+        "Wellington",
+        "Queenstown",
+        "Christchurch",
+        "Nelson / Marlborough"
+      ],
       "expat_vibe": "Easy transition for Americans. English, friendly people, outdoor lifestyle. Smaller and quieter than Australia. Queenstown adventure capital of the world. Very high quality of life. Remote from rest of the world is the main complaint.",
-      "facebook_groups": ["Expats in New Zealand", "Americans in NZ"],
-      "forums": ["r/newzealand expats", "expatica.com/nz"],
+      "facebook_groups": [
+        "Expats in New Zealand",
+        "Americans in NZ"
+      ],
+      "forums": [
+        "r/newzealand expats",
+        "expatica.com/nz"
+      ],
       "internations_chapter": true,
       "cost_note": "Expensive. Auckland comparable to major US cities. Regional NZ more affordable. Auckland housing particularly high.",
       "language_barrier": "None. English native.",
-      "healthcare_expat": "Excellent public healthcare for residents. Private insurance for faster access. Very high standard."
+      "healthcare_expat": "Excellent public healthcare for residents. Private insurance for faster access. Very high standard.",
+      "community_why": "You will find welcoming expat communities in Auckland, Wellington, and selected regional hubs. Smaller population means fewer niche services than larger countries.",
+      "expat_vibe_why": "The lifestyle is calm, outdoors-focused, and often excellent for quality of life. Geographic remoteness can feel isolating over time for some retirees.",
+      "language_barrier_why": "Language transition is very easy for English-speaking retirees. Practical adaptation is more about systems and location tradeoffs than communication.",
+      "healthcare_expat_why": "Healthcare standards are strong, with dependable care in major centers. In smaller areas, specialist access can require more travel and patience.",
+      "cost_note_why": "New Zealand is not cheap, especially in housing-constrained cities. Budget discipline matters more here than the laid-back reputation suggests."
     },
     "Oman": {
       "community_size": "Small but growing",
       "estimated_americans": "3,000+",
-      "popular_areas": ["Muscat (Qurum, Al Mouj, Madinat Sultan Qaboos)", "Salalah"],
+      "popular_areas": [
+        "Muscat (Qurum, Al Mouj, Madinat Sultan Qaboos)",
+        "Salalah"
+      ],
       "expat_vibe": "Quiet Gulf alternative to Dubai. Muscat is clean, safe, and slower paced. Smaller expat scene but welcoming. English widely spoken in business and expat neighborhoods.",
-      "facebook_groups": ["Expats in Oman", "Muscat Expats", "Americans in Oman"],
-      "forums": ["r/oman", "expat.com/oman"],
+      "facebook_groups": [
+        "Expats in Oman",
+        "Muscat Expats",
+        "Americans in Oman"
+      ],
+      "forums": [
+        "r/oman",
+        "expat.com/oman"
+      ],
       "internations_chapter": true,
       "cost_note": "Lower than Dubai or Abu Dhabi. Housing in Qurum and Al Mouj is the main expense. Muscat offers good value for a Gulf capital.",
       "language_barrier": "Moderate. Arabic is official but English works in Muscat expat and business life. Outside Muscat, Arabic helps.",
-      "healthcare_expat": "Good private hospitals in Muscat. Private insurance essential. Medicare not accepted."
+      "healthcare_expat": "Good private hospitals in Muscat. Private insurance essential. Medicare not accepted.",
+      "community_why": "You will find a smaller but friendly expat community, especially in Muscat. The smaller network means fewer ready-made retiree support channels.",
+      "expat_vibe_why": "Life is calmer than some Gulf alternatives and often feels safer and less rushed. Entertainment and social variety can feel limited if you want big-city pace.",
+      "language_barrier_why": "English is usable in many expat-facing settings in Muscat. Arabic becomes important once you move beyond core expat routines.",
+      "healthcare_expat_why": "Private healthcare in Muscat can cover routine needs well. Serious-care planning still requires good insurance and provider mapping.",
+      "cost_note_why": "Oman can be better value than neighboring Gulf hotspots. Housing and imported lifestyle costs can still surprise first-time movers."
     },
     "Canada": {
       "community_size": "Enormous",
       "estimated_americans": "1,000,000+",
-      "popular_areas": ["Vancouver (West End, Kitsilano)", "Toronto (Annex, Leslieville)", "Montreal (Plateau, Mile End)", "Victoria BC", "Halifax"],
+      "popular_areas": [
+        "Vancouver (West End, Kitsilano)",
+        "Toronto (Annex, Leslieville)",
+        "Montreal (Plateau, Mile End)",
+        "Victoria BC",
+        "Halifax"
+      ],
       "expat_vibe": "Most natural transition from US. Familiar culture, English language, similar systems. Victoria BC particularly popular with US retirees for mild climate. Montreal bilingual and culturally distinct. Toronto world-class diverse city.",
-      "facebook_groups": ["Americans in Canada", "US Expats in Vancouver", "Americans in Toronto"],
-      "forums": ["r/canada expats", "canadavisa.com"],
+      "facebook_groups": [
+        "Americans in Canada",
+        "US Expats in Vancouver",
+        "Americans in Toronto"
+      ],
+      "forums": [
+        "r/canada expats",
+        "canadavisa.com"
+      ],
       "internations_chapter": true,
       "cost_note": "Vancouver and Toronto very expensive housing. Montreal and Halifax more affordable. Canadian dollar usually favorable for Americans.",
       "language_barrier": "None in English Canada. French in Quebec helpful.",
-      "healthcare_expat": "Universal healthcare for legal residents. Wait times can be long for non-urgent care. Private insurance recommended initially."
+      "healthcare_expat": "Universal healthcare for legal residents. Wait times can be long for non-urgent care. Private insurance recommended initially.",
+      "community_why": "You will find one of the easiest social transitions from the US with large American communities in major metros. Top markets can feel crowded and expensive quickly.",
+      "expat_vibe_why": "Daily life feels familiar but with different healthcare and tax realities. Climate and winter duration can be a bigger lifestyle factor than many expect.",
+      "language_barrier_why": "Language is straightforward in most provinces, so transition friction is low. In Quebec, French can become important for full integration.",
+      "healthcare_expat_why": "Healthcare quality is strong and long-term coverage is a major draw once eligibility is in place. Wait times for non-urgent care are a real planning factor.",
+      "cost_note_why": "Canada can be expensive in housing-heavy metros like Vancouver and Toronto. Mid-size cities can offer a much better balance for retirees."
     },
     "United States": {
       "community_size": "You are home",
       "estimated_americans": "335,000,000",
-      "popular_areas": ["Florida (Naples, Sarasota, The Villages)", "Arizona (Scottsdale, Sedona, Tucson)", "Texas (Austin, San Antonio hill country)", "North Carolina (Asheville, Chapel Hill)", "South Carolina (Charleston, Hilton Head)"],
+      "popular_areas": [
+        "Florida (Naples, Sarasota, The Villages)",
+        "Arizona (Scottsdale, Sedona, Tucson)",
+        "Texas (Austin, San Antonio hill country)",
+        "North Carolina (Asheville, Chapel Hill)",
+        "South Carolina (Charleston, Hilton Head)"
+      ],
       "expat_vibe": "No transition required. Consider no-income-tax states for retirement: Florida, Texas, Nevada, Washington, Wyoming, South Dakota, Alaska, Tennessee, New Hampshire. The Villages in Florida is world's largest retirement community.",
-      "facebook_groups": ["Various city and state retirement groups"],
-      "forums": ["aarp.org", "r/retirement"],
+      "facebook_groups": [
+        "Various city and state retirement groups"
+      ],
+      "forums": [
+        "aarp.org",
+        "r/retirement"
+      ],
       "internations_chapter": false,
       "cost_note": "Huge variation by state and city. Sun Belt states generally more affordable. Northeast and California expensive. Consider state income tax when comparing.",
       "language_barrier": "None.",
-      "healthcare_expat": "Medicare at 65. Full access to US healthcare system. Highest quality but highest cost globally."
+      "healthcare_expat": "Medicare at 65. Full access to US healthcare system. Highest quality but highest cost globally.",
+      "community_why": "You already have full domestic support networks, institutions, and familiar systems. The downside is that cost and policy outcomes vary dramatically by state.",
+      "expat_vibe_why": "Staying in the US removes immigration friction and keeps family access simple. You still need to choose location carefully because lifestyle quality differs widely.",
+      "language_barrier_why": "Language is not a barrier, so your transition burden is minimal. Regional systems and local bureaucracy can still feel very different across states.",
+      "healthcare_expat_why": "You keep full continuity with Medicare and existing provider ecosystems. Out-of-pocket risk still requires careful plan design and state-level comparison.",
+      "cost_note_why": "US retirement costs can range from very manageable to very high depending on state and metro. Your location decision is the single biggest lever."
     }
   }
 }

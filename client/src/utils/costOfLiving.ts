@@ -425,6 +425,27 @@ export function budgetPreferencesEqual(
 
 const WEEKS_PER_MONTH = 4.33
 
+export const GROCERY_BASKET_STAPLE_COUNT = 15
+
+/** Display labels for the monthly grocery basket (quantities baked into labels). */
+export const GROCERY_BASKET_STAPLES: readonly { label: string }[] = [
+  { label: 'Milk 6L' },
+  { label: 'Bread 6 loaves' },
+  { label: 'Rice 1.5kg' },
+  { label: 'Eggs 24' },
+  { label: 'Cheese 0.75kg' },
+  { label: 'Chicken 2.5kg' },
+  { label: 'Beef 1kg' },
+  { label: 'Apples 2kg' },
+  { label: 'Bananas 2kg' },
+  { label: 'Oranges 1.5kg' },
+  { label: 'Tomatoes 2kg' },
+  { label: 'Potatoes 2kg' },
+  { label: 'Onions 1kg' },
+  { label: 'Lettuce 3 heads' },
+  { label: 'Bottled water 4 bottles' },
+]
+
 const GROCERY_BASKET: Record<string, number> = {
   milk_1L: 6,
   bread_500g: 6,
@@ -453,14 +474,97 @@ const RENT_FIELD: Record<HousingTier, keyof CityData> = {
 const TRANSPORT_PASS_FALLBACK_RIDES_PER_MONTH = 40
 const MOBILE_PLAN_FALLBACK_USD = 20
 
+function cityPrice(city: CityData, key: keyof CityData, fallback = 0): number {
+  const v = Number(city[key])
+  return Number.isFinite(v) && v > 0 ? v : fallback
+}
+
+export type BudgetLineItem = {
+  label: string
+  amount: number
+}
+
+export function buildDiningBudgetLineItems(
+  city: CityData,
+  lifestyle: LifestyleInputs,
+): BudgetLineItem[] {
+  const adults = lifestyle.includeSpouse ? 2 : 1
+  const casualMealsPerMonth = lifestyle.diningCasualPerWeek * WEEKS_PER_MONTH
+  const coffeesPerMonth = lifestyle.coffeeShopPerWeek * WEEKS_PER_MONTH
+  const items: BudgetLineItem[] = []
+
+  if (casualMealsPerMonth > 0) {
+    items.push({
+      label: `Casual meals (${Math.round(casualMealsPerMonth)}x/mo)`,
+      amount: Math.round(
+        casualMealsPerMonth * cityPrice(city, 'meal_inexpensive_restaurant') * adults,
+      ),
+    })
+  }
+  if (lifestyle.diningNicePerMonth > 0) {
+    items.push({
+      label: `Dinner for two (${Math.round(lifestyle.diningNicePerMonth)}x/mo)`,
+      amount: Math.round(
+        lifestyle.diningNicePerMonth * cityPrice(city, 'meal_midrange_restaurant_for2'),
+      ),
+    })
+  }
+  if (coffeesPerMonth > 0) {
+    items.push({
+      label: `Coffee shop (${Math.round(coffeesPerMonth)}x/mo)`,
+      amount: Math.round(coffeesPerMonth * cityPrice(city, 'cappuccino') * adults),
+    })
+  }
+  if (lifestyle.diningCasualPerWeek > 0) {
+    items.push({
+      label: 'Fast food (2x/mo)',
+      amount: Math.round(2 * cityPrice(city, 'mcmeal') * adults),
+    })
+  }
+
+  return items
+}
+
+export function buildAlcoholBudgetLineItems(
+  city: CityData,
+  lifestyle: LifestyleInputs,
+): BudgetLineItem[] {
+  const adults = lifestyle.includeSpouse ? 2 : 1
+  const beerHomePerMonth = lifestyle.beerHomePerWeek * WEEKS_PER_MONTH
+  const beerOutPerMonth = lifestyle.beerOutPerWeek * WEEKS_PER_MONTH
+  const items: BudgetLineItem[] = []
+
+  if (beerHomePerMonth > 0) {
+    items.push({
+      label: `Beer at home (${Math.round(beerHomePerMonth)}x/mo)`,
+      amount: Math.round(
+        beerHomePerMonth * cityPrice(city, 'domestic_beer_bottle') * adults,
+      ),
+    })
+  }
+  if (lifestyle.winePerMonth > 0) {
+    items.push({
+      label: `Wine, ${Math.round(lifestyle.winePerMonth)} bottles/mo`,
+      amount: Math.round(lifestyle.winePerMonth * cityPrice(city, 'wine_bottle_midrange')),
+    })
+  }
+  if (beerOutPerMonth > 0) {
+    items.push({
+      label: `Beer out (${Math.round(beerOutPerMonth)}x/mo)`,
+      amount: Math.round(
+        beerOutPerMonth * cityPrice(city, 'domestic_beer_draught') * adults,
+      ),
+    })
+  }
+
+  return items
+}
+
 export function calculateMonthlyBudget(
   city: CityData,
   lifestyle: LifestyleInputs,
 ): BudgetBreakdown {
-  const n = (key: keyof CityData, fallback = 0): number => {
-    const v = Number(city[key])
-    return Number.isFinite(v) && v > 0 ? v : fallback
-  }
+  const n = (key: keyof CityData, fallback = 0): number => cityPrice(city, key, fallback)
 
   const adults = lifestyle.includeSpouse ? 2 : 1
 
@@ -544,12 +648,12 @@ export function lifestylesEqual(a: LifestyleInputs, b: LifestyleInputs): boolean
 
 export const BUDGET_BAR_CATEGORY_KEYS = [
   'rent',
-  'foodAndDrink',
+  'groceries',
+  'diningAndDrinks',
+  'utilities',
   'transport',
-  'utilitiesAndMobile',
   'lifestyle',
-  'healthInsurance',
-  'incidentals',
+  'other',
 ] as const
 
 export type BudgetBarCategoryKey = (typeof BUDGET_BAR_CATEGORY_KEYS)[number]
@@ -568,12 +672,12 @@ export type BudgetBreakdownDisplay = {
 function budgetBarAmounts(breakdown: BudgetBreakdown): Record<BudgetBarCategoryKey, number> {
   return {
     rent: breakdown.rent,
-    foodAndDrink: breakdown.groceries + breakdown.dining + breakdown.alcohol,
+    groceries: breakdown.groceries,
+    diningAndDrinks: breakdown.dining + breakdown.alcohol,
+    utilities: breakdown.utilities,
     transport: breakdown.transport,
-    utilitiesAndMobile: breakdown.utilities + breakdown.mobile,
     lifestyle: breakdown.leisure + breakdown.mobile + breakdown.clothing,
-    healthInsurance: breakdown.healthInsurance,
-    incidentals: breakdown.incidentals,
+    other: breakdown.healthInsurance + breakdown.incidentals,
   }
 }
 
@@ -586,12 +690,12 @@ export function buildBudgetBarPercents(
   if (total <= 0) {
     return {
       rent: 0,
-      foodAndDrink: 0,
+      groceries: 0,
+      diningAndDrinks: 0,
+      utilities: 0,
       transport: 0,
-      utilitiesAndMobile: 0,
       lifestyle: 0,
-      healthInsurance: 0,
-      incidentals: 0,
+      other: 0,
       remaining: 0,
     }
   }

@@ -1,0 +1,19 @@
+.panel-heads-up {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md, 10px);
+  background: color-mix(in srgb, var(--text-muted) 8%, var(--surface));
+  box-sizing: border-box;
+}
+
+.panel-heads-up__text {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.panel-heads-up__lead {
+  font-weight: 700;
+  color: var(--text);
+}

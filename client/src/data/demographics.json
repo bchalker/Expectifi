@@ -9,9 +9,15 @@
     "Portugal": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 84, "Unaffiliated": 13, "Muslim": 1, "Other": 2},
+        "breakdown": {
+          "Christian": 84,
+          "Unaffiliated": 13,
+          "Muslim": 1,
+          "Other": 2
+        },
         "christian_note": "Predominantly Roman Catholic",
-        "expat_worship": "Catholic churches everywhere. Protestant and international English-language services in Lisbon and Porto."
+        "expat_worship": "Catholic churches everywhere. Protestant and international English-language services in Lisbon and Porto.",
+        "expat_worship_why": "If faith community matters to you, Portugal is easy to navigate because Catholic institutions are everywhere and international services exist in major hubs. Outside Lisbon and Porto, your options narrow and are more local-language first."
       },
       "demographics": {
         "population": "10.2M",
@@ -20,15 +26,23 @@
         "english_proficiency": "High",
         "expat_population": "Large — estimated 80,000+ Americans and growing",
         "official_language": "Portuguese",
-        "common_languages": "Portuguese; English widely spoken in cities and tourist areas"
+        "common_languages": "Portuguese; English widely spoken in cities and tourist areas",
+        "expat_population_why": "The expat base is already large enough that you can get practical relocation guidance quickly. That popularity also means more competition in the same neighborhoods and services.",
+        "common_languages_why": "English usage in major expat areas lowers your startup friction a lot. Portuguese still matters for deeper integration and smoother admin life."
       }
     },
     "Spain": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 70, "Unaffiliated": 26, "Muslim": 3, "Other": 1},
+        "breakdown": {
+          "Christian": 70,
+          "Unaffiliated": 26,
+          "Muslim": 3,
+          "Other": 1
+        },
         "christian_note": "Predominantly Roman Catholic, increasingly secular",
-        "expat_worship": "Catholic churches everywhere. International English churches in major cities and expat areas."
+        "expat_worship": "Catholic churches everywhere. International English churches in major cities and expat areas.",
+        "expat_worship_why": "You can usually find both traditional Catholic and international worship options in big expat cities. In smaller towns, options are less diverse and usually Spanish-led."
       },
       "demographics": {
         "population": "47.4M",
@@ -37,15 +51,23 @@
         "english_proficiency": "Moderate",
         "expat_population": "Very large — over 300,000 Americans and major British expat community",
         "official_language": "Spanish",
-        "common_languages": "Spanish; English in tourist areas and cities; Catalan in Barcelona"
+        "common_languages": "Spanish; English in tourist areas and cities; Catalan in Barcelona",
+        "expat_population_why": "Spain's large foreign resident base makes it easier to build a social circle fast. In high-demand expat zones, popularity can push costs and crowding.",
+        "common_languages_why": "English works in many tourist and expat districts, but bureaucracy still runs in Spanish. Functional Spanish gives you much better control over daily decisions."
       }
     },
     "Italy": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 80, "Unaffiliated": 16, "Muslim": 3, "Other": 1},
+        "breakdown": {
+          "Christian": 80,
+          "Unaffiliated": 16,
+          "Muslim": 3,
+          "Other": 1
+        },
         "christian_note": "Predominantly Roman Catholic",
-        "expat_worship": "Catholic churches everywhere. English-language Mass available in major cities. Protestant services in larger cities."
+        "expat_worship": "Catholic churches everywhere. English-language Mass available in major cities. Protestant services in larger cities.",
+        "expat_worship_why": "Catholic infrastructure is abundant, and larger cities offer international congregations. In smaller towns, options are typically local-language and less varied."
       },
       "demographics": {
         "population": "60.4M",
@@ -54,15 +76,23 @@
         "english_proficiency": "Moderate",
         "expat_population": "Large — major American expat presence in Florence, Rome, Milan",
         "official_language": "Italian",
-        "common_languages": "Italian; English in tourist areas; limited outside cities"
+        "common_languages": "Italian; English in tourist areas; limited outside cities",
+        "expat_population_why": "Italy's established expat nodes make initial settlement easier in the right cities. Outside those nodes, support networks can feel sparse.",
+        "common_languages_why": "English is useful in tourism-heavy areas but limited for many practical tasks. Basic Italian often determines how smooth your first year feels."
       }
     },
     "Greece": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 90, "Muslim": 5, "Unaffiliated": 4, "Other": 1},
+        "breakdown": {
+          "Christian": 90,
+          "Muslim": 5,
+          "Unaffiliated": 4,
+          "Other": 1
+        },
         "christian_note": "Predominantly Greek Orthodox",
-        "expat_worship": "Greek Orthodox churches everywhere. Catholic and Protestant churches in Athens and major tourist islands."
+        "expat_worship": "Greek Orthodox churches everywhere. Catholic and Protestant churches in Athens and major tourist islands.",
+        "expat_worship_why": "Orthodox institutions are deeply present, and major expat centers add more diverse options. On smaller islands, worship choices are often narrower and local."
       },
       "demographics": {
         "population": "10.7M",
@@ -71,15 +101,23 @@
         "english_proficiency": "Moderate-High",
         "expat_population": "Growing — significant expat scene in Athens, Crete, and islands",
         "official_language": "Greek",
-        "common_languages": "Greek; English widely spoken in tourist areas and among educated population"
+        "common_languages": "Greek; English widely spoken in tourist areas and among educated population",
+        "expat_population_why": "Greece's growing expat population gives you social momentum without feeling overwhelmingly crowded. The community is still uneven by region, so location matters.",
+        "common_languages_why": "English helps a lot in tourism-oriented places and early setup. Greek basics still improve everyday confidence and problem-solving."
       }
     },
     "France": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 61, "Unaffiliated": 29, "Muslim": 8, "Other": 2},
+        "breakdown": {
+          "Christian": 61,
+          "Unaffiliated": 29,
+          "Muslim": 8,
+          "Other": 2
+        },
         "christian_note": "Predominantly Roman Catholic, highly secular society",
-        "expat_worship": "Catholic churches everywhere. American Church in Paris. Protestant and other services in major cities."
+        "expat_worship": "Catholic churches everywhere. American Church in Paris. Protestant and other services in major cities.",
+        "expat_worship_why": "France gives you broad worship access in major cities, including established international congregations. In rural areas, options can be fewer and more language-dependent."
       },
       "demographics": {
         "population": "67.8M",
@@ -88,15 +126,23 @@
         "english_proficiency": "Moderate",
         "expat_population": "Very large — major American expat community especially in Paris and south",
         "official_language": "French",
-        "common_languages": "French; English in Paris and tourist areas; limited in rural areas"
+        "common_languages": "French; English in Paris and tourist areas; limited in rural areas",
+        "expat_population_why": "A large, mature expat presence gives you plenty of practical support if you choose common destinations. In top hubs, the same demand can compress housing options.",
+        "common_languages_why": "English can get you started in major cities, especially Paris. French remains essential for durable day-to-day control and administrative confidence."
       }
     },
     "Croatia": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 88, "Unaffiliated": 9, "Muslim": 2, "Other": 1},
+        "breakdown": {
+          "Christian": 88,
+          "Unaffiliated": 9,
+          "Muslim": 2,
+          "Other": 1
+        },
         "christian_note": "Predominantly Roman Catholic",
-        "expat_worship": "Catholic churches everywhere. Limited non-Catholic options outside Zagreb."
+        "expat_worship": "Catholic churches everywhere. Limited non-Catholic options outside Zagreb.",
+        "expat_worship_why": "Croatia's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "3.9M",
@@ -105,15 +151,22 @@
         "english_proficiency": "High",
         "expat_population": "Growing — Dubrovnik and coastal areas popular with expats",
         "official_language": "Croatian",
-        "common_languages": "Croatian; English very widely spoken especially in tourist areas"
+        "common_languages": "Croatian; English very widely spoken especially in tourist areas",
+        "expat_population_why": "Current data points to Growing — Dubrovnik and coastal areas popular with expats, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Croatian; English very widely spoken especially in tourist areas. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Hungary": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 62, "Unaffiliated": 35, "Other": 3},
+        "breakdown": {
+          "Christian": 62,
+          "Unaffiliated": 35,
+          "Other": 3
+        },
         "christian_note": "Mix of Catholic and Protestant (Reformed/Lutheran)",
-        "expat_worship": "Catholic and Protestant churches available. International English churches in Budapest."
+        "expat_worship": "Catholic and Protestant churches available. International English churches in Budapest.",
+        "expat_worship_why": "Hungary's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "9.7M",
@@ -122,15 +175,22 @@
         "english_proficiency": "Moderate",
         "expat_population": "Moderate — Budapest has growing expat scene",
         "official_language": "Hungarian",
-        "common_languages": "Hungarian; English in Budapest; limited outside capital"
+        "common_languages": "Hungarian; English in Budapest; limited outside capital",
+        "expat_population_why": "Current data points to Moderate — Budapest has growing expat scene, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Hungarian; English in Budapest; limited outside capital. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Czech Republic": {
       "religion": {
         "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 66, "Christian": 30, "Other": 4},
+        "breakdown": {
+          "Unaffiliated": 66,
+          "Christian": 30,
+          "Other": 4
+        },
         "christian_note": "One of the most secular countries in Europe",
-        "expat_worship": "Catholic and Protestant churches available. International English services in Prague."
+        "expat_worship": "Catholic and Protestant churches available. International English services in Prague.",
+        "expat_worship_why": "Czech Republic's dominant context is Unaffiliated, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "10.9M",
@@ -139,15 +199,22 @@
         "english_proficiency": "Moderate-High",
         "expat_population": "Large — Prague has very large expat community",
         "official_language": "Czech",
-        "common_languages": "Czech; English widely spoken in Prague; limited outside"
+        "common_languages": "Czech; English widely spoken in Prague; limited outside",
+        "expat_population_why": "Current data points to Large — Prague has very large expat community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Czech; English widely spoken in Prague; limited outside. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Poland": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 91, "Unaffiliated": 8, "Other": 1},
+        "breakdown": {
+          "Christian": 91,
+          "Unaffiliated": 8,
+          "Other": 1
+        },
         "christian_note": "Predominantly Roman Catholic, one of Europe's most religious countries",
-        "expat_worship": "Catholic churches everywhere. International English services in Warsaw and Krakow."
+        "expat_worship": "Catholic churches everywhere. International English services in Warsaw and Krakow.",
+        "expat_worship_why": "Poland's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "38.0M",
@@ -156,15 +223,22 @@
         "english_proficiency": "Moderate-High",
         "expat_population": "Growing — Warsaw and Krakow popular with expats",
         "official_language": "Polish",
-        "common_languages": "Polish; English increasingly common especially among younger people"
+        "common_languages": "Polish; English increasingly common especially among younger people",
+        "expat_population_why": "Current data points to Growing — Warsaw and Krakow popular with expats, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Polish; English increasingly common especially among younger people. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Romania": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 93, "Unaffiliated": 5, "Other": 2},
+        "breakdown": {
+          "Christian": 93,
+          "Unaffiliated": 5,
+          "Other": 2
+        },
         "christian_note": "Predominantly Romanian Orthodox",
-        "expat_worship": "Orthodox churches everywhere. Catholic and Protestant services available. Limited English services."
+        "expat_worship": "Orthodox churches everywhere. Catholic and Protestant services available. Limited English services.",
+        "expat_worship_why": "Romania's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "19.2M",
@@ -173,15 +247,23 @@
         "english_proficiency": "Moderate-High",
         "expat_population": "Small but growing — Bucharest has emerging expat scene",
         "official_language": "Romanian",
-        "common_languages": "Romanian; English increasingly spoken in cities especially by younger people"
+        "common_languages": "Romanian; English increasingly spoken in cities especially by younger people",
+        "expat_population_why": "Current data points to Small but growing — Bucharest has emerging expat scene, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Romanian; English increasingly spoken in cities especially by younger people. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Bulgaria": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 72, "Muslim": 14, "Unaffiliated": 13, "Other": 1},
+        "breakdown": {
+          "Christian": 72,
+          "Muslim": 14,
+          "Unaffiliated": 13,
+          "Other": 1
+        },
         "christian_note": "Predominantly Bulgarian Orthodox",
-        "expat_worship": "Orthodox churches everywhere. Limited English-language services."
+        "expat_worship": "Orthodox churches everywhere. Limited English-language services.",
+        "expat_worship_why": "Bulgaria's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "6.5M",
@@ -190,15 +272,23 @@
         "english_proficiency": "Moderate",
         "expat_population": "Small — Black Sea coast has British expat community",
         "official_language": "Bulgarian",
-        "common_languages": "Bulgarian; English in Sofia and tourist areas"
+        "common_languages": "Bulgarian; English in Sofia and tourist areas",
+        "expat_population_why": "Current data points to Small — Black Sea coast has British expat community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Bulgarian; English in Sofia and tourist areas. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Serbia": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 93, "Muslim": 4, "Unaffiliated": 2, "Other": 1},
+        "breakdown": {
+          "Christian": 93,
+          "Muslim": 4,
+          "Unaffiliated": 2,
+          "Other": 1
+        },
         "christian_note": "Predominantly Serbian Orthodox",
-        "expat_worship": "Orthodox churches everywhere. Growing international community in Belgrade with some English services."
+        "expat_worship": "Orthodox churches everywhere. Growing international community in Belgrade with some English services.",
+        "expat_worship_why": "Serbia's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "6.8M",
@@ -207,15 +297,23 @@
         "english_proficiency": "Moderate-High",
         "expat_population": "Growing — Belgrade has rapidly growing digital nomad and expat scene",
         "official_language": "Serbian",
-        "common_languages": "Serbian; English widely spoken in Belgrade especially among younger population"
+        "common_languages": "Serbian; English widely spoken in Belgrade especially among younger population",
+        "expat_population_why": "Current data points to Growing — Belgrade has rapidly growing digital nomad and expat scene, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Serbian; English widely spoken in Belgrade especially among younger population. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Georgia": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 83, "Muslim": 11, "Unaffiliated": 4, "Other": 2},
+        "breakdown": {
+          "Christian": 83,
+          "Muslim": 11,
+          "Unaffiliated": 4,
+          "Other": 2
+        },
         "christian_note": "Predominantly Georgian Orthodox, one of the world's oldest Christian nations",
-        "expat_worship": "Georgian Orthodox churches everywhere. Growing international community in Tbilisi with some English services."
+        "expat_worship": "Georgian Orthodox churches everywhere. Growing international community in Tbilisi with some English services.",
+        "expat_worship_why": "Georgia's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "3.7M",
@@ -224,15 +322,22 @@
         "english_proficiency": "Moderate",
         "expat_population": "Large and rapidly growing — major digital nomad destination since 2022",
         "official_language": "Georgian",
-        "common_languages": "Georgian; Russian (older generation); English growing rapidly especially in Tbilisi"
+        "common_languages": "Georgian; Russian (older generation); English growing rapidly especially in Tbilisi",
+        "expat_population_why": "Current data points to Large and rapidly growing — major digital nomad destination since 2022, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Georgian; Russian (older generation); English growing rapidly especially in Tbilisi. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Morocco": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 99, "Christian": 1, "Other": 0},
+        "breakdown": {
+          "Muslim": 99,
+          "Christian": 1,
+          "Other": 0
+        },
         "christian_note": "Predominantly Sunni Muslim. Small Christian expat community.",
-        "expat_worship": "Mosques everywhere. Catholic and Protestant churches available in Casablanca, Rabat, Marrakech for expats."
+        "expat_worship": "Mosques everywhere. Catholic and Protestant churches available in Casablanca, Rabat, Marrakech for expats.",
+        "expat_worship_why": "Morocco's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "37.5M",
@@ -241,15 +346,22 @@
         "english_proficiency": "Low-Moderate",
         "expat_population": "Moderate — Marrakech and Essaouira have established Western expat communities",
         "official_language": "Arabic, Tamazight",
-        "common_languages": "Arabic; French widely spoken; English limited but growing"
+        "common_languages": "Arabic; French widely spoken; English limited but growing",
+        "expat_population_why": "Current data points to Moderate — Marrakech and Essaouira have established Western expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Arabic; French widely spoken; English limited but growing. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Tunisia": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 99, "Christian": 1, "Other": 0},
+        "breakdown": {
+          "Muslim": 99,
+          "Christian": 1,
+          "Other": 0
+        },
         "christian_note": "Predominantly Sunni Muslim. Small Christian expat community.",
-        "expat_worship": "Mosques everywhere. Catholic churches available in Tunis and coastal cities for expats."
+        "expat_worship": "Mosques everywhere. Catholic churches available in Tunis and coastal cities for expats.",
+        "expat_worship_why": "Tunisia's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "12.1M",
@@ -258,15 +370,22 @@
         "english_proficiency": "Low",
         "expat_population": "Small — limited but some European expats in coastal areas",
         "official_language": "Arabic",
-        "common_languages": "Arabic; French widely spoken; English limited"
+        "common_languages": "Arabic; French widely spoken; English limited",
+        "expat_population_why": "Current data points to Small — limited but some European expats in coastal areas, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Arabic; French widely spoken; English limited. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Egypt": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 91, "Christian": 9, "Other": 0},
+        "breakdown": {
+          "Muslim": 91,
+          "Christian": 9,
+          "Other": 0
+        },
         "christian_note": "Predominantly Sunni Muslim. Significant Coptic Christian minority (~9%).",
-        "expat_worship": "Mosques everywhere. Coptic, Catholic, and Protestant churches available especially in Cairo."
+        "expat_worship": "Mosques everywhere. Coptic, Catholic, and Protestant churches available especially in Cairo.",
+        "expat_worship_why": "Egypt's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "105M",
@@ -275,15 +394,23 @@
         "english_proficiency": "Low-Moderate",
         "expat_population": "Moderate — Cairo and Red Sea coast have expat communities",
         "official_language": "Arabic",
-        "common_languages": "Arabic; English in Cairo tourist and business areas; French also spoken"
+        "common_languages": "Arabic; English in Cairo tourist and business areas; French also spoken",
+        "expat_population_why": "Current data points to Moderate — Cairo and Red Sea coast have expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Arabic; English in Cairo tourist and business areas; French also spoken. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Turkey": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 98, "Christian": 1, "Unaffiliated": 1, "Other": 0},
+        "breakdown": {
+          "Muslim": 98,
+          "Christian": 1,
+          "Unaffiliated": 1,
+          "Other": 0
+        },
         "christian_note": "Predominantly Sunni Muslim. Small historic Christian minority.",
-        "expat_worship": "Mosques everywhere. Catholic, Protestant, and Orthodox churches in Istanbul and major cities."
+        "expat_worship": "Mosques everywhere. Catholic, Protestant, and Orthodox churches in Istanbul and major cities.",
+        "expat_worship_why": "Turkey's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "85.3M",
@@ -292,15 +419,22 @@
         "english_proficiency": "Low-Moderate",
         "expat_population": "Large — Istanbul and coastal areas (Bodrum, Antalya) have major expat communities",
         "official_language": "Turkish",
-        "common_languages": "Turkish; English in tourist areas and Istanbul; limited elsewhere"
+        "common_languages": "Turkish; English in tourist areas and Istanbul; limited elsewhere",
+        "expat_population_why": "Current data points to Large — Istanbul and coastal areas (Bodrum, Antalya) have major expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Turkish; English in tourist areas and Istanbul; limited elsewhere. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Mexico": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 88, "Unaffiliated": 9, "Other": 3},
+        "breakdown": {
+          "Christian": 88,
+          "Unaffiliated": 9,
+          "Other": 3
+        },
         "christian_note": "Predominantly Roman Catholic with growing Protestant/Evangelical presence",
-        "expat_worship": "Catholic churches everywhere. English-language Protestant and non-denominational churches in major expat areas."
+        "expat_worship": "Catholic churches everywhere. English-language Protestant and non-denominational churches in major expat areas.",
+        "expat_worship_why": "If worship access matters, Mexico is straightforward because Catholic churches are everywhere and English-language options are common in expat hubs. In less expat-heavy cities, service language becomes more Spanish-dependent."
       },
       "demographics": {
         "population": "128M",
@@ -309,15 +443,22 @@
         "english_proficiency": "Low-Moderate",
         "expat_population": "Very large — over 1.5 million Americans live in Mexico",
         "official_language": "Spanish",
-        "common_languages": "Spanish; English widely spoken in expat areas and tourist zones"
+        "common_languages": "Spanish; English widely spoken in expat areas and tourist zones",
+        "expat_population_why": "The huge American expat population means there is a playbook for almost every relocation step. In major enclaves, that same demand can reshape neighborhoods and pricing.",
+        "common_languages_why": "You can function in English in many retiree destinations early on. Your independence rises quickly once you can handle daily Spanish interactions."
       }
     },
     "Colombia": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 86, "Unaffiliated": 11, "Other": 3},
+        "breakdown": {
+          "Christian": 86,
+          "Unaffiliated": 11,
+          "Other": 3
+        },
         "christian_note": "Predominantly Roman Catholic with growing Evangelical presence",
-        "expat_worship": "Catholic churches everywhere. Growing English-language church options in Medellin and Bogota."
+        "expat_worship": "Catholic churches everywhere. Growing English-language church options in Medellin and Bogota.",
+        "expat_worship_why": "You will find strong Christian infrastructure and growing expat-oriented congregations in major cities. Outside those centers, English-language worship can be limited."
       },
       "demographics": {
         "population": "51.9M",
@@ -326,372 +467,22 @@
         "english_proficiency": "Low",
         "expat_population": "Large and rapidly growing — Medellin is a top expat destination globally",
         "official_language": "Spanish",
-        "common_languages": "Spanish; English in expat neighborhoods of Medellin and Bogota"
+        "common_languages": "Spanish; English in expat neighborhoods of Medellin and Bogota",
+        "expat_population_why": "Medellin and Bogota now have enough expat depth to support newcomers well. Concentration in a few areas means your city choice has outsized impact.",
+        "common_languages_why": "English support exists in specific neighborhoods, but Spanish still drives most daily life. Language investment is one of the fastest ways to reduce friction."
       }
     },
     "Panama": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 86, "Unaffiliated": 7, "Other": 7},
-        "christian_note": "Mix of Roman Catholic and growing Protestant/Evangelical",
-        "expat_worship": "Catholic churches everywhere. English-language churches in Panama City and expat areas. Large English-speaking community."
-      },
-      "demographics": {
-        "population": "4.4M",
-        "median_age": 29,
-        "urban_pct": 69,
-        "english_proficiency": "Moderate",
-        "expat_population": "Very large relative to population — major retirement destination with large American community",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English widely spoken in Panama City and expat areas; dollar economy reduces language barrier"
-      }
-    },
-    "Costa Rica": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 78, "Unaffiliated": 16, "Other": 6},
+        "breakdown": {
+          "Christian": 86,
+          "Unaffiliated": 7,
+          "Other": 7
+        },
         "christian_note": "Mix of Roman Catholic and Protestant/Evangelical",
-        "expat_worship": "Catholic churches everywhere. Active English-language church community especially in expat areas."
-      },
-      "demographics": {
-        "population": "5.2M",
-        "median_age": 33,
-        "urban_pct": 82,
-        "english_proficiency": "Moderate",
-        "expat_population": "Very large relative to population — major US retirement destination",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English in tourist and expat areas; good English-speaking infrastructure"
-      }
-    },
-    "Ecuador": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 87, "Unaffiliated": 10, "Other": 3},
-        "christian_note": "Predominantly Roman Catholic",
-        "expat_worship": "Catholic churches everywhere. English-language church options in Cuenca expat community."
-      },
-      "demographics": {
-        "population": "18.0M",
-        "median_age": 28,
-        "urban_pct": 64,
-        "english_proficiency": "Low",
-        "expat_population": "Large — Cuenca has one of Latin America's largest expat communities per capita",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English in Cuenca expat areas; limited elsewhere"
-      }
-    },
-    "Dominican Republic": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 87, "Unaffiliated": 11, "Other": 2},
-        "christian_note": "Mix of Roman Catholic and Protestant",
-        "expat_worship": "Catholic churches everywhere. English-language services in expat and tourist areas."
-      },
-      "demographics": {
-        "population": "11.2M",
-        "median_age": 27,
-        "urban_pct": 84,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Moderate — Santo Domingo and Punta Cana have expat communities",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English in tourist zones and Santo Domingo"
-      }
-    },
-    "Uruguay": {
-      "religion": {
-        "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 47, "Christian": 47, "Other": 6},
-        "christian_note": "One of Latin America's most secular countries. Mix of Catholic and Protestant.",
-        "expat_worship": "Catholic and Protestant churches available. Small but established expat community with some English services."
-      },
-      "demographics": {
-        "population": "3.5M",
-        "median_age": 36,
-        "urban_pct": 95,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Small but growing — Montevideo increasingly popular with South American expats and some Americans",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; limited English outside tourist areas"
-      }
-    },
-    "Argentina": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 75, "Unaffiliated": 19, "Other": 6},
-        "christian_note": "Predominantly Roman Catholic with growing Evangelical presence",
-        "expat_worship": "Catholic churches everywhere. English-language churches in Buenos Aires expat areas."
-      },
-      "demographics": {
-        "population": "45.8M",
-        "median_age": 32,
-        "urban_pct": 92,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Large — Buenos Aires has significant American and European expat community",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English in Buenos Aires expat areas; Italian cultural influence"
-      }
-    },
-    "Brazil": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 87, "Unaffiliated": 8, "Other": 5},
-        "christian_note": "Mix of Roman Catholic and rapidly growing Evangelical/Pentecostal",
-        "expat_worship": "Catholic and Evangelical churches everywhere. English-language services in major cities."
-      },
-      "demographics": {
-        "population": "215M",
-        "median_age": 33,
-        "urban_pct": 88,
-        "english_proficiency": "Low",
-        "expat_population": "Moderate — Sao Paulo and Florianopolis have expat communities",
-        "official_language": "Portuguese",
-        "common_languages": "Portuguese; English limited outside major business areas"
-      }
-    },
-    "Peru": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 87, "Unaffiliated": 9, "Other": 4},
-        "christian_note": "Predominantly Roman Catholic",
-        "expat_worship": "Catholic churches everywhere. English-language services in Lima expat areas."
-      },
-      "demographics": {
-        "population": "33.4M",
-        "median_age": 30,
-        "urban_pct": 78,
-        "english_proficiency": "Low",
-        "expat_population": "Small but growing — Lima and Cusco have expat communities",
-        "official_language": "Spanish, Quechua",
-        "common_languages": "Spanish; English in Lima tourist areas and Cusco"
-      }
-    },
-    "Chile": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 72, "Unaffiliated": 24, "Other": 4},
-        "christian_note": "Mix of Roman Catholic and growing Evangelical/Pentecostal",
-        "expat_worship": "Catholic churches everywhere. English-language services in Santiago expat areas."
-      },
-      "demographics": {
-        "population": "19.5M",
-        "median_age": 35,
-        "urban_pct": 88,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Small — Santiago has professional expat community",
-        "official_language": "Spanish",
-        "common_languages": "Spanish; English in business areas of Santiago"
-      }
-    },
-    "Thailand": {
-      "religion": {
-        "dominant": "Buddhism",
-        "breakdown": {"Buddhist": 93, "Muslim": 5, "Christian": 1, "Other": 1},
-        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority in south.",
-        "expat_worship": "Buddhist temples everywhere. Churches in Bangkok and Chiang Mai. International English-language services available."
-      },
-      "demographics": {
-        "population": "71.7M",
-        "median_age": 40,
-        "urban_pct": 53,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Very large — estimated 60,000+ Americans; massive international expat community",
-        "official_language": "Thai",
-        "common_languages": "Thai; English in tourist areas, Bangkok, and Chiang Mai expat zones"
-      }
-    },
-    "Malaysia": {
-      "religion": {
-        "dominant": "Islam",
-        "breakdown": {"Muslim": 64, "Buddhist": 18, "Christian": 9, "Hindu": 6, "Other": 3},
-        "christian_note": "Officially Islamic but constitutionally protects freedom of religion. Diverse religious landscape.",
-        "expat_worship": "Mosques, Buddhist temples, churches, and Hindu temples all present. English-language churches widely available."
-      },
-      "demographics": {
-        "population": "33.6M",
-        "median_age": 30,
-        "urban_pct": 78,
-        "english_proficiency": "High",
-        "expat_population": "Very large — major expat destination; English is widely spoken",
-        "official_language": "Malay (Bahasa Malaysia)",
-        "common_languages": "Malay, English (widely spoken), Mandarin, Tamil — very multilingual country"
-      }
-    },
-    "Vietnam": {
-      "religion": {
-        "dominant": "Unaffiliated/Folk",
-        "breakdown": {"Unaffiliated/Folk": 73, "Buddhist": 15, "Christian": 8, "Other": 4},
-        "christian_note": "Mix of folk religion, Buddhism, and Christianity. Relatively secular in practice.",
-        "expat_worship": "Buddhist pagodas everywhere. Catholic churches common. English-language services in Hanoi and Ho Chi Minh City."
-      },
-      "demographics": {
-        "population": "97.5M",
-        "median_age": 31,
-        "urban_pct": 38,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Large and growing — Da Nang and Hoi An popular with Western expats",
-        "official_language": "Vietnamese",
-        "common_languages": "Vietnamese; English growing especially in expat areas and among younger people"
-      }
-    },
-    "Philippines": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 90, "Muslim": 6, "Other": 4},
-        "christian_note": "Predominantly Roman Catholic (80%). Most Christian country in Asia.",
-        "expat_worship": "Catholic churches everywhere. Wide variety of Protestant denominations. Very familiar Christian culture for Americans."
-      },
-      "demographics": {
-        "population": "114M",
-        "median_age": 25,
-        "urban_pct": 48,
-        "english_proficiency": "Very High",
-        "expat_population": "Very large — major American expat community; English is official language",
-        "official_language": "Filipino (Tagalog), English",
-        "common_languages": "English and Filipino both official; English universally spoken"
-      }
-    },
-    "Indonesia": {
-      "religion": {
-        "dominant": "Islam",
-        "breakdown": {"Muslim": 87, "Christian": 10, "Hindu": 2, "Buddhist": 1},
-        "christian_note": "World's largest Muslim country. Significant Christian minority especially in Bali (Hindu) and eastern islands.",
-        "expat_worship": "Bali is predominantly Hindu — unique in Indonesia. Churches in Christian areas. Mosques everywhere."
-      },
-      "demographics": {
-        "population": "276M",
-        "median_age": 30,
-        "urban_pct": 58,
-        "english_proficiency": "Low-Moderate",
-        "expat_population": "Large in Bali — massive international expat and digital nomad community",
-        "official_language": "Indonesian (Bahasa Indonesia)",
-        "common_languages": "Indonesian; English in Bali tourist areas; limited elsewhere"
-      }
-    },
-    "Japan": {
-      "religion": {
-        "dominant": "Unaffiliated/Shinto-Buddhist",
-        "breakdown": {"Unaffiliated/Shinto-Buddhist": 72, "Buddhist": 25, "Christian": 2, "Other": 1},
-        "christian_note": "Most Japanese practice both Shinto and Buddhist traditions without strong religious identity. Very few Christians.",
-        "expat_worship": "Buddhist temples and Shinto shrines everywhere. Churches in major cities. International English services in Tokyo and Osaka."
-      },
-      "demographics": {
-        "population": "124.5M",
-        "median_age": 49,
-        "urban_pct": 92,
-        "english_proficiency": "Low",
-        "expat_population": "Moderate — Tokyo has large expat community; limited outside major cities",
-        "official_language": "Japanese",
-        "common_languages": "Japanese; English in tourist areas; limited elsewhere; signage often in English"
-      }
-    },
-    "South Korea": {
-      "religion": {
-        "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 57, "Christian": 28, "Buddhist": 14, "Other": 1},
-        "christian_note": "Surprisingly large Christian population. Mix of Protestant and Catholic.",
-        "expat_worship": "Many churches including large English-language congregations in Seoul. Buddhist temples widely available."
-      },
-      "demographics": {
-        "population": "51.7M",
-        "median_age": 44,
-        "urban_pct": 82,
-        "english_proficiency": "Moderate",
-        "expat_population": "Moderate — Seoul has expat community; growing K-culture interest driving more arrivals",
-        "official_language": "Korean",
-        "common_languages": "Korean; English in Seoul business and expat areas; growing English proficiency"
-      }
-    },
-    "Taiwan": {
-      "religion": {
-        "dominant": "Buddhism/Taoism",
-        "breakdown": {"Buddhist/Taoist/Folk": 71, "Christian": 4, "Unaffiliated": 24, "Other": 1},
-        "christian_note": "Mix of Buddhist, Taoist, and folk religion. Small but active Christian community.",
-        "expat_worship": "Buddhist and Taoist temples everywhere. English-language churches available in Taipei."
-      },
-      "demographics": {
-        "population": "23.6M",
-        "median_age": 43,
-        "urban_pct": 79,
-        "english_proficiency": "Moderate-High",
-        "expat_population": "Growing — Taipei has active expat community especially tech workers",
-        "official_language": "Mandarin Chinese",
-        "common_languages": "Mandarin; English widely spoken among educated population; Taiwanese Hokkien also spoken"
-      }
-    },
-    "Singapore": {
-      "religion": {
-        "dominant": "Buddhism",
-        "breakdown": {"Buddhist": 31, "Christian": 19, "Unaffiliated": 18, "Muslim": 15, "Taoist": 8, "Hindu": 5, "Other": 4},
-        "christian_note": "Highly diverse religious landscape. Freedom of religion strongly protected.",
-        "expat_worship": "All major religions well represented. Wide variety of English-language churches and international religious services."
-      },
-      "demographics": {
-        "population": "5.9M",
-        "median_age": 42,
-        "urban_pct": 100,
-        "english_proficiency": "Very High",
-        "expat_population": "Very large relative to population — about 30% of residents are foreign nationals",
-        "official_language": "English, Mandarin, Malay, Tamil",
-        "common_languages": "English is primary language of business and government; truly multilingual city-state"
-      }
-    },
-    "Hong Kong": {
-      "religion": {
-        "dominant": "Buddhism/Taoism",
-        "breakdown": {"Buddhist/Taoist": 56, "Christian": 12, "Unaffiliated": 28, "Other": 4},
-        "christian_note": "Significant Christian minority. Wide variety of denominations and international churches.",
-        "expat_worship": "Buddhist temples, Christian churches of all denominations, mosques all present. Large English-language Christian community."
-      },
-      "demographics": {
-        "population": "7.4M",
-        "median_age": 46,
-        "urban_pct": 100,
-        "english_proficiency": "Very High",
-        "expat_population": "Very large — historically major expat hub; note changed political environment post-2020",
-        "official_language": "Chinese (Cantonese), English",
-        "common_languages": "Cantonese and English both official; Mandarin increasingly important"
-      }
-    },
-    "India": {
-      "religion": {
-        "dominant": "Hinduism",
-        "breakdown": {"Hindu": 80, "Muslim": 15, "Christian": 2, "Sikh": 2, "Other": 1},
-        "christian_note": "Predominantly Hindu. Significant Muslim minority. Christians concentrated in Kerala and Goa.",
-        "expat_worship": "Hindu temples everywhere. Churches in Goa and Kerala. Mosques widely available. All major religions present."
-      },
-      "demographics": {
-        "population": "1.43B",
-        "median_age": 28,
-        "urban_pct": 36,
-        "english_proficiency": "Moderate-High",
-        "expat_population": "Large Indian-American diaspora returning; limited Western expat community outside major cities",
-        "official_language": "Hindi, English (and 21 other official languages)",
-        "common_languages": "English widely spoken in business and educated circles; Hindi dominant; huge regional language diversity"
-      }
-    },
-    "Cambodia": {
-      "religion": {
-        "dominant": "Buddhism",
-        "breakdown": {"Buddhist": 97, "Muslim": 2, "Christian": 1},
-        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority (Cham people).",
-        "expat_worship": "Buddhist temples everywhere. Small number of churches in Phnom Penh and Siem Reap."
-      },
-      "demographics": {
-        "population": "17.0M",
-        "median_age": 26,
-        "urban_pct": 25,
-        "english_proficiency": "Moderate",
-        "expat_population": "Moderate — Phnom Penh and Siem Reap have established expat communities",
-        "official_language": "Khmer",
-        "common_languages": "Khmer; English widely spoken in expat and tourist areas"
-      }
-    },
-    "Panama": {
-      "religion": {
-        "dominant": "Christianity",
-        "breakdown": {"Christian": 86, "Unaffiliated": 7, "Other": 7},
-        "christian_note": "Mix of Roman Catholic and Protestant/Evangelical",
-        "expat_worship": "Catholic churches everywhere. English-language churches in Panama City. Large English-speaking population."
+        "expat_worship": "Catholic churches everywhere. English-language churches in Panama City. Large English-speaking population.",
+        "expat_worship_why": "You can find familiar Christian options easily, including English-language services in key expat hubs. Outside major centers, religious life is more local-language."
       },
       "demographics": {
         "population": "4.4M",
@@ -700,15 +491,519 @@
         "english_proficiency": "Moderate",
         "expat_population": "Very large relative to population — top retirement destination",
         "official_language": "Spanish",
-        "common_languages": "Spanish; English widely spoken in Panama City and expat areas"
+        "common_languages": "Spanish; English widely spoken in Panama City and expat areas",
+        "expat_population_why": "Panama's retiree-focused expat base makes practical onboarding unusually straightforward. Popularity also concentrates demand in a handful of areas.",
+        "common_languages_why": "English is widely workable in many expat and business zones. Spanish skills still improve healthcare and everyday independence."
+      }
+    },
+    "Costa Rica": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 78,
+          "Unaffiliated": 16,
+          "Other": 6
+        },
+        "christian_note": "Mix of Roman Catholic and Protestant/Evangelical",
+        "expat_worship": "Catholic churches everywhere. Active English-language church community especially in expat areas.",
+        "expat_worship_why": "You will find broad Christian worship access and active English-language communities in key retiree regions. In less expat-heavy towns, options are fewer and more local-language."
+      },
+      "demographics": {
+        "population": "5.2M",
+        "median_age": 33,
+        "urban_pct": 82,
+        "english_proficiency": "Moderate",
+        "expat_population": "Very large relative to population — major US retirement destination",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in tourist and expat areas; good English-speaking infrastructure",
+        "expat_population_why": "Large relative expat density means support networks are strong for newcomers. In top retirement corridors, demand pressure can affect housing and services.",
+        "common_languages_why": "English usage in tourism-heavy zones lowers transition stress quickly. Spanish still gives you more control outside those zones."
+      }
+    },
+    "Ecuador": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 87,
+          "Unaffiliated": 10,
+          "Other": 3
+        },
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. English-language church options in Cuenca expat community.",
+        "expat_worship_why": "Ecuador's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "18.0M",
+        "median_age": 28,
+        "urban_pct": 64,
+        "english_proficiency": "Low",
+        "expat_population": "Large — Cuenca has one of Latin America's largest expat communities per capita",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in Cuenca expat areas; limited elsewhere",
+        "expat_population_why": "Current data points to Large — Cuenca has one of Latin America's largest expat communities per capita, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; English in Cuenca expat areas; limited elsewhere. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Dominican Republic": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 87,
+          "Unaffiliated": 11,
+          "Other": 2
+        },
+        "christian_note": "Mix of Roman Catholic and Protestant",
+        "expat_worship": "Catholic churches everywhere. English-language services in expat and tourist areas.",
+        "expat_worship_why": "Dominican Republic's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "11.2M",
+        "median_age": 27,
+        "urban_pct": 84,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Moderate — Santo Domingo and Punta Cana have expat communities",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in tourist zones and Santo Domingo",
+        "expat_population_why": "Current data points to Moderate — Santo Domingo and Punta Cana have expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; English in tourist zones and Santo Domingo. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Uruguay": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {
+          "Unaffiliated": 47,
+          "Christian": 47,
+          "Other": 6
+        },
+        "christian_note": "One of Latin America's most secular countries. Mix of Catholic and Protestant.",
+        "expat_worship": "Catholic and Protestant churches available. Small but established expat community with some English services.",
+        "expat_worship_why": "Uruguay's dominant context is Unaffiliated, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "3.5M",
+        "median_age": 36,
+        "urban_pct": 95,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Small but growing — Montevideo increasingly popular with South American expats and some Americans",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; limited English outside tourist areas",
+        "expat_population_why": "Current data points to Small but growing — Montevideo increasingly popular with South American expats and some Americans, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; limited English outside tourist areas. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Argentina": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 75,
+          "Unaffiliated": 19,
+          "Other": 6
+        },
+        "christian_note": "Predominantly Roman Catholic with growing Evangelical presence",
+        "expat_worship": "Catholic churches everywhere. English-language churches in Buenos Aires expat areas.",
+        "expat_worship_why": "Argentina's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "45.8M",
+        "median_age": 32,
+        "urban_pct": 92,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large — Buenos Aires has significant American and European expat community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in Buenos Aires expat areas; Italian cultural influence",
+        "expat_population_why": "Current data points to Large — Buenos Aires has significant American and European expat community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; English in Buenos Aires expat areas; Italian cultural influence. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Brazil": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 87,
+          "Unaffiliated": 8,
+          "Other": 5
+        },
+        "christian_note": "Mix of Roman Catholic and rapidly growing Evangelical/Pentecostal",
+        "expat_worship": "Catholic and Evangelical churches everywhere. English-language services in major cities.",
+        "expat_worship_why": "Brazil's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "215M",
+        "median_age": 33,
+        "urban_pct": 88,
+        "english_proficiency": "Low",
+        "expat_population": "Moderate — Sao Paulo and Florianopolis have expat communities",
+        "official_language": "Portuguese",
+        "common_languages": "Portuguese; English limited outside major business areas",
+        "expat_population_why": "Current data points to Moderate — Sao Paulo and Florianopolis have expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Portuguese; English limited outside major business areas. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Peru": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 87,
+          "Unaffiliated": 9,
+          "Other": 4
+        },
+        "christian_note": "Predominantly Roman Catholic",
+        "expat_worship": "Catholic churches everywhere. English-language services in Lima expat areas.",
+        "expat_worship_why": "Peru's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "33.4M",
+        "median_age": 30,
+        "urban_pct": 78,
+        "english_proficiency": "Low",
+        "expat_population": "Small but growing — Lima and Cusco have expat communities",
+        "official_language": "Spanish, Quechua",
+        "common_languages": "Spanish; English in Lima tourist areas and Cusco",
+        "expat_population_why": "Current data points to Small but growing — Lima and Cusco have expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; English in Lima tourist areas and Cusco. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Chile": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 72,
+          "Unaffiliated": 24,
+          "Other": 4
+        },
+        "christian_note": "Mix of Roman Catholic and growing Evangelical/Pentecostal",
+        "expat_worship": "Catholic churches everywhere. English-language services in Santiago expat areas.",
+        "expat_worship_why": "Chile's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "19.5M",
+        "median_age": 35,
+        "urban_pct": 88,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Small — Santiago has professional expat community",
+        "official_language": "Spanish",
+        "common_languages": "Spanish; English in business areas of Santiago",
+        "expat_population_why": "Current data points to Small — Santiago has professional expat community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Spanish; English in business areas of Santiago. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Thailand": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {
+          "Buddhist": 93,
+          "Muslim": 5,
+          "Christian": 1,
+          "Other": 1
+        },
+        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority in south.",
+        "expat_worship": "Buddhist temples everywhere. Churches in Bangkok and Chiang Mai. International English-language services available.",
+        "expat_worship_why": "You can keep religious continuity through international churches in major expat hubs while living in a predominantly Buddhist culture. Outside those hubs, options can thin out quickly."
+      },
+      "demographics": {
+        "population": "71.7M",
+        "median_age": 40,
+        "urban_pct": 53,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Very large — estimated 60,000+ Americans; massive international expat community",
+        "official_language": "Thai",
+        "common_languages": "Thai; English in tourist areas, Bangkok, and Chiang Mai expat zones",
+        "expat_population_why": "Large expat numbers mean you can find peer communities at many budget levels. Fast-moving expat neighborhoods can feel transient instead of rooted.",
+        "common_languages_why": "English works in core tourism and expat zones, so transition is manageable. For long-term ease, basic Thai helps with healthcare and local services."
+      }
+    },
+    "Malaysia": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {
+          "Muslim": 64,
+          "Buddhist": 18,
+          "Christian": 9,
+          "Hindu": 6,
+          "Other": 3
+        },
+        "christian_note": "Officially Islamic but constitutionally protects freedom of religion. Diverse religious landscape.",
+        "expat_worship": "Mosques, Buddhist temples, churches, and Hindu temples all present. English-language churches widely available.",
+        "expat_worship_why": "Malaysia's multi-faith landscape gives you broad worship choice in major urban centers. Local legal and cultural norms still matter, so context awareness is important."
+      },
+      "demographics": {
+        "population": "33.6M",
+        "median_age": 30,
+        "urban_pct": 78,
+        "english_proficiency": "High",
+        "expat_population": "Very large — major expat destination; English is widely spoken",
+        "official_language": "Malay (Bahasa Malaysia)",
+        "common_languages": "Malay, English (widely spoken), Mandarin, Tamil — very multilingual country",
+        "expat_population_why": "Large foreign-resident communities create practical support and social depth for retirees. Community distribution is uneven, so city selection is everything.",
+        "common_languages_why": "Widespread English usage makes first-year adaptation much easier. Learning local language basics still helps in non-expat daily interactions."
+      }
+    },
+    "Vietnam": {
+      "religion": {
+        "dominant": "Unaffiliated/Folk",
+        "breakdown": {
+          "Unaffiliated/Folk": 73,
+          "Buddhist": 15,
+          "Christian": 8,
+          "Other": 4
+        },
+        "christian_note": "Mix of folk religion, Buddhism, and Christianity. Relatively secular in practice.",
+        "expat_worship": "Buddhist pagodas everywhere. Catholic churches common. English-language services in Hanoi and Ho Chi Minh City.",
+        "expat_worship_why": "You can access a mix of worship options in major cities, including English-friendly congregations. Outside those cities, options can be more limited and locally oriented."
+      },
+      "demographics": {
+        "population": "97.5M",
+        "median_age": 31,
+        "urban_pct": 38,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large and growing — Da Nang and Hoi An popular with Western expats",
+        "official_language": "Vietnamese",
+        "common_languages": "Vietnamese; English growing especially in expat areas and among younger people",
+        "expat_population_why": "Vietnam's expat communities are large enough to offer real support in key hubs. The network is still concentrated, so city choice drives your experience.",
+        "common_languages_why": "English is improving in expat-facing neighborhoods and among younger residents. Practical Vietnamese still helps significantly for long-term comfort."
+      }
+    },
+    "Philippines": {
+      "religion": {
+        "dominant": "Christianity",
+        "breakdown": {
+          "Christian": 90,
+          "Muslim": 6,
+          "Other": 4
+        },
+        "christian_note": "Predominantly Roman Catholic (80%). Most Christian country in Asia.",
+        "expat_worship": "Catholic churches everywhere. Wide variety of Protestant denominations. Very familiar Christian culture for Americans.",
+        "expat_worship_why": "You can keep familiar Christian worship practices very easily because church infrastructure is extensive and culturally central. Regional quality and style still vary by city."
+      },
+      "demographics": {
+        "population": "114M",
+        "median_age": 25,
+        "urban_pct": 48,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large — major American expat community; English is official language",
+        "official_language": "Filipino (Tagalog), English",
+        "common_languages": "English and Filipino both official; English universally spoken",
+        "expat_population_why": "The large American-linked expat base makes social and practical onboarding easier than in many Asian markets. Concentration in a few cities means local conditions can differ sharply.",
+        "common_languages_why": "High English usage is a major transition advantage and reduces daily friction. Local language awareness still helps outside metro expat bubbles."
+      }
+    },
+    "Indonesia": {
+      "religion": {
+        "dominant": "Islam",
+        "breakdown": {
+          "Muslim": 87,
+          "Christian": 10,
+          "Hindu": 2,
+          "Buddhist": 1
+        },
+        "christian_note": "World's largest Muslim country. Significant Christian minority especially in Bali (Hindu) and eastern islands.",
+        "expat_worship": "Bali is predominantly Hindu — unique in Indonesia. Churches in Christian areas. Mosques everywhere.",
+        "expat_worship_why": "Indonesia's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "276M",
+        "median_age": 30,
+        "urban_pct": 58,
+        "english_proficiency": "Low-Moderate",
+        "expat_population": "Large in Bali — massive international expat and digital nomad community",
+        "official_language": "Indonesian (Bahasa Indonesia)",
+        "common_languages": "Indonesian; English in Bali tourist areas; limited elsewhere",
+        "expat_population_why": "Current data points to Large in Bali — massive international expat and digital nomad community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Indonesian; English in Bali tourist areas; limited elsewhere. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Japan": {
+      "religion": {
+        "dominant": "Unaffiliated/Shinto-Buddhist",
+        "breakdown": {
+          "Unaffiliated/Shinto-Buddhist": 72,
+          "Buddhist": 25,
+          "Christian": 2,
+          "Other": 1
+        },
+        "christian_note": "Most Japanese practice both Shinto and Buddhist traditions without strong religious identity. Very few Christians.",
+        "expat_worship": "Buddhist temples and Shinto shrines everywhere. Churches in major cities. International English services in Tokyo and Osaka.",
+        "expat_worship_why": "Major Japanese cities offer international congregations even though the broader culture is not institutionally religion-forward. Outside metro centers, your options can narrow quickly."
+      },
+      "demographics": {
+        "population": "124.5M",
+        "median_age": 49,
+        "urban_pct": 92,
+        "english_proficiency": "Low",
+        "expat_population": "Moderate — Tokyo has large expat community; limited outside major cities",
+        "official_language": "Japanese",
+        "common_languages": "Japanese; English in tourist areas; limited elsewhere; signage often in English",
+        "expat_population_why": "The expat base in top cities is substantial enough for community support, but integration still takes effort. Outside major hubs, social onboarding can be slower.",
+        "common_languages_why": "English helps in selected urban contexts but is not enough for full daily independence. Basic Japanese is one of the best investments you can make."
+      }
+    },
+    "South Korea": {
+      "religion": {
+        "dominant": "Unaffiliated",
+        "breakdown": {
+          "Unaffiliated": 57,
+          "Christian": 28,
+          "Buddhist": 14,
+          "Other": 1
+        },
+        "christian_note": "Surprisingly large Christian population. Mix of Protestant and Catholic.",
+        "expat_worship": "Many churches including large English-language congregations in Seoul. Buddhist temples widely available.",
+        "expat_worship_why": "South Korea's dominant context is Unaffiliated, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "51.7M",
+        "median_age": 44,
+        "urban_pct": 82,
+        "english_proficiency": "Moderate",
+        "expat_population": "Moderate — Seoul has expat community; growing K-culture interest driving more arrivals",
+        "official_language": "Korean",
+        "common_languages": "Korean; English in Seoul business and expat areas; growing English proficiency",
+        "expat_population_why": "Current data points to Moderate — Seoul has expat community; growing K-culture interest driving more arrivals, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Korean; English in Seoul business and expat areas; growing English proficiency. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Taiwan": {
+      "religion": {
+        "dominant": "Buddhism/Taoism",
+        "breakdown": {
+          "Buddhist/Taoist/Folk": 71,
+          "Christian": 4,
+          "Unaffiliated": 24,
+          "Other": 1
+        },
+        "christian_note": "Mix of Buddhist, Taoist, and folk religion. Small but active Christian community.",
+        "expat_worship": "Buddhist and Taoist temples everywhere. English-language churches available in Taipei.",
+        "expat_worship_why": "Taiwan's dominant context is Buddhism/Taoism, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "23.6M",
+        "median_age": 43,
+        "urban_pct": 79,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Growing — Taipei has active expat community especially tech workers",
+        "official_language": "Mandarin Chinese",
+        "common_languages": "Mandarin; English widely spoken among educated population; Taiwanese Hokkien also spoken",
+        "expat_population_why": "Current data points to Growing — Taipei has active expat community especially tech workers, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Mandarin; English widely spoken among educated population; Taiwanese Hokkien also spoken. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Singapore": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {
+          "Buddhist": 31,
+          "Christian": 19,
+          "Unaffiliated": 18,
+          "Muslim": 15,
+          "Taoist": 8,
+          "Hindu": 5,
+          "Other": 4
+        },
+        "christian_note": "Highly diverse religious landscape. Freedom of religion strongly protected.",
+        "expat_worship": "All major religions well represented. Wide variety of English-language churches and international religious services.",
+        "expat_worship_why": "Singapore's dominant context is Buddhism, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "5.9M",
+        "median_age": 42,
+        "urban_pct": 100,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large relative to population — about 30% of residents are foreign nationals",
+        "official_language": "English, Mandarin, Malay, Tamil",
+        "common_languages": "English is primary language of business and government; truly multilingual city-state",
+        "expat_population_why": "Current data points to Very large relative to population — about 30% of residents are foreign nationals, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English is primary language of business and government; truly multilingual city-state. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Hong Kong": {
+      "religion": {
+        "dominant": "Buddhism/Taoism",
+        "breakdown": {
+          "Buddhist/Taoist": 56,
+          "Christian": 12,
+          "Unaffiliated": 28,
+          "Other": 4
+        },
+        "christian_note": "Significant Christian minority. Wide variety of denominations and international churches.",
+        "expat_worship": "Buddhist temples, Christian churches of all denominations, mosques all present. Large English-language Christian community.",
+        "expat_worship_why": "Hong Kong's dominant context is Buddhism/Taoism, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "7.4M",
+        "median_age": 46,
+        "urban_pct": 100,
+        "english_proficiency": "Very High",
+        "expat_population": "Very large — historically major expat hub; note changed political environment post-2020",
+        "official_language": "Chinese (Cantonese), English",
+        "common_languages": "Cantonese and English both official; Mandarin increasingly important",
+        "expat_population_why": "Current data points to Very large — historically major expat hub; note changed political environment post-2020, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Cantonese and English both official; Mandarin increasingly important. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "India": {
+      "religion": {
+        "dominant": "Hinduism",
+        "breakdown": {
+          "Hindu": 80,
+          "Muslim": 15,
+          "Christian": 2,
+          "Sikh": 2,
+          "Other": 1
+        },
+        "christian_note": "Predominantly Hindu. Significant Muslim minority. Christians concentrated in Kerala and Goa.",
+        "expat_worship": "Hindu temples everywhere. Churches in Goa and Kerala. Mosques widely available. All major religions present.",
+        "expat_worship_why": "India's dominant context is Hinduism, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "1.43B",
+        "median_age": 28,
+        "urban_pct": 36,
+        "english_proficiency": "Moderate-High",
+        "expat_population": "Large Indian-American diaspora returning; limited Western expat community outside major cities",
+        "official_language": "Hindi, English (and 21 other official languages)",
+        "common_languages": "English widely spoken in business and educated circles; Hindi dominant; huge regional language diversity",
+        "expat_population_why": "Current data points to Large Indian-American diaspora returning; limited Western expat community outside major cities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English widely spoken in business and educated circles; Hindi dominant; huge regional language diversity. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
+      }
+    },
+    "Cambodia": {
+      "religion": {
+        "dominant": "Buddhism",
+        "breakdown": {
+          "Buddhist": 97,
+          "Muslim": 2,
+          "Christian": 1
+        },
+        "christian_note": "Predominantly Theravada Buddhist. Small Muslim minority (Cham people).",
+        "expat_worship": "Buddhist temples everywhere. Small number of churches in Phnom Penh and Siem Reap.",
+        "expat_worship_why": "Cambodia's dominant context is Buddhism, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
+      },
+      "demographics": {
+        "population": "17.0M",
+        "median_age": 26,
+        "urban_pct": 25,
+        "english_proficiency": "Moderate",
+        "expat_population": "Moderate — Phnom Penh and Siem Reap have established expat communities",
+        "official_language": "Khmer",
+        "common_languages": "Khmer; English widely spoken in expat and tourist areas",
+        "expat_population_why": "Current data points to Moderate — Phnom Penh and Siem Reap have established expat communities, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Khmer; English widely spoken in expat and tourist areas. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "United Arab Emirates": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 76, "Christian": 9, "Hindu": 6, "Buddhist": 2, "Other": 7},
+        "breakdown": {
+          "Muslim": 76,
+          "Christian": 9,
+          "Hindu": 6,
+          "Buddhist": 2,
+          "Other": 7
+        },
         "christian_note": "Officially Islamic but very diverse due to large expat population. All major religions practiced by expats.",
-        "expat_worship": "Mosques everywhere. Churches, temples, and gurdwaras for expat communities. Religious tolerance for expats."
+        "expat_worship": "Mosques everywhere. Churches, temples, and gurdwaras for expat communities. Religious tolerance for expats.",
+        "expat_worship_why": "You can find worship options across major faiths because of the country's highly international resident mix. Local norms still set boundaries, so staying informed matters."
       },
       "demographics": {
         "population": "9.9M",
@@ -717,15 +1012,23 @@
         "english_proficiency": "Very High",
         "expat_population": "Enormous — about 90% of UAE population are foreign nationals",
         "official_language": "Arabic",
-        "common_languages": "Arabic official; English is the language of business and widely spoken; huge multilingual expat community"
+        "common_languages": "Arabic official; English is the language of business and widely spoken; huge multilingual expat community",
+        "expat_population_why": "With an overwhelmingly foreign-born population, expat social entry is usually fast. Communities can be transient, so continuity takes effort.",
+        "common_languages_why": "English is the practical default for most business and day-to-day interactions. Arabic remains important for deeper cultural fluency and some official settings."
       }
     },
     "Oman": {
       "religion": {
         "dominant": "Islam",
-        "breakdown": {"Muslim": 86, "Christian": 6, "Hindu": 5, "Other": 3},
+        "breakdown": {
+          "Muslim": 86,
+          "Christian": 6,
+          "Hindu": 5,
+          "Other": 3
+        },
         "christian_note": "Muslim majority country. Ibadi Islam is the dominant branch in Oman.",
-        "expat_worship": "Mosques throughout Muscat. Christian churches and Hindu temples serve expat communities, especially in Muscat."
+        "expat_worship": "Mosques throughout Muscat. Christian churches and Hindu temples serve expat communities, especially in Muscat.",
+        "expat_worship_why": "Oman's dominant context is Islam, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "5.0M",
@@ -734,15 +1037,22 @@
         "english_proficiency": "Moderate",
         "expat_population": "Small but growing, concentrated in Muscat",
         "official_language": "Arabic",
-        "common_languages": "Arabic official; English widely spoken in Muscat business and expat areas; large South Asian expat workforce"
+        "common_languages": "Arabic official; English widely spoken in Muscat business and expat areas; large South Asian expat workforce",
+        "expat_population_why": "Current data points to Small but growing, concentrated in Muscat, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Arabic official; English widely spoken in Muscat business and expat areas; large South Asian expat workforce. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Malta": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 91, "Unaffiliated": 6, "Other": 3},
+        "breakdown": {
+          "Christian": 91,
+          "Unaffiliated": 6,
+          "Other": 3
+        },
         "christian_note": "Predominantly Roman Catholic. One of Europe's most religious countries.",
-        "expat_worship": "Catholic churches everywhere. English-language services widely available. Official English-speaking country."
+        "expat_worship": "Catholic churches everywhere. English-language services widely available. Official English-speaking country.",
+        "expat_worship_why": "Malta's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "0.5M",
@@ -751,15 +1061,23 @@
         "english_proficiency": "Very High",
         "expat_population": "Very large relative to population — major expat hub especially British and EU",
         "official_language": "Maltese, English",
-        "common_languages": "English and Maltese both official; English universally spoken"
+        "common_languages": "English and Maltese both official; English universally spoken",
+        "expat_population_why": "Current data points to Very large relative to population — major expat hub especially British and EU, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English and Maltese both official; English universally spoken. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Cyprus": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 82, "Muslim": 13, "Unaffiliated": 4, "Other": 1},
+        "breakdown": {
+          "Christian": 82,
+          "Muslim": 13,
+          "Unaffiliated": 4,
+          "Other": 1
+        },
         "christian_note": "Predominantly Greek Orthodox. Turkish Cypriot Muslim minority in north.",
-        "expat_worship": "Orthodox churches everywhere. English-language services available due to large British community."
+        "expat_worship": "Orthodox churches everywhere. English-language services available due to large British community.",
+        "expat_worship_why": "Cyprus's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "1.3M",
@@ -768,15 +1086,24 @@
         "english_proficiency": "Very High",
         "expat_population": "Very large relative to population — major British expat destination",
         "official_language": "Greek, Turkish",
-        "common_languages": "Greek; English very widely spoken due to British colonial history and large expat community"
+        "common_languages": "Greek; English very widely spoken due to British colonial history and large expat community",
+        "expat_population_why": "Current data points to Very large relative to population — major British expat destination, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by Greek; English very widely spoken due to British colonial history and large expat community. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "New Zealand": {
       "religion": {
         "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 49, "Christian": 44, "Hindu": 3, "Muslim": 2, "Other": 2},
+        "breakdown": {
+          "Unaffiliated": 49,
+          "Christian": 44,
+          "Hindu": 3,
+          "Muslim": 2,
+          "Other": 2
+        },
         "christian_note": "Increasingly secular. Mix of Protestant and Catholic denominations.",
-        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available."
+        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available.",
+        "expat_worship_why": "New Zealand's dominant context is Unaffiliated, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "5.1M",
@@ -785,15 +1112,25 @@
         "english_proficiency": "Native",
         "expat_population": "Large relative to population — major destination for British, Australian, and American expats",
         "official_language": "English, Maori, NZ Sign Language",
-        "common_languages": "English primary; Maori cultural presence; highly multicultural"
+        "common_languages": "English primary; Maori cultural presence; highly multicultural",
+        "expat_population_why": "Current data points to Large relative to population — major destination for British, Australian, and American expats, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English primary; Maori cultural presence; highly multicultural. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Australia": {
       "religion": {
         "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 44, "Christian": 44, "Muslim": 3, "Hindu": 3, "Buddhist": 3, "Other": 3},
+        "breakdown": {
+          "Unaffiliated": 44,
+          "Christian": 44,
+          "Muslim": 3,
+          "Hindu": 3,
+          "Buddhist": 3,
+          "Other": 3
+        },
         "christian_note": "Highly secular and diverse. Mix of Catholic, Anglican, and other denominations.",
-        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available."
+        "expat_worship": "Christian churches of all denominations widely available. English-language worship universally available.",
+        "expat_worship_why": "Worship access is broad and familiar in major Australian cities, with strong English-language continuity. Practical differences are more regional than structural."
       },
       "demographics": {
         "population": "26.5M",
@@ -802,15 +1139,24 @@
         "english_proficiency": "Native",
         "expat_population": "Very large — major destination for British, American, and Asian expats",
         "official_language": "English (de facto)",
-        "common_languages": "English primary; highly multicultural with many community languages"
+        "common_languages": "English primary; highly multicultural with many community languages",
+        "expat_population_why": "Australia's large international communities make social entry easier for US retirees. Visa eligibility, not community availability, is usually the harder part.",
+        "common_languages_why": "Shared language removes most communication friction from day one. Regional service access and distance matter more than language for lifestyle quality."
       }
     },
     "United States": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 64, "Unaffiliated": 28, "Jewish": 2, "Muslim": 1, "Other": 5},
+        "breakdown": {
+          "Christian": 64,
+          "Unaffiliated": 28,
+          "Jewish": 2,
+          "Muslim": 1,
+          "Other": 5
+        },
         "christian_note": "Mix of Protestant, Catholic, and other denominations. Declining but still majority Christian.",
-        "expat_worship": "All denominations and faiths available everywhere. No special consideration needed."
+        "expat_worship": "All denominations and faiths available everywhere. No special consideration needed.",
+        "expat_worship_why": "United States's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "335M",
@@ -819,15 +1165,25 @@
         "english_proficiency": "Native",
         "expat_population": "You are home",
         "official_language": "English (de facto)",
-        "common_languages": "English; Spanish widely spoken; highly multicultural"
+        "common_languages": "English; Spanish widely spoken; highly multicultural",
+        "expat_population_why": "Current data points to You are home, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English; Spanish widely spoken; highly multicultural. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "Canada": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 55, "Unaffiliated": 29, "Muslim": 4, "Hindu": 3, "Sikh": 2, "Other": 7},
+        "breakdown": {
+          "Christian": 55,
+          "Unaffiliated": 29,
+          "Muslim": 4,
+          "Hindu": 3,
+          "Sikh": 2,
+          "Other": 7
+        },
         "christian_note": "Mix of Catholic and Protestant. Increasingly secular and diverse.",
-        "expat_worship": "All denominations widely available. English-language worship universally available."
+        "expat_worship": "All denominations widely available. English-language worship universally available.",
+        "expat_worship_why": "Canada's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "38.8M",
@@ -836,15 +1192,24 @@
         "english_proficiency": "Native",
         "expat_population": "Very large — major destination for American expats and immigrants",
         "official_language": "English, French",
-        "common_languages": "English primary; French in Quebec; highly multicultural"
+        "common_languages": "English primary; French in Quebec; highly multicultural",
+        "expat_population_why": "Current data points to Very large — major destination for American expats and immigrants, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English primary; French in Quebec; highly multicultural. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     },
     "United Kingdom": {
       "religion": {
         "dominant": "Unaffiliated",
-        "breakdown": {"Unaffiliated": 53, "Christian": 40, "Muslim": 5, "Hindu": 1, "Other": 1},
+        "breakdown": {
+          "Unaffiliated": 53,
+          "Christian": 40,
+          "Muslim": 5,
+          "Hindu": 1,
+          "Other": 1
+        },
         "christian_note": "Increasingly secular. Church of England, Catholic, and other denominations present.",
-        "expat_worship": "All denominations available. English-language worship universally available."
+        "expat_worship": "All denominations available. English-language worship universally available.",
+        "expat_worship_why": "You can access broad worship options in essentially every major UK city. In smaller areas, variety can narrow, but language is rarely a barrier."
       },
       "demographics": {
         "population": "67.7M",
@@ -853,15 +1218,23 @@
         "english_proficiency": "Native",
         "expat_population": "Very large American expat community especially in London",
         "official_language": "English",
-        "common_languages": "English; Welsh in Wales; Scottish Gaelic in Scotland; highly multicultural"
+        "common_languages": "English; Welsh in Wales; Scottish Gaelic in Scotland; highly multicultural",
+        "expat_population_why": "A large American expat footprint makes social and professional integration relatively straightforward. In top global cities, demand pressure is the bigger challenge than access.",
+        "common_languages_why": "Shared language removes a huge chunk of transition risk. Local terminology and systems still take a little adjustment time."
       }
     },
     "Germany": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 55, "Unaffiliated": 37, "Muslim": 6, "Other": 2},
+        "breakdown": {
+          "Christian": 55,
+          "Unaffiliated": 37,
+          "Muslim": 6,
+          "Other": 2
+        },
         "christian_note": "Mix of Catholic (south) and Protestant/Lutheran (north). Increasingly secular.",
-        "expat_worship": "Catholic and Protestant churches everywhere. International English-language services in major cities."
+        "expat_worship": "Catholic and Protestant churches everywhere. International English-language services in major cities.",
+        "expat_worship_why": "Germany offers broad Christian infrastructure plus international congregations in major cities. Smaller cities usually have fewer English-language options."
       },
       "demographics": {
         "population": "83.8M",
@@ -870,15 +1243,24 @@
         "english_proficiency": "High",
         "expat_population": "Very large — major expat destination, especially Berlin",
         "official_language": "German",
-        "common_languages": "German; English widely spoken especially among younger population and in cities"
+        "common_languages": "German; English widely spoken especially among younger population and in cities",
+        "expat_population_why": "Large expat populations in key metros make onboarding more practical and social. Beyond those metros, integration can feel more language-dependent.",
+        "common_languages_why": "English works well in many urban settings and among younger residents. German remains important for administration and long-term autonomy."
       }
     },
     "South Africa": {
       "religion": {
         "dominant": "Christianity",
-        "breakdown": {"Christian": 86, "Unaffiliated": 8, "Muslim": 2, "Hindu": 1, "Other": 3},
+        "breakdown": {
+          "Christian": 86,
+          "Unaffiliated": 8,
+          "Muslim": 2,
+          "Hindu": 1,
+          "Other": 3
+        },
         "christian_note": "Predominantly Christian with diverse denominations.",
-        "expat_worship": "Christian churches of all denominations widely available. English-language services very common."
+        "expat_worship": "Christian churches of all denominations widely available. English-language services very common.",
+        "expat_worship_why": "South Africa's dominant context is Christianity, so you can usually find a path that fits your worship style with some local research. English-language options are typically strongest in larger cities."
       },
       "demographics": {
         "population": "60.0M",
@@ -887,7 +1269,9 @@
         "english_proficiency": "High",
         "expat_population": "Moderate — Cape Town has significant expat community",
         "official_language": "11 official languages including English, Zulu, Xhosa, Afrikaans",
-        "common_languages": "English widely spoken in business and urban areas; Afrikaans; Zulu and other Bantu languages"
+        "common_languages": "English widely spoken in business and urban areas; Afrikaans; Zulu and other Bantu languages",
+        "expat_population_why": "Current data points to Moderate — Cape Town has significant expat community, which helps you judge how much peer support you can expect when you arrive. Larger hubs usually provide smoother landing support than secondary cities.",
+        "common_languages_why": "Daily communication is shaped by English widely spoken in business and urban areas; Afrikaans; Zulu and other Bantu languages. Even if you can start in English, basic local language skills usually improve your long-term quality of life."
       }
     }
   }

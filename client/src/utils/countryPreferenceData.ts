@@ -201,6 +201,27 @@ export function computeSocialLawsScore(country: string): number {
   return Math.max(0, score)
 }
 
+function roundInsuranceUsd(value: number): number {
+  if (value < 100) return Math.round(value / 5) * 5
+  return Math.round(value / 10) * 10
+}
+
+/** Rough monthly expat insurance range from country-level annual estimate. */
+export function healthcareInsuranceMonthlyRange(
+  country: string,
+): { low: number; high: number } {
+  const fields = getCountryPreferenceFields(country)
+  const monthly = (fields.estimated_expat_insurance_usd ?? 3000) / 12
+  const low = roundInsuranceUsd(monthly * 0.9)
+  const high = roundInsuranceUsd(monthly * 1.45)
+  return { low: Math.max(low, 40), high: Math.max(high, low + 20) }
+}
+
+export function formatHealthcareInsuranceMonthlyRange(country: string): string {
+  const { low, high } = healthcareInsuranceMonthlyRange(country)
+  return `$${low.toLocaleString('en-US')}–${high.toLocaleString('en-US')}`
+}
+
 export function computeHealthcareCostScore(
   country: string,
   monthlyIncome: number,

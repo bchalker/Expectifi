@@ -8,22 +8,17 @@ const LEGEND_ITEMS: {
   dotClass: string
 }[] = [
   { key: 'rent', label: 'Rent', barClass: 'rent', dotClass: 'rent' },
-  { key: 'foodAndDrink', label: 'Food & Drink', barClass: 'food', dotClass: 'food' },
-  { key: 'transport', label: 'Transport', barClass: 'transport', dotClass: 'transport' },
+  { key: 'groceries', label: 'Groceries', barClass: 'groceries', dotClass: 'groceries' },
   {
-    key: 'utilitiesAndMobile',
-    label: 'Utilities & Mobile',
-    barClass: 'utilities',
-    dotClass: 'utilities',
+    key: 'diningAndDrinks',
+    label: 'Dining & drinks',
+    barClass: 'dining',
+    dotClass: 'dining',
   },
+  { key: 'utilities', label: 'Utilities', barClass: 'utilities', dotClass: 'utilities' },
+  { key: 'transport', label: 'Transportation', barClass: 'transport', dotClass: 'transport' },
   { key: 'lifestyle', label: 'Lifestyle', barClass: 'lifestyle', dotClass: 'lifestyle' },
-  {
-    key: 'healthInsurance',
-    label: 'Health insurance',
-    barClass: 'health',
-    dotClass: 'health',
-  },
-  { key: 'incidentals', label: 'Incidentals', barClass: 'misc', dotClass: 'misc' },
+  { key: 'other', label: 'Other', barClass: 'other', dotClass: 'other' },
 ]
 
 type Props = {
@@ -40,16 +35,12 @@ export function ColBudgetBreakdownBar({
   const { barPercents } = breakdown
   const segments = [
     { key: 'rent', className: 'rent', pct: barPercents.rent },
-    { key: 'foodAndDrink', className: 'food', pct: barPercents.foodAndDrink },
+    { key: 'groceries', className: 'groceries', pct: barPercents.groceries },
+    { key: 'diningAndDrinks', className: 'dining', pct: barPercents.diningAndDrinks },
+    { key: 'utilities', className: 'utilities', pct: barPercents.utilities },
     { key: 'transport', className: 'transport', pct: barPercents.transport },
-    {
-      key: 'utilitiesAndMobile',
-      className: 'utilities',
-      pct: barPercents.utilitiesAndMobile,
-    },
     { key: 'lifestyle', className: 'lifestyle', pct: barPercents.lifestyle },
-    { key: 'healthInsurance', className: 'health', pct: barPercents.healthInsurance },
-    { key: 'incidentals', className: 'misc', pct: barPercents.incidentals },
+    { key: 'other', className: 'other', pct: barPercents.other },
     { key: 'remaining', className: 'remaining', pct: barPercents.remaining },
   ].filter((segment) => segment.pct > 0)
 

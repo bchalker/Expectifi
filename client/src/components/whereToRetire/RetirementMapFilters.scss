@@ -296,6 +296,15 @@
   color: var(--text-muted);
 }
 
+.wtr-map-filters__field-hint {
+  margin: var(--space-1) 0 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
 .wtr-map-filters__group-stack {
   display: flex;
   flex-direction: column;

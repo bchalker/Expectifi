@@ -1,18 +1,25 @@
 import {
-  IconBarbell,
   IconBolt,
   IconBus,
-  IconDeviceMobile,
-  IconGlassFull,
   IconHomeDollar,
   IconMovie,
   IconShoppingCart,
   IconToolsKitchen3,
 } from '@tabler/icons-react'
-import type { BudgetBreakdownDisplay, MapCity } from '../../../utils/costOfLiving'
-import { formatUsd } from '../../../utils/costOfLiving'
-import { hasTravelAdvisory } from '../../../utils/costOfLiving'
+import type {
+  BudgetBreakdownDisplay,
+  LifestyleInputs,
+  MapCity,
+} from '../../../utils/costOfLiving'
+import {
+  buildAlcoholBudgetLineItems,
+  buildDiningBudgetLineItems,
+  formatUsd,
+  hasTravelAdvisory,
+} from '../../../utils/costOfLiving'
 import { ColBudgetBreakdownBar } from '../ColBudgetBreakdownBar'
+import { ColGroceriesBudgetCard } from '../ColGroceriesBudgetCard'
+import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { CityDetailIndexRows } from './CityDetailIndexRows'
 import { LITERS_PER_US_GALLON } from '../../../utils/units'
 import { rentCardHeaderSubtitle } from '../../../utils/units'
@@ -21,14 +28,11 @@ import {
   COL_CATEGORY_ICON_SIZE,
   type ColCategoryCardProps,
 } from '../ColCategoryCard'
-import { ColExtrasList, type ColExtraLineItem } from '../ColExtrasList'
 import { DestinationExchangeRate } from '../DestinationExchangeRate'
 import { TravelAdvisoryNotice } from '../TravelAdvisoryNotice'
 import { formatUsdField } from './cityDetailTabUtils'
 
 type ColCategoryPanelCard = ColCategoryCardProps & { id: string }
-
-const COL_EXTRA_ICON_SIZE = 18
 
 function formatGasPerGallon(pricePerLiter: number): string {
   if (!Number.isFinite(pricePerLiter) || pricePerLiter <= 0) return formatUsdField(null)
@@ -58,26 +62,40 @@ function estimate2brRent(oneBr: number, threeBr: number): number {
 function buildColBudgetCards(
   city: MapCity,
   budgetBreakdown: BudgetBreakdownDisplay,
+  lifestyle: LifestyleInputs,
 ): ColCategoryPanelCard[] {
   const { breakdown } = budgetBreakdown
   const icon = COL_CATEGORY_ICON_SIZE
   const transitAvailable = hasTransitPassData(city.transport_monthly_pass)
-  const foodAndDrinkTotal = breakdown.groceries + breakdown.dining + breakdown.alcohol
   const lifestyleTotal = breakdown.leisure + breakdown.mobile + breakdown.clothing
+  const diningLineItems = buildDiningBudgetLineItems(city, lifestyle)
+  const alcoholLineItems = buildAlcoholBudgetLineItems(city, lifestyle)
+  const diningDrinksGroups = [
+    ...(diningLineItems.length > 0
+      ? [
+          {
+            title: 'Dining',
+            rows: diningLineItems.map((item) => ({
+              label: item.label,
+              value: formatUsd(item.amount),
+            })),
+          },
+        ]
+      : []),
+    ...(alcoholLineItems.length > 0
+      ? [
+          {
+            title: 'Alcohol',
+            rows: alcoholLineItems.map((item) => ({
+              label: item.label,
+              value: formatUsd(item.amount),
+            })),
+          },
+        ]
+      : []),
+  ]
 
   return [
-    {
-      id: 'food-drink',
-      variant: 'hero',
-      title: 'Food & Drink',
-      icon: <IconToolsKitchen3 size={icon} stroke={1.5} aria-hidden />,
-      headerAmount: formatColHeaderAmount(foodAndDrinkTotal),
-      rows: [
-        { label: 'Groceries', value: formatUsd(breakdown.groceries) },
-        { label: 'Dining & coffee', value: formatUsd(breakdown.dining) },
-        { label: 'Alcohol', value: formatUsd(breakdown.alcohol) },
-      ],
-    },
     {
       id: 'rent',
       variant: 'hero',
@@ -120,13 +138,21 @@ function buildColBudgetCards(
       footerPill: 'City center is always more expensive',
     },
     {
+      id: 'dining-drinks',
+      variant: 'hero',
+      title: 'Dining & drinks',
+      icon: <IconToolsKitchen3 size={icon} stroke={1.5} aria-hidden />,
+      headerAmount: formatColHeaderAmount(breakdown.dining + breakdown.alcohol),
+      rowGroups: diningDrinksGroups,
+    },
+    {
       id: 'utilities-internet',
       variant: 'hero',
       title: 'Utilities',
       icon: <IconBolt size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(breakdown.utilities),
       rows: [
-        { label: 'Broadband (60 Mbps)', value: 'incl.' },
+        { label: 'Internet', value: 'incl.' },
         { label: 'Electricity', value: 'incl.' },
         { label: 'Water & heating', value: 'incl.' },
       ],
@@ -191,53 +217,20 @@ function buildColBudgetCards(
   ]
 }
 
-function buildColSupplementalItems(city: MapCity): ColExtraLineItem[] {
-  const icon = COL_EXTRA_ICON_SIZE
-  return [
-    {
-      id: 'gym',
-      label: 'Gym membership',
-      value: formatUsdField(city.gym_monthly),
-      note: 'Monthly, one adult',
-      icon: <IconBarbell size={icon} stroke={1.5} aria-hidden />,
-    },
-    {
-      id: 'leisure',
-      label: 'Leisure',
-      value: formatUsdField(city.cinema_ticket),
-      note: 'Cinema ticket',
-      icon: <IconMovie size={icon} stroke={1.5} aria-hidden />,
-    },
-    {
-      id: 'beer',
-      label: 'Beer (bottle)',
-      value: formatUsdField(city.domestic_beer_bottle),
-      note: 'Domestic, supermarket',
-      icon: <IconGlassFull size={icon} stroke={1.5} aria-hidden />,
-    },
-    {
-      id: 'mobile',
-      label: 'Mobile plan',
-      value: formatUsdField(city.mobile_plan_monthly_usd),
-      note: 'Prepaid data SIM',
-      icon: <IconDeviceMobile size={icon} stroke={1.5} aria-hidden />,
-    },
-  ]
-}
-
 type Props = {
   city: MapCity
   planMonthlyIncome: number
   budgetBreakdown: BudgetBreakdownDisplay
+  lifestyle: LifestyleInputs
 }
 
 export function CostOfLivingTab({
   city,
   planMonthlyIncome,
   budgetBreakdown,
+  lifestyle,
 }: Props) {
-  const colBudgetCards = buildColBudgetCards(city, budgetBreakdown)
-  const colSupplementalItems = buildColSupplementalItems(city)
+  const colBudgetCards = buildColBudgetCards(city, budgetBreakdown, lifestyle)
   const showTravelAdvisory = hasTravelAdvisory(city.country)
 
   return (
@@ -256,7 +249,7 @@ export function CostOfLivingTab({
       <div>
         <DestinationExchangeRate city={city} planMonthlyIncome={planMonthlyIncome} />
       </div>
-      <section
+      <DetailPanelCard
         className="wtr-city-detail__col-budget-group"
         aria-label="Monthly budget breakdown and costs"
       >
@@ -264,6 +257,10 @@ export function CostOfLivingTab({
           breakdown={budgetBreakdown}
           className="wtr-city-detail__budget-bar"
           showTitle
+        />
+        <ColGroceriesBudgetCard
+          amount={budgetBreakdown.breakdown.groceries}
+          className="wtr-city-detail__col-groceries"
         />
         <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
           {colBudgetCards.map((card) => {
@@ -278,13 +275,7 @@ export function CostOfLivingTab({
         <p className="wtr-city-detail__col-budget-footnote font-xs">
           Based on your lifestyle preset basket and dining habits
         </p>
-      </section>
-      <div className="wtr-city-detail__col-extras">
-        <p className="wtr-city-detail__col-extras-note">
-          Local price references
-        </p>
-        <ColExtrasList items={colSupplementalItems} />
-      </div>
+      </DetailPanelCard>
     </div>
   )
 }

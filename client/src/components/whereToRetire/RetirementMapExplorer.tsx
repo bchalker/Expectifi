@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   IconArrowLeft,
+  IconChevronDown,
   IconChevronRight,
   IconCircleX,
   IconSearch,
@@ -41,6 +42,7 @@ import {
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
 import { RetirementMapLibreMap } from "./RetirementMapLibreMap";
 import { WtrCityListPagination } from "./WtrCityListPagination";
+import { WtrMinRetirementScoreSlider } from "./WtrMinRetirementScoreSlider";
 import {
   RetirementMapFilters,
   type MapOptionsPanelTab,
@@ -51,6 +53,7 @@ import type {
   FavoriteCityEntry,
 } from "../../lib/retirementStorage";
 import "./RetirementMapExplorer.scss";
+import "./WtrFilterPriorityCrossRef.scss";
 
 export type WtrExplorerViewMode = "map" | "compare";
 
@@ -249,10 +252,17 @@ export function RetirementMapExplorer({
   const [scoreSortDescending, setScoreSortDescending] = useState(true);
   const [listSearchQuery, setListSearchQuery] = useState("");
   const [listSearchOpen, setListSearchOpen] = useState(false);
+  const listSearchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleListSearch = useCallback(() => {
     setListSearchOpen((open) => !open);
   }, []);
+
+  useEffect(() => {
+    if (!listSearchOpen) return;
+    const id = requestAnimationFrame(() => listSearchInputRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, [listSearchOpen]);
 
   const baseFilteredCities = useMemo(
     () =>
@@ -387,6 +397,7 @@ export function RetirementMapExplorer({
   );
 
   const listCardsRef = useRef<HTMLDivElement>(null);
+  const listHeadRef = useRef<HTMLElement>(null);
   const listBodyRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
 
@@ -403,6 +414,25 @@ export function RetirementMapExplorer({
   useEffect(() => {
     setListPage((page) => Math.min(page, Math.max(0, listPageCount - 1)));
   }, [listPageCount]);
+
+  useEffect(() => {
+    if (filterCrossRefHighlight !== "minRetirementScore") return;
+    if (pinColorView !== "score") {
+      onPinColorViewChange("score");
+    }
+    const frame = window.requestAnimationFrame(() => {
+      listHeadRef.current
+        ?.querySelector('[data-wtr-filter-crossref="minRetirementScore"]')
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      onFilterCrossRefHighlightClear?.();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [
+    filterCrossRefHighlight,
+    pinColorView,
+    onPinColorViewChange,
+    onFilterCrossRefHighlightClear,
+  ]);
 
   useEffect(() => {
     const el = listCardsRef.current;
@@ -577,7 +607,59 @@ export function RetirementMapExplorer({
                 </button>
               </div>
             ) : null}
-            <header className="wtr-explorer__list-head">
+            <div className="wtr-explorer__list-head-stack">
+              <div
+                className={[
+                  "wtr-explorer__list-search-panel",
+                  listSearchOpen && "wtr-explorer__list-search-panel--open",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-hidden={!listSearchOpen}
+              >
+                <div
+                  className={[
+                    "wtr-explorer__list-search",
+                    listSearchQuery && "wtr-explorer__list-search--has-value",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <TextField
+                    className="wtr-explorer__list-search-field"
+                    variant="secondary"
+                    fullWidth
+                    aria-label="Search city list"
+                    value={listSearchQuery}
+                    onChange={(value) => {
+                      setListSearchQuery(value);
+                      setListPage(0);
+                    }}
+                  >
+                    <Input
+                      ref={listSearchInputRef}
+                      type="text"
+                      inputMode="search"
+                      placeholder="Search cities or countries"
+                      tabIndex={listSearchOpen ? 0 : -1}
+                    />
+                  </TextField>
+                  {listSearchQuery ? (
+                    <button
+                      type="button"
+                      className="wtr-explorer__list-search-clear"
+                      aria-label="Clear search"
+                      onClick={() => {
+                        setListSearchQuery("");
+                        setListPage(0);
+                      }}
+                    >
+                      <IconCircleX size={16} stroke={1.5} aria-hidden />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            <header ref={listHeadRef} className="wtr-explorer__list-head">
               <div className="wtr-explorer__list-head-top">
               <LabeledBadgeSelect
                 className="wtr-explorer__pin-view-select"
@@ -650,66 +732,64 @@ export function RetirementMapExplorer({
                   type="button"
                   className={[
                     "wtr-explorer__list-head-icon-btn",
+                    "wtr-explorer__list-head-search-btn",
                     listSearchOpen && "wtr-explorer__list-head-icon-btn--active",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   aria-label={listSearchOpen ? "Hide city search" : "Search cities"}
                   aria-pressed={listSearchOpen}
+                  aria-expanded={listSearchOpen}
                   onClick={toggleListSearch}
                 >
-                  <IconSearch
-                    className="wtr-explorer__list-sort-icon"
-                    size={18}
-                    stroke={1.5}
-                    aria-hidden
-                  />
+                  <span className="wtr-explorer__list-head-search-icon-wrap" aria-hidden>
+                    <IconSearch
+                      className="wtr-explorer__list-search-icon"
+                      size={18}
+                      stroke={1.5}
+                    />
+                    <IconChevronDown
+                      className="wtr-explorer__list-search-caret"
+                      size={14}
+                      stroke={1.5}
+                    />
+                  </span>
                 </button>
               </div>
               </div>
-              {listSearchOpen ? (
               <div
                 className={[
-                  "wtr-explorer__list-search",
-                  listSearchQuery && "wtr-explorer__list-search--has-value",
+                  "wtr-explorer__list-score-filter",
+                  pinColorView === "score" &&
+                    "wtr-explorer__list-score-filter--open",
                 ]
                   .filter(Boolean)
                   .join(" ")}
+                aria-hidden={pinColorView !== "score"}
               >
-                <TextField
-                  className="wtr-explorer__list-search-field"
-                  variant="secondary"
-                  fullWidth
-                  aria-label="Search city list"
-                  value={listSearchQuery}
-                  onChange={(value) => {
-                    setListSearchQuery(value);
-                    setListPage(0);
-                  }}
+                <div
+                  className={[
+                    "wtr-explorer__list-score-filter-inner",
+                    "wtr-filter-cross-ref-anchor",
+                  ].join(" ")}
+                  data-wtr-filter-crossref="minRetirementScore"
+                  data-wtr-filter-crossref-highlight={
+                    filterCrossRefHighlight === "minRetirementScore"
+                      ? "true"
+                      : undefined
+                  }
                 >
-                  <Input
-                    type="text"
-                    inputMode="search"
-                    placeholder="Search cities or countries"
-                    autoFocus
-                  />
-                </TextField>
-                {listSearchQuery ? (
-                  <button
-                    type="button"
-                    className="wtr-explorer__list-search-clear"
-                    aria-label="Clear search"
-                    onClick={() => {
-                      setListSearchQuery("");
+                  <WtrMinRetirementScoreSlider
+                    value={filters.minRetirementScore}
+                    onChange={(minRetirementScore) => {
+                      onFiltersChange({ ...filters, minRetirementScore });
                       setListPage(0);
                     }}
-                  >
-                    <IconCircleX size={16} stroke={1.5} aria-hidden />
-                  </button>
-                ) : null}
+                  />
+                </div>
               </div>
-              ) : null}
             </header>
+            </div>
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
                 {listSearchQuery.trim()

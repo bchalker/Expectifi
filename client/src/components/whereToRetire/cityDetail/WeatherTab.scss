@@ -17,23 +17,6 @@
   line-height: 1.5;
 }
 
-.wtr-weather-tab__panel {
-  padding: var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg, 12px);
-  background: var(--color-card);
-  box-sizing: border-box;
-}
-
-.wtr-weather-tab__panel-title {
-  margin: 0 0 var(--space-3);
-  font-family: var(--body);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--text-muted);
-}
-
 .wtr-weather-tab__title-row {
   position: sticky;
   top: 0;
@@ -48,7 +31,7 @@
   // margin-block: calc(-1 * var(--space-2)) 0;
   // margin-inline: calc(-1 * var(--wtr-tabpanel-pad, var(--space-5)));
   padding: var(--space-2) 0 var(--space-4);
-  background: var(--surface);
+  background: #f9f9f9;
   border-bottom: 1px solid var(--border);
   // box-shadow: rgba(33, 35, 38, 0.08) 0 6px 8px -8px;
 }

@@ -17,6 +17,7 @@ export type DemographicsCountryData = {
     breakdown: ReligionBreakdown
     christian_note: string
     expat_worship: string
+    expat_worship_why?: string
   }
   demographics: {
     population: string
@@ -26,7 +27,10 @@ export type DemographicsCountryData = {
     expat_population: string
     official_language: string
     common_languages: string
+    expat_population_why?: string
+    common_languages_why?: string
   }
+  panel_heads_up?: string
 }
 
 type DemographicsDatasetFile = {
@@ -56,6 +60,26 @@ export const DEMOGRAPHICS_UNAVAILABLE_MESSAGE =
 
 export const DEMOGRAPHICS_TAB_SOURCE_FOOTER =
   'Religion: Pew Research Center 2020. Demographics: World Bank / UN 2024.'
+
+export function defaultDemographicsPanelHeadsUp(): string {
+  return 'This is country-level data — your city or neighborhood may feel very different. Religion and language snapshots do not capture block-by-block diversity.'
+}
+
+export function getDemographicsPanelHeadsUp(data: DemographicsCountryData | null): string {
+  if (data?.panel_heads_up?.trim()) return data.panel_heads_up.trim()
+  return defaultDemographicsPanelHeadsUp()
+}
+
+/** Warm retiree-focused note for median age row. */
+export function medianAgeWhy(age: number): string {
+  if (age < 35) {
+    return "You'll be among a younger, working-age population — vibrant cities, but fewer retirees your age in daily life."
+  }
+  if (age <= 50) {
+    return 'A mixed-age population — enough peers near retirement age in many cities without feeling like a retiree-only town.'
+  }
+  return 'An older national median often means more retirees nearby — easier to find social circles in your age bracket.'
+}
 
 const LEGEND_MIN_PCT = 1
 

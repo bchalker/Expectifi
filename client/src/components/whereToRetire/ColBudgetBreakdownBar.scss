@@ -31,7 +31,11 @@
   background: var(--color-text-success);
 }
 
-.wtr-col-budget-bar__segment--food {
+.wtr-col-budget-bar__segment--groceries {
+  background: color-mix(in srgb, var(--color-amber) 72%, white);
+}
+
+.wtr-col-budget-bar__segment--dining {
   background: var(--color-amber);
 }
 
@@ -47,11 +51,7 @@
   background: #8b6bb8;
 }
 
-.wtr-col-budget-bar__segment--health {
-  background: #c96b8a;
-}
-
-.wtr-col-budget-bar__segment--misc {
+.wtr-col-budget-bar__segment--other {
   background: color-mix(in srgb, var(--text-muted) 55%, var(--surface2));
 }
 
@@ -85,7 +85,11 @@
   background: var(--color-text-success);
 }
 
-.wtr-col-budget-bar__dot--food {
+.wtr-col-budget-bar__dot--groceries {
+  background: color-mix(in srgb, var(--color-amber) 72%, white);
+}
+
+.wtr-col-budget-bar__dot--dining {
   background: var(--color-amber);
 }
 
@@ -101,11 +105,7 @@
   background: #8b6bb8;
 }
 
-.wtr-col-budget-bar__dot--health {
-  background: #c96b8a;
-}
-
-.wtr-col-budget-bar__dot--misc {
+.wtr-col-budget-bar__dot--other {
   background: color-mix(in srgb, var(--text-muted) 55%, var(--surface2));
 }
 

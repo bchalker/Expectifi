@@ -2,16 +2,22 @@ import { useMemo, type CSSProperties } from 'react'
 import {
   DEMOGRAPHICS_UNAVAILABLE_MESSAGE,
   getDemographicsData,
+  getDemographicsPanelHeadsUp,
   getReligionBarSegments,
   getReligionLegendItems,
+  medianAgeWhy,
 } from '../../utils/demographics'
 import {
   getEnglishProficiency,
   getEnglishProficiencyBadgeLabel,
   getEnglishProficiencyTone,
+  getEnglishProficiencyWhy,
   type EnglishProficiencyLevel,
 } from '../../utils/englishProficiency'
 import { getCountryPreferenceFields } from '../../utils/countryPreferenceData'
+import { DetailPanelCard } from '../ui/DetailPanelCard'
+import { NarrativeWhyLine } from '../ui/NarrativeWhyLine'
+import { PanelHeadsUpCallout } from '../ui/PanelHeadsUpCallout'
 import './DestinationPeopleCultureTab.scss'
 
 function socialLawDisclosureLabels(country: string): string[] {
@@ -116,6 +122,7 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
   const data = useMemo(() => getDemographicsData(country), [country])
   const englishLevel = useMemo(() => getEnglishProficiency(country), [country])
   const socialDisclosures = useMemo(() => socialLawDisclosureLabels(country), [country])
+  const panelHeadsUp = useMemo(() => getDemographicsPanelHeadsUp(data), [data])
 
   if (!data && !englishLevel) {
     return (
@@ -153,7 +160,7 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
         </div>
       ) : null}
       {religion ? (
-        <section
+        <DetailPanelCard
           className="wtr-people-culture__group"
           aria-labelledby="wtr-people-culture-religion-heading"
           {...staggerSectionProps(
@@ -175,12 +182,15 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
           <p className="wtr-people-culture__worship-note">
             <em>Places of worship for expats:</em> {religion.expat_worship}
           </p>
-        </section>
+          <NarrativeWhyLine className="wtr-people-culture__why">
+            {religion.expat_worship_why}
+          </NarrativeWhyLine>
+        </DetailPanelCard>
       ) : null}
 
       {demographics ? (
-        <section
-          className="wtr-people-culture__group"
+        <DetailPanelCard
+          className="wtr-people-culture__group wtr-people-culture__demographics"
           aria-labelledby="wtr-people-culture-demo-heading"
           {...staggerSectionProps(
             sectionIndex++,
@@ -195,44 +205,53 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
           >
             Demographics
           </h3>
-          <dl className="wtr-people-culture__rows">
-            <div className="wtr-people-culture__row">
-              <dt>Population</dt>
-              <dd>{demographics.population}</dd>
+          <dl className="wtr-people-culture__demo-grid">
+            <div className="wtr-people-culture__demo-cell">
+              <dt className="font-xs">Population</dt>
+              <dd className="font-base">{demographics.population}</dd>
             </div>
-            <div className="wtr-people-culture__row">
-              <dt>Median age</dt>
-              <dd>
+            <div className="wtr-people-culture__demo-cell">
+              <dt className="font-xs">Median age</dt>
+              <dd className="font-base">
                 <span className="tabular-nums">{demographics.median_age}</span> years
                 <span className="wtr-people-culture__age-note">
                   {medianAgeInterpretation(demographics.median_age)}
                 </span>
+                <NarrativeWhyLine className="wtr-people-culture__why">
+                  {medianAgeWhy(demographics.median_age)}
+                </NarrativeWhyLine>
               </dd>
             </div>
-            <div className="wtr-people-culture__row">
-              <dt>Urban population</dt>
-              <dd>
+            <div className="wtr-people-culture__demo-cell">
+              <dt className="font-xs">Urban population</dt>
+              <dd className="font-base">
                 <span className="tabular-nums">{demographics.urban_pct}</span>%
               </dd>
             </div>
-            <div className="wtr-people-culture__row">
-              <dt>Official language</dt>
-              <dd>{demographics.official_language}</dd>
+            <div className="wtr-people-culture__demo-cell">
+              <dt className="font-xs">Official language</dt>
+              <dd className="font-base">{demographics.official_language}</dd>
             </div>
-            <div className="wtr-people-culture__row">
-              <dt>Common languages</dt>
-              <dd>{demographics.common_languages}</dd>
+            <div className="wtr-people-culture__demo-cell wtr-people-culture__demo-cell--wide">
+              <dt className="font-xs">Common languages</dt>
+              <dd className="font-base">{demographics.common_languages}</dd>
+              <NarrativeWhyLine className="wtr-people-culture__why">
+                {demographics.common_languages_why}
+              </NarrativeWhyLine>
             </div>
             {englishLevel ? (
-              <div className="wtr-people-culture__row wtr-people-culture__row--badge">
-                <dt>English proficiency</dt>
-                <dd>
+              <div className="wtr-people-culture__demo-cell">
+                <dt className="font-xs">English proficiency</dt>
+                <dd className="font-base">
                   <EnglishProficiencyBadge level={englishLevel} />
                 </dd>
+                <NarrativeWhyLine className="wtr-people-culture__why">
+                  {getEnglishProficiencyWhy(englishLevel)}
+                </NarrativeWhyLine>
               </div>
             ) : null}
           </dl>
-        </section>
+        </DetailPanelCard>
       ) : englishLevel ? (
         <section
           className="wtr-people-culture__group"
@@ -251,6 +270,9 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             English
           </h3>
           <EnglishProficiencyBadge level={englishLevel} />
+          <NarrativeWhyLine className="wtr-people-culture__why">
+            {getEnglishProficiencyWhy(englishLevel)}
+          </NarrativeWhyLine>
         </section>
       ) : null}
 
@@ -272,8 +294,23 @@ export function DestinationPeopleCultureTab({ country, staggerClassName, stagger
             Expat community
           </h3>
           <p className="wtr-people-culture__expat-copy">{demographics.expat_population}</p>
+          <NarrativeWhyLine className="wtr-people-culture__why">
+            {demographics.expat_population_why}
+          </NarrativeWhyLine>
         </section>
       ) : null}
+
+      <PanelHeadsUpCallout
+        className="wtr-people-culture__heads-up"
+        {...staggerSectionProps(
+          sectionIndex++,
+          undefined,
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        {panelHeadsUp}
+      </PanelHeadsUpCallout>
     </div>
   )
 }

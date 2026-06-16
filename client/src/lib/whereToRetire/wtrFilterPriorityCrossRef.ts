@@ -66,8 +66,8 @@ const FOREIGN_TAX_VALUE_LABELS: Record<ForeignTaxFilter, string> = {
 
 const HEALTHCARE_VALUE_LABELS: Record<HealthcareFilter, string> = {
   any: 'Any',
-  'good-care': '60+',
-  excellent: '75+',
+  'good-care': 'Good care+',
+  excellent: 'World-class only',
 }
 
 const SAFETY_VALUE_LABELS: Record<SafetyFilter, string> = {

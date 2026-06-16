@@ -1,6 +1,13 @@
 import { useMemo, type CSSProperties } from 'react'
+import { IconShieldHeart, IconStethoscope } from '@tabler/icons-react'
+import { DetailPanelCard } from '../ui/DetailPanelCard'
+import { formatHealthcareInsuranceMonthlyRange } from '../../utils/countryPreferenceData'
 import {
+  formatHealthcareSourceLabel,
   getQualityOfLifeData,
+  HEALTHCARE_BAND_SEGMENTS,
+  healthcareBand,
+  healthcareBandDescription,
   QOL_NORMALIZED_MAX,
   QOL_TAB_SOURCE_FOOTER,
   QOL_UNAVAILABLE_MESSAGE,
@@ -74,6 +81,108 @@ function QoLBar({
   )
 }
 
+function QoLHealthcareCard({
+  country,
+  data,
+  style,
+}: {
+  country: string
+  data: QualityOfLifeCountryData
+  style?: CSSProperties
+}) {
+  const score = data.healthcare_index
+  const scoreValue = formatScore(score)
+  const { band, label: bandLabel } = healthcareBand(score)
+  const description = healthcareBandDescription(score)
+  const sourceLabel = formatHealthcareSourceLabel(data.source)
+  const insuranceRange = formatHealthcareInsuranceMonthlyRange(country)
+
+  return (
+    <DetailPanelCard
+      as="article"
+      className="wtr-qol-healthcare"
+      aria-labelledby="wtr-qol-healthcare-heading"
+      style={style}
+    >
+      <div className="wtr-qol-healthcare__body">
+        <div id="wtr-qol-healthcare-heading" className="wtr-qol-healthcare__header">
+          <span className="wtr-qol-healthcare__header-icon" aria-hidden>
+            <IconStethoscope size={16} strokeWidth={1.5} />
+          </span>
+          <span className="wtr-qol-healthcare__header-label">Healthcare quality</span>
+        </div>
+
+        <div className="wtr-qol-healthcare__score-row">
+          <p className="wtr-qol-healthcare__score tabular-nums">
+            <span className="wtr-qol-healthcare__score-value">{scoreValue}</span>
+            <span className="wtr-qol-healthcare__score-denom"> / 100</span>
+          </p>
+          <span className={`wtr-qol-healthcare__badge wtr-qol-healthcare__badge--${band}`}>
+            {bandLabel}
+          </span>
+        </div>
+
+        <p className="wtr-qol-healthcare__description">
+          <span className="wtr-qol-healthcare__why-label">Why it matters for you:</span> {description}
+        </p>
+
+        <div className="wtr-qol-healthcare__meter" role="img" aria-label={`Healthcare band: ${bandLabel}`}>
+          <div className="wtr-qol-healthcare__meter-segments">
+            {HEALTHCARE_BAND_SEGMENTS.map((segment) => (
+              <div
+                key={segment.band}
+                className={[
+                  'wtr-qol-healthcare__meter-segment',
+                  `wtr-qol-healthcare__meter-segment--${segment.band}`,
+                  segment.band === band ? 'wtr-qol-healthcare__meter-segment--active' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              />
+            ))}
+          </div>
+          <div className="wtr-qol-healthcare__meter-labels">
+            {HEALTHCARE_BAND_SEGMENTS.map((segment) => (
+              <span
+                key={segment.band}
+                className={[
+                  'wtr-qol-healthcare__meter-label',
+                  segment.band === band ? 'wtr-qol-healthcare__meter-label--active' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {segment.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="wtr-qol-healthcare__divider" role="presentation" />
+
+      <div className="wtr-qol-healthcare__insurance">
+        <div className="wtr-qol-healthcare__insurance-label">
+          <span className="wtr-qol-healthcare__insurance-icon" aria-hidden>
+            <IconShieldHeart size={16} strokeWidth={1.5} />
+          </span>
+          <span>Insurance cost</span>
+        </div>
+        <p className="wtr-qol-healthcare__insurance-value tabular-nums">
+          {insuranceRange}
+          <span className="wtr-qol-healthcare__insurance-suffix">/mo est.</span>
+        </p>
+      </div>
+
+      <div className="wtr-qol-healthcare__divider" role="presentation" />
+
+      <p className="wtr-qol-healthcare__footer">
+        Rated by country, not city · Source: {sourceLabel}
+      </p>
+    </DetailPanelCard>
+  )
+}
+
 function QoLOverallCard({
   data,
   className,
@@ -89,10 +198,9 @@ function QoLOverallCard({
   const scoreValue = formatScore(qolNormalized)
 
   return (
-    <article
+    <div
       className={['wtr-qol-overall', `wtr-qol-overall--${band}`, className].filter(Boolean).join(' ')}
       style={style}
-      aria-labelledby="wtr-qol-overall-heading"
     >
       <h3
         id="wtr-qol-overall-heading"
@@ -114,7 +222,7 @@ function QoLOverallCard({
         label={`Overall quality of life: ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
         tone={band}
       />
-    </article>
+    </div>
   )
 }
 
@@ -140,7 +248,6 @@ function QoLMetricRow({ config }: { config: MetricRowConfig }) {
 function buildMetricRows(data: QualityOfLifeCountryData): MetricRowConfig[] {
   return [
     { id: 'safety', label: 'Safety', score: data.safety_index, invertBar: false },
-    { id: 'healthcare', label: 'Healthcare', score: data.healthcare_index, invertBar: false },
     { id: 'climate', label: 'Climate', score: data.climate_index, invertBar: false },
     { id: 'pollution', label: 'Air quality', score: data.pollution_index, invertBar: true },
     { id: 'purchasing', label: 'Purchasing', score: data.purchasing_power_index, invertBar: false },
@@ -164,21 +271,28 @@ export function DestinationQualityOfLifeTab({ country, staggerClassName, stagger
   return (
     <div className="wtr-qol-tab">
       <section
-        className="wtr-qol-tab__row wtr-qol-tab__row--overall"
+        className="wtr-qol-tab__row wtr-qol-tab__row--score"
         {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
       >
-        <QoLOverallCard data={data} />
+        <DetailPanelCard
+          as="article"
+          className="wtr-qol-score-card"
+          aria-labelledby="wtr-qol-overall-heading"
+        >
+          <QoLOverallCard data={data} />
+          <ul className="wtr-qol-metrics">
+            {metrics.map((row) => (
+              <QoLMetricRow key={row.id} config={row} />
+            ))}
+          </ul>
+        </DetailPanelCard>
       </section>
 
       <section
-        className="wtr-qol-tab__row wtr-qol-tab__row--breakdown"
+        className="wtr-qol-tab__row wtr-qol-tab__row--healthcare"
         {...staggerSectionProps(1, undefined, staggerClassName, staggerStyle)}
       >
-        <ul className="wtr-qol-metrics">
-          {metrics.map((row) => (
-            <QoLMetricRow key={row.id} config={row} />
-          ))}
-        </ul>
+        <QoLHealthcareCard country={country} data={data} />
       </section>
 
       <section

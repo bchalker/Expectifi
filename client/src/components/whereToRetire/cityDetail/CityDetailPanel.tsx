@@ -15,7 +15,7 @@ import { useCityClimate } from '../../../hooks/useCityClimate'
 import type { MapFilters, ScoredMapCity } from '../../../lib/whereToRetire/cityMapScoring'
 import { DEFAULT_LIFESTYLE, monthlyBudgetForScoring } from '../../../lib/whereToRetire/cityMapScoring'
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
-import type { BudgetBreakdownDisplay } from '../../../utils/costOfLiving'
+import type { BudgetBreakdownDisplay, LifestyleInputs } from '../../../utils/costOfLiving'
 import { DEMOGRAPHICS_TAB_SOURCE_FOOTER } from '../../../utils/demographics'
 import { EXPAT_TAB_SOURCE_FOOTER } from '../../../utils/expatInfo'
 import { getQualityOfLifeData, QOL_WORLD_BANK_PROXY_NOTE } from '../../../utils/qualityOfLife'
@@ -163,6 +163,7 @@ type CityDetailPanelBodyProps = {
   scored: ScoredMapCity
   planMonthlyIncome: number
   budgetBreakdown: BudgetBreakdownDisplay
+  lifestyle: LifestyleInputs
   mobileSheet: boolean
   listNav: DestinationListNav | null
   activeTab: CityDetailTab
@@ -177,6 +178,7 @@ function CityDetailPanelBody({
   scored,
   planMonthlyIncome,
   budgetBreakdown,
+  lifestyle,
   mobileSheet,
   listNav,
   activeTab,
@@ -237,6 +239,7 @@ function CityDetailPanelBody({
             city={scored.city}
             planMonthlyIncome={planMonthlyIncome}
             budgetBreakdown={budgetBreakdown}
+            lifestyle={lifestyle}
           />
         )
       case 'weather':
@@ -478,6 +481,7 @@ export function CityDetailPanel({
         scored={scored}
         planMonthlyIncome={planMonthlyIncome}
         budgetBreakdown={budgetBreakdown}
+        lifestyle={mapFilters.lifestyle ?? DEFAULT_LIFESTYLE}
         mobileSheet={mobileSheet}
         listNav={listNav}
         activeTab={activeTab}

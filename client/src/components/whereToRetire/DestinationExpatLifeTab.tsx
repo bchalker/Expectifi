@@ -1,5 +1,8 @@
-import { useMemo, type CSSProperties } from 'react'
-import { IconAlertCircle, IconExternalLink } from '@tabler/icons-react'
+import { useMemo, type CSSProperties } from "react";
+import { IconAlertCircle, IconExternalLinkFilled } from "@tabler/icons-react";
+import { DetailPanelCard } from "../ui/DetailPanelCard";
+import { NarrativeWhyLine } from "../ui/NarrativeWhyLine";
+import { PanelHeadsUpCallout } from "../ui/PanelHeadsUpCallout";
 import {
   expatCommunitySizeTone,
   expatUnavailableMessage,
@@ -7,19 +10,19 @@ import {
   formatEstimatedAmericans,
   forumLinkHref,
   getExpatDestinationInfo,
+  getExpatPanelHeadsUp,
   isDomesticRetirementDestination,
-} from '../../utils/expatInfo'
-import './DestinationExpatLifeTab.scss'
+} from "../../utils/expatInfo";
+import "./DestinationExpatLifeTab.scss";
 
-const POPULAR_AREAS_MAX = 4
-const INTERNATIONS_URL = 'https://www.internations.org/'
+const INTERNATIONS_URL = "https://www.internations.org/";
 
 type Props = {
-  city: string
-  country: string
-  staggerClassName?: string
-  staggerStyle?: (index: number) => CSSProperties
-}
+  city: string;
+  country: string;
+  staggerClassName?: string;
+  staggerStyle?: (index: number) => CSSProperties;
+};
 
 function staggerSectionProps(
   index: number,
@@ -28,12 +31,14 @@ function staggerSectionProps(
   staggerStyle: ((index: number) => CSSProperties) | undefined,
 ): { className?: string; style?: CSSProperties } {
   if (!staggerClassName || !staggerStyle) {
-    return baseClass ? { className: baseClass } : {}
+    return baseClass ? { className: baseClass } : {};
   }
   return {
-    className: baseClass ? `${baseClass} ${staggerClassName}` : staggerClassName,
+    className: baseClass
+      ? `${baseClass} ${staggerClassName}`
+      : staggerClassName,
     style: staggerStyle(index),
-  }
+  };
 }
 
 export function DestinationExpatLifeTab({
@@ -42,131 +47,175 @@ export function DestinationExpatLifeTab({
   staggerClassName,
   staggerStyle,
 }: Props) {
-  const data = useMemo(() => getExpatDestinationInfo(country), [country])
+  const data = useMemo(() => getExpatDestinationInfo(country), [country]);
+  const panelHeadsUp = useMemo(() => getExpatPanelHeadsUp(data), [data]);
 
   if (isDomesticRetirementDestination(country)) {
     return (
-      <p {...staggerSectionProps(0, 'wtr-expat-life__empty', staggerClassName, staggerStyle)}>
-        {city} is a domestic US retirement destination. Expat community data applies to
-        international relocations — use Best overall fit or Lowest cost views to compare US
-        cities.
-      </p>
-    )
-  }
-
-  if (!data) {
-    return (
-      <p {...staggerSectionProps(0, 'wtr-expat-life__empty', staggerClassName, staggerStyle)}>
-        {expatUnavailableMessage(city)}
-      </p>
-    )
-  }
-
-  const tone = expatCommunitySizeTone(data.community_size)
-  const americansNote = formatEstimatedAmericans(data.estimated_americans)
-  const visibleAreas = data.popular_areas.slice(0, POPULAR_AREAS_MAX)
-  const moreAreas = data.popular_areas.length - visibleAreas.length
-
-  let sectionIndex = 0
-
-  return (
-    <div className="wtr-expat-life">
-      <section
-        className="wtr-expat-life__group"
+      <p
         {...staggerSectionProps(
-          sectionIndex++,
-          'wtr-expat-life__group',
+          0,
+          "wtr-expat-life__empty",
           staggerClassName,
           staggerStyle,
         )}
       >
-        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Community</h3>
+        {city} is a domestic US retirement destination. Expat community data
+        applies to international relocations — use Best overall fit or Lowest
+        cost views to compare US cities.
+      </p>
+    );
+  }
+
+  if (!data) {
+    return (
+      <p
+        {...staggerSectionProps(
+          0,
+          "wtr-expat-life__empty",
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        {expatUnavailableMessage(city)}
+      </p>
+    );
+  }
+
+  const tone = expatCommunitySizeTone(data.community_size);
+  const americansNote = formatEstimatedAmericans(data.estimated_americans);
+
+  let sectionIndex = 0;
+
+  return (
+    <div className="wtr-expat-life">
+      <DetailPanelCard
+        className="wtr-expat-life__group"
+        {...staggerSectionProps(
+          sectionIndex++,
+          "wtr-expat-life__group",
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
+          Community
+        </h3>
         <div className="wtr-expat-life__community-row">
-          <span className={`wtr-expat-life__size-badge wtr-expat-life__size-badge--${tone}`}>
+          <span
+            className={`wtr-expat-life__size-badge wtr-expat-life__size-badge--${tone}`}
+          >
             {data.community_size}
           </span>
           {americansNote ? (
             <span className="wtr-expat-life__americans">{americansNote}</span>
           ) : null}
         </div>
-      </section>
+        <NarrativeWhyLine>{data.community_why}</NarrativeWhyLine>
+      </DetailPanelCard>
 
-      {visibleAreas.length > 0 ? (
-        <section
+      {data.popular_areas.length > 0 ? (
+        <DetailPanelCard
           className="wtr-expat-life__group"
           {...staggerSectionProps(
             sectionIndex++,
-            'wtr-expat-life__group',
+            "wtr-expat-life__group",
             staggerClassName,
             staggerStyle,
           )}
         >
-          <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Popular expat areas</h3>
-          <div className="wtr-expat-life__area-pills">
-            {visibleAreas.map((area) => (
-              <span key={area} className="wtr-expat-life__area-pill">
+          <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
+            Popular expat areas
+          </h3>
+          <ul className="wtr-expat-life__area-list">
+            {data.popular_areas.map((area) => (
+              <li key={area} className="wtr-expat-life__area-item">
                 {area}
-              </span>
+              </li>
             ))}
-            {moreAreas > 0 ? (
-              <span className="wtr-expat-life__area-pill wtr-expat-life__area-pill--more">
-                +{moreAreas} more
-              </span>
-            ) : null}
-          </div>
-        </section>
+          </ul>
+        </DetailPanelCard>
       ) : null}
 
-      <section
+      <DetailPanelCard
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          'wtr-expat-life__group',
+          "wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
       >
-        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">What expats say</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
+          What expats say
+        </h3>
         <blockquote className="wtr-expat-life__vibe">{data.expat_vibe}</blockquote>
-      </section>
+        <NarrativeWhyLine className="wtr-expat-life__why">{data.expat_vibe_why}</NarrativeWhyLine>
+      </DetailPanelCard>
 
-      <dl className="wtr-expat-life__rows">
-        <div className="wtr-expat-life__row">
-          <dt>Day-to-day language</dt>
-          <dd>{data.language_barrier}</dd>
-        </div>
-        <div className="wtr-expat-life__row">
-          <dt>Healthcare for expats</dt>
-          <dd>{data.healthcare_expat}</dd>
-        </div>
-      </dl>
-
-      <section
+      <DetailPanelCard
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          'wtr-expat-life__group',
+          "wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
       >
-        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Cost reality check</h3>
+        <dl className="wtr-expat-life__rows">
+          <div className="wtr-expat-life__row">
+            <dt>Day-to-day language</dt>
+            <dd>{data.language_barrier}</dd>
+            <NarrativeWhyLine className="wtr-expat-life__why">
+              {data.language_barrier_why}
+            </NarrativeWhyLine>
+          </div>
+          <div className="wtr-expat-life__row">
+            <dt>Healthcare for expats</dt>
+            <dd>{data.healthcare_expat}</dd>
+            <NarrativeWhyLine className="wtr-expat-life__why">
+              {data.healthcare_expat_why}
+            </NarrativeWhyLine>
+          </div>
+        </dl>
+      </DetailPanelCard>
+
+      <DetailPanelCard
+        className="wtr-expat-life__group"
+        {...staggerSectionProps(
+          sectionIndex++,
+          "wtr-expat-life__group",
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
+          Cost reality check
+        </h3>
         <div className="wtr-expat-life__cost-callout" role="note">
-          <IconAlertCircle size={18} stroke={1.5} className="wtr-expat-life__cost-icon" aria-hidden />
+          <IconAlertCircle
+            size={18}
+            stroke={1.5}
+            className="wtr-expat-life__cost-icon"
+            aria-hidden
+          />
           <p>{data.cost_note}</p>
         </div>
-      </section>
+        <NarrativeWhyLine className="wtr-expat-life__why">{data.cost_note_why}</NarrativeWhyLine>
+      </DetailPanelCard>
 
       <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          'wtr-expat-life__group',
+          "wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
       >
-        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">Connect with the community</h3>
+        <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
+          Connect with the community
+        </h3>
         <ul className="wtr-expat-life__fb-list">
           {data.facebook_groups.map((group) => (
             <li key={group}>
@@ -177,7 +226,7 @@ export function DestinationExpatLifeTab({
                 className="wtr-expat-life__fb-link"
               >
                 {group} on Facebook
-                <IconExternalLink size={14} stroke={1.5} aria-hidden />
+                <IconExternalLinkFilled size={14} stroke={1.5} aria-hidden />
               </a>
             </li>
           ))}
@@ -193,7 +242,7 @@ export function DestinationExpatLifeTab({
                   className="wtr-expat-life__forum-link"
                 >
                   {forum}
-                  <IconExternalLink size={14} stroke={1.5} aria-hidden />
+                  <IconExternalLinkFilled size={14} stroke={1.5} aria-hidden />
                 </a>
               </li>
             ))}
@@ -207,10 +256,22 @@ export function DestinationExpatLifeTab({
             className="wtr-expat-life__internations-badge"
           >
             InterNations chapter active
-            <IconExternalLink size={14} stroke={1.5} aria-hidden />
+            <IconExternalLinkFilled size={14} stroke={1.5} aria-hidden />
           </a>
         ) : null}
       </section>
+
+      <PanelHeadsUpCallout
+        className="wtr-expat-life__heads-up"
+        {...staggerSectionProps(
+          sectionIndex++,
+          undefined,
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        {panelHeadsUp}
+      </PanelHeadsUpCallout>
     </div>
-  )
+  );
 }

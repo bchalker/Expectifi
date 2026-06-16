@@ -81,6 +81,20 @@ export function getEnglishProficiencyBadgeLabel(level: EnglishProficiencyLevel):
   return 'Limited English'
 }
 
+/** Retiree-focused guidance for the English proficiency badge. */
+export function getEnglishProficiencyWhy(level: EnglishProficiencyLevel): string {
+  if (level === 'native' || level === 'very_high') {
+    return 'Daily errands, healthcare intake, and making friends are much easier when English is common — you can lean on it while you learn the local language.'
+  }
+  if (level === 'high' || level === 'moderate_high') {
+    return 'Major cities and expat neighborhoods usually work in English — outside those bubbles, basic local language still pays off fast.'
+  }
+  if (level === 'moderate') {
+    return 'Plan for a learning curve on banking, contracts, and friendships — English works in tourist zones, not everywhere you will live.'
+  }
+  return 'Assume you will need local language or a translator for daily life — pick a city with a strong expat infrastructure if that is not your plan.'
+}
+
 /** Numeric rank for comparison highlighting (higher = better English). */
 export function getEnglishProficiencyRank(level: EnglishProficiencyLevel): number {
   const index = PROFICIENCY_ORDER.indexOf(level)

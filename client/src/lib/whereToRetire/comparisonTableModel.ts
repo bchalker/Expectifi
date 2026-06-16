@@ -197,7 +197,7 @@ export const COMPARISON_TABLE_ROWS: ComparisonRowDef[] = [
   { id: 'gasoline', kind: 'data', label: 'Gasoline per gallon / per liter', highlight: 'lower-green' },
   { id: 'sec-utilities', kind: 'section', label: 'Utilities & Services' },
   { id: 'utilities', kind: 'data', label: 'Utilities monthly 85m²', highlight: 'lower-green', format: 'money' },
-  { id: 'internet', kind: 'data', label: 'Internet 60Mbps monthly', highlight: 'lower-green', format: 'money' },
+  { id: 'internet', kind: 'data', label: 'Internet', highlight: 'lower-green', format: 'money' },
   { id: 'mobileTariff', kind: 'data', label: 'Mobile tariff per minute', highlight: 'lower-green', format: 'money' },
   { id: 'sec-leisure', kind: 'section', label: 'Leisure' },
   { id: 'gym', kind: 'data', label: 'Gym membership monthly', highlight: 'lower-green', format: 'money' },

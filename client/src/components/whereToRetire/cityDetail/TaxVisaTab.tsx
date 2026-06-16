@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
+import { DetailPanelCard } from '../../ui/DetailPanelCard'
+import { PanelHeadsUpCallout } from '../../ui/PanelHeadsUpCallout'
 import {
   getTaxVisaData,
-  TAX_RATE_HOME_COUNTRY_NOTE,
-  TAX_VISA_FOREIGN_INCOME_NOTE,
+  getTaxVisaPanelHeadsUp,
   TAX_VISA_TAB_DISCLAIMER_BODY,
   TAX_VISA_UNAVAILABLE_MESSAGE,
 } from '../../../utils/taxVisa'
@@ -17,26 +18,34 @@ type Props = CityDetailTabStaggerProps & {
   country: string
 }
 
-function TaxInfoCard({
+function TaxNarrativeCard({
   title,
   value,
-  note,
+  why,
 }: {
   title: string
   value: string
-  note?: string
+  why?: string
 }) {
   return (
-    <article className="wtr-city-detail__card wtr-tax-visa-tab__card">
+    <DetailPanelCard as="article" className="wtr-tax-visa-tab__card">
       <h3 className="wtr-city-detail__section-title">{title}</h3>
       <p className="wtr-city-detail__card-value">{value}</p>
-      {note ? <p className="wtr-city-detail__card-note">{note}</p> : null}
-    </article>
+      {why ? (
+        <p className="wtr-tax-visa-tab__why">
+          <span className="wtr-tax-visa-tab__why-label">Why it matters for you:</span> {why}
+        </p>
+      ) : null}
+    </DetailPanelCard>
   )
 }
 
 export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
   const data = useMemo(() => getTaxVisaData(country), [country])
+  const panelHeadsUp = useMemo(
+    () => getTaxVisaPanelHeadsUp(country, data),
+    [country, data],
+  )
 
   if (!data) {
     return (
@@ -54,32 +63,32 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--tax-visa">
       <div
-        className="wtr-city-detail__cards wtr-tax-visa-tab__cards"
+        className="wtr-tax-visa-tab__cards"
         {...staggerSectionProps(0, 'wtr-tax-visa-tab__cards', staggerClassName, staggerStyle)}
       >
-        <TaxInfoCard
+        <TaxNarrativeCard
           title="Tax rate"
           value={formatTextField(data.tax_rate_label)}
-          note={TAX_RATE_HOME_COUNTRY_NOTE}
+          why={data.tax_rate_why}
         />
-        <TaxInfoCard
+        <TaxNarrativeCard
           title="Tax on foreign income"
           value={formatTextField(data.tax_summary)}
-          note={TAX_VISA_FOREIGN_INCOME_NOTE}
+          why={data.tax_summary_why}
         />
-        <TaxInfoCard
+        <TaxNarrativeCard
           title="Key exemptions"
           value={formatTextField(data.key_exemptions)}
-          note={data.us_tax_treaty ? 'US Tax Treaty applies' : undefined}
+          why={data.key_exemptions_why}
         />
-        <TaxInfoCard
+        <TaxNarrativeCard
           title="Healthcare access"
           value={formatTextField(data.healthcare_notes)}
+          why={data.healthcare_notes_why}
         />
       </div>
 
-      <section
-        className="wtr-tax-visa-tab__visa-section"
+      <DetailPanelCard
         aria-labelledby="wtr-tax-visa-visa-heading"
         {...staggerSectionProps(1, 'wtr-tax-visa-tab__visa-section', staggerClassName, staggerStyle)}
       >
@@ -100,13 +109,26 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
           <div className="wtr-tax-visa-tab__row">
             <dt className="wtr-tax-visa-tab__label">How it works</dt>
             <dd className="wtr-tax-visa-tab__value">{formatTextField(data.visa_summary)}</dd>
+            {data.visa_summary_why ? (
+              <dd className="wtr-tax-visa-tab__why wtr-tax-visa-tab__why--row">
+                <span className="wtr-tax-visa-tab__why-label">Why it matters for you:</span>{' '}
+                {data.visa_summary_why}
+              </dd>
+            ) : null}
           </div>
         </dl>
-      </section>
+      </DetailPanelCard>
+
+      <PanelHeadsUpCallout
+        className="wtr-tax-visa-tab__heads-up"
+        {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
+      >
+        {panelHeadsUp}
+      </PanelHeadsUpCallout>
 
       <p
         className="wtr-tax-visa-tab__disclaimer"
-        {...staggerSectionProps(2, 'wtr-tax-visa-tab__disclaimer', staggerClassName, staggerStyle)}
+        {...staggerSectionProps(3, 'wtr-tax-visa-tab__disclaimer', staggerClassName, staggerStyle)}
       >
         <strong>Sources</strong>: {TAX_VISA_TAB_DISCLAIMER_BODY}
       </p>

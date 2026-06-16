@@ -1,0 +1,16 @@
+.detail-panel-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-card);
+  box-shadow: rgba(0, 0, 0, 0.15) 0 2px 8px;
+  box-sizing: border-box;
+}
+
+.detail-panel-card__title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-muted);
+}

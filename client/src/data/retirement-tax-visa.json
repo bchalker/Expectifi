@@ -33,7 +33,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 85,
-      "flight_hours_from_us": 7
+      "flight_hours_from_us": 7,
+      "tax_rate_why": "Portugal's NHR tax break closed for new applicants in 2024, so foreign pensions now face normal progressive rates. The US–Portugal treaty and Foreign Tax Credit usually prevent double taxation.",
+      "tax_summary_why": "You file in Portugal on local income, but your US return doesn't go away — the treaty is your safety net, not a free pass.",
+      "key_exemptions_why": "Locked in NHR before 2024? You're grandfathered for the rest of your term. New arrivals get IFICI or standard rates — neither treats pension income like old NHR.",
+      "healthcare_notes_why": "You'll need private insurance to get the visa, then public SNS opens once you're properly registered.",
+      "visa_summary_why": "The D7 is one of Europe's more reachable retirement visas if your income is mostly passive."
     },
     "Spain": {
       "tax_rate_label": "Progressive rates up to 47%",
@@ -57,7 +62,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 75,
-      "flight_hours_from_us": 8
+      "flight_hours_from_us": 8,
+      "tax_rate_why": "There's no special pension deal here — your foreign pension faces normal Spanish progressive rates. Budget for that, and lean on the US–Spain treaty and Foreign Tax Credit to avoid double taxation.",
+      "tax_summary_why": "The Golden Visa is gone, so the Non-Lucrative Visa is the main retiree path — passive income proof and annual renewals are part of the real cost of settling in.",
+      "key_exemptions_why": "No flat-rate pension exemption means your visa income threshold (~€28,800/year) is the gate — plan for that before you pick a neighborhood.",
+      "healthcare_notes_why": "You'll need private insurance to apply, then Spain's public system becomes excellent once you're registered as a resident.",
+      "visa_summary_why": "Five years to permanent residency is a clear runway if you want EU roots without a work visa."
     },
     "Italy": {
       "tax_rate_label": "7% flat tax (special regime)",
@@ -81,7 +91,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 9
+      "flight_hours_from_us": 9,
+      "tax_rate_why": "The 7% flat regime is real savings — but only in qualifying southern towns under Article 24-ter, not anywhere in Italy you fancy.",
+      "tax_summary_why": "You trade location flexibility for a decade of predictable tax on foreign income — worth it if a small southern comune fits your lifestyle.",
+      "key_exemptions_why": "Standard rates up to 43% apply outside the special regime — confirm your municipality qualifies before you sign a lease.",
+      "healthcare_notes_why": "Private insurance gets you through the visa phase; SSN public care is excellent once you're registered.",
+      "visa_summary_why": "Elective Residency works for passive-income retirees — bureaucracy is the main friction, not the income threshold."
     },
     "Greece": {
       "tax_rate_label": "7% flat tax (Article 5B)",
@@ -105,7 +120,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 10
+      "flight_hours_from_us": 10,
+      "tax_rate_why": "Article 5B's 7% flat rate on foreign income for up to 15 years is among Europe's best deals — if you meet the investment and relocation rules.",
+      "tax_summary_why": "The flat election is optional but powerful — compare it against standard progressive rates before you declare residency.",
+      "key_exemptions_why": "The €250,000 property tie-in is non-negotiable for the special regime — factor that into your upfront capital plan.",
+      "healthcare_notes_why": "Public care opens after residency; private insurance is required to get your visa in the first place.",
+      "visa_summary_why": "The Financially Independent Person route suits retirees with steady passive income who want island or mainland Mediterranean life."
     },
     "France": {
       "tax_rate_label": "US retirement distributions exempt locally",
@@ -129,7 +149,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 80,
-      "flight_hours_from_us": 8
+      "flight_hours_from_us": 8,
+      "tax_rate_why": "The US–France treaty can exempt US retirement account distributions from French tax once you're resident — that's a meaningful break if your income is mostly 401(k) or IRA draws.",
+      "tax_summary_why": "French tax is complex, but pension and Social Security treatment under the treaty often surprises retirees in a good way — get it mapped professionally.",
+      "key_exemptions_why": "Roth and investment income follow different rules than traditional pensions — don't assume one exemption covers everything.",
+      "healthcare_notes_why": "Sécurité Sociale is world-class once you're in the system — plan for private cover during the first months of legal residence.",
+      "visa_summary_why": "The Long Stay Visitor visa is the classic retiree path — prove sufficient passive income and you can live in France year-round."
     },
     "Croatia": {
       "tax_rate_label": "Progressive rates 20-30%",
@@ -153,7 +178,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Hungary": {
       "tax_rate_label": "15% flat income tax",
@@ -177,7 +207,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Czech Republic": {
       "tax_rate_label": "15% flat income tax (23% above threshold)",
@@ -201,7 +236,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Poland": {
       "tax_rate_label": "Progressive 12-32%",
@@ -225,7 +265,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Romania": {
       "tax_rate_label": "10% flat income tax",
@@ -249,7 +294,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Bulgaria": {
       "tax_rate_label": "10% flat income tax",
@@ -273,7 +323,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Serbia": {
       "tax_rate_label": "15% flat income tax",
@@ -297,7 +352,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Georgia": {
       "tax_rate_label": "Territorial tax (foreign income not taxed)",
@@ -321,7 +381,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Georgia's territorial system means foreign pensions and Social Security usually stay off the local return — plus US citizens get a year visa-free.",
+      "tax_summary_why": "Only Georgian-source income is taxed — most retirees living on US income keep the full territorial benefit without a special visa.",
+      "key_exemptions_why": "The 365-day visa-free stay is unusual — many retirees cycle residency without a formal retirement program at all.",
+      "healthcare_notes_why": "Private care in Tbilisi is affordable and improving — insurance is cheap compared to US plans.",
+      "visa_summary_why": "No formal retirement visa needed for many Americans — the low cost of living and territorial tax are the main draws."
     },
     "Morocco": {
       "tax_rate_label": "Progressive rates, pension exemptions available",
@@ -345,7 +410,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Tunisia": {
       "tax_rate_label": "Progressive rates up to 35%",
@@ -369,7 +439,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Egypt": {
       "tax_rate_label": "Progressive rates 0-27.5%",
@@ -393,7 +468,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Turkey": {
       "tax_rate_label": "Progressive rates 15-40%",
@@ -417,7 +497,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Mexico": {
       "tax_rate_label": "Non-resident: no local tax on foreign income",
@@ -441,7 +526,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 45,
-      "flight_hours_from_us": 3
+      "flight_hours_from_us": 3,
+      "tax_rate_why": "Keep non-resident status and your US pension often stays untaxed locally — a big draw for Americans here. Cross 183 days and Mexico can tax worldwide income up to 35%.",
+      "tax_summary_why": "Where you spend your days and whether Mexico considers you resident will change your bill more than the headline rate.",
+      "key_exemptions_why": "The US–Mexico treaty coordinates the rules, but residency status is the lever that matters day to day.",
+      "healthcare_notes_why": "Many retirees come specifically for care quality vs. price — budget private insurance until you're comfortable with IMSS.",
+      "visa_summary_why": "Income and savings paths are well-trodden — San Miguel, Puerto Vallarta, and Mérida have deep expat support."
     },
     "Colombia": {
       "tax_rate_label": "Territorial (non-resident) or progressive up to 39% (resident)",
@@ -465,7 +555,13 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Stay under 183 days in any 365-day window and Colombia generally taxes only local income — cross that line and worldwide income can hit progressive rates up to 39%.",
+      "tax_summary_why": "Many expats deliberately manage their calendar because residency timing is the whole game — there's no US–Colombia treaty to fall back on.",
+      "key_exemptions_why": "Without a treaty, your US filing continues as usual — local non-resident status is what keeps foreign pensions off the Colombian return.",
+      "healthcare_notes_why": "Medellín and Bogotá offer excellent private care at a fraction of US prices — budget insurance from day one since Medicare won't travel with you.",
+      "visa_summary_why": "At roughly $750/month, the pensioner visa is one of the most reachable in Latin America if Medellín's spring climate fits your plan.",
+      "panel_heads_up": "As a US citizen, you still file with the IRS on worldwide income. Colombia has no US tax treaty — your 183-day count determines whether local tax applies to foreign income. Map both sides with a cross-border advisor before you commit."
     },
     "Panama": {
       "tax_rate_label": "Territorial (foreign income not taxed)",
@@ -489,7 +585,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 4
+      "flight_hours_from_us": 4,
+      "tax_rate_why": "Territorial taxation means US pensions and Social Security typically stay off the Panamanian return — one of the clearest tax wins in the Americas.",
+      "tax_summary_why": "Only Panama-source income is taxed locally, so most retirees living on US retirement income keep the full territorial benefit.",
+      "key_exemptions_why": "No US–Panama treaty, but territorial rules often make that irrelevant for pension-only income — still confirm your specific sources.",
+      "healthcare_notes_why": "Panama City has JCI-accredited hospitals at reasonable cost — insurance is essential since Medicare doesn't apply abroad.",
+      "visa_summary_why": "The Pensionado visa grants immediate permanent residency plus retiree discounts — one of the smoothest paths in Central America."
     },
     "Costa Rica": {
       "tax_rate_label": "Territorial (foreign income not taxed)",
@@ -513,7 +614,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 4
+      "flight_hours_from_us": 4,
+      "tax_rate_why": "Costa Rica taxes only local-source income, so US pensions and Social Security usually stay completely off the CR return.",
+      "tax_summary_why": "Territorial rules are straightforward for typical retirees — your main job is proving pension income for the visa, not fighting local tax on foreign income.",
+      "key_exemptions_why": "Foreign investment and pension income are exempt — employment or Costa Rican business income is what triggers local tax.",
+      "healthcare_notes_why": "CAJA public healthcare after residency is excellent value; many expats use private care for speed and keep CAJA as backup.",
+      "visa_summary_why": "$1,000/month lifetime pension qualifies you for Pensionado — permanent residency in three years if you stay the course."
     },
     "Ecuador": {
       "tax_rate_label": "Territorial (foreign income often exempt)",
@@ -537,7 +643,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial rules and senior discounts can leave foreign pension income lightly taxed or exempt — the dollar economy removes currency risk from your budget.",
+      "tax_summary_why": "Cuenca and Quito expats often live entirely on US pensions with minimal local tax friction — verify your income sources still qualify.",
+      "key_exemptions_why": "Senior discounts on utilities and services add up — they're separate from tax but part of why Ecuador pencils out for retirees.",
+      "healthcare_notes_why": "Private care in Quito and Cuenca is excellent and cheap; IESS public cover is an option once you're in the system.",
+      "visa_summary_why": "The pensioner visa is accessible and Cuenca's expat infrastructure is mature — good for a soft landing in the Andes."
     },
     "Dominican Republic": {
       "tax_rate_label": "Foreign income not taxed for first 3 years",
@@ -561,7 +672,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Uruguay": {
       "tax_rate_label": "Foreign income not taxed for first 10 years",
@@ -585,7 +701,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "New tax residents get a 10-year exemption on foreign-source income — a long runway before standard rates apply.",
+      "tax_summary_why": "The decade exemption is the headline — after year ten, foreign income faces a 12% rate, so plan the long arc not just year one.",
+      "key_exemptions_why": "The tax holiday applies to new residents who qualify — confirm your residency start date and reporting obligations.",
+      "healthcare_notes_why": "Montevideo private hospitals are international-standard — public and private options both work for retirees.",
+      "visa_summary_why": "Rentista visa suits passive-income retirees who want stability, mild climate, and a clear path to permanent residency."
     },
     "Argentina": {
       "tax_rate_label": "Progressive rates up to 35%",
@@ -609,7 +730,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Brazil": {
       "tax_rate_label": "Progressive rates up to 27.5%",
@@ -633,7 +759,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Peru": {
       "tax_rate_label": "Non-resident: 5-30% on Peru-source income only",
@@ -657,7 +788,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Days spent in-country and whether you're treated as resident often matter more than the headline rate — track your calendar carefully.",
+      "tax_summary_why": "Crossing the residency threshold can switch you from local-only taxation to worldwide income — plan your stays before you sign a long lease.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Chile": {
       "tax_rate_label": "Progressive rates up to 40%",
@@ -681,7 +817,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Thailand": {
       "tax_rate_label": "Foreign income remitted in same year taxable",
@@ -705,7 +846,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 55,
-      "flight_hours_from_us": 18
+      "flight_hours_from_us": 18,
+      "tax_rate_why": "What hits your Thai bank account — and when — can trigger tax; a common surprise for retirees wiring pensions monthly.",
+      "tax_summary_why": "Keeping funds in US accounts and transferring only what you need can reduce what Thailand sees as taxable remittances.",
+      "key_exemptions_why": "The retirement visa gets you in the door — it doesn't come with a tax holiday.",
+      "healthcare_notes_why": "Bangkok and Chiang Mai offer excellent private care at a fraction of US cost — plan for visa-required international insurance first.",
+      "visa_summary_why": "The O-A is straightforward at 50+, but annual renewal and insurance minimums are part of the real cost of living here."
     },
     "Malaysia": {
       "tax_rate_label": "Foreign income exempt (territorial system)",
@@ -729,7 +875,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 18
+      "flight_hours_from_us": 18,
+      "tax_rate_why": "Malaysia exempts foreign-source income for residents — US pensions and Social Security typically stay off the Malaysian return.",
+      "tax_summary_why": "Territorial treatment is why MM2H retirees often pay zero local tax on US retirement income — only Malaysian-source income is in scope.",
+      "key_exemptions_why": "Remittance rules matter for some income types — pensions paid directly from the US usually stay exempt without extra steps.",
+      "healthcare_notes_why": "KL and Penang have international-standard hospitals — insurance is required for MM2H and sensible for any retiree.",
+      "visa_summary_why": "MM2H tiers (Silver/Gold/Platinum) set income and deposit bars — pick the tier that matches your budget before you shop for condos."
     },
     "Vietnam": {
       "tax_rate_label": "Non-resident: 20% on Vietnam-source income only",
@@ -753,7 +904,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 18
+      "flight_hours_from_us": 18,
+      "tax_rate_why": "Days spent in-country and whether you're treated as resident often matter more than the headline rate — track your calendar carefully.",
+      "tax_summary_why": "Crossing the residency threshold can switch you from local-only taxation to worldwide income — plan your stays before you sign a long lease.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Philippines": {
       "tax_rate_label": "Pension income exempt from Philippine tax",
@@ -777,7 +933,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 16
+      "flight_hours_from_us": 16,
+      "tax_rate_why": "SRRV holders often pay no Philippine tax on pension income — that's a major reason retirees choose the archipelago over other Southeast Asian options.",
+      "tax_summary_why": "Territorial treatment plus SRRV exemptions mean US Social Security and pensions frequently stay off the local return.",
+      "key_exemptions_why": "The SRRV deposit and pension proof are the gate — tax benefits follow visa status, not the other way around.",
+      "healthcare_notes_why": "English-speaking doctors and good Manila/Cebu hospitals make care accessible — private insurance is still essential.",
+      "visa_summary_why": "Age 50+ with $1,500/month pension plus a deposit gets you permanent residence — one of the clearest retirement visa formulas in Asia."
     },
     "Indonesia": {
       "tax_rate_label": "Territorial (non-resident foreign income not taxed)",
@@ -801,7 +962,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Malta": {
       "tax_rate_label": "15% flat tax on foreign income (special regime)",
@@ -825,7 +991,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The Global Residence Programme's 15% flat tax on remitted foreign income is predictable — with a minimum annual tax that sets a floor on what you'll pay.",
+      "tax_summary_why": "Income you don't remit to Malta often stays untaxed locally — structure matters if you have investments outside the country.",
+      "key_exemptions_why": "The €15,000 minimum annual tax means ultra-low-income retirees still pay something — factor that into your budget.",
+      "healthcare_notes_why": "English-speaking doctors and EU-standard care make Malta comfortable for US retirees once you're insured and registered.",
+      "visa_summary_why": "Property purchase or rental plus the GRP application is the standard path — EU residency is the payoff for the paperwork."
     },
     "Cyprus": {
       "tax_rate_label": "5% flat tax on foreign pensions over €3,420",
@@ -849,7 +1020,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The 5% flat option on foreign pensions above €3,420/year is one of the EU's best retiree rates — if you elect it and qualify.",
+      "tax_summary_why": "You can choose the 5% pension rate or standard progressive tax — the election is worth modeling before you become tax resident.",
+      "key_exemptions_why": "Territorial aspects for non-domiciled residents add another layer — professional advice pays for itself quickly here.",
+      "healthcare_notes_why": "English-speaking care and EU standards make Cyprus easy for US retirees once private insurance gets you through the visa gate.",
+      "visa_summary_why": "Category F suits passive-income retirees who want EU access with Mediterranean weather and a low pension tax option."
     },
     "South Africa": {
       "tax_rate_label": "Progressive rates up to 45%",
@@ -873,7 +1049,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "New Zealand": {
       "tax_rate_label": "Progressive rates up to 39%",
@@ -897,7 +1078,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 22
+      "flight_hours_from_us": 22,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Japan": {
       "tax_rate_label": "Progressive rates up to 45% (+10% local)",
@@ -921,7 +1107,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 110,
-      "flight_hours_from_us": 14
+      "flight_hours_from_us": 14,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "United Arab Emirates": {
       "tax_rate_label": "No income tax",
@@ -945,7 +1136,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Australia": {
       "tax_rate_label": "Progressive rates 19-45% + 2% Medicare levy",
@@ -969,7 +1165,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 20
+      "flight_hours_from_us": 20,
+      "tax_rate_why": "Australia taxes residents on worldwide income up to 45% plus Medicare levy — the US–Australia treaty helps but doesn't replace US filing.",
+      "tax_summary_why": "Dedicated retirement visas are effectively closed — immigration pathways are the bigger hurdle than the rate on the label.",
+      "key_exemptions_why": "Four-year transitional resident rules may apply to some new arrivals — worth checking if you're planning a recent move.",
+      "healthcare_notes_why": "Medicare for permanent residents is excellent — private insurance bridges the gap during waiting periods.",
+      "visa_summary_why": "Subclass 405/410 retirement visas aren't open to new applicants — explore investor or family routes if Australia is the goal."
     },
     "United States": {
       "tax_rate_label": "Your home country — federal + state taxes apply",
@@ -993,7 +1194,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 120,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Staying home means federal tax on retirement account draws and up to 85% of Social Security — state choice matters enormously for your net income.",
+      "tax_summary_why": "Nine states skip income tax entirely — if you're flexible on location, that's often the biggest tax lever you have without leaving the country.",
+      "key_exemptions_why": "State SS exemptions and property tax rules vary wildly — your city pick affects the bill as much as your portfolio.",
+      "healthcare_notes_why": "Medicare at 65 is the anchor — Medigap or Advantage fills the gaps; budget both premiums and out-of-pocket before you retire.",
+      "visa_summary_why": "No immigration friction — full access to SS, Medicare, and familiar systems is the tradeoff for US tax rates."
     },
     "United Kingdom": {
       "tax_rate_label": "Progressive rates 20-45%",
@@ -1017,7 +1223,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 7
+      "flight_hours_from_us": 7,
+      "tax_rate_why": "US pensions are taxable in the UK as foreign pension income — the treaty governs how, not whether, you'll report them.",
+      "tax_summary_why": "National Insurance and income tax stack on pension income — budget for both, not just the headline rate.",
+      "key_exemptions_why": "Treaty Article 17 and Form 1116 FTC usually coordinate the US and UK sides — don't assume exemption without advice.",
+      "healthcare_notes_why": "NHS access for legal residents is excellent — private cover speeds elective care while you establish residency.",
+      "visa_summary_why": "No retirement visa for Americans — ancestry, wealth, or family routes are the realistic paths for long stays."
     },
     "Canada": {
       "tax_rate_label": "Progressive federal rates 15-33% + provincial",
@@ -1041,7 +1252,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 3
+      "flight_hours_from_us": 3,
+      "tax_rate_why": "Canada taxes residents on worldwide income — the US–Canada treaty coordinates pensions and Social Security so you're not blindly double-taxed.",
+      "tax_summary_why": "Provincial rates stack on federal — your province pick affects the total as much as the national brackets.",
+      "key_exemptions_why": "The treaty is comprehensive but doesn't eliminate US filing — Foreign Tax Credit and treaty articles need professional mapping.",
+      "healthcare_notes_why": "Provincial universal care is excellent once you're a legal resident — wait periods vary by province.",
+      "visa_summary_why": "No dedicated retirement visa — Super Visa works for family ties; most US retirees need another pathway to live full-time."
     },
     "Germany": {
       "tax_rate_label": "Progressive rates 14-45% + solidarity surcharge",
@@ -1065,7 +1281,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 90,
-      "flight_hours_from_us": 9
+      "flight_hours_from_us": 9,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Austria": {
       "tax_rate_label": "Progressive rates 20-55%",
@@ -1089,7 +1310,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Switzerland": {
       "tax_rate_label": "Progressive rates vary by canton (10-36%)",
@@ -1113,7 +1339,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Netherlands": {
       "tax_rate_label": "Progressive rates 36.97-49.5%",
@@ -1137,7 +1368,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Belgium": {
       "tax_rate_label": "Progressive rates up to 50%",
@@ -1161,7 +1397,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Denmark": {
       "tax_rate_label": "Progressive rates up to 55.9%",
@@ -1185,7 +1426,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Sweden": {
       "tax_rate_label": "Progressive rates up to 57%",
@@ -1209,7 +1455,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Norway": {
       "tax_rate_label": "Progressive rates up to 47.4%",
@@ -1233,7 +1484,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Finland": {
       "tax_rate_label": "Progressive rates up to 51.4%",
@@ -1257,7 +1513,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Iceland": {
       "tax_rate_label": "Progressive rates 22.5-46.3%",
@@ -1281,7 +1542,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Ireland": {
       "tax_rate_label": "Progressive rates 20-40% + USC",
@@ -1305,7 +1571,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 7
+      "flight_hours_from_us": 7,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Luxembourg": {
       "tax_rate_label": "Progressive rates up to 42%",
@@ -1329,7 +1600,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Singapore": {
       "tax_rate_label": "Territorial (foreign income generally not taxed)",
@@ -1353,7 +1629,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 200,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Hong Kong": {
       "tax_rate_label": "Territorial (foreign income not taxed locally)",
@@ -1377,7 +1658,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "India": {
       "tax_rate_label": "Progressive rates up to 30%",
@@ -1401,7 +1687,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Days spent in-country and whether you're treated as resident often matter more than the headline rate — track your calendar carefully.",
+      "tax_summary_why": "Crossing the residency threshold can switch you from local-only taxation to worldwide income — plan your stays before you sign a long lease.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "South Korea": {
       "tax_rate_label": "Progressive 6-45%",
@@ -1425,7 +1716,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 150,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Taiwan": {
       "tax_rate_label": "Progressive rates 5-40%",
@@ -1449,7 +1745,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Cambodia": {
       "tax_rate_label": "Flat 20% on foreign income (non-resident exempt)",
@@ -1473,7 +1774,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Sri Lanka": {
       "tax_rate_label": "Progressive rates 6-36%",
@@ -1497,7 +1803,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Nepal": {
       "tax_rate_label": "Progressive rates 1-36%",
@@ -1521,7 +1832,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Albania": {
       "tax_rate_label": "15% flat income tax",
@@ -1545,7 +1861,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Montenegro": {
       "tax_rate_label": "9-15% flat income tax",
@@ -1569,7 +1890,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Bosnia And Herzegovina": {
       "tax_rate_label": "10% flat income tax",
@@ -1593,7 +1919,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "North Macedonia": {
       "tax_rate_label": "10% flat income tax",
@@ -1617,7 +1948,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Slovakia": {
       "tax_rate_label": "Progressive 19-25%",
@@ -1641,7 +1977,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Slovenia": {
       "tax_rate_label": "Progressive 16-50%",
@@ -1665,7 +2006,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Estonia": {
       "tax_rate_label": "20% flat income tax",
@@ -1689,7 +2035,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Latvia": {
       "tax_rate_label": "Progressive 20-31%",
@@ -1713,7 +2064,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Lithuania": {
       "tax_rate_label": "Progressive 15-32%",
@@ -1737,7 +2093,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Moldova": {
       "tax_rate_label": "12% flat income tax",
@@ -1761,7 +2122,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Kazakhstan": {
       "tax_rate_label": "10% flat income tax",
@@ -1785,7 +2151,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Kyrgyzstan": {
       "tax_rate_label": "10% flat income tax",
@@ -1809,7 +2180,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Tajikistan": {
       "tax_rate_label": "12-20% income tax",
@@ -1833,7 +2209,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Uzbekistan": {
       "tax_rate_label": "12% flat income tax",
@@ -1857,7 +2238,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Azerbaijan": {
       "tax_rate_label": "14-25% income tax",
@@ -1881,7 +2267,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Armenia": {
       "tax_rate_label": "20% flat income tax",
@@ -1905,7 +2296,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Jordan": {
       "tax_rate_label": "Progressive 5-30%",
@@ -1929,7 +2325,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Lebanon": {
       "tax_rate_label": "Progressive 2-25%",
@@ -1953,7 +2354,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Israel": {
       "tax_rate_label": "Progressive 10-50%",
@@ -1977,7 +2383,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "New immigrants and returning residents get a 10-year exemption on foreign income — one of the strongest tax holidays for eligible movers.",
+      "tax_summary_why": "The Olim exemption is real but eligibility-specific — it's not available to every retiree who simply wants to relocate.",
+      "key_exemptions_why": "Law of Return and Aliyah status gate the tax benefits — confirm eligibility before counting on the 10-year window.",
+      "healthcare_notes_why": "Kupot holim health funds deliver excellent universal care once you're enrolled — mandatory enrollment for residents.",
+      "visa_summary_why": "Law of Return provides a unique path for eligible Jewish immigrants and family — unlike any standard retirement visa elsewhere."
     },
     "Saudi Arabia": {
       "tax_rate_label": "No personal income tax",
@@ -2001,7 +2412,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Qatar": {
       "tax_rate_label": "No personal income tax",
@@ -2025,7 +2441,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Kuwait": {
       "tax_rate_label": "No personal income tax",
@@ -2049,7 +2470,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Oman": {
       "tax_rate_label": "No personal income tax",
@@ -2073,7 +2499,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Bahrain": {
       "tax_rate_label": "No personal income tax",
@@ -2097,7 +2528,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Pakistan": {
       "tax_rate_label": "Progressive 0-35%",
@@ -2121,7 +2557,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Bangladesh": {
       "tax_rate_label": "Progressive 0-30%",
@@ -2145,7 +2586,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "China": {
       "tax_rate_label": "Progressive 3-45%",
@@ -2169,7 +2615,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Mongolia": {
       "tax_rate_label": "10% flat income tax",
@@ -2193,7 +2644,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Ghana": {
       "tax_rate_label": "Progressive 0-35%",
@@ -2217,7 +2673,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Kenya": {
       "tax_rate_label": "Progressive 10-35%",
@@ -2241,7 +2702,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Tanzania": {
       "tax_rate_label": "Progressive 9-30%",
@@ -2265,7 +2731,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Rwanda": {
       "tax_rate_label": "Progressive 0-30%",
@@ -2289,7 +2760,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Nigeria": {
       "tax_rate_label": "Progressive 7-24%",
@@ -2313,7 +2789,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Ethiopia": {
       "tax_rate_label": "Progressive 10-35%",
@@ -2337,7 +2818,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Uganda": {
       "tax_rate_label": "Progressive 10-40%",
@@ -2361,7 +2847,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Senegal": {
       "tax_rate_label": "Progressive 0-43%",
@@ -2385,7 +2876,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Cameroon": {
       "tax_rate_label": "Progressive 10-38.5%",
@@ -2409,7 +2905,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Ivory Coast": {
       "tax_rate_label": "Progressive 2-36%",
@@ -2433,7 +2934,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Madagascar": {
       "tax_rate_label": "Progressive 0-20%",
@@ -2457,7 +2963,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Mozambique": {
       "tax_rate_label": "Progressive 10-32%",
@@ -2481,7 +2992,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Namibia": {
       "tax_rate_label": "Progressive 18-37%",
@@ -2505,7 +3021,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Botswana": {
       "tax_rate_label": "Progressive 5-25%",
@@ -2529,7 +3050,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Zambia": {
       "tax_rate_label": "Progressive 0-37.5%",
@@ -2553,7 +3079,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Zimbabwe": {
       "tax_rate_label": "Progressive 0-40%",
@@ -2577,7 +3108,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Jamaica": {
       "tax_rate_label": "Progressive 25-30%",
@@ -2601,7 +3137,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Trinidad And Tobago": {
       "tax_rate_label": "25% flat income tax",
@@ -2625,7 +3166,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Barbados": {
       "tax_rate_label": "Progressive 12.5-28.5%",
@@ -2649,7 +3195,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Belize": {
       "tax_rate_label": "Territorial (foreign income not taxed)",
@@ -2673,7 +3224,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Guatemala": {
       "tax_rate_label": "Progressive 5-7%",
@@ -2697,7 +3253,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Honduras": {
       "tax_rate_label": "Progressive 15-25%",
@@ -2721,7 +3282,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Bolivia": {
       "tax_rate_label": "13% flat income tax",
@@ -2745,7 +3311,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Paraguay": {
       "tax_rate_label": "Territorial (foreign income not taxed)",
@@ -2769,7 +3340,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Guyana": {
       "tax_rate_label": "Progressive 28-40%",
@@ -2793,7 +3369,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Fiji": {
       "tax_rate_label": "Progressive 0-20%",
@@ -2817,7 +3398,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Papua New Guinea": {
       "tax_rate_label": "Progressive 22-42%",
@@ -2841,7 +3427,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Seychelles": {
       "tax_rate_label": "Progressive 0-30%",
@@ -2865,7 +3456,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Maldives": {
       "tax_rate_label": "No personal income tax",
@@ -2889,7 +3485,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Brunei": {
       "tax_rate_label": "No personal income tax",
@@ -2913,7 +3514,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Bhutan": {
       "tax_rate_label": "Progressive 0-25%",
@@ -2937,7 +3543,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Nicaragua": {
       "tax_rate_label": "Territorial (foreign income not taxed)",
@@ -2961,7 +3572,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Territorial taxation often keeps US pensions off the local return — but what you remit and your residency status still shape the bill.",
+      "tax_summary_why": "Most retirees living on US pensions and Social Security focus on visa proof and residency days — local tax on foreign income is often minimal if you structure correctly.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "A formal retirement or passive-income visa path exists — income proof and insurance are usually the main hurdles."
     },
     "Kosovo (Disputed Territory)": {
       "tax_rate_label": "Progressive 0-10%",
@@ -2985,7 +3601,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Isle Of Man": {
       "tax_rate_label": "20% flat income tax (10% cap on certain income)",
@@ -3009,7 +3630,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Jersey": {
       "tax_rate_label": "20% flat income tax",
@@ -3033,7 +3659,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "The flat rate on the label is predictable for budgeting — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Bermuda": {
       "tax_rate_label": "No personal income tax",
@@ -3057,7 +3688,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Gibraltar": {
       "tax_rate_label": "Progressive 6-28% (Category 2 max £32,000/year)",
@@ -3081,7 +3717,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Curacao": {
       "tax_rate_label": "Progressive up to 46.5%",
@@ -3105,7 +3746,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "New Caledonia": {
       "tax_rate_label": "Progressive French-style rates",
@@ -3129,7 +3775,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "You'll likely need private insurance to get the visa and for day-to-day care — Medicare doesn't cover you abroad.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Afghanistan": {
       "tax_rate_label": "Not a retirement destination",
@@ -3153,7 +3804,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Algeria": {
       "tax_rate_label": "Progressive 0-35%",
@@ -3177,7 +3833,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Bahamas": {
       "tax_rate_label": "No personal income tax",
@@ -3201,7 +3862,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Zero local income tax is real — but residency pathways, insurance, and living costs still need to work on your budget.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Iraq": {
       "tax_rate_label": "Not recommended - active conflict zones",
@@ -3225,7 +3891,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Malawi": {
       "tax_rate_label": "Progressive 0-35%",
@@ -3249,7 +3920,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — There's no US tax treaty — your US filing continues as usual, and local rules determine what gets taxed here.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "Foreign Tax Credit on your US return is usually the backstop — local exemptions define what you owe here first.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     },
     "Venezuela": {
       "tax_rate_label": "Progressive up to 34% (but economic instability)",
@@ -3273,7 +3949,12 @@
       "disaster_risk_score": 35,
       "stability_score": 65,
       "avg_broadband_mbps": 50,
-      "flight_hours_from_us": 12
+      "flight_hours_from_us": 12,
+      "tax_rate_why": "Progressive rates apply to your income here — The US tax treaty and Foreign Tax Credit usually keep you from paying twice on the same income.",
+      "tax_summary_why": "Your specific income mix (pension, investments, part-time work) determines the practical bill — the summary above is the starting point, not your personal rate.",
+      "key_exemptions_why": "The exemptions above are what separate a favorable setup from a costly one — verify they apply to your income sources.",
+      "healthcare_notes_why": "Healthcare quality varies by city — private insurance is still the safe default for US retirees overseas.",
+      "visa_summary_why": "No dedicated retirement visa — explore passive-income, investor, or long-stay routes that match your situation."
     }
   }
 }

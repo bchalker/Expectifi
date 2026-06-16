@@ -18,15 +18,12 @@ import {
   buildLifestyleInputs,
   hasNonDefaultMapFilters,
   resolveWhereToLook,
-  type ClimateFilter,
   type DirectFlightOrigin,
-  type EnglishProficiencyFilter,
   type ForeignTaxFilter,
   type HealthcareFilter,
   type MapFilters,
   type MapSortBy,
   type MaxFlightTimeFilter,
-  type SafetyFilter,
   type VisaFreeDaysFilter,
 } from "../../lib/whereToRetire/cityMapScoring";
 import type {
@@ -39,7 +36,6 @@ import {
   WtrFilterSegmentedRow,
   WtrFilterToggleBox,
 } from "./WtrFilterFieldChrome";
-import { WtrMinRetirementScoreSlider } from "./WtrMinRetirementScoreSlider";
 import { WtrBudgetTabContent } from "./WtrBudgetTabContent";
 import { WtrFilterCrossRefAnchor } from "./WtrFilterPriorityCrossRef";
 import type { WtrFilterScrollTarget } from "../../lib/whereToRetire/wtrFilterPriorityCrossRef";
@@ -71,34 +67,10 @@ const SORT_OPTIONS: { id: MapSortBy; label: string }[] = [
   { id: "dollar-strength", label: "Strongest dollar" },
 ];
 
-const ENGLISH_PROFICIENCY_OPTIONS: {
-  id: EnglishProficiencyFilter;
-  label: string;
-}[] = [
-  { id: "any", label: "Any English level" },
-  { id: "english-only", label: "English only" },
-  { id: "mostly-english", label: "Mostly English" },
-  { id: "some-english", label: "Some English" },
-];
-
-const CLIMATE_OPTIONS: { id: ClimateFilter; label: string }[] = [
-  { id: "any", label: "Any climate" },
-  { id: "warm-year-round", label: "Warm year-round" },
-  { id: "mediterranean", label: "Mediterranean" },
-  { id: "tropical", label: "Tropical" },
-  { id: "four-seasons", label: "Four seasons" },
-];
-
-const SAFETY_SEGMENTS: { id: SafetyFilter; label: string }[] = [
-  { id: "any", label: "Any" },
-  { id: "reasonably-safe", label: "55+" },
-  { id: "very-safe", label: "75+" },
-];
-
 const HEALTHCARE_SEGMENTS: { id: HealthcareFilter; label: string }[] = [
   { id: "any", label: "Any" },
-  { id: "good-care", label: "60+" },
-  { id: "excellent", label: "75+" },
+  { id: "good-care", label: "Good care+" },
+  { id: "excellent", label: "World-class only" },
 ];
 
 const MAX_FLIGHT_TIME_SEGMENTS: { id: MaxFlightTimeFilter; label: string }[] = [
@@ -120,16 +92,6 @@ type FilterChangeProps = {
   filters: MapFilters;
   onChange: (filters: MapFilters) => void;
 };
-
-function filterSelectFieldClass(chosen: boolean, extra?: string) {
-  return [
-    "wtr-map-filters__field",
-    extra,
-    chosen && "wtr-map-filters__field--chosen",
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
 
 type SortSelectProps = FilterChangeProps & {
   className?: string;
@@ -155,48 +117,6 @@ export function WtrMapSortSelect({
       value={filters.sortBy}
       options={SORT_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
       onChange={(id) => onChange({ ...filters, sortBy: id as MapSortBy })}
-      popoverClassName="wtr-map-filters__select-popover"
-      listClassName="wtr-map-filters__select-list"
-    />
-  );
-}
-
-function EnglishProficiencySelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <AppSelect
-      className={filterSelectFieldClass(filters.englishProficiency !== "any")}
-      ariaLabel="English proficiency"
-      label="English proficiency"
-      labelClassName="wtr-map-filters__field-label"
-      value={filters.englishProficiency}
-      options={ENGLISH_PROFICIENCY_OPTIONS.map((opt) => ({
-        id: opt.id,
-        label: opt.label,
-      }))}
-      onChange={(id) =>
-        onChange({
-          ...filters,
-          englishProficiency: id as EnglishProficiencyFilter,
-        })
-      }
-      popoverClassName="wtr-map-filters__select-popover"
-      listClassName="wtr-map-filters__select-list"
-    />
-  );
-}
-
-function ClimateSelect({ filters, onChange }: FilterChangeProps) {
-  return (
-    <AppSelect
-      className={filterSelectFieldClass(filters.climate !== "any")}
-      ariaLabel="Climate"
-      label="Climate"
-      labelClassName="wtr-map-filters__field-label"
-      value={filters.climate}
-      options={CLIMATE_OPTIONS.map((opt) => ({ id: opt.id, label: opt.label }))}
-      onChange={(id) =>
-        onChange({ ...filters, climate: id as ClimateFilter })
-      }
       popoverClassName="wtr-map-filters__select-popover"
       listClassName="wtr-map-filters__select-list"
     />
@@ -321,6 +241,8 @@ function FilterControlsStack({
         <WtrFilterCrossRefAnchor
           crossRefKey="healthcare"
           highlighted={filterCrossRefHighlight === "healthcare"}
+          noteText="Sets a minimum standard · your Priorities rank above it"
+          showAdjustLink={false}
         >
           <WtrFilterSegmentedRow
             label="Healthcare"
@@ -329,6 +251,7 @@ function FilterControlsStack({
             options={HEALTHCARE_SEGMENTS}
             onChange={(healthcare) => onChange({ ...filters, healthcare })}
           />
+          <p className="wtr-map-filters__field-hint">Rated by country, not city</p>
         </WtrFilterCrossRefAnchor>
         {showUsFilters ? (
           <WtrFilterToggleBox
@@ -342,25 +265,6 @@ function FilterControlsStack({
       </FilterGroupCard>
 
       <FilterGroupCard title="Quality of Life">
-        <EnglishProficiencySelect filters={filters} onChange={onChange} />
-        <WtrFilterCrossRefAnchor
-          crossRefKey="climate"
-          highlighted={filterCrossRefHighlight === "climate"}
-        >
-          <ClimateSelect filters={filters} onChange={onChange} />
-        </WtrFilterCrossRefAnchor>
-        <WtrFilterCrossRefAnchor
-          crossRefKey="safety"
-          highlighted={filterCrossRefHighlight === "safety"}
-        >
-          <WtrFilterSegmentedRow
-            label="Safety"
-            ariaLabel="Safety"
-            value={filters.safety}
-            options={SAFETY_SEGMENTS}
-            onChange={(safety) => onChange({ ...filters, safety })}
-          />
-        </WtrFilterCrossRefAnchor>
         <WtrFilterCrossRefAnchor
           crossRefKey="goodAirOnly"
           highlighted={filterCrossRefHighlight === "goodAirOnly"}
@@ -370,33 +274,6 @@ function FilterControlsStack({
             pressed={filters.goodAirOnly}
             onToggle={() =>
               onChange({ ...filters, goodAirOnly: !filters.goodAirOnly })
-            }
-          />
-        </WtrFilterCrossRefAnchor>
-        <div
-          className="wtr-filter-cross-ref-anchor"
-          data-wtr-filter-crossref="minRetirementScore"
-          data-wtr-filter-crossref-highlight={
-            filterCrossRefHighlight === "minRetirementScore" ? "true" : undefined
-          }
-        >
-          <WtrMinRetirementScoreSlider
-            value={filters.minRetirementScore}
-            onChange={(minRetirementScore) =>
-              onChange({ ...filters, minRetirementScore })
-            }
-          />
-        </div>
-        <WtrFilterCrossRefAnchor
-          crossRefKey="hideAdvisories"
-          highlighted={filterCrossRefHighlight === "hideAdvisories"}
-        >
-          <WtrFilterToggleBox
-            label="Hide unsafe cities"
-            subtitle="with travel advisories"
-            pressed={filters.hideAdvisories}
-            onToggle={() =>
-              onChange({ ...filters, hideAdvisories: !filters.hideAdvisories })
             }
           />
         </WtrFilterCrossRefAnchor>
