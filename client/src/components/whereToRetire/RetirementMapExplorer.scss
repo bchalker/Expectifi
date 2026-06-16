@@ -803,6 +803,10 @@
 }
 
 @media (max-width: 680px) {
+  .where-to-retire__main .wtr-explorer__list-panel-back {
+    display: none;
+  }
+
   .wtr-explorer {
     --wtr-list-panel-w: 100%;
     flex: 0 0 auto;

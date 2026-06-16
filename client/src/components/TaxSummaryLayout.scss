@@ -340,7 +340,7 @@ $tax-summary-sidebar-shadow-detail-open:
   }
 
   .section--tax-summary--where-to-retire .wtr-filters-sidebar {
-    order: 1;
+    order: 2;
     box-shadow: none;
     background: transparent;
   }
@@ -348,7 +348,13 @@ $tax-summary-sidebar-shadow-detail-open:
   .section--tax-summary--where-to-retire
     .section--tax-summary__income-layout
     > .portfolio-accounts-reveal {
-    order: 2;
+    order: 3;
+  }
+}
+
+@media (max-width: 680px) {
+  .section--tax-summary--where-to-retire .where-to-retire__mobile-back {
+    order: 1;
   }
 }
 

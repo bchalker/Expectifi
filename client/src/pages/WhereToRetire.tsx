@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { PreferencesWizardModal } from "../components/preferences/PreferencesWizardModal";
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
 import { WtrFiltersSidebar } from "../components/whereToRetire/WtrFiltersSidebar";
@@ -222,6 +223,16 @@ export function WhereToRetire({ c }: Props) {
             .join(" ")}
         >
           <div className="section--tax-summary__income-layout">
+            <div className="where-to-retire__mobile-back where-to-retire__main-panel-back">
+              <button
+                type="button"
+                className="app-page-back where-to-retire__panel-back"
+                onClick={() => navigateApp(APP_DASHBOARD_PATH)}
+              >
+                <IconArrowLeft size={16} stroke={1.5} aria-hidden />
+                Back to dashboard
+              </button>
+            </div>
             <div
               className={[
                 "portfolio-accounts-reveal",

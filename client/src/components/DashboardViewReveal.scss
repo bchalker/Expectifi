@@ -91,6 +91,7 @@
 .account-balances-stack,
 .main > .section--life-events,
 .where-to-retire__main-panel-back,
+.where-to-retire__mobile-back,
 .wtr-filters-sidebar__intro,
 .wtr-filters-sidebar__slider,
 .where-to-retire__map-stage,
@@ -120,6 +121,7 @@ html[data-dashboard-view-flush] {
   .account-balances-stack,
   .main > .section--life-events,
   .where-to-retire__main-panel-back,
+  .where-to-retire__mobile-back,
   .wtr-filters-sidebar__intro,
   .wtr-filters-sidebar__slider,
   .where-to-retire__map-stage,
@@ -184,7 +186,8 @@ html[data-dashboard-view-enter='income'] {
 
 /* Where to retire page — same top-down rhythm. */
 html[data-dashboard-view-enter='where-to-retire'] {
-  .where-to-retire__main-panel-back {
+  .where-to-retire__main-panel-back,
+  .where-to-retire__mobile-back {
     @include dashboard-view-rise(0);
   }
 
@@ -272,6 +275,7 @@ html[data-dashboard-view-enter='income']
   html[data-dashboard-view-enter='income'] .where-to-retire-preview-panel,
   html[data-dashboard-view-enter='income'] .account-balances-stack,
   html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__main-panel-back,
+  html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__mobile-back,
   html[data-dashboard-view-enter='where-to-retire'] .wtr-filters-sidebar__intro,
   html[data-dashboard-view-enter='where-to-retire'] .wtr-filters-sidebar__slider,
   html[data-dashboard-view-enter='where-to-retire'] .where-to-retire__map-stage,

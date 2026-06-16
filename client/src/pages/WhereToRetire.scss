@@ -109,6 +109,10 @@
   box-sizing: border-box;
 }
 
+.where-to-retire__mobile-back {
+  display: none;
+}
+
 .where-to-retire__main--drawer-open,
 .section--tax-summary--where-to-retire--drawer-open .where-to-retire__main {
   overflow: visible;
@@ -159,6 +163,16 @@
   .app-scroll-stack--where-to-retire > .app-scroll-stack__main > .where-to-retire {
     flex: 0 0 auto;
     min-height: auto;
+  }
+
+  .where-to-retire__mobile-back {
+    display: flex;
+    position: static;
+    order: 1;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-3) var(--space-5);
+    border-radius: 0;
   }
 
   .where-to-retire__main {
