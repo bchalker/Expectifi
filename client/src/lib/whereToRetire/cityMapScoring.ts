@@ -16,6 +16,7 @@ import {
   type LifestyleInputs,
   type MapCity,
 } from '../../utils/costOfLiving'
+import { hasReconsiderTravelAdvisory } from '../travelAdvisories'
 import {
   passesEnglishProficiencyMapFilter,
   type EnglishProficiencyFilter,
@@ -132,6 +133,8 @@ export type MapFilters = {
   medicareAccess: boolean
   /** When true, cities in travel-advisory countries are hidden. */
   hideAdvisories: boolean
+  /** When true, cities in Level 3 (Reconsider Travel) countries are hidden. */
+  hideLevel3Cautions: boolean
   safety: SafetyFilter
   healthcare: HealthcareFilter
   goodAirOnly: boolean
@@ -164,6 +167,7 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   retirementVisa: false,
   medicareAccess: false,
   hideAdvisories: false,
+  hideLevel3Cautions: false,
   safety: 'any',
   healthcare: 'any',
   goodAirOnly: false,
@@ -547,6 +551,7 @@ export function countActiveMapFilters(filters: MapFilters): number {
   if (filters.retirementVisa) count += 1
   if (filters.medicareAccess) count += 1
   if (filters.hideAdvisories) count += 1
+  if (filters.hideLevel3Cautions) count += 1
   if (filters.safety !== 'any') count += 1
   if (filters.healthcare !== 'any') count += 1
   if (filters.goodAirOnly) count += 1
@@ -576,6 +581,7 @@ export function mapFiltersKey(filters: MapFilters): string {
     filters.retirementVisa ? '1' : '0',
     filters.medicareAccess ? '1' : '0',
     filters.hideAdvisories ? '1' : '0',
+    filters.hideLevel3Cautions ? '1' : '0',
     filters.safety,
     filters.healthcare,
     filters.goodAirOnly ? '1' : '0',
@@ -613,6 +619,8 @@ export function passesMapFilters(
   if (!passesMapDealbreakers(city.country, filters)) return false
 
   if (filters.hideAdvisories && hasTravelAdvisory(city.country)) return false
+
+  if (filters.hideLevel3Cautions && hasReconsiderTravelAdvisory(city.country)) return false
 
   if (!passesSafetyFilter(city.country, filters.safety)) return false
   if (!passesHealthcareFilter(city.country, filters.healthcare)) return false

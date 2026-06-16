@@ -5,6 +5,7 @@ import {
   CloseButton,
 } from "@heroui/react";
 import { AppSelect } from "../ui/AppSelect";
+import { AppButton } from "../ui/AppButton";
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
 import { useIsMobileBottomSheet } from "../../hooks/useMobileBottomSheet";
@@ -28,7 +29,10 @@ import {
   type SafetyFilter,
   type VisaFreeDaysFilter,
 } from "../../lib/whereToRetire/cityMapScoring";
-import type { FavoriteCityEntry } from "../../lib/retirementStorage";
+import type {
+  ExcludedCountryEntry,
+  FavoriteCityEntry,
+} from "../../lib/retirementStorage";
 import { WtrMapFiltersExcludeTab } from "./WtrMapFiltersExcludeTab";
 import { WtrMapFiltersFavoritesTab } from "./WtrMapFiltersFavoritesTab";
 import {
@@ -407,11 +411,10 @@ type PanelProps = FilterChangeProps & {
   activeTab: MapOptionsPanelTab;
   onActiveTabChange: (tab: MapOptionsPanelTab) => void;
   monthlyIncome: number;
-  excludedCountries: string[];
+  excludedCountryEntries: ExcludedCountryEntry[];
   favoriteCities: FavoriteCityEntry[];
   onAddExcludedCountry: (country: string) => void;
   onRemoveExcludedCountry: (country: string) => void;
-  onClearExcludedCountries: () => void;
   onRemoveFavorite: (city: string, country: string) => void;
   filterCrossRefHighlight?: WtrFilterScrollTarget | null;
   onFilterCrossRefHighlightClear?: () => void;
@@ -433,11 +436,10 @@ export function RetirementMapFilters({
   filters,
   onChange,
   monthlyIncome,
-  excludedCountries,
+  excludedCountryEntries,
   favoriteCities,
   onAddExcludedCountry,
   onRemoveExcludedCountry,
-  onClearExcludedCountries,
   onRemoveFavorite,
   filterCrossRefHighlight = null,
   onFilterCrossRefHighlightClear,
@@ -466,11 +468,11 @@ export function RetirementMapFilters({
   const panelTabs = useMemo(
     () =>
       FILTER_PANEL_TABS.map((tab) =>
-        tab.id === "exclude" && excludedCountries.length > 0
-          ? { ...tab, label: `Excluded (${excludedCountries.length})` }
+        tab.id === "exclude" && excludedCountryEntries.length > 0
+          ? { ...tab, label: `Excluded (${excludedCountryEntries.length})` }
           : tab,
       ),
-    [excludedCountries.length],
+    [excludedCountryEntries.length],
   );
 
   const {
@@ -584,10 +586,11 @@ export function RetirementMapFilters({
 
           {activeTab === "exclude" ? (
             <WtrMapFiltersExcludeTab
-              excludedCountries={excludedCountries}
+              filters={filters}
+              onChange={onChange}
+              excludedCountryEntries={excludedCountryEntries}
               onAddExcludedCountry={onAddExcludedCountry}
               onRemoveExcludedCountry={onRemoveExcludedCountry}
-              onClearExcludedCountries={onClearExcludedCountries}
             />
           ) : null}
 
@@ -612,8 +615,8 @@ export function RetirementMapFilters({
         </div>
       </div>
 
-      {activeTab === "filters" && showClearFilters ? (
-        <footer className="wtr-map-filters__footer">
+      <footer className="wtr-map-filters__footer">
+        {activeTab === "filters" && showClearFilters ? (
           <Button
             variant="ghost"
             size="sm"
@@ -622,11 +625,8 @@ export function RetirementMapFilters({
           >
             Clear filters
           </Button>
-        </footer>
-      ) : null}
-
-      {activeTab === "budget" && showClearBudget ? (
-        <footer className="wtr-map-filters__footer">
+        ) : null}
+        {activeTab === "budget" && showClearBudget ? (
           <Button
             variant="ghost"
             size="sm"
@@ -635,8 +635,17 @@ export function RetirementMapFilters({
           >
             Reset to typical
           </Button>
-        </footer>
-      ) : null}
+        ) : null}
+        <AppButton
+          type="button"
+          size="md"
+          variant="primary"
+          className="wtr-map-filters__confirm"
+          onPress={onClose}
+        >
+          Confirm
+        </AppButton>
+      </footer>
       </div>
     </aside>
     </>

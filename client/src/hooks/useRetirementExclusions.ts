@@ -3,6 +3,7 @@ import {
   addExcludedCountry,
   clearExcludedCountries,
   getExcludedCountries,
+  getExcludedCountryEntries,
   removeExcludedCountry,
   RETIREMENT_EXCLUSIONS_EVENT,
   setExcludedCountries,
@@ -14,16 +15,23 @@ function subscribe(onStoreChange: () => void) {
 }
 
 function getSnapshot() {
-  return getExcludedCountries().join('\u0001')
+  return [
+    getExcludedCountries().join('\u0001'),
+    getExcludedCountryEntries()
+      .map((entry) => `${entry.country}\u0002${entry.reason}`)
+      .join('\u0003'),
+  ].join('|')
 }
 
 export function useRetirementExclusions() {
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
   const excludedCountries = getExcludedCountries()
+  const excludedCountryEntries = getExcludedCountryEntries()
 
   return {
     excludedCountries,
+    excludedCountryEntries,
     setExcludedCountries: useCallback((countries: string[]) => {
       setExcludedCountries(countries)
     }, []),

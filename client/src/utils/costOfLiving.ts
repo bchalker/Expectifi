@@ -162,24 +162,16 @@ export const EXCLUDED_COUNTRIES = [
   'Libya',
 ] as const
 
-/** Shown with travel-advisory badge; can be hidden via map filters. */
-export const TRAVEL_ADVISORY_COUNTRIES = ['Venezuela', 'Nicaragua'] as const
-
 const EXCLUDED_COUNTRY_KEYS = new Set(
   EXCLUDED_COUNTRIES.map((c) => normalizeLookup(c)),
-)
-
-const TRAVEL_ADVISORY_COUNTRY_KEYS = new Set(
-  TRAVEL_ADVISORY_COUNTRIES.map((c) => normalizeLookup(c)),
 )
 
 export function isExcludedCountry(country: string): boolean {
   return EXCLUDED_COUNTRY_KEYS.has(normalizeLookup(country))
 }
 
-export function hasTravelAdvisory(country: string): boolean {
-  return TRAVEL_ADVISORY_COUNTRY_KEYS.has(normalizeLookup(country))
-}
+/** Level 4 — default-exclude and “Hide unsafe cities” filter. */
+export { hasDoNotTravelAdvisory as hasTravelAdvisory } from '../lib/travelAdvisories'
 
 let cachedCities: CityData[] | null = null
 let cachedMapCities: MapCity[] | null = null

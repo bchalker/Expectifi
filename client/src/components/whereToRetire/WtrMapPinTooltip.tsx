@@ -10,6 +10,8 @@ import {
   formatUsd,
   hasTravelAdvisory,
 } from '../../utils/costOfLiving'
+import { hasReconsiderTravelAdvisory } from '../../lib/travelAdvisories'
+import { WtrTravelAdvisoryCautionChip } from './WtrTravelAdvisoryCautionChip'
 import {
   formatEstimatedAmericans,
   getExpatDestinationInfo,
@@ -40,6 +42,7 @@ export function WtrMapPinTooltip({
   const { displayScore: badgeScore, bandClass, pinColor, bandLabel } = display
   const fitBadgeColors = getFitScoreColors(badgeScore)
   const showAdvisory = hasTravelAdvisory(city.country)
+  const showCaution = hasReconsiderTravelAdvisory(city.country)
   const incomeFit = mapIncomeFitDisplayForCity(
     city.city,
     city.country,
@@ -131,6 +134,13 @@ export function WtrMapPinTooltip({
                 {incomeFit.visaLabel}
               </span>
               <span className="wtr-dest-card__meta-tax">{incomeFit.taxLabel}</span>
+              {showCaution ? (
+                <WtrTravelAdvisoryCautionChip country={city.country} />
+              ) : null}
+            </div>
+          ) : showCaution ? (
+            <div className="wtr-dest-card__meta font-xs">
+              <WtrTravelAdvisoryCautionChip country={city.country} />
             </div>
           ) : null}
 

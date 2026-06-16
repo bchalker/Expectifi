@@ -3,6 +3,7 @@ import {
   addExcludedCountry,
   clearExcludedCountries,
   getExcludedCountries,
+  getExcludedCountryEntries,
   getFavoriteCities,
   isFavorited,
   removeExcludedCountry,
@@ -10,6 +11,7 @@ import {
   RETIREMENT_STORAGE_EVENT,
   setExcludedCountries,
   toggleFavoriteCity,
+  type ExcludedCountryEntry,
   type FavoriteCityEntry,
 } from '../lib/retirementStorage'
 
@@ -22,6 +24,9 @@ function getSnapshot() {
   const favorites = getFavoriteCities()
   return [
     getExcludedCountries().join('\u0001'),
+    getExcludedCountryEntries()
+      .map((entry) => `${entry.country}\u0002${entry.reason}`)
+      .join('\u0003'),
     favorites.map((f) => `${f.city}\u0001${f.country}`).join('\u0002'),
   ].join('|')
 }
@@ -31,10 +36,12 @@ export function useRetirementMapStorage() {
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
   const excludedCountries = getExcludedCountries()
+  const excludedCountryEntries = getExcludedCountryEntries()
   const favoriteCities = getFavoriteCities()
 
   return {
     excludedCountries,
+    excludedCountryEntries,
     favoriteCities,
     setExcludedCountries: useCallback((countries: string[]) => {
       setExcludedCountries(countries)
@@ -63,4 +70,4 @@ export function useRetirementMapStorage() {
   }
 }
 
-export type { FavoriteCityEntry }
+export type { ExcludedCountryEntry, FavoriteCityEntry }

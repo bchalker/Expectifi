@@ -40,7 +40,15 @@ import { useUserTier } from "../hooks/useUserTier";
 import { hasRetirementPreferences } from "../types/preferences";
 import { PLAN_STATE_SERVER_HYDRATED_EVENT } from "../lib/planStateServerSync";
 import { useWtrMapPinColorView } from "../hooks/useWtrMapPinColorView";
+import {
+  hasNonDefaultUserExclusions,
+} from "../lib/retirementStorage";
 import type { MapCity } from "../utils/costOfLiving";
+import { AppToast } from "../components/ui/AppToast";
+import {
+  HIDE_LEVEL3_CAUTIONS_TOAST_MESSAGE,
+  WTR_HIDE_LEVEL3_CAUTIONS_EVENT,
+} from "../lib/whereToRetire/wtrHideLevel3Cautions";
 import "../components/TaxSummaryLayout.scss";
 import "./WhereToRetire.scss";
 
@@ -92,6 +100,7 @@ export function WhereToRetire({ c }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<MapOptionsPanelTab>("filters");
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+  const [hideLevel3ToastVisible, setHideLevel3ToastVisible] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   const notifyMapLayout = useCallback(() => {
@@ -145,6 +154,21 @@ export function WhereToRetire({ c }: Props) {
   );
 
   useEffect(() => {
+    const onHideLevel3 = () => {
+      setMapFilters((prev) => {
+        if (prev.hideLevel3Cautions) return prev;
+        const next = { ...prev, hideLevel3Cautions: true };
+        saveBudgetPreferences(next.budgetPreferences);
+        return next;
+      });
+      setHideLevel3ToastVisible(true);
+    };
+    window.addEventListener(WTR_HIDE_LEVEL3_CAUTIONS_EVENT, onHideLevel3);
+    return () =>
+      window.removeEventListener(WTR_HIDE_LEVEL3_CAUTIONS_EVENT, onHideLevel3);
+  }, []);
+
+  useEffect(() => {
     setExplorationIncome(defaultExplorationIncome(grossMonthlyIncome));
   }, [grossMonthlyIncome]);
 
@@ -154,12 +178,12 @@ export function WhereToRetire({ c }: Props) {
       (isAtProjectedExplorationIncome(grossMonthlyIncome, explorationIncome)
         ? 0
         : 1) +
-      (storage.excludedCountries.length > 0 ? 1 : 0),
+      (hasNonDefaultUserExclusions(storage.excludedCountryEntries) ? 1 : 0),
     [
       grossMonthlyIncome,
       explorationIncome,
       mapFilters,
-      storage.excludedCountries.length,
+      storage.excludedCountryEntries,
     ],
   );
 
@@ -306,6 +330,7 @@ export function WhereToRetire({ c }: Props) {
                     pinColorView={pinColorView}
                     onPinColorViewChange={handlePinColorViewChange}
                     excludedCountries={storage.excludedCountries}
+                    excludedCountryEntries={storage.excludedCountryEntries}
                     isFavoritedCity={storage.isFavoritedCity}
                     onToggleFavoriteCity={storage.toggleFavoriteCity}
                     favoriteCities={storage.favoriteCities}
@@ -317,7 +342,6 @@ export function WhereToRetire({ c }: Props) {
                     onDrawerTabChange={setDrawerTab}
                     onAddExcludedCountry={storage.addExcludedCountry}
                     onRemoveExcludedCountry={storage.removeExcludedCountry}
-                    onClearExcludedCountries={storage.clearExcludedCountries}
                     onRemoveFavorite={storage.removeFavoriteCity}
                     compareIds={compareIds}
                     compareOverlayOpen={viewMode === "compare"}
@@ -401,6 +425,13 @@ export function WhereToRetire({ c }: Props) {
         initialWizardStep={preferencesInitialStep}
         scrollToFactorId={preferencesScrollFactorId}
         mapFilters={mapFilters}
+      />
+      <AppToast
+        message={HIDE_LEVEL3_CAUTIONS_TOAST_MESSAGE}
+        visible={hideLevel3ToastVisible}
+        onDismiss={() => setHideLevel3ToastVisible(false)}
+        placement="corner"
+        durationMs={3500}
       />
     </div>
   );

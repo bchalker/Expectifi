@@ -46,7 +46,10 @@ import {
   type MapOptionsPanelTab,
 } from "./RetirementMapFilters";
 import type { WtrFilterScrollTarget } from "../../lib/whereToRetire/wtrFilterPriorityCrossRef";
-import type { FavoriteCityEntry } from "../../lib/retirementStorage";
+import type {
+  ExcludedCountryEntry,
+  FavoriteCityEntry,
+} from "../../lib/retirementStorage";
 import "./RetirementMapExplorer.scss";
 
 export type WtrExplorerViewMode = "map" | "compare";
@@ -72,7 +75,6 @@ type Props = {
   onDrawerTabChange: (tab: MapOptionsPanelTab) => void;
   onAddExcludedCountry: (country: string) => void;
   onRemoveExcludedCountry: (country: string) => void;
-  onClearExcludedCountries: () => void;
   onRemoveFavorite: (city: string, country: string) => void;
   compareIds: string[];
   compareOverlayOpen?: boolean;
@@ -81,6 +83,7 @@ type Props = {
   onClearCompare: () => void;
   onViewComparison: () => void;
   excludedCountries: string[];
+  excludedCountryEntries: ExcludedCountryEntry[];
   favoriteCities: FavoriteCityEntry[];
   isFavoritedCity: (city: string, country: string) => boolean;
   onToggleFavoriteCity: (entry: {
@@ -209,7 +212,6 @@ export function RetirementMapExplorer({
   onDrawerTabChange,
   onAddExcludedCountry,
   onRemoveExcludedCountry,
-  onClearExcludedCountries,
   onRemoveFavorite,
   compareIds,
   compareOverlayOpen = false,
@@ -218,6 +220,7 @@ export function RetirementMapExplorer({
   onClearCompare,
   onViewComparison,
   excludedCountries,
+  excludedCountryEntries,
   favoriteCities,
   isFavoritedCity,
   onToggleFavoriteCity,
@@ -262,6 +265,16 @@ export function RetirementMapExplorer({
       ),
     [explorationIncome, filters, excludedCountries, preferences],
   );
+
+  /** Canonical fit-score rank — stable when the list is re-sorted by pin view or filters. */
+  const fitRankByCityId = useMemo(() => {
+    const fitSorted = [...baseFilteredCities].sort((a, b) => {
+      const byScore = b.retirementScore - a.retirementScore;
+      if (byScore !== 0) return byScore;
+      return a.city.city.localeCompare(b.city.city);
+    });
+    return new Map(fitSorted.map((item, index) => [item.city.id, index + 1]));
+  }, [baseFilteredCities]);
 
   const sortedCities = useMemo(
     () =>
@@ -330,6 +343,7 @@ export function RetirementMapExplorer({
         filters.retirementVisa ? "1" : "0",
         filters.medicareAccess ? "1" : "0",
         filters.hideAdvisories ? "1" : "0",
+        filters.hideLevel3Cautions ? "1" : "0",
         filters.safety,
         filters.healthcare,
         filters.goodAirOnly ? "1" : "0",
@@ -361,6 +375,7 @@ export function RetirementMapExplorer({
       filters.visaQualifyingOnly,
       filters.fitsMyIncome,
       filters.hideAdvisories,
+      filters.hideLevel3Cautions,
       filters.medicareAccess,
       filters.regionScope,
       filters.regions,
@@ -719,7 +734,7 @@ export function RetirementMapExplorer({
                           scored={item}
                           monthlyIncome={explorationIncome}
                           pinColorView={pinColorView}
-                          rank={safeListPage * LIST_PAGE_SIZE + index + 1}
+                          rank={fitRankByCityId.get(item.city.id) ?? 0}
                           active={selectedId === item.city.id}
                           staggerIndex={index}
                           incomeFit={mapIncomeFitDisplayForCity(
@@ -831,11 +846,10 @@ export function RetirementMapExplorer({
           filters={filters}
           onChange={onFiltersChange}
           monthlyIncome={explorationIncome}
-          excludedCountries={excludedCountries}
+          excludedCountryEntries={excludedCountryEntries}
           favoriteCities={favoriteCities}
           onAddExcludedCountry={onAddExcludedCountry}
           onRemoveExcludedCountry={onRemoveExcludedCountry}
-          onClearExcludedCountries={onClearExcludedCountries}
           onRemoveFavorite={onRemoveFavorite}
           filterCrossRefHighlight={filterCrossRefHighlight}
           onFilterCrossRefHighlightClear={onFilterCrossRefHighlightClear}

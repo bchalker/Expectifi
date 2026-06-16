@@ -14,6 +14,8 @@ import {
   formatUsd,
   hasTravelAdvisory,
 } from "../../utils/costOfLiving";
+import { hasReconsiderTravelAdvisory } from "../../lib/travelAdvisories";
+import { WtrTravelAdvisoryCautionChip } from "./WtrTravelAdvisoryCautionChip";
 import { getFitScoreColors } from "../../utils/fitScore";
 import { CountryFlag } from "../ui/CountryFlag";
 import {
@@ -59,6 +61,7 @@ export function RetirementDestinationCard({
   const { displayScore: badgeScore, bandClass, pinColor, bandLabel } = display;
   const fitBadgeColors = getFitScoreColors(badgeScore);
   const showAdvisory = hasTravelAdvisory(city.country);
+  const showCaution = hasReconsiderTravelAdvisory(city.country);
   const expatInfo =
     pinColorView === "expat" ? getExpatDestinationInfo(city.country) : null;
   const americansNote =
@@ -199,6 +202,13 @@ export function RetirementDestinationCard({
                 {incomeFit.visaLabel}
               </span>
               <span className="wtr-dest-card__meta-tax">{incomeFit.taxLabel}</span>
+              {showCaution ? (
+                <WtrTravelAdvisoryCautionChip country={city.country} />
+              ) : null}
+            </div>
+          ) : showCaution ? (
+            <div className="wtr-dest-card__meta font-xs">
+              <WtrTravelAdvisoryCautionChip country={city.country} />
             </div>
           ) : null}
 

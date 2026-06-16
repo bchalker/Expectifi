@@ -1,3 +1,8 @@
+import {
+  getDoNotTravelAdvisoryCountries,
+  hasDoNotTravelAdvisory,
+} from './travelAdvisories'
+
 export type FavoriteCityEntry = {
   city: string
   country: string
@@ -5,12 +10,20 @@ export type FavoriteCityEntry = {
   savedAt: string
 }
 
-const EXCLUDED_COUNTRIES_KEY = 'retirement_excluded_countries'
+export type ExclusionReason = 'travel_advisory' | 'manual'
+
+export type ExcludedCountryEntry = {
+  country: string
+  reason: ExclusionReason
+}
+
+const MANUAL_EXCLUDED_COUNTRIES_KEY = 'retirement_excluded_countries'
+const ADVISORY_INCLUDED_OVERRIDES_KEY = 'retirement_advisory_included_overrides'
 const FAVORITE_CITIES_KEY = 'retirement_favorite_cities'
 
-export function getExcludedCountries(): string[] {
+function readStringList(key: string): string[] {
   try {
-    const raw = localStorage.getItem(EXCLUDED_COUNTRIES_KEY)
+    const raw = localStorage.getItem(key)
     const parsed = raw ? JSON.parse(raw) : []
     return Array.isArray(parsed) ? parsed.filter((c) => typeof c === 'string') : []
   } catch {
@@ -18,23 +31,106 @@ export function getExcludedCountries(): string[] {
   }
 }
 
-export function setExcludedCountries(countries: string[]): void {
-  localStorage.setItem(EXCLUDED_COUNTRIES_KEY, JSON.stringify(countries))
+function writeStringList(key: string, values: string[]): void {
+  localStorage.setItem(key, JSON.stringify(values))
   dispatchStorageChange()
 }
 
+/** User-initiated country exclusions (search / detail panel). */
+export function getManualExcludedCountries(): string[] {
+  return readStringList(MANUAL_EXCLUDED_COUNTRIES_KEY)
+}
+
+/** Countries the user chose to include despite a default travel-advisory exclusion. */
+export function getAdvisoryIncludedOverrides(): string[] {
+  return readStringList(ADVISORY_INCLUDED_OVERRIDES_KEY)
+}
+
+function setManualExcludedCountries(countries: string[]): void {
+  writeStringList(MANUAL_EXCLUDED_COUNTRIES_KEY, countries)
+}
+
+function setAdvisoryIncludedOverrides(countries: string[]): void {
+  writeStringList(ADVISORY_INCLUDED_OVERRIDES_KEY, countries)
+}
+
+/** Same source as the Filters “Hide unsafe cities” toggle (`hasTravelAdvisory`). */
+export function getDefaultTravelAdvisoryExcludedCountries(): readonly string[] {
+  return getDoNotTravelAdvisoryCountries()
+}
+
+export function isDefaultTravelAdvisoryExclusion(country: string): boolean {
+  return hasDoNotTravelAdvisory(country)
+}
+
+/** Merged exclusion list used for map filtering and counts. */
+export function getExcludedCountries(): string[] {
+  const overrides = new Set(getAdvisoryIncludedOverrides())
+  const advisory = getDoNotTravelAdvisoryCountries().filter((country) => !overrides.has(country))
+  const manual = getManualExcludedCountries()
+  return [...new Set([...advisory, ...manual])]
+}
+
+export function getExcludedCountryEntries(): ExcludedCountryEntry[] {
+  const overrides = new Set(getAdvisoryIncludedOverrides())
+  const manual = new Set(getManualExcludedCountries())
+  const entries: ExcludedCountryEntry[] = []
+
+  for (const country of getDoNotTravelAdvisoryCountries()) {
+    if (!overrides.has(country)) {
+      entries.push({ country, reason: 'travel_advisory' })
+    }
+  }
+
+  for (const country of manual) {
+    if (hasDoNotTravelAdvisory(country) && !overrides.has(country)) continue
+    entries.push({ country, reason: 'manual' })
+  }
+
+  entries.sort((a, b) => a.country.localeCompare(b.country))
+  return entries
+}
+
+/** True when exclusions differ from the default travel-advisory set alone. */
+export function hasNonDefaultUserExclusions(
+  entries: readonly ExcludedCountryEntry[] = getExcludedCountryEntries(),
+): boolean {
+  const hasManual = entries.some((entry) => entry.reason === 'manual')
+  const advisoryCount = entries.filter((entry) => entry.reason === 'travel_advisory').length
+  const overrideCount = getDoNotTravelAdvisoryCountries().length - advisoryCount
+  return hasManual || overrideCount > 0
+}
+
+export function setExcludedCountries(countries: string[]): void {
+  setManualExcludedCountries(countries)
+}
+
 export function addExcludedCountry(country: string): void {
-  const current = getExcludedCountries()
+  if (hasDoNotTravelAdvisory(country)) {
+    setAdvisoryIncludedOverrides(
+      getAdvisoryIncludedOverrides().filter((name) => name !== country),
+    )
+    return
+  }
+  const current = getManualExcludedCountries()
   if (current.includes(country)) return
-  setExcludedCountries([...current, country])
+  setManualExcludedCountries([...current, country])
 }
 
 export function removeExcludedCountry(country: string): void {
-  setExcludedCountries(getExcludedCountries().filter((c) => c !== country))
+  if (hasDoNotTravelAdvisory(country)) {
+    const overrides = getAdvisoryIncludedOverrides()
+    if (!overrides.includes(country)) {
+      setAdvisoryIncludedOverrides([...overrides, country])
+    }
+    return
+  }
+  setManualExcludedCountries(getManualExcludedCountries().filter((c) => c !== country))
 }
 
 export function clearExcludedCountries(): void {
-  setExcludedCountries([])
+  setManualExcludedCountries([])
+  setAdvisoryIncludedOverrides([])
 }
 
 export const RETIREMENT_EXCLUSIONS_EVENT = 'retirement-exclusions-changed'

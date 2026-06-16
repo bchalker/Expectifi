@@ -12,7 +12,8 @@ import {
 } from './welcomeGate'
 
 const LEGACY_FORCE_ONBOARDING_SESSION_KEY = 'headwayplanner_force_onboarding'
-const EXCLUDED_COUNTRIES_KEY = 'retirement_excluded_countries'
+const MANUAL_EXCLUDED_COUNTRIES_KEY = 'retirement_excluded_countries'
+const ADVISORY_INCLUDED_OVERRIDES_KEY = 'retirement_advisory_included_overrides'
 const FAVORITE_CITIES_KEY = 'retirement_favorite_cities'
 const MANUAL_PROJECTIONS_CALLOUT_DISMISSED_KEY =
   'retirement-calculator/manual-projections-callout-dismissed'
@@ -60,7 +61,8 @@ export function clearAllLocalUserData(): void {
     for (const key of ALL_EXPECTIFI_PLAN_KEYS) {
       localStorage.removeItem(key)
     }
-    localStorage.removeItem(EXCLUDED_COUNTRIES_KEY)
+    localStorage.removeItem(MANUAL_EXCLUDED_COUNTRIES_KEY)
+    localStorage.removeItem(ADVISORY_INCLUDED_OVERRIDES_KEY)
     localStorage.removeItem(FAVORITE_CITIES_KEY)
     localStorage.removeItem(MANUAL_PROJECTIONS_CALLOUT_DISMISSED_KEY)
     localStorage.removeItem(OPEN_ER_CACHE_PREFIX)

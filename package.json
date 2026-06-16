@@ -12,7 +12,8 @@
     "dev": "npm run dev:client & npm run dev:server",
     "build": "npm run build -w client",
     "build:client": "npm run build -w client",
-    "start": "npm run start -w server"
+    "start": "npm run start -w server",
+    "refresh-travel-advisories": "node scripts/refresh-travel-advisories.mjs"
   },
   "devDependencies": {
     "amadeus": "^11.0.0"

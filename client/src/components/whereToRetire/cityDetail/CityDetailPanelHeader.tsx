@@ -10,6 +10,8 @@ import type { RetirementScoreResult } from '../../../utils/retirementScore'
 import { CountryFlag } from '../../ui/CountryFlag'
 import { Tooltip } from '../../Tooltip'
 import { EXCLUDE_COUNTRY_TOOLTIP } from '../WtrExcludeCountryIcon'
+import { hasReconsiderTravelAdvisory } from '../../../lib/travelAdvisories'
+import { WtrTravelAdvisoryCautionChip } from '../WtrTravelAdvisoryCautionChip'
 
 export type CityDetailPanelHeaderProps = {
   cityName: string
@@ -37,6 +39,7 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
   const fitScore = Math.max(0, Math.min(100, Math.round(headerScore.displayScore)))
   const { band: scoreBand, label: scoreBandLabel } = scoreDetailBandFromScore(fitScore)
   const fitScoreColors = getFitScoreColors(fitScore)
+  const showCaution = hasReconsiderTravelAdvisory(country)
 
   return (
     <header className="wtr-city-detail__header" aria-label="Destination summary">
@@ -108,6 +111,9 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
                   <IconForbid size={16} stroke={1.5} aria-hidden />
                 </span>
               </Tooltip>
+            ) : null}
+            {showCaution ? (
+              <WtrTravelAdvisoryCautionChip country={country} />
             ) : null}
           </div>
         </div>
