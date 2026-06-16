@@ -339,11 +339,21 @@
   border-top: 1px solid var(--border);
 }
 
-.wtr-filters-sidebar__preferences-row {
+.wtr-filters-sidebar__preferences-stack {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  min-width: 0;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.wtr-filters-sidebar__preferences-stack .wtr-filters-sidebar__preferences-btn {
+  justify-content: center;
+}
+
+.wtr-filters-sidebar__preferences-stack .wtr-filters-sidebar__preferences-btn-copy {
+  align-items: center;
+  text-align: center;
 }
 
 .wtr-filters-sidebar__preferences-btn {

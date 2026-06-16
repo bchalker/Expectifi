@@ -151,7 +151,7 @@ export function WtrFiltersSidebar({
             <div className="wtr-filters-sidebar__preferences-wrap">
               <div className="wtr-filters-sidebar__preferences-panel">
                 <div className="wtr-filters-sidebar__preferences-cta">
-                  <div className="wtr-filters-sidebar__preferences-row">
+                  <div className="wtr-filters-sidebar__preferences-stack">
                     <button
                       type="button"
                       className={[

@@ -1,6 +1,13 @@
-import { IconProgressHelp, IconX } from "@tabler/icons-react";
+import { IconInfoSquareRounded, IconX } from "@tabler/icons-react";
 import { Popover } from "@heroui/react";
-import { useCallback, useEffect, useId, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  type ComponentPropsWithRef,
+} from "react";
 import { createPortal } from "react-dom";
 import {
   ALL_CORE_KEYS,
@@ -86,6 +93,30 @@ function WtrFitScoreHelpPanel({
   );
 }
 
+const FitScoreHelpLinkTrigger = forwardRef<
+  HTMLButtonElement,
+  ComponentPropsWithRef<"button"> & { open?: boolean }
+>(function FitScoreHelpLinkTrigger(
+  { open, className = "", ...props },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={["wtr-fit-score-help-link", "font-xs", className]
+        .filter(Boolean)
+        .join(" ")}
+      aria-label="How your Fit score works"
+      aria-expanded={open}
+      {...props}
+    >
+      What is a Fit score?
+      <IconInfoSquareRounded size={14} stroke={1.5} aria-hidden />
+    </button>
+  );
+});
+
 export function WtrFitScoreHelpPopout() {
   const [open, setOpen] = useState(false);
   const isMobileSheet = useWtrFitScoreMobileSheet();
@@ -112,15 +143,10 @@ export function WtrFitScoreHelpPopout() {
   }, [open, close]);
 
   const trigger = (
-    <button
-      type="button"
-      className="wtr-fit-score-help-trigger"
-      aria-label="How your Fit score works"
-      aria-expanded={open}
+    <FitScoreHelpLinkTrigger
+      open={open}
       onClick={() => setOpen((prev) => !prev)}
-    >
-      <IconProgressHelp size={24} stroke={1.5} aria-hidden />
-    </button>
+    />
   );
 
   if (isMobileSheet) {
@@ -159,11 +185,13 @@ export function WtrFitScoreHelpPopout() {
   return (
     <Popover isOpen={open} onOpenChange={setOpen}>
       <Popover.Trigger
-        className="wtr-fit-score-help-trigger"
-        aria-label="How your Fit score works"
-      >
-        <IconProgressHelp size={24} stroke={1.5} aria-hidden />
-      </Popover.Trigger>
+        render={(triggerProps) => (
+          <FitScoreHelpLinkTrigger
+            open={open}
+            {...(triggerProps as ComponentPropsWithRef<"button">)}
+          />
+        )}
+      />
       <Popover.Content
         placement="left"
         offset={8}
