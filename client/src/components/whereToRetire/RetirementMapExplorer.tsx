@@ -19,10 +19,12 @@ import type { OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import {
+  resolveWhereToLook,
   scoreAndFilterMapCities,
   type MapFilters,
   type ScoredMapCity,
 } from "../../lib/whereToRetire/cityMapScoring";
+import { mapPinViewOptionsForWhereToLook } from "../../lib/whereToRetire/mapPinColorCopy";
 import type { RetirementPreferences } from "../../types/preferences";
 import { lookupRetirementCity } from "../../lib/whereToRetire/retirementCityLookup";
 import { countryToIsoCode } from "../../utils/costOfLiving";
@@ -31,6 +33,7 @@ import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import { RetirementDestinationCard } from "./RetirementDestinationCard";
 import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
 import { WtrCompareBar, type CompareBarCity } from "./WtrCompareBar";
+import { LabeledBadgeSelect } from "../ui/LabeledBadgeSelect";
 import {
   mapIncomeFitDisplayForCity,
   monthlyOutflowForMapCity,
@@ -42,6 +45,7 @@ import {
   RetirementMapFilters,
   type MapOptionsPanelTab,
 } from "./RetirementMapFilters";
+import type { WtrFilterScrollTarget } from "../../lib/whereToRetire/wtrFilterPriorityCrossRef";
 import type { FavoriteCityEntry } from "../../lib/retirementStorage";
 import "./RetirementMapExplorer.scss";
 
@@ -58,6 +62,7 @@ type Props = {
     next: MapFilters | ((prev: MapFilters) => MapFilters),
   ) => void;
   pinColorView: MapPinColorView;
+  onPinColorViewChange: (view: MapPinColorView) => void;
   headerSlot?: ReactNode;
   /** Rendered directly under `.wtr-explorer__chrome`, above the map row. */
   chromeFooterSlot?: ReactNode;
@@ -85,6 +90,8 @@ type Props = {
   }) => void;
   onDetailPanelOpenChange?: (open: boolean) => void;
   onBackToDashboard?: () => void;
+  filterCrossRefHighlight?: WtrFilterScrollTarget | null;
+  onFilterCrossRefHighlightClear?: () => void;
 };
 
 const LIST_PAGE_SIZE = 25;
@@ -161,6 +168,31 @@ function sortCitiesForPinView(
   return cities;
 }
 
+function pinViewSortHelper(
+  pinColorView: MapPinColorView,
+  scoreSortDescending: boolean,
+  budgetSortDescending: boolean,
+  expatSortDescending: boolean,
+): string {
+  if (pinColorView === "score") {
+    return scoreSortDescending
+      ? "from highest to lowest"
+      : "from lowest to highest";
+  }
+  if (pinColorView === "budget") {
+    return budgetSortDescending
+      ? "from highest to lowest"
+      : "from lowest to highest";
+  }
+  return expatSortDescending ? "largest first" : "smallest first";
+}
+
+function pinViewSelectLabel(pinColorView: MapPinColorView): string {
+  if (pinColorView === "score") return "Best fit score";
+  if (pinColorView === "budget") return "Lowest cost";
+  return "Expat friendly";
+}
+
 export function RetirementMapExplorer({
   explorationIncome,
   planMonthlyIncome,
@@ -168,6 +200,7 @@ export function RetirementMapExplorer({
   preferences,
   onFiltersChange,
   pinColorView,
+  onPinColorViewChange,
   headerSlot,
   chromeFooterSlot,
   filtersOpen,
@@ -190,10 +223,16 @@ export function RetirementMapExplorer({
   onToggleFavoriteCity,
   onDetailPanelOpenChange,
   onBackToDashboard,
+  filterCrossRefHighlight = null,
+  onFilterCrossRefHighlightClear,
 }: Props) {
   const favoritedKeySet = useMemo(
     () => new Set(favoriteCities.map((f) => `${f.city}\u0001${f.country}`)),
     [favoriteCities],
+  );
+  const pinViewOptions = useMemo(
+    () => mapPinViewOptionsForWhereToLook(resolveWhereToLook(filters)),
+    [filters],
   );
 
   const chromeRef = useRef<HTMLDivElement>(null);
@@ -525,167 +564,72 @@ export function RetirementMapExplorer({
             ) : null}
             <header className="wtr-explorer__list-head">
               <div className="wtr-explorer__list-head-top">
-              {pinColorView === "expat" ? (
-                <button
-                  type="button"
-                  className="wtr-explorer__list-sort-control"
-                  aria-label={
-                    expatSortDescending
-                      ? "Sort by expat community size, largest first. Click to sort smallest first."
-                      : "Sort by expat community size, smallest first. Click to sort largest first."
-                  }
-                  onClick={() => {
-                    setExpatSortDescending((prev) => !prev);
-                    setListPage(0);
-                  }}
-                >
-                  <span className="wtr-explorer__list-sort-label">
-                    Sort by expat community size
-                  </span>
-                </button>
-              ) : pinColorView === "budget" ? (
-                <button
-                  type="button"
-                  className="wtr-explorer__list-sort-control"
-                  aria-label={
-                    budgetSortDescending
-                      ? "Sort by monthly cost, highest first. Click to sort lowest first."
-                      : "Sort by monthly cost, lowest first. Click to sort highest first."
-                  }
-                  onClick={() => {
-                    setBudgetSortDescending((prev) => !prev);
-                    setListPage(0);
-                  }}
-                >
-                  <span className="wtr-explorer__list-sort-text">
-                    <span className="wtr-explorer__list-sort-label">
-                      Sort by monthly cost
-                    </span>
-                    <span className="wtr-explorer__list-sort-sub">
-                      {budgetSortDescending
-                        ? "From highest to lowest"
-                        : "From lowest to highest"}
-                    </span>
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="wtr-explorer__list-sort-control"
-                  aria-label={
-                    scoreSortDescending
-                      ? "Sort by Fit score, highest first. Click to sort lowest first."
-                      : "Sort by Fit score, lowest first. Click to sort highest first."
-                  }
-                  onClick={() => {
-                    setScoreSortDescending((prev) => !prev);
-                    setListPage(0);
-                  }}
-                >
-                  <span className="wtr-explorer__list-sort-text">
-                    <span className="wtr-explorer__list-sort-label">
-                      Sort by Fit score
-                    </span>
-                    <span className="wtr-explorer__list-sort-sub">
-                      {scoreSortDescending
-                        ? "From highest to lowest"
-                        : "From lowest to highest"}
-                    </span>
-                  </span>
-                </button>
-              )}
+              <LabeledBadgeSelect
+                className="wtr-explorer__pin-view-select"
+                value={pinColorView}
+                options={pinViewOptions}
+                onChange={(view) => {
+                  onPinColorViewChange(view);
+                  setListPage(0);
+                }}
+                label={pinViewSelectLabel(pinColorView)}
+                helper={pinViewSortHelper(
+                  pinColorView,
+                  scoreSortDescending,
+                  budgetSortDescending,
+                  expatSortDescending,
+                )}
+                helperPlacement="below"
+                ariaLabel="Map view"
+              />
               <div className="wtr-explorer__list-head-actions">
-                {pinColorView === "expat" ? (
-                  <button
-                    type="button"
-                    className="wtr-explorer__list-head-icon-btn"
-                    aria-label={
-                      expatSortDescending
+                <button
+                  type="button"
+                  className="wtr-explorer__list-head-icon-btn"
+                  aria-label={
+                    pinColorView === "expat"
+                      ? expatSortDescending
                         ? "Sort by expat community size, largest first. Click to sort smallest first."
                         : "Sort by expat community size, smallest first. Click to sort largest first."
-                    }
-                    onClick={() => {
+                      : pinColorView === "budget"
+                        ? budgetSortDescending
+                          ? "Sort by monthly cost, highest first. Click to sort lowest first."
+                          : "Sort by monthly cost, lowest first. Click to sort highest first."
+                        : scoreSortDescending
+                          ? "Best fit score, highest first. Click to sort lowest first."
+                          : "Best fit score, lowest first. Click to sort highest first."
+                  }
+                  onClick={() => {
+                    if (pinColorView === "expat") {
                       setExpatSortDescending((prev) => !prev);
-                      setListPage(0);
-                    }}
-                  >
-                    {expatSortDescending ? (
-                      <IconSortDescending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    ) : (
-                      <IconSortAscending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    )}
-                  </button>
-                ) : pinColorView === "budget" ? (
-                  <button
-                    type="button"
-                    className="wtr-explorer__list-head-icon-btn"
-                    aria-label={
-                      budgetSortDescending
-                        ? "Sort by monthly cost, highest first. Click to sort lowest first."
-                        : "Sort by monthly cost, lowest first. Click to sort highest first."
-                    }
-                    onClick={() => {
+                    } else if (pinColorView === "budget") {
                       setBudgetSortDescending((prev) => !prev);
-                      setListPage(0);
-                    }}
-                  >
-                    {budgetSortDescending ? (
-                      <IconSortDescending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    ) : (
-                      <IconSortAscending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="wtr-explorer__list-head-icon-btn"
-                    aria-label={
-                      scoreSortDescending
-                        ? "Sort by Fit score, highest first. Click to sort lowest first."
-                        : "Sort by Fit score, lowest first. Click to sort highest first."
-                    }
-                    onClick={() => {
+                    } else {
                       setScoreSortDescending((prev) => !prev);
-                      setListPage(0);
-                    }}
-                  >
-                    {scoreSortDescending ? (
-                      <IconSortDescending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    ) : (
-                      <IconSortAscending
-                        className="wtr-explorer__list-sort-icon"
-                        size={18}
-                        stroke={1.5}
-                        aria-hidden
-                      />
-                    )}
-                  </button>
-                )}
+                    }
+                    setListPage(0);
+                  }}
+                >
+                  {(pinColorView === "expat"
+                    ? expatSortDescending
+                    : pinColorView === "budget"
+                      ? budgetSortDescending
+                      : scoreSortDescending) ? (
+                    <IconSortDescending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  ) : (
+                    <IconSortAscending
+                      className="wtr-explorer__list-sort-icon"
+                      size={18}
+                      stroke={1.5}
+                      aria-hidden
+                    />
+                  )}
+                </button>
                 <span className="wtr-explorer__list-head-divider" aria-hidden />
                 <button
                   type="button"
@@ -842,6 +786,7 @@ export function RetirementMapExplorer({
               favoritedKeySet={favoritedKeySet}
               selectedId={selectedId}
               detailPanelOpen={detailPanelOpen}
+              suppressTooltips={filtersOpen}
               fitKey={structuralFiltersKey}
               onSelect={openDestination}
             />
@@ -892,6 +837,8 @@ export function RetirementMapExplorer({
           onRemoveExcludedCountry={onRemoveExcludedCountry}
           onClearExcludedCountries={onClearExcludedCountries}
           onRemoveFavorite={onRemoveFavorite}
+          filterCrossRefHighlight={filterCrossRefHighlight}
+          onFilterCrossRefHighlightClear={onFilterCrossRefHighlightClear}
         />
       </div>
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef, type ReactNode } from "react";
+import { useMemo, useRef, useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   Button,
@@ -37,9 +37,12 @@ import {
 } from "./WtrFilterFieldChrome";
 import { WtrMinRetirementScoreSlider } from "./WtrMinRetirementScoreSlider";
 import { WtrBudgetTabContent } from "./WtrBudgetTabContent";
+import { WtrFilterCrossRefAnchor } from "./WtrFilterPriorityCrossRef";
+import type { WtrFilterScrollTarget } from "../../lib/whereToRetire/wtrFilterPriorityCrossRef";
 import { budgetPreferencesEqual, DEFAULT_BUDGET_PREFERENCES } from "../../utils/costOfLiving";
 import "./RetirementMapFilters.scss";
 import "./BudgetPanel.scss";
+import "./WtrFilterPriorityCrossRef.scss";
 
 export type MapOptionsPanelTab =
   | "filters"
@@ -244,7 +247,13 @@ function FilterGroupCard({
   );
 }
 
-function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
+function FilterControlsStack({
+  filters,
+  onChange,
+  filterCrossRefHighlight = null,
+}: FilterChangeProps & {
+  filterCrossRefHighlight?: WtrFilterScrollTarget | null;
+}) {
   const showUsFilters = resolveWhereToLook(filters) === "us";
 
   return (
@@ -267,13 +276,18 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
           options={VISA_FREE_DAYS_SEGMENTS}
           onChange={(visaFreeDays) => onChange({ ...filters, visaFreeDays })}
         />
-        <WtrFilterSegmentedRow
-          label="Taxes under"
-          ariaLabel="Taxes under"
-          value={filters.foreignTax}
-          options={FOREIGN_TAX_SEGMENTS}
-          onChange={(foreignTax) => onChange({ ...filters, foreignTax })}
-        />
+        <WtrFilterCrossRefAnchor
+          crossRefKey="foreignTax"
+          highlighted={filterCrossRefHighlight === "foreignTax"}
+        >
+          <WtrFilterSegmentedRow
+            label="Taxes under"
+            ariaLabel="Taxes under"
+            value={filters.foreignTax}
+            options={FOREIGN_TAX_SEGMENTS}
+            onChange={(foreignTax) => onChange({ ...filters, foreignTax })}
+          />
+        </WtrFilterCrossRefAnchor>
       </FilterGroupCard>
 
       <FilterGroupCard title="Transportation/Flights">
@@ -300,13 +314,18 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
       </FilterGroupCard>
 
       <FilterGroupCard title="Healthcare">
-        <WtrFilterSegmentedRow
-          label="Healthcare"
-          ariaLabel="Healthcare quality"
-          value={filters.healthcare}
-          options={HEALTHCARE_SEGMENTS}
-          onChange={(healthcare) => onChange({ ...filters, healthcare })}
-        />
+        <WtrFilterCrossRefAnchor
+          crossRefKey="healthcare"
+          highlighted={filterCrossRefHighlight === "healthcare"}
+        >
+          <WtrFilterSegmentedRow
+            label="Healthcare"
+            ariaLabel="Healthcare quality"
+            value={filters.healthcare}
+            options={HEALTHCARE_SEGMENTS}
+            onChange={(healthcare) => onChange({ ...filters, healthcare })}
+          />
+        </WtrFilterCrossRefAnchor>
         {showUsFilters ? (
           <WtrFilterToggleBox
             label="Medicare access"
@@ -320,35 +339,63 @@ function FilterControlsStack({ filters, onChange }: FilterChangeProps) {
 
       <FilterGroupCard title="Quality of Life">
         <EnglishProficiencySelect filters={filters} onChange={onChange} />
-        <ClimateSelect filters={filters} onChange={onChange} />
-        <WtrFilterSegmentedRow
-          label="Safety"
-          ariaLabel="Safety"
-          value={filters.safety}
-          options={SAFETY_SEGMENTS}
-          onChange={(safety) => onChange({ ...filters, safety })}
-        />
-        <WtrFilterToggleBox
-          label="Good air only"
-          pressed={filters.goodAirOnly}
-          onToggle={() =>
-            onChange({ ...filters, goodAirOnly: !filters.goodAirOnly })
+        <WtrFilterCrossRefAnchor
+          crossRefKey="climate"
+          highlighted={filterCrossRefHighlight === "climate"}
+        >
+          <ClimateSelect filters={filters} onChange={onChange} />
+        </WtrFilterCrossRefAnchor>
+        <WtrFilterCrossRefAnchor
+          crossRefKey="safety"
+          highlighted={filterCrossRefHighlight === "safety"}
+        >
+          <WtrFilterSegmentedRow
+            label="Safety"
+            ariaLabel="Safety"
+            value={filters.safety}
+            options={SAFETY_SEGMENTS}
+            onChange={(safety) => onChange({ ...filters, safety })}
+          />
+        </WtrFilterCrossRefAnchor>
+        <WtrFilterCrossRefAnchor
+          crossRefKey="goodAirOnly"
+          highlighted={filterCrossRefHighlight === "goodAirOnly"}
+        >
+          <WtrFilterToggleBox
+            label="Good air only"
+            pressed={filters.goodAirOnly}
+            onToggle={() =>
+              onChange({ ...filters, goodAirOnly: !filters.goodAirOnly })
+            }
+          />
+        </WtrFilterCrossRefAnchor>
+        <div
+          className="wtr-filter-cross-ref-anchor"
+          data-wtr-filter-crossref="minRetirementScore"
+          data-wtr-filter-crossref-highlight={
+            filterCrossRefHighlight === "minRetirementScore" ? "true" : undefined
           }
-        />
-        <WtrMinRetirementScoreSlider
-          value={filters.minRetirementScore}
-          onChange={(minRetirementScore) =>
-            onChange({ ...filters, minRetirementScore })
-          }
-        />
-        <WtrFilterToggleBox
-          label="Hide unsafe cities"
-          subtitle="with travel advisories"
-          pressed={filters.hideAdvisories}
-          onToggle={() =>
-            onChange({ ...filters, hideAdvisories: !filters.hideAdvisories })
-          }
-        />
+        >
+          <WtrMinRetirementScoreSlider
+            value={filters.minRetirementScore}
+            onChange={(minRetirementScore) =>
+              onChange({ ...filters, minRetirementScore })
+            }
+          />
+        </div>
+        <WtrFilterCrossRefAnchor
+          crossRefKey="hideAdvisories"
+          highlighted={filterCrossRefHighlight === "hideAdvisories"}
+        >
+          <WtrFilterToggleBox
+            label="Hide unsafe cities"
+            subtitle="with travel advisories"
+            pressed={filters.hideAdvisories}
+            onToggle={() =>
+              onChange({ ...filters, hideAdvisories: !filters.hideAdvisories })
+            }
+          />
+        </WtrFilterCrossRefAnchor>
       </FilterGroupCard>
     </div>
   );
@@ -366,6 +413,8 @@ type PanelProps = FilterChangeProps & {
   onRemoveExcludedCountry: (country: string) => void;
   onClearExcludedCountries: () => void;
   onRemoveFavorite: (city: string, country: string) => void;
+  filterCrossRefHighlight?: WtrFilterScrollTarget | null;
+  onFilterCrossRefHighlightClear?: () => void;
 };
 
 const FILTER_PANEL_TABS: { id: MapOptionsPanelTab; label: string }[] = [
@@ -390,6 +439,8 @@ export function RetirementMapFilters({
   onRemoveExcludedCountry,
   onClearExcludedCountries,
   onRemoveFavorite,
+  filterCrossRefHighlight = null,
+  onFilterCrossRefHighlightClear,
 }: PanelProps) {
   const isMobileSheet = useIsMobileBottomSheet();
   const panelRef = useRef<HTMLElement>(null);
@@ -399,6 +450,18 @@ export function RetirementMapFilters({
     filters.budgetPreferences,
     DEFAULT_BUDGET_PREFERENCES,
   );
+
+  useEffect(() => {
+    if (!open || !filterCrossRefHighlight) return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = panelRef.current?.querySelector(
+        `[data-wtr-filter-crossref="${filterCrossRefHighlight}"]`,
+      );
+      target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      onFilterCrossRefHighlightClear?.();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open, filterCrossRefHighlight, onFilterCrossRefHighlightClear]);
 
   const panelTabs = useMemo(
     () =>
@@ -512,7 +575,11 @@ export function RetirementMapFilters({
       <div className="wtr-map-filters__scroll">
         <div className="wtr-map-filters__body">
           {activeTab === "filters" ? (
-            <FilterControlsStack filters={filters} onChange={onChange} />
+            <FilterControlsStack
+              filters={filters}
+              onChange={onChange}
+              filterCrossRefHighlight={filterCrossRefHighlight}
+            />
           ) : null}
 
           {activeTab === "exclude" ? (

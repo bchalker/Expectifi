@@ -204,6 +204,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  margin-left: auto;
 }
 
 .wtr-explorer__list-head-icon-btn {
@@ -488,6 +489,10 @@
   border-radius: 4px;
 }
 
+.wtr-explorer__pin-view-select {
+  flex: 0 0 auto;
+}
+
 .wtr-explorer__list-sort-text {
   flex: 1 1 auto;
   display: flex;
@@ -500,9 +505,9 @@
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  font-family: var(--heading);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  // font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 700;
   line-height: 1.3;
   color: var(--text);
 }

@@ -8,8 +8,10 @@ import { BottomSheetHandle } from '../ui/BottomSheetHandle'
 import {
   hasRetirementPreferences,
   markDestinationPrefsOverlayOpened,
+  type CorePreferenceKey,
   type RetirementPreferences,
 } from '../../types/preferences'
+import type { MapFilters } from '../../lib/whereToRetire/cityMapScoring'
 import { WIZARD_STEP_LABELS } from '../../utils/preferenceFactors'
 import {
   PreferencesWizard,
@@ -17,6 +19,7 @@ import {
   type PreferencesWizardMode,
 } from './PreferencesWizard'
 import './PreferencesWizard.scss'
+import '../whereToRetire/WtrFilterPriorityCrossRef.scss'
 
 const FADE_MS = 280
 const SLIDE_MS = 320
@@ -38,6 +41,9 @@ type Props = {
   mode?: PreferencesWizardMode
   allowDismiss?: boolean
   placement?: PreferencesWizardPlacement
+  initialWizardStep?: number
+  scrollToFactorId?: CorePreferenceKey | null
+  mapFilters?: MapFilters
 }
 
 export function PreferencesWizardModal({
@@ -48,6 +54,9 @@ export function PreferencesWizardModal({
   mode = 'stepped',
   allowDismiss,
   placement = 'center',
+  initialWizardStep = 1,
+  scrollToFactorId = null,
+  mapFilters,
 }: Props) {
   const isMapRail = placement === 'map-rail'
   const isMobileSheet = useIsMobileBottomSheet() && isMapRail
@@ -73,8 +82,8 @@ export function PreferencesWizardModal({
   })
 
   useEffect(() => {
-    if (open) setWizardStep(1)
-  }, [open])
+    if (open) setWizardStep(initialWizardStep)
+  }, [open, initialWizardStep])
 
   useEffect(() => {
     if (open) {
@@ -200,6 +209,9 @@ export function PreferencesWizardModal({
       <PreferencesWizard
         mode={mode}
         initialValues={initialValues}
+        initialWizardStep={initialWizardStep}
+        scrollToFactorId={scrollToFactorId}
+        mapFilters={mapFilters}
         onComplete={onComplete}
         progressPlacement="external"
         onWizardStepChange={setWizardStep}

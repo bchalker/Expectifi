@@ -4,6 +4,14 @@ import { PreferencesWizardModal } from "../components/preferences/PreferencesWiz
 import { RetirementMapExplorer } from "../components/whereToRetire/RetirementMapExplorer";
 import { WtrFiltersSidebar } from "../components/whereToRetire/WtrFiltersSidebar";
 import type { MapOptionsPanelTab } from "../components/whereToRetire/RetirementMapFilters";
+import {
+  WTR_OPEN_FILTERS_EVENT,
+  WTR_OPEN_PREFERENCES_EVENT,
+  type WtrFilterScrollTarget,
+  type WtrOpenFiltersDetail,
+  type WtrOpenPreferencesDetail,
+} from "../lib/whereToRetire/wtrFilterPriorityCrossRef";
+import type { CorePreferenceKey } from "../types/preferences";
 import { WtrComparisonTableView } from "../components/whereToRetire/WtrComparisonTableView";
 import type { ComputedSnapshot } from "../lib/computeResults";
 import { APP_DASHBOARD_PATH, navigateApp } from "../lib/appPaths";
@@ -51,6 +59,11 @@ export function WhereToRetire({ c }: Props) {
   const { isHydrated } = useUserTier();
   const { prefs, setPrefs, reloadPrefs, hasSavedPrefs } = useRetirementPreferences();
   const [preferencesWizardOpen, setPreferencesWizardOpen] = useState(false);
+  const [preferencesInitialStep, setPreferencesInitialStep] = useState(1);
+  const [preferencesScrollFactorId, setPreferencesScrollFactorId] =
+    useState<CorePreferenceKey | null>(null);
+  const [filterCrossRefHighlight, setFilterCrossRefHighlight] =
+    useState<WtrFilterScrollTarget | null>(null);
   const [prefsUpdatedFlash, setPrefsUpdatedFlash] = useState(false);
   const [explorationIncome, setExplorationIncome] = useState(() => {
     const stashed = readStashedWtrExplorationIncome();
@@ -98,6 +111,26 @@ export function WhereToRetire({ c }: Props) {
       notifyMapLayout();
     },
     [notifyMapLayout],
+  );
+
+  const openPreferencesWizard = useCallback(
+    (detail?: WtrOpenPreferencesDetail) => {
+      setPreferencesInitialStep(detail?.step ?? 1);
+      setPreferencesScrollFactorId(detail?.factorId ?? null);
+      setPreferencesWizardOpen(true);
+    },
+    [],
+  );
+
+  const openFiltersFromCrossRef = useCallback(
+    (detail?: WtrOpenFiltersDetail) => {
+      setPreferencesWizardOpen(false);
+      if (detail?.crossRefKey) {
+        setFilterCrossRefHighlight(detail.crossRefKey);
+      }
+      openDrawerTab("filters");
+    },
+    [openDrawerTab],
   );
 
   const handleMapFiltersChange = useCallback(
@@ -203,11 +236,29 @@ export function WhereToRetire({ c }: Props) {
   }, [reloadPrefs, syncPreferencesWizardOpen]);
 
   useEffect(() => {
-    const onOpenWizard = () => setPreferencesWizardOpen(true);
+    const onOpenWizard = () => openPreferencesWizard();
+    const onOpenPreferencesCrossRef = (event: Event) => {
+      openPreferencesWizard(
+        (event as CustomEvent<WtrOpenPreferencesDetail>).detail,
+      );
+    };
+    const onOpenFiltersCrossRef = (event: Event) => {
+      openFiltersFromCrossRef(
+        (event as CustomEvent<WtrOpenFiltersDetail>).detail,
+      );
+    };
     window.addEventListener("retirement-preferences-open-wizard", onOpenWizard);
-    return () =>
+    window.addEventListener(WTR_OPEN_PREFERENCES_EVENT, onOpenPreferencesCrossRef);
+    window.addEventListener(WTR_OPEN_FILTERS_EVENT, onOpenFiltersCrossRef);
+    return () => {
       window.removeEventListener("retirement-preferences-open-wizard", onOpenWizard);
-  }, []);
+      window.removeEventListener(
+        WTR_OPEN_PREFERENCES_EVENT,
+        onOpenPreferencesCrossRef,
+      );
+      window.removeEventListener(WTR_OPEN_FILTERS_EVENT, onOpenFiltersCrossRef);
+    };
+  }, [openPreferencesWizard, openFiltersFromCrossRef]);
 
   return (
     <div className="where-to-retire">
@@ -253,6 +304,7 @@ export function WhereToRetire({ c }: Props) {
                     preferences={prefs}
                     onFiltersChange={handleMapFiltersChange}
                     pinColorView={pinColorView}
+                    onPinColorViewChange={handlePinColorViewChange}
                     excludedCountries={storage.excludedCountries}
                     isFavoritedCity={storage.isFavoritedCity}
                     onToggleFavoriteCity={storage.toggleFavoriteCity}
@@ -277,6 +329,10 @@ export function WhereToRetire({ c }: Props) {
                     onViewComparison={() => setViewMode("compare")}
                     onDetailPanelOpenChange={setDetailPanelOpen}
                     onBackToDashboard={() => navigateApp(APP_DASHBOARD_PATH)}
+                    filterCrossRefHighlight={filterCrossRefHighlight}
+                    onFilterCrossRefHighlightClear={() =>
+                      setFilterCrossRefHighlight(null)
+                    }
                   />
                   {viewMode === "compare" ? (
                     <div
@@ -315,7 +371,6 @@ export function WhereToRetire({ c }: Props) {
                 explorationIncome={explorationIncome}
                 onExplorationIncomeChange={setExplorationIncome}
                 pinColorView={pinColorView}
-                onPinColorViewChange={handlePinColorViewChange}
                 filters={mapFilters}
                 onFiltersChange={handleMapFiltersChange}
                 activeFilterCount={activeFilterCount}
@@ -323,7 +378,7 @@ export function WhereToRetire({ c }: Props) {
                 onToggleFilters={toggleFiltersPanel}
                 filterButtonRef={filterButtonRef}
                 onOpenBudgetTab={() => openDrawerTab("budget")}
-                onOpenPreferences={() => setPreferencesWizardOpen(true)}
+                onOpenPreferences={() => openPreferencesWizard()}
                 onClosePreferences={() => setPreferencesWizardOpen(false)}
                 preferencesOpen={preferencesWizardOpen}
                 preferencesUpdatedFlash={prefsUpdatedFlash}
@@ -335,11 +390,17 @@ export function WhereToRetire({ c }: Props) {
 
       <PreferencesWizardModal
         open={preferencesWizardOpen}
-        onClose={() => setPreferencesWizardOpen(false)}
+        onClose={() => {
+          setPreferencesWizardOpen(false);
+          setPreferencesScrollFactorId(null);
+        }}
         initialValues={prefs}
         onComplete={handlePreferencesComplete}
         placement="map-rail"
         allowDismiss={hasRetirementPreferences()}
+        initialWizardStep={preferencesInitialStep}
+        scrollToFactorId={preferencesScrollFactorId}
+        mapFilters={mapFilters}
       />
     </div>
   );

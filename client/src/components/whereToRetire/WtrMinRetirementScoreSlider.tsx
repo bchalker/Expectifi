@@ -1,4 +1,5 @@
 import "./WtrMinRetirementScoreSlider.scss";
+import "./WtrFilterPriorityCrossRef.scss";
 
 const SLIDER_MAX = 100;
 
@@ -66,6 +67,10 @@ export function WtrMinRetirementScoreSlider({ value, onChange }: Props) {
           </span>
         ))}
       </div>
+      <p className="wtr-cross-ref-note wtr-filter-score-slider__meta-note">
+        This score comes from your Travel Priorities — adjusting your
+        priorities can change which cities meet this threshold.
+      </p>
     </div>
   );
 }

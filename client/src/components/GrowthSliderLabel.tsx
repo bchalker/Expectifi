@@ -387,12 +387,12 @@ export function GrowthSliderLabel({
               <p className="growth-slider-label__panel-rate-lead font-xs">
                 {onOpenRetirementAgeCompare ? (
                   <>
-                    When I am{" "}
+                    Until I am{" "}
                     <button
                       type="button"
                       className="growth-slider-label__panel-age-link tabular-nums"
                       onClick={onOpenRetirementAgeCompare}
-                      aria-label={`When I am ${retirementAge}. Compare other retirement ages.`}
+                      aria-label={`Til I am ${retirementAge}. Compare other retirement ages.`}
                     >
                       {retirementAge}
                     </button>
@@ -402,7 +402,10 @@ export function GrowthSliderLabel({
                   "I expect to grow at"
                 )}
               </p>
-              <div className="growth-slider-label__panel-rate" aria-live="polite">
+              <div
+                className="growth-slider-label__panel-rate"
+                aria-live="polite"
+              >
                 <span className="growth-slider-label__panel-rate-pct strip-equation-main-val--tween">
                   {headlinePct}%
                 </span>

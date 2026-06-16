@@ -35,6 +35,11 @@
   border-top: 1px dashed var(--color-border-tertiary, var(--border));
 }
 
+.pref-factor-row__filter-cross-ref {
+  margin-top: 0;
+  padding-top: var(--space-1);
+}
+
 .pref-factor-row__control-label {
   margin: 0;
   font-size: var(--text-sm);

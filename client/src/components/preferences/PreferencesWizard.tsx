@@ -27,6 +27,9 @@ import {
 } from '../../utils/preferenceFactors'
 import { PreferenceFactorRow } from './PreferenceFactorRow'
 import { PreferenceReviewRow } from './PreferenceReviewRow'
+import { WtrPriorityFilterCrossRefNote } from '../whereToRetire/WtrFilterPriorityCrossRef'
+import type { MapFilters } from '../../lib/whereToRetire/cityMapScoring'
+import { PRIORITY_FACTOR_FILTER_CROSS_REF } from '../../lib/whereToRetire/wtrFilterPriorityCrossRef'
 import './PreferencesWizard.scss'
 
 export type PreferencesWizardMode = 'stepped' | 'settings'
@@ -37,6 +40,9 @@ type Props = {
   initialValues?: RetirementPreferences
   mode?: PreferencesWizardMode
   progressPlacement?: PreferencesWizardProgressPlacement
+  initialWizardStep?: number
+  scrollToFactorId?: CorePreferenceKey | null
+  mapFilters?: MapFilters
   onWizardStepChange?: (step: number) => void
   onChange?: (prefs: RetirementPreferences) => void
   onComplete?: (prefs: RetirementPreferences) => void
@@ -73,6 +79,9 @@ export function PreferencesWizard({
   initialValues,
   mode = 'stepped',
   progressPlacement = 'inline',
+  initialWizardStep = 1,
+  scrollToFactorId = null,
+  mapFilters,
   onWizardStepChange,
   onChange,
   onComplete,
@@ -87,6 +96,21 @@ export function PreferencesWizard({
   useEffect(() => {
     if (initialValues) setPrefs(normalizeRetirementPreferences(initialValues))
   }, [initialValues])
+
+  useEffect(() => {
+    if (mode !== 'stepped') return
+    setWizardStep(initialWizardStep)
+  }, [mode, initialWizardStep])
+
+  useEffect(() => {
+    if (!scrollToFactorId) return
+    const frame = window.requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-wtr-pref-factor="${scrollToFactorId}"]`)
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [scrollToFactorId, wizardStep])
 
   useEffect(() => {
     if (mode === 'stepped') onWizardStepChange?.(wizardStep)
@@ -187,6 +211,11 @@ export function PreferencesWizard({
       climateTempMaxF={key === 'climate' ? prefs.climateTempMaxF : undefined}
       onClimateTempChange={key === 'climate' ? setClimateTempRange : undefined}
       readOnly={mode === 'stepped' && wizardStep === 5}
+      filterCrossRefNote={
+        mapFilters && PRIORITY_FACTOR_FILTER_CROSS_REF[key] ? (
+          <WtrPriorityFilterCrossRefNote factorId={key} filters={mapFilters} />
+        ) : null
+      }
     />
   )
 

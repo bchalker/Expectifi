@@ -1,0 +1,120 @@
+.labeled-badge-select {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.labeled-badge-select__trigger {
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.labeled-badge-select__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.labeled-badge-select__trail {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.labeled-badge-select__trigger:hover {
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
+
+.labeled-badge-select__trigger:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.labeled-badge-select__trigger--open {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+}
+
+.labeled-badge-select__copy .label-with-helper-pill__label {
+  font-family: var(--body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.label-with-helper-pill--helper-below .labeled-badge-select__copy .label-with-helper-pill__label {
+  // margin-bottom: var(--space-1);
+}
+
+.label-with-helper-pill--helper-above .labeled-badge-select__copy .label-with-helper-pill__label {
+  margin-top: var(--space-1);
+}
+
+.labeled-badge-select__menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 380;
+  min-width: 100%;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+}
+
+.labeled-badge-select__option {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.labeled-badge-select__option:hover:not(:disabled) {
+  background: var(--surface2);
+}
+
+.labeled-badge-select__option--selected {
+  background: color-mix(in srgb, var(--accent-light) 65%, var(--surface));
+}
+
+.labeled-badge-select__option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.labeled-badge-select__option:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}

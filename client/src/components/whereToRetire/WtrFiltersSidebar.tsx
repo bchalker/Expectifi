@@ -21,7 +21,6 @@ type Props = {
   explorationIncome: number;
   onExplorationIncomeChange: (income: number) => void;
   pinColorView: MapPinColorView;
-  onPinColorViewChange: (view: MapPinColorView) => void;
   filters: MapFilters;
   onFiltersChange: (filters: MapFilters) => void;
   activeFilterCount: number;
@@ -40,7 +39,6 @@ export function WtrFiltersSidebar({
   explorationIncome,
   onExplorationIncomeChange,
   pinColorView,
-  onPinColorViewChange,
   filters,
   onFiltersChange,
   activeFilterCount,
@@ -144,7 +142,6 @@ export function WtrFiltersSidebar({
           <div className="wtr-filters-sidebar__selects">
             <WtrIncomeToolbarMapSelects
               pinColorView={pinColorView}
-              onPinColorViewChange={onPinColorViewChange}
               filters={filters}
               onFiltersChange={onFiltersChange}
             />

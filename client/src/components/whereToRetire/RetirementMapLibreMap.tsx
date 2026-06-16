@@ -23,7 +23,10 @@ import "./WtrMapPinTooltip.scss";
 
 const BOUNDS_EASE_DURATION_MS = 900;
 const TOOLTIP_FADE_MS = 180;
-const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/bright";
+const MAP_STYLE_URLS = [
+  "https://tiles.openfreemap.org/styles/bright/style.json",
+  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+] as const;
 
 type Props = {
   destinations: ScoredMapCity[];
@@ -35,6 +38,8 @@ type Props = {
   selectedId: string | null;
   /** When true, emphasize the selected pin; map camera does not move with the detail panel. */
   detailPanelOpen: boolean;
+  /** Hide pin hover tooltips (detail panel, filters drawer, etc.). */
+  suppressTooltips?: boolean;
   fitKey: string;
   onSelect: (id: string) => void;
 };
@@ -116,6 +121,20 @@ function applyPinDisplay(
   pinEl.dataset.cityId = cityId;
 }
 
+function clearTooltipTimers(
+  hideTooltipTimeoutRef: { current: number | null },
+  enterTooltipFrameRef: { current: number | null },
+) {
+  if (hideTooltipTimeoutRef.current != null) {
+    window.clearTimeout(hideTooltipTimeoutRef.current);
+    hideTooltipTimeoutRef.current = null;
+  }
+  if (enterTooltipFrameRef.current != null) {
+    window.cancelAnimationFrame(enterTooltipFrameRef.current);
+    enterTooltipFrameRef.current = null;
+  }
+}
+
 function syncPinSelection(mapContainer: HTMLElement, focusId: string | null) {
   mapContainer.querySelectorAll<HTMLElement>(".wtr-map-pin").forEach((el) => {
     const id = el.getAttribute("data-city-id");
@@ -138,10 +157,12 @@ export function RetirementMapLibreMap({
   favoritedKeySet,
   selectedId,
   detailPanelOpen,
+  suppressTooltips = false,
   fitKey,
   onSelect,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapShellRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef(new Map<string, MarkerEntry>());
   const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>());
@@ -155,9 +176,13 @@ export function RetirementMapLibreMap({
   const hideTooltipTimeoutRef = useRef<number | null>(null);
   const enterTooltipFrameRef = useRef<number | null>(null);
   const detailPanelOpenRef = useRef(detailPanelOpen);
+  const suppressTooltipsRef = useRef(suppressTooltips);
+  const dismissTooltipRef = useRef<(immediate?: boolean) => void>(() => {});
   const prevFocusIdForBoundsRef = useRef<string | null>(null);
   const prevFitKeyRef = useRef(fitKey);
   const hasAutoFitRef = useRef(false);
+  const styleIndexRef = useRef(0);
+  const switchedStyleRef = useRef(false);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const handleToggleExpatTier = useCallback(
@@ -198,17 +223,27 @@ export function RetirementMapLibreMap({
   pinColorViewRef.current = pinColorView;
   filtersRef.current = filters;
   detailPanelOpenRef.current = detailPanelOpen;
+  suppressTooltipsRef.current = suppressTooltips;
+
+  dismissTooltipRef.current = (immediate = true) => {
+    clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
+    if (immediate) {
+      setTooltip(null);
+      return;
+    }
+    setTooltip((prev) => {
+      if (!prev) return null;
+      return { ...prev, visible: false, leaving: true };
+    });
+    hideTooltipTimeoutRef.current = window.setTimeout(() => {
+      setTooltip((prev) => (prev?.leaving ? null : prev));
+      hideTooltipTimeoutRef.current = null;
+    }, TOOLTIP_FADE_MS);
+  };
 
   openTooltipRef.current = (cityId, x, y) => {
-    if (detailPanelOpenRef.current) return;
-    if (hideTooltipTimeoutRef.current != null) {
-      window.clearTimeout(hideTooltipTimeoutRef.current);
-      hideTooltipTimeoutRef.current = null;
-    }
-    if (enterTooltipFrameRef.current != null) {
-      window.cancelAnimationFrame(enterTooltipFrameRef.current);
-      enterTooltipFrameRef.current = null;
-    }
+    if (detailPanelOpenRef.current || suppressTooltipsRef.current) return;
+    clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
 
     setTooltip({ cityId, x, y, visible: false, leaving: false });
 
@@ -250,18 +285,23 @@ export function RetirementMapLibreMap({
   const hoveredDisplay = tooltip ? pinDisplays.get(tooltip.cityId) : null;
 
   useEffect(() => {
-    if (!detailPanelOpen) return;
+    if (!detailPanelOpen && !suppressTooltips) return;
+    dismissTooltipRef.current(true);
+  }, [detailPanelOpen, suppressTooltips]);
 
-    if (hideTooltipTimeoutRef.current != null) {
-      window.clearTimeout(hideTooltipTimeoutRef.current);
-      hideTooltipTimeoutRef.current = null;
-    }
-    if (enterTooltipFrameRef.current != null) {
-      window.cancelAnimationFrame(enterTooltipFrameRef.current);
-      enterTooltipFrameRef.current = null;
-    }
-    setTooltip(null);
-  }, [detailPanelOpen]);
+  useEffect(() => {
+    const shell = mapShellRef.current;
+    if (!shell) return;
+
+    const onPointerLeaveMap = (event: MouseEvent) => {
+      const related = event.relatedTarget;
+      if (related instanceof Node && shell.contains(related)) return;
+      dismissTooltipRef.current(true);
+    };
+
+    shell.addEventListener("mouseleave", onPointerLeaveMap);
+    return () => shell.removeEventListener("mouseleave", onPointerLeaveMap);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -290,7 +330,7 @@ export function RetirementMapLibreMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: MAP_STYLE_URL,
+      style: MAP_STYLE_URLS[0],
       center: [0, 20],
       zoom: 2,
       minZoom: 2,
@@ -303,15 +343,45 @@ export function RetirementMapLibreMap({
       "top-left",
     );
 
+    const promoteFallbackStyle = () => {
+      if (switchedStyleRef.current) return;
+      const nextIndex = styleIndexRef.current + 1;
+      if (nextIndex >= MAP_STYLE_URLS.length) return;
+      switchedStyleRef.current = true;
+      styleIndexRef.current = nextIndex;
+      map.setStyle(MAP_STYLE_URLS[nextIndex]);
+    };
+
+    const onMapError = (event: { error?: { message?: string } }) => {
+      const message = event.error?.message ?? "";
+      if (!message) return;
+      // External tile/style outages should not leave users with a blank map.
+      if (
+        /style|sprite|glyph|tile|fetch|network|timed out|cors|403|404|5\d{2}/i.test(
+          message,
+        )
+      ) {
+        promoteFallbackStyle();
+      }
+    };
+
+    map.on("error", onMapError);
+
+    const onMapInteractionStart = () => {
+      dismissTooltipRef.current(true);
+    };
+    map.on("movestart", onMapInteractionStart);
+    map.on("dragstart", onMapInteractionStart);
+    map.on("zoomstart", onMapInteractionStart);
+
     mapRef.current = map;
 
     return () => {
-      if (hideTooltipTimeoutRef.current != null) {
-        window.clearTimeout(hideTooltipTimeoutRef.current);
-      }
-      if (enterTooltipFrameRef.current != null) {
-        window.cancelAnimationFrame(enterTooltipFrameRef.current);
-      }
+      map.off("error", onMapError);
+      map.off("movestart", onMapInteractionStart);
+      map.off("dragstart", onMapInteractionStart);
+      map.off("zoomstart", onMapInteractionStart);
+      clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
       markersRef.current.forEach((entry) => {
         entry.marker.remove();
       });
@@ -378,11 +448,12 @@ export function RetirementMapLibreMap({
 
         host.addEventListener("click", () => {
           if (detailPanelOpenRef.current) return;
+          dismissTooltipRef.current(true);
           onSelectRef.current(cityId);
         });
 
         host.addEventListener("mouseenter", () => {
-          if (detailPanelOpenRef.current) return;
+          if (detailPanelOpenRef.current || suppressTooltipsRef.current) return;
           const scored = destinationsRef.current.find(
             (d) => d.city.id === cityId,
           );
@@ -596,6 +667,7 @@ export function RetirementMapLibreMap({
   return (
     <>
       <div
+        ref={mapShellRef}
         className={[
           "wtr-maplibre-map",
           detailPanelOpen && "wtr-maplibre-map--detail-open",

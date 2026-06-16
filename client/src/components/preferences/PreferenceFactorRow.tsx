@@ -23,6 +23,7 @@ type Props = {
   enabled?: boolean
   onEnabledChange?: (enabled: boolean) => void
   readOnly?: boolean
+  filterCrossRefNote?: React.ReactNode
 }
 
 export function PreferenceFactorRow({
@@ -36,6 +37,7 @@ export function PreferenceFactorRow({
   enabled = true,
   onEnabledChange,
   readOnly = false,
+  filterCrossRefNote = null,
 }: Props) {
   const def = getFactorDefinition(factorId)
   const level = getFactorLevelCopy(factorId, step)
@@ -59,6 +61,7 @@ export function PreferenceFactorRow({
       ]
         .filter(Boolean)
         .join(' ')}
+      data-wtr-pref-factor={factorId}
     >
       <div className="pref-factor-row__header">
         <div className="pref-factor-row__copy">
@@ -158,6 +161,7 @@ export function PreferenceFactorRow({
           ) : null}
         </div>
       ) : null}
+      {filterCrossRefNote}
     </div>
   )
 }

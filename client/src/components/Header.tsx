@@ -15,8 +15,6 @@ import {
 } from '../lib/appNavDrawers'
 import { firstNameFromDisplayName } from '../utils/userDisplayName'
 import { PhaseSegmentTabs, type PhaseSegment } from './PhaseSegmentTabs'
-import expectifiLogoSvg from '../branding/expectifi-logo.svg?raw'
-import expectifiLogoMobileSvg from '../branding/expectifi-logo-mobile.svg?raw'
 import './Header.scss'
 
 const MARKETING_SECTIONS = [
@@ -30,15 +28,9 @@ const MARKETING_MOBILE_NAV_MQ = '(min-width: 761px)'
 
 function HeaderBrandLogo() {
   return (
-    <span className="header__logo-picture" aria-hidden="true">
-      <span
-        className="header__logo header__logo--full"
-        dangerouslySetInnerHTML={{ __html: expectifiLogoSvg }}
-      />
-      <span
-        className="header__logo header__logo--mark"
-        dangerouslySetInnerHTML={{ __html: expectifiLogoMobileSvg }}
-      />
+    <span className="header__wordmark" aria-hidden="true">
+      <span className="header__wordmark-expect">Expect</span>
+      <span className="header__wordmark-ifi">ifi</span>
     </span>
   )
 }
