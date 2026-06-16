@@ -104,6 +104,16 @@ export function peekPostSignOutSession(): boolean {
   }
 }
 
+export function consumePostSignOutSession(): boolean {
+  try {
+    const v = sessionStorage.getItem(POST_SIGNOUT_SESSION_KEY) === '1'
+    if (v) sessionStorage.removeItem(POST_SIGNOUT_SESSION_KEY)
+    return v
+  } catch {
+    return false
+  }
+}
+
 export function clearPostSignOutSession(): void {
   try {
     sessionStorage.removeItem(POST_SIGNOUT_SESSION_KEY)

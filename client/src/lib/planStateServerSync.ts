@@ -1,4 +1,9 @@
-import { migrateIncomeUiFields, mergeIncomeUiFields, type IncomeUiFields } from './accountIncomeStorage'
+import {
+  incomeUiFieldsHaveData,
+  migrateIncomeUiFields,
+  mergeIncomeUiFields,
+  type IncomeUiFields,
+} from './accountIncomeStorage'
 import type { AppSnapshotV1 } from './appSnapshot'
 import { fetchUserPlanState, saveUserPlanState } from './api/planState'
 import { applyPlanStatePayloadToLocal } from './planStorage/applyPlanState'
@@ -11,6 +16,7 @@ import { getPlanWriteTier } from './planStorage/writeContext'
 import { tierIsAuthenticated } from './planStorage/resolveTier'
 import type { UserPlanStatePayload } from './planStateTypes'
 import { loadRetirementPreferences } from '../types/preferences'
+import { consumePostSignOutSession } from './welcomeGate'
 
 function asSession(raw: unknown): AppSnapshotV1 | null {
   if (!raw || typeof raw !== 'object') return null
@@ -18,55 +24,67 @@ function asSession(raw: unknown): AppSnapshotV1 | null {
   return o.version === 1 && o.inputs && o.ui ? o : null
 }
 
-function incomeUiFieldCount(session: AppSnapshotV1 | null): number {
-  if (!session?.ui) return 0
-  return (
-    Object.keys(session.ui.accountIncomeStrategies ?? {}).length +
-    Object.keys(session.ui.accountIncomeFunds ?? {}).length +
-    Object.keys(session.ui.accountWithdrawRates ?? {}).length
-  )
+function emptyIncomeUiFields(): IncomeUiFields {
+  return {
+    accountIncomeFunds: {},
+    accountIncomeStrategies: {},
+    accountWithdrawRates: {},
+  }
 }
 
-function localSessionShouldWinOverRemote(
-  local: UserPlanStatePayload,
+function incomeUiFromSession(session: AppSnapshotV1 | null): IncomeUiFields {
+  if (!session?.ui) return emptyIncomeUiFields()
+  return migrateIncomeUiFields({
+    accountIncomeFunds: session.ui.accountIncomeFunds ?? {},
+    accountIncomeStrategies: session.ui.accountIncomeStrategies ?? {},
+    accountWithdrawRates: session.ui.accountWithdrawRates ?? {},
+  })
+}
+
+/** Combine dedicated accountIncomeUi blob with session.ui income fields. */
+function incomeUiFromPayload(payload: UserPlanStatePayload): IncomeUiFields {
+  const fromSession = incomeUiFromSession(asSession(payload.session))
+  const fromBlob = payload.accountIncomeUi as IncomeUiFields | null
+  if (fromBlob && incomeUiFieldsHaveData(fromBlob)) {
+    return mergeIncomeUiFields(fromSession, fromBlob)
+  }
+  return fromSession
+}
+
+function mergeAccountIncomeUiForSync(
   remote: UserPlanStatePayload,
+  local: UserPlanStatePayload,
+  remoteUpdatedAt: string | null,
+  localSavedAt: string | null = loadLocalPlanStateSavedAt(),
+): IncomeUiFields | null {
+  const remoteUi = incomeUiFromPayload(remote)
+  const localUi = incomeUiFromPayload(local)
+
+  if (!incomeUiFieldsHaveData(remoteUi)) {
+    return incomeUiFieldsHaveData(localUi) ? localUi : null
+  }
+  if (!incomeUiFieldsHaveData(localUi)) {
+    return remoteUi
+  }
+
+  const remoteMs = parseSavedAtMs(remoteUpdatedAt)
+  const localMs = parseSavedAtMs(localSavedAt)
+
+  // Server same age or newer — remote income wins on conflicts (cross-device pull).
+  if (remoteMs >= localMs) {
+    return mergeIncomeUiFields(localUi, remoteUi)
+  }
+
+  // This device edited more recently — keep local income on conflicts.
+  return mergeIncomeUiFields(remoteUi, localUi)
+}
+
+/** Only push local plan state to the server when this device is strictly newer. */
+function localSessionShouldWinOverRemote(
   localSavedAt: string | null,
   remoteUpdatedAt: string | null,
 ): boolean {
-  if (localPlanStateIsNewerThanRemote(localSavedAt, remoteUpdatedAt)) {
-    const localSession = asSession(local.session)
-    const remoteSession = asSession(remote.session)
-    const localIncomeCount = incomeUiFieldCount(localSession)
-    const remoteIncomeCount = incomeUiFieldCount(remoteSession)
-    const remoteAccountIncomeUiCount = incomeUiFieldCountFromPayload(remote.accountIncomeUi)
-    const localAccountIncomeUiCount = incomeUiFieldCountFromPayload(local.accountIncomeUi)
-    if (
-      remoteIncomeCount + remoteAccountIncomeUiCount >
-      localIncomeCount + localAccountIncomeUiCount
-    ) {
-      return false
-    }
-    return true
-  }
-  const localSession = asSession(local.session)
-  const remoteSession = asSession(remote.session)
-  if (localSession?.phase === 'income' && remoteSession?.phase !== 'income') return true
-  if (incomeUiFieldCount(localSession) > incomeUiFieldCount(remoteSession)) return true
-  return false
-}
-
-function incomeUiFieldCountFromPayload(raw: unknown): number {
-  if (!raw || typeof raw !== 'object') return 0
-  const fields = raw as {
-    accountIncomeStrategies?: Record<string, unknown>
-    accountIncomeFunds?: Record<string, unknown>
-    accountWithdrawRates?: Record<string, unknown>
-  }
-  return (
-    Object.keys(fields.accountIncomeStrategies ?? {}).length +
-    Object.keys(fields.accountIncomeFunds ?? {}).length +
-    Object.keys(fields.accountWithdrawRates ?? {}).length
-  )
+  return localPlanStateIsNewerThanRemote(localSavedAt, remoteUpdatedAt)
 }
 
 function mergeRetirementPreferences(
@@ -128,17 +146,12 @@ function mergeRemoteFieldsIntoLocal(
     local,
     remoteUpdatedAt,
   )
-  const mergedAccountIncomeUi =
-    remote.accountIncomeUi || local.accountIncomeUi
-      ? mergeIncomeUiFields(
-          (remote.accountIncomeUi ?? {
-            accountIncomeFunds: {},
-            accountIncomeStrategies: {},
-            accountWithdrawRates: {},
-          }) as IncomeUiFields,
-          (local.accountIncomeUi ?? null) as IncomeUiFields | null,
-        )
-      : null
+  const mergedAccountIncomeUi = mergeAccountIncomeUiForSync(
+    remote,
+    local,
+    remoteUpdatedAt,
+    loadLocalPlanStateSavedAt(),
+  )
 
   return {
     ...local,
@@ -175,8 +188,10 @@ function restoreMissingLocalFieldsFromRemote(
     patch.retirementPreferences = remote.retirementPreferences
     hasPatch = true
   }
-  if (!local.accountIncomeUi && remote.accountIncomeUi) {
-    patch.accountIncomeUi = remote.accountIncomeUi
+  const localIncomeUi = incomeUiFromPayload(local)
+  const remoteIncomeUi = incomeUiFromPayload(remote)
+  if (!incomeUiFieldsHaveData(localIncomeUi) && incomeUiFieldsHaveData(remoteIncomeUi)) {
+    patch.accountIncomeUi = remoteIncomeUi
     hasPatch = true
   }
 
@@ -193,17 +208,12 @@ function mergeLocalSessionOverrides(
 ): UserPlanStatePayload {
   const remoteSession = asSession(remote.session)
   const localSession = asSession(local.session)
-  const mergedAccountIncomeUi =
-    remote.accountIncomeUi || local.accountIncomeUi
-      ? mergeIncomeUiFields(
-          (remote.accountIncomeUi ?? {
-            accountIncomeFunds: {},
-            accountIncomeStrategies: {},
-            accountWithdrawRates: {},
-          }) as IncomeUiFields,
-          (local.accountIncomeUi ?? null) as IncomeUiFields | null,
-        )
-      : null
+  const mergedAccountIncomeUi = mergeAccountIncomeUiForSync(
+    remote,
+    local,
+    remoteUpdatedAt,
+    loadLocalPlanStateSavedAt(),
+  )
 
   if (!remoteSession || !localSession) {
     const mergedRetirementPreferences = mergeRetirementPreferences(
@@ -228,31 +238,18 @@ function mergeLocalSessionOverrides(
 
   const remoteUi = remoteSession.ui
   const localUi = localSession.ui
-  const mergeIncomeUi = incomeUiFieldCount(localSession) > 0
 
   let session: AppSnapshotV1 = remoteSession
   if (localSession.phase === 'income' && remoteSession.phase !== 'income') {
     session = { ...session, phase: 'income' }
   }
-  if (mergeIncomeUi && localUi) {
+  if (mergedAccountIncomeUi && incomeUiFieldsHaveData(mergedAccountIncomeUi)) {
     session = {
       ...session,
       ui: {
         ...remoteUi,
-        ...migrateIncomeUiFields({
-          accountIncomeFunds: {
-            ...remoteUi.accountIncomeFunds,
-            ...localUi.accountIncomeFunds,
-          },
-          accountIncomeStrategies: {
-            ...remoteUi.accountIncomeStrategies,
-            ...localUi.accountIncomeStrategies,
-          },
-          accountWithdrawRates: {
-            ...remoteUi.accountWithdrawRates,
-            ...localUi.accountWithdrawRates,
-          },
-        }),
+        ...localUi,
+        ...mergedAccountIncomeUi,
       },
     }
   }
@@ -364,30 +361,33 @@ export async function hydratePlanStateFromServer(): Promise<boolean> {
   if (hydrateInFlight) return hydrateInFlight
   hydrateInFlight = (async () => {
     try {
+      const resumedAfterSignOut = consumePostSignOutSession()
       const local = buildPlanStatePayloadFromLocal()
       const localSavedAt = loadLocalPlanStateSavedAt()
       const { planState: remote, updatedAt: remoteUpdatedAt } = await fetchUserPlanState()
 
       if (remote && planStatePayloadHasData(remote)) {
-        if (localSessionShouldWinOverRemote(local, remote, localSavedAt, remoteUpdatedAt)) {
+        if (resumedAfterSignOut) {
+          applyPlanStatePayloadToLocal(remote)
+          touchLocalPlanStateSavedAt(remoteUpdatedAt ?? remote.savedAt)
+          dispatchPlanStateServerHydrated()
+          return true
+        }
+
+        if (localSessionShouldWinOverRemote(localSavedAt, remoteUpdatedAt)) {
           const mergedLocal = mergeRemoteFieldsIntoLocal(remote, local, remoteUpdatedAt)
           applyMergedSyncedFields(mergedLocal)
           restoreMissingLocalFieldsFromRemote(remote, local)
           if (planStatePayloadHasData(mergedLocal)) {
             pushPlanStateToServer(mergedLocal)
+            touchLocalPlanStateSavedAt(new Date().toISOString())
             dispatchPlanStateServerHydrated()
             return true
           }
         }
         const merged = mergeLocalSessionOverrides(remote, local, remoteUpdatedAt)
         applyPlanStatePayloadToLocal(merged)
-        const mergedDiffersFromRemote = merged !== remote
-        touchLocalPlanStateSavedAt(
-          mergedDiffersFromRemote ? new Date().toISOString() : (remoteUpdatedAt ?? remote.savedAt),
-        )
-        if (mergedDiffersFromRemote) {
-          pushPlanStateToServer(merged)
-        }
+        touchLocalPlanStateSavedAt(remoteUpdatedAt ?? remote.savedAt)
         dispatchPlanStateServerHydrated()
         return true
       }

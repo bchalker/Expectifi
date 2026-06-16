@@ -65,6 +65,7 @@ import { loadLifePlans, type LifePlans } from "./lib/planStorage/life";
 import {
   PLAN_STATE_SERVER_HYDRATED_EVENT,
   flushPlanStateServerSync,
+  hydratePlanStateFromServer,
   queuePlanStateServerSync,
 } from "./lib/planStateServerSync";
 import { hydrateAppSnapshot } from "./lib/appSnapshot";
@@ -594,6 +595,17 @@ export default function App({ initialAuthModal = null }: AppProps) {
     window.addEventListener("pagehide", onPageHide);
     return () => window.removeEventListener("pagehide", onPageHide);
   }, [user]);
+
+  /** Pull latest plan state when returning to this tab (cross-device income / prefs sync). */
+  useEffect(() => {
+    if (!user) return;
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      void hydratePlanStateFromServer();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [user?.id]);
 
   /** After server plan-state hydrate, refresh session UI and derived local-only state. */
   useEffect(() => {
