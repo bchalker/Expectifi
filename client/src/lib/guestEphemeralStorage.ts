@@ -1,7 +1,7 @@
 import { clearStoredAppState } from './appStateStorage'
 import { clearStoredPositionsImport } from './positionsImportStorage'
 import { getPlanWriteTier } from './planStorage/writeContext'
-import { hasSavePlanBeenAccepted, loadMeta } from './planStorage/meta'
+import { tierIsAuthenticated } from './planStorage/resolveTier'
 import { clearBalanceInputModeStorage } from './retirementBalanceMode'
 import { BROKERAGE_BALANCE_MODE_KEY } from './brokerageBalanceMode'
 import { clearLocalUserPrefsStorage } from './userPrefs'
@@ -21,9 +21,9 @@ type GuestTabRecord = {
   ts: number
 }
 
-/** Tier 1: no localStorage — tab registry exists only to run teardown cleanup for browser_saved+. */
+/** Ephemeral guest tabs: only track when signed in (guests use sessionStorage only). */
 export function shouldTrackEphemeralGuestTabs(): boolean {
-  return getPlanWriteTier() !== 'anonymous'
+  return tierIsAuthenticated(getPlanWriteTier())
 }
 
 function readGuestTabs(): GuestTabRecord[] {
@@ -64,14 +64,11 @@ function pruneStaleGuestTabs(tabs: GuestTabRecord[], now = Date.now()): GuestTab
   return tabs.filter((tab) => now - tab.ts < GUEST_TAB_STALE_MS)
 }
 
-/** Remove guest financial session data. Preserves expectifi plan keys for browser_saved tier. */
+/** Remove guest financial session data. Preserves onboarding profile only. */
 export function clearEphemeralGuestStorage(): void {
-  const isBrowserSaved = loadMeta()?.tier === 'browser_saved' && hasSavePlanBeenAccepted()
   try {
-    if (!isBrowserSaved) {
-      clearStoredAppState()
-      clearStoredManualAccounts()
-    }
+    clearStoredAppState()
+    clearStoredManualAccounts()
     clearStoredPositionsImport()
     clearBalanceInputModeStorage()
     localStorage.removeItem(BROKERAGE_BALANCE_MODE_KEY)

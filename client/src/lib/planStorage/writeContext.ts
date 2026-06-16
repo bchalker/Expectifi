@@ -1,5 +1,4 @@
-import { hasSavePlanBeenAccepted } from './meta'
-import { canPersistPlanToLocalStorage } from './resolveTier'
+import { tierIsAuthenticated } from './resolveTier'
 import type { UserTier } from './types'
 
 /** Set by UserTierProvider after hydration; used by storage modules (no React in lib code). */
@@ -14,16 +13,21 @@ export function getPlanWriteTier(): UserTier {
   return planWriteTier
 }
 
+/** Signed-in users: full plan cache in localStorage + server sync. */
 export function canWritePlanLocalStorage(): boolean {
-  return canPersistPlanToLocalStorage(planWriteTier)
+  if (migrationWriteBypass) return true
+  return tierIsAuthenticated(planWriteTier)
 }
 
-/** True when expectifi/* plan blobs may be written (consent + tier). */
-export function canWriteExpectifiPlanBlobs(): boolean {
+/** Onboarding profile only — allowed for guests and signed-in users. */
+export function canWriteGuestProfile(): boolean {
   if (migrationWriteBypass) return true
-  if (!canPersistPlanToLocalStorage(planWriteTier)) return false
-  if (planWriteTier === 'browser_saved' && !hasSavePlanBeenAccepted()) return false
   return true
+}
+
+/** True when expectifi/* plan blobs (session, accounts, income UI, etc.) may be written. */
+export function canWriteExpectifiPlanBlobs(): boolean {
+  return canWritePlanLocalStorage()
 }
 
 /** Legacy migration runs before planWriteTier is set; bypass consent guard for that boot step only. */

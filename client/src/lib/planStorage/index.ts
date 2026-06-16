@@ -58,10 +58,11 @@ export {
   type HydratePlanOptions,
 } from './hydrate'
 export { persistPlanState } from './persist'
-export { purgeUnconsentedPlanStorage } from './purgeUnconsented'
+export { purgeUnconsentedPlanStorage, purgeGuestNonProfilePlanStorage } from './purgeUnconsented'
 export { clearCsvSession, loadCsvSession, saveCsvSession } from './csvSession'
 export {
   canWritePlanLocalStorage,
+  canWriteGuestProfile,
   getPlanWriteTier,
   setPlanWriteTier,
 } from './writeContext'

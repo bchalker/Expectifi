@@ -68,13 +68,13 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
     saveRetirementPreferences(
       normalizeRetirementPreferences(payload.retirementPreferences),
       undefined,
-      { skipServerSync: true },
+      { skipServerSync: true, skipTouchSavedAt: true },
     )
     window.dispatchEvent(new CustomEvent('retirement-preferences-updated'))
   }
   if (payload.accountIncomeUi) {
     const normalized = migrateIncomeUiFields(payload.accountIncomeUi as IncomeUiFields)
-    saveIncomeUiSnap(normalized, { skipServerSync: true })
+    saveIncomeUiSnap(normalized, { skipServerSync: true, skipTouchSavedAt: true })
     const session = loadPlanSession()
     if (session) {
       savePlanSession({
@@ -91,7 +91,7 @@ export function applyPlanStatePayloadToLocal(payload: UserPlanStatePayload): voi
     if (sessionSnapshot.version === 1 && sessionSnapshot.ui) {
       const fromSession = incomeUiFromSessionSnapshot(sessionSnapshot)
       if (incomeUiFieldsHaveData(fromSession)) {
-        saveIncomeUiSnap(fromSession, { skipServerSync: true })
+        saveIncomeUiSnap(fromSession, { skipServerSync: true, skipTouchSavedAt: true })
         window.dispatchEvent(new CustomEvent(ACCOUNT_INCOME_UI_UPDATED_EVENT))
       }
     }

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useUserTier } from "../hooks/useUserTier";
 import { loadCsvSession } from "../lib/planStorage/csvSession";
 import { dismissProNudge, isProNudgeDismissed } from "../lib/proNudgeDismissed";
+import { loadPlanProfile, profileHasOnboardingComplete } from "../lib/planStorage";
 import { isSessionSavePlanDismissed } from "../lib/sessionFlags";
 import { AppButton } from "./ui/AppButton";
 import "./AccountPlanBottomBanner.scss";
@@ -45,13 +46,12 @@ function hasSessionCsvImportData(): boolean {
 function phase2Eligible(
   user: unknown,
   isPro: boolean,
-  tier: string,
   proNudgeDismissed: boolean,
 ): boolean {
   return (
     !user &&
     !isPro &&
-    (tier === "browser_saved" || isSessionSavePlanDismissed()) &&
+    (profileHasOnboardingComplete(loadPlanProfile()) || isSessionSavePlanDismissed()) &&
     !proNudgeDismissed
   );
 }
@@ -101,7 +101,7 @@ export function AccountPlanBottomBanner({
   );
 
   const showPhase1 = showSavePlanPrompt;
-  const showPhase2 = phase2Eligible(user, isPro, tier, proNudgeDismissed);
+  const showPhase2 = phase2Eligible(user, isPro, proNudgeDismissed);
   const bannerVisible = displayPanel != null;
 
   const clearTransitionTimer = useCallback(() => {
@@ -192,7 +192,7 @@ export function AccountPlanBottomBanner({
     if (displayPanel !== "confirmation") return;
     const confirmId = window.setTimeout(() => {
       runExitThen(() => {
-        if (phase2Eligible(user, isPro, tier, proNudgeDismissed)) {
+        if (phase2Eligible(user, isPro, proNudgeDismissed)) {
           setDisplayPanel("phase2");
           beginEnter();
         } else {
@@ -229,7 +229,8 @@ export function AccountPlanBottomBanner({
       const showNudge =
         !user &&
         !isPro &&
-        (tier === "browser_saved" || isSessionSavePlanDismissed()) &&
+        (profileHasOnboardingComplete(loadPlanProfile()) ||
+          isSessionSavePlanDismissed()) &&
         !proNudgeDismissed;
       if (showNudge) {
         setDisplayPanel("phase2");

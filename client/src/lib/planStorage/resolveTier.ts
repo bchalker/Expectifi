@@ -19,8 +19,9 @@ export function resolveUserTier(auth: AuthTierInput): UserTier {
   return 'anonymous'
 }
 
+/** Full plan blobs (session, accounts, prefs) — authenticated users only. Guests: profile key only. */
 export function canPersistPlanToLocalStorage(tier: UserTier): boolean {
-  return tier === 'browser_saved' || tier === 'authenticated_free' || tier === 'pro'
+  return tierIsAuthenticated(tier)
 }
 
 export function tierIsAuthenticated(tier: UserTier): boolean {

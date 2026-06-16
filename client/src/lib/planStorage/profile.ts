@@ -2,7 +2,7 @@ import { parseStoredUserProfile, type StoredUserProfile } from '../storedUserPro
 import { EXPECTIFI_PROFILE_KEY } from './keys'
 import type { StoredPlanProfile } from './types'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'
-import { canWriteExpectifiPlanBlobs } from './writeContext'
+import { canWriteGuestProfile } from './writeContext'
 
 export function loadPlanProfile(): StoredPlanProfile | null {
   const raw = readJsonFromLocalStorage<StoredPlanProfile>(EXPECTIFI_PROFILE_KEY)
@@ -24,7 +24,7 @@ export function loadPlanProfile(): StoredPlanProfile | null {
 export function savePlanProfile(patch: Partial<StoredPlanProfile>): StoredPlanProfile {
   const current = loadPlanProfile() ?? { version: 1 as const }
   const next: StoredPlanProfile = { ...current, ...patch, version: 1 }
-  if (canWriteExpectifiPlanBlobs()) {
+  if (canWriteGuestProfile()) {
     writeJsonToLocalStorage(EXPECTIFI_PROFILE_KEY, next)
   }
   return next

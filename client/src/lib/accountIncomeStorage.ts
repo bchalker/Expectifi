@@ -221,12 +221,14 @@ export function loadAccountIncomeUiFieldsForPlanState(): IncomeUiFields | null {
 
 export function saveIncomeUiSnap(
   ui: IncomeUiFields,
-  options?: { skipServerSync?: boolean },
+  options?: { skipServerSync?: boolean; skipTouchSavedAt?: boolean },
 ): void {
   const migrated = migrateIncomeUiFields(ui)
   if (canWriteExpectifiPlanBlobs()) {
     writeJsonToLocalStorage(EXPECTIFI_ACCOUNT_INCOME_UI_KEY, migrated)
-    touchLocalPlanStateSavedAt()
+    if (!options?.skipTouchSavedAt) {
+      touchLocalPlanStateSavedAt()
+    }
     if (!options?.skipServerSync) {
       void import('./planStateServerSync').then(({ queuePlanStateServerSync }) => {
         queuePlanStateServerSync()

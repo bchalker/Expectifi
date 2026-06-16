@@ -1,6 +1,6 @@
 import { ageFromIsoDateString, isValidIsoDateString } from './ageFromDob'
 import type { CalculatorInputs } from './computeResults'
-import { canWritePlanLocalStorage, loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage'
+import { loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage'
 import { clampClaimAge, normalizeClaimAge, type SsClaimAge } from './socialSecurity'
 
 /** Guest welcome / plan profile (localStorage). */
@@ -170,13 +170,7 @@ export function loadLocalUserPrefs(): UserPrefs | null {
     if (!raw) {
       for (const legacyKey of LEGACY_USER_PREFS_STORAGE_KEYS) {
         raw = localStorage.getItem(legacyKey)
-        if (raw) {
-          if (!canWritePlanLocalStorage()) {
-            localStorage.setItem(USER_PREFS_STORAGE_KEY, raw)
-            localStorage.removeItem(legacyKey)
-          }
-          break
-        }
+        if (raw) break
       }
     }
     if (!raw) return null
@@ -186,13 +180,8 @@ export function loadLocalUserPrefs(): UserPrefs | null {
   }
 }
 
-export function saveLocalUserPrefs(prefs: UserPrefs): void {
-  if (canWritePlanLocalStorage()) return
-  try {
-    localStorage.setItem(USER_PREFS_STORAGE_KEY, JSON.stringify(prefs))
-  } catch {
-    /* quota / private mode */
-  }
+export function saveLocalUserPrefs(_prefs: UserPrefs): void {
+  /* Guests persist onboarding data in expectifi/profile-v1 only. */
 }
 
 export function clearLocalUserPrefsStorage(): void {
@@ -211,34 +200,21 @@ export function clearLocalUserPrefsStorage(): void {
 }
 
 export function markWelcomeCompletedLocal(): void {
-  if (canWritePlanLocalStorage()) {
-    savePlanProfile({ ...loadPlanProfile(), version: 1, onboardingComplete: true })
-    return
-  }
-  try {
-    localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
-    for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
-      localStorage.removeItem(legacyKey)
-    }
-  } catch {
-    /* quota / private mode */
-  }
+  savePlanProfile({
+    ...(loadPlanProfile() ?? { version: 1 as const }),
+    onboardingComplete: true,
+    version: 1,
+  })
 }
 
 export function isWelcomeCompletedLocal(): boolean {
-  if (canWritePlanLocalStorage() && profileHasOnboardingComplete(loadPlanProfile())) {
+  if (profileHasOnboardingComplete(loadPlanProfile())) {
     return true
   }
   try {
     if (localStorage.getItem(WELCOME_COMPLETED_STORAGE_KEY) === '1') return true
     for (const legacyKey of LEGACY_WELCOME_COMPLETED_STORAGE_KEYS) {
-      if (localStorage.getItem(legacyKey) === '1') {
-        if (!canWritePlanLocalStorage()) {
-          localStorage.setItem(WELCOME_COMPLETED_STORAGE_KEY, '1')
-        }
-        localStorage.removeItem(legacyKey)
-        return true
-      }
+      if (localStorage.getItem(legacyKey) === '1') return true
     }
     return false
   } catch {

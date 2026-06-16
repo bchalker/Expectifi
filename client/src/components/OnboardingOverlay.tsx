@@ -8,7 +8,7 @@ import {
   saveLocalUserPrefs,
   type UserPrefs,
 } from "../lib/userPrefs";
-import { canWritePlanLocalStorage, savePlanProfile } from "../lib/planStorage";
+import { savePlanProfile } from "../lib/planStorage";
 import {
   setSessionOnboardingAccounts,
   setSessionOnboardingComplete,
@@ -424,9 +424,7 @@ export function OnboardingOverlay({
     );
     setSessionOnboardingAccounts(JSON.stringify(finishedEntries));
     setSessionOnboardingComplete(true);
-    if (canWritePlanLocalStorage()) {
-      savePlanProfile({ onboardingComplete: true });
-    }
+    savePlanProfile({ onboardingComplete: true });
     markWelcomeCompletedLocal();
     clearForceOnboardingSession();
     setBusy(false);

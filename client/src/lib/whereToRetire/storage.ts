@@ -1,5 +1,6 @@
 import type { BudgetPreferences } from '../../utils/costOfLiving'
 import { DEFAULT_BUDGET_PREFERENCES } from '../../utils/costOfLiving'
+import { canWritePlanLocalStorage } from '../planStorage/writeContext'
 
 const DESTINATIONS_KEY = 'wtr-destinations'
 const LEGACY_DESTINATIONS_KEY = 'where-to-retire-destinations'
@@ -82,6 +83,7 @@ export function loadSelectedDestinationKeys(): string[] {
 
 export function saveDestinationState(state: StoredDestinationState): void {
   if (typeof window === 'undefined') return
+  if (!canWritePlanLocalStorage()) return
   localStorage.setItem(DESTINATIONS_KEY, JSON.stringify(normalizeDestinationState(state)))
 }
 
@@ -139,6 +141,7 @@ export function loadIncomeOverride(): number | null {
 
 export function saveIncomeOverride(value: number | null): void {
   if (typeof window === 'undefined') return
+  if (!canWritePlanLocalStorage()) return
   if (value == null) {
     localStorage.removeItem(INCOME_OVERRIDE_KEY)
     return
@@ -165,6 +168,7 @@ export function loadBudgetPreferences(): BudgetPreferences | null {
 
 export function saveBudgetPreferences(prefs: BudgetPreferences): void {
   if (typeof window === 'undefined') return
+  if (!canWritePlanLocalStorage()) return
   localStorage.setItem(BUDGET_PREFERENCES_KEY, JSON.stringify(prefs))
 }
 

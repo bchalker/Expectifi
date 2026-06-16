@@ -15,11 +15,11 @@ import { isSessionOnboardingComplete, resetAnonymousEphemeralSessionOnBoot } fro
 import { profileToCalculatorPatch } from '../userProfileStorage'
 import { loadPlanAccounts, planAccountsHaveBalances } from './accounts'
 import { hasSavePlanBeenAccepted, loadMeta } from './meta'
-import { purgeUnconsentedPlanStorage } from './purgeUnconsented'
+import { purgeGuestNonProfilePlanStorage, purgeUnconsentedPlanStorage } from './purgeUnconsented'
 import { migrateLegacyPlanStorageIfNeeded } from './migrateLegacy'
 import { loadPlanProfile, profileHasOnboardingComplete } from './profile'
 import { hydratePlanSession, loadPlanSession } from './session'
-import { resolveUserTier } from './resolveTier'
+import { resolveUserTier, tierIsAuthenticated } from './resolveTier'
 import type { AuthTierInput } from './types'
 import type { PlanHydration, StoredPlanProfile, UserTier } from './types'
 
@@ -93,7 +93,7 @@ function hydratePlanStateForTier(
   let phase: 'growth' | 'income' = 'growth'
   let activePreset: string | null = null
 
-  if (tier === 'browser_saved' || tier === 'pro' || tier === 'authenticated_free') {
+  if (tierIsAuthenticated(tier)) {
     if (profile) {
       inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
     }
@@ -108,6 +108,8 @@ function hydratePlanStateForTier(
     }
     inputs = mergeManualAccountsIntoInputs(inputs, accounts)
     inputs = applyImportedBalanceOverrides(inputs)
+  } else if (profile) {
+    inputs = { ...inputs, ...profileToCalculatorPatch(profile) }
   }
 
   const onboardingComplete = resolveOnboardingComplete(tier, profile, accounts)
@@ -133,6 +135,9 @@ export function bootPlanHydration(
   options?: Pick<HydratePlanOptions, 'defaultInputs' | 'defaultUi'>,
 ): PlanHydration {
   purgeUnconsentedPlanStorage()
+  if (!tierIsAuthenticated(resolveUserTier(auth))) {
+    purgeGuestNonProfilePlanStorage()
+  }
   loadMeta()
   migrateLegacyPlanStorageIfNeeded()
   const tier = resolveUserTier(auth)

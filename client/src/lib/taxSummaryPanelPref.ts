@@ -1,4 +1,5 @@
 import { EXPECTIFI_TAX_SUMMARY_PANEL_OPEN_KEY } from './planStorage/keys'
+import { canWritePlanLocalStorage } from './planStorage/writeContext'
 
 export function loadTaxSummaryPanelOpen(): boolean {
   try {
@@ -12,6 +13,7 @@ export function loadTaxSummaryPanelOpen(): boolean {
 }
 
 export function saveTaxSummaryPanelOpen(open: boolean): void {
+  if (!canWritePlanLocalStorage()) return
   try {
     localStorage.setItem(EXPECTIFI_TAX_SUMMARY_PANEL_OPEN_KEY, String(open))
   } catch {

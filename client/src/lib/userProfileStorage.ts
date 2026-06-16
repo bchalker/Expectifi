@@ -14,7 +14,7 @@ import { RETIRE_AGE_MIN, RETIRE_AGE_MAX } from './userPrefs'
 import { pensionConfigForLocale } from './localePensionConfig'
 import { normalizeCalculatorFilingStatus } from './filingStatus'
 import { clampClaimAgeInRange } from './socialSecurity'
-import { canWritePlanLocalStorage } from './planStorage/writeContext'
+import { canWriteGuestProfile } from './planStorage/writeContext'
 import { loadPlanProfile, profileHasOnboardingComplete, savePlanProfile } from './planStorage/profile'
 import type { StoredPlanProfile } from './planStorage/types'
 import { parseStoredUserProfile, type StoredUserProfile } from './storedUserProfile'
@@ -85,7 +85,7 @@ export function loadUserProfile(): StoredUserProfile | null {
 export function saveUserProfile(patch: Partial<StoredUserProfile>): StoredUserProfile {
   const current = loadUserProfile() ?? { version: 1 as const }
   const next: StoredUserProfile = { ...current, ...patch, version: 1 }
-  if (!canWritePlanLocalStorage()) {
+  if (!canWriteGuestProfile()) {
     return next
   }
   savePlanProfile({
@@ -198,7 +198,7 @@ export function syncUserProfileFromCalculatorInputs(
   inputs: CalculatorInputs,
   ui: CalculatorUi,
 ): void {
-  if (!hasPersistedPlanningProfile() || !canWritePlanLocalStorage()) return
+  if (!hasPersistedPlanningProfile()) return
   saveUserProfile(profilePatchFromCalculatorInputs(inputs, ui))
 }
 

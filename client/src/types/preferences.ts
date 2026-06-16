@@ -1,4 +1,6 @@
 import { touchLocalPlanStateSavedAt } from '../lib/planStorage/localSavedAt'
+import { getPlanWriteTier } from '../lib/planStorage/writeContext'
+import { tierIsAuthenticated } from '../lib/planStorage/resolveTier'
 
 export type PreferenceStep =
   | 0
@@ -298,15 +300,19 @@ export function loadRetirementPreferences(
 export function saveRetirementPreferences(
   prefs: RetirementPreferences,
   config: WizardConfig = RETIREMENT_WIZARD_CONFIG,
-  options?: { skipServerSync?: boolean },
+  options?: { skipServerSync?: boolean; skipTouchSavedAt?: boolean },
 ): void {
   if (typeof window === 'undefined') return
   const normalized = normalizeRetirementPreferences(prefs)
-  localStorage.setItem(
-    config.storageKey,
-    JSON.stringify({ ...normalized, _version: PREFERENCES_STORAGE_VERSION }),
-  )
-  touchLocalPlanStateSavedAt()
+  if (tierIsAuthenticated(getPlanWriteTier())) {
+    localStorage.setItem(
+      config.storageKey,
+      JSON.stringify({ ...normalized, _version: PREFERENCES_STORAGE_VERSION }),
+    )
+    if (!options?.skipTouchSavedAt) {
+      touchLocalPlanStateSavedAt()
+    }
+  }
   if (!options?.skipServerSync) {
     void import('../lib/planStateServerSync').then(
       ({ queuePlanStateServerSync, flushPlanStateServerSync }) => {

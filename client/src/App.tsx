@@ -459,8 +459,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
       setUiState(resolvedUi);
       setPhase(resolvedPhase);
       setActivePreset(hydration.activePreset);
-      saveCalculatorPhaseSnap(resolvedPhase);
-      saveIncomeUiSnap(resolvedUi);
     };
 
     if (userId && syncedAuthUserIdRef.current !== userId) {
@@ -600,8 +598,13 @@ export default function App({ initialAuthModal = null }: AppProps) {
   useEffect(() => {
     if (!user) return;
     const onVisibility = () => {
-      if (document.visibilityState !== "visible") return;
-      void hydratePlanStateFromServer();
+      if (document.visibilityState === "hidden") {
+        flushPlanStateServerSync();
+        return;
+      }
+      if (document.visibilityState === "visible") {
+        void hydratePlanStateFromServer();
+      }
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
@@ -620,10 +623,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
           ...s,
           ...resolvedUi,
         }));
-        saveIncomeUiSnap(resolvedUi);
         const resolvedPhase = resolveCalculatorPhase(hydrated.phase);
         setPhase(resolvedPhase);
-        saveCalculatorPhaseSnap(resolvedPhase);
         setActivePreset(hydrated.activePreset);
       }
       setLifePlans(loadLifePlans());

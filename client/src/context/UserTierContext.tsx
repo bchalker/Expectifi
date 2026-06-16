@@ -9,15 +9,14 @@ import {
 } from 'react'
 import { useAuth, type AuthUser } from './AuthContext'
 import {
+  profileHasOnboardingComplete,
+  loadPlanProfile,
+  savePlanProfile,
   bootPlanHydration,
   canPersistPlanToLocalStorage,
   createDefaultPlanHydration,
-  defaultMeta,
-  hasSavePlanBeenAccepted,
-  persistPlanState,
   purgeUnconsentedPlanStorage,
   resolveUserTier,
-  saveMeta,
   setPlanWriteTier,
   type AuthTierInput,
   type PlanHydration,
@@ -164,19 +163,12 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
 
   const acceptBrowserSave = useCallback(() => {
     const snapshot = browserSaveSnapshotRef.current?.()
-    if (!snapshot) return
+    if (!snapshot?.profile) return
 
-    const meta = defaultMeta('browser_saved')
-    meta.prompts.savePlanAcceptedAt = new Date().toISOString()
-    saveMeta(meta)
-    setPlanWriteTier('browser_saved')
-
-    persistPlanState('browser_saved', snapshot)
+    savePlanProfile({ ...snapshot.profile, onboardingComplete: true, version: 1 })
     setHydration((current) => ({
       ...current,
-      tier: 'browser_saved',
-      profile: snapshot.profile,
-      accounts: snapshot.accounts,
+      profile: { ...snapshot.profile, onboardingComplete: true, version: 1 },
       onboardingComplete: true,
     }))
     clearSessionOnboardingAccounts()
@@ -191,7 +183,7 @@ export function UserTierProvider({ children }: { children: ReactNode }) {
     if (!isSessionOnboardingComplete()) return false
     if (!savePlanSignals.dashboardVisible) return false
     if (savePlanSignals.projectedIncomeMonthly <= 0) return false
-    if (hasSavePlanBeenAccepted()) return false
+    if (profileHasOnboardingComplete(loadPlanProfile())) return false
     if (isSessionSavePlanDismissed()) return false
     return true
   }, [
