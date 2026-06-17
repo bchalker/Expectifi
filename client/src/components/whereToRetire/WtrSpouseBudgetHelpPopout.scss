@@ -1,0 +1,207 @@
+.wtr-spouse-budget-help__trigger {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 0.12em;
+  cursor: help;
+}
+
+.wtr-spouse-budget-help__trigger:hover,
+.wtr-spouse-budget-help__trigger[aria-expanded='true'] {
+  color: var(--text);
+}
+
+.wtr-spouse-budget-help__trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.wtr-spouse-budget-help-popover.popover,
+.wtr-spouse-budget-help-popover {
+  z-index: 1200;
+  width: max-content;
+  min-width: 18rem;
+  max-width: min(24rem, calc(100vw - var(--space-4)));
+  padding: 0;
+  background: var(--color-background-primary, var(--surface));
+  border: 0.5px solid var(--color-border-secondary, var(--border));
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 0.13);
+  color: var(--color-text-primary, var(--text));
+  box-sizing: border-box;
+}
+
+.wtr-spouse-budget-help-popover__dialog.popover__dialog {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: inherit;
+  box-shadow: none;
+  outline: none;
+  overflow: hidden;
+}
+
+.wtr-spouse-budget-help-popover__arrow,
+.wtr-spouse-budget-help-popover [data-slot='popover-overlay-arrow-group'] svg,
+.wtr-spouse-budget-help-popover [data-slot='popover-overlay-arrow'] path {
+  fill: var(--color-background-primary, var(--surface));
+  stroke: var(--color-border-secondary, var(--border));
+}
+
+.wtr-spouse-budget-help__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.wtr-spouse-budget-help__title {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.wtr-spouse-budget-help__content {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  box-sizing: border-box;
+}
+
+.wtr-spouse-budget-help__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--space-2);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.wtr-spouse-budget-help__close:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.wtr-spouse-budget-help__close:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.wtr-spouse-budget-help__body {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.wtr-spouse-budget-help__body strong {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wtr-spouse-budget-help__list {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wtr-spouse-budget-help__list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.wtr-spouse-budget-help__list-item + .wtr-spouse-budget-help__list-item {
+  margin-top: var(--space-1);
+}
+
+.wtr-spouse-budget-help__list-icon {
+  flex-shrink: 0;
+  margin-top: 0.15em;
+  color: var(--text-muted);
+}
+
+.wtr-spouse-budget-help__list-copy {
+  min-width: 0;
+}
+
+.wtr-spouse-budget-help__list strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+@media (max-width: 680px) {
+  .wtr-spouse-budget-help__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: color-mix(in srgb, var(--text) 32%, transparent);
+    cursor: default;
+  }
+
+  .wtr-spouse-budget-help__sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 1401;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    height: 100dvh;
+    background: var(--surface);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: hidden;
+  }
+
+  .wtr-spouse-budget-help__sheet .wtr-spouse-budget-help__head {
+    padding: var(--space-3) var(--space-4);
+    box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
+  }
+
+  .wtr-spouse-budget-help__sheet .wtr-spouse-budget-help__content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+}

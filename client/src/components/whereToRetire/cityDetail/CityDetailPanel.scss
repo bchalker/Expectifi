@@ -227,6 +227,7 @@
   padding: var(--space-4);
   border-radius: 0;
   background: var(--wtr-city-detail-panel-bg);
+  // box-shadow: inset 5px 0 0 0 rgba(0, 0, 0, .03);
   box-sizing: border-box;
 }
 
@@ -292,11 +293,12 @@
   // border-right: 1px solid var(--border);
   background: var(--surface);
   background: var(--sky-blue);
-  background: linear-gradient(to bottom, var(--sky-blue-d1), var(--surface) 90%);
+  background: linear-gradient(to bottom, var(--sky-blue-d1), var(--sky-blue) 90%);
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  box-shadow: inset -10px 0 0 0 rgba(0, 0, 0, .03);
 
 }
 
@@ -336,7 +338,7 @@ all .3s ease;
 
 .wtr-city-detail__nav-item:hover {
   color: var(--text);
-  background: var(--wtr-city-detail-panel-bg);
+  background: var(--surface);
 }
 
 .wtr-city-detail__nav-item--active {
@@ -727,4 +729,16 @@ all .3s ease;
   .wtr-city-detail__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

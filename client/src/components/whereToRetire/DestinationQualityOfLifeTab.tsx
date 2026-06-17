@@ -1,22 +1,21 @@
 import { useMemo, type CSSProperties } from "react";
 import { IconShieldHeart, IconStethoscope } from "@tabler/icons-react";
+import { DataConfidenceNote } from "../ui/DataConfidenceNote";
 import { formatHealthcareInsuranceMonthlyRange } from "../../utils/countryPreferenceData";
 import {
-  formatHealthcareSourceLabel,
+  formatQoLDisplayScore,
   getQualityOfLifeData,
-  HEALTHCARE_BAND_SEGMENTS,
-  healthcareBand,
+  getQoLTabSourceFooter,
   healthcareBandDescription,
   QOL_NORMALIZED_MAX,
-  QOL_TAB_SOURCE_FOOTER,
   QOL_UNAVAILABLE_MESSAGE,
-  qolBarFillPercent,
-  qolMetricBarBand,
   qolNormalizedFromIndex,
   qolOverallScoreBand,
+  resolveQoLMetricBand,
   type QoLMetricKey,
   type QualityOfLifeCountryData,
 } from "../../utils/qualityOfLife";
+import { QoLBandedScoreMeter } from "./QoLBandedScoreMeter";
 import "./DestinationQualityOfLifeTab.scss";
 
 type Props = {
@@ -29,7 +28,6 @@ type MetricRowConfig = {
   id: QoLMetricKey;
   label: string;
   score: number;
-  invertBar: boolean;
 };
 
 function staggerSectionProps(
@@ -49,44 +47,6 @@ function staggerSectionProps(
   };
 }
 
-function formatScore(score: number): string {
-  return Number.isInteger(score) ? `${score}` : score.toFixed(1);
-}
-
-function QoLBar({
-  fillPct,
-  valueNow,
-  max,
-  label,
-  tone,
-}: {
-  fillPct: number;
-  valueNow: number;
-  max: number;
-  label: string;
-  tone: string;
-}) {
-  return (
-    <div
-      className="wtr-qol-bar__track"
-      role="progressbar"
-      aria-valuemin={0}
-      aria-valuemax={max}
-      aria-valuenow={valueNow}
-      aria-label={label}
-    >
-      {fillPct > 0 ? (
-        <div
-          className={["wtr-qol-bar__fill", `wtr-qol-bar__fill--${tone}`].join(
-            " ",
-          )}
-          style={{ width: `${fillPct}%` }}
-        />
-      ) : null}
-    </div>
-  );
-}
-
 function QoLHealthcareCard({
   country,
   data,
@@ -97,10 +57,7 @@ function QoLHealthcareCard({
   style?: CSSProperties;
 }) {
   const score = data.healthcare_index;
-  const scoreValue = formatScore(score);
-  const { band, label: bandLabel } = healthcareBand(score);
   const description = healthcareBandDescription(score);
-  const sourceLabel = formatHealthcareSourceLabel(data.source);
   const insuranceRange = formatHealthcareInsuranceMonthlyRange(country);
 
   return (
@@ -122,88 +79,30 @@ function QoLHealthcareCard({
           </span>
         </div>
 
-        <div className="wtr-qol-healthcare__score-row">
-          <p className="wtr-qol-healthcare__score tabular-nums">
-            <span className="wtr-qol-healthcare__score-value">
-              {scoreValue}
-            </span>
-            <span className="wtr-qol-healthcare__score-denom"> / 100</span>
-          </p>
-          <span
-            className={`wtr-qol-healthcare__badge wtr-qol-healthcare__badge--${band}`}
-          >
-            {bandLabel}
-          </span>
-        </div>
-
-        <p className="wtr-qol-healthcare__description">
-          <span className="wtr-qol-healthcare__why-label">
-            Why it matters for you:
-          </span>{" "}
-          {description}
-        </p>
-
-        <div
-          className="wtr-qol-healthcare__meter"
-          role="img"
-          aria-label={`Healthcare band: ${bandLabel}`}
-        >
-          <div className="wtr-qol-healthcare__meter-segments">
-            {HEALTHCARE_BAND_SEGMENTS.map((segment) => (
-              <div
-                key={segment.band}
-                className={[
-                  "wtr-qol-healthcare__meter-segment",
-                  `wtr-qol-healthcare__meter-segment--${segment.band}`,
-                  segment.band === band
-                    ? "wtr-qol-healthcare__meter-segment--active"
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              />
-            ))}
-          </div>
-          <div className="wtr-qol-healthcare__meter-labels">
-            {HEALTHCARE_BAND_SEGMENTS.map((segment) => (
-              <span
-                key={segment.band}
-                className={[
-                  "wtr-qol-healthcare__meter-label",
-                  segment.band === band
-                    ? "wtr-qol-healthcare__meter-label--active"
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {segment.label}
-              </span>
-            ))}
-          </div>
-        </div>
+        <QoLBandedScoreMeter
+          metricKey="healthcare"
+          score={score}
+          description={description}
+        />
       </div>
 
       <div className="wtr-qol-healthcare__divider" role="presentation" />
 
       <div className="wtr-qol-healthcare__insurance">
-        <div className="wtr-qol-healthcare__insurance-label">
-          <span className="wtr-qol-healthcare__insurance-icon" aria-hidden>
-            <IconShieldHeart size={16} strokeWidth={1.5} />
-          </span>
-          <span>Insurance cost</span>
+        <div className="wtr-qol-healthcare__insurance-copy">
+          <div className="wtr-qol-healthcare__insurance-label">
+            <span className="wtr-qol-healthcare__insurance-icon" aria-hidden>
+              <IconShieldHeart size={16} strokeWidth={1.5} />
+            </span>
+            <span>Insurance cost</span>
+          </div>
+          <DataConfidenceNote variant="heuristic" />
         </div>
         <p className="wtr-qol-healthcare__insurance-value tabular-nums">
           {insuranceRange}
           <span className="wtr-qol-healthcare__insurance-suffix">/mo est.</span>
         </p>
       </div>
-
-      <div className="wtr-qol-healthcare__divider" role="presentation" />
-
-      <p className="wtr-qol-healthcare__footer">
-        Rated by country, not city · Source: {sourceLabel}
-      </p>
     </article>
   );
 }
@@ -221,8 +120,11 @@ function QoLOverallCard({
   const { band, label: bandLabel } = qolOverallScoreBand(
     data.quality_of_life_index,
   );
-  const overallFill = qolNormalized;
-  const scoreValue = formatScore(qolNormalized);
+  const scoreValue = formatQoLDisplayScore(qolNormalized);
+  const { label: meterBandLabel } = resolveQoLMetricBand(
+    "overall",
+    qolNormalized,
+  );
 
   return (
     <div
@@ -251,34 +153,34 @@ function QoLOverallCard({
           {bandLabel}
         </span>
       </div>
-      <QoLBar
-        fillPct={overallFill}
-        valueNow={qolNormalized}
-        max={QOL_NORMALIZED_MAX}
-        label={`Overall quality of life: ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
-        tone={band}
+      <QoLBandedScoreMeter
+        metricKey="overall"
+        score={qolNormalized}
+        compact
+        meterAriaLabel={`Overall quality of life: ${meterBandLabel}, score ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
       />
     </div>
   );
 }
 
 function QoLMetricRow({ config }: { config: MetricRowConfig }) {
-  const fillPct = qolBarFillPercent(config.score, config.invertBar);
-  const tone = qolMetricBarBand(config.score, config.id);
+  const scoreValue = formatQoLDisplayScore(config.score);
+  const { label: bandLabel } = resolveQoLMetricBand(config.id, config.score);
 
   return (
     <li className="wtr-qol-metric-row">
-      <span className="wtr-qol-metric-row__label">{config.label}</span>
-      <QoLBar
-        fillPct={fillPct}
-        valueNow={config.score}
-        max={100}
-        label={`${config.label}: ${formatScore(config.score)} out of 100`}
-        tone={tone}
+      <div className="wtr-qol-metric-row__head">
+        <span className="wtr-qol-metric-row__label">{config.label}</span>
+        <span className="wtr-qol-metric-row__value tabular-nums">
+          {scoreValue}
+        </span>
+      </div>
+      <QoLBandedScoreMeter
+        metricKey={config.id}
+        score={config.score}
+        compact
+        meterAriaLabel={`${config.label}: ${bandLabel}, score ${scoreValue} out of 100`}
       />
-      <span className="wtr-qol-metric-row__value tabular-nums">
-        {formatScore(config.score)}
-      </span>
     </li>
   );
 }
@@ -289,31 +191,26 @@ function buildMetricRows(data: QualityOfLifeCountryData): MetricRowConfig[] {
       id: "safety",
       label: "Safety",
       score: data.safety_index,
-      invertBar: false,
     },
     {
       id: "climate",
       label: "Climate",
       score: data.climate_index,
-      invertBar: false,
     },
     {
       id: "pollution",
       label: "Air quality",
       score: data.pollution_index,
-      invertBar: true,
     },
     {
       id: "purchasing",
       label: "Purchasing",
       score: data.purchasing_power_index,
-      invertBar: false,
     },
     {
       id: "traffic",
       label: "Traffic",
       score: data.traffic_commute_index,
-      invertBar: true,
     },
   ];
 }
@@ -324,6 +221,10 @@ export function DestinationQualityOfLifeTab({
   staggerStyle,
 }: Props) {
   const data = useMemo(() => getQualityOfLifeData(country), [country]);
+  const sourceFooter = useMemo(
+    () => (data ? getQoLTabSourceFooter(data.source) : ""),
+    [data],
+  );
 
   if (!data) {
     return (
@@ -372,7 +273,7 @@ export function DestinationQualityOfLifeTab({
         className="wtr-qol-tab__row wtr-qol-tab__row--source"
         {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
       >
-        <p className="wtr-qol-tab__footnote">{QOL_TAB_SOURCE_FOOTER}</p>
+        <p className="wtr-qol-tab__footnote">{sourceFooter}</p>
       </section>
     </div>
   );

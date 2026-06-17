@@ -353,6 +353,7 @@ function CityDetailPanelBody({
                 .join(' ')}
             >
               <DetailPanelCard className="wtr-city-detail__tab-card">
+                <h3 className="sr-only">{activeTabMeta?.label ?? 'Section'}</h3>
                 {tabContent}
               </DetailPanelCard>
             </div>

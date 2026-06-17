@@ -7,7 +7,7 @@ import {
   getAllMapCities,
   type CityData,
 } from '../../../utils/costOfLiving'
-import { getQualityOfLifeData, qolNormalizedFromIndex } from '../../../utils/qualityOfLife'
+import { getQualityOfLifeData, qolNormalizedFromIndex, getUsQoLNormalizedBenchmark } from '../../../utils/qualityOfLife'
 
 export const MISSING_FIELD_TEXT = 'Not reported'
 export const INDEX_UNAVAILABLE_DISPLAY = '—'
@@ -34,8 +34,8 @@ export function getHomeColBenchmark(locale: OnboardingRegionId): number | null {
   return getColIndexForCountry(homeBenchmarkCountryForLocale(locale))
 }
 
-export function getHomeQolBenchmark(locale: OnboardingRegionId): number | null {
-  return getQolIndexNormalizedForCountry(homeBenchmarkCountryForLocale(locale))
+export function getHomeQolBenchmark(_locale: OnboardingRegionId): number | null {
+  return getUsQoLNormalizedBenchmark()
 }
 
 export function homeAvgShortLabel(locale: OnboardingRegionId): string {
@@ -89,12 +89,8 @@ export function colComparisonCopy(
   return `${parts.pillLabel} ${parts.suffixBeforeBenchmark}${parts.benchmarkPhrase}`
 }
 
-export function qolComparisonCopy(
-  value: number,
-  benchmark: number,
-  locale: OnboardingRegionId,
-): string {
-  const parts = qolComparisonParts(value, benchmark, locale)
+export function qolComparisonCopy(value: number, benchmark: number): string {
+  const parts = qolComparisonParts(value, benchmark)
   if (!parts) return ''
   return `${parts.pillLabel} ${parts.suffixBeforeBenchmark}${parts.benchmarkPhrase}`
 }
@@ -128,17 +124,18 @@ export function colComparisonParts(
 export function qolComparisonParts(
   value: number,
   benchmark: number,
-  locale: OnboardingRegionId,
 ): IndexComparisonParts | null {
-  const ref = homeAvgTitleLabel(locale)
+  const ref = 'US Average'
   if (value === benchmark) {
     return { pillLabel: 'Same as', suffixBeforeBenchmark: 'the ', benchmarkPhrase: ref }
   }
-  const pct = Math.round((Math.abs(value - benchmark) / benchmark) * 100)
+  const diff = Math.abs(value - benchmark)
   if (value > benchmark) {
-    return { pillLabel: `${pct}% above`, suffixBeforeBenchmark: 'the ', benchmarkPhrase: ref }
+    const pillLabel = diff === 1 ? '1 point above' : `${diff} points above`
+    return { pillLabel, suffixBeforeBenchmark: 'the ', benchmarkPhrase: ref }
   }
-  return { pillLabel: `${pct}% below`, suffixBeforeBenchmark: 'the ', benchmarkPhrase: ref }
+  const pillLabel = diff === 1 ? '1 point below' : `${diff} points below`
+  return { pillLabel, suffixBeforeBenchmark: 'the ', benchmarkPhrase: ref }
 }
 
 export function indexBarScaleMax(value: number, benchmark: number, floor = 100): number {

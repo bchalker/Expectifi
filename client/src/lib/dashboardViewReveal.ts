@@ -41,7 +41,7 @@ export function clearDashboardViewEnterAttrs(): void {
   document.documentElement.removeAttribute(MANUAL_PLAN_ATTR)
 }
 
-let clearTimer: ReturnType<typeof setTimeout> | undefined
+let clearTimer: number | undefined
 
 function scheduleClearDashboardViewEnter(): void {
   if (typeof window === 'undefined') return

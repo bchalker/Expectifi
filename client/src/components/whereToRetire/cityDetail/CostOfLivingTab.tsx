@@ -55,13 +55,6 @@ function hasTransitPassData(amount: number): boolean {
   return Number.isFinite(amount) && amount > 0;
 }
 
-/** Midpoint estimate when 2BR rent is not in source data. */
-function estimate2brRent(oneBr: number, threeBr: number): number {
-  if (!Number.isFinite(oneBr) || oneBr <= 0) return 0;
-  if (!Number.isFinite(threeBr) || threeBr <= 0) return Math.round(oneBr * 1.4);
-  return Math.round((oneBr + threeBr) / 2);
-}
-
 function buildColBudgetCards(
   city: MapCity,
   budgetBreakdown: BudgetBreakdownDisplay,
@@ -115,26 +108,6 @@ function buildColBudgetCards(
         {
           label: "1BR outside center",
           value: formatUsdField(city.rent_1br_outside_centre),
-        },
-        {
-          label: "2BR city center",
-          value: formatUsdField(
-            estimate2brRent(
-              city.rent_1br_city_centre,
-              city.rent_3br_city_centre,
-            ),
-          ),
-          note: "Estimated from 1BR & 3BR",
-        },
-        {
-          label: "2BR outside center",
-          value: formatUsdField(
-            estimate2brRent(
-              city.rent_1br_outside_centre,
-              city.rent_3br_outside_centre,
-            ),
-          ),
-          note: "Estimated from 1BR & 3BR",
         },
         {
           label: "3BR city center",

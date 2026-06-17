@@ -19,8 +19,21 @@
   background: transparent;
 }
 
-.wtr-budget-hero__title {
+.wtr-budget-hero__intro-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.wtr-budget-hero__sub {
   margin: 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.wtr-budget-hero__title {
+  margin: var(--space-half) 0 0;
   font-family: var(--heading);
   font-size: clamp(1.05rem, 3.5vw, 1.35rem);
   font-weight: 600;
@@ -29,25 +42,24 @@
   color: var(--text);
 }
 
-.wtr-budget-hero__sub {
-  margin: var(--space-2) 0 0;
-  text-align: center;
-  color: var(--text-muted);
-}
-
-.wtr-budget-hero__title-income {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
+.wtr-budget-hero__intro-value {
+  margin: var(--space-1) 0 0;
+  font-family: var(--heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.1;
   color: var(--color-amber-dark);
-}
-
-.wtr-budget-hero__title-income-amount {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
 
-.wtr-budget-hero__title-income-suffix {
-  font-size: 0.78em;
+.wtr-budget-hero__intro-value-amount {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-budget-hero__intro-value-suffix {
+  font-size: 0.75em;
   font-weight: 600;
 }
 

@@ -1,5 +1,4 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react'
-import { AppChip } from '../ui/AppChip'
 import { formatUsdOrDash } from '../../utils/costOfLiving'
 import type { ColBudgetCategoryDot } from './ColBudgetBreakdownBar'
 import './ColCategoryCard.scss'
@@ -163,9 +162,7 @@ export function ColCategoryCard(
             {props.footerPill != null ? (
               <div className="wtr-col-category-card__footer-pill">
                 {typeof props.footerPill === 'string' ? (
-                  <AppChip variant="secondary" color="default">
-                    {props.footerPill}
-                  </AppChip>
+                  <span className="wtr-col-category-card__footer-note">{props.footerPill}</span>
                 ) : (
                   props.footerPill
                 )}

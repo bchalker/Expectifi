@@ -6,24 +6,45 @@ import {
 } from '../../utils/costOfLiving'
 import { regionFromCountry, type DestinationRegion } from './cityMapScoring'
 
-export const INCOME_EXPLORE_MIN = 0
-export const INCOME_EXPLORE_HEADROOM = 1_000
+/** Restraint end of the budget slider — belt-tightening vs projected income. */
+export const BUDGET_SLIDER_MIN_MULTIPLIER = 0.6
+
+/** Cushion end of the budget slider — plausible upside vs projected income. */
+export const BUDGET_SLIDER_MAX_MULTIPLIER = 1.4
+
 export const INCOME_EXPLORE_STEP = 50
 
-/** Slider max is always ~$1k above projected monthly income, stepped to $50. */
+function roundExplorationBound(value: number, mode: 'floor' | 'ceil'): number {
+  if (mode === 'floor') {
+    return Math.floor(value / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
+  }
+  return Math.ceil(value / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
+}
+
+/** Slider min scales with projected income (restraint end), stepped to $50. */
+export function explorationIncomeMin(planMonthlyIncome: number): number {
+  const income = Math.max(0, planMonthlyIncome)
+  if (income <= 0) return 0
+  return roundExplorationBound(income * BUDGET_SLIDER_MIN_MULTIPLIER, 'floor')
+}
+
+/** Slider max scales with projected income (cushion end), stepped to $50. */
 export function explorationIncomeMax(planMonthlyIncome: number): number {
-  const raw = planMonthlyIncome + INCOME_EXPLORE_HEADROOM
-  return Math.ceil(raw / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
+  const income = Math.max(0, planMonthlyIncome)
+  if (income <= 0) return INCOME_EXPLORE_STEP
+  const min = explorationIncomeMin(income)
+  const max = roundExplorationBound(income * BUDGET_SLIDER_MAX_MULTIPLIER, 'ceil')
+  return Math.max(max, min + INCOME_EXPLORE_STEP)
 }
 
 export function getTotalMapCityCount(): number {
   return getAllMapCities().length
 }
 
-export function incomeSliderPct(value: number, max: number): number {
-  if (max <= INCOME_EXPLORE_MIN) return 0
-  const clamped = Math.min(max, Math.max(INCOME_EXPLORE_MIN, value))
-  return ((clamped - INCOME_EXPLORE_MIN) / (max - INCOME_EXPLORE_MIN)) * 100
+export function incomeSliderPct(value: number, min: number, max: number): number {
+  if (max <= min) return 0
+  const clamped = Math.min(max, Math.max(min, value))
+  return ((clamped - min) / (max - min)) * 100
 }
 
 const REGION_LABELS: Record<DestinationRegion, string> = {
@@ -107,11 +128,11 @@ export function computeBudgetExplorationStats(monthlyIncome: number): BudgetExpl
 export function clampExplorationIncome(
   value: number,
   planMonthlyIncome: number,
-  floor = INCOME_EXPLORE_MIN,
 ): number {
+  const min = explorationIncomeMin(planMonthlyIncome)
   const max = explorationIncomeMax(planMonthlyIncome)
   const stepped = Math.round(value / INCOME_EXPLORE_STEP) * INCOME_EXPLORE_STEP
-  return Math.min(max, Math.max(floor, stepped))
+  return Math.min(max, Math.max(min, stepped))
 }
 
 export function defaultExplorationIncome(planMonthlyIncome: number): number {

@@ -34,6 +34,8 @@ Required calc modules:
 SHARED COMPONENTS
 Before writing any UI, check src/components/ui/ for an existing component. If a pattern appears more than once it must be a shared component. Required shared components: SliderRow, NumberInput, Card, SectionTitle, Badge, Toggle, DrawerPanel, NavButton, ModeButton, AccordionSection, Tooltip, EmptyState, UpgradePrompt, PlanBadge, AccountCard, EventCard, ScenarioCard, SyncStatus.
 
+Toggle switches (`ui/Toggle`): checked/on track uses solid `var(--green1)` with a white thumb — not a pale accent tint.
+
 Every shared component accepts a className prop. No hardcoded colors — CSS custom properties only. No hardcoded font sizes — var(--text-*) tokens only. All money and percentage displays must have font-variant-numeric: tabular-nums and font-feature-settings: "tnum". Props fully typed, no any.
 
 ICONS

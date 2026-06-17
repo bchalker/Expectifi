@@ -1,12 +1,12 @@
 import { useUserLocale } from '../../../context/UserLocaleContext'
 import { Tooltip } from '../../Tooltip'
-import { AppChip } from '../../ui/AppChip'
-import { wtrIndexBandChipColor } from '../../../lib/whereToRetire/wtrChipColors'
 import {
   formatQoLIndex,
   getQualityOfLifeData,
+  isQoLUsBaselineComparable,
   qolNormalizedFromIndex,
   qolOverallScoreBand,
+  getUsQoLNormalizedBenchmark,
   QOL_NORMALIZED_MAX,
   type QoLOverallBand,
 } from '../../../utils/qualityOfLife'
@@ -17,8 +17,11 @@ import {
   getHomeColBenchmark,
   INDEX_UNAVAILABLE_DISPLAY,
   indexBarScaleMax,
+  qolComparisonParts,
+  qolIndexBandRelative,
   type ColIndexBand,
   type IndexComparisonParts,
+  type QolIndexBand,
 } from './cityDetailTabUtils'
 import './CityDetailIndexRows.scss'
 import '../../Tooltip.scss'
@@ -27,7 +30,10 @@ const COL_INDEX_TOOLTIP =
   'Numbeo cost of living index (New York City = 100). Lower scores mean lower everyday costs. Country-level data — city costs may vary.'
 
 const QOL_INDEX_TOOLTIP =
-  'Overall quality of life score normalized to 0–100 from Numbeo country data. Country-level data — city conditions may vary.'
+  'Overall quality of life score normalized to 0–100. Numbeo-sourced destinations include a US average marker on the same scale. Country-level data — city conditions may vary.'
+
+const QOL_US_BASELINE_TOOLTIP =
+  'US overall quality of life normalized to 0–100 from Numbeo country data (same source and formula as Numbeo-sourced destinations). Country-level data — city conditions may vary.'
 
 const HOME_AVG_TOOLTIPS = {
   col: COL_INDEX_TOOLTIP,
@@ -37,9 +43,11 @@ const HOME_AVG_TOOLTIPS = {
 type IndexCardProps = {
   label: string
   tooltip: string
+  benchmarkTooltip?: string
   value: number | null
   displayValue: string
   band: ColIndexBand | QoLOverallBand | null
+  comparisonBand: ColIndexBand | QolIndexBand | null
   benchmark: number | null
   comparison: IndexComparisonParts | null
   tierLabel: string | null
@@ -47,23 +55,53 @@ type IndexCardProps = {
   fillVariant: 'col' | 'qol'
 }
 
+const INDEX_BAR_GOOD_BANDS = new Set<string>(['affordable', 'excellent', 'above-average'])
+const INDEX_BAR_MID_BANDS = new Set<string>(['moderate', 'average'])
+
+type IndexBarTone = 'good' | 'mid' | 'bad' | 'neutral'
+
+function indexBarFillTone(
+  band: ColIndexBand | QoLOverallBand | QolIndexBand | null,
+): IndexBarTone {
+  if (!band) return 'neutral'
+  if (INDEX_BAR_GOOD_BANDS.has(band)) return 'good'
+  if (INDEX_BAR_MID_BANDS.has(band)) return 'mid'
+  return 'bad'
+}
+
+function IndexCaptionPill({
+  label,
+  tone,
+}: {
+  label: string
+  tone: IndexBarTone
+}) {
+  return (
+    <span
+      className={[
+        'wtr-city-detail-index-card__pill',
+        tone !== 'neutral' && `wtr-city-detail-index-card__pill--${tone}`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {label}
+    </span>
+  )
+}
+
 function IndexComparisonRow({
   comparison,
-  band,
+  tone,
   tooltip,
 }: {
   comparison: IndexComparisonParts
-  band: ColIndexBand | null
+  tone: IndexBarTone
   tooltip: string
 }) {
   return (
     <div className="wtr-city-detail-index-card__comparison-row">
-      <AppChip
-        color={band ? wtrIndexBandChipColor(band) : 'default'}
-        variant="soft"
-      >
-        {comparison.pillLabel}
-      </AppChip>
+      <IndexCaptionPill label={comparison.pillLabel} tone={tone} />
       <span className="wtr-city-detail-index-card__comparison-text">
         {comparison.suffixBeforeBenchmark}
         <Tooltip
@@ -80,32 +118,22 @@ function IndexComparisonRow({
   )
 }
 
-function IndexTierRow({ label, band }: { label: string; band: QoLOverallBand }) {
+function IndexTierRow({ label, tone }: { label: string; tone: IndexBarTone }) {
   return (
     <div className="wtr-city-detail-index-card__tier-row">
-      <AppChip color={wtrIndexBandChipColor(band)} variant="soft">
-        {label}
-      </AppChip>
+      <IndexCaptionPill label={label} tone={tone} />
     </div>
   )
-}
-
-const INDEX_BAR_GOOD_BANDS = new Set<string>(['affordable', 'excellent', 'above-average'])
-const INDEX_BAR_MID_BANDS = new Set<string>(['moderate', 'average'])
-
-function indexBarFillTone(band: ColIndexBand | QoLOverallBand | null): 'good' | 'mid' | 'bad' | 'neutral' {
-  if (!band) return 'neutral'
-  if (INDEX_BAR_GOOD_BANDS.has(band)) return 'good'
-  if (INDEX_BAR_MID_BANDS.has(band)) return 'mid'
-  return 'bad'
 }
 
 function CityDetailIndexCard({
   label,
   tooltip,
+  benchmarkTooltip,
   value,
   displayValue,
   band,
+  comparisonBand,
   benchmark,
   comparison,
   tierLabel,
@@ -122,7 +150,8 @@ function CityDetailIndexCard({
   const fillPct = showBar ? Math.min(100, (value / scaleMax) * 100) : 0
   const markerPct =
     showBar && usesHomeBenchmark ? Math.min(100, (benchmark / scaleMax) * 100) : null
-  const fillTone = indexBarFillTone(band)
+  const accentBand = comparison ? comparisonBand : band
+  const fillTone = indexBarFillTone(accentBand)
 
   return (
     <article
@@ -141,7 +170,17 @@ function CityDetailIndexCard({
         ) : null}
       </h4>
 
-      <p className="wtr-city-detail-index-card__score tabular-nums">{displayValue}</p>
+      <div className="wtr-city-detail-index-card__score-wrap">
+        <p
+          className={[
+            'wtr-city-detail-index-card__score',
+            'tabular-nums',
+            `wtr-city-detail-index-card__score--${fillTone}`,
+          ].join(' ')}
+        >
+          {displayValue}
+        </p>
+      </div>
 
       {showBar ? (
         <div className="wtr-city-detail-index-card__bar-wrap">
@@ -176,10 +215,18 @@ function CityDetailIndexCard({
         </div>
       ) : null}
 
-      {tierLabel && band ? (
-        <IndexTierRow label={tierLabel} band={band as QoLOverallBand} />
-      ) : comparison ? (
-        <IndexComparisonRow comparison={comparison} band={band as ColIndexBand | null} tooltip={tooltip} />
+      {comparison ? (
+        <div className="wtr-city-detail-index-card__caption">
+          <IndexComparisonRow
+            comparison={comparison}
+            tone={fillTone}
+            tooltip={benchmarkTooltip ?? tooltip}
+          />
+        </div>
+      ) : tierLabel && band ? (
+        <div className="wtr-city-detail-index-card__caption">
+          <IndexTierRow label={tierLabel} tone={fillTone} />
+        </div>
       ) : null}
     </article>
   )
@@ -212,6 +259,16 @@ export function CityDetailIndexRows({ country, className }: Props) {
   const qolIndex = qolIndexMetrics(country)
   const homeColBenchmark = getHomeColBenchmark(locale)
   const qolTier = qolData ? qolOverallScoreBand(qolData.quality_of_life_index) : null
+  const qolUsComparable = isQoLUsBaselineComparable(qolData?.source)
+  const usQolBenchmark = qolUsComparable ? getUsQoLNormalizedBenchmark() : null
+  const qolComparison =
+    qolUsComparable && qolIndex.value != null && usQolBenchmark != null
+      ? qolComparisonParts(qolIndex.value, usQolBenchmark)
+      : null
+  const qolComparisonBand =
+    qolUsComparable && qolIndex.value != null && usQolBenchmark != null
+      ? qolIndexBandRelative(qolIndex.value, usQolBenchmark)
+      : null
 
   const colBand =
     colIndex.value != null && homeColBenchmark != null
@@ -231,6 +288,7 @@ export function CityDetailIndexRows({ country, className }: Props) {
         value={colIndex.value}
         displayValue={colIndex.display}
         band={colBand}
+        comparisonBand={colBand}
         benchmark={homeColBenchmark}
         comparison={colComparison}
         tierLabel={null}
@@ -240,12 +298,14 @@ export function CityDetailIndexRows({ country, className }: Props) {
       <CityDetailIndexCard
         label="Quality of Life"
         tooltip={HOME_AVG_TOOLTIPS.qol}
+        benchmarkTooltip={QOL_US_BASELINE_TOOLTIP}
         value={qolIndex.value}
         displayValue={qolIndex.display}
         band={qolTier?.band ?? null}
-        benchmark={null}
-        comparison={null}
-        tierLabel={qolTier?.label ?? null}
+        comparisonBand={qolComparisonBand}
+        benchmark={qolUsComparable ? usQolBenchmark : null}
+        comparison={qolComparison}
+        tierLabel={qolUsComparable ? null : (qolTier?.label ?? null)}
         titleSuffix="(Country avg)"
         fillVariant="qol"
       />

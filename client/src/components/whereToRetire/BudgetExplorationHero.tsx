@@ -3,9 +3,9 @@ import { Tooltip } from '../Tooltip'
 import {
   clampExplorationIncome,
   explorationIncomeMax,
+  explorationIncomeMin,
   isAtProjectedExplorationIncome,
   resolveExplorationIncome,
-  INCOME_EXPLORE_MIN,
   INCOME_EXPLORE_STEP,
   incomeSliderPct,
 } from '../../lib/whereToRetire/budgetExplorationStats'
@@ -26,6 +26,11 @@ export function BudgetExplorationHero({
   onExplorationIncomeChange,
   section = 'slider',
 }: Props) {
+  const incomeMin = useMemo(
+    () => explorationIncomeMin(planMonthlyIncome),
+    [planMonthlyIncome],
+  )
+
   const incomeMax = useMemo(
     () => explorationIncomeMax(planMonthlyIncome),
     [planMonthlyIncome],
@@ -36,8 +41,8 @@ export function BudgetExplorationHero({
     [planMonthlyIncome, explorationIncome],
   )
 
-  const fillWidth = incomeSliderPct(explorationIncome, incomeMax)
-  const planMarkerPct = incomeSliderPct(planMonthlyIncome, incomeMax)
+  const fillWidth = incomeSliderPct(explorationIncome, incomeMin, incomeMax)
+  const planMarkerPct = incomeSliderPct(planMonthlyIncome, incomeMin, incomeMax)
   const withinFillWidth = Math.min(fillWidth, planMarkerPct)
   const overFillWidth = Math.max(0, fillWidth - planMarkerPct)
   const showOverFill = overFillWidth > 0
@@ -49,21 +54,16 @@ export function BudgetExplorationHero({
   const thumbIncome = atProjected ? planMonthlyIncome : mapIncome
 
   const introBlock = section === 'intro' ? (
-    <>
+    <div className="wtr-budget-hero__intro-stack">
+      <p className="wtr-budget-hero__sub font-xs">Based on your projected income</p>
       <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
-        Where can you retire on{' '}
-        <span className="wtr-budget-hero__title-income">
-          <span className="wtr-budget-hero__title-income-amount tabular-nums">
-            {fmt(planMonthlyIncome)}
-          </span>
-          <span className="wtr-budget-hero__title-income-suffix">/mo</span>
-        </span>
-        ?
+        Where can you retire on?
       </h1>
-      <p className="wtr-budget-hero__sub font-xs">
-        Based on your projected retirement income
+      <p className="wtr-budget-hero__intro-value tabular-nums">
+        <span className="wtr-budget-hero__intro-value-amount">{fmt(planMonthlyIncome)}</span>
+        <span className="wtr-budget-hero__intro-value-suffix">/mo</span>
       </p>
-    </>
+    </div>
   ) : null
 
   if (section === 'intro') {
@@ -91,7 +91,7 @@ export function BudgetExplorationHero({
     <div className="wtr-budget-hero__slider-main">
       <div className="wtr-budget-hero__slider-rail">
         <span className="wtr-budget-hero__tick-edge wtr-budget-hero__tick-edge--min">
-          {fmtMon(INCOME_EXPLORE_MIN)}
+          {fmtMon(incomeMin)}
         </span>
         <div className="wtr-budget-hero__track-wrap">
           <div className="wtr-budget-hero__track" aria-hidden />
@@ -141,7 +141,7 @@ export function BudgetExplorationHero({
           <input
             type="range"
             className="wtr-budget-hero__input"
-            min={INCOME_EXPLORE_MIN}
+            min={incomeMin}
             max={incomeMax}
             step={INCOME_EXPLORE_STEP}
             value={explorationIncome}

@@ -62,17 +62,18 @@
 }
 
 .ui-toggle__input:checked + .ui-toggle__track {
-  background: color-mix(in srgb, var(--accent-text) 18%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent-text) 35%, var(--border-strong));
+  background: var(--green1);
+  border-color: var(--green1);
 }
 
 .ui-toggle__input:checked + .ui-toggle__track::after {
   transform: translate(1rem, -50%);
-  border-color: color-mix(in srgb, var(--accent-text) 25%, var(--border));
+  background: var(--surface);
+  border-color: var(--surface);
 }
 
 .ui-toggle__input:focus-visible + .ui-toggle__track {
-  outline: 2px solid var(--accent-text);
+  outline: 2px solid var(--green1);
   outline-offset: 2px;
 }
 

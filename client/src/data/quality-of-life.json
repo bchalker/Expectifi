@@ -2,7 +2,7 @@
   "metadata": {
     "last_updated": "2026-05",
     "total_countries": 141,
-    "numbeo_countries": 83,
+    "numbeo_countries": 82,
     "world_bank_proxy_countries": 59,
     "disclaimer": "Numbeo data: crowdsourced city-level estimates 2024. World Bank proxy: derived from life expectancy, homicide rate, healthcare expenditure, and air pollution PM2.5. All scores normalized to 0-220 scale. Source field indicates data origin.",
     "fields": {

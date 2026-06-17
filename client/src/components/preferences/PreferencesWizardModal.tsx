@@ -221,11 +221,18 @@ export function PreferencesWizardModal({
 
   const modal = isMapRail ? (
     <>
-      {!isMobileSheet && visible ? (
+      {!isMobileSheet && isMapRail ? (
         <button
           type="button"
-          className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
+          className={[
+            "wtr-explorer__drawer-backdrop",
+            visible && "wtr-explorer__drawer-backdrop--open",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           aria-label="Close preferences"
+          aria-hidden={!visible}
+          tabIndex={visible ? 0 : -1}
           onClick={onClose}
         />
       ) : null}

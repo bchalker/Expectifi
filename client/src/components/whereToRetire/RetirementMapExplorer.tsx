@@ -589,6 +589,21 @@ export function RetirementMapExplorer({
           .filter(Boolean)
           .join(" ")}
       >
+        {!mobileListOnly ? (
+          <button
+            type="button"
+            className={[
+              "wtr-explorer__drawer-backdrop",
+              filtersOpen && "wtr-explorer__drawer-backdrop--open",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-label="Close map options"
+            aria-hidden={!filtersOpen}
+            tabIndex={filtersOpen ? 0 : -1}
+            onClick={() => onFiltersOpenChange(false)}
+          />
+        ) : null}
         <aside
           id="wtr-explorer-list-panel"
           className="wtr-explorer__list-panel"
@@ -866,14 +881,6 @@ export function RetirementMapExplorer({
 
         {!mobileListOnly ? (
           <div className="wtr-explorer__map-stage">
-            {filtersOpen ? (
-              <button
-                type="button"
-                className="wtr-explorer__drawer-backdrop wtr-explorer__drawer-backdrop--open"
-                aria-label="Close map options"
-                onClick={() => onFiltersOpenChange(false)}
-              />
-            ) : null}
             <RetirementMapLibreMap
               destinations={filteredCities}
               monthlyIncome={explorationIncome}

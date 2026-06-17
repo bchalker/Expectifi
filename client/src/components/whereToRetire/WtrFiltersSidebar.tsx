@@ -9,10 +9,12 @@ import { BudgetExplorationHero } from "./BudgetExplorationHero";
 import { WtrIncomeToolbarMapSelects } from "./WtrIncomeToolbarMapSelects";
 import { WtrMapFilterButton } from "./WtrMapFilterButton";
 import { WtrFitScoreHelpPopout } from "./WtrFitScoreHelpPopout";
+import { WtrSpouseBudgetHelpPopout } from "./WtrSpouseBudgetHelpPopout";
 import { applyMapFiltersBudgetPreferences } from "../../lib/whereToRetire/cityMapScoring";
 import type { MapFilters } from "../../lib/whereToRetire/cityMapScoring";
 import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
 import { Card } from "../ui/Card";
+import { Toggle } from "../ui/Toggle";
 import { IntensitySelector } from "./IntensitySelector";
 import "./WtrFiltersSidebar.scss";
 
@@ -124,6 +126,28 @@ export function WtrFiltersSidebar({
                   }),
                 )
               }
+            />
+            <Toggle
+              className="wtr-filters-sidebar__intensity-spouse-toggle"
+              label={
+                <>
+                  <WtrSpouseBudgetHelpPopout />
+                  {" spouse/partner"}
+                </>
+              }
+              value={filters.budgetPreferences.includeSpouse}
+              onChange={(includeSpouse) =>
+                onFiltersChange(
+                  applyMapFiltersBudgetPreferences(filters, {
+                    ...filters.budgetPreferences,
+                    includeSpouse,
+                  }),
+                )
+              }
+            />
+            <hr
+              className="wtr-filters-sidebar__intensity-separator"
+              aria-hidden
             />
             <div className="wtr-filters-sidebar__intensity-footer">
               <button
