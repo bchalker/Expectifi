@@ -92,7 +92,7 @@ export function DestinationExpatLifeTab({
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          "wtr-expat-life__group",
+          "detail-panel-card wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
@@ -118,7 +118,7 @@ export function DestinationExpatLifeTab({
           className="wtr-expat-life__group"
           {...staggerSectionProps(
             sectionIndex++,
-            "wtr-expat-life__group",
+            "detail-panel-card wtr-expat-life__group",
             staggerClassName,
             staggerStyle,
           )}
@@ -140,7 +140,7 @@ export function DestinationExpatLifeTab({
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          "wtr-expat-life__group",
+          "detail-panel-card wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
@@ -148,15 +148,19 @@ export function DestinationExpatLifeTab({
         <h3 className="wtr-city-detail__section-title wtr-expat-life__section-title">
           What expats say
         </h3>
-        <blockquote className="wtr-expat-life__vibe">{data.expat_vibe}</blockquote>
-        <NarrativeWhyLine className="wtr-expat-life__why">{data.expat_vibe_why}</NarrativeWhyLine>
+        <blockquote className="wtr-expat-life__vibe">
+          {data.expat_vibe}
+        </blockquote>
+        <NarrativeWhyLine className="wtr-expat-life__why">
+          {data.expat_vibe_why}
+        </NarrativeWhyLine>
       </section>
 
       <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          "wtr-expat-life__group",
+          "detail-panel-card wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
@@ -183,7 +187,7 @@ export function DestinationExpatLifeTab({
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          "wtr-expat-life__group",
+          "detail-panel-card wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}
@@ -200,14 +204,16 @@ export function DestinationExpatLifeTab({
           />
           <p>{data.cost_note}</p>
         </div>
-        <NarrativeWhyLine className="wtr-expat-life__why">{data.cost_note_why}</NarrativeWhyLine>
+        <NarrativeWhyLine className="wtr-expat-life__why">
+          {data.cost_note_why}
+        </NarrativeWhyLine>
       </section>
 
       <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
-          "wtr-expat-life__group",
+          "detail-panel-card wtr-expat-life__group",
           staggerClassName,
           staggerStyle,
         )}

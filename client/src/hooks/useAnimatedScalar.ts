@@ -55,3 +55,61 @@ export function useAnimatedScalar(
 
   return display
 }
+
+/**
+ * Count up from zero when `active` becomes true or `target` changes while active.
+ */
+export function useAnimatedScalarEntry(
+  target: number,
+  active: boolean,
+  defaultDurationMs = 420,
+) {
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    if (!active) {
+      setDisplay(0)
+      return
+    }
+    if (!Number.isFinite(target)) {
+      setDisplay(0)
+      return
+    }
+
+    let cancelled = false
+    let startRaf = 0
+    let animRaf = 0
+
+    setDisplay(0)
+
+    startRaf = requestAnimationFrame(() => {
+      if (cancelled) return
+
+      const ms = motionMs(defaultDurationMs)
+      if (ms <= 0) {
+        setDisplay(target)
+        return
+      }
+
+      const from = 0
+      const t0 = performance.now()
+      const step = (now: number) => {
+        if (cancelled) return
+        const u = Math.min(1, (now - t0) / ms)
+        const next = from + (target - from) * easeOutCubic(u)
+        setDisplay(next)
+        if (u < 1) animRaf = requestAnimationFrame(step)
+        else setDisplay(target)
+      }
+      animRaf = requestAnimationFrame(step)
+    })
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(startRaf)
+      cancelAnimationFrame(animRaf)
+    }
+  }, [target, active, defaultDurationMs])
+
+  return display
+}

@@ -5,57 +5,61 @@ import {
   IconMovie,
   IconShoppingCart,
   IconToolsKitchen3,
-} from '@tabler/icons-react'
+} from "@tabler/icons-react";
 import type {
   BudgetBreakdownDisplay,
   LifestyleInputs,
   MapCity,
-} from '../../../utils/costOfLiving'
+} from "../../../utils/costOfLiving";
 import {
   buildAlcoholBudgetLineItems,
   buildDiningBudgetLineItems,
   formatUsd,
   hasTravelAdvisory,
-} from '../../../utils/costOfLiving'
-import { ColBudgetBreakdownBar, COL_BUDGET_CARD_CATEGORY_DOT } from '../ColBudgetBreakdownBar'
-import { ColGroceriesBudgetCard } from '../ColGroceriesBudgetCard'
-import { CityDetailIndexRows } from './CityDetailIndexRows'
-import { LITERS_PER_US_GALLON } from '../../../utils/units'
-import { rentCardHeaderSubtitle } from '../../../utils/units'
+} from "../../../utils/costOfLiving";
+import {
+  ColBudgetBreakdownBar,
+  COL_BUDGET_CARD_CATEGORY_DOT,
+} from "../ColBudgetBreakdownBar";
+import { ColGroceriesBudgetCard } from "../ColGroceriesBudgetCard";
+import { CityDetailIndexRows } from "./CityDetailIndexRows";
+import { LITERS_PER_US_GALLON } from "../../../utils/units";
+import { rentCardHeaderSubtitle } from "../../../utils/units";
 import {
   ColCategoryCard,
   COL_CATEGORY_ICON_SIZE,
   type ColCategoryCardProps,
-} from '../ColCategoryCard'
-import { DestinationExchangeRate } from '../DestinationExchangeRate'
-import { TravelAdvisoryNotice } from '../TravelAdvisoryNotice'
-import { formatUsdField } from './cityDetailTabUtils'
+} from "../ColCategoryCard";
+import { DestinationExchangeRate } from "../DestinationExchangeRate";
+import { TravelAdvisoryNotice } from "../TravelAdvisoryNotice";
+import { formatUsdField } from "./cityDetailTabUtils";
 
-type ColCategoryPanelCard = ColCategoryCardProps & { id: string }
+type ColCategoryPanelCard = ColCategoryCardProps & { id: string };
 
 function formatGasPerGallon(pricePerLiter: number): string {
-  if (!Number.isFinite(pricePerLiter) || pricePerLiter <= 0) return formatUsdField(null)
-  return formatUsd(pricePerLiter * LITERS_PER_US_GALLON)
+  if (!Number.isFinite(pricePerLiter) || pricePerLiter <= 0)
+    return formatUsdField(null);
+  return formatUsd(pricePerLiter * LITERS_PER_US_GALLON);
 }
 
 function formatGasPerLiter(pricePerLiter: number): string {
-  return formatUsdField(pricePerLiter)
+  return formatUsdField(pricePerLiter);
 }
 
 function formatColHeaderAmount(amount: number): string {
-  if (!Number.isFinite(amount) || amount <= 0) return 'varies'
-  return formatUsd(amount)
+  if (!Number.isFinite(amount) || amount <= 0) return "varies";
+  return formatUsd(amount);
 }
 
 function hasTransitPassData(amount: number): boolean {
-  return Number.isFinite(amount) && amount > 0
+  return Number.isFinite(amount) && amount > 0;
 }
 
 /** Midpoint estimate when 2BR rent is not in source data. */
 function estimate2brRent(oneBr: number, threeBr: number): number {
-  if (!Number.isFinite(oneBr) || oneBr <= 0) return 0
-  if (!Number.isFinite(threeBr) || threeBr <= 0) return Math.round(oneBr * 1.4)
-  return Math.round((oneBr + threeBr) / 2)
+  if (!Number.isFinite(oneBr) || oneBr <= 0) return 0;
+  if (!Number.isFinite(threeBr) || threeBr <= 0) return Math.round(oneBr * 1.4);
+  return Math.round((oneBr + threeBr) / 2);
 }
 
 function buildColBudgetCards(
@@ -63,17 +67,18 @@ function buildColBudgetCards(
   budgetBreakdown: BudgetBreakdownDisplay,
   lifestyle: LifestyleInputs,
 ): ColCategoryPanelCard[] {
-  const { breakdown } = budgetBreakdown
-  const icon = COL_CATEGORY_ICON_SIZE
-  const transitAvailable = hasTransitPassData(city.transport_monthly_pass)
-  const lifestyleTotal = breakdown.leisure + breakdown.mobile + breakdown.clothing
-  const diningLineItems = buildDiningBudgetLineItems(city, lifestyle)
-  const alcoholLineItems = buildAlcoholBudgetLineItems(city, lifestyle)
+  const { breakdown } = budgetBreakdown;
+  const icon = COL_CATEGORY_ICON_SIZE;
+  const transitAvailable = hasTransitPassData(city.transport_monthly_pass);
+  const lifestyleTotal =
+    breakdown.leisure + breakdown.mobile + breakdown.clothing;
+  const diningLineItems = buildDiningBudgetLineItems(city, lifestyle);
+  const alcoholLineItems = buildAlcoholBudgetLineItems(city, lifestyle);
   const diningDrinksGroups = [
     ...(diningLineItems.length > 0
       ? [
           {
-            title: 'Dining',
+            title: "Dining",
             rows: diningLineItems.map((item) => ({
               label: item.label,
               value: formatUsd(item.amount),
@@ -84,7 +89,7 @@ function buildColBudgetCards(
     ...(alcoholLineItems.length > 0
       ? [
           {
-            title: 'Alcohol',
+            title: "Alcohol",
             rows: alcoholLineItems.map((item) => ({
               label: item.label,
               value: formatUsd(item.amount),
@@ -92,89 +97,95 @@ function buildColBudgetCards(
           },
         ]
       : []),
-  ]
+  ];
 
   return [
     {
-      id: 'rent',
-      variant: 'hero',
-      title: 'Rent',
+      id: "rent",
+      variant: "hero",
+      title: "Rent",
       icon: <IconHomeDollar size={icon} stroke={1.5} aria-hidden />,
       headerSubtitle: rentCardHeaderSubtitle(),
       headerAmount: formatColHeaderAmount(breakdown.rent),
       rows: [
         {
-          label: '1BR city center',
+          label: "1BR city center",
           value: formatUsdField(city.rent_1br_city_centre),
         },
         {
-          label: '1BR outside center',
+          label: "1BR outside center",
           value: formatUsdField(city.rent_1br_outside_centre),
         },
         {
-          label: '2BR city center',
+          label: "2BR city center",
           value: formatUsdField(
-            estimate2brRent(city.rent_1br_city_centre, city.rent_3br_city_centre),
+            estimate2brRent(
+              city.rent_1br_city_centre,
+              city.rent_3br_city_centre,
+            ),
           ),
-          note: 'Estimated from 1BR & 3BR',
+          note: "Estimated from 1BR & 3BR",
         },
         {
-          label: '2BR outside center',
+          label: "2BR outside center",
           value: formatUsdField(
-            estimate2brRent(city.rent_1br_outside_centre, city.rent_3br_outside_centre),
+            estimate2brRent(
+              city.rent_1br_outside_centre,
+              city.rent_3br_outside_centre,
+            ),
           ),
-          note: 'Estimated from 1BR & 3BR',
+          note: "Estimated from 1BR & 3BR",
         },
         {
-          label: '3BR city center',
+          label: "3BR city center",
           value: formatUsdField(city.rent_3br_city_centre),
         },
         {
-          label: '3BR outside center',
+          label: "3BR outside center",
           value: formatUsdField(city.rent_3br_outside_centre),
         },
       ],
-      footerPill: 'City center is always more expensive',
+      footerPill: "City center is always more expensive",
     },
     {
-      id: 'dining-drinks',
-      variant: 'hero',
-      title: 'Dining & drinks',
+      id: "dining-drinks",
+      variant: "hero",
+      title: "Dining & drinks",
       icon: <IconToolsKitchen3 size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(breakdown.dining + breakdown.alcohol),
       rowGroups: diningDrinksGroups,
     },
     {
-      id: 'utilities-internet',
-      variant: 'hero',
-      title: 'Utilities',
+      id: "utilities-internet",
+      variant: "hero",
+      title: "Utilities",
       icon: <IconBolt size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(breakdown.utilities),
       rows: [
-        { label: 'Internet', value: 'incl.' },
-        { label: 'Electricity', value: 'incl.' },
-        { label: 'Water & heating', value: 'incl.' },
+        { label: "Internet", value: "incl." },
+        { label: "Electricity", value: "incl." },
+        { label: "Water & heating", value: "incl." },
       ],
     },
     {
-      id: 'transport',
-      variant: 'hero',
-      title: 'Transportation',
+      id: "transport",
+      variant: "hero",
+      title: "Transportation",
       icon: <IconBus size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(breakdown.transport),
       rows: [
         {
-          label: 'Gas (per gallon)',
+          label: "Gas (per gallon)",
           value: formatGasPerGallon(city.gasoline_1L),
         },
         {
-          label: 'Gas (per liter)',
+          label: "Gas (per liter)",
           value: formatGasPerLiter(city.gasoline_1L),
         },
         ...(transitAvailable
           ? [
               {
-                label: 'Monthly transit pass',
+                label: "Monthly transit pass",
                 value: formatUsdField(city.transport_monthly_pass),
               },
             ]
@@ -182,46 +193,49 @@ function buildColBudgetCards(
       ],
       emptyStateNote: transitAvailable
         ? undefined
-        : 'Monthly transit pass data unavailable for this city',
+        : "Monthly transit pass data unavailable for this city",
     },
     {
-      id: 'lifestyle',
-      variant: 'hero',
-      title: 'Lifestyle',
+      id: "lifestyle",
+      variant: "hero",
+      title: "Lifestyle",
       icon: <IconMovie size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(lifestyleTotal),
       rows: [
-        { label: 'Leisure & gym', value: formatUsd(breakdown.leisure) },
-        { label: 'Mobile plan', value: formatUsd(breakdown.mobile) },
-        { label: 'Clothing & shoes', value: formatUsd(breakdown.clothing) },
+        { label: "Leisure & gym", value: formatUsd(breakdown.leisure) },
+        { label: "Mobile plan", value: formatUsd(breakdown.mobile) },
+        { label: "Clothing & shoes", value: formatUsd(breakdown.clothing) },
       ],
     },
     {
-      id: 'health-misc',
-      variant: 'hero',
-      title: 'Other',
+      id: "health-misc",
+      variant: "hero",
+      title: "Other",
       icon: <IconShoppingCart size={icon} stroke={1.5} aria-hidden />,
       headerAmount: formatColHeaderAmount(
         breakdown.healthInsurance + breakdown.incidentals,
       ),
       rows: [
-        { label: 'Health insurance', value: formatUsd(breakdown.healthInsurance) },
         {
-          label: 'Incidentals',
+          label: "Health insurance",
+          value: formatUsd(breakdown.healthInsurance),
+        },
+        {
+          label: "Incidentals",
           value: formatUsd(breakdown.incidentals),
-          note: 'Personal care, household items, gifts',
+          note: "Personal care, household items, gifts",
         },
       ],
     },
-  ]
+  ];
 }
 
 type Props = {
-  city: MapCity
-  planMonthlyIncome: number
-  budgetBreakdown: BudgetBreakdownDisplay
-  lifestyle: LifestyleInputs
-}
+  city: MapCity;
+  planMonthlyIncome: number;
+  budgetBreakdown: BudgetBreakdownDisplay;
+  lifestyle: LifestyleInputs;
+};
 
 export function CostOfLivingTab({
   city,
@@ -229,13 +243,13 @@ export function CostOfLivingTab({
   budgetBreakdown,
   lifestyle,
 }: Props) {
-  const colBudgetCards = buildColBudgetCards(city, budgetBreakdown, lifestyle)
-  const showTravelAdvisory = hasTravelAdvisory(city.country)
+  const colBudgetCards = buildColBudgetCards(city, budgetBreakdown, lifestyle);
+  const showTravelAdvisory = hasTravelAdvisory(city.country);
 
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--col">
       <section
-        className="wtr-city-detail__col-summary"
+        className="detail-panel-card wtr-city-detail__col-summary"
         aria-label="Cost indices"
       >
         <CityDetailIndexRows country={city.country} />
@@ -246,10 +260,13 @@ export function CostOfLivingTab({
         </div>
       ) : null}
       <div>
-        <DestinationExchangeRate city={city} planMonthlyIncome={planMonthlyIncome} />
+        <DestinationExchangeRate
+          city={city}
+          planMonthlyIncome={planMonthlyIncome}
+        />
       </div>
       <section
-        className="wtr-city-detail__col-budget-group"
+        className="detail-panel-card wtr-city-detail__col-budget-group"
         aria-label="Monthly budget breakdown and costs"
       >
         <ColBudgetBreakdownBar
@@ -263,13 +280,13 @@ export function CostOfLivingTab({
         />
         <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
           {colBudgetCards.map((card) => {
-            const { id: _id, ...categoryProps } = card
-            const categoryDot = COL_BUDGET_CARD_CATEGORY_DOT[card.id]
+            const { id: _id, ...categoryProps } = card;
+            const categoryDot = COL_BUDGET_CARD_CATEGORY_DOT[card.id];
             return (
               <div key={card.id} className="wtr-city-detail__card-cell">
                 <ColCategoryCard {...categoryProps} categoryDot={categoryDot} />
               </div>
-            )
+            );
           })}
         </div>
         <p className="wtr-city-detail__col-budget-footnote font-xs">
@@ -277,5 +294,5 @@ export function CostOfLivingTab({
         </p>
       </section>
     </div>
-  )
+  );
 }

@@ -11,14 +11,14 @@
 .wtr-weather-tab {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
   min-width: 0;
   font-size: var(--text-sm);
   line-height: 1.5;
 }
 
 .wtr-weather-tab__title-row {
-  position: sticky;
+  // position: sticky;
   top: 0;
   z-index: 3;
   display: grid;
@@ -31,7 +31,7 @@
   // margin-block: calc(-1 * var(--space-2)) 0;
   // margin-inline: calc(-1 * var(--wtr-tabpanel-pad, var(--space-5)));
   padding: var(--space-2) 0 var(--space-4);
-  background: var(--wtr-city-detail-panel-bg);
+  // background: var(--wtr-city-detail-panel-bg);
   border-bottom: 1px solid var(--border);
   // box-shadow: rgba(33, 35, 38, 0.08) 0 6px 8px -8px;
 }

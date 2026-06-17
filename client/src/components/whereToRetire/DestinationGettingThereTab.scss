@@ -14,7 +14,7 @@
 }
 
 .wtr-getting-there__group {
-margin-top: var(--space-3);
+// margin-top: var(--space-3);
   box-sizing: border-box;
 }
 
@@ -244,8 +244,8 @@ margin-top: var(--space-3);
   gap: var(--space-2) /* review: was 0.55rem */;
   padding: var(--space-3) /* review: was 0.7rem */ var(--space-3) /* review: was 0.8rem */;
   border-radius: var(--radius-lg, 12px);
-
-  background: #f9f9f9;
+margin: var(--space-3) 0;
+  background: var(--bg-faint);
   box-sizing: border-box;
 }
 
@@ -292,6 +292,7 @@ margin-top: var(--space-3);
   text-decoration: none;
   color: var(--text);
   background: var(--color-card);
+  margin: var(--space-3) 0;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;

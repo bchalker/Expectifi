@@ -277,6 +277,7 @@ function CityDetailPanelBody({
       case 'peopleCulture':
         return (
           <PeopleAndCultureTab
+            city={city.city}
             country={city.country}
           />
         )

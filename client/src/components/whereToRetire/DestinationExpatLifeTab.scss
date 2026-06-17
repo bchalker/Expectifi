@@ -1,7 +1,7 @@
 .wtr-expat-life {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-3);
 }
 
 .wtr-expat-life__empty {
@@ -12,7 +12,7 @@
 }
 
 .wtr-expat-life__group {
-  margin-bottom: var(--space-4) /* review: was 1.15rem */;
+  // margin-bottom: var(--space-4) /* review: was 1.15rem */;
 }
 
 .wtr-expat-life__section-title {

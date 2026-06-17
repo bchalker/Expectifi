@@ -1,11 +1,19 @@
 import { useMemo, type CSSProperties } from "react";
 import {
   DEMOGRAPHICS_UNAVAILABLE_MESSAGE,
+  demographicsCityUnavailableBody,
+  demographicsCityUnavailableTitle,
+  demographicsCountryFallbackLabel,
+  formatCompactDemographicNumber,
   getDemographicsData,
   getDemographicsPanelHeadsUp,
   getReligionBarSegments,
   getReligionLegendItems,
   medianAgeWhy,
+  parseCompactDemographicNumber,
+  peopleCultureCountryScopeHelper,
+  religionCityUnavailableBody,
+  religionCityUnavailableTitle,
 } from "../../utils/demographics";
 import {
   getEnglishProficiency,
@@ -15,6 +23,10 @@ import {
   type EnglishProficiencyLevel,
 } from "../../utils/englishProficiency";
 import { getCountryPreferenceFields } from "../../utils/countryPreferenceData";
+import {
+  scaledMetricValue,
+  usePeopleCultureMetricsAnimation,
+} from "../../hooks/usePeopleCultureMetricsAnimation";
 import { NarrativeWhyLine } from "../ui/NarrativeWhyLine";
 import { PanelHeadsUpCallout } from "../ui/PanelHeadsUpCallout";
 import "../ui/DetailPanelCard.scss";
@@ -30,6 +42,7 @@ function socialLawDisclosureLabels(country: string): string[] {
 }
 
 type Props = {
+  city: string;
   country: string;
   staggerClassName?: string;
   staggerStyle?: (index: number) => CSSProperties;
@@ -52,6 +65,145 @@ function staggerSectionProps(
   };
 }
 
+function DemographicsDataEmptyCard({
+  city,
+  country,
+  showCountryFallback,
+  onShowCountryFallback,
+}: {
+  city: string;
+  country: string;
+  showCountryFallback: boolean;
+  onShowCountryFallback: () => void;
+}) {
+  return (
+    <section className="detail-panel-card wtr-people-culture__group wtr-people-culture__data-empty">
+      <h3 className="wtr-people-culture__data-empty-title">
+        {demographicsCityUnavailableTitle()}
+      </h3>
+      <p className="wtr-people-culture__data-empty-body">
+        {demographicsCityUnavailableBody(city)}
+      </p>
+      {showCountryFallback ? (
+        <button
+          type="button"
+          className="wtr-people-culture__country-fallback"
+          onClick={onShowCountryFallback}
+        >
+          {demographicsCountryFallbackLabel(country)}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function ReligionDataEmptyCard({ city }: { city: string }) {
+  return (
+    <section className="detail-panel-card wtr-people-culture__group wtr-people-culture__data-empty">
+      <h3 className="wtr-people-culture__data-empty-title">
+        {religionCityUnavailableTitle()}
+      </h3>
+      <p className="wtr-people-culture__data-empty-body">
+        {religionCityUnavailableBody(city)}
+      </p>
+    </section>
+  );
+}
+
+function EnglishProficiencySection({
+  level,
+  staggerIndex,
+  staggerClassName,
+  staggerStyle,
+}: {
+  level: EnglishProficiencyLevel;
+  staggerIndex: number;
+  staggerClassName?: string;
+  staggerStyle?: (index: number) => CSSProperties;
+}) {
+  return (
+    <section
+      aria-labelledby="wtr-people-culture-english-heading"
+      {...staggerSectionProps(
+        staggerIndex,
+        "detail-panel-card wtr-people-culture__group wtr-people-culture__english",
+        staggerClassName,
+        staggerStyle,
+      )}
+    >
+      <h3
+        id="wtr-people-culture-english-heading"
+        className="wtr-city-detail__section-title wtr-people-culture__section-title"
+      >
+        English
+      </h3>
+      <p className="wtr-people-culture__english-level">
+        {getEnglishProficiencyBadgeLabel(level)}
+      </p>
+      <NarrativeWhyLine className="wtr-people-culture__demo-callout">
+        {getEnglishProficiencyWhy(level)}
+      </NarrativeWhyLine>
+    </section>
+  );
+}
+
+function PeopleCultureSectionHeader({
+  id,
+  title,
+  country,
+}: {
+  id: string;
+  title: string;
+  country: string;
+}) {
+  return (
+    <div className="wtr-people-culture__section-header">
+      <h3
+        id={id}
+        className="wtr-city-detail__section-title wtr-people-culture__section-title"
+      >
+        {title}
+      </h3>
+      <p className="wtr-people-culture__section-helper">
+        {peopleCultureCountryScopeHelper(country)}
+      </p>
+    </div>
+  );
+}
+
+function ReligionStackedBar({
+  breakdown,
+  revealed,
+}: {
+  breakdown: Record<string, number>;
+  revealed: boolean;
+}) {
+  const segments = getReligionBarSegments(breakdown);
+  if (!segments.length) return null;
+
+  return (
+    <div
+      className={[
+        "wtr-people-culture__religion-bar",
+        revealed && "wtr-people-culture__religion-bar--revealed",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      role="img"
+      aria-label={segments.map((s) => `${s.key} ${s.pct}%`).join(", ")}
+    >
+      {segments.map((seg) => (
+        <span
+          key={seg.key}
+          className={`wtr-people-culture__religion-segment wtr-people-culture__religion-segment--${seg.key.toLowerCase()}`}
+          style={{ "--segment-target": `${seg.pct}%` } as CSSProperties}
+          title={`${seg.key} ${seg.pct}%`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function EnglishProficiencyBadge({
   level,
 }: {
@@ -65,32 +217,6 @@ export function EnglishProficiencyBadge({
     >
       {label}
     </span>
-  );
-}
-
-function ReligionStackedBar({
-  breakdown,
-}: {
-  breakdown: Record<string, number>;
-}) {
-  const segments = getReligionBarSegments(breakdown);
-  if (!segments.length) return null;
-
-  return (
-    <div
-      className="wtr-people-culture__religion-bar"
-      role="img"
-      aria-label={segments.map((s) => `${s.key} ${s.pct}%`).join(", ")}
-    >
-      {segments.map((seg) => (
-        <span
-          key={seg.key}
-          className={`wtr-people-culture__religion-segment wtr-people-culture__religion-segment--${seg.key.toLowerCase()}`}
-          style={{ width: `${seg.pct}%` }}
-          title={`${seg.key} ${seg.pct}%`}
-        />
-      ))}
-    </div>
   );
 }
 
@@ -117,12 +243,14 @@ function ReligionLegend({ breakdown }: { breakdown: Record<string, number> }) {
 
 function ReligionBreakdown({
   breakdown,
+  revealed,
 }: {
   breakdown: Record<string, number>;
+  revealed: boolean;
 }) {
   return (
     <div className="wtr-people-culture__religion-breakdown">
-      <ReligionStackedBar breakdown={breakdown} />
+      <ReligionStackedBar breakdown={breakdown} revealed={revealed} />
       <ReligionLegend breakdown={breakdown} />
     </div>
   );
@@ -135,6 +263,7 @@ function medianAgeInterpretation(age: number): string {
 }
 
 export function DestinationPeopleCultureTab({
+  city,
   country,
   staggerClassName,
   staggerStyle,
@@ -164,7 +293,58 @@ export function DestinationPeopleCultureTab({
 
   const religion = data?.religion;
   const demographics = data?.demographics;
+  const metricsAnimationKey = `${city}|${country}`;
+  const { countProgress, religionRevealed } = usePeopleCultureMetricsAnimation(
+    demographics ? metricsAnimationKey : "",
+  );
+  const populationNumeric = useMemo(
+    () => (demographics ? parseCompactDemographicNumber(demographics.population) : null),
+    [demographics],
+  );
   let sectionIndex = 0;
+
+  if (!data) {
+    return (
+      <div className="wtr-people-culture">
+        {socialDisclosures.length > 0 ? (
+          <div
+            className="wtr-people-culture__social-disclosures"
+            {...staggerSectionProps(
+              sectionIndex++,
+              undefined,
+              staggerClassName,
+              staggerStyle,
+            )}
+          >
+            {socialDisclosures.map((label) => (
+              <span key={label} className="wtr-people-culture__social-badge">
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {englishLevel ? (
+          <EnglishProficiencySection
+            level={englishLevel}
+            staggerIndex={sectionIndex++}
+            staggerClassName={staggerClassName}
+            staggerStyle={staggerStyle}
+          />
+        ) : null}
+        <div {...staggerSectionProps(sectionIndex++, undefined, staggerClassName, staggerStyle)}>
+          <DemographicsDataEmptyCard
+            city={city}
+            country={country}
+            showCountryFallback={false}
+            onShowCountryFallback={() => {}}
+          />
+        </div>
+        <div {...staggerSectionProps(sectionIndex++, undefined, staggerClassName, staggerStyle)}>
+          <ReligionDataEmptyCard city={city} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="wtr-people-culture">
@@ -189,38 +369,6 @@ export function DestinationPeopleCultureTab({
           ))}
         </div>
       ) : null}
-      {religion ? (
-        <section
-          aria-labelledby="wtr-people-culture-religion-heading"
-          {...staggerSectionProps(
-            sectionIndex++,
-            "detail-panel-card wtr-people-culture__group",
-            staggerClassName,
-            staggerStyle,
-          )}
-        >
-          <h3
-            id="wtr-people-culture-religion-heading"
-            className="wtr-city-detail__section-title wtr-people-culture__section-title"
-          >
-            Religion
-          </h3>
-          <ReligionBreakdown breakdown={religion.breakdown} />
-          <div className="wtr-people-culture__religion-summary">
-            <p className="wtr-people-culture__dominant">{religion.dominant}</p>
-            <p className="wtr-people-culture__dominant-note">
-              {religion.christian_note}
-            </p>
-            <p className="wtr-people-culture__worship-note">
-              <em>Places of worship for expats:</em> {religion.expat_worship}
-            </p>
-          </div>
-          <NarrativeWhyLine className="wtr-people-culture__why">
-            {religion.expat_worship_why}
-          </NarrativeWhyLine>
-        </section>
-      ) : null}
-
       {demographics ? (
         <section
           aria-labelledby="wtr-people-culture-demo-heading"
@@ -231,30 +379,34 @@ export function DestinationPeopleCultureTab({
             staggerStyle,
           )}
         >
-          <h3
+          <PeopleCultureSectionHeader
             id="wtr-people-culture-demo-heading"
-            className="wtr-city-detail__section-title wtr-people-culture__section-title"
-          >
-            Demographics
-          </h3>
+            title="Demographics"
+            country={country}
+          />
           <div className="wtr-people-culture__demo-overview">
             <div className="wtr-people-culture__demo-stats">
               <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--start">
                 <span className="wtr-people-culture__demo-stat-label">Population</span>
                 <span className="wtr-people-culture__demo-stat-value">
-                  {demographics.population}
+                  {populationNumeric != null
+                    ? formatCompactDemographicNumber(
+                        scaledMetricValue(populationNumeric, countProgress),
+                        demographics.population,
+                      )
+                    : demographics.population}
                 </span>
               </div>
               <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--center">
                 <span className="wtr-people-culture__demo-stat-label">Urban</span>
                 <span className="wtr-people-culture__demo-stat-value tabular-nums">
-                  {demographics.urban_pct}%
+                  {Math.floor(scaledMetricValue(demographics.urban_pct, countProgress))}%
                 </span>
               </div>
               <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--end">
                 <span className="wtr-people-culture__demo-stat-label">Median Age</span>
                 <span className="wtr-people-culture__demo-stat-value tabular-nums">
-                  {demographics.median_age}
+                  {Math.floor(scaledMetricValue(demographics.median_age, countProgress))}
                 </span>
               </div>
             </div>
@@ -295,26 +447,34 @@ export function DestinationPeopleCultureTab({
             ) : null}
           </div>
         </section>
-      ) : englishLevel ? (
+      ) : null}
+      {religion ? (
         <section
-          className="wtr-people-culture__group"
-          aria-labelledby="wtr-people-culture-english-heading"
+          aria-labelledby="wtr-people-culture-religion-heading"
           {...staggerSectionProps(
             sectionIndex++,
-            "wtr-people-culture__group",
+            "detail-panel-card wtr-people-culture__group",
             staggerClassName,
             staggerStyle,
           )}
         >
-          <h3
-            id="wtr-people-culture-english-heading"
-            className="wtr-city-detail__section-title wtr-people-culture__section-title"
-          >
-            English
-          </h3>
-          <EnglishProficiencyBadge level={englishLevel} />
+          <PeopleCultureSectionHeader
+            id="wtr-people-culture-religion-heading"
+            title="Religion"
+            country={country}
+          />
+          <ReligionBreakdown breakdown={religion.breakdown} revealed={religionRevealed} />
+          <div className="wtr-people-culture__religion-summary">
+            <p className="wtr-people-culture__dominant">{religion.dominant}</p>
+            <p className="wtr-people-culture__dominant-note">
+              {religion.christian_note}
+            </p>
+            <p className="wtr-people-culture__worship-note">
+              <em>Places of worship for expats:</em> {religion.expat_worship}
+            </p>
+          </div>
           <NarrativeWhyLine className="wtr-people-culture__why">
-            {getEnglishProficiencyWhy(englishLevel)}
+            {religion.expat_worship_why}
           </NarrativeWhyLine>
         </section>
       ) : null}
@@ -335,26 +495,20 @@ export function DestinationPeopleCultureTab({
           >
             Expat community
           </h3>
-          <p className="wtr-people-culture__expat-copy">
-            {demographics.expat_population}
-          </p>
+          <PanelHeadsUpCallout className="wtr-people-culture__expat-heads-up">
+            {panelHeadsUp}
+          </PanelHeadsUpCallout>
+          <div className="wtr-people-culture__expat-block">
+            <p className="wtr-people-culture__expat-label">Community size</p>
+            <p className="wtr-people-culture__expat-copy">
+              {demographics.expat_population}
+            </p>
+          </div>
           <NarrativeWhyLine className="wtr-people-culture__why">
             {demographics.expat_population_why}
           </NarrativeWhyLine>
         </section>
       ) : null}
-
-      <PanelHeadsUpCallout
-        className="wtr-people-culture__heads-up"
-        {...staggerSectionProps(
-          sectionIndex++,
-          undefined,
-          staggerClassName,
-          staggerStyle,
-        )}
-      >
-        {panelHeadsUp}
-      </PanelHeadsUpCallout>
     </div>
   );
 }

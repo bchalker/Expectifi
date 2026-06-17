@@ -58,6 +58,34 @@ export const RELIGION_BAR_ORDER: ReligionKey[] = [
 export const DEMOGRAPHICS_UNAVAILABLE_MESSAGE =
   'People and culture data not yet available for this country.'
 
+export function demographicsCityUnavailableTitle(): string {
+  return 'Demographic data not available'
+}
+
+export function demographicsCityUnavailableBody(city: string): string {
+  const place = city.trim() || 'this city'
+  return `We don't yet have reliable population, urbanization, or age data for ${place} specifically. This is more common for smaller or less-studied cities — we're expanding coverage over time.`
+}
+
+export function demographicsCountryFallbackLabel(country: string): string {
+  return `See ${country.trim()} country-level estimate →`
+}
+
+export function religionCityUnavailableTitle(): string {
+  return 'Religious affiliation data not available'
+}
+
+export function religionCityUnavailableBody(city: string): string {
+  const place = city.trim() || 'this city'
+  return `Our source for this (Pew Research) doesn't publish city-level breakdowns for ${place}. We'll add it if a reliable dataset becomes available.`
+}
+
+/** Helper under Demographics / Religion section titles (country-level Pew & World Bank data). */
+export function peopleCultureCountryScopeHelper(country: string): string {
+  const name = country.trim()
+  return name ? `Country-level data · ${name}` : 'Country-level data'
+}
+
 export const DEMOGRAPHICS_TAB_SOURCE_FOOTER =
   'Religion: Pew Research Center 2020. Demographics: World Bank / UN 2024.'
 
@@ -88,6 +116,10 @@ export function getDemographicsData(country: string): DemographicsCountryData | 
   const trimmed = country.trim()
   if (!trimmed) return null
   return dataset.countries[trimmed] ?? null
+}
+
+export function hasCountryPeopleCultureData(country: string): boolean {
+  return getDemographicsData(country) != null
 }
 
 export function getReligionBarSegments(
@@ -168,4 +200,42 @@ export function getDemographicsRowNumericValue(
 function formatPct(value: number | undefined): string {
   if (value == null) return '—'
   return `${value}%`
+}
+
+/** Parse compact figures like `47.4M`, `850K`, or plain numbers for count-up animation. */
+export function parseCompactDemographicNumber(raw: string): number | null {
+  const trimmed = raw.trim().replace(/,/g, '')
+  const match = trimmed.match(/^([\d.]+)\s*([KMB])?$/i)
+  if (!match) return null
+
+  const value = Number.parseFloat(match[1])
+  if (!Number.isFinite(value)) return null
+
+  const suffix = (match[2] ?? '').toUpperCase()
+  const multiplier =
+    suffix === 'B' ? 1_000_000_000 : suffix === 'M' ? 1_000_000 : suffix === 'K' ? 1_000 : 1
+
+  return value * multiplier
+}
+
+/** Format an animated scalar using the suffix/precision from the source label. */
+export function formatCompactDemographicNumber(value: number, template: string): string {
+  if (value <= 0) {
+    const trimmed = template.trim()
+    const match = trimmed.match(/^[\d,]+(?:\.\d+)?\s*([KMB])?$/i)
+    const suffix = (match?.[1] ?? '').toUpperCase()
+    if (/\.\d/.test(trimmed) && suffix) return `0.0${suffix}`
+    if (suffix) return `0${suffix}`
+    return '0'
+  }
+
+  const trimmed = template.trim()
+  const match = trimmed.match(/^[\d,]+(?:\.\d+)?\s*([KMB])?$/i)
+  const suffix = (match?.[1] ?? '').toUpperCase()
+  const multiplier =
+    suffix === 'B' ? 1_000_000_000 : suffix === 'M' ? 1_000_000 : suffix === 'K' ? 1_000 : 1
+  const scaled = value / multiplier
+  const decimalPlaces = /\.\d/.test(trimmed) ? 1 : 0
+
+  return `${scaled.toFixed(decimalPlaces)}${suffix}`
 }
