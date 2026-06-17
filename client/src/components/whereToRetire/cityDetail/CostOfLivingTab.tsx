@@ -19,7 +19,6 @@ import {
 } from '../../../utils/costOfLiving'
 import { ColBudgetBreakdownBar, COL_BUDGET_CARD_CATEGORY_DOT } from '../ColBudgetBreakdownBar'
 import { ColGroceriesBudgetCard } from '../ColGroceriesBudgetCard'
-import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { CityDetailIndexRows } from './CityDetailIndexRows'
 import { LITERS_PER_US_GALLON } from '../../../utils/units'
 import { rentCardHeaderSubtitle } from '../../../utils/units'
@@ -249,7 +248,7 @@ export function CostOfLivingTab({
       <div>
         <DestinationExchangeRate city={city} planMonthlyIncome={planMonthlyIncome} />
       </div>
-      <DetailPanelCard
+      <section
         className="wtr-city-detail__col-budget-group"
         aria-label="Monthly budget breakdown and costs"
       >
@@ -276,7 +275,7 @@ export function CostOfLivingTab({
         <p className="wtr-city-detail__col-budget-footnote font-xs">
           Based on your lifestyle preset basket and dining habits
         </p>
-      </DetailPanelCard>
+      </section>
     </div>
   )
 }

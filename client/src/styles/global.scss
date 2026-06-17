@@ -78,6 +78,7 @@
   /* App page canvas — body and chrome that sit on the page background */
   --page-bg: hsl(36, 20%, 86%);
   --page-bg-light: hsl(36, 20%, 92%);
+  --page-bg-lighter: hsl(36, 20%, 96%);
   /* Scrolls with page content — no fixed viewport reservation */
   --app-privacy-trust-h: 0px;
   --app-plan-banner-h: 0px;
@@ -215,6 +216,7 @@
 
   --bg: var(--page-bg);
   --bg-faint: var(--page-bg-light);
+  --bg-fainter: var(--page-bg-lighter);
   --surface: var(--ds-color-surface);
   --surface2: var(--ds-color-surface2);
   --text: var(--ds-color-text);

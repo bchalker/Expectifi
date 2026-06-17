@@ -5,7 +5,6 @@ import { formatTemp } from '../../../lib/api/openMeteo'
 import type { PreferenceStep, RetirementPreferences } from '../../../types/preferences'
 import { deriveClimateNotes } from '../../../utils/climateNotes'
 import { deriveClimateDetail } from '../../../utils/climateDetail'
-import { DetailPanelCard, DetailPanelCardTitle } from '../../ui/DetailPanelCard'
 import { ClimateMonthlyChart } from '../ClimateMonthlyChart'
 import { MonthlyPrecipChart } from '../MonthlyPrecipChart'
 import { staggerSectionProps, type CityDetailTabStaggerProps } from './cityDetailTabUtils'
@@ -197,7 +196,7 @@ export function WeatherTab({
           </div>
         </div>
 
-        <DetailPanelCard
+        <section
           aria-label="Climate match summary"
           {...staggerSectionProps(staggerIdx++, summaryCardClassName, staggerClassName, staggerStyle)}
         >
@@ -220,9 +219,9 @@ export function WeatherTab({
               {retireeNote.body}
             </p>
           </div>
-        </DetailPanelCard>
+        </section>
 
-        <DetailPanelCard
+        <section
           aria-label="Climate averages"
           {...staggerSectionProps(
             staggerIdx++,
@@ -257,9 +256,9 @@ export function WeatherTab({
               secondary={detail.metrics.rainyMonthRange}
             />
           </div>
-        </DetailPanelCard>
+        </section>
 
-        <DetailPanelCard
+        <section
           aria-labelledby="wtr-weather-chart-heading"
           {...staggerSectionProps(
             staggerIdx++,
@@ -268,9 +267,16 @@ export function WeatherTab({
             staggerStyle,
           )}
         >
-          <DetailPanelCardTitle id="wtr-weather-chart-heading">
-            Monthly temperatures
-          </DetailPanelCardTitle>
+          <div className="wtr-weather-tab__section-header">
+            <h3 className="wtr-weather-tab__section-title" id="wtr-weather-chart-heading">
+              Monthly temperatures
+            </h3>
+            <p className="wtr-weather-tab__section-helper">
+              Avg highs {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
+              {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} · climate normals
+              2011–2020 (NASA POWER)
+            </p>
+          </div>
           <ClimateMonthlyChart
             monthly={climate.monthly}
             lat={lat}
@@ -279,14 +285,9 @@ export function WeatherTab({
             climatePreferenceStep={climatePreferenceStep}
             climatePreferenceDirection={climatePreferenceDirection}
           />
-          <p className="wtr-weather-tab__chart-note">
-            Avg highs {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
-            {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} · climate normals
-            2011–2020 (NASA POWER)
-          </p>
-        </DetailPanelCard>
+        </section>
 
-        <DetailPanelCard
+        <section
           aria-labelledby="wtr-weather-precip-heading"
           {...staggerSectionProps(
             staggerIdx++,
@@ -295,14 +296,16 @@ export function WeatherTab({
             staggerStyle,
           )}
         >
-          <DetailPanelCardTitle id="wtr-weather-precip-heading">
-            Monthly precipitation
-          </DetailPanelCardTitle>
+          <div className="wtr-weather-tab__section-header">
+            <h3 className="wtr-weather-tab__section-title" id="wtr-weather-precip-heading">
+              Monthly precipitation
+            </h3>
+            <p className="wtr-weather-tab__section-helper">
+              Monthly totals from daily averages · climate normals 2011–2020 (NASA POWER)
+            </p>
+          </div>
           <MonthlyPrecipChart monthly={climate.monthly} />
-          <p className="wtr-weather-tab__chart-note">
-            Monthly totals from daily averages · climate normals 2011–2020 (NASA POWER)
-          </p>
-        </DetailPanelCard>
+        </section>
       </article>
     </div>
   )

@@ -1,6 +1,5 @@
 import { useMemo, type CSSProperties } from "react";
 import { IconAlertCircle, IconExternalLinkFilled } from "@tabler/icons-react";
-import { DetailPanelCard } from "../ui/DetailPanelCard";
 import { NarrativeWhyLine } from "../ui/NarrativeWhyLine";
 import { PanelHeadsUpCallout } from "../ui/PanelHeadsUpCallout";
 import {
@@ -89,7 +88,7 @@ export function DestinationExpatLifeTab({
 
   return (
     <div className="wtr-expat-life">
-      <DetailPanelCard
+      <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
@@ -112,10 +111,10 @@ export function DestinationExpatLifeTab({
           ) : null}
         </div>
         <NarrativeWhyLine>{data.community_why}</NarrativeWhyLine>
-      </DetailPanelCard>
+      </section>
 
       {data.popular_areas.length > 0 ? (
-        <DetailPanelCard
+        <section
           className="wtr-expat-life__group"
           {...staggerSectionProps(
             sectionIndex++,
@@ -134,10 +133,10 @@ export function DestinationExpatLifeTab({
               </li>
             ))}
           </ul>
-        </DetailPanelCard>
+        </section>
       ) : null}
 
-      <DetailPanelCard
+      <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
@@ -151,9 +150,9 @@ export function DestinationExpatLifeTab({
         </h3>
         <blockquote className="wtr-expat-life__vibe">{data.expat_vibe}</blockquote>
         <NarrativeWhyLine className="wtr-expat-life__why">{data.expat_vibe_why}</NarrativeWhyLine>
-      </DetailPanelCard>
+      </section>
 
-      <DetailPanelCard
+      <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
@@ -178,9 +177,9 @@ export function DestinationExpatLifeTab({
             </NarrativeWhyLine>
           </div>
         </dl>
-      </DetailPanelCard>
+      </section>
 
-      <DetailPanelCard
+      <section
         className="wtr-expat-life__group"
         {...staggerSectionProps(
           sectionIndex++,
@@ -202,7 +201,7 @@ export function DestinationExpatLifeTab({
           <p>{data.cost_note}</p>
         </div>
         <NarrativeWhyLine className="wtr-expat-life__why">{data.cost_note_why}</NarrativeWhyLine>
-      </DetailPanelCard>
+      </section>
 
       <section
         className="wtr-expat-life__group"

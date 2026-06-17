@@ -1,6 +1,5 @@
 import { useMemo, type CSSProperties } from 'react'
 import { IconShieldHeart, IconStethoscope } from '@tabler/icons-react'
-import { DetailPanelCard } from '../ui/DetailPanelCard'
 import { formatHealthcareInsuranceMonthlyRange } from '../../utils/countryPreferenceData'
 import {
   formatHealthcareSourceLabel,
@@ -98,8 +97,7 @@ function QoLHealthcareCard({
   const insuranceRange = formatHealthcareInsuranceMonthlyRange(country)
 
   return (
-    <DetailPanelCard
-      as="article"
+    <article
       className="wtr-qol-healthcare"
       aria-labelledby="wtr-qol-healthcare-heading"
       style={style}
@@ -179,7 +177,7 @@ function QoLHealthcareCard({
       <p className="wtr-qol-healthcare__footer">
         Rated by country, not city · Source: {sourceLabel}
       </p>
-    </DetailPanelCard>
+    </article>
   )
 }
 
@@ -274,8 +272,7 @@ export function DestinationQualityOfLifeTab({ country, staggerClassName, stagger
         className="wtr-qol-tab__row wtr-qol-tab__row--score"
         {...staggerSectionProps(0, undefined, staggerClassName, staggerStyle)}
       >
-        <DetailPanelCard
-          as="article"
+        <article
           className="wtr-qol-score-card"
           aria-labelledby="wtr-qol-overall-heading"
         >
@@ -285,7 +282,7 @@ export function DestinationQualityOfLifeTab({ country, staggerClassName, stagger
               <QoLMetricRow key={row.id} config={row} />
             ))}
           </ul>
-        </DetailPanelCard>
+        </article>
       </section>
 
       <section

@@ -11,7 +11,7 @@
 .wtr-weather-tab {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-6);
   min-width: 0;
   font-size: var(--text-sm);
   line-height: 1.5;
@@ -31,7 +31,7 @@
   // margin-block: calc(-1 * var(--space-2)) 0;
   // margin-inline: calc(-1 * var(--wtr-tabpanel-pad, var(--space-5)));
   padding: var(--space-2) 0 var(--space-4);
-  background: #f9f9f9;
+  background: var(--color-card);
   border-bottom: 1px solid var(--border);
   // box-shadow: rgba(33, 35, 38, 0.08) 0 6px 8px -8px;
 }
@@ -145,8 +145,38 @@
 
 .wtr-weather-tab__summary-divider {
   height: 1px;
-  margin-inline: calc(-1 * var(--space-4));
   background: var(--border);
+}
+
+.wtr-weather-tab__section-header {
+  display: flex;
+  flex-direction: column;
+  // gap: var(--space-1);
+margin-bottom: var(--space-6);
+}
+
+.wtr-weather-tab__section-header .wtr-weather-tab__section-title {
+  margin: 0;
+}
+
+.wtr-weather-tab__section-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.wtr-weather-tab__section-helper {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.wtr-weather-tab__metrics-card {
+  padding: var(--space-1) 0;
 }
 
 .wtr-weather-tab__summary-retiree {
@@ -171,10 +201,6 @@
 
 .wtr-weather-tab__retiree-label {
   font-weight: 600;
-}
-
-.wtr-weather-tab__metrics-card {
-  padding: var(--space-4) var(--space-3);
 }
 
 .wtr-weather-tab__metrics {
@@ -231,13 +257,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-}
-
-.wtr-weather-tab__chart-note {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.4;
-  color: var(--text-muted);
 }
 
 

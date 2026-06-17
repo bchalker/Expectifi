@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { PanelHeadsUpCallout } from '../../ui/PanelHeadsUpCallout'
 import {
   getTaxVisaData,
@@ -28,7 +27,7 @@ function TaxNarrativeCard({
   why?: string
 }) {
   return (
-    <DetailPanelCard as="article" className="wtr-tax-visa-tab__card">
+    <article className="wtr-tax-visa-tab__card">
       <h3 className="wtr-city-detail__section-title">{title}</h3>
       <p className="wtr-city-detail__card-value">{value}</p>
       {why ? (
@@ -36,7 +35,7 @@ function TaxNarrativeCard({
           <span className="wtr-tax-visa-tab__why-label">Why it matters for you:</span> {why}
         </p>
       ) : null}
-    </DetailPanelCard>
+    </article>
   )
 }
 
@@ -88,7 +87,7 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
         />
       </div>
 
-      <DetailPanelCard
+      <section
         aria-labelledby="wtr-tax-visa-visa-heading"
         {...staggerSectionProps(1, 'wtr-tax-visa-tab__visa-section', staggerClassName, staggerStyle)}
       >
@@ -117,7 +116,7 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
             ) : null}
           </div>
         </dl>
-      </DetailPanelCard>
+      </section>
 
       <PanelHeadsUpCallout
         className="wtr-tax-visa-tab__heads-up"

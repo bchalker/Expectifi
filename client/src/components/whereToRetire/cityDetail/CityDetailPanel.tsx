@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useState, useCallback, type ReactNode } from 'react'
 import { AppOverlayScrollbars } from '../../ui/AppOverlayScrollbars'
 import { AppSelect } from '../../ui/AppSelect'
+import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { useRetirementExclusions } from '../../../hooks/useRetirementExclusions'
 import {
   IconChartBar,
@@ -350,7 +351,9 @@ function CityDetailPanelBody({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {tabContent}
+              <DetailPanelCard className="wtr-city-detail__tab-card">
+                {tabContent}
+              </DetailPanelCard>
             </div>
           </div>
 
