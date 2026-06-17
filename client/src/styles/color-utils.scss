@@ -1,0 +1,34 @@
+// Color helpers for CSS custom properties and any compile-time color value.
+//
+// SCSS (import this file in any .scss that needs it):
+//   color-alpha(var(--token), 0.2)   — like rgba(token, 0.2)
+//   color-shade(var(--token), 0.7)   — 70% black (darker)
+//   color-tint(var(--token), 0.3)    — 30% white (lighter)
+//
+// Plain CSS (no import):
+//   rgb(from var(--token) r g b / 0.2)
+//   color-mix(in srgb, var(--token) 20%, transparent)
+
+@function color-alpha($color, $alpha) {
+  @if $alpha < 0 or $alpha > 1 {
+    @error "color-alpha: opacity must be between 0 and 1, got #{$alpha}.";
+  }
+
+  @return color-mix(in srgb, #{$color} #{$alpha * 100%}, transparent);
+}
+
+@function color-shade($color, $black-ratio) {
+  @if $black-ratio < 0 or $black-ratio > 1 {
+    @error "color-shade: black ratio must be between 0 and 1, got #{$black-ratio}.";
+  }
+
+  @return color-mix(in srgb, #{$color} #{(1 - $black-ratio) * 100%}, black);
+}
+
+@function color-tint($color, $white-ratio) {
+  @if $white-ratio < 0 or $white-ratio > 1 {
+    @error "color-tint: white ratio must be between 0 and 1, got #{$white-ratio}.";
+  }
+
+  @return color-mix(in srgb, #{$color} #{(1 - $white-ratio) * 100%}, white);
+}

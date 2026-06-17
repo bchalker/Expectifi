@@ -206,13 +206,15 @@ export function DestinationPeopleCultureTab({
             Religion
           </h3>
           <ReligionBreakdown breakdown={religion.breakdown} />
-          <p className="wtr-people-culture__dominant">{religion.dominant}</p>
-          <p className="wtr-people-culture__dominant-note">
-            {religion.christian_note}
-          </p>
-          <p className="wtr-people-culture__worship-note">
-            <em>Places of worship for expats:</em> {religion.expat_worship}
-          </p>
+          <div className="wtr-people-culture__religion-summary">
+            <p className="wtr-people-culture__dominant">{religion.dominant}</p>
+            <p className="wtr-people-culture__dominant-note">
+              {religion.christian_note}
+            </p>
+            <p className="wtr-people-culture__worship-note">
+              <em>Places of worship for expats:</em> {religion.expat_worship}
+            </p>
+          </div>
           <NarrativeWhyLine className="wtr-people-culture__why">
             {religion.expat_worship_why}
           </NarrativeWhyLine>
@@ -235,53 +237,63 @@ export function DestinationPeopleCultureTab({
           >
             Demographics
           </h3>
-          <dl className="wtr-people-culture__demo-grid">
-            <div className="wtr-people-culture__demo-cell">
-              <dt className="font-xs">Population</dt>
-              <dd className="font-base">{demographics.population}</dd>
-            </div>
-            <div className="wtr-people-culture__demo-cell">
-              <dt className="font-xs">Median age</dt>
-              <dd className="font-base">
-                <span className="tabular-nums">{demographics.median_age}</span>{" "}
-                years
-                <span className="wtr-people-culture__age-note">
-                  {medianAgeInterpretation(demographics.median_age)}
+          <div className="wtr-people-culture__demo-overview">
+            <div className="wtr-people-culture__demo-stats">
+              <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--start">
+                <span className="wtr-people-culture__demo-stat-label">Population</span>
+                <span className="wtr-people-culture__demo-stat-value">
+                  {demographics.population}
                 </span>
-                <NarrativeWhyLine className="wtr-people-culture__why">
-                  {medianAgeWhy(demographics.median_age)}
-                </NarrativeWhyLine>
-              </dd>
+              </div>
+              <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--center">
+                <span className="wtr-people-culture__demo-stat-label">Urban</span>
+                <span className="wtr-people-culture__demo-stat-value tabular-nums">
+                  {demographics.urban_pct}%
+                </span>
+              </div>
+              <div className="wtr-people-culture__demo-stat wtr-people-culture__demo-stat--end">
+                <span className="wtr-people-culture__demo-stat-label">Median Age</span>
+                <span className="wtr-people-culture__demo-stat-value tabular-nums">
+                  {demographics.median_age}
+                </span>
+              </div>
             </div>
-            <div className="wtr-people-culture__demo-cell">
-              <dt className="font-xs">Urban population</dt>
-              <dd className="font-base">
-                <span className="tabular-nums">{demographics.urban_pct}</span>%
-              </dd>
+            <div className="wtr-people-culture__demo-age-callout">
+              <p className="wtr-people-culture__demo-age-headline">
+                {medianAgeInterpretation(demographics.median_age)}
+              </p>
+              <NarrativeWhyLine className="wtr-people-culture__demo-callout">
+                {medianAgeWhy(demographics.median_age)}
+              </NarrativeWhyLine>
             </div>
-            <div className="wtr-people-culture__demo-cell">
-              <dt className="font-xs">Official language</dt>
-              <dd className="font-base">{demographics.official_language}</dd>
-            </div>
-            <div className="wtr-people-culture__demo-cell wtr-people-culture__demo-cell--wide">
-              <dt className="font-xs">Common languages</dt>
-              <dd className="font-base">{demographics.common_languages}</dd>
-              <NarrativeWhyLine className="wtr-people-culture__why">
+          </div>
+          <div className="wtr-people-culture__demo-language-group">
+            <p className="wtr-people-culture__demo-inline-row">
+              <strong>Official Language:</strong> {demographics.official_language}
+            </p>
+            <div className="wtr-people-culture__demo-block">
+              <p className="wtr-people-culture__demo-block-title">
+                <strong>Common Languages</strong>
+              </p>
+              <p className="wtr-people-culture__demo-block-body">
+                {demographics.common_languages}
+              </p>
+              <NarrativeWhyLine className="wtr-people-culture__demo-callout">
                 {demographics.common_languages_why}
               </NarrativeWhyLine>
             </div>
             {englishLevel ? (
-              <div className="wtr-people-culture__demo-cell">
-                <dt className="font-xs">English proficiency</dt>
-                <dd className="font-base">
-                  <EnglishProficiencyBadge level={englishLevel} />
-                </dd>
-                <NarrativeWhyLine className="wtr-people-culture__why">
+              <div className="wtr-people-culture__demo-block">
+                <p className="wtr-people-culture__demo-inline-row">
+                  <strong>English Proficiency:</strong>{" "}
+                  {getEnglishProficiencyBadgeLabel(englishLevel)}
+                </p>
+                <p className="wtr-people-culture__demo-block-body">
                   {getEnglishProficiencyWhy(englishLevel)}
-                </NarrativeWhyLine>
+                </p>
               </div>
             ) : null}
-          </dl>
+          </div>
         </section>
       ) : englishLevel ? (
         <section
