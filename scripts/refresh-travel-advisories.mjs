@@ -36,6 +36,10 @@ const HARD_EXCLUDED_COUNTRIES = new Set(
     'Sudan',
     'Somalia',
     'Libya',
+    'Saudi Arabia',
+    'Afghanistan',
+    'Brunei',
+    'Mauritania',
   ].map((c) => normalizeKey(c)),
 )
 

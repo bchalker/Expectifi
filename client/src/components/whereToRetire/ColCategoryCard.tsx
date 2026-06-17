@@ -1,7 +1,9 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { AppChip } from '../ui/AppChip'
 import { formatUsdOrDash } from '../../utils/costOfLiving'
+import type { ColBudgetCategoryDot } from './ColBudgetBreakdownBar'
 import './ColCategoryCard.scss'
+import './ColBudgetCategoryIcon.scss'
 
 const ICON_SIZE = 18
 
@@ -20,6 +22,7 @@ type HeroCardProps = {
   variant: 'hero'
   title: string
   icon: ReactNode
+  categoryDot?: ColBudgetCategoryDot
   headerSubtitle?: string
   headerAmount?: string
   panelTitle?: string
@@ -36,6 +39,7 @@ type RowsCardProps = {
   variant: 'rows'
   title: string
   icon: ReactNode
+  categoryDot?: ColBudgetCategoryDot
   subtitle?: string
   rows: ColCategoryRowLine[]
 }
@@ -46,6 +50,16 @@ export function ColCategoryCard(
   props: ColCategoryCardProps & { className?: string; style?: CSSProperties },
 ) {
   const { title, icon, className, style } = props
+
+  const categoryDot = props.categoryDot
+
+  const iconClassName = [
+    'wtr-col-category-card__icon',
+    categoryDot &&
+      `wtr-col-budget-category-icon wtr-col-budget-category-icon--${categoryDot}`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const renderRowLines = (rows: ColCategoryRowLine[], keyPrefix: string) =>
     rows.map((row, rowIndex) => (
@@ -112,7 +126,7 @@ export function ColCategoryCard(
           <header className="wtr-col-category-card__head">
             <div className="wtr-col-category-card__head-main">
               <div className="wtr-col-category-card__head-intro">
-                <span className="wtr-col-category-card__icon" aria-hidden>
+                <span className={iconClassName} aria-hidden>
                   {icon}
                 </span>
                 <div className="wtr-col-category-card__head-text">
@@ -168,7 +182,7 @@ export function ColCategoryCard(
         <>
           <header className="wtr-col-category-card__head">
             <div className="wtr-col-category-card__head-row">
-              <span className="wtr-col-category-card__icon" aria-hidden>
+              <span className={iconClassName} aria-hidden>
                 {icon}
               </span>
               <h4 className="wtr-col-category-card__title">{title}</h4>

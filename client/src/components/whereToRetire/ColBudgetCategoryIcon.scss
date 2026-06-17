@@ -1,0 +1,45 @@
+.wtr-col-budget-category-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--space-1);
+  box-sizing: border-box;
+}
+
+.wtr-col-budget-category-icon--rent {
+  background: var(--color-text-success);
+  color: var(--surface);
+}
+
+.wtr-col-budget-category-icon--groceries {
+  background: color-mix(in srgb, var(--color-amber) 72%, white);
+  color: var(--text);
+}
+
+.wtr-col-budget-category-icon--dining {
+  background: var(--color-amber);
+  color: var(--surface);
+}
+
+.wtr-col-budget-category-icon--transport {
+  background: #4a7ab8;
+  color: var(--surface);
+}
+
+.wtr-col-budget-category-icon--utilities {
+  background: var(--color-teal-mid);
+  color: var(--surface);
+}
+
+.wtr-col-budget-category-icon--lifestyle {
+  background: #8b6bb8;
+  color: var(--surface);
+}
+
+.wtr-col-budget-category-icon--other {
+  background: color-mix(in srgb, var(--text-muted) 55%, var(--surface2));
+  color: var(--surface);
+}

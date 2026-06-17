@@ -38,7 +38,7 @@
   flex: 1 1 auto;
 }
 
-.wtr-col-groceries-card__icon {
+.wtr-col-groceries-card__icon:not(.wtr-col-budget-category-icon) {
   display: flex;
   flex-shrink: 0;
   align-items: center;

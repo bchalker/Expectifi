@@ -160,14 +160,52 @@ export const EXCLUDED_COUNTRIES = [
   'Sudan',
   'Somalia',
   'Libya',
+  // Sharia law enforcement — not recommended for retirement
+  'Saudi Arabia',
+  'Afghanistan',
+  'Brunei',
+  'Mauritania',
+] as const
+
+/** City-level omissions within countries that remain otherwise available. */
+export const EXCLUDED_CITY_LOCATIONS = [
+  // Nigeria — northern states with sharia law enforcement
+  { city: 'Kano', country: 'Nigeria' },
+  { city: 'Sokoto', country: 'Nigeria' },
+  { city: 'Gusau', country: 'Nigeria' },
+  { city: 'Kaduna', country: 'Nigeria' },
+  { city: 'Katsina', country: 'Nigeria' },
+  { city: 'Zaria', country: 'Nigeria' },
+  { city: 'Maiduguri', country: 'Nigeria' },
+  { city: 'Bauchi', country: 'Nigeria' },
+  { city: 'Gombe', country: 'Nigeria' },
+  { city: 'Yola', country: 'Nigeria' },
+  { city: 'Minna', country: 'Nigeria' },
+  { city: 'Dutse', country: 'Nigeria' },
+  { city: 'Damaturu', country: 'Nigeria' },
+  { city: 'Birnin Kebbi', country: 'Nigeria' },
+  { city: 'Jos', country: 'Nigeria' },
 ] as const
 
 const EXCLUDED_COUNTRY_KEYS = new Set(
   EXCLUDED_COUNTRIES.map((c) => normalizeLookup(c)),
 )
 
+const EXCLUDED_CITY_KEYS = new Set(
+  EXCLUDED_CITY_LOCATIONS.map(
+    ({ city, country }) => `${normalizeLookup(city)}|${normalizeLookup(country)}`,
+  ),
+)
+
 export function isExcludedCountry(country: string): boolean {
   return EXCLUDED_COUNTRY_KEYS.has(normalizeLookup(country))
+}
+
+export function isExcludedCity(city: string, country: string): boolean {
+  if (isExcludedCountry(country)) return true
+  return EXCLUDED_CITY_KEYS.has(
+    `${normalizeLookup(city)}|${normalizeLookup(country)}`,
+  )
 }
 
 /** Level 4 — default-exclude and “Hide unsafe cities” filter. */
@@ -182,7 +220,7 @@ function loadAllCityRows(): CityData[] {
   cachedCities = lines
     .filter((line) => line.trim().length > 0)
     .map((line) => parseCityRow(line.split(',')))
-    .filter((row) => !isExcludedCountry(row.country))
+    .filter((row) => !isExcludedCity(row.city, row.country))
   return cachedCities
 }
 

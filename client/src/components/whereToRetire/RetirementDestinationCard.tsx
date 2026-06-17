@@ -1,9 +1,11 @@
 import type { CSSProperties, KeyboardEvent } from "react";
 import {
   IconAlertTriangle,
+  IconArrowNarrowRightDashed,
   IconCheck,
   IconHeart,
   IconHeartFilled,
+  IconZoomIn,
 } from "@tabler/icons-react";
 import type { ScoredMapCity } from "../../lib/whereToRetire/cityMapScoring";
 import {
@@ -74,8 +76,6 @@ export function RetirementDestinationCard({
   const monthlyCost = mapFilters
     ? monthlyOutflowForMapCity(scored, monthlyIncome, mapFilters)
     : scored.monthlyBudget;
-  const monthlySurplus =
-    monthlyCost != null ? Math.max(0, monthlyIncome - monthlyCost) : null;
   const showMonthlyStat =
     (pinColorView === "budget" || pinColorView === "score") &&
     monthlyCost != null &&
@@ -151,7 +151,20 @@ export function RetirementDestinationCard({
               <span className="wtr-dest-card__name">{city.city}</span>
               <span className="wtr-dest-card__country">
                 <CountryFlag country={city.country} size="s" className="wtr-dest-card__flag" />
-                <span className="wtr-dest-card__country-name">{city.country}</span>
+                <span className="wtr-dest-card__country-line">
+                  <span className="wtr-dest-card__country-name">{city.country}</span>
+                  {showCaution ? (
+                    <>
+                      <span className="wtr-dest-card__country-divider" aria-hidden>
+                        ·
+                      </span>
+                      <WtrTravelAdvisoryCautionChip
+                        country={city.country}
+                        variant="inline"
+                      />
+                    </>
+                  ) : null}
+                </span>
               </span>
             </div>
 
@@ -161,16 +174,34 @@ export function RetirementDestinationCard({
                   {formatUsd(monthlyCost)}
                   <span className="wtr-dest-card__budget-suffix">/mo</span>
                 </span>
-                {pinColorView === "budget" &&
-                monthlySurplus != null &&
-                monthlySurplus > 0 ? (
-                  <span className="wtr-dest-card__budget-surplus tabular-nums">
-                    + {formatUsd(monthlySurplus)}
-                  </span>
-                ) : null}
               </span>
             ) : null}
           </div>
+
+          {incomeFit ? (
+            <div className="wtr-dest-card__meta font-xs">
+              <span className="wtr-dest-card__meta-visa">
+                {incomeFit.visaQualifies ? (
+                  <IconCheck
+                    className="wtr-dest-card__meta-visa-icon"
+                    size={14}
+                    stroke={2}
+                    aria-hidden
+                  />
+                ) : null}
+                {incomeFit.visaLabel}
+              </span>
+              <span
+                className={[
+                  "wtr-dest-card__meta-tax",
+                  `wtr-dest-card__meta-tax--${incomeFit.taxTone}`,
+                ].join(" ")}
+              >
+                <span className="wtr-dest-card__meta-tax-dot" aria-hidden />
+                {incomeFit.taxLabel}
+              </span>
+            </div>
+          ) : null}
 
           {pinColorView === "expat" ? (
             <span className="wtr-dest-card__expat-badge-row">
@@ -188,30 +219,6 @@ export function RetirementDestinationCard({
             </span>
           ) : null}
 
-          {incomeFit ? (
-            <div className="wtr-dest-card__meta font-xs">
-              <span className="wtr-dest-card__meta-visa">
-                {incomeFit.visaQualifies ? (
-                  <IconCheck
-                    className="wtr-dest-card__meta-visa-icon"
-                    size={14}
-                    stroke={2}
-                    aria-hidden
-                  />
-                ) : null}
-                {incomeFit.visaLabel}
-              </span>
-              <span className="wtr-dest-card__meta-tax">{incomeFit.taxLabel}</span>
-              {showCaution ? (
-                <WtrTravelAdvisoryCautionChip country={city.country} />
-              ) : null}
-            </div>
-          ) : showCaution ? (
-            <div className="wtr-dest-card__meta font-xs">
-              <WtrTravelAdvisoryCautionChip country={city.country} />
-            </div>
-          ) : null}
-
           {showAdvisory ? (
             <span className="wtr-dest-card__advisory-footer">
               <IconAlertTriangle size={14} stroke={1.5} aria-hidden />
@@ -221,22 +228,31 @@ export function RetirementDestinationCard({
         </div>
 
         {pinColorView === "score" ? (
-          <div
-            className="wtr-dest-card__fit-col"
-            style={
-              {
-                "--wtr-fit-col-bg": fitBadgeColors.background,
-                "--wtr-fit-score-color": fitBadgeColors.text,
-              } as CSSProperties
-            }
-          >
-            <span className="wtr-dest-card__fit-sep" aria-hidden />
-            <div className="wtr-dest-card__fit-stack">
+          <div className="wtr-dest-card__fit-col">
+            <div
+              className="wtr-dest-card__fit-stack"
+              style={
+                {
+                  "--wtr-fit-col-bg": fitBadgeColors.background,
+                  "--wtr-fit-score-color": fitBadgeColors.text,
+                } as CSSProperties
+              }
+            >
               <span
                 className="wtr-dest-card__fit-badge tabular-nums"
                 aria-label={`Fit score ${badgeScore} out of 100`}
               >
                 {badgeScore}
+              </span>
+              <span className="wtr-dest-card__fit-zoom" aria-hidden>
+                <span className="wtr-dest-card__fit-zoom-icons">
+                  <span className="wtr-dest-card__fit-zoom-search">
+                    <IconZoomIn size={14} stroke={2} />
+                  </span>
+                  <span className="wtr-dest-card__fit-go">
+                    <IconArrowNarrowRightDashed size={14} stroke={1.5} />
+                  </span>
+                </span>
               </span>
             </div>
           </div>

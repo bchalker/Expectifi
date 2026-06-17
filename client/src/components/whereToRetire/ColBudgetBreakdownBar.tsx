@@ -1,25 +1,16 @@
-import type { BudgetBarCategoryKey, BudgetBreakdownDisplay } from '../../utils/costOfLiving'
+import type { BudgetBreakdownDisplay } from '../../utils/costOfLiving'
 import './ColBudgetBreakdownBar.scss'
 
-const LEGEND_ITEMS: {
-  key: BudgetBarCategoryKey
-  label: string
-  barClass: string
-  dotClass: string
-}[] = [
-  { key: 'rent', label: 'Rent', barClass: 'rent', dotClass: 'rent' },
-  { key: 'groceries', label: 'Groceries', barClass: 'groceries', dotClass: 'groceries' },
-  {
-    key: 'diningAndDrinks',
-    label: 'Dining & drinks',
-    barClass: 'dining',
-    dotClass: 'dining',
-  },
-  { key: 'utilities', label: 'Utilities', barClass: 'utilities', dotClass: 'utilities' },
-  { key: 'transport', label: 'Transportation', barClass: 'transport', dotClass: 'transport' },
-  { key: 'lifestyle', label: 'Lifestyle', barClass: 'lifestyle', dotClass: 'lifestyle' },
-  { key: 'other', label: 'Other', barClass: 'other', dotClass: 'other' },
-]
+export type ColBudgetCategoryDot = 'rent' | 'groceries' | 'dining' | 'utilities' | 'transport' | 'lifestyle' | 'other'
+
+export const COL_BUDGET_CARD_CATEGORY_DOT: Record<string, ColBudgetCategoryDot> = {
+  rent: 'rent',
+  'dining-drinks': 'dining',
+  'utilities-internet': 'utilities',
+  transport: 'transport',
+  lifestyle: 'lifestyle',
+  'health-misc': 'other',
+}
 
 type Props = {
   breakdown: BudgetBreakdownDisplay
@@ -61,30 +52,6 @@ export function ColBudgetBreakdownBar({
           />
         ))}
       </div>
-      <ul className="wtr-col-budget-bar__legend">
-        {LEGEND_ITEMS.filter((item) => barPercents[item.key] > 0).map((item) => (
-          <li key={item.key} className="wtr-col-budget-bar__legend-item">
-            <span
-              className={`wtr-col-budget-bar__dot wtr-col-budget-bar__dot--${item.dotClass}`}
-              aria-hidden
-            />
-            <span className="wtr-col-budget-bar__legend-text">
-              {item.label} {barPercents[item.key]}%
-            </span>
-          </li>
-        ))}
-        {barPercents.remaining > 0 ? (
-          <li className="wtr-col-budget-bar__legend-item">
-            <span
-              className="wtr-col-budget-bar__dot wtr-col-budget-bar__dot--remaining"
-              aria-hidden
-            />
-            <span className="wtr-col-budget-bar__legend-text">
-              Remaining {barPercents.remaining}%
-            </span>
-          </li>
-        ) : null}
-      </ul>
     </section>
   )
 }

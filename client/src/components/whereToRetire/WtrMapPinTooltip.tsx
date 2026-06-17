@@ -153,17 +153,16 @@ export function WtrMapPinTooltip({
         </div>
 
         {pinColorView === 'score' ? (
-          <div
-            className="wtr-dest-card__fit-col"
-            style={
-              {
-                '--wtr-fit-col-bg': fitBadgeColors.background,
-                '--wtr-fit-score-color': fitBadgeColors.text,
-              } as CSSProperties
-            }
-          >
-            <span className="wtr-dest-card__fit-sep" aria-hidden />
-            <div className="wtr-dest-card__fit-stack">
+          <div className="wtr-dest-card__fit-col">
+            <div
+              className="wtr-dest-card__fit-stack"
+              style={
+                {
+                  '--wtr-fit-col-bg': fitBadgeColors.background,
+                  '--wtr-fit-score-color': fitBadgeColors.text,
+                } as CSSProperties
+              }
+            >
               <span
                 className="wtr-dest-card__fit-badge tabular-nums"
                 aria-label={`Fit score ${badgeScore} out of 100`}

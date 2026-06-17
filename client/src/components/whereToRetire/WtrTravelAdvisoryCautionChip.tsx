@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { IconAlertTriangle, IconMapExclamation } from '@tabler/icons-react'
 import {
   formatTravelAdvisorySummary,
   getDoNotTravelAdvisory,
@@ -13,7 +13,7 @@ type Props = {
   country: string
   className?: string
   /** List cards use the shorter label; detail header can use the longer one. */
-  variant?: 'caution' | 'do-not-travel'
+  variant?: 'caution' | 'do-not-travel' | 'icon' | 'inline'
 }
 
 export function WtrTravelAdvisoryCautionChip({
@@ -39,25 +39,80 @@ export function WtrTravelAdvisoryCautionChip({
     requestHideLevel3CautionedCities()
   }
 
+  const tooltipContent = (
+    <>
+      <span className="wtr-travel-caution-chip__tooltip-title">{entry.title}</span>
+      <span className="wtr-travel-caution-chip__tooltip-meta">
+        {formatTravelAdvisorySummary(entry)} Source: US State Department.
+      </span>
+      {entry.level === 3 ? (
+        <button
+          type="button"
+          className="wtr-travel-caution-chip__tooltip-action"
+          onClick={handleHideLevel3}
+        >
+          Hide all Level 3 cities
+        </button>
+      ) : null}
+    </>
+  )
+
+  if (variant === 'icon') {
+    return (
+      <Tooltip
+        content={tooltipContent}
+        placement="top"
+        showArrow
+        contentClassName="wtr-travel-caution-chip__tooltip"
+        triggerClassName={['wtr-travel-caution-chip__trigger', className]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <span
+          className={[
+            'wtr-travel-caution-chip',
+            'wtr-travel-caution-chip--icon',
+            entry.level === 4
+              ? 'wtr-travel-caution-chip--severe'
+              : 'wtr-travel-caution-chip--caution',
+          ].join(' ')}
+          aria-label={label}
+        >
+          <IconMapExclamation size={14} stroke={1.5} aria-hidden />
+        </span>
+      </Tooltip>
+    )
+  }
+
+  if (variant === 'inline') {
+    return (
+      <Tooltip
+        content={tooltipContent}
+        placement="top"
+        showArrow
+        contentClassName="wtr-travel-caution-chip__tooltip"
+        triggerClassName={['wtr-travel-caution-chip__trigger', className]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <span
+          className={[
+            'wtr-travel-caution-chip',
+            'wtr-travel-caution-chip--inline',
+            entry.level === 4 && 'wtr-travel-caution-chip--inline-severe',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          Travel advisory
+        </span>
+      </Tooltip>
+    )
+  }
+
   return (
     <Tooltip
-      content={
-        <>
-          <span className="wtr-travel-caution-chip__tooltip-title">{entry.title}</span>
-          <span className="wtr-travel-caution-chip__tooltip-meta">
-            {formatTravelAdvisorySummary(entry)} Source: US State Department.
-          </span>
-          {entry.level === 3 ? (
-            <button
-              type="button"
-              className="wtr-travel-caution-chip__tooltip-action"
-              onClick={handleHideLevel3}
-            >
-              Hide all Level 3 cities
-            </button>
-          ) : null}
-        </>
-      }
+      content={tooltipContent}
       placement="top"
       showArrow
       contentClassName="wtr-travel-caution-chip__tooltip"

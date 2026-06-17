@@ -157,15 +157,15 @@
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev:hover:not(:disabled) {
   background: var(--surface);
   box-shadow:
-    inset -2px 0 0 0 var(--wtr-pag-inset-hover),
-    6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+    inset 0px 0 0 0 var(--wtr-pag-inset-hover),
+    6px 0 4px -6px color-mix(in srgb, var(--color-navy) 42%, transparent);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--next:hover:not(:disabled) {
   background: var(--surface);
   box-shadow:
-    inset 2px 0 0 0 var(--wtr-pag-inset-hover),
-    -6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+    inset 0px 0 0 0 var(--wtr-pag-inset-hover),
+    -6px 0 4px -6px color-mix(in srgb, var(--color-navy) 42%, transparent);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev:hover:not(:disabled) svg,

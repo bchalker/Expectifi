@@ -17,7 +17,7 @@ import {
   formatUsd,
   hasTravelAdvisory,
 } from '../../../utils/costOfLiving'
-import { ColBudgetBreakdownBar } from '../ColBudgetBreakdownBar'
+import { ColBudgetBreakdownBar, COL_BUDGET_CARD_CATEGORY_DOT } from '../ColBudgetBreakdownBar'
 import { ColGroceriesBudgetCard } from '../ColGroceriesBudgetCard'
 import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { CityDetailIndexRows } from './CityDetailIndexRows'
@@ -265,9 +265,10 @@ export function CostOfLivingTab({
         <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
           {colBudgetCards.map((card) => {
             const { id: _id, ...categoryProps } = card
+            const categoryDot = COL_BUDGET_CARD_CATEGORY_DOT[card.id]
             return (
               <div key={card.id} className="wtr-city-detail__card-cell">
-                <ColCategoryCard {...categoryProps} />
+                <ColCategoryCard {...categoryProps} categoryDot={categoryDot} />
               </div>
             )
           })}

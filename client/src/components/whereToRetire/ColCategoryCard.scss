@@ -39,12 +39,11 @@
   gap: var(--space-2) /* review: was 0.4rem */;
 }
 
-.wtr-col-category-card__icon {
+.wtr-col-category-card__icon:not(.wtr-col-budget-category-icon) {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-
   color: var(--text-muted);
 }
 

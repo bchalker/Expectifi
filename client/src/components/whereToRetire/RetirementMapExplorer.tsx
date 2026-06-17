@@ -540,6 +540,7 @@ export function RetirementMapExplorer({
 
   const closePanel = useCallback(() => {
     setPanelOpen(false);
+    setSelectedId(null);
   }, []);
 
   const expandListPanel = useCallback(() => {
@@ -742,6 +743,7 @@ export function RetirementMapExplorer({
                   aria-expanded={listSearchOpen}
                   onClick={toggleListSearch}
                 >
+                  <span className="wtr-explorer__list-head-search-bg" aria-hidden />
                   <span className="wtr-explorer__list-head-search-icon-wrap" aria-hidden>
                     <IconSearch
                       className="wtr-explorer__list-search-icon"
@@ -815,7 +817,7 @@ export function RetirementMapExplorer({
                           monthlyIncome={explorationIncome}
                           pinColorView={pinColorView}
                           rank={fitRankByCityId.get(item.city.id) ?? 0}
-                          active={selectedId === item.city.id}
+                          active={detailPanelOpen && selectedId === item.city.id}
                           staggerIndex={index}
                           incomeFit={mapIncomeFitDisplayForCity(
                             item.city.city,

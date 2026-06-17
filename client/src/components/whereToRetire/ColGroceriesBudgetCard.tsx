@@ -7,6 +7,7 @@ import {
 } from '../../utils/costOfLiving'
 import { COL_CATEGORY_ICON_SIZE } from './ColCategoryCard'
 import './ColGroceriesBudgetCard.scss'
+import './ColBudgetCategoryIcon.scss'
 
 type Props = {
   amount: number
@@ -32,7 +33,10 @@ export function ColGroceriesBudgetCard({ amount, className }: Props) {
       >
         <div className="wtr-col-groceries-card__head-main">
           <div className="wtr-col-groceries-card__head-intro">
-            <span className="wtr-col-groceries-card__icon" aria-hidden>
+            <span
+              className="wtr-col-groceries-card__icon wtr-col-budget-category-icon wtr-col-budget-category-icon--groceries"
+              aria-hidden
+            >
               <IconShoppingCart size={COL_CATEGORY_ICON_SIZE} stroke={1.5} />
             </span>
             <div className="wtr-col-groceries-card__head-text">
