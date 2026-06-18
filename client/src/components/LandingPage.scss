@@ -267,7 +267,8 @@ body:has(.landing-page) {
   overflow: hidden;
   background-color: var(--surface);
   background-size: contain;
-  background-position: right top;
+  background-size: 110%;
+  background-position: top left;
   background-repeat: no-repeat;
 // background-position-x: right;
   height: auto;

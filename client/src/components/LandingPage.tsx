@@ -165,7 +165,7 @@ export function LandingPage({
               Two tools. One retirement picture.
             </h2>
             <p className="landing-section__tagline">
-              Every nest egg looks different. Let&apos;s look at yours.
+              Every nest egg looks different.
             </p>
             <div className="landing-feature-cards">
               {FEATURE_CARDS.map((card) => {
