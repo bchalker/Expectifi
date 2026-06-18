@@ -119,16 +119,20 @@ import {
 } from "./lib/guaranteedIncome";
 import { isSsConfigured } from "./lib/socialSecurity";
 import {
+  clearGuestOnboardingCancelState,
   clearGuestProfileAndSession,
+  clearPostOnboardingImportSession,
   heartbeatEphemeralGuestTab,
   initEphemeralGuestSession,
   shouldTrackEphemeralGuestTabs,
   teardownEphemeralGuestTab,
 } from "./lib/guestEphemeralStorage";
+import { touchBrowserSavedLastActiveAt } from "./lib/planStorage/browserSavedInactivity";
 import { OnboardingOverlay } from "./components/OnboardingOverlay";
 import {
   shouldShowWelcomeOverlay,
   peekForceOnboardingSession,
+  clearForceOnboardingSession,
 } from "./lib/welcomeGate";
 import { useUserTier } from "./hooks/useUserTier";
 import type { PlanPersistSnapshot } from "./lib/planStorage";
@@ -219,7 +223,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
     resolveCalculatorPhase(hydration.phase),
   );
   const [drawer, setDrawer] = useState<DrawerName | null>(null);
-  const [configTab, setConfigTab] = useState<ConfigDrawerTab>("profile");
+  const [configTab, setConfigTab] = useState<ConfigDrawerTab>("plan");
   const [activePreset, setActivePreset] = useState<string | null>(
     () => hydration.activePreset,
   );
@@ -246,6 +250,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
     clearGoogleCheckoutUi,
     user,
     saveUserPrefs,
+    signOut,
+    returnToLanding,
   } = useAuth();
 
   const path = useAppPath();
@@ -582,6 +588,9 @@ export default function App({ initialAuthModal = null }: AppProps) {
       persistCalculatorSession({ inputs, ui, phase, activePreset });
       syncPlanningPrefsFromInputs(inputs);
       syncUserProfileFromCalculatorInputs(inputs, ui);
+      if (!user) {
+        touchBrowserSavedLastActiveAt();
+      }
       const planningPrefs = calculatorInputsToPlanningPrefs(inputs);
       if (user && planningPrefs) {
         void saveUserPrefs(planningPrefs);
@@ -682,15 +691,84 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const welcomeDone = !showWelcome;
 
+  const handleOnboardingCancel = useCallback(() => {
+    clearForceOnboardingSession();
+    if (user?.email) {
+      void signOut();
+      return;
+    }
+    clearGuestOnboardingCancelState();
+    returnToLanding();
+  }, [user?.email, signOut, returnToLanding]);
+
+  const [postOnboardingImportActive, setPostOnboardingImportActive] =
+    useState(false);
+  const postOnboardingImportPendingRef = useRef(false);
+  const [openImportRequest, setOpenImportRequest] = useState(0);
+
+  const handlePostOnboardingImportCancel = useCallback(() => {
+    setPostOnboardingImportActive(false);
+    postOnboardingImportPendingRef.current = false;
+    setOpenImportRequest(0);
+    clearForceOnboardingSession();
+    if (user?.email) {
+      void signOut();
+      return;
+    }
+    clearGuestOnboardingCancelState();
+    returnToLanding();
+  }, [user?.email, signOut, returnToLanding]);
+
+  const queuePostOnboardingImport = useCallback(() => {
+    postOnboardingImportPendingRef.current = true;
+    setPostOnboardingImportActive(true);
+    try {
+      sessionStorage.setItem("expectifi_open_import", "1");
+      sessionStorage.setItem("expectifi_post_onboarding_import", "1");
+    } catch {
+      /* private mode */
+    }
+  }, []);
+
+  /** Latch post-onboarding import UI for the session (logo + cancel). */
   useEffect(() => {
-    if (!welcomeDone || typeof sessionStorage === "undefined") return;
-    const openImport =
-      sessionStorage.getItem("expectifi_open_import") === "1" ||
-      sessionStorage.getItem("headwayplanner_open_import") === "1";
-    if (!openImport) return;
-    sessionStorage.removeItem("expectifi_open_import");
-    sessionStorage.removeItem("headwayplanner_open_import");
-    setOpenImportRequest((n) => n + 1);
+    if (!welcomeDone) return;
+    try {
+      if (sessionStorage.getItem("expectifi_post_onboarding_import") === "1") {
+        setPostOnboardingImportActive(true);
+      }
+    } catch {
+      /* private mode */
+    }
+  }, [welcomeDone]);
+
+  /** Defer import open until dashboard (AccountBalances) has mounted after onboarding. */
+  useEffect(() => {
+    if (!welcomeDone) return;
+    const sessionPending =
+      typeof sessionStorage !== "undefined" &&
+      (sessionStorage.getItem("expectifi_open_import") === "1" ||
+        sessionStorage.getItem("headwayplanner_open_import") === "1");
+    if (!postOnboardingImportPendingRef.current && !sessionPending) return;
+
+    postOnboardingImportPendingRef.current = false;
+    try {
+      sessionStorage.removeItem("expectifi_open_import");
+      sessionStorage.removeItem("headwayplanner_open_import");
+    } catch {
+      /* private mode */
+    }
+
+    let innerFrame = 0;
+    const outerFrame = window.requestAnimationFrame(() => {
+      innerFrame = window.requestAnimationFrame(() => {
+        setOpenImportRequest((n) => n + 1);
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(outerFrame);
+      if (innerFrame) window.cancelAnimationFrame(innerFrame);
+    };
   }, [welcomeDone]);
 
   /** On sign-in, restore planning goals from DB (localStorage is cleared on other devices). */
@@ -788,6 +866,14 @@ export default function App({ initialAuthModal = null }: AppProps) {
       }),
     [inputs, uiForCompute, balanceMode, brokerageMode, positionsImportRev],
   );
+
+  /** Clear post-onboarding import chrome after accounts are added. */
+  useEffect(() => {
+    if (!postOnboardingImportActive || !c.hasPortfolioBalances) return;
+    setPostOnboardingImportActive(false);
+    postOnboardingImportPendingRef.current = false;
+    clearPostOnboardingImportSession();
+  }, [postOnboardingImportActive, c.hasPortfolioBalances]);
 
   const [lifePlans, setLifePlans] = useState<LifePlans>(() => loadLifePlans());
 
@@ -999,7 +1085,6 @@ export default function App({ initialAuthModal = null }: AppProps) {
 
   const showGoalBarRow =
     welcomeDone && !isWhereToRetire && c.hasPortfolioBalances;
-  const [openImportRequest, setOpenImportRequest] = useState(0);
   const dashboardViewBootstrappedRef = useRef(false);
 
   useLayoutEffect(() => {
@@ -1220,11 +1305,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
               navContext={navContext}
               onOpenConfig={() => {
                 setMobileNavOpen(false);
-                setConfigTab(user ? "profile" : "plan");
+                setConfigTab("plan");
                 setDrawer("config");
               }}
               onSignIn={openAuthSignIn}
               onCreateAccount={openAuthRegister}
+              hideCreateAccountCta={welcomeDone}
               welcomeDone={welcomeDone}
               goalBar={headerGoalBar}
               phaseToggle={
@@ -1247,7 +1333,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                 setDrawer(name);
               }}
               onOpenConfig={() => {
-                setConfigTab(user ? "profile" : "plan");
+                setConfigTab("plan");
                 setDrawer("config");
               }}
               onOpenSignIn={() => {
@@ -1276,7 +1362,8 @@ export default function App({ initialAuthModal = null }: AppProps) {
               setShowWelcome(false);
               replaceAppPath(APP_DASHBOARD_PATH);
             }}
-            onConnectAccounts={() => setOpenImportRequest((n) => n + 1)}
+            onCancel={handleOnboardingCancel}
+            onConnectAccounts={queuePostOnboardingImport}
             onAccountsSaved={() => {
               saveBalanceInputMode("manual");
               setBalanceMode("manual");
@@ -1487,6 +1574,12 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             onOpenUpgradeCsv={openCsvUpgrade}
                             openImportRequest={openImportRequest || undefined}
                             onImportOpenHandled={() => setOpenImportRequest(0)}
+                            postOnboardingImportActive={
+                              postOnboardingImportActive
+                            }
+                            onPostOnboardingImportCancel={
+                              handlePostOnboardingImportCancel
+                            }
                             onManualAccountsCommitted={() =>
                               setManualAccountsRev((n) => n + 1)
                             }

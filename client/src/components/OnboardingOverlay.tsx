@@ -96,6 +96,25 @@ function OnboardingBackButton({ disabled, onClick }: OnboardingBackButtonProps) 
   );
 }
 
+function OnboardingCancelLink({
+  disabled,
+  onClick,
+}: {
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="onboarding-overlay__cancel-btn"
+      disabled={disabled}
+      onClick={onClick}
+    >
+      Cancel
+    </button>
+  );
+}
+
 function syncOnboardingChromeInsets() {
   if (typeof document === "undefined" || typeof window === "undefined") return;
   if (window.matchMedia(MOBILE_ONBOARDING_MQ).matches) return;
@@ -118,7 +137,8 @@ type Props = {
   setInputs: (p: Partial<CalculatorInputs>) => void;
   setUi?: (p: Partial<CalculatorUi>) => void;
   onComplete: () => void;
-  /** Dismiss welcome without saving; dashboard stays empty. */
+  /** Return to the marketing landing page. */
+  onCancel: () => void;
   /** When set, prefs are written to the user profile on submit. */
   saveUserPrefs?: (prefs: UserPrefs) => Promise<{ error?: string }>;
   /** After welcome, open the account import flow on the dashboard. */
@@ -254,6 +274,7 @@ export function OnboardingOverlay({
   setInputs,
   setUi,
   onComplete,
+  onCancel,
   saveUserPrefs,
   onConnectAccounts,
   onAccountsSaved,
@@ -429,11 +450,19 @@ export function OnboardingOverlay({
     clearForceOnboardingSession();
     setBusy(false);
     const openConnect = options?.openConnect ?? false;
+    if (openConnect) {
+      try {
+        sessionStorage.setItem("expectifi_open_import", "1");
+        sessionStorage.setItem("expectifi_post_onboarding_import", "1");
+      } catch {
+        /* private mode */
+      }
+    }
     if (options?.fadeOut) {
       setExiting(true);
       window.setTimeout(() => {
-        onComplete();
         if (openConnect) onConnectAccounts?.();
+        onComplete();
       }, 320);
       return;
     }
@@ -514,6 +543,10 @@ export function OnboardingOverlay({
     >
       <div className="onboarding-overlay__panel">
         <header className="onboarding-overlay__header">
+          <span className="onboarding-overlay__brand" aria-hidden="true">
+            <span className="onboarding-overlay__brand-expect">Expect</span>
+            <span className="onboarding-overlay__brand-ifi">ifi</span>
+          </span>
           <OnboardingProgressSteps
             activeIndex={(['profile', 'contributions', 'goals'] as const).indexOf(step)}
             totalSteps={3}
@@ -589,6 +622,7 @@ export function OnboardingOverlay({
           ) : null}
           {step === "profile" ? (
             <div className="onboarding-overlay__footer-actions">
+              <OnboardingCancelLink disabled={busy} onClick={onCancel} />
               <button
                 type="button"
                 className="onboarding-overlay__btn onboarding-overlay__btn--primary"
@@ -616,14 +650,17 @@ export function OnboardingOverlay({
                     setStep("profile");
                   }}
                 />
-                <button
-                  type="button"
-                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                  disabled={busy}
-                  onClick={onContributionsContinue}
-                >
-                  Continue →
-                </button>
+                <div className="onboarding-overlay__footer-actions">
+                  <OnboardingCancelLink disabled={busy} onClick={onCancel} />
+                  <button
+                    type="button"
+                    className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                    disabled={busy}
+                    onClick={onContributionsContinue}
+                  >
+                    Continue →
+                  </button>
+                </div>
               </div>
             </>
           ) : (
@@ -635,14 +672,20 @@ export function OnboardingOverlay({
                   setStep("contributions");
                 }}
               />
-              <button
-                type="button"
-                className="onboarding-overlay__btn onboarding-overlay__btn--primary"
-                disabled={busy || exiting}
-                onClick={onFinishWithAddAccounts}
-              >
-                {busy ? "Saving…" : "Add your accounts →"}
-              </button>
+              <div className="onboarding-overlay__footer-actions">
+                <OnboardingCancelLink
+                  disabled={busy || exiting}
+                  onClick={onCancel}
+                />
+                <button
+                  type="button"
+                  className="onboarding-overlay__btn onboarding-overlay__btn--primary"
+                  disabled={busy || exiting}
+                  onClick={onFinishWithAddAccounts}
+                >
+                  {busy ? "Saving…" : "Add your accounts →"}
+                </button>
+              </div>
             </div>
           )}
         </footer>

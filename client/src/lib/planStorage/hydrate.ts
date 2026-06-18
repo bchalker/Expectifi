@@ -23,6 +23,7 @@ import { purgeGuestNonProfilePlanStorage, purgeUnconsentedPlanStorage } from './
 import { migrateLegacyPlanStorageIfNeeded } from './migrateLegacy'
 import { loadPlanProfile, profileHasOnboardingComplete } from './profile'
 import { hydratePlanSession, loadPlanSession } from './session'
+import { expireGuestBrowserSavedPlanIfInactive } from './browserSavedInactivity'
 import { resolveUserTier, tierIsAuthenticated } from './resolveTier'
 import type { AuthTierInput } from './types'
 import type { PlanHydration, StoredPlanProfile, UserTier } from './types'
@@ -144,6 +145,7 @@ export function bootPlanHydration(
 ): PlanHydration {
   purgeUnconsentedPlanStorage()
   if (!tierIsAuthenticated(resolveUserTier(auth))) {
+    expireGuestBrowserSavedPlanIfInactive(auth)
     purgeGuestNonProfilePlanStorage()
   }
   loadMeta()

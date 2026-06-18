@@ -102,6 +102,7 @@ import {
   PORTFOLIO_REVEAL_START_DELAY_MS,
   schedulePortfolioWaveReveal,
 } from "../lib/portfolioWaveReveal";
+import { clearPostOnboardingImportSession } from "../lib/guestEphemeralStorage";
 import { positionUsesCustomReturnMode } from "../lib/positionReturnModel";
 import { computeBucketTrendDisplay } from "../lib/bucketHoldingTrend";
 import {
@@ -408,6 +409,9 @@ type Props = {
   /** Increment to open the CSV import panel once (e.g. after welcome connect). */
   openImportRequest?: number;
   onImportOpenHandled?: () => void;
+  /** True while finishing onboarding via “Add your accounts”. */
+  postOnboardingImportActive?: boolean;
+  onPostOnboardingImportCancel?: () => void;
   /** After manual balances are committed to expectifi/accounts-v1. */
   onManualAccountsCommitted?: () => void;
   /** Growth vs income — drives personalized bucket row hints. */
@@ -465,6 +469,8 @@ function AccountBalancesContent({
   onOpenUpgradeCsv,
   openImportRequest,
   onImportOpenHandled,
+  postOnboardingImportActive = false,
+  onPostOnboardingImportCancel,
   onManualAccountsCommitted,
   phase = "growth",
   onOpenSocialSecurity,
@@ -1321,7 +1327,10 @@ function AccountBalancesContent({
     if (lastOpenImportRequestRef.current === openImportRequest) return;
     lastOpenImportRequestRef.current = openImportRequest;
     setOpenManageRequest((n) => n + 1);
-    onImportOpenHandled?.();
+    const frame = window.requestAnimationFrame(() => {
+      onImportOpenHandled?.();
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [
     openImportRequest,
     mergedDashboard,
@@ -1496,13 +1505,36 @@ function AccountBalancesContent({
   }, [clearManageOverlayLeaveTimer, finishCsvImportLaunch, manageOverlayPhase]);
 
   const manageMenuWasOpenRef = useRef(false);
+  const [showPostOnboardingImport, setShowPostOnboardingImport] = useState(false);
+
+  useEffect(() => {
+    if (hasAnyAccountCardData) {
+      setShowPostOnboardingImport(false);
+      clearPostOnboardingImportSession();
+      onImportOpenHandled?.();
+      setCloseManageRequest((n) => n + 1);
+      return;
+    }
+    const sessionActive =
+      postOnboardingImportActive ||
+      (typeof sessionStorage !== "undefined" &&
+        sessionStorage.getItem("expectifi_post_onboarding_import") === "1");
+    setShowPostOnboardingImport(sessionActive);
+  }, [
+    hasAnyAccountCardData,
+    postOnboardingImportActive,
+    onImportOpenHandled,
+  ]);
+
   const handleManageOpenChange = useCallback(
     (open: boolean) => {
       const wasOpen = manageMenuWasOpenRef.current;
       manageMenuWasOpenRef.current = open;
       setManageMenuOpen(open);
-      if (open && !wasOpen) {
-        setManageOverlayPhase("method");
+      if (open) {
+        if (!wasOpen) {
+          setManageOverlayPhase("method");
+        }
         return;
       }
       if (!open) {
@@ -2236,6 +2268,7 @@ function AccountBalancesContent({
     hideTrigger?: boolean;
     initialOpen?: boolean;
     requiredEntry?: boolean;
+    postOnboardingImport?: boolean;
   }) {
     if (!showBalanceEntryActions) return null;
     const removeConfirmOpen =
@@ -2256,6 +2289,8 @@ function AccountBalancesContent({
           hideTrigger={options?.hideTrigger}
           initialOpen={options?.initialOpen}
           requiredEntry={options?.requiredEntry}
+          postOnboardingImport={options?.postOnboardingImport}
+          onPostOnboardingCancel={onPostOnboardingImportCancel}
           canClearAccounts={Boolean(
             hasAnyAccountCardData && onRemoveRetirementAccounts,
           )}
@@ -3339,6 +3374,7 @@ function AccountBalancesContent({
                     hideTrigger: true,
                     initialOpen: true,
                     requiredEntry: true,
+                    postOnboardingImport: showPostOnboardingImport,
                   })
                 : null}
               <div className="account-balances-card-scroll">

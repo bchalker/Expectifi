@@ -22,10 +22,10 @@ import type { LifePlans } from '../lib/planStorage/life'
 export type ConfigDrawerTab = 'profile' | 'plan' | 'guaranteed-income' | 'preferences' | 'life'
 
 const TABS: { id: ConfigDrawerTab; label: string }[] = [
-  { id: 'profile', label: 'Profile' },
   { id: 'plan', label: 'Planning' },
   { id: 'guaranteed-income', label: 'Guaranteed Income' },
   { id: 'preferences', label: 'Travel Priorities' },
+  { id: 'profile', label: 'Privacy' },
   // { id: 'life', label: 'Life' }, // Life tab — commented out, may reuse later
 ]
 

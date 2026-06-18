@@ -348,10 +348,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         firstName.trim(),
       );
       if (error) setMsg(error);
-      else {
-        setMsg("Account created. You are signed in.");
-        setMsgOk(true);
-      }
+      else setMsgOk(true);
     } catch {
       setMsg("Could not apply promo code. Try again.");
     } finally {
@@ -374,12 +371,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setBusy(true);
     const { error } = await signIn(email, password);
     setBusy(false);
-    if (error) {
-      setMsg(error);
-      return;
-    }
-    setMsg("Signed in.");
-    setMsgOk(true);
+    if (error) setMsg(error);
   }
 
   async function onRegisterNoStripe(e: FormEvent) {
@@ -404,8 +396,6 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
       setMsg(error);
       return;
     }
-    setMsg("Account created. You are signed in.");
-    setMsgOk(true);
   }
 
   if (!mode) return null;

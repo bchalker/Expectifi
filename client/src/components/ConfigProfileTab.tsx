@@ -16,7 +16,7 @@ export function ConfigProfileTab({
   onOpenRegister,
   onResetGuestProfile,
 }: Props) {
-  const { user, cancelAccount, signOut, loading } = useAuth()
+  const { user, cancelAccount, loading } = useAuth()
   const confirmState = useOverlayState()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -85,17 +85,7 @@ export function ConfigProfileTab({
   }
 
   return (
-    <section className="config-profile-tab" aria-label="Account">
-      <AppButton
-        type="button"
-        size="sm"
-        variant="secondary"
-        className="config-profile-tab__signout-btn"
-        onPress={() => void signOut()}
-      >
-        Sign out
-      </AppButton>
-
+    <section className="config-profile-tab" aria-label="Privacy">
       <div className="config-profile-tab__cancel-card">
         <p className="config-profile-tab__cancel-note">
           <strong>Note.</strong> Your privacy is the utmost concern. When you cancel your account, it ends your Stripe

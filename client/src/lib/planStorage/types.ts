@@ -12,6 +12,11 @@ export type ExpectifiMeta = {
   version: typeof PLAN_META_VERSION
   tier: PersistedGuestTier
   visitCount: number
+  /**
+   * Last meaningful edit to a browser-saved guest plan (ISO). Used for 30-day
+   * inactivity expiry — not session TTL, auth expiry, or cache busting.
+   */
+  lastActiveAt?: string
   /** ISO timestamps for Phase B+ prompts */
   prompts: {
     savePlanAcceptedAt?: string

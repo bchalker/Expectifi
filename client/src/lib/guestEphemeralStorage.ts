@@ -8,6 +8,18 @@ import { clearLocalUserPrefsStorage } from './userPrefs'
 import { clearStoredManualAccounts } from './manualAccountEntries'
 import { clearUserProfileStorage } from './userProfileStorage'
 import { clearGuestWhereToRetireStorage } from './whereToRetire/storage'
+import { purgeGuestNonProfilePlanStorage } from './planStorage/purgeUnconsented'
+import {
+  EXPECTIFI_META_KEY,
+  EXPECTIFI_PROFILE_KEY,
+  MIGRATION_LEGACY_CLEANUP_KEYS,
+} from './planStorage/keys'
+import {
+  clearSessionOnboardingAccounts,
+  clearSessionOnboardingComplete,
+} from './sessionFlags'
+import { clearCalculatorPhaseSnap } from './calculatorPhaseSnap'
+import { clearIncomeUiSnap } from './accountIncomeStorage'
 
 const GUEST_TAB_ID_KEY = 'expectifi_guest_tab_id'
 const GUEST_TABS_KEY = 'expectifi_guest_open_tabs'
@@ -83,6 +95,49 @@ export function clearGuestProfileAndSession(): void {
   clearUserProfileStorage()
   clearLocalUserPrefsStorage()
   clearEphemeralGuestStorage()
+}
+
+const OPEN_IMPORT_SESSION_KEY = 'expectifi_open_import'
+const LEGACY_OPEN_IMPORT_SESSION_KEY = 'headwayplanner_open_import'
+const POST_ONBOARDING_IMPORT_SESSION_KEY = 'expectifi_post_onboarding_import'
+
+/** Clear post-onboarding add-accounts session flags (accounts added or flow finished). */
+export function clearPostOnboardingImportSession(): void {
+  try {
+    sessionStorage.removeItem(OPEN_IMPORT_SESSION_KEY)
+    sessionStorage.removeItem(LEGACY_OPEN_IMPORT_SESSION_KEY)
+    sessionStorage.removeItem(POST_ONBOARDING_IMPORT_SESSION_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Wipe guest plan/profile blobs from localStorage and session (no navigation side effects). */
+export function clearGuestPersistedPlanStorage(): void {
+  clearGuestProfileAndSession()
+  purgeGuestNonProfilePlanStorage()
+  try {
+    localStorage.removeItem(EXPECTIFI_PROFILE_KEY)
+    localStorage.removeItem(EXPECTIFI_META_KEY)
+    for (const key of MIGRATION_LEGACY_CLEANUP_KEYS) {
+      localStorage.removeItem(key)
+    }
+  } catch {
+    /* ignore */
+  }
+  clearSessionOnboardingComplete()
+  clearSessionOnboardingAccounts()
+  clearCalculatorPhaseSnap()
+  clearIncomeUiSnap()
+  clearPostOnboardingImportSession()
+}
+
+/**
+ * Guest abandoned onboarding or post-onboarding add accounts — wipe stored progress
+ * so Get Started opens a fresh onboarding flow.
+ */
+export function clearGuestOnboardingCancelState(): void {
+  clearGuestPersistedPlanStorage()
 }
 
 function touchGuestTab(tabId: string, now = Date.now()): GuestTabRecord[] {

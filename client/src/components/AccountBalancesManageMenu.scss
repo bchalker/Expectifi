@@ -566,14 +566,81 @@ $account-balances-manage-menu-max-height: min(
   justify-content: flex-start;
 }
 
+.account-balances-manage__header--post-onboarding {
+  justify-content: space-between;
+}
+
+.account-balances-manage__header-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.account-balances-manage__brand {
+  display: inline-flex;
+  align-items: baseline;
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.account-balances-manage__brand-expect {
+  color: var(--blue1);
+}
+
+.account-balances-manage__brand-ifi {
+  color: var(--green5);
+}
+
+.account-balances-manage__header--post-onboarding .account-balances-manage__title {
+  margin: 0;
+}
+
 .account-balances-manage__backdrop:not(.account-balances-manage__backdrop--required-entry) {
   background: color-mix(in srgb, var(--surface) 50%, transparent);
 }
 
 .account-balances-manage__backdrop--required-entry {
-  z-index: 201;
+  z-index: 1100;
   background: color-mix(in srgb, var(--surface) 50%, transparent);
   cursor: default;
+  pointer-events: none;
+}
+
+/* Post-onboarding required entry: hide app chrome at all breakpoints. */
+body:has(
+    .account-balances-manage__backdrop--required-entry:not(
+        .account-balances-manage__backdrop--closing
+      )
+  ) {
+  background-image: none;
+}
+
+body:has(
+    .account-balances-manage__backdrop--required-entry:not(
+        .account-balances-manage__backdrop--closing
+      )
+  )
+  .app-header-shell,
+body:has(
+    .account-balances-manage__backdrop--required-entry:not(
+        .account-balances-manage__backdrop--closing
+      )
+  )
+  .app-privacy-trust,
+body:has(
+    .account-balances-manage__backdrop--required-entry:not(
+        .account-balances-manage__backdrop--closing
+      )
+  )
+  .account-plan-bottom-banner-fixed {
+  visibility: hidden;
   pointer-events: none;
 }
 

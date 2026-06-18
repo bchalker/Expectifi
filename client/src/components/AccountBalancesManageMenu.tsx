@@ -199,6 +199,9 @@ export type AccountBalancesManageMenuProps = {
    * (not used when opened from the header Manage Financials trigger).
    */
   requiredEntry?: boolean;
+  /** Post-onboarding add accounts — Expectifi header, cancel returns to landing. */
+  postOnboardingImport?: boolean;
+  onPostOnboardingCancel?: () => void;
   /** Opens Pro checkout / register flow from upgrade prompt. */
   onOpenUpgrade?: () => void;
   /** Nested confirm (e.g. remove all accounts) rendered above the menu panel. */
@@ -226,6 +229,8 @@ export function AccountBalancesManageMenu({
   hideTrigger = false,
   initialOpen = false,
   requiredEntry = false,
+  postOnboardingImport = false,
+  onPostOnboardingCancel,
   onOpenUpgrade,
   stackedOverlay = null,
   removeConfirmOpen = false,
@@ -288,9 +293,20 @@ export function AccountBalancesManageMenu({
   }, [closing, completeClose, open]);
 
   const dismiss = useCallback(() => {
-    if (requiredEntry) return;
+    if (requiredEntry && !postOnboardingImport) return;
     close();
-  }, [close, requiredEntry]);
+  }, [close, postOnboardingImport, requiredEntry]);
+
+  const handlePostOnboardingCancel = useCallback(() => {
+    if (!postOnboardingImport || closing) return;
+    completeClose();
+    onPostOnboardingCancel?.();
+  }, [
+    closing,
+    completeClose,
+    onPostOnboardingCancel,
+    postOnboardingImport,
+  ]);
 
   const openMenu = useCallback(() => {
     setClosing(false);
@@ -576,6 +592,8 @@ export function AccountBalancesManageMenu({
                     "account-balances-manage__header",
                     requiredEntry &&
                       "account-balances-manage__header--required-entry",
+                    postOnboardingImport &&
+                      "account-balances-manage__header--post-onboarding",
                     !showMethodSelector &&
                       "account-balances-manage__header--phase",
                   ]
@@ -583,12 +601,34 @@ export function AccountBalancesManageMenu({
                     .join(" ")}
                 >
                   {showMethodSelector ? (
-                    <h2
-                      id="account-balances-manage-panel-title"
-                      className="account-balances-manage__title"
-                    >
-                      Add accounts
-                    </h2>
+                    postOnboardingImport ? (
+                      <div className="account-balances-manage__header-title-group">
+                        <span
+                          className="account-balances-manage__brand"
+                          aria-hidden="true"
+                        >
+                          <span className="account-balances-manage__brand-expect">
+                            Expect
+                          </span>
+                          <span className="account-balances-manage__brand-ifi">
+                            ifi
+                          </span>
+                        </span>
+                        <h2
+                          id="account-balances-manage-panel-title"
+                          className="account-balances-manage__title"
+                        >
+                          Add accounts
+                        </h2>
+                      </div>
+                    ) : (
+                      <h2
+                        id="account-balances-manage-panel-title"
+                        className="account-balances-manage__title"
+                      >
+                        Add accounts
+                      </h2>
+                    )
                   ) : (
                     <div className="account-balances-manage__header-main">
                       <button
@@ -621,7 +661,16 @@ export function AccountBalancesManageMenu({
                       </div>
                     </div>
                   )}
-                  {!requiredEntry ? (
+                  {postOnboardingImport ? (
+                    <button
+                      type="button"
+                      className="account-balances-manage__close"
+                      aria-label="Cancel and return to home"
+                      onClick={handlePostOnboardingCancel}
+                    >
+                      <IconX size={16} stroke={1.5} aria-hidden />
+                    </button>
+                  ) : !requiredEntry ? (
                     <button
                       type="button"
                       className="account-balances-manage__close"

@@ -140,7 +140,7 @@
 .auth-modal__title {
   margin: 0;
   font-family: var(--heading);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);
   line-height: 1.25;
@@ -475,10 +475,9 @@
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--color-card);
-  font-family: var(--mono);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.65;
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

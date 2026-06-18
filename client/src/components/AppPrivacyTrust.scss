@@ -2,8 +2,8 @@
   position: relative;
   z-index: var(--z-privacy-trust);
   width: 100%;
-  max-width: none;
-  margin: 0;
+  max-width: var(--layout-app-max);
+  margin-inline: auto;
   flex-shrink: 0;
   padding: var(--space-3) var(--layout-app-inner-pad)
     calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
@@ -18,9 +18,8 @@
 }
 
 .app-privacy-trust__text {
-  margin: 0 auto;
+  margin: 0;
   width: 100%;
-  max-width: none;
   font-size: var(--text-xs);
   line-height: 1.15;
   text-align: center;

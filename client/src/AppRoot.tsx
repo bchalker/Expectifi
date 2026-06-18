@@ -11,7 +11,7 @@ import { ContactModal } from './components/ContactModal'
 import { LandingPage } from './components/LandingPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
-import { landingNavigateOnboarding } from './components/landingNav'
+import { enterAppFromLanding } from './components/landingNav'
 import { trackPageView } from './lib/analytics'
 import { consumeLandingAuthIntent } from './lib/landingAuthIntent'
 
@@ -31,16 +31,32 @@ function resolveGuestView(path: string): 'landing' | 'app' {
 }
 
 export default function AppRoot() {
-  const { loading: authLoading, user, signedOut, resolveGoogleCheckoutFromUrl, clearGoogleCheckoutUi } = useAuth()
+  const {
+    loading: authLoading,
+    user,
+    signedOut,
+    landingGateEpoch,
+    releaseLandingGate,
+    resolveGoogleCheckoutFromUrl,
+    clearGoogleCheckoutUi,
+  } = useAuth()
   const path = useAppPath()
   const [landingAuthModal, setLandingAuthModal] = useState<AuthModalMode | null>(null)
   const [contactOpen, setContactOpen] = useState(false)
 
-  const guestView = useMemo(() => resolveGuestView(path), [path, user, signedOut])
+  const guestView = useMemo(
+    () => resolveGuestView(path),
+    [path, user, signedOut, landingGateEpoch],
+  )
 
   const showLanding = signedOut || guestView === 'landing'
 
   const initialAuthModal: AuthModalMode | null = path === APP_PATHS.login ? 'signin' : null
+
+  const handleGetStarted = useCallback(() => {
+    releaseLandingGate()
+    enterAppFromLanding()
+  }, [releaseLandingGate])
 
   useEffect(() => {
     trackPageView(path + (typeof window !== 'undefined' ? window.location.search : ''))
@@ -153,7 +169,7 @@ export default function AppRoot() {
         <LandingPage
           onSignIn={openLandingSignIn}
           onCreateAccount={openLandingRegister}
-          onGetStarted={landingNavigateOnboarding}
+          onGetStarted={handleGetStarted}
           onContactClick={openContact}
         />
         <AuthModal

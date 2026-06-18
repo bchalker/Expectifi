@@ -66,6 +66,8 @@ type HeaderAppProps = HeaderAuthProps & {
     onPhase: (phase: PhaseSegment) => void
     targetRetirementAge: number
   } | null
+  /** Post-onboarding dashboard: hide Create account (footer banner carries upgrade CTA). */
+  hideCreateAccountCta?: boolean
 }
 
 export type HeaderProps = HeaderMarketingProps | HeaderAppProps
@@ -122,12 +124,14 @@ function HeaderAuthTail({
   drawer,
   onOpenConfig,
   welcomeDone = true,
+  hideCreateAccountCta = false,
   wrapInTail = true,
 }: HeaderAuthProps & {
   variant: HeaderProps['variant']
   drawer?: DrawerName | null
   onOpenConfig?: () => void
   welcomeDone?: boolean
+  hideCreateAccountCta?: boolean
   wrapInTail?: boolean
 }) {
   const { apiReady, loading, user, googleCheckoutUi, signOut } = useAuth()
@@ -154,6 +158,16 @@ function HeaderAuthTail({
           .filter(Boolean)
           .join(' ')}
       >
+        <div className="header__profile-popout" role="menu" aria-label="Profile">
+          <button
+            type="button"
+            role="menuitem"
+            className="header__profile-popout-action"
+            onClick={() => void signOut()}
+          >
+            Sign out
+          </button>
+        </div>
         <div className="header__profile-menu">
           <button
             type="button"
@@ -169,16 +183,6 @@ function HeaderAuthTail({
               <span className="header__profile-ages">View My Plans</span>
             ) : null}
           </button>
-          <div className="header__profile-popout" role="menu" aria-label="Profile">
-            <button
-              type="button"
-              role="menuitem"
-              className="header__profile-popout-action"
-              onClick={() => void signOut()}
-            >
-              Sign out
-            </button>
-          </div>
         </div>
       </div>,
     )
@@ -215,9 +219,11 @@ function HeaderAuthTail({
           <button type="button" className="header__auth-link" onClick={onSignIn}>
             Sign in
           </button>
-          <button type="button" className="header__auth-cta" onClick={onCreateAccount}>
-            Create account
-          </button>
+          {!hideCreateAccountCta ? (
+            <button type="button" className="header__auth-cta" onClick={onCreateAccount}>
+              Create account
+            </button>
+          ) : null}
         </div>
       </>,
     )
@@ -513,6 +519,9 @@ export function Header(props: HeaderProps) {
               drawer={variant === 'app' ? props.drawer : undefined}
               onOpenConfig={variant === 'app' ? props.onOpenConfig : undefined}
               welcomeDone={variant === 'app' ? props.welcomeDone : undefined}
+              hideCreateAccountCta={
+                variant === 'app' ? props.hideCreateAccountCta === true : false
+              }
               wrapInTail={false}
             />
           </div>

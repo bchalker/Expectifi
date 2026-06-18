@@ -105,7 +105,7 @@ export function DrawerPanel({
           className="drawer-config-footer__confirm"
           onPress={onConfigConfirm}
         >
-          Confirm
+          Done
         </AppButton>
       </div>
     ) : undefined

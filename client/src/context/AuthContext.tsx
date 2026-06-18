@@ -9,7 +9,7 @@ import {
 } from "react";
 import { ApiRequestError, apiFetchJson } from "../lib/api";
 import { clearAllLocalUserData } from "../lib/clearAllLocalUserData";
-import { APP_PATHS } from "../lib/appPaths";
+import { APP_DASHBOARD_PATH, APP_PATHS, replaceAppPath } from "../lib/appPaths";
 import {
   clearPostSignOutSession,
   markOnboardingFromSignup,
@@ -127,8 +127,14 @@ type AuthCtx = {
   /** Full-page navigation to `/api/auth/google` (cookie session on return). */
   signInWithGoogle: () => void;
   signOut: () => Promise<void>;
+  /** Guest (or signed-out) — show marketing landing without a server logout. */
+  returnToLanding: () => void;
   /** True after sign-out until the user signs in again (immediate landing redirect). */
   signedOut: boolean;
+  /** Bumped when leaving the marketing landing so AppRoot re-resolves guest view. */
+  landingGateEpoch: number;
+  /** Clear post-sign-out landing gate and enter the calculator from marketing CTAs. */
+  releaseLandingGate: () => void;
   /** Marks welcome survey complete on the server; call after persisting plan fields to calculator state. */
   completeOnboarding: () => Promise<{ error?: string }>;
   /** Persist welcome fields to the user profile. */
@@ -166,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [signedOut, setSignedOut] = useState(() => peekPostSignOutSession());
+  const [landingGateEpoch, setLandingGateEpoch] = useState(0);
   const [googleCheckoutUi, setGoogleCheckoutUi] = useState<{
     email: string;
     displayName: string | null;
@@ -180,6 +187,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearAuthCallbackMessage = useCallback(() => {
     setAuthCallbackMessage(null);
+  }, []);
+
+  const releaseLandingGate = useCallback(() => {
+    clearPostSignOutSession();
+    setSignedOut(false);
+    setLandingGateEpoch((epoch) => epoch + 1);
   }, []);
 
   const resolveGoogleCheckoutFromUrl =
@@ -208,6 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSignedOut(false);
           clearPostSignOutSession();
           if (!data.user.onboardingDone) markOnboardingFromSignup();
+          replaceAppPath(APP_DASHBOARD_PATH);
           return { status: "session_ready" };
         }
         setUser(null);
@@ -249,6 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSignedOut(false);
         clearPostSignOutSession();
         if (!data.user.onboardingDone) markOnboardingFromSignup();
+        replaceAppPath(APP_DASHBOARD_PATH);
         return {};
       } catch (e) {
         if (e instanceof ApiRequestError) {
@@ -341,13 +356,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string) => {
       try {
-        await apiFetchJson<{ ok: true; user: AuthUser }>("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ email, password }),
-        });
-        await refreshSession();
+        const data = await apiFetchJson<{ ok: true; user: AuthUser }>(
+          "/api/auth/login",
+          {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+          },
+        );
         clearPostSignOutSession();
+        setUser(normalizeAuthUser(data.user));
         setSignedOut(false);
+        replaceAppPath(APP_DASHBOARD_PATH);
         return {};
       } catch (e) {
         if (e instanceof ApiRequestError && e.code === "invalid_credentials") {
@@ -356,7 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: "Could not sign in. Is the API running?" };
       }
     },
-    [refreshSession],
+    [],
   );
 
   const signUp = useCallback(
@@ -387,6 +406,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSignedOut(false);
         clearPostSignOutSession();
         if (!data.user.onboardingDone) markOnboardingFromSignup();
+        replaceAppPath(APP_DASHBOARD_PATH);
         return {};
       } catch (e) {
         if (e instanceof ApiRequestError) {
@@ -427,6 +447,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const returnToLanding = useCallback(() => {
+    markPostSignOutSession();
+    setSignedOut(true);
+    replaceAppPath(APP_PATHS.home);
+  }, []);
+
   const signOut = useCallback(async () => {
     markPostSignOutSession();
     setSignedOut(true);
@@ -437,7 +463,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       /* still redirect — local session is cleared */
     }
-    window.location.replace(APP_PATHS.home);
+    replaceAppPath(APP_PATHS.home);
   }, []);
 
   const completeOnboarding = useCallback(async () => {
@@ -528,6 +554,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       user,
       signedOut,
+      landingGateEpoch,
+      releaseLandingGate,
       googleCheckoutUi,
       clearGoogleCheckoutUi,
       resolveGoogleCheckoutFromUrl,
@@ -538,6 +566,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signInWithGoogle,
       signOut,
+      returnToLanding,
       completeOnboarding,
       updateDisplayName,
       saveUserPrefs,
@@ -549,6 +578,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     user,
     signedOut,
+    landingGateEpoch,
+    releaseLandingGate,
     googleCheckoutUi,
     clearGoogleCheckoutUi,
     resolveGoogleCheckoutFromUrl,
@@ -559,6 +590,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signInWithGoogle,
     signOut,
+    returnToLanding,
     completeOnboarding,
     updateDisplayName,
     saveUserPrefs,

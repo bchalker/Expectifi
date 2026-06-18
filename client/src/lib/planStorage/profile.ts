@@ -2,7 +2,9 @@ import { parseStoredUserProfile, type StoredUserProfile } from '../storedUserPro
 import { EXPECTIFI_PROFILE_KEY } from './keys'
 import type { StoredPlanProfile } from './types'
 import { readJsonFromLocalStorage, writeJsonToLocalStorage } from './storageUtils'
-import { canWriteGuestProfile } from './writeContext'
+import { touchBrowserSavedLastActiveAt } from './browserSavedInactivity'
+import { canWriteGuestProfile, getPlanWriteTier } from './writeContext'
+import { tierIsAuthenticated } from './resolveTier'
 
 export function loadPlanProfile(): StoredPlanProfile | null {
   const raw = readJsonFromLocalStorage<StoredPlanProfile>(EXPECTIFI_PROFILE_KEY)
@@ -26,6 +28,9 @@ export function savePlanProfile(patch: Partial<StoredPlanProfile>): StoredPlanPr
   const next: StoredPlanProfile = { ...current, ...patch, version: 1 }
   if (canWriteGuestProfile()) {
     writeJsonToLocalStorage(EXPECTIFI_PROFILE_KEY, next)
+    if (!tierIsAuthenticated(getPlanWriteTier())) {
+      touchBrowserSavedLastActiveAt()
+    }
   }
   return next
 }
