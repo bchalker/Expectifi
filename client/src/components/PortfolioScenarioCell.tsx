@@ -22,6 +22,7 @@ export type PortfolioScenarioCellAccountProps = {
 
 export type PortfolioScenarioCellHoldingProps = {
   symbol: string
+  scopeKey: string
   contributingRows: ImportedPositionRow[]
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
@@ -83,6 +84,7 @@ export function PortfolioScenarioCell(props: PortfolioScenarioCellProps) {
 
   const {
     symbol,
+    scopeKey,
     contributingRows,
     label,
     common,
@@ -103,7 +105,7 @@ export function PortfolioScenarioCell(props: PortfolioScenarioCellProps) {
         'portfolio-scenario-cell',
         'portfolio-scenario-cell--holding',
         inheritsAccountScenario && 'portfolio-scenario-cell--inherits-account',
-        isHoldingScenarioOpen(symbol) && 'portfolio-scenario-cell--holding-active',
+        isHoldingScenarioOpen(symbol, scopeKey) && 'portfolio-scenario-cell--holding-active',
         className,
       ]
         .filter(Boolean)
@@ -111,6 +113,7 @@ export function PortfolioScenarioCell(props: PortfolioScenarioCellProps) {
     >
       <HoldingScenarioRowPopout
         symbol={symbol}
+        scopeKey={scopeKey}
         contributingRows={contributingRows}
         label={label}
         common={common}

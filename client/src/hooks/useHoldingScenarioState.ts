@@ -57,6 +57,8 @@ export type UseHoldingScenarioStateArgs = {
   retRate: number
   brkRate: number
   initialTab?: ScenarioIntentTabId
+  /** Resets local tab/choice when a different holding panel opens. */
+  panelInstanceKey?: string
 }
 
 export function useHoldingScenarioState({
@@ -69,6 +71,7 @@ export function useHoldingScenarioState({
   retRate,
   brkRate,
   initialTab,
+  panelInstanceKey,
 }: UseHoldingScenarioStateArgs) {
   const h = horizonClamp(yearsToRetirement)
   const calY = retirementCalendarYear
@@ -128,12 +131,8 @@ export function useHoldingScenarioState({
 
   useEffect(() => {
     setUiChoice(resolvedChoice)
-    setActiveTab(intentFromScenarioChoice(resolvedChoice))
-  }, [resolvedChoice, scenarioTickerLabel])
-
-  useEffect(() => {
-    if (initialTab) setActiveTab(initialTab)
-  }, [initialTab, scenarioTickerLabel])
+    setActiveTab(initialTab ?? intentFromScenarioChoice(resolvedChoice))
+  }, [panelInstanceKey, initialTab])
 
   useEffect(() => {
     const first = targets[0]

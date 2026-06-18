@@ -17,6 +17,8 @@ export type AccountScenarioOpenState = {
 
 export type HoldingScenarioOpenState = {
   symbol: string
+  /** Distinguishes the same ticker in different account buckets (one popout at a time). */
+  scopeKey: string
   contributingRows: ImportedPositionRow[]
   initialTab?: ScenarioIntentTabId
 }
@@ -35,11 +37,15 @@ type ScenarioPopoutContextValue = {
   isAccountScenarioOpen: (bucket: AccountScenarioBucketId) => boolean
   holdingOpen: HoldingScenarioOpenState | null
   openHoldingScenario: (
-    payload: { symbol: string; contributingRows: ImportedPositionRow[] },
+    payload: {
+      symbol: string
+      scopeKey: string
+      contributingRows: ImportedPositionRow[]
+    },
     initialTab?: ScenarioIntentTabId,
   ) => void
   closeHoldingScenario: () => void
-  isHoldingScenarioOpen: (symbol: string) => boolean
+  isHoldingScenarioOpen: (symbol: string, scopeKey: string) => boolean
 }
 
 const ScenarioPopoutContext = createContext<ScenarioPopoutContextValue | null>(null)
@@ -67,7 +73,11 @@ export function ScenarioPopoutProvider({ children }: { children: ReactNode }) {
 
   const openHoldingScenario = useCallback(
     (
-      payload: { symbol: string; contributingRows: ImportedPositionRow[] },
+      payload: {
+        symbol: string
+        scopeKey: string
+        contributingRows: ImportedPositionRow[]
+      },
       initialTab?: ScenarioIntentTabId,
     ) => {
       setAccountOpen(null)
@@ -81,8 +91,10 @@ export function ScenarioPopoutProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const isHoldingScenarioOpen = useCallback(
-    (symbol: string) =>
-      holdingOpen != null && holdingSymbolKey(holdingOpen.symbol) === holdingSymbolKey(symbol),
+    (symbol: string, scopeKey: string) =>
+      holdingOpen != null &&
+      holdingSymbolKey(holdingOpen.symbol) === holdingSymbolKey(symbol) &&
+      holdingOpen.scopeKey === scopeKey,
     [holdingOpen],
   )
 

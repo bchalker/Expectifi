@@ -15,6 +15,7 @@ import './HoldingScenarioRowPopout.scss'
 
 type Props = {
   symbol: string
+  scopeKey: string
   contributingRows: ImportedPositionRow[]
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
@@ -28,6 +29,7 @@ type Props = {
 /** HeroUI popout anchored left of the holding scenario trigger — matches account scenario popout. */
 export function HoldingScenarioRowPopout({
   symbol,
+  scopeKey,
   contributingRows,
   label,
   common,
@@ -41,14 +43,14 @@ export function HoldingScenarioRowPopout({
   const { holdingOpen, openHoldingScenario, closeHoldingScenario, isHoldingScenarioOpen } =
     useScenarioPopout()
 
-  const isOpen = isHoldingScenarioOpen(symbol)
+  const isOpen = isHoldingScenarioOpen(symbol, scopeKey)
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
-      openHoldingScenario({ symbol, contributingRows })
+      openHoldingScenario({ symbol, scopeKey, contributingRows })
       return
     }
-    if (isHoldingScenarioOpen(symbol)) {
+    if (isHoldingScenarioOpen(symbol, scopeKey)) {
       closeHoldingScenario()
     }
   }
@@ -66,7 +68,7 @@ export function HoldingScenarioRowPopout({
               variant={variant}
               inheritAccent={inheritAccent}
               rowActive={isOpen}
-              onOpen={() => openHoldingScenario({ symbol, contributingRows })}
+              onOpen={() => openHoldingScenario({ symbol, scopeKey, contributingRows })}
               sublabel={HOLDING_ROW_SCENARIO_SUBLABEL}
               className="portfolio-scenario-cell__trigger"
               triggerSlotProps={triggerProps as ComponentPropsWithRef<'button'>}
@@ -77,33 +79,36 @@ export function HoldingScenarioRowPopout({
           <span className="portfolio-scenario-cell__override-note">Overrides account scenario</span>
         ) : null}
       </div>
-      <Popover.Content
-        placement="left"
-        offset={10}
-        shouldFlip
-        className="holding-scenario-heroui-popover"
-      >
-        <Popover.Arrow className="holding-scenario-heroui-popover__arrow" />
-        <Popover.Dialog
-          className="holding-scenario-heroui-popover__dialog"
-          aria-label={`Holding scenario for ${symbol}`}
+      {isOpen ? (
+        <Popover.Content
+          placement="left"
+          offset={10}
+          shouldFlip
+          className="holding-scenario-heroui-popover"
         >
-          <HoldingScenarioPopout
-            key={`${symbol}-${holdingOpen?.initialTab ?? 'default'}`}
-            contributingRows={contributingRows}
-            importedPositionRows={data.importedPositionRows}
-            inputs={data.inputs}
-            setInputs={data.setInputs}
-            yearsToRetirement={data.yearsToRetirement}
-            retirementCalendarYear={data.retirementCalendarYear}
-            retRate={data.retRate}
-            brkRate={data.brkRate}
-            initialTab={holdingOpen?.symbol === symbol ? holdingOpen.initialTab : undefined}
-            onClose={closeHoldingScenario}
-            variant="heroui"
-          />
-        </Popover.Dialog>
-      </Popover.Content>
+          <Popover.Arrow className="holding-scenario-heroui-popover__arrow" />
+          <Popover.Dialog
+            className="holding-scenario-heroui-popover__dialog"
+            aria-label={`Holding scenario for ${symbol}`}
+          >
+            <HoldingScenarioPopout
+              key={`${scopeKey}-${symbol}-${holdingOpen?.initialTab ?? 'default'}`}
+              panelInstanceKey={`${scopeKey}:${symbol}`}
+              contributingRows={contributingRows}
+              importedPositionRows={data.importedPositionRows}
+              inputs={data.inputs}
+              setInputs={data.setInputs}
+              yearsToRetirement={data.yearsToRetirement}
+              retirementCalendarYear={data.retirementCalendarYear}
+              retRate={data.retRate}
+              brkRate={data.brkRate}
+              initialTab={holdingOpen?.symbol === symbol ? holdingOpen.initialTab : undefined}
+              onClose={closeHoldingScenario}
+              variant="heroui"
+            />
+          </Popover.Dialog>
+        </Popover.Content>
+      ) : null}
     </Popover>
   )
 }

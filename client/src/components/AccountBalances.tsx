@@ -77,6 +77,7 @@ import { incomeBalanceForProjection } from "../lib/accountIncomeMonthly";
 import { fmt, fmtInput, fmtMon, parseNum } from "../utils/format";
 import { currencySymbol } from "../lib/displayCurrency";
 import {
+  accountScenarioBucketForPositionId,
   accountScenarioIsActive,
   blendedRateForAccountBucket,
   getAccountReturnScenario,
@@ -933,10 +934,12 @@ function AccountBalancesContent({
     );
     if (contributingRows.length === 0) return;
 
+    const bucket = accountScenarioBucketForPositionId(model.id) ?? "all";
     setBalanceEditPanel(null);
     setBalanceEditClosing(false);
     openHoldingScenario({
       symbol: normalizeImportSymbol(model.ticker) || model.ticker,
+      scopeKey: `${bucket}:${symbolKey}`,
       contributingRows,
     });
     onReturnEditorOpenHandled?.();
@@ -1505,21 +1508,31 @@ function AccountBalancesContent({
   }, [clearManageOverlayLeaveTimer, finishCsvImportLaunch, manageOverlayPhase]);
 
   const manageMenuWasOpenRef = useRef(false);
+  const prevHasAccountCardDataRef = useRef(hasAnyAccountCardData);
   const [showPostOnboardingImport, setShowPostOnboardingImport] = useState(false);
 
   useEffect(() => {
-    if (hasAnyAccountCardData) {
-      setShowPostOnboardingImport(false);
-      clearPostOnboardingImportSession();
-      onImportOpenHandled?.();
-      setCloseManageRequest((n) => n + 1);
+    const hadAccounts = prevHasAccountCardDataRef.current;
+    prevHasAccountCardDataRef.current = hasAnyAccountCardData;
+
+    if (!hasAnyAccountCardData) {
+      const sessionActive =
+        postOnboardingImportActive ||
+        (typeof sessionStorage !== "undefined" &&
+          sessionStorage.getItem("expectifi_post_onboarding_import") === "1");
+      setShowPostOnboardingImport(sessionActive);
       return;
     }
-    const sessionActive =
-      postOnboardingImportActive ||
-      (typeof sessionStorage !== "undefined" &&
-        sessionStorage.getItem("expectifi_post_onboarding_import") === "1");
-    setShowPostOnboardingImport(sessionActive);
+
+    setShowPostOnboardingImport(false);
+    clearPostOnboardingImportSession();
+
+    // Close the required post-onboarding overlay once accounts are first added —
+    // not on every render while the user already has saved accounts.
+    if (!hadAccounts) {
+      onImportOpenHandled?.();
+      setCloseManageRequest((n) => n + 1);
+    }
   }, [
     hasAnyAccountCardData,
     postOnboardingImportActive,

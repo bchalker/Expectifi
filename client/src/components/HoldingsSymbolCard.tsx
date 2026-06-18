@@ -22,6 +22,7 @@ export {
 
 export type HoldingsSymbolCardScenarioProps = {
   symbol: string
+  scopeKey: string
   contributingRows: ImportedPositionRow[]
   label: string
   common: ScenarioUiChoice | typeof SCENARIO_MIXED
@@ -55,7 +56,8 @@ export function HoldingsSymbolCard({
   breakdown = null,
 }: HoldingsSymbolCardProps) {
   const { isHoldingScenarioOpen } = useScenarioPopout()
-  const scenarioActive = isHoldingScenarioOpen(symbol)
+  const scenarioActive =
+    scenario != null && isHoldingScenarioOpen(scenario.symbol, scenario.scopeKey)
   const [breakdownOpen, setBreakdownOpen] = useState(false)
   const breakdownPanelId = useId()
   const breakdownToggleRef = useRef<HTMLButtonElement>(null)
@@ -173,6 +175,7 @@ export function HoldingsSymbolCardScenarioPanel({
       <PortfolioScenarioCell
         layout="holding"
         symbol={scenario.symbol}
+        scopeKey={scenario.scopeKey}
         contributingRows={scenario.contributingRows}
         label={scenario.label}
         common={scenario.common}

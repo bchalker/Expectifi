@@ -135,7 +135,7 @@
     height: 6px;
     margin-right: 0;
     border-radius: 999px;
-    background: var(--green1);
+    background: var(--sky-blue-d4);
     opacity: 0;
     transform: translateX(-6px);
     transition:
@@ -148,7 +148,7 @@
 
 .tax-treatment-disclosure.portfolio-account-group--scenario-active
   .portfolio-bucket-account-row__name {
-  color: var(--green1);
+  color: var(--sky-blue-d6);
 }
 
 .tax-treatment-disclosure.portfolio-account-group--scenario-active
@@ -178,7 +178,7 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--green1);
+    background: var(--sky-blue-d4);
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 0.28s ease-out;

@@ -175,6 +175,7 @@ function AggregatedHoldingGroup({
   const scenarioProps = scenarioBundle
     ? {
         symbol: r.symbol,
+        scopeKey: `${accountScenarioBucket ?? 'all'}:${r.symbol}`,
         contributingRows: r.contributingRows,
         label,
         common: displayChoice,

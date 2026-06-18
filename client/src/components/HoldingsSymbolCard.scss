@@ -26,7 +26,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--green1, var(--success, #15803d));
+  background: var(--sky-blue-d4, var(--success, #15803d));
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s ease-out;
@@ -320,7 +320,7 @@
   height: 5px;
   margin-right: 0;
   border-radius: 50%;
-  background: var(--green1, var(--success, #15803d));
+  background: var(--sky-blue-d6, var(--success, #15803d));
   opacity: 0;
   transform: translateX(-6px);
   transition:
@@ -375,7 +375,7 @@
 }
 
 .holdings-symbol-card--scenario-active .holdings-symbol-card__symbol {
-  color: var(--green1, var(--success, #15803d));
+  color: var(--sky-blue-d6, var(--success, #15803d));
 }
 
 .holdings-symbol-card__desc {

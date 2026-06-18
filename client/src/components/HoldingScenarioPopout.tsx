@@ -113,6 +113,8 @@ export type HoldingScenarioPopoutProps = {
   onClose: () => void
   /** Inside HeroUI Popover — chrome comes from popover shell. */
   variant?: 'standalone' | 'heroui'
+  /** Resets editor state when opening a different holding panel. */
+  panelInstanceKey?: string
 }
 
 /** @deprecated Use HoldingScenarioPopout — kept for import sites during migration. */
@@ -131,6 +133,7 @@ export function HoldingScenarioPopout({
   initialTab,
   onClose,
   variant = 'standalone',
+  panelInstanceKey,
 }: HoldingScenarioPopoutProps) {
   const state = useHoldingScenarioState({
     contributingRows,
@@ -142,6 +145,7 @@ export function HoldingScenarioPopout({
     retRate,
     brkRate,
     initialTab,
+    panelInstanceKey,
   })
 
   const onNoScenario = () => {

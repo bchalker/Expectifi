@@ -557,7 +557,7 @@ $account-balances-manage-menu-max-height: min(
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: 14px 16px;
+  padding: var(--space-2);
   border-bottom: 0.5px solid var(--border);
   // background: var(--sky-blue-u2);
 }

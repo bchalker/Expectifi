@@ -949,67 +949,54 @@ export function PositionsCsvImport({
 
             {postReviewStep === "intent" && intentExamples ? (
               <div className="csv-import-intent">
-                <h3 className="csv-import-intent__title">
-                  You already have holdings loaded
-                </h3>
-                <p className="csv-import-intent__lead">
-                  How should this file affect your current portfolio?
-                </p>
+                {/* <p className="csv-import-intent__lead">
+                  You have existing holdings. How should this file merge?
+                </p> */}
                 <div
                   className="csv-import-intent__options"
                   role="radiogroup"
                   aria-label="Import intent"
                 >
-                  <div className="csv-import-intent__pair">
-                    <label
-                      className={`csv-import-intent__option${importIntent === "update" ? " csv-import-intent__option--selected" : ""}`}
-                    >
-                      <input
-                        type="radio"
-                        name="csv-import-intent"
-                        className="csv-import-intent__radio"
-                        checked={importIntent === "update"}
-                        disabled={confirmBlocking}
-                        onChange={() => setImportIntent("update")}
-                      />
-                      <span className="csv-import-intent__option-body">
-                        <span className="csv-import-intent__option-title">
-                          Update existing
-                        </span>
-                        <span className="csv-import-intent__option-desc">
-                          Revise values for holdings you already have, add new
-                          ones, and flag anything no longer in this file.
-                        </span>
-                        <span className="csv-import-intent__option-example">
-                          {intentExamples.update}
-                        </span>
+                  <label
+                    className={`csv-import-intent__option${importIntent === "update" ? " csv-import-intent__option--selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="csv-import-intent"
+                      className="csv-import-intent__radio"
+                      checked={importIntent === "update"}
+                      disabled={confirmBlocking}
+                      onChange={() => setImportIntent("update")}
+                    />
+                    <span className="csv-import-intent__option-body">
+                      <span className="csv-import-intent__option-title">
+                        Update existing
                       </span>
-                    </label>
-                    <label
-                      className={`csv-import-intent__option${importIntent === "add" ? " csv-import-intent__option--selected" : ""}`}
-                    >
-                      <input
-                        type="radio"
-                        name="csv-import-intent"
-                        className="csv-import-intent__radio"
-                        checked={importIntent === "add"}
-                        disabled={confirmBlocking}
-                        onChange={() => setImportIntent("add")}
-                      />
-                      <span className="csv-import-intent__option-body">
-                        <span className="csv-import-intent__option-title">
-                          Add from new source
-                        </span>
-                        <span className="csv-import-intent__option-desc">
-                          Append these holdings without touching your current
-                          ones.
-                        </span>
-                        <span className="csv-import-intent__option-example">
-                          {intentExamples.add}
-                        </span>
+                      <span className="csv-import-intent__option-desc">
+                        Revise matching holdings and add new ones.
                       </span>
-                    </label>
-                  </div>
+                    </span>
+                  </label>
+                  <label
+                    className={`csv-import-intent__option${importIntent === "add" ? " csv-import-intent__option--selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="csv-import-intent"
+                      className="csv-import-intent__radio"
+                      checked={importIntent === "add"}
+                      disabled={confirmBlocking}
+                      onChange={() => setImportIntent("add")}
+                    />
+                    <span className="csv-import-intent__option-body">
+                      <span className="csv-import-intent__option-title">
+                        Add from new source
+                      </span>
+                      <span className="csv-import-intent__option-desc">
+                        Append to your existing holdings without changing them.
+                      </span>
+                    </span>
+                  </label>
                   <label
                     className={`csv-import-intent__option csv-import-intent__option--replace${importIntent === "replace" ? " csv-import-intent__option--selected" : ""}`}
                   >
@@ -1026,11 +1013,7 @@ export function PositionsCsvImport({
                         Replace all
                       </span>
                       <span className="csv-import-intent__option-desc">
-                        Remove all current holdings and start fresh with this
-                        file.
-                      </span>
-                      <span className="csv-import-intent__option-example">
-                        {intentExamples.replace}
+                        Remove your current holdings and start fresh.
                       </span>
                     </span>
                   </label>

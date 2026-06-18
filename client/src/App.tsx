@@ -706,6 +706,10 @@ export default function App({ initialAuthModal = null }: AppProps) {
   const postOnboardingImportPendingRef = useRef(false);
   const [openImportRequest, setOpenImportRequest] = useState(0);
 
+  const handleImportOpenHandled = useCallback(() => {
+    setOpenImportRequest(0);
+  }, []);
+
   const handlePostOnboardingImportCancel = useCallback(() => {
     setPostOnboardingImportActive(false);
     postOnboardingImportPendingRef.current = false;
@@ -1573,7 +1577,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             onOpenSignIn={openAuthSignIn}
                             onOpenUpgradeCsv={openCsvUpgrade}
                             openImportRequest={openImportRequest || undefined}
-                            onImportOpenHandled={() => setOpenImportRequest(0)}
+                            onImportOpenHandled={handleImportOpenHandled}
                             postOnboardingImportActive={
                               postOnboardingImportActive
                             }
