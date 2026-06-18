@@ -109,7 +109,8 @@ body:has(.landing-page) {
 
 /* ── Hero ── */
 .landing-hero {
-  background: var(--landing-navy);
+  background: var(--sky-blue-d6);
+  background: linear-gradient(to bottom right, var(--sky-blue-d6), var(--sky-blue-d7));
   padding: clamp(2.5rem, 8vw, 4.5rem) 0 clamp(2.75rem, 7vw, 4rem);
 }
 

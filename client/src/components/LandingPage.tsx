@@ -42,7 +42,7 @@ Your projected retirement income connects directly to the map. As you configure 
 const TRUST_ITEMS = [
   "United States & Canada",
   "Your data stays private",
-  "No account required to start",
+  "No account required",
   "Results in under 2 minutes",
 ] as const;
 
