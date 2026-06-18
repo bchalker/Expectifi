@@ -49,14 +49,20 @@ const OUTLOOK_CARD_META: Record<
   },
 }
 
-function formatPopoutOutlookRange(choice: OutlookScenarioChoice, horizon: number): string {
-  return formatOutlookScenarioRateRange(choice, horizon).replace(' … ', ' - ')
+function formatPopoutOutlookRange(
+  choice: OutlookScenarioChoice,
+  horizon: number,
+  globalBlended?: number,
+): string {
+  return formatOutlookScenarioRateRange(choice, horizon, globalBlended).replace(' … ', ' - ')
 }
 
 type Props = {
   horizon: number
   selection: OutlookScenarioChoice | null
   onSelect: (choice: OutlookScenarioChoice) => void
+  /** When set, outlook tile ranges anchor to the global slider (holding popout). */
+  globalBlended?: number
 }
 
 function OutlookTrendIcons({
@@ -78,13 +84,13 @@ function OutlookTrendIcons({
   )
 }
 
-export function AccountScenarioOutlookGrid({ horizon, selection, onSelect }: Props) {
+export function AccountScenarioOutlookGrid({ horizon, selection, onSelect, globalBlended }: Props) {
   return (
     <div className="account-scenario-outlook-grid" role="listbox" aria-label="Market outlook">
       {OUTLOOK_SCENARIO_TILES.map((tile) => {
         const meta = OUTLOOK_CARD_META[tile.choice]
         const selected = selection === tile.choice
-        const range = formatPopoutOutlookRange(tile.choice, horizon)
+        const range = formatPopoutOutlookRange(tile.choice, horizon, globalBlended)
 
         return (
           <button

@@ -513,11 +513,7 @@ export function PositionsCsvImport({
         key: k,
         label: k === "(blank)" ? "(missing account name)" : k,
         total: pending.parsed.rows
-          .filter(
-            (r) =>
-              fidelityAccountKey(r.accountName) === k &&
-              !isPendingActivityImportRow(r),
-          )
+          .filter((r) => fidelityAccountKey(r.accountName) === k)
           .reduce((s, r) => s + r.currentValue, 0),
       }))
       .filter((row) => row.total > 0);
@@ -1114,7 +1110,8 @@ export function PositionsCsvImport({
   };
 
   const importFlowExiting = confirmOverlay.mode === "exiting";
-  const holdingsRowCount = pending?.parsed.rows.length ?? 0;
+  const holdingsRowCount =
+    pending?.parsed.rows.filter((r) => !isPendingActivityImportRow(r)).length ?? 0;
   const isAccountMappingStep =
     postReviewStep === "review" && holdingsRowCount > 0 && !parseError;
   const holdingsCountLabel =

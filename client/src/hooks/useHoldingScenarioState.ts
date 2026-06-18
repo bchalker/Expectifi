@@ -148,7 +148,15 @@ export function useHoldingScenarioState({
     (choice: ScenarioUiChoice, customPct: number, yearly?: number[]) => {
       if (!targets.length) return
       const patched = targets.map((m) =>
-        applyScenarioUiChoice(m, choice, blendedRateForDashboardPositionId(m.id, retRate, brkRate), h, customPct, yearly),
+        applyScenarioUiChoice(
+          m,
+          choice,
+          blendedRateForDashboardPositionId(m.id, retRate, brkRate),
+          h,
+          customPct,
+          yearly,
+          { anchorOutlookToGlobal: true },
+        ),
       )
       setInputs({ positionReturnModels: mergePatchPositionModelsIntoInputs(inputs, patched) })
     },

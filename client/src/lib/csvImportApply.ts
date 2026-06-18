@@ -51,11 +51,15 @@ function applyUpdateIntent(
     }
   }
 
-  const mergedRows = [...inc.rows.filter((r) => !isPendingActivityImportRow(r)), ...keptFromPrior]
+  const mergedHoldings = [
+    ...inc.rows.filter((r) => !isPendingActivityImportRow(r)),
+    ...keptFromPrior,
+  ]
+  const pendingAdjustments = inc.rows.filter((r) => isPendingActivityImportRow(r))
 
   const updatedBatch: PositionsImportBatch = {
     ...inc,
-    rows: mergedRows,
+    rows: [...mergedHoldings, ...pendingAdjustments],
   }
 
   const batches = [...otherBatches, updatedBatch]

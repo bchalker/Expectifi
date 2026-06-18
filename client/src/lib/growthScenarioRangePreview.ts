@@ -11,6 +11,10 @@ import {
   type OutlookScenarioChoice,
 } from "./holdingScenarioApply";
 import {
+  anchoredOutlookScenarioRateRangePcts,
+  globalRelativeScenarioRates,
+} from "./scenarioRates";
+import {
   effectiveMarketScenarioId,
   fvAnnuityWithYearlyRates,
   getMarketScenarioDefinition,
@@ -20,9 +24,7 @@ import {
 } from "./marketScenario";
 import {
   calcPositionFV,
-  decimalToPct,
   positionUsesCustomReturnMode,
-  scenarioRatesDecimal,
 } from "./positionReturnModel";
 
 export type GrowthScenarioRangeRowId = "very_bear" | "normal" | "very_bull";
@@ -108,35 +110,6 @@ function savingsScenarioDelta(
   const baseline = fvAnnuity(save, retRate, h);
   const rates = globalRelativeScenarioRates(choice, retRate, h);
   return fvAnnuityWithYearlyRates(save, rates) - baseline;
-}
-
-/**
- * Outlook preset paths anchored to the current global slider rate.
- * Absolute SCENARIO_PRESETS (used by outlookRetirementDelta) ignore globalBlended on
- * the scenario leg, which makes wing FVs cancel against Expected when the slider moves.
- */
-function globalRelativeScenarioRates(
-  choice: OutlookScenarioChoice,
-  globalBlended: number,
-  horizon: number,
-): number[] {
-  const h = horizonClamp(horizon);
-  const preset = scenarioRatesDecimal(choice, h);
-  const anchor = scenarioRatesDecimal("base", h);
-  return preset.map((rate, i) => {
-    const anchorRate = anchor[i] ?? anchor[anchor.length - 1] ?? globalBlended;
-    return globalBlended + (rate - anchorRate);
-  });
-}
-
-function globalRelativeScenarioRangePcts(
-  choice: OutlookScenarioChoice,
-  globalBlended: number,
-  horizon: number,
-): { min: number; max: number } {
-  const rates = globalRelativeScenarioRates(choice, globalBlended, horizon);
-  const pcts = rates.map((d) => decimalToPct(d));
-  return { min: Math.min(...pcts), max: Math.max(...pcts) };
 }
 
 function lumpOutlookDelta(
@@ -277,12 +250,12 @@ export function computeGrowthScenarioRangePreview(
 
   const pessimisticFv = projectedFor("very_bear");
   const optimisticFv = projectedFor("very_bull");
-  const pessimisticRange = globalRelativeScenarioRangePcts(
+  const pessimisticRange = anchoredOutlookScenarioRateRangePcts(
     "very_bear",
     baseRetRate,
     h,
   );
-  const optimisticRange = globalRelativeScenarioRangePcts(
+  const optimisticRange = anchoredOutlookScenarioRateRangePcts(
     "very_bull",
     baseRetRate,
     h,

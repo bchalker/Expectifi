@@ -80,7 +80,11 @@ export function OutlookMarketTabs({
     <div className="holding-scenario-outlook-tabs">
       <div className="holding-scenario-outlook-tabs__list" role="tablist" aria-label="Market outlook">
         {tiles.map((t) => {
-          const rateRangeLabel = formatOutlookScenarioRateRange(t.choice, horizon)
+          const rateRangeLabel = formatOutlookScenarioRateRange(
+            t.choice,
+            horizon,
+            scope === 'holding' ? globalBlended : undefined,
+          )
           const isSelected = value === t.choice
 
           return (

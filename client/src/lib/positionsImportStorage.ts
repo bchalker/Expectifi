@@ -169,8 +169,23 @@ export function flattenBatches(batches: PositionsImportBatch[]): ImportedPositio
   return out
 }
 
+/** All stored rows including pending-activity balance adjustments (not holdings). */
+export function flattenBatchesForBalances(batches: PositionsImportBatch[]): ImportedPositionRow[] {
+  const out: ImportedPositionRow[] = []
+  for (const b of batches) {
+    for (const r of b.rows) {
+      out.push({
+        ...r,
+        costBasis: r.costBasis ?? null,
+        symbol: normalizeImportSymbol(r.symbol),
+      })
+    }
+  }
+  return out
+}
+
 export function computeBalancesFromBatches(batches: PositionsImportBatch[]) {
-  return totalsToCalculatorBases(totalsFromPositionRows(flattenBatches(batches)))
+  return totalsToCalculatorBases(totalsFromPositionRows(flattenBatchesForBalances(batches)))
 }
 
 function migrateV1ToV2(o: StoredPositionsImportV1): StoredPositionsImportV2 {

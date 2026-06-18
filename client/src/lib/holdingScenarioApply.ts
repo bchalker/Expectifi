@@ -1,6 +1,10 @@
 import type { CalculatorInputs } from './computeResults'
 import { fmtK } from '../utils/format'
 import {
+  globalRelativeScenarioRates,
+  ratesMatchAnchoredScenario,
+} from './scenarioRates'
+import {
   annualizedReturnFromYearlyPath,
   decimalToPct,
   defaultPositionReturns,
@@ -91,13 +95,26 @@ export function formatSignedRatePct(pct: number): string {
   return `${sign}${Math.abs(rounded).toFixed(1)}%`
 }
 
+export type OutlookScenarioApplyOptions = {
+  /** Holding outlook: anchor preset shape to global slider. Account scenarios omit this. */
+  anchorOutlookToGlobal?: boolean
+}
+
 /**
- * Yearly return span for a scenario preset (matches compute — not global ± modifier).
- * e.g. Very Bearish `−12.0% … +2.0%` when early years are negative.
+ * Yearly return span for outlook tiles.
+ * Pass `globalBlended` for slider-anchored holding ranges; omit for absolute account ranges.
  */
-export function formatOutlookScenarioRateRange(choice: OutlookScenarioChoice, horizon: number): string {
+export function formatOutlookScenarioRateRange(
+  choice: OutlookScenarioChoice,
+  horizon: number,
+  globalBlended?: number,
+): string {
   const h = horizonClamp(horizon)
-  const pcts = scenarioRatesDecimal(choice, h).map((d) => decimalToPct(d))
+  const rateDecimals =
+    globalBlended != null
+      ? globalRelativeScenarioRates(choice, globalBlended, h)
+      : scenarioRatesDecimal(choice, h)
+  const pcts = rateDecimals.map((d) => decimalToPct(d))
   const min = Math.min(...pcts)
   const max = Math.max(...pcts)
   if (Math.abs(max - min) < 0.05) return formatSignedRatePct(min)
@@ -126,7 +143,9 @@ export function outlookRetirementDelta(
     0,
   )
   const globalModel = applyScenarioUiChoice(stub, 'default', globalBlended, h, 0)
-  const scenarioModel = applyScenarioUiChoice(stub, choice, globalBlended, h, 0)
+  const scenarioModel = applyScenarioUiChoice(stub, choice, globalBlended, h, 0, undefined, {
+    anchorOutlookToGlobal: true,
+  })
   const baseline = projectPositionAtRetirement(globalModel, 0, h)
   const projected = projectPositionAtRetirement(scenarioModel, 0, h)
   return projected - baseline
@@ -192,7 +211,21 @@ export function inferScenarioUiChoice(m: PositionReturnModel, blended: number, h
   }
   if (m.returnMode === 'peryear') return 'peryear'
   if (m.returnMode === 'scenario' && m.scenario) {
+    if (m.returnOverride === true && m.id !== '_account') {
+      if (m.scenario === 'very_bull') return 'very_bull'
+      if (m.scenario === 'bull') return 'bull'
+      if (m.scenario === 'very_bear') return 'very_bear'
+      if (m.scenario === 'bear') return 'bear'
+      return 'base'
+    }
     if (ratesMatchScenario(m.scenario, rates, h)) {
+      if (m.scenario === 'very_bull') return 'very_bull'
+      if (m.scenario === 'bull') return 'bull'
+      if (m.scenario === 'very_bear') return 'very_bear'
+      if (m.scenario === 'bear') return 'bear'
+      return 'base'
+    }
+    if (ratesMatchAnchoredScenario(m.scenario, rates, h, blended)) {
       if (m.scenario === 'very_bull') return 'very_bull'
       if (m.scenario === 'bull') return 'bull'
       if (m.scenario === 'very_bear') return 'very_bear'
@@ -238,8 +271,16 @@ export function inferCommonScenarioChoice(
   return first
 }
 
-function applyScenarioToModel(m: PositionReturnModel, scenario: PositionScenarioId, h: number): PositionReturnModel {
-  const yr = scenarioRatesDecimal(scenario, h)
+function applyScenarioToModel(
+  m: PositionReturnModel,
+  scenario: PositionScenarioId,
+  h: number,
+  globalBlended: number,
+  anchorToGlobal: boolean,
+): PositionReturnModel {
+  const yr = anchorToGlobal
+    ? globalRelativeScenarioRates(scenario, globalBlended, h)
+    : scenarioRatesDecimal(scenario, h)
   return {
     ...m,
     returnMode: 'scenario',
@@ -257,8 +298,10 @@ export function applyScenarioUiChoice(
   horizon: number,
   customPct: number,
   yearlyOverride?: number[],
+  options?: OutlookScenarioApplyOptions,
 ): PositionReturnModel {
   const h = horizonClamp(horizon)
+  const anchorOutlook = options?.anchorOutlookToGlobal === true
   switch (choice) {
     case 'default':
       return {
@@ -270,15 +313,15 @@ export function applyScenarioUiChoice(
         returnOverride: false,
       }
     case 'very_bull':
-      return applyScenarioToModel(m, 'very_bull', h)
+      return applyScenarioToModel(m, 'very_bull', h, blended, anchorOutlook)
     case 'bull':
-      return applyScenarioToModel(m, 'bull', h)
+      return applyScenarioToModel(m, 'bull', h, blended, anchorOutlook)
     case 'base':
-      return applyScenarioToModel(m, 'base', h)
+      return applyScenarioToModel(m, 'base', h, blended, anchorOutlook)
     case 'very_bear':
-      return applyScenarioToModel(m, 'very_bear', h)
+      return applyScenarioToModel(m, 'very_bear', h, blended, anchorOutlook)
     case 'bear':
-      return applyScenarioToModel(m, 'bear', h)
+      return applyScenarioToModel(m, 'bear', h, blended, anchorOutlook)
     case 'custom': {
       const dec = pctToDecimal(customPct)
       return {

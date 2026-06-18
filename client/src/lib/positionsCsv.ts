@@ -35,11 +35,14 @@ export function normalizeImportSymbol(symbol: string): string {
   return String(symbol).replace(/\*+$/g, '').trim()
 }
 
-/** Fidelity exports a synthetic "Pending activity" line for unsettled cash; exclude from imports and UI. */
+/** Fidelity synthetic row for unsettled cash (e.g. "Pending activity" / cash debit). Excluded from holdings UI and return models; included in account/bucket balance totals. */
 export function isPendingActivityImportRow(r: ImportedPositionRow): boolean {
   const sym = normalizeImportSymbol(r.symbol).toLowerCase()
   const desc = r.description.trim().toLowerCase()
-  return sym === 'pending activity' || desc === 'pending activity'
+  if (sym === 'pending activity' || desc === 'pending activity') return true
+  if (sym.includes('pending activity') || desc.includes('pending activity')) return true
+  if (desc.includes('unsettled activity')) return true
+  return false
 }
 
 /** Common sweep / government money market-style symbols (Fidelity, Schwab, Vanguard, etc.). */
@@ -415,7 +418,6 @@ export function parseFidelityPositionsCsv(text: string): ParsedPositionsCsv {
       dailyChangeDollar,
       dailyChangePercent,
     }
-    if (isPendingActivityImportRow(row)) continue
 
     const bucket = mapRowToBucket(row)
     if (bucket === 'unknown') unknownAccounts.add(fidelityAccountKey(accountName))
@@ -427,11 +429,10 @@ export function parseFidelityPositionsCsv(text: string): ParsedPositionsCsv {
   return { headers, rows, totals, unknownAccounts }
 }
 
-/** Sum current value by mapped bucket from arbitrary position rows (e.g. merged imports). */
+/** Sum current value by mapped bucket from position rows (includes pending-activity adjustments). */
 export function totalsFromPositionRows(rows: ImportedPositionRow[]): ParsedPositionsCsv['totals'] {
   const totals: ParsedPositionsCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
   for (const r of rows) {
-    if (isPendingActivityImportRow(r)) continue
     const bucket = mapRowToBucket(r)
     if (bucket !== 'unknown') totals[bucket] += r.currentValue
   }
@@ -487,16 +488,17 @@ export function groupPositionsByAccount(rows: ImportedPositionRow[]): ImportedAc
   }
   const out: ImportedAccountGroup[] = []
   for (const [accountName, groupRows] of byName) {
-    const bucket = mapRowToBucket(groupRows[0]!)
+    const holdingRows = groupRows.filter((r) => !isPendingActivityImportRow(r))
+    const bucket = mapRowToBucket(holdingRows[0] ?? groupRows[0]!)
     const total = groupRows.reduce((s, x) => s + x.currentValue, 0)
-    groupRows.sort((a, b) => b.currentValue - a.currentValue)
+    holdingRows.sort((a, b) => b.currentValue - a.currentValue)
     out.push({
       accountName,
       bucket,
       calculatorLabel: accountBucketLabel(bucket),
       total,
-      rows: groupRows,
-      brokerSource: resolveBrokerSource(groupRows[0]!),
+      rows: holdingRows,
+      brokerSource: resolveBrokerSource(holdingRows[0] ?? groupRows[0]!),
     })
   }
   return out

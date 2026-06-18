@@ -8,6 +8,7 @@ import {
   scenarioColumnShortLabel,
   type ScenarioUiChoice,
 } from './holdingScenarioApply'
+import { globalRelativeScenarioRates } from './scenarioRates'
 import type { MarketScenarioId } from './marketScenario'
 import { getMarketScenarioDefinition, resolveGlobalMarketScenarioRates } from './marketScenario'
 import {
@@ -245,7 +246,17 @@ export function projectionModelForHolding(
 ): PositionReturnModel {
   const h = horizonClamp(horizon)
   const source = holdingReturnRateSource(model, accountScenario, blended)
-  if (source === 'custom') return model
+  if (source === 'custom') {
+    if (model.returnMode === 'scenario' && model.scenario) {
+      const rates = globalRelativeScenarioRates(model.scenario, blended, h)
+      return {
+        ...model,
+        yearlyReturns: rates,
+        flatRate: annualizedReturnFromYearlyPath(rates),
+      }
+    }
+    return model
+  }
   if (source === 'account' && accountScenario) {
     const flat = effectiveHoldingFlatRate(model, accountScenario, blended)
     return {
@@ -279,7 +290,8 @@ function effectiveRateRangeLabel(
 ): string {
   const h = horizonClamp(horizon)
   if (isOutlookScenarioChoice(choice)) {
-    return formatOutlookScenarioRateRange(choice, h)
+    const anchorToGlobal = model.id !== '_account' && model.returnMode === 'scenario'
+    return formatOutlookScenarioRateRange(choice, h, anchorToGlobal ? blended : undefined)
   }
   if (choice === 'custom') {
     return `${decimalToPct(model.flatRate).toFixed(1)}%`

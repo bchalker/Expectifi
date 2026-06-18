@@ -88,7 +88,6 @@ function accumulateTotals(rows: ImportedPositionRow[]): ParsedPositionsCsv {
   const totals: ParsedPositionsCsv['totals'] = { trad401k: 0, se401k: 0, roth: 0, hsa: 0, brokerage: 0 }
   const unknownAccounts = new Set<string>()
   for (const r of rows) {
-    if (isPendingActivityImportRow(r)) continue
     const bucket = mapRowToBucket(r)
     if (bucket === 'unknown') unknownAccounts.add(r.accountName.trim() || '(blank)')
     else totals[bucket] += r.currentValue
@@ -180,7 +179,6 @@ export function parseFidelityPositionsExport(text: string): ParsedPositionsCsv {
     const costBasis = iCost >= 0 ? parseCostBasisNullable(costRaw) : null
 
     const row = rowFromHolding(accountName, symRaw, description, currentValue, costBasis)
-    if (isPendingActivityImportRow(row)) continue
     rows.push(row)
   }
 

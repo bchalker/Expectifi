@@ -1,9 +1,9 @@
 import {
   IconArrowNarrowDownDashed,
   IconChevronCompactDown,
+  IconCircleX,
   IconTrendingDown,
   IconTrendingUp,
-  IconTransfer,
 } from "@tabler/icons-react";
 import {
   useCallback,
@@ -22,7 +22,7 @@ import {
   scenarioColumnShortLabel,
   HOLDING_ROW_SCENARIO_SUBLABEL,
 } from "../lib/holdingScenarioApply";
-import { HoldingsScenarioBadge } from "./HoldingsScenarioBadge";
+import { HoldingsScenarioBadge, holdingsScenarioTriggerChoiceClass } from "./HoldingsScenarioBadge";
 import {
   blendedBaselineFV,
   positionUsesCustomReturnMode,
@@ -75,7 +75,6 @@ export function GrowthSliderLabel({
   retirementYear,
   horizon,
   retirementAge,
-  onEditPosition,
   onRemovePositionReturn,
   sliderTrack,
   sliderTicks,
@@ -258,9 +257,7 @@ export function GrowthSliderLabel({
             className="growth-slider-hover-pop__remove"
             aria-label={`Remove custom return overrides for ${p.ticker || "this holding"} (all accounts)`}
             onClick={() => {
-              const tk = normalizeImportSymbol(p.ticker).toUpperCase();
-              const ids = tk ? positionIdsForTickerKey(tk) : [p.id];
-              onRemovePositionReturn(ids.length ? ids : [p.id]);
+              removePositionOverrides(p);
               clearCloseTimer();
               setHoverId(null);
               setAnchor(null);
@@ -273,13 +270,23 @@ export function GrowthSliderLabel({
     );
   }
 
-  function scenarioLabelFor(p: PositionReturnModel): string {
+  function scenarioChoiceFor(p: PositionReturnModel) {
     const b = blendedFor(p);
-    const scenarioChoice = inferScenarioUiChoice(p, b, h);
+    return inferScenarioUiChoice(p, b, h);
+  }
+
+  function scenarioLabelFor(p: PositionReturnModel): string {
+    const scenarioChoice = scenarioChoiceFor(p);
     return scenarioColumnShortLabel(
       scenarioChoice,
       scenarioChoice === "custom" ? p.flatRate : undefined,
     );
+  }
+
+  function removePositionOverrides(p: PositionReturnModel) {
+    const tk = normalizeImportSymbol(p.ticker).toUpperCase();
+    const ids = tk ? positionIdsForTickerKey(tk) : [p.id];
+    onRemovePositionReturn(ids.length ? ids : [p.id]);
   }
 
   function renderInlineSuffix() {
@@ -347,7 +354,10 @@ export function GrowthSliderLabel({
               aria-hidden
             />
             <ul className="growth-slider-label__exception-list">
-              {customPositionsForSuffix.map((p) => (
+              {customPositionsForSuffix.map((p) => {
+                const scenarioChoice = scenarioChoiceFor(p);
+                const scenarioClass = holdingsScenarioTriggerChoiceClass(scenarioChoice);
+                return (
                 <li key={p.id} className="growth-slider-label__exception-row">
                   <button
                     type="button"
@@ -358,19 +368,27 @@ export function GrowthSliderLabel({
                   >
                     {p.ticker || "—"}
                   </button>
-                  <span className="growth-slider-label__exception-scenario">
+                  <span
+                    className={[
+                      "growth-slider-label__exception-scenario",
+                      scenarioClass,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
                     {scenarioLabelFor(p)}
                   </span>
                   <button
                     type="button"
-                    className="growth-slider-label__exception-transfer"
-                    aria-label={`Open scenario for ${p.ticker || "holding"}`}
-                    onClick={() => onEditPosition(p.id)}
+                    className="growth-slider-label__exception-remove"
+                    aria-label={`Remove custom return overrides for ${p.ticker || "holding"} (all accounts)`}
+                    onClick={() => removePositionOverrides(p)}
                   >
-                    <IconTransfer size={14} stroke={1.5} aria-hidden />
+                    <IconCircleX size={14} stroke={1.5} aria-hidden />
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </>
         ) : null}
