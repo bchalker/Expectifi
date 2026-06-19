@@ -7,10 +7,10 @@
 
 .wtr-intensity-selector__track {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: stretch;
-  justify-content: space-between;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   min-height: 2.25rem;
   margin: 0;
   padding: var(--space-half);
