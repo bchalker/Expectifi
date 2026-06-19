@@ -61,9 +61,8 @@ function ContextParagraph({
 
   return (
     <p className="where-to-retire-preview-panel__context">
-      Your top domestic matches are competitive with the best worldwide options
-      at this income level. Our Where to Retire tool scores each city on{" "}
-      {WTR_SCORE_FACTORS} so you can compare your options in detail.
+      Our Where to Retire tool scores each city on {WTR_SCORE_FACTORS} so you
+      can compare your options in detail.
     </p>
   );
 }

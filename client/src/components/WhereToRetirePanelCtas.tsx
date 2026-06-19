@@ -16,7 +16,7 @@ export function WhereToRetirePanelCtas({
         className="where-to-retire-preview-panel__cta-primary"
         onClick={onExplore}
       >
-        Explore where to retire
+        Where to Retire
       </button>
       <button
         type="button"
@@ -25,7 +25,7 @@ export function WhereToRetirePanelCtas({
       >
         {hasOpenedPrefsOverlay
           ? "Update destination priorities"
-          : "Set destination priorities"}
+          : "Set your priorities"}
       </button>
     </div>
   );
