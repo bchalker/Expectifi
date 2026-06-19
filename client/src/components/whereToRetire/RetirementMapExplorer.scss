@@ -1160,30 +1160,11 @@
   .wtr-explorer__list-panel-inner {
     width: 100%;
     min-width: 0;
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
     height: auto;
-    overflow: hidden;
+    overflow: visible;
     border-right: none;
-  }
-
-  .wtr-explorer__map-row--list-only .wtr-explorer__list-panel-inner {
-    max-height: calc(
-      100svh - var(--app-measured-header-h, var(--app-top-chrome-h)) -
-        var(--wtr-mobile-pagination-h, 2.75rem) - env(safe-area-inset-bottom, 0px)
-    );
-  }
-
-  .wtr-explorer__list-mobile-scroll {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding-bottom: calc(
-      var(--wtr-mobile-pagination-h, 2.75rem) + env(safe-area-inset-bottom, 0px)
-    );
   }
 
   .wtr-explorer__list-head-stack {
@@ -1208,9 +1189,9 @@
   }
 
   .wtr-explorer__list-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
   }
 
   .wtr-explorer__list-scroll-inner {

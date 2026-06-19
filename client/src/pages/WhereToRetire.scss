@@ -460,7 +460,9 @@
   .where-to-retire__main-panel-map .where-to-retire__map-stage,
   .where-to-retire__main-panel-map .wtr-explorer,
   .wtr-explorer__map-row--list-only,
-  .wtr-explorer__list-panel {
+  .wtr-explorer__list-panel,
+  .wtr-explorer__list-panel-inner,
+  .wtr-explorer__list-body {
     overflow: visible;
   }
 }

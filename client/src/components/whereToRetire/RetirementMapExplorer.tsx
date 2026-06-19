@@ -475,7 +475,6 @@ export function RetirementMapExplorer({
   const listHeadRef = useRef<HTMLElement>(null);
   const listBodyRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
-  const listMobileScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setListPage(0);
@@ -574,7 +573,7 @@ export function RetirementMapExplorer({
 
   const scrollListToTop = useCallback(() => {
     if (mobileListOnly) {
-      listMobileScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      listHeadRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
       return;
     }
     const viewport = listScrollRef.current?.osInstance()?.elements().viewport;
@@ -672,8 +671,6 @@ export function RetirementMapExplorer({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [filtersOpen, closeFiltersPanel]);
-
-  const listHeadInMobileScroll = mobileListOnly && filteredCities.length > 0;
 
   const listHeadStack = (
     <div className="wtr-explorer__list-head-stack">
@@ -968,7 +965,7 @@ export function RetirementMapExplorer({
                 </button>
               </div>
             ) : null}
-            {!listHeadInMobileScroll ? listHeadStack : null}
+            {listHeadStack}
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
                 {listSearchQuery.trim()
@@ -977,14 +974,8 @@ export function RetirementMapExplorer({
               </p>
             ) : (
               <div ref={listBodyRef} className="wtr-explorer__list-body">
-                {listHeadInMobileScroll ? (
-                  <div
-                    ref={listMobileScrollRef}
-                    className="wtr-explorer__list-mobile-scroll"
-                  >
-                    {listHeadStack}
-                    {listCards}
-                  </div>
+                {mobileListOnly ? (
+                  listCards
                 ) : (
                   <AppOverlayScrollbars
                     ref={listScrollRef}
