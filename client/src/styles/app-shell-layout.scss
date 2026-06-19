@@ -44,7 +44,9 @@ html.app-shell-layout[data-main-hero-stuck='true'] {
   max-height: 100svh;
   // overflow: hidden;
   box-sizing: border-box;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+  --app-page-shell-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px,
+    rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+  box-shadow: var(--app-page-shell-shadow);
 }
 
 .app-header-shell {
@@ -108,6 +110,10 @@ html.app-shell-layout[data-main-hero-stuck='true'] {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
-  
+}
+
+/* WTR wraps .main inside .where-to-retire — same card shadow as dashboard .main */
+.app-scroll-stack__main > .main,
+.app-scroll-stack__main > .where-to-retire > .main {
+  box-shadow: var(--app-page-shell-shadow);
 }

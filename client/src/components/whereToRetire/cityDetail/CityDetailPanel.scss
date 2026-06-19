@@ -664,23 +664,6 @@ all .3s ease;
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .wtr-dest-panel--sheet .wtr-city-detail__header {
-    text-align: center;
-  }
-
-  .wtr-dest-panel--sheet .wtr-city-detail__header-group {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    text-align: center;
-    box-shadow: none;
-  }
-
-  .wtr-dest-panel--sheet .wtr-city-detail__fit-score-wrap,
-  .wtr-dest-panel--sheet .wtr-city-detail__identity,
-  .wtr-dest-panel--sheet .wtr-city-detail__cost-block {
-    grid-column: auto;
-  }
-
   .wtr-dest-panel--sheet .wtr-city-detail__nav {
     display: none;
   }
@@ -705,38 +688,28 @@ all .3s ease;
     border-right: none;
   }
 
-  .wtr-dest-panel--sheet .wtr-city-detail__fit-score-wrap {
-    align-self: auto;
-    max-width: 12rem;
+  .wtr-dest-panel--sheet .wtr-city-detail__footer {
+    box-shadow: none;
+  }
+
+  /* Sheet header (mobile + tablet): score | city | cost — same horizontal layout. */
+  .wtr-dest-panel--sheet .wtr-city-detail__header-group {
+    padding: var(--space-2);
   }
 
   .wtr-dest-panel--sheet .wtr-city-detail__fit-score {
-    border-radius: var(--radius-lg, 12px);
+    width: auto;
+    min-width: 2.75rem;
+    padding: var(--space-2);
+    border-radius: var(--space-2);
   }
 
   .wtr-dest-panel--sheet .wtr-city-detail__identity {
-    align-items: center;
-    padding: var(--space-3) var(--space-4) 0;
-  }
-
-  .wtr-dest-panel--sheet .wtr-city-detail__country-line {
-    justify-content: center;
+    padding-block: 0;
   }
 
   .wtr-dest-panel--sheet .wtr-city-detail__cost-block {
-    align-items: center;
-    padding: 0 var(--space-4) var(--space-3);
-    text-align: center;
-  }
-
-  .wtr-dest-panel--sheet .wtr-city-detail__close-zone {
-    align-self: flex-end;
-    padding: 0 var(--space-4) var(--space-3);
-    border-left: none;
-  }
-
-  .wtr-dest-panel--sheet .wtr-city-detail__footer {
-    box-shadow: none;
+    padding-block: 0;
   }
 }
 

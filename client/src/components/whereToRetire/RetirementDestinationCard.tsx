@@ -166,6 +166,7 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
     <div
       role={isList ? "button" : undefined}
       tabIndex={isList ? 0 : undefined}
+      data-city-id={isList ? city.id : undefined}
       className={[
         "wtr-dest-card",
         isTooltip && "wtr-dest-card--tooltip",

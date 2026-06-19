@@ -222,15 +222,15 @@ function CityDetailPanelBody({
                 : PANEL_ESTIMATES_NOTE
 
   const tabKey = `${city.id}-${activeTab}`
-  const [fadedTabKey, setFadedTabKey] = useState<string | null>(null)
+  const [fadedTabKey, setFadedTabKey] = useState<CityDetailTab | null>(null)
 
   useLayoutEffect(() => {
     setFadedTabKey(null)
-    const id = requestAnimationFrame(() => setFadedTabKey(tabKey))
+    const id = requestAnimationFrame(() => setFadedTabKey(activeTab))
     return () => cancelAnimationFrame(id)
-  }, [tabKey])
+  }, [activeTab])
 
-  const tabFadeIn = fadedTabKey === tabKey
+  const tabFadeIn = fadedTabKey === activeTab
 
   const tabContent = (() => {
     switch (activeTab) {
@@ -246,6 +246,7 @@ function CityDetailPanelBody({
       case 'weather':
         return (
           <WeatherTab
+            cityId={city.id}
             climate={climate}
             climatePreferenceStep={climatePreferenceStep}
             climatePreferenceDirection={climatePreferenceDirection}

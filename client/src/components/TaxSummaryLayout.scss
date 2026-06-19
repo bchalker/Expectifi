@@ -265,6 +265,13 @@ $tax-summary-sidebar-shadow-detail-open:
   }
 }
 
+/* WTR detail-column layout: filters rail matches city list width (22rem). */
+@media (min-width: 1919px) {
+  .section--tax-summary--where-to-retire {
+    --layout-snapshot-panel-width: var(--layout-snapshot-panel-width-where-to-retire);
+  }
+}
+
 /* Growth two-column layout — mirrors income harvest; mobile stacks assumptions above accounts. */
 .section--tax-summary--growth-assumptions .section--tax-summary__growth-layout {
   display: flex;
@@ -355,6 +362,14 @@ $tax-summary-sidebar-shadow-detail-open:
 @media (max-width: 680px) {
   .section--tax-summary--where-to-retire .where-to-retire__mobile-back {
     order: 1;
+  }
+
+  .section--tax-summary.section--tax-summary--where-to-retire {
+    overflow: visible;
+  }
+
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout {
+    overflow: visible;
   }
 }
 

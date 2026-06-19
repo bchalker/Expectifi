@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { CityClimate } from '../lib/api/openMeteo'
 import { getCityClimateForPlace } from '../lib/api/openMeteo'
 import type { MapCity } from '../utils/costOfLiving'
+import { getCityClimateNormals } from '../utils/climateNormals'
 
 type CityClimateState = {
   climate: CityClimate | null
@@ -28,10 +29,12 @@ export function useCityClimate(city: MapCity | null): CityClimateState {
     setFailed(false)
 
     void (async () => {
-      const result = await getCityClimateForPlace(city.city, city.country, city.lat, city.lng)
+      const live =
+        (await getCityClimateForPlace(city.city, city.country, city.lat, city.lng)) ??
+        getCityClimateNormals(city.city, city.country)
       if (cancelled) return
-      if (result) {
-        setClimate(result)
+      if (live) {
+        setClimate(live)
         setFailed(false)
       } else {
         setClimate(null)

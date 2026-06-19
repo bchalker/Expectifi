@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import maplibregl from "maplibre-gl";
 import type { MapLayerMouseEvent } from "maplibre-gl";
@@ -24,6 +31,17 @@ import {
   WTR_CITIES_SOURCE,
 } from "../../lib/whereToRetire/wtrMapCityLayers";
 import {
+  fitMapToResults,
+  MAP_FIT_MAX_ZOOM,
+  MAP_FIT_MIN_ZOOM,
+} from "../../lib/whereToRetire/fitMapToResults";
+import {
+  flyMapToSelectedCity,
+  MAP_DETAIL_CITY_ZOOM,
+  MAP_DETAIL_FLY_DURATION_MS,
+} from "../../lib/whereToRetire/flyMapToSelectedCity";
+import { applyWtrDetailBasemapSymbolVisibility } from "../../lib/whereToRetire/wtrMapBasemapSymbols";
+import {
   resolveMapPinDisplay,
   type MapPinColorView,
 } from "../../lib/whereToRetire/mapPinDisplay";
@@ -35,10 +53,56 @@ import "./WtrMapPinTooltip.scss";
 
 const BOUNDS_EASE_DURATION_MS = 900;
 const TOOLTIP_FADE_MS = 180;
+/** Primary: Carto (stable). Fallback: OpenFreeMap bright (no /style.json suffix). */
 const MAP_STYLE_URLS = [
-  "https://tiles.openfreemap.org/styles/bright/style.json",
   "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  "https://tiles.openfreemap.org/styles/bright",
 ] as const;
+
+type MapPendingContext = {
+  pending: (() => void) | null;
+  waiting: boolean;
+};
+
+function flushPendingMapAction(
+  map: maplibregl.Map,
+  ctx: MapPendingContext,
+): void {
+  if (!map.isStyleLoaded() || !ctx.pending) return;
+  const action = ctx.pending;
+  ctx.pending = null;
+  ctx.waiting = false;
+  action();
+}
+
+/** Run now if the style is loaded; otherwise overwrite pending with latest and run on idle. */
+function runWhenMapStyleReady(
+  map: maplibregl.Map,
+  ctx: MapPendingContext,
+  run: () => void,
+): void {
+  if (map.isStyleLoaded()) {
+    ctx.pending = null;
+    ctx.waiting = false;
+    run();
+    return;
+  }
+
+  ctx.pending = run;
+  if (ctx.waiting) return;
+  ctx.waiting = true;
+
+  const onIdle = () => {
+    if (!map.isStyleLoaded()) return;
+    map.off("idle", onIdle);
+    ctx.waiting = false;
+    const action = ctx.pending;
+    ctx.pending = null;
+    action?.();
+  };
+
+  map.on("idle", onIdle);
+}
 
 type Props = {
   destinations: ScoredMapCity[];
@@ -49,8 +113,12 @@ type Props = {
   favoritedKeySet: ReadonlySet<string>;
   selectedId: string | null;
   detailPanelOpen: boolean;
+  detailColumnLayout?: boolean;
+  detailPanelPaddingRight?: number;
+  detailFlyCoords?: { lng: number; lat: number } | null;
   suppressTooltips?: boolean;
   fitKey: string;
+  fitDestinations: ScoredMapCity[];
   onSelect: (id: string) => void;
 };
 
@@ -74,17 +142,6 @@ function prefersReducedMotion(): boolean {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-}
-
-function whenMapReady(map: maplibregl.Map, run: () => void): () => void {
-  if (map.isStyleLoaded()) {
-    run();
-    return () => {};
-  }
-  map.once("load", run);
-  return () => {
-    map.off("load", run);
-  };
 }
 
 function projectPinTooltipPosition(
@@ -129,8 +186,12 @@ export function RetirementMapLibreMap({
   favoritedKeySet,
   selectedId,
   detailPanelOpen,
+  detailColumnLayout = false,
+  detailPanelPaddingRight = 0,
+  detailFlyCoords = null,
   suppressTooltips = false,
   fitKey,
+  fitDestinations,
   onSelect,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -147,14 +208,25 @@ export function RetirementMapLibreMap({
   const hideTooltipTimeoutRef = useRef<number | null>(null);
   const enterTooltipFrameRef = useRef<number | null>(null);
   const detailPanelOpenRef = useRef(detailPanelOpen);
+  const detailColumnLayoutRef = useRef(detailColumnLayout);
+  const detailPanelPaddingRightRef = useRef(detailPanelPaddingRight);
+  const selectedIdRef = useRef(selectedId);
   const suppressTooltipsRef = useRef(suppressTooltips);
   const dismissTooltipRef = useRef<(immediate?: boolean) => void>(() => {});
-  const openTooltipRef = useRef<(cityId: string, x: number, y: number) => void>(() => {});
+  const openTooltipRef = useRef<(cityId: string, x: number, y: number) => void>(
+    () => {},
+  );
   const prevFocusIdForBoundsRef = useRef<string | null>(null);
   const prevFitKeyRef = useRef(fitKey);
+  const fitDestinationsRef = useRef(fitDestinations);
   const hasAutoFitRef = useRef(false);
+  const lastFlownSelectedIdRef = useRef<string | null>(null);
+  const prevSelectedIdForFlyRef = useRef<string | null>(null);
+  const mapPendingRef = useRef<MapPendingContext>({
+    pending: null,
+    waiting: false,
+  });
   const styleIndexRef = useRef(0);
-  const switchedStyleRef = useRef(false);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const legendActiveBands =
@@ -223,11 +295,15 @@ export function RetirementMapLibreMap({
   citiesGeoJsonRef.current = citiesGeoJson;
 
   destinationsRef.current = destinations;
+  fitDestinationsRef.current = fitDestinations;
   onSelectRef.current = onSelect;
   monthlyIncomeRef.current = monthlyIncome;
   pinColorViewRef.current = pinColorView;
   filtersRef.current = filters;
   detailPanelOpenRef.current = detailPanelOpen;
+  detailColumnLayoutRef.current = detailColumnLayout;
+  detailPanelPaddingRightRef.current = detailPanelPaddingRight;
+  selectedIdRef.current = selectedId;
   suppressTooltipsRef.current = suppressTooltips;
 
   const positionTooltipPortal = (x: number, y: number) => {
@@ -259,7 +335,12 @@ export function RetirementMapLibreMap({
   };
 
   openTooltipRef.current = (cityId, x, y) => {
-    if (detailPanelOpenRef.current || suppressTooltipsRef.current) return;
+    if (
+      (detailPanelOpenRef.current && !detailColumnLayoutRef.current) ||
+      suppressTooltipsRef.current
+    ) {
+      return;
+    }
     clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
 
     setTooltip({ cityId, x, y, visible: false, leaving: false });
@@ -279,6 +360,64 @@ export function RetirementMapLibreMap({
     void mountFrame;
   };
 
+  const flyToCityById = useCallback(
+    (cityId: string, lng: number, lat: number, citySwitch: boolean) => {
+      const map = mapRef.current;
+      if (!map) return;
+
+      const runFly = () => {
+        const overlayPanelWidth = detailColumnLayoutRef.current
+          ? 0
+          : detailPanelPaddingRightRef.current;
+
+        map.resize();
+        flyMapToSelectedCity(map, lng, lat, {
+          overlayPanelWidth,
+          duration: prefersReducedMotion() ? 0 : MAP_DETAIL_FLY_DURATION_MS,
+          cityId,
+          citySwitch,
+        });
+        lastFlownSelectedIdRef.current = cityId;
+      };
+
+      runWhenMapStyleReady(map, mapPendingRef.current, runFly);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!detailPanelOpen) {
+      lastFlownSelectedIdRef.current = null;
+      prevSelectedIdForFlyRef.current = null;
+      mapPendingRef.current.pending = null;
+      mapPendingRef.current.waiting = false;
+    }
+
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    applyWtrDetailBasemapSymbolVisibility(map, detailPanelOpen);
+  }, [detailPanelOpen]);
+
+  useLayoutEffect(() => {
+    if (!detailPanelOpen || !selectedId || !detailFlyCoords) return;
+    if (lastFlownSelectedIdRef.current === selectedId) return;
+
+    const { lng, lat } = detailFlyCoords;
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
+
+    const citySwitch =
+      prevSelectedIdForFlyRef.current !== null &&
+      prevSelectedIdForFlyRef.current !== selectedId;
+    prevSelectedIdForFlyRef.current = selectedId;
+    flyToCityById(selectedId, lng, lat, citySwitch);
+  }, [
+    selectedId,
+    detailPanelOpen,
+    detailFlyCoords?.lng,
+    detailFlyCoords?.lat,
+    flyToCityById,
+  ]);
+
   const hoveredScored = tooltip
     ? destinations.find((item) => item.city.id === tooltip.cityId)
     : null;
@@ -293,7 +432,9 @@ export function RetirementMapLibreMap({
     cityLayerHandlersAttachedRef.current = true;
 
     map.on("click", WTR_CITIES_LAYER, (event) => {
-      if (detailPanelOpenRef.current) return;
+      if (detailPanelOpenRef.current && !detailColumnLayoutRef.current) {
+        return;
+      }
       const cityId = cityIdFromEvent(event);
       if (!cityId) return;
       dismissTooltipRef.current(true);
@@ -301,7 +442,10 @@ export function RetirementMapLibreMap({
     });
 
     map.on("mouseenter", WTR_CITIES_LAYER, (event) => {
-      if (detailPanelOpenRef.current || suppressTooltipsRef.current) return;
+      if (suppressTooltipsRef.current) return;
+      if (detailPanelOpenRef.current && !detailColumnLayoutRef.current) {
+        return;
+      }
       const cityId = cityIdFromEvent(event);
       const scored = cityId
         ? destinationsRef.current.find((d) => d.city.id === cityId)
@@ -312,7 +456,10 @@ export function RetirementMapLibreMap({
         clearWtrCityHoverState(map, hoveredCityIdRef.current);
       }
       hoveredCityIdRef.current = cityId;
-      map.setFeatureState({ source: WTR_CITIES_SOURCE, id: cityId }, { hover: true });
+      map.setFeatureState(
+        { source: WTR_CITIES_SOURCE, id: cityId },
+        { hover: true },
+      );
       map.getCanvas().style.cursor = "pointer";
 
       const { x, y } = projectPinTooltipPosition(
@@ -376,13 +523,13 @@ export function RetirementMapLibreMap({
       map.touchZoomRotate,
     ] as const;
 
-    if (detailPanelOpen) {
+    if (detailPanelOpen && !detailColumnLayout) {
       interactionModes.forEach((mode) => mode.disable());
       return;
     }
 
     interactionModes.forEach((mode) => mode.enable());
-  }, [detailPanelOpen]);
+  }, [detailPanelOpen, detailColumnLayout]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -391,9 +538,9 @@ export function RetirementMapLibreMap({
       container: containerRef.current,
       style: MAP_STYLE_URLS[0],
       center: [0, 20],
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 8,
+      zoom: MAP_FIT_MIN_ZOOM,
+      minZoom: MAP_FIT_MIN_ZOOM,
+      maxZoom: Math.max(MAP_FIT_MAX_ZOOM, MAP_DETAIL_CITY_ZOOM),
       maxTileCacheSize: 80,
       attributionControl: { compact: true },
     });
@@ -404,12 +551,12 @@ export function RetirementMapLibreMap({
     );
 
     const promoteFallbackStyle = () => {
-      if (switchedStyleRef.current) return;
       const nextIndex = styleIndexRef.current + 1;
       if (nextIndex >= MAP_STYLE_URLS.length) return;
-      switchedStyleRef.current = true;
       styleIndexRef.current = nextIndex;
       cityLayerHandlersAttachedRef.current = false;
+      mapPendingRef.current.pending = null;
+      mapPendingRef.current.waiting = false;
       map.setStyle(MAP_STYLE_URLS[nextIndex]);
     };
 
@@ -439,6 +586,8 @@ export function RetirementMapLibreMap({
       ensureWtrCityLayers(map);
       attachCityLayerHandlers(map);
       updateWtrCityLayerData(map, citiesGeoJsonRef.current);
+      applyWtrDetailBasemapSymbolVisibility(map, detailPanelOpenRef.current);
+      flushPendingMapAction(map, mapPendingRef.current);
     };
 
     map.on("load", onStyleReady);
@@ -458,6 +607,8 @@ export function RetirementMapLibreMap({
       hoveredCityIdRef.current = null;
       map.remove();
       mapRef.current = null;
+      mapPendingRef.current.pending = null;
+      mapPendingRef.current.waiting = false;
     };
   }, []);
 
@@ -554,36 +705,17 @@ export function RetirementMapLibreMap({
     if (hasAutoFitRef.current && !panelJustClosed && !filtersChanged) return;
     hasAutoFitRef.current = true;
 
-    return whenMapReady(map, () => {
+    return runWhenMapStyleReady(map, mapPendingRef.current, () => {
       const reduced = prefersReducedMotion();
-      const duration = reduced ? 0 : BOUNDS_EASE_DURATION_MS;
-      const visibleDestinations = destinationsRef.current;
-
-      map.stop();
-
-      if (!visibleDestinations.length) {
-        map.easeTo({
-          center: [0, 20],
-          zoom: 2,
-          duration: reduced ? 0 : BOUNDS_EASE_DURATION_MS * 0.85,
-          essential: true,
-        });
-        return;
-      }
-
-      const bounds = new maplibregl.LngLatBounds();
-      visibleDestinations.forEach((item) => {
-        bounds.extend([item.city.lng, item.city.lat]);
-      });
-
-      map.fitBounds(bounds, {
-        padding: 40,
-        duration,
-        maxZoom: 6,
-        essential: true,
+      fitMapToResults(fitDestinationsRef.current, map, {
+        duration: reduced ? 0 : BOUNDS_EASE_DURATION_MS,
+        maxZoom: MAP_FIT_MAX_ZOOM,
+        minZoom: MAP_FIT_MIN_ZOOM,
       });
     });
   }, [fitKey, focusId]);
+
+  const detailOverlayOpen = detailPanelOpen && !detailColumnLayout;
 
   const hoverTooltip =
     tooltip && hoveredScored && typeof document !== "undefined"
@@ -621,7 +753,11 @@ export function RetirementMapLibreMap({
         ref={mapShellRef}
         className={[
           "wtr-maplibre-map",
-          detailPanelOpen && "wtr-maplibre-map--detail-open",
+          detailOverlayOpen && "wtr-maplibre-map--detail-open",
+          detailOverlayOpen && "wtr-maplibre-map--detail-overlay",
+          detailColumnLayout &&
+            detailPanelOpen &&
+            "wtr-maplibre-map--detail-column-open",
         ]
           .filter(Boolean)
           .join(" ")}

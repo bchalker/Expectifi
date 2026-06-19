@@ -36,12 +36,12 @@
   background: var(--surface2);
 }
 
-.wtr-maplibre-map--detail-open .wtr-maplibre-map__canvas {
+.wtr-maplibre-map--detail-overlay .wtr-maplibre-map__canvas {
   pointer-events: none;
   cursor: default;
 }
 
-.wtr-maplibre-map--detail-open .wtr-map-pin-host {
+.wtr-maplibre-map--detail-overlay .wtr-map-pin-host {
   cursor: default;
 }
 

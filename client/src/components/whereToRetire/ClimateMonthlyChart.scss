@@ -1,5 +1,5 @@
 .wtr-climate-monthly-chart {
-  --wtr-climate-bar-fill: color-mix(in srgb, var(--text-muted) 35%, var(--surface));
+  --wtr-climate-bar-fill: rgba(0,0,0,0.15);
   --wtr-climate-bar-comfort: var(--green3);
   --wtr-climate-comfort-band: color-mix(in srgb, var(--green3) 18%, transparent);
   width: 100%;

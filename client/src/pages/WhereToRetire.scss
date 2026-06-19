@@ -65,6 +65,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  max-width: var(--layout-wtr-max);
 }
 
 @media (min-width: 681px) {
@@ -200,6 +201,20 @@
 
   .where-to-retire {
     min-height: 0;
+    overflow: visible;
+  }
+
+  .main--where-to-retire > .section--tax-summary--where-to-retire {
+    overflow: visible;
+  }
+
+  .section--tax-summary--where-to-retire .section--tax-summary__income-layout {
+    overflow: visible;
+  }
+
+  .where-to-retire__main:not(.where-to-retire__main--drawer-open):not(
+      .where-to-retire__main--compare-open
+    ) {
     overflow: visible;
   }
 
@@ -432,6 +447,20 @@
   .where-to-retire__main-panel-map .wtr-explorer {
     flex: 0 0 auto;
     min-height: auto;
+    overflow: visible;
+  }
+
+  .section--tax-summary--where-to-retire
+    .section--tax-summary__income-layout
+    > .portfolio-accounts-reveal,
+  .where-to-retire__main:not(.where-to-retire__main--drawer-open):not(
+      .where-to-retire__main--compare-open
+    ),
+  .where-to-retire__main-panel-map,
+  .where-to-retire__main-panel-map .where-to-retire__map-stage,
+  .where-to-retire__main-panel-map .wtr-explorer,
+  .wtr-explorer__map-row--list-only,
+  .wtr-explorer__list-panel {
     overflow: visible;
   }
 }

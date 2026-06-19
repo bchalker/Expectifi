@@ -25,6 +25,11 @@ html[data-no-portfolio-subheader='true'] .app-header-shell--ss-claim {
   --app-header-stack-h: calc(var(--app-top-chrome-h) + var(--goal-bar-h));
 }
 
+.app-header-shell--where-to-retire .header--app,
+.app-header-shell--where-to-retire .header--app .header__inner {
+  max-width: var(--layout-wtr-max);
+}
+
 .app-header-shell--where-to-retire.app-header-shell--ss-claim {
   --subheader-h: 0px;
 }

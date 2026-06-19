@@ -14,9 +14,12 @@ import {
   staggerSectionProps,
   type CityDetailTabStaggerProps,
 } from "./cityDetailTabUtils";
+import { getSmokeSeasonForCity } from "../../../data/smokeSeasonData";
+import { SmokeSeasonBadge } from "./SmokeSeasonBadge";
 import "./WeatherTab.scss";
 
 type Props = CityDetailTabStaggerProps & {
+  cityId: string;
   climate: CityClimate | null;
   climatePreferenceStep: PreferenceStep;
   climatePreferenceDirection: RetirementPreferences["climatePreference"];
@@ -157,6 +160,7 @@ function MetricColumn({
 }
 
 export function WeatherTab({
+  cityId,
   climate,
   climatePreferenceStep,
   climatePreferenceDirection,
@@ -195,20 +199,25 @@ export function WeatherTab({
     ],
   );
 
+  const smokeSeason = getSmokeSeasonForCity(cityId);
+
   if (failed) {
     return (
       <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--weather">
-        <p
-          role="status"
-          {...staggerSectionProps(
-            0,
-            "wtr-weather-tab__unavailable",
-            staggerClassName,
-            staggerStyle,
-          )}
-        >
-          Climate data unavailable
-        </p>
+        <article className="wtr-weather-tab" aria-label="Climate and weather">
+          <p
+            role="status"
+            {...staggerSectionProps(
+              0,
+              "wtr-weather-tab__unavailable",
+              staggerClassName,
+              staggerStyle,
+            )}
+          >
+            Climate data unavailable
+          </p>
+          {smokeSeason ? <SmokeSeasonBadge cityId={cityId} /> : null}
+        </article>
       </div>
     );
   }
@@ -367,6 +376,8 @@ export function WeatherTab({
             />
           </div>
         </section>
+
+        <SmokeSeasonBadge cityId={cityId} />
 
         <section
           aria-labelledby="wtr-weather-chart-heading"

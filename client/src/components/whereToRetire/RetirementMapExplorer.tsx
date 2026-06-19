@@ -20,6 +20,7 @@ import type { OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { useWtrDetailColumnLayout } from "../../hooks/useWtrDetailColumnLayout";
 import {
   resolveWhereToLook,
   scoreAndFilterMapCities,
@@ -243,8 +244,10 @@ export function RetirementMapExplorer({
 
   const chromeRef = useRef<HTMLDivElement>(null);
   const mobileListOnly = useWtrMobileListOnly();
+  const detailColumnLayout = useWtrDetailColumnLayout();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [detailPanelWidth, setDetailPanelWidth] = useState(0);
   const [listPanelOpen, setListPanelOpen] = useState(true);
   const [listPage, setListPage] = useState(0);
   const [expatSortDescending, setExpatSortDescending] = useState(true);
@@ -278,6 +281,7 @@ export function RetirementMapExplorer({
 
   /** Map rescoring is debounced so slider drags do not rescore ~900 cities every frame. */
   const debouncedExplorationIncome = useDebouncedValue(explorationIncome, 250);
+  const debouncedListSearchQuery = useDebouncedValue(listSearchQuery, 300);
   const debouncedMinRetirementScore = useDebouncedValue(
     filters.minRetirementScore,
     200,
@@ -327,7 +331,21 @@ export function RetirementMapExplorer({
     ],
   );
 
-  /** Canonical fit-score rank — stable when the list is re-sorted by pin view or filters. */
+  /** Viewport fit tracks the list result set (debounced search + debounced map filters). */
+  const mapFitDestinations = useMemo(() => {
+    const query = debouncedListSearchQuery.trim().toLowerCase();
+    if (!query) return mapSortedCities;
+    return mapSortedCities.filter(({ city }) => {
+      const haystack = `${city.city} ${city.country}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [mapSortedCities, debouncedListSearchQuery]);
+
+  const mapFitKey = useMemo(
+    () => mapFitDestinations.map((item) => item.city.id).join("\0"),
+    [mapFitDestinations],
+  );
+
   const fitRankByCityId = useMemo(() => {
     const fitSorted = [...baseFilteredCities].sort((a, b) => {
       const byScore = b.retirementScore - a.retirementScore;
@@ -514,12 +532,39 @@ export function RetirementMapExplorer({
     }
   }, [filteredCities, selectedId]);
 
-  const selectedScored = useMemo(
-    () => filteredCities.find((s) => s.city.id === selectedId) ?? null,
-    [filteredCities, selectedId],
-  );
+  useEffect(() => {
+    if (!selectedId || !panelOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      listCardsRef.current
+        ?.querySelector(`[data-city-id="${CSS.escape(selectedId)}"]`)
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedId, panelOpen]);
+
+  const selectedScored = useMemo(() => {
+    if (!selectedId) return null;
+    return (
+      filteredCities.find((s) => s.city.id === selectedId) ??
+      mapSortedCities.find((s) => s.city.id === selectedId) ??
+      null
+    );
+  }, [filteredCities, mapSortedCities, selectedId]);
 
   const detailPanelOpen = panelOpen && selectedScored != null;
+
+  const detailFlyCoords = useMemo(() => {
+    if (!selectedScored) return null;
+    return {
+      lng: selectedScored.city.lng,
+      lat: selectedScored.city.lat,
+    };
+  }, [selectedScored?.city.id, selectedScored?.city.lng, selectedScored?.city.lat]);
+
+  useEffect(() => {
+    if (!detailColumnLayout) return;
+    notifyMapResize();
+  }, [detailColumnLayout, detailPanelOpen, detailPanelWidth]);
 
   useEffect(() => {
     onDetailPanelOpenChange?.(detailPanelOpen);
@@ -527,9 +572,15 @@ export function RetirementMapExplorer({
   }, [detailPanelOpen, onDetailPanelOpenChange]);
 
   const scrollListToTop = useCallback(() => {
+    if (mobileListOnly) {
+      listBodyRef.current
+        ?.closest(".wtr-explorer__list-panel-inner")
+        ?.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
     const viewport = listScrollRef.current?.osInstance()?.elements().viewport;
     viewport?.scrollTo({ top: 0, behavior: "auto" });
-  }, []);
+  }, [mobileListOnly]);
 
   const changeListPage = useCallback(
     (page: number) => {
@@ -554,15 +605,24 @@ export function RetirementMapExplorer({
     [filteredCities, scrollListToTop, selectedId],
   );
 
+  const openDestination = useCallback(
+    (id: string) => {
+      if (panelOpen && selectedId === id) return;
+      setSelectedId(id);
+      const index = filteredCities.findIndex((s) => s.city.id === id);
+      if (index >= 0) setListPage(Math.floor(index / LIST_PAGE_SIZE));
+      setPanelOpen(true);
+    },
+    [filteredCities, panelOpen, selectedId],
+  );
+
   const goToFilteredCityIndex = useCallback(
     (index: number) => {
       const item = filteredCities[index];
       if (!item) return;
-      setSelectedId(item.city.id);
-      setListPage(Math.floor(index / LIST_PAGE_SIZE));
-      if (!panelOpen) setPanelOpen(true);
+      openDestination(item.city.id);
     },
-    [filteredCities, panelOpen],
+    [filteredCities, openDestination],
   );
 
   const destinationListNav = useMemo(() => {
@@ -583,17 +643,9 @@ export function RetirementMapExplorer({
     };
   }, [filteredCities, goToFilteredCityIndex, selectedId]);
 
-  const openDestination = useCallback(
-    (id: string) => {
-      setSelectedId(id);
-      const index = filteredCities.findIndex((s) => s.city.id === id);
-      if (index >= 0) setListPage(Math.floor(index / LIST_PAGE_SIZE));
-      if (panelOpen && selectedId === id) return;
-      if (panelOpen) return;
-      setPanelOpen(true);
-    },
-    [filteredCities, panelOpen, selectedId],
-  );
+  const handleDetailPanelWidthChange = useCallback((width: number) => {
+    setDetailPanelWidth(width);
+  }, []);
 
   const closePanel = useCallback(() => {
     setPanelOpen(false);
@@ -642,6 +694,10 @@ export function RetirementMapExplorer({
           !mobileListOnly &&
             !listPanelOpen &&
             "wtr-explorer__map-row--list-collapsed",
+          detailColumnLayout && "wtr-explorer__map-row--detail-column",
+          detailColumnLayout &&
+            detailPanelOpen &&
+            "wtr-explorer__map-row--detail-open",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -876,6 +932,11 @@ export function RetirementMapExplorer({
                   ref={listScrollRef}
                   className="wtr-explorer__list-scroll"
                   defer={false}
+                  options={
+                    mobileListOnly
+                      ? { overflow: { x: 'hidden', y: 'hidden' } }
+                      : undefined
+                  }
                 >
                   <div className="wtr-explorer__list-scroll-inner">
                     <div
@@ -945,8 +1006,12 @@ export function RetirementMapExplorer({
               favoritedKeySet={favoritedKeySet}
               selectedId={selectedId}
               detailPanelOpen={detailPanelOpen}
+              detailColumnLayout={detailColumnLayout}
+              detailPanelPaddingRight={detailPanelWidth}
+              detailFlyCoords={detailFlyCoords}
               suppressTooltips={filtersOpen}
-              fitKey={structuralFiltersKey}
+              fitKey={mapFitKey}
+              fitDestinations={mapFitDestinations}
               onSelect={openDestination}
             />
           </div>
@@ -980,6 +1045,8 @@ export function RetirementMapExplorer({
           open={detailPanelOpen}
           onClose={closePanel}
           listNav={destinationListNav}
+          detailColumnLayout={detailColumnLayout}
+          onPanelWidthChange={handleDetailPanelWidthChange}
         />
 
         <RetirementMapFilters

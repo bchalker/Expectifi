@@ -604,6 +604,14 @@
   --wtr-map-edge-fade-size: 20%;
 }
 
+@media (min-width: 1919px) {
+  .wtr-explorer__map-row--detail-column.wtr-explorer__map-row--detail-open .wtr-explorer__map-stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    transition: flex-basis 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
 .wtr-explorer__map-stage .wtr-maplibre-map::after {
   content: '';
   position: absolute;
@@ -1159,10 +1167,35 @@
     border-right: none;
   }
 
+  /* Scroll the list column here so sticky head works on iOS (not app-scroll-stack). */
+  .wtr-explorer__map-row--list-only .wtr-explorer__list-panel-inner {
+    max-height: calc(
+      100svh - var(--app-measured-header-h, var(--app-top-chrome-h)) -
+        var(--wtr-mobile-pagination-h, 2.75rem) - env(safe-area-inset-bottom, 0px)
+    );
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
   .wtr-explorer__list-head-stack {
+    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 11;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--surface);
+  }
+
+  .wtr-explorer__map-row--list-only .wtr-explorer__list-scroll,
+  .wtr-explorer__map-row--list-only .wtr-explorer__list-scroll [data-overlayscrollbars-viewport] {
+    overflow: visible !important;
+  }
+
+  .wtr-explorer__map-row--list-only .wtr-explorer__list-scroll[data-overlayscrollbars='host'] {
+    overflow: visible;
   }
 
   .wtr-explorer__list-head {
@@ -1173,7 +1206,7 @@
   .where-to-retire__main .wtr-explorer__list-head,
   .where-to-retire__main-panel .wtr-explorer__list-head {
     --list-head-inline-pad: var(--space-5);
-    padding: var(--space-3) var(--list-head-inline-pad);
+    padding: var(--space-2);
   }
 
   .wtr-explorer__list-body {
@@ -1185,6 +1218,7 @@
   .wtr-explorer__list-scroll {
     flex: 0 0 auto;
     min-height: auto;
+    overflow: visible;
   }
 
   .wtr-explorer__list-scroll-inner {

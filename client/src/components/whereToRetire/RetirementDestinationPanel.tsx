@@ -31,6 +31,8 @@ type Props = {
   open: boolean;
   onClose: () => void;
   listNav: DestinationListNav | null;
+  detailColumnLayout?: boolean;
+  onPanelWidthChange?: (width: number) => void;
 };
 
 export function RetirementDestinationPanel({
@@ -42,6 +44,8 @@ export function RetirementDestinationPanel({
   open,
   onClose,
   listNav,
+  detailColumnLayout = false,
+  onPanelWidthChange,
 }: Props) {
   const mobileSheet = useWtrDestPanelMobileSheet();
   const sheetRef = useRef<HTMLElement>(null);
@@ -63,7 +67,14 @@ export function RetirementDestinationPanel({
 
   useEffect(() => {
     const el = sheetRef.current;
-    if (!el || mobileSheet) return;
+    if (!el || mobileSheet || detailColumnLayout) {
+      if (el && detailColumnLayout) {
+        el.style.transform = "";
+        el.style.visibility = "";
+        el.style.pointerEvents = "";
+      }
+      return;
+    }
 
     mapRailAnimRef.current?.cancel();
     mapRailAnimRef.current = null;
@@ -148,7 +159,26 @@ export function RetirementDestinationPanel({
       anim.cancel();
       mapRailAnimRef.current = null;
     };
-  }, [open, mobileSheet]);
+  }, [open, mobileSheet, detailColumnLayout]);
+
+  useEffect(() => {
+    if (mobileSheet || !open) {
+      onPanelWidthChange?.(0);
+      return;
+    }
+    const el = sheetRef.current;
+    if (!el) return;
+
+    const reportWidth = () => onPanelWidthChange?.(el.offsetWidth);
+    reportWidth();
+
+    const observer = new ResizeObserver(reportWidth);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      onPanelWidthChange?.(0);
+    };
+  }, [mobileSheet, open, onPanelWidthChange]);
 
   useEffect(() => {
     if (!open) return;
@@ -191,7 +221,12 @@ export function RetirementDestinationPanel({
         ref={sheetRef}
         className={[
           "wtr-dest-panel",
-          !mobileSheet && "wtr-dest-panel--map-rail",
+          !mobileSheet &&
+            !detailColumnLayout &&
+            "wtr-dest-panel--map-rail",
+          !mobileSheet &&
+            detailColumnLayout &&
+            "wtr-dest-panel--detail-column",
           open && "wtr-dest-panel--open",
           mobileSheet && "wtr-dest-panel--sheet",
           isDragging && "mobile-bottom-sheet-panel--dragging",
