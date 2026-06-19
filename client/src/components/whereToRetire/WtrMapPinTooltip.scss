@@ -28,21 +28,6 @@
   max-width: 17.5rem;
 }
 
-.wtr-pin-tooltip-card.wtr-dest-card {
-  width: 100%;
-  min-width: 12.5rem;
-  max-width: 17.5rem;
-  min-height: 3.5rem;
-  padding: 0;
-  border: none;
-  overflow: hidden;
-  cursor: default;
-  pointer-events: none;
-  box-shadow:
-    0 4px 14px color-mix(in srgb, var(--color-navy) 12%, transparent),
-    0 1px 3px color-mix(in srgb, var(--text) 8%, transparent);
-}
-
 .wtr-pin-tooltip__arrow {
   flex-shrink: 0;
   width: 0;
@@ -52,50 +37,6 @@
   border-right: 8px solid transparent;
   border-left: 8px solid transparent;
   filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--color-navy) 10%, transparent));
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__name {
-  font-size: var(--text-sm);
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__country-name {
-  font-size: var(--text-xs);
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__top {
-  gap: 0;
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__body {
-  padding: var(--space-3);
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__fit-col {
-  padding: 0;
-  border: none;
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__fit-stack {
-  padding: 0;
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__fit-badge {
-  font-size: var(--text-base);
-}
-
-.wtr-pin-tooltip-card .wtr-dest-card__advisory-footer {
-  margin-left: calc(-1 * var(--space-3));
-  margin-right: calc(-1 * var(--space-3));
-  margin-bottom: calc(-1 * var(--space-3));
-}
-
-.wtr-pin-tooltip-card.wtr-dest-card:hover,
-.wtr-pin-tooltip-card.wtr-dest-card--active {
-  border: none;
-  background: var(--surface);
-  box-shadow:
-    0 4px 14px color-mix(in srgb, var(--color-navy) 12%, transparent),
-    0 1px 3px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

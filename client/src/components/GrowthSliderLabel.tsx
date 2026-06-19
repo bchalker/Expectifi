@@ -50,7 +50,6 @@ export type GrowthSliderLabelProps = {
   retirementYear: number;
   horizon: number;
   retirementAge: number;
-  onEditPosition: (positionId: string) => void;
   /** Clear stored return overrides for these position ids (usually one ticker → many accounts). */
   onRemovePositionReturn: (positionIds: string[]) => void;
   /** Range input for the strip slider row (value pin renders above the track). */

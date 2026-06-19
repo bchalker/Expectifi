@@ -170,6 +170,8 @@
     --sky-blue-wave: hsl(var(--sky-blue-h), var(--sky-blue-s), 16%);
   --sky-blue-d7: hsl(var(--sky-blue-h), var(--sky-blue-s), 8%);
   
+  --slider-gradient: linear-gradient(to bottom, var(--sky-blue-u1) 0%, rgba(255, 255, 255, 0) 15px);
+
   --color-background-primary: #ffffff;
   --color-background-success: var(--green6);
   --color-border-success: color-mix(in srgb, var(--color-text-success) 32%, transparent);

@@ -2,7 +2,6 @@ import {
   EXPAT_PIN_LEGEND,
   BUDGET_PIN_LEGEND,
   SCORE_PIN_LEGEND,
-  type ExpatLegendTierId,
   type MapPinColorView,
 } from '../../lib/whereToRetire/mapPinDisplay'
 import './WtrMapPinLegend.scss'
@@ -12,16 +11,23 @@ type Props = {
   /** `bar` — inline row beside description; `overlay` — floating card on map (legacy). */
   variant?: 'bar' | 'overlay'
   className?: string
-  activeExpatTiers?: ExpatLegendTierId[]
-  onToggleExpatTier?: (tier: ExpatLegendTierId) => void
+  activeBands?: readonly string[]
+  onToggleBand?: (bandClass: string) => void
+}
+
+function legendToggleLabel(view: MapPinColorView, label: string, isActive: boolean): string {
+  const action = isActive ? 'Hide' : 'Show'
+  if (view === 'score') return `${action} ${label} retirement scores`
+  if (view === 'budget') return `${action} ${label} budget fit`
+  return `${action} ${label} expat communities`
 }
 
 export function WtrMapPinLegend({
   view,
   variant = 'overlay',
   className,
-  activeExpatTiers,
-  onToggleExpatTier,
+  activeBands,
+  onToggleBand,
 }: Props) {
   const items =
     view === 'score'
@@ -37,14 +43,14 @@ export function WtrMapPinLegend({
         ? 'Budget fit legend'
         : 'Expat community legend'
 
-  const expatInteractive = view === 'expat' && onToggleExpatTier != null
+  const interactive = onToggleBand != null
 
   return (
     <div
       className={[
         'wtr-map-pin-legend',
         variant === 'bar' && 'wtr-map-pin-legend--bar',
-        expatInteractive && 'wtr-map-pin-legend--interactive',
+        interactive && 'wtr-map-pin-legend--interactive',
         className,
       ]
         .filter(Boolean)
@@ -53,13 +59,12 @@ export function WtrMapPinLegend({
       aria-label={ariaLabel}
     >
       {items.map((item) => {
-        const tier = item.bandClass as ExpatLegendTierId
         const isActive =
-          !expatInteractive ||
-          !activeExpatTiers ||
-          activeExpatTiers.includes(tier)
+          !interactive ||
+          !activeBands ||
+          activeBands.includes(item.bandClass)
 
-        if (expatInteractive) {
+        if (interactive) {
           return (
             <button
               key={item.bandClass}
@@ -71,8 +76,8 @@ export function WtrMapPinLegend({
                 isActive ? 'wtr-map-pin-legend__item--on' : 'wtr-map-pin-legend__item--off',
               ].join(' ')}
               aria-pressed={isActive}
-              aria-label={`${isActive ? 'Hide' : 'Show'} ${item.label} expat communities`}
-              onClick={() => onToggleExpatTier(tier)}
+              aria-label={legendToggleLabel(view, item.label, isActive)}
+              onClick={() => onToggleBand(item.bandClass)}
             >
               <span
                 className="wtr-map-pin-legend__dot"

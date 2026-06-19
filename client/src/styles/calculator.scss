@@ -559,6 +559,12 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(15, 1
   column-gap: var(--space-2) /* review: was 10px */;
   row-gap: var(--space-1);
   width: 100%;
+  padding: var(--space-3);
+  background: transparent;
+  border-radius: var(--space-2);
+  background-image: var(--slider-gradient);
+  overflow: hidden;
+  
 }
 
 .range-inline-row > input[type='range'] {

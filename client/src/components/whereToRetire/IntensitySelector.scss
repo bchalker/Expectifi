@@ -9,6 +9,7 @@
   position: relative;
   display: flex;
   align-items: stretch;
+  justify-content: space-between;
   width: 100%;
   min-height: 2.25rem;
   margin: 0;
@@ -42,10 +43,10 @@
 .wtr-intensity-selector__btn {
   position: relative;
   z-index: 1;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 auto;
   min-height: 1.75rem;
   padding: 0 var(--space-2);
+  white-space: nowrap;
   border: 0;
   border-radius: 9999px;
   background: transparent;
@@ -55,7 +56,7 @@
   line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 180ms ease;
+  transition: all 180ms ease;
 }
 
 .wtr-intensity-selector__btn:hover {
@@ -83,18 +84,18 @@
 }
 
 .wtr-intensity-selector--compact .wtr-intensity-selector__track {
-  min-height: 1.75rem;
-  padding: 2px;
+  min-height: 2rem;
+  padding: var(--space-1);
 }
 
 .wtr-intensity-selector--compact .wtr-intensity-selector__thumb {
-  top: 2px;
-  bottom: 2px;
+  top: var(--space-1);
+  bottom: var(--space-1);
 }
 
 .wtr-intensity-selector--compact .wtr-intensity-selector__btn {
   min-height: 1.375rem;
-  padding: 0 var(--space-1);
+  padding: 0 var(--space-3);
   font-size: var(--text-sm);
 }
 

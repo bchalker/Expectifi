@@ -76,7 +76,17 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
           </h2>
           <div className="wtr-city-detail__country-line">
             <CountryFlag country={country} size="s" className="wtr-city-detail__flag" />
-            <p className="wtr-city-detail__country">{country}</p>
+            <span className="wtr-city-detail__country-text">
+              <span className="wtr-city-detail__country">{country}</span>
+              {showCaution ? (
+                <>
+                  <span className="wtr-city-detail__country-divider" aria-hidden>
+                    ·
+                  </span>
+                  <WtrTravelAdvisoryCautionChip country={country} variant="inline" />
+                </>
+              ) : null}
+            </span>
             {onExcludeCountry ? (
               <Tooltip
                 content={
@@ -111,9 +121,6 @@ export const CityDetailPanelHeader = memo(function CityDetailPanelHeader({
                   <IconForbid size={16} stroke={1.5} aria-hidden />
                 </span>
               </Tooltip>
-            ) : null}
-            {showCaution ? (
-              <WtrTravelAdvisoryCautionChip country={country} />
             ) : null}
           </div>
         </div>

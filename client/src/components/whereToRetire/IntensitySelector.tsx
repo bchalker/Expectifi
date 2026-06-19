@@ -57,8 +57,12 @@ export function IntensitySelector({
     if (!track || typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(() => measureThumb())
     ro.observe(track)
+    for (const option of INTENSITY_OPTIONS) {
+      const tab = buttonRefs.current[option.id]
+      if (tab) ro.observe(tab)
+    }
     return () => ro.disconnect()
-  }, [measureThumb])
+  }, [measureThumb, value])
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     const idx = INTENSITY_OPTIONS.findIndex((opt) => opt.id === value)

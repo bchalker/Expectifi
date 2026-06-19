@@ -19,20 +19,21 @@
   cursor: pointer;
   text-align: center;
   padding: var(--space-4) var(--space-6);
-  padding-top: 0;
   // background: #f9f9f9;
   // border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--border-radius-lg);
   box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
   box-shadow: rgba(17, 12, 46, 0.08) 0px 8px 20px 0px;
-  transition: box-shadow 150ms ease;
+  transition: all .3s ease;
   padding-bottom: var(--space-3);
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--sky-blue) 0px 10px 10px -10px, rgba(255, 255, 255, 0.8) 0px 0px 0px 0px;
 }
 
 .retirement-sensitivity-trigger__btn:hover {
 
   box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+  box-shadow: var(--sky-blue) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
 
 .retirement-sensitivity-trigger__btn:focus-visible {

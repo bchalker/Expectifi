@@ -45,7 +45,9 @@
 }
 
 .labeled-badge-select__trigger--open {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  // box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  border-radius: var(--space-2) var(--space-2) 0 0;
+  border: none;
 }
 
 .labeled-badge-select__copy .label-with-helper-pill__label {
@@ -67,19 +69,19 @@
 
 .labeled-badge-select__menu {
   position: absolute;
-  top: calc(100% + 0.35rem);
-  left: 0;
+  top: calc(100% + -1px);
+  left: 0px;
   z-index: 380;
   min-width: 100%;
   width: max-content;
   max-width: min(18rem, calc(100vw - 2rem));
   margin: 0;
-  padding: var(--space-1);
+  padding: var(--space-2);
   list-style: none;
   box-sizing: border-box;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  // border: 1px solid var(--border);
+  border-radius: 0 0 var(--space-2) var(--space-2);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
 }
 
@@ -88,7 +90,7 @@
   width: 100%;
   padding: var(--space-2) var(--space-3);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--space-2);
   background: transparent;
   color: var(--text);
   font-family: var(--body);
@@ -102,11 +104,11 @@
 }
 
 .labeled-badge-select__option:hover:not(:disabled) {
-  background: var(--surface2);
+  background: var(--sky-blue-u2);
 }
 
 .labeled-badge-select__option--selected {
-  background: color-mix(in srgb, var(--accent-light) 65%, var(--surface));
+  background: color-mix(in srgb, var(--sky-blue) 65%, var(--surface));
 }
 
 .labeled-badge-select__option:disabled {

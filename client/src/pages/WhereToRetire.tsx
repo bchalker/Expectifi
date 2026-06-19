@@ -104,8 +104,10 @@ export function WhereToRetire({ c }: Props) {
   const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   const notifyMapLayout = useCallback(() => {
-    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
   }, []);
 
   const closeDrawer = useCallback(() => {

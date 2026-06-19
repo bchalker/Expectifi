@@ -55,42 +55,37 @@ export function writeMapPinColorView(view: MapPinColorView): void {
 }
 
 function budgetDisplay(monthlyBudget: number, monthlyIncome: number): MapPinDisplay {
+  const bandClass = budgetFitBandFromBudget(monthlyBudget, monthlyIncome)
   const ratio =
     monthlyIncome > 0 ? monthlyBudget / monthlyIncome : monthlyBudget > 0 ? 2 : 0
   const pct = Math.round(ratio * 100)
-
-  if (ratio <= 0.5) {
-    return {
+  const bandMeta: Record<
+    BudgetFitBand,
+    { pinColor: string; bandLabel: string }
+  > = {
+    'well-within': {
       pinColor: '#22c55e',
-      bandClass: 'well-within',
-      displayScore: pct,
       bandLabel: 'Well within budget',
-      tooltipScoreLabel: `${pct}% of income`,
-    }
-  }
-  if (ratio <= 0.75) {
-    return {
+    },
+    comfortable: {
       pinColor: '#f59e0b',
-      bandClass: 'comfortable',
-      displayScore: pct,
       bandLabel: 'Comfortable',
-      tooltipScoreLabel: `${pct}% of income`,
-    }
-  }
-  if (ratio <= 1) {
-    return {
+    },
+    tight: {
       pinColor: '#f97316',
-      bandClass: 'tight',
-      displayScore: pct,
       bandLabel: 'Tight',
-      tooltipScoreLabel: `${pct}% of income`,
-    }
+    },
+    'over-budget': {
+      pinColor: '#ef4444',
+      bandLabel: 'Over budget',
+    },
   }
+  const meta = bandMeta[bandClass]
   return {
-    pinColor: '#ef4444',
-    bandClass: 'over-budget',
+    pinColor: meta.pinColor,
+    bandClass,
     displayScore: pct,
-    bandLabel: 'Over budget',
+    bandLabel: meta.bandLabel,
     tooltipScoreLabel: `${pct}% of income`,
   }
 }
@@ -157,12 +152,42 @@ export const SCORE_PIN_LEGEND: MapPinLegendItem[] = [
   { bandClass: 'poor', color: '#BF3A2B', label: 'Poor' },
 ]
 
+export const SCORE_LEGEND_BAND_IDS = [
+  'excellent',
+  'good',
+  'moderate',
+  'poor',
+] as const
+
+export type ScoreLegendBandId = (typeof SCORE_LEGEND_BAND_IDS)[number]
+
 export const BUDGET_PIN_LEGEND: MapPinLegendItem[] = [
   { bandClass: 'well-within', color: '#22c55e', label: 'Well within' },
   { bandClass: 'comfortable', color: '#f59e0b', label: 'Comfortable' },
   { bandClass: 'tight', color: '#f97316', label: 'Tight' },
   { bandClass: 'over-budget', color: '#ef4444', label: 'Over budget' },
 ]
+
+export const BUDGET_LEGEND_BAND_IDS = [
+  'well-within',
+  'comfortable',
+  'tight',
+  'over-budget',
+] as const
+
+export type BudgetLegendBandId = (typeof BUDGET_LEGEND_BAND_IDS)[number]
+
+export function budgetFitBandFromBudget(
+  monthlyBudget: number,
+  monthlyIncome: number,
+): BudgetFitBand {
+  const ratio =
+    monthlyIncome > 0 ? monthlyBudget / monthlyIncome : monthlyBudget > 0 ? 2 : 0
+  if (ratio <= 0.5) return 'well-within'
+  if (ratio <= 0.75) return 'comfortable'
+  if (ratio <= 1) return 'tight'
+  return 'over-budget'
+}
 
 export const EXPAT_PIN_LEGEND: MapPinLegendItem[] = [
   { bandClass: 'enormous', color: '#22c55e', label: 'Enormous' },

@@ -128,7 +128,7 @@
 
 .wtr-dest-card__head-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
   min-width: 0;
@@ -234,7 +234,7 @@
 }
 
 .wtr-dest-card__budget-amount {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -247,6 +247,17 @@
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.wtr-dest-card__budget-surplus {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  line-height: 1.2;
+  color: var(--green-d1);
+  white-space: nowrap;
 }
 
 .wtr-dest-card__name-row {
@@ -477,4 +488,74 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
   text-align: center;
+}
+
+/* Map pin hover tooltip — compact card shell; fit score inherits base sizing. */
+.wtr-dest-card--tooltip {
+  width: 100%;
+  min-width: 12.5rem;
+  max-width: 17.5rem;
+  min-height: 3.5rem;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  cursor: default;
+  pointer-events: none;
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--color-navy) 12%, transparent),
+    0 1px 3px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__name {
+  font-size: var(--text-sm);
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__country-name {
+  font-size: var(--text-xs);
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__top {
+  gap: 0;
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__head-row {
+  align-items: flex-start;
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__budget-stat {
+  align-self: flex-start;
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__body {
+  padding: var(--space-3);
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__fit-col {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  padding: 0;
+  border: none;
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__fit-badge {
+  font-size: var(--text-base);
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__fit-stack {
+  padding: 0;
+}
+
+.wtr-dest-card--tooltip .wtr-dest-card__advisory-footer {
+  margin-left: calc(-1 * var(--space-3));
+  margin-right: calc(-1 * var(--space-3));
+  margin-bottom: calc(-1 * var(--space-3));
+}
+
+.wtr-dest-card--tooltip:hover,
+.wtr-dest-card--tooltip.wtr-dest-card--active {
+  border: none;
+  background: var(--surface);
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--color-navy) 12%, transparent),
+    0 1px 3px color-mix(in srgb, var(--text) 8%, transparent);
 }

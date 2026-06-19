@@ -42,7 +42,6 @@ export function GlobalGrowthRateSlider({
   retirementCalendarYear,
   yearsToRetirement,
   targetRetirementAge,
-  onOpenPositionReturnEditor,
   onRemovePositionReturn,
   hideDefaultHelperText = false,
   suffixLayout = "inline",
@@ -69,7 +68,6 @@ export function GlobalGrowthRateSlider({
         retirementYear={retirementCalendarYear}
         horizon={yearsToRetirement}
         retirementAge={targetRetirementAge}
-        onEditPosition={onOpenPositionReturnEditor}
         onRemovePositionReturn={onRemovePositionReturn}
         hideDefaultHelperText={hideDefaultHelperText}
         suffixLayout={suffixLayout}

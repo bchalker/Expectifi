@@ -1,8 +1,10 @@
 import { useCallback, useEffect } from 'react'
 import {
   applyWhereToLook,
+  BUDGET_LEGEND_BAND_IDS,
   EXPAT_LEGEND_TIER_IDS,
   resolveWhereToLook,
+  SCORE_LEGEND_BAND_IDS,
   type MapFilters,
 } from '../lib/whereToRetire/cityMapScoring'
 import type { MapPinColorView } from '../lib/whereToRetire/mapPinDisplay'
@@ -37,6 +39,18 @@ export function useWtrMapPinColorView(
         onFiltersChange((prev) => ({
           ...prev,
           expatCommunityTiers: [...EXPAT_LEGEND_TIER_IDS],
+        }))
+      }
+      if (view !== 'score') {
+        onFiltersChange((prev) => ({
+          ...prev,
+          scorePinBands: [...SCORE_LEGEND_BAND_IDS],
+        }))
+      }
+      if (view !== 'budget') {
+        onFiltersChange((prev) => ({
+          ...prev,
+          budgetPinBands: [...BUDGET_LEGEND_BAND_IDS],
         }))
       }
     },

@@ -206,7 +206,7 @@
   min-height: 0;
   padding: var(--space-2) var(--list-head-inline-pad);
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   box-sizing: border-box;
 }
 
@@ -267,12 +267,12 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1.85rem;
-  height: 1.85rem;
+  // width: 1.85rem;
+  // height: 1.85rem;
   z-index: 0;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
-  transform: translate(-50%, -50%) skewX(-12deg) scale(0);
+  // transform: translate(-50%, -50%) skewX(-12deg) scale(0);
   transform-origin: center;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
@@ -919,6 +919,10 @@
 .wtr-explorer__list-panel .wtr-dest-card__body {
   padding: var(--space-2) var(--space-3);
   box-sizing: border-box;
+}
+
+.wtr-explorer__list-panel .wtr-dest-card__head-row {
+  align-items: flex-start;
 }
 
 .wtr-explorer__list-panel .wtr-dest-card__rank-col {

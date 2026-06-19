@@ -41,8 +41,13 @@ import {
   type DirectFlightOrigin,
 } from '../../utils/mapDestinationFilters'
 import {
+  BUDGET_LEGEND_BAND_IDS,
+  budgetFitBandFromBudget,
   EXPAT_LEGEND_TIER_IDS,
+  SCORE_LEGEND_BAND_IDS,
+  type BudgetLegendBandId,
   type ExpatLegendTierId,
+  type ScoreLegendBandId,
 } from './mapPinDisplay'
 import { expatCommunityPinTier } from '../../utils/expatInfo'
 import {
@@ -153,6 +158,10 @@ export type MapFilters = {
   visaQualifyingOnly: boolean
   /** Active expat community size tiers (expat pin view legend filter). */
   expatCommunityTiers: ExpatLegendTierId[]
+  /** Active retirement score bands (score pin view legend filter). */
+  scorePinBands: ScoreLegendBandId[]
+  /** Active budget fit bands (budget pin view legend filter). */
+  budgetPinBands: BudgetLegendBandId[]
 }
 
 export const DEFAULT_MAP_FILTERS: MapFilters = {
@@ -180,32 +189,77 @@ export const DEFAULT_MAP_FILTERS: MapFilters = {
   lifestyle: DEFAULT_LIFESTYLE,
   visaQualifyingOnly: false,
   expatCommunityTiers: [...EXPAT_LEGEND_TIER_IDS],
+  scorePinBands: [...SCORE_LEGEND_BAND_IDS],
+  budgetPinBands: [...BUDGET_LEGEND_BAND_IDS],
 }
 
-export type { ExpatLegendTierId } from './mapPinDisplay'
-export { EXPAT_LEGEND_TIER_IDS } from './mapPinDisplay'
+export type { ExpatLegendTierId, ScoreLegendBandId, BudgetLegendBandId } from './mapPinDisplay'
+export {
+  BUDGET_LEGEND_BAND_IDS,
+  EXPAT_LEGEND_TIER_IDS,
+  SCORE_LEGEND_BAND_IDS,
+} from './mapPinDisplay'
+
+function isDefaultLegendSelection<T extends string>(
+  active: readonly T[],
+  allIds: readonly T[],
+): boolean {
+  return (
+    active.length === allIds.length && allIds.every((id) => active.includes(id))
+  )
+}
+
+function toggleLegendSelection<T extends string>(
+  active: readonly T[],
+  allIds: readonly T[],
+  id: T,
+): T[] {
+  if (active.includes(id)) {
+    if (active.length <= 1) return [...allIds]
+    return active.filter((item) => item !== id)
+  }
+  return [...active, id].sort(
+    (a, b) => allIds.indexOf(a) - allIds.indexOf(b),
+  )
+}
 
 export function isDefaultExpatCommunityTiers(
   tiers: readonly ExpatLegendTierId[],
 ): boolean {
-  return (
-    tiers.length === EXPAT_LEGEND_TIER_IDS.length &&
-    EXPAT_LEGEND_TIER_IDS.every((tier) => tiers.includes(tier))
-  )
+  return isDefaultLegendSelection(tiers, EXPAT_LEGEND_TIER_IDS)
+}
+
+export function isDefaultScorePinBands(
+  bands: readonly ScoreLegendBandId[],
+): boolean {
+  return isDefaultLegendSelection(bands, SCORE_LEGEND_BAND_IDS)
+}
+
+export function isDefaultBudgetPinBands(
+  bands: readonly BudgetLegendBandId[],
+): boolean {
+  return isDefaultLegendSelection(bands, BUDGET_LEGEND_BAND_IDS)
 }
 
 export function toggleExpatCommunityTier(
   tiers: ExpatLegendTierId[],
   tier: ExpatLegendTierId,
 ): ExpatLegendTierId[] {
-  if (tiers.includes(tier)) {
-    if (tiers.length <= 1) return [...EXPAT_LEGEND_TIER_IDS]
-    return tiers.filter((t) => t !== tier)
-  }
-  return [...tiers, tier].sort(
-    (a, b) =>
-      EXPAT_LEGEND_TIER_IDS.indexOf(a) - EXPAT_LEGEND_TIER_IDS.indexOf(b),
-  )
+  return toggleLegendSelection(tiers, EXPAT_LEGEND_TIER_IDS, tier)
+}
+
+export function toggleScorePinBand(
+  bands: ScoreLegendBandId[],
+  band: ScoreLegendBandId,
+): ScoreLegendBandId[] {
+  return toggleLegendSelection(bands, SCORE_LEGEND_BAND_IDS, band)
+}
+
+export function toggleBudgetPinBand(
+  bands: BudgetLegendBandId[],
+  band: BudgetLegendBandId,
+): BudgetLegendBandId[] {
+  return toggleLegendSelection(bands, BUDGET_LEGEND_BAND_IDS, band)
 }
 
 function passesExpatCommunityTierMapFilter(
@@ -216,6 +270,24 @@ function passesExpatCommunityTierMapFilter(
   const tier = expatCommunityPinTier(country)
   if (tier === 'domestic' || tier === 'none') return false
   return activeTiers.includes(tier)
+}
+
+function passesScorePinBandMapFilter(
+  scored: ScoredMapCity,
+  activeBands: ScoreLegendBandId[],
+): boolean {
+  if (isDefaultScorePinBands(activeBands)) return true
+  return activeBands.includes(scored.band)
+}
+
+function passesBudgetPinBandMapFilter(
+  scored: ScoredMapCity,
+  monthlyIncome: number,
+  activeBands: BudgetLegendBandId[],
+): boolean {
+  if (isDefaultBudgetPinBands(activeBands)) return true
+  const band = budgetFitBandFromBudget(scored.monthlyBudget, monthlyIncome)
+  return activeBands.includes(band)
 }
 
 const US_COUNTRY = 'United States'
@@ -561,6 +633,8 @@ export function countActiveMapFilters(filters: MapFilters): number {
   if (filters.minRetirementScore > 0) count += 1
   if (filters.visaQualifyingOnly) count += 1
   if (!isDefaultExpatCommunityTiers(filters.expatCommunityTiers)) count += 1
+  if (!isDefaultScorePinBands(filters.scorePinBands)) count += 1
+  if (!isDefaultBudgetPinBands(filters.budgetPinBands)) count += 1
   return count
 }
 
@@ -593,6 +667,8 @@ export function mapFiltersKey(filters: MapFilters): string {
     JSON.stringify(filters.budgetPreferences),
     filters.visaQualifyingOnly ? '1' : '0',
     [...filters.expatCommunityTiers].sort().join(','),
+    [...filters.scorePinBands].sort().join(','),
+    [...filters.budgetPinBands].sort().join(','),
   ].join('|')
 }
 
@@ -641,6 +717,14 @@ export function passesMapFilters(
   }
 
   if (!passesExpatCommunityTierMapFilter(city.country, filters.expatCommunityTiers)) {
+    return false
+  }
+
+  if (!passesScorePinBandMapFilter(scored, filters.scorePinBands)) {
+    return false
+  }
+
+  if (!passesBudgetPinBandMapFilter(scored, monthlyIncome, filters.budgetPinBands)) {
     return false
   }
 

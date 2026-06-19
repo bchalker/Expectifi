@@ -164,6 +164,7 @@ export const EXCLUDED_COUNTRIES = [
   'Saudi Arabia',
   'Afghanistan',
   'Brunei',
+  'Pakistan',
   'Mauritania',
 ] as const
 

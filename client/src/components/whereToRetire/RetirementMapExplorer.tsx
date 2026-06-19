@@ -19,6 +19,7 @@ import { Input, TextField } from "@heroui/react";
 import type { OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 import { AnimatedCount } from "../ui/AnimatedCount";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import {
   resolveWhereToLook,
   scoreAndFilterMapCities,
@@ -35,10 +36,7 @@ import { RetirementDestinationCard } from "./RetirementDestinationCard";
 import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
 import { WtrCompareBar, type CompareBarCity } from "./WtrCompareBar";
 import { LabeledBadgeSelect } from "../ui/LabeledBadgeSelect";
-import {
-  mapIncomeFitDisplayForCity,
-  monthlyOutflowForMapCity,
-} from "../../lib/whereToRetire/mapIncomeFit";
+import { monthlyOutflowForMapCity } from "../../lib/whereToRetire/mapIncomeFit";
 import { resolveCompareScored } from "../../hooks/useWtrComparisonColumns";
 import { RetirementMapLibreMap } from "./RetirementMapLibreMap";
 import { WtrCityListPagination } from "./WtrCityListPagination";
@@ -122,8 +120,10 @@ function useWtrMobileListOnly(): boolean {
 }
 
 function notifyMapResize() {
-  requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-  window.setTimeout(() => window.dispatchEvent(new Event("resize")), 340);
+  if (typeof window === "undefined") return;
+  window.requestAnimationFrame(() => {
+    window.dispatchEvent(new Event("resize"));
+  });
 }
 
 function sortCitiesForPinView(
@@ -276,6 +276,57 @@ export function RetirementMapExplorer({
     [explorationIncome, filters, excludedCountries, preferences],
   );
 
+  /** Map rescoring is debounced so slider drags do not rescore ~900 cities every frame. */
+  const debouncedExplorationIncome = useDebouncedValue(explorationIncome, 250);
+  const debouncedMinRetirementScore = useDebouncedValue(
+    filters.minRetirementScore,
+    200,
+  );
+
+  const mapScoringFilters = useMemo(
+    () => ({ ...filters, minRetirementScore: debouncedMinRetirementScore }),
+    [filters, debouncedMinRetirementScore],
+  );
+
+  const mapBaseFilteredCities = useMemo(
+    () =>
+      scoreAndFilterMapCities(
+        debouncedExplorationIncome,
+        mapScoringFilters,
+        undefined,
+        excludedCountries,
+        preferences,
+      ),
+    [
+      debouncedExplorationIncome,
+      mapScoringFilters,
+      excludedCountries,
+      preferences,
+    ],
+  );
+
+  const mapSortedCities = useMemo(
+    () =>
+      sortCitiesForPinView(
+        mapBaseFilteredCities,
+        pinColorView,
+        debouncedExplorationIncome,
+        mapScoringFilters,
+        expatSortDescending,
+        budgetSortDescending,
+        scoreSortDescending,
+      ),
+    [
+      mapBaseFilteredCities,
+      pinColorView,
+      debouncedExplorationIncome,
+      mapScoringFilters,
+      expatSortDescending,
+      budgetSortDescending,
+      scoreSortDescending,
+    ],
+  );
+
   /** Canonical fit-score rank — stable when the list is re-sorted by pin view or filters. */
   const fitRankByCityId = useMemo(() => {
     const fitSorted = [...baseFilteredCities].sort((a, b) => {
@@ -364,6 +415,9 @@ export function RetirementMapExplorer({
         filters.minRetirementScore,
         JSON.stringify(filters.lifestyle ?? null),
         filters.visaQualifyingOnly ? "1" : "0",
+        [...filters.expatCommunityTiers].sort().join(","),
+        [...filters.scorePinBands].sort().join(","),
+        [...filters.budgetPinBands].sort().join(","),
         pinColorView,
         excludedCountries.join(","),
       ].join("|"),
@@ -383,6 +437,9 @@ export function RetirementMapExplorer({
       filters.minRetirementScore,
       filters.lifestyle,
       filters.visaQualifyingOnly,
+      filters.expatCommunityTiers,
+      filters.scorePinBands,
+      filters.budgetPinBands,
       filters.fitsMyIncome,
       filters.hideAdvisories,
       filters.hideLevel3Cautions,
@@ -831,15 +888,13 @@ export function RetirementMapExplorer({
                           scored={item}
                           monthlyIncome={explorationIncome}
                           pinColorView={pinColorView}
-                          rank={fitRankByCityId.get(item.city.id) ?? 0}
+                          rank={
+                            pinColorView === "score"
+                              ? (fitRankByCityId.get(item.city.id) ?? 0)
+                              : safeListPage * LIST_PAGE_SIZE + index + 1
+                          }
                           active={detailPanelOpen && selectedId === item.city.id}
                           staggerIndex={index}
-                          incomeFit={mapIncomeFitDisplayForCity(
-                            item.city.city,
-                            item.city.country,
-                            explorationIncome,
-                            filters,
-                          )}
                           mapFilters={filters}
                           onSelect={() => openDestination(item.city.id)}
                           isFavorited={isFavoritedCity(
@@ -882,8 +937,8 @@ export function RetirementMapExplorer({
         {!mobileListOnly ? (
           <div className="wtr-explorer__map-stage">
             <RetirementMapLibreMap
-              destinations={filteredCities}
-              monthlyIncome={explorationIncome}
+              destinations={mapSortedCities}
+              monthlyIncome={debouncedExplorationIncome}
               pinColorView={pinColorView}
               filters={filters}
               onFiltersChange={onFiltersChange}

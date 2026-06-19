@@ -142,13 +142,28 @@
   min-width: 0;
 }
 
+.wtr-city-detail__country-text {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2em;
+  min-width: 0;
+}
+
+.wtr-city-detail__country-divider {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-faint);
+}
+
 .wtr-city-detail__flag {
   flex-shrink: 0;
   line-height: 0;
 }
 
 .wtr-city-detail__country {
-  margin: 0;
   min-width: 0;
   font-size: var(--text-sm);
   color: var(--color-text-secondary, var(--text-muted));
