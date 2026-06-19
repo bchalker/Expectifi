@@ -70,22 +70,24 @@ export function IncomeAccountRowDetail({ content }: Props) {
         </div>
       ) : null}
 
-      <dl className="income-account-row-detail__stats">
-        {content.stats.map((row) => (
-          <div key={row.label} className="income-account-row-detail__stat">
-            <dt>{renderIncomeTextWithRmdTerms(row.label)}</dt>
-            <dd className="tabular-nums">
-              {row.valueTermId ? (
-                <IncomeAccordionTerm termId={row.valueTermId}>{row.value}</IncomeAccordionTerm>
-              ) : (
-                row.value
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <div className="income-account-row-detail__meta">
+        <dl className="income-account-row-detail__stats">
+          {content.stats.map((row) => (
+            <div key={row.label} className="income-account-row-detail__stat">
+              <dt>{renderIncomeTextWithRmdTerms(row.label)}</dt>
+              <dd className="tabular-nums">
+                {row.valueTermId ? (
+                  <IncomeAccordionTerm termId={row.valueTermId}>{row.value}</IncomeAccordionTerm>
+                ) : (
+                  row.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
-      <IncomeAccordionSources sources={content.sources} />
+        <IncomeAccordionSources sources={content.sources} />
+      </div>
     </article>
   )
 }
