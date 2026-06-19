@@ -475,6 +475,7 @@ export function RetirementMapExplorer({
   const listHeadRef = useRef<HTMLElement>(null);
   const listBodyRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
+  const listMobileScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setListPage(0);
@@ -573,9 +574,7 @@ export function RetirementMapExplorer({
 
   const scrollListToTop = useCallback(() => {
     if (mobileListOnly) {
-      listBodyRef.current
-        ?.closest(".wtr-explorer__list-panel-inner")
-        ?.scrollTo({ top: 0, behavior: "auto" });
+      listMobileScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
       return;
     }
     const viewport = listScrollRef.current?.osInstance()?.elements().viewport;
@@ -674,6 +673,239 @@ export function RetirementMapExplorer({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [filtersOpen, closeFiltersPanel]);
 
+  const listHeadInMobileScroll = mobileListOnly && filteredCities.length > 0;
+
+  const listHeadStack = (
+    <div className="wtr-explorer__list-head-stack">
+      <div
+        className={[
+          "wtr-explorer__list-search-panel",
+          listSearchOpen && "wtr-explorer__list-search-panel--open",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-hidden={!listSearchOpen}
+      >
+        <div
+          className={[
+            "wtr-explorer__list-search",
+            listSearchQuery && "wtr-explorer__list-search--has-value",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          <TextField
+            className="wtr-explorer__list-search-field"
+            variant="secondary"
+            fullWidth
+            aria-label="Search city list"
+            value={listSearchQuery}
+            onChange={(value) => {
+              setListSearchQuery(value);
+              setListPage(0);
+            }}
+          >
+            <Input
+              ref={listSearchInputRef}
+              type="text"
+              inputMode="search"
+              placeholder="Search cities or countries"
+              tabIndex={listSearchOpen ? 0 : -1}
+            />
+          </TextField>
+          {listSearchQuery ? (
+            <button
+              type="button"
+              className="wtr-explorer__list-search-clear"
+              aria-label="Clear search"
+              onClick={() => {
+                setListSearchQuery("");
+                setListPage(0);
+              }}
+            >
+              <IconCircleX size={16} stroke={1.5} aria-hidden />
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <header ref={listHeadRef} className="wtr-explorer__list-head">
+        <div className="wtr-explorer__list-head-top">
+          <LabeledBadgeSelect
+            className="wtr-explorer__pin-view-select"
+            value={pinColorView}
+            options={pinViewOptions}
+            onChange={(view) => {
+              onPinColorViewChange(view);
+              setListPage(0);
+            }}
+            label={pinViewSelectLabel(pinColorView)}
+            helper={pinViewSortHelper(
+              pinColorView,
+              scoreSortDescending,
+              budgetSortDescending,
+              expatSortDescending,
+            )}
+            helperPlacement="below"
+            ariaLabel="Map view"
+          />
+          <div className="wtr-explorer__list-head-actions">
+            <button
+              type="button"
+              className="wtr-explorer__list-head-icon-btn"
+              aria-label={
+                pinColorView === "expat"
+                  ? expatSortDescending
+                    ? "Sort by expat community size, largest first. Click to sort smallest first."
+                    : "Sort by expat community size, smallest first. Click to sort largest first."
+                  : pinColorView === "budget"
+                    ? budgetSortDescending
+                      ? "Sort by monthly cost, highest first. Click to sort lowest first."
+                      : "Sort by monthly cost, lowest first. Click to sort highest first."
+                    : scoreSortDescending
+                      ? "Best fit score, highest first. Click to sort lowest first."
+                      : "Best fit score, lowest first. Click to sort highest first."
+              }
+              onClick={() => {
+                if (pinColorView === "expat") {
+                  setExpatSortDescending((prev) => !prev);
+                } else if (pinColorView === "budget") {
+                  setBudgetSortDescending((prev) => !prev);
+                } else {
+                  setScoreSortDescending((prev) => !prev);
+                }
+                setListPage(0);
+              }}
+            >
+              {(pinColorView === "expat"
+                ? expatSortDescending
+                : pinColorView === "budget"
+                  ? budgetSortDescending
+                  : scoreSortDescending) ? (
+                <IconSortDescending
+                  className="wtr-explorer__list-sort-icon"
+                  size={18}
+                  stroke={1.5}
+                  aria-hidden
+                />
+              ) : (
+                <IconSortAscending
+                  className="wtr-explorer__list-sort-icon"
+                  size={18}
+                  stroke={1.5}
+                  aria-hidden
+                />
+              )}
+            </button>
+            <span className="wtr-explorer__list-head-divider" aria-hidden />
+            <button
+              type="button"
+              className={[
+                "wtr-explorer__list-head-icon-btn",
+                "wtr-explorer__list-head-search-btn",
+                listSearchOpen && "wtr-explorer__list-head-icon-btn--active",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-label={listSearchOpen ? "Hide city search" : "Search cities"}
+              aria-pressed={listSearchOpen}
+              aria-expanded={listSearchOpen}
+              onClick={toggleListSearch}
+            >
+              <span className="wtr-explorer__list-head-search-bg" aria-hidden />
+              <span
+                className="wtr-explorer__list-head-search-icon-wrap"
+                aria-hidden
+              >
+                <IconSearch
+                  className="wtr-explorer__list-search-icon"
+                  size={18}
+                  stroke={1.5}
+                />
+                <IconChevronDown
+                  className="wtr-explorer__list-search-caret"
+                  size={14}
+                  stroke={1.5}
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          className={[
+            "wtr-explorer__list-score-filter",
+            pinColorView === "score" && "wtr-explorer__list-score-filter--open",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-hidden={pinColorView !== "score"}
+        >
+          <div
+            className={[
+              "wtr-explorer__list-score-filter-inner",
+              "wtr-filter-cross-ref-anchor",
+            ].join(" ")}
+            data-wtr-filter-crossref="minRetirementScore"
+            data-wtr-filter-crossref-highlight={
+              filterCrossRefHighlight === "minRetirementScore"
+                ? "true"
+                : undefined
+            }
+          >
+            <WtrMinRetirementScoreSlider
+              value={filters.minRetirementScore}
+              onChange={(minRetirementScore) => {
+                onFiltersChange({ ...filters, minRetirementScore });
+                setListPage(0);
+              }}
+            />
+          </div>
+        </div>
+      </header>
+    </div>
+  );
+
+  const listCards = (
+    <div
+      ref={listCardsRef}
+      className="wtr-dest-card-list wtr-explorer__list-cards"
+    >
+      {listCities.map((item, index) => (
+        <RetirementDestinationCard
+          key={`${item.city.id}-${pinColorView}`}
+          scored={item}
+          monthlyIncome={explorationIncome}
+          pinColorView={pinColorView}
+          rank={
+            pinColorView === "score"
+              ? (fitRankByCityId.get(item.city.id) ?? 0)
+              : safeListPage * LIST_PAGE_SIZE + index + 1
+          }
+          active={detailPanelOpen && selectedId === item.city.id}
+          staggerIndex={index}
+          mapFilters={filters}
+          onSelect={() => openDestination(item.city.id)}
+          isFavorited={isFavoritedCity(
+            item.city.city,
+            item.city.country,
+          )}
+          onToggleFavorite={() => {
+            const recordIso = lookupRetirementCity(
+              item.city.city,
+              item.city.country,
+            )?.country_iso;
+            const iso =
+              recordIso ?? countryToIsoCode(item.city.country) ?? "";
+            onToggleFavoriteCity({
+              city: item.city.city,
+              country: item.city.country,
+              country_iso: iso,
+            });
+          }}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="wtr-explorer">
       <div ref={chromeRef} className="wtr-explorer__chrome">
@@ -736,190 +968,7 @@ export function RetirementMapExplorer({
                 </button>
               </div>
             ) : null}
-            <div className="wtr-explorer__list-head-stack">
-              <div
-                className={[
-                  "wtr-explorer__list-search-panel",
-                  listSearchOpen && "wtr-explorer__list-search-panel--open",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                aria-hidden={!listSearchOpen}
-              >
-                <div
-                  className={[
-                    "wtr-explorer__list-search",
-                    listSearchQuery && "wtr-explorer__list-search--has-value",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  <TextField
-                    className="wtr-explorer__list-search-field"
-                    variant="secondary"
-                    fullWidth
-                    aria-label="Search city list"
-                    value={listSearchQuery}
-                    onChange={(value) => {
-                      setListSearchQuery(value);
-                      setListPage(0);
-                    }}
-                  >
-                    <Input
-                      ref={listSearchInputRef}
-                      type="text"
-                      inputMode="search"
-                      placeholder="Search cities or countries"
-                      tabIndex={listSearchOpen ? 0 : -1}
-                    />
-                  </TextField>
-                  {listSearchQuery ? (
-                    <button
-                      type="button"
-                      className="wtr-explorer__list-search-clear"
-                      aria-label="Clear search"
-                      onClick={() => {
-                        setListSearchQuery("");
-                        setListPage(0);
-                      }}
-                    >
-                      <IconCircleX size={16} stroke={1.5} aria-hidden />
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            <header ref={listHeadRef} className="wtr-explorer__list-head">
-              <div className="wtr-explorer__list-head-top">
-              <LabeledBadgeSelect
-                className="wtr-explorer__pin-view-select"
-                value={pinColorView}
-                options={pinViewOptions}
-                onChange={(view) => {
-                  onPinColorViewChange(view);
-                  setListPage(0);
-                }}
-                label={pinViewSelectLabel(pinColorView)}
-                helper={pinViewSortHelper(
-                  pinColorView,
-                  scoreSortDescending,
-                  budgetSortDescending,
-                  expatSortDescending,
-                )}
-                helperPlacement="below"
-                ariaLabel="Map view"
-              />
-              <div className="wtr-explorer__list-head-actions">
-                <button
-                  type="button"
-                  className="wtr-explorer__list-head-icon-btn"
-                  aria-label={
-                    pinColorView === "expat"
-                      ? expatSortDescending
-                        ? "Sort by expat community size, largest first. Click to sort smallest first."
-                        : "Sort by expat community size, smallest first. Click to sort largest first."
-                      : pinColorView === "budget"
-                        ? budgetSortDescending
-                          ? "Sort by monthly cost, highest first. Click to sort lowest first."
-                          : "Sort by monthly cost, lowest first. Click to sort highest first."
-                        : scoreSortDescending
-                          ? "Best fit score, highest first. Click to sort lowest first."
-                          : "Best fit score, lowest first. Click to sort highest first."
-                  }
-                  onClick={() => {
-                    if (pinColorView === "expat") {
-                      setExpatSortDescending((prev) => !prev);
-                    } else if (pinColorView === "budget") {
-                      setBudgetSortDescending((prev) => !prev);
-                    } else {
-                      setScoreSortDescending((prev) => !prev);
-                    }
-                    setListPage(0);
-                  }}
-                >
-                  {(pinColorView === "expat"
-                    ? expatSortDescending
-                    : pinColorView === "budget"
-                      ? budgetSortDescending
-                      : scoreSortDescending) ? (
-                    <IconSortDescending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  ) : (
-                    <IconSortAscending
-                      className="wtr-explorer__list-sort-icon"
-                      size={18}
-                      stroke={1.5}
-                      aria-hidden
-                    />
-                  )}
-                </button>
-                <span className="wtr-explorer__list-head-divider" aria-hidden />
-                <button
-                  type="button"
-                  className={[
-                    "wtr-explorer__list-head-icon-btn",
-                    "wtr-explorer__list-head-search-btn",
-                    listSearchOpen && "wtr-explorer__list-head-icon-btn--active",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  aria-label={listSearchOpen ? "Hide city search" : "Search cities"}
-                  aria-pressed={listSearchOpen}
-                  aria-expanded={listSearchOpen}
-                  onClick={toggleListSearch}
-                >
-                  <span className="wtr-explorer__list-head-search-bg" aria-hidden />
-                  <span className="wtr-explorer__list-head-search-icon-wrap" aria-hidden>
-                    <IconSearch
-                      className="wtr-explorer__list-search-icon"
-                      size={18}
-                      stroke={1.5}
-                    />
-                    <IconChevronDown
-                      className="wtr-explorer__list-search-caret"
-                      size={14}
-                      stroke={1.5}
-                    />
-                  </span>
-                </button>
-              </div>
-              </div>
-              <div
-                className={[
-                  "wtr-explorer__list-score-filter",
-                  pinColorView === "score" &&
-                    "wtr-explorer__list-score-filter--open",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                aria-hidden={pinColorView !== "score"}
-              >
-                <div
-                  className={[
-                    "wtr-explorer__list-score-filter-inner",
-                    "wtr-filter-cross-ref-anchor",
-                  ].join(" ")}
-                  data-wtr-filter-crossref="minRetirementScore"
-                  data-wtr-filter-crossref-highlight={
-                    filterCrossRefHighlight === "minRetirementScore"
-                      ? "true"
-                      : undefined
-                  }
-                >
-                  <WtrMinRetirementScoreSlider
-                    value={filters.minRetirementScore}
-                    onChange={(minRetirementScore) => {
-                      onFiltersChange({ ...filters, minRetirementScore });
-                      setListPage(0);
-                    }}
-                  />
-                </div>
-              </div>
-            </header>
-            </div>
+            {!listHeadInMobileScroll ? listHeadStack : null}
             {filteredCities.length === 0 ? (
               <p className="wtr-dest-card-list__empty wtr-explorer__list-empty">
                 {listSearchQuery.trim()
@@ -928,60 +977,25 @@ export function RetirementMapExplorer({
               </p>
             ) : (
               <div ref={listBodyRef} className="wtr-explorer__list-body">
-                <AppOverlayScrollbars
-                  ref={listScrollRef}
-                  className="wtr-explorer__list-scroll"
-                  defer={false}
-                  options={
-                    mobileListOnly
-                      ? { overflow: { x: 'hidden', y: 'hidden' } }
-                      : undefined
-                  }
-                >
-                  <div className="wtr-explorer__list-scroll-inner">
-                    <div
-                      ref={listCardsRef}
-                      className="wtr-dest-card-list wtr-explorer__list-cards"
-                    >
-                      {listCities.map((item, index) => (
-                        <RetirementDestinationCard
-                          key={`${item.city.id}-${pinColorView}`}
-                          scored={item}
-                          monthlyIncome={explorationIncome}
-                          pinColorView={pinColorView}
-                          rank={
-                            pinColorView === "score"
-                              ? (fitRankByCityId.get(item.city.id) ?? 0)
-                              : safeListPage * LIST_PAGE_SIZE + index + 1
-                          }
-                          active={detailPanelOpen && selectedId === item.city.id}
-                          staggerIndex={index}
-                          mapFilters={filters}
-                          onSelect={() => openDestination(item.city.id)}
-                          isFavorited={isFavoritedCity(
-                            item.city.city,
-                            item.city.country,
-                          )}
-                          onToggleFavorite={() => {
-                            const recordIso = lookupRetirementCity(
-                              item.city.city,
-                              item.city.country,
-                            )?.country_iso;
-                            const iso =
-                              recordIso ??
-                              countryToIsoCode(item.city.country) ??
-                              "";
-                            onToggleFavoriteCity({
-                              city: item.city.city,
-                              country: item.city.country,
-                              country_iso: iso,
-                            });
-                          }}
-                        />
-                      ))}
-                    </div>
+                {listHeadInMobileScroll ? (
+                  <div
+                    ref={listMobileScrollRef}
+                    className="wtr-explorer__list-mobile-scroll"
+                  >
+                    {listHeadStack}
+                    {listCards}
                   </div>
-                </AppOverlayScrollbars>
+                ) : (
+                  <AppOverlayScrollbars
+                    ref={listScrollRef}
+                    className="wtr-explorer__list-scroll"
+                    defer={false}
+                  >
+                    <div className="wtr-explorer__list-scroll-inner">
+                      {listCards}
+                    </div>
+                  </AppOverlayScrollbars>
+                )}
                 <WtrCityListPagination
                   className="wtr-list-pagination--dest-panel wtr-list-pagination--explorer-list"
                   page={listPage}

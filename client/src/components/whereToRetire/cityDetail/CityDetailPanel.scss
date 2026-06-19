@@ -713,6 +713,29 @@ all .3s ease;
   }
 }
 
+@media (max-width: 680px) {
+  .wtr-dest-panel--sheet .wtr-city-detail__fit-score-value,
+  .wtr-dest-panel--sheet .wtr-city-detail__fit-score-number {
+    font-size: var(--text-sm);
+  }
+
+  .wtr-dest-panel--sheet .wtr-city-detail__name {
+    font-size: var(--text-sm);
+  }
+
+  .wtr-dest-panel--sheet .wtr-city-detail__cost-total {
+    font-size: var(--text-sm);
+  }
+
+  .wtr-dest-panel--sheet .wtr-city-detail__cards--col {
+    display: flex;
+    flex-direction: column;
+    column-count: unset;
+    grid-template-columns: unset;
+    gap: var(--space-3);
+  }
+}
+
 @media (min-width: 681px) {
   .wtr-city-detail__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
