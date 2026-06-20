@@ -3318,6 +3318,11 @@ function AccountBalancesContent({
                   </TaxBreakdownPanelTrigger>
                 ) : null}
               </div>
+              {phase === "growth" && totalRetirementBar ? (
+                <div className="account-balances-header-row__total-mobile">
+                  {totalRetirementBar}
+                </div>
+              ) : null}
               <div className="account-balances-header-row__actions">
                 <div className="account-balances-header-row__actions-primary">
                   {phase === "growth" && inputs && setInputs ? (

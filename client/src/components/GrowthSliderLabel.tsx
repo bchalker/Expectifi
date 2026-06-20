@@ -400,7 +400,7 @@ export function GrowthSliderLabel({
         {suffixLayout === "panel" ? (
           <>
             <div className="growth-slider-label__panel-heading">
-              <p className="growth-slider-label__panel-rate-lead font-xs">
+              <p className="growth-slider-label__panel-rate-lead">
                 {onOpenRetirementAgeCompare ? (
                   <>
                     Until I am{" "}

@@ -145,6 +145,12 @@
   width: auto;
 }
 
+.account-balances-header-row__total-mobile {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .account-balances-header-row__entry {
   display: flex;
   flex-wrap: wrap;
@@ -297,6 +303,71 @@
   .account-balances-header-row:not(.life-events-panel__header)
     .account-balances-header-row__actions-primary > * {
     flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row:not(.life-events-panel__header) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row__total-mobile {
+    display: block;
+    order: 2;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__title-block {
+    order: 1;
+    margin-bottom: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row__total-mobile
+    .account-balances-total-retirement--merged {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row__total-mobile
+    .account-balances-total-retirement--merged
+    .account-balances-total-retirement__label {
+    display: block;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row__total-mobile
+    .account-balances-total-retirement__value {
+    margin-left: auto;
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary {
+    width: 100%;
+    justify-content: stretch;
+    gap: var(--space-2);
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-header-row:not(.life-events-panel__header)
+    .account-balances-header-row__actions-primary > * {
+    flex: 1 1 0;
     min-width: 0;
   }
 }
