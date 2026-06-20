@@ -402,10 +402,23 @@ $tax-summary-sidebar-shadow-detail-open:
     padding: var(--space-2);
   }
 
-  .account-balances-total-retirement--merged:not(
+  .section--tax-summary--growth-assumptions
+    .account-balances-card-inner-wrap
+    > .account-balances-total-retirement--merged:not(
       .account-balances-total-retirement--income
     ) {
-    display: none;
+    margin-top: var(--space-3);
+    margin-bottom: 0;
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  .section--tax-summary--growth-assumptions
+    .account-balances-card-inner-wrap
+    > .account-balances-total-retirement--merged:not(
+      .account-balances-total-retirement--income
+    )
+    .account-balances-total-retirement__label {
+    display: block;
   }
 
   .tax-summary-card__accounts {

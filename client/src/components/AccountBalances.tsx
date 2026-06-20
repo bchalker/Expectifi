@@ -3314,15 +3314,10 @@ function AccountBalancesContent({
                 </h2>
                 {phase === "growth" || showWithdrawalGuidance ? (
                   <TaxBreakdownPanelTrigger>
-                    View Tax Details
+                    Tax Details
                   </TaxBreakdownPanelTrigger>
                 ) : null}
               </div>
-              {phase === "growth" && totalRetirementBar ? (
-                <div className="account-balances-header-row__total-mobile">
-                  {totalRetirementBar}
-                </div>
-              ) : null}
               <div className="account-balances-header-row__actions">
                 <div className="account-balances-header-row__actions-primary">
                   {phase === "growth" && inputs && setInputs ? (
@@ -3406,7 +3401,7 @@ function AccountBalancesContent({
         <>
           <div className="input-col-title">Retirement Accounts</div>
           {phase === "growth" || showWithdrawalGuidance ? (
-            <TaxBreakdownPanelTrigger>View Tax Details</TaxBreakdownPanelTrigger>
+            <TaxBreakdownPanelTrigger>Tax Details</TaxBreakdownPanelTrigger>
           ) : null}
           {!readOnly &&
           (hasRetirementAccountData || balanceMode === "imported") ? (
