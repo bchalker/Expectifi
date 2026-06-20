@@ -12,6 +12,7 @@ import { useAppPath } from "../hooks/useAppPath";
 import { useWelcomeSettingsReveal } from "../hooks/useWelcomeSettingsReveal";
 import { navigateApp } from "../lib/appPaths";
 import type { DrawerName } from "../lib/computeResults";
+import type { PhaseSegment } from "./PhaseSegmentTabs";
 import "./AppLeftNav.scss";
 
 const MOBILE_NAV_BODY_CLASS = "app-left-nav--mobile-open-body";
@@ -35,6 +36,14 @@ type Props = {
   welcomeDone?: boolean;
   /** Upper area of the mobile nav sheet. */
   goalBar?: ReactNode;
+  /** Growth / Income / Where to Retire — stacked under the goal on mobile. */
+  dashboardViewNav?: {
+    phase: PhaseSegment;
+    isWhereToRetire: boolean;
+    onSelectGrowth: () => void;
+    onSelectIncome: () => void;
+    onSelectWhereToRetire: () => void;
+  } | null;
 };
 
 export function AppLeftNav({
@@ -49,6 +58,7 @@ export function AppLeftNav({
   navContext,
   welcomeDone = true,
   goalBar = null,
+  dashboardViewNav = null,
 }: Props) {
   const { apiReady, loading, user, googleCheckoutUi } = useAuth();
   const { showSettings, slideIn } = useWelcomeSettingsReveal(welcomeDone);
@@ -87,6 +97,14 @@ export function AppLeftNav({
     onOpenConfig();
     closeMobile();
   }, [onOpenConfig, closeMobile]);
+
+  const selectDashboardView = useCallback(
+    (action: () => void) => {
+      action();
+      closeMobile();
+    },
+    [closeMobile],
+  );
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -141,7 +159,10 @@ export function AppLeftNav({
       ];
     },
   );
-  const hasPanelItems = routeNavItems.length > 0 || drawerNavItems.length > 0;
+  const hasPanelItems =
+    routeNavItems.length > 0 ||
+    drawerNavItems.length > 0 ||
+    dashboardViewNav != null;
   const showGuestProfile = Boolean(accountLabel || showViewMyPlansInProfile);
 
   return (
@@ -171,6 +192,82 @@ export function AppLeftNav({
         aria-label="Panels and tools"
       >
         {goalBar ? <div className="app-left-nav__goal">{goalBar}</div> : null}
+        {dashboardViewNav ? (
+          <div
+            className="app-left-nav__views"
+            role="navigation"
+            aria-label="Dashboard views"
+          >
+            <button
+              type="button"
+              className={[
+                "app-left-nav__view-btn",
+                !dashboardViewNav.isWhereToRetire &&
+                dashboardViewNav.phase === "growth"
+                  ? "app-left-nav__view-btn--active"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-current={
+                !dashboardViewNav.isWhereToRetire &&
+                dashboardViewNav.phase === "growth"
+                  ? "page"
+                  : undefined
+              }
+              onClick={() =>
+                selectDashboardView(dashboardViewNav.onSelectGrowth)
+              }
+            >
+              Growth
+            </button>
+            <button
+              type="button"
+              className={[
+                "app-left-nav__view-btn",
+                !dashboardViewNav.isWhereToRetire &&
+                dashboardViewNav.phase === "income"
+                  ? "app-left-nav__view-btn--active"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-current={
+                !dashboardViewNav.isWhereToRetire &&
+                dashboardViewNav.phase === "income"
+                  ? "page"
+                  : undefined
+              }
+              onClick={() =>
+                selectDashboardView(dashboardViewNav.onSelectIncome)
+              }
+            >
+              Income
+            </button>
+            <button
+              type="button"
+              className={[
+                "app-left-nav__view-btn",
+                dashboardViewNav.isWhereToRetire
+                  ? "app-left-nav__view-btn--active"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-current={
+                dashboardViewNav.isWhereToRetire ? "page" : undefined
+              }
+              onClick={() =>
+                selectDashboardView(dashboardViewNav.onSelectWhereToRetire)
+              }
+            >
+              Where to Retire
+            </button>
+          </div>
+        ) : null}
+        {dashboardViewNav ? (
+          <div className="app-left-nav__rule" aria-hidden="true" />
+        ) : null}
         {routeNavItems.length > 0 ? (
           <div className="app-left-nav__routes" aria-label="App pages">
             {routeNavItems.map(

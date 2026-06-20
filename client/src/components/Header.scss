@@ -474,6 +474,7 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.15s ease;
+  gap: var(--space-half);
 }
 
 .header__account-group__profile:hover,
@@ -631,7 +632,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--header-brand-green);
+  color: var(--sky-blue-d2);
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
@@ -943,21 +944,7 @@
   }
 
   .header__phase {
-    display: flex;
-    order: 2;
-    flex: 1 1 auto;
-    min-width: 0;
-    padding-inline: var(--space-1);
-  }
-
-  .header__phase .subheader-phase-segment {
-    min-height: 1.75rem;
-    max-width: 100%;
-  }
-
-  .header__phase .subheader-phase-segment__tab {
-    min-height: 1.625rem;
-    font-size: var(--text-xs);
+    display: none;
   }
 
   .header__menu-btn {

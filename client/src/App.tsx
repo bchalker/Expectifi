@@ -181,6 +181,7 @@ import { flattenBatches } from "./lib/positionsImportStorage";
 import { AppPrivacyTrust } from "./components/AppPrivacyTrust";
 import { AccountPlanBottomBanner } from "./components/AccountPlanBottomBanner";
 import { WhereToRetire } from "./pages/WhereToRetire";
+import { stashWtrExplorationIncome } from "./lib/whereToRetire/wtrPreviewIncome";
 
 const defaultInputs = defaultCalculatorInputs;
 const defaultUi = defaultCalculatorUi;
@@ -1262,6 +1263,26 @@ export default function App({ initialAuthModal = null }: AppProps) {
     <GoalProgressBar {...goalBarProps} className="goal-progress-bar--in-mobile-nav" />
   ) : null;
 
+  const mobileDashboardViewNav =
+    welcomeDone && dashboardHasPortfolio
+      ? {
+          phase,
+          isWhereToRetire,
+          onSelectGrowth: () => {
+            if (isWhereToRetire) navigateApp(APP_DASHBOARD_PATH);
+            onPhaseChange("growth");
+          },
+          onSelectIncome: () => {
+            if (isWhereToRetire) navigateApp(APP_DASHBOARD_PATH);
+            onPhaseChange("income");
+          },
+          onSelectWhereToRetire: () => {
+            stashWtrExplorationIncome(cDisplay.grossMon);
+            navigateApp(APP_PATHS.whereToRetire);
+          },
+        }
+      : null;
+
   const dashboardSubHeader = showDashboardSubHeader ? (
     <SubHeader {...dashboardSubHeaderProps} />
   ) : null;
@@ -1351,6 +1372,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
               navContext={navContext}
               welcomeDone={welcomeDone}
               goalBar={mobileNavGoalBar}
+              dashboardViewNav={mobileDashboardViewNav}
             />
             {!fixedHeaderHeroHidden ? dashboardSubHeader : null}
           </div>
