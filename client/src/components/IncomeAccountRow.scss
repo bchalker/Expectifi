@@ -154,7 +154,8 @@
   color: var(--color-sky-blue-dark);
 }
 
-.income-account-row__balance {
+.income-account-row__balance,
+.income-account-row__bucket-value {
   flex-shrink: 0;
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -164,6 +165,12 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   white-space: nowrap;
+}
+
+.income-account-row__bucket-value-amount {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .income-account-row__body:empty {
@@ -334,70 +341,135 @@
   }
 }
 
+@media (min-width: 681px) {
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__header-row {
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__content {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__main {
+    padding: var(--space-4);
+    padding-right: 0;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__header-row
+    > .portfolio-bucket-account-row__values {
+    flex: 0 0 auto;
+    align-self: center;
+    align-items: flex-end;
+    padding: var(--space-4) 0;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__actions {
+    align-self: center;
+    padding: var(--space-4);
+    padding-left: 0;
+  }
+}
+
 @media (max-width: 680px) {
   .portfolio-account-list--income
-    .income-account-row.tax-treatment-disclosure.portfolio-account-group
-    .portfolio-bucket-account-row__actions {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    justify-content: center;
-    align-items: center;
-    padding-top: var(--space-5);
-    padding-inline: var(--portfolio-row-pad-x, var(--space-4));
-    gap: 0;
-  }
-
-  .portfolio-account-list--income
     .income-account-row
-    .portfolio-bucket-account-row__main {
-    padding-bottom: 0;
-  }
-
-  /* Income mobile: order badge + name + values on one row; strategy below */
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__title-row {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-  }
-
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__title-row--stacked-hint {
-    row-gap: var(--space-2);
-  }
-
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__title-row
-    .portfolio-bucket-account-row__hint-stack {
-    flex: 1 1 100%;
-    order: 3;
-  }
-
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__hint-stack {
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__header-row {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: calc(100% + 2 * var(--portfolio-row-pad-x, var(--space-4)));
-    max-width: none;
-    margin-top: var(--space-2);
-    margin-inline: calc(-1 * var(--portfolio-row-pad-x, var(--space-4)));
-    padding-top: var(--space-3);
-    padding-inline: var(--portfolio-row-pad-x, var(--space-4));
-    border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
-    box-sizing: border-box;
+    align-items: stretch;
   }
 
   .portfolio-account-list--income
     .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__content,
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__main {
+    width: 100%;
+    padding: var(--space-2) var(--space-4) 0;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__identity-col {
+    align-items: center;
+    gap: var(--space-1);
+    text-align: center;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__name-group {
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__header-row
+    > .portfolio-bucket-account-row__values {
+    width: 100%;
+    align-self: stretch;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-3) var(--space-4) 0;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__values-row,
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__values-extra {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__total {
+    justify-content: center;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__hint-stack {
+    width: 100%;
+    margin: 0;
+    padding: var(--space-3) 0 0;
+    align-items: center;
+  }
+
+  .portfolio-account-list--income
+    .income-account-row
+    .portfolio-bucket-account-row--income-summary
     .income-account-row__strategy-line {
     justify-content: center;
     text-align: center;
@@ -405,19 +477,16 @@
 
   .portfolio-account-list--income
     .income-account-row
-    .portfolio-bucket-account-row__title-row
-    .portfolio-bucket-account-row__values {
-    align-items: flex-end;
-    align-self: auto;
-    text-align: right;
-  }
-
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__values-row,
-  .portfolio-account-list--income
-    .income-account-row
-    .portfolio-bucket-account-row__values-extra {
-    justify-content: flex-end;
+    .portfolio-bucket-account-row--income-summary
+    .portfolio-bucket-account-row__actions {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--space-2);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    gap: 0;
+    border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
   }
 }

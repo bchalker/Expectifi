@@ -112,6 +112,16 @@
   flex: 1 1 auto;
 }
 
+.portfolio-bucket-account-row__identity-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .portfolio-bucket-account-row__title-row--stacked-hint {
   flex-wrap: wrap;
   align-items: baseline;
@@ -134,8 +144,8 @@
 }
 
 .portfolio-bucket-account-row__name {
-  font-family: var(--heading);
-  font-size: var(--text-sm);
+  font-family: var(--body);
+  font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.25;
   color: var(--text);
@@ -516,7 +526,10 @@
 }
 
 @media (max-width: 680px) {
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__header-row {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__header-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto auto auto;
@@ -524,14 +537,29 @@
     align-items: start;
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__content,
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__main,
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__identity,
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__title-row {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__content,
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__main,
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__identity,
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__title-row {
     display: contents;
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__name-group {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__name-group {
     grid-column: 1;
     grid-row: 1;
     align-self: center;
@@ -540,7 +568,9 @@
     padding-bottom: var(--space-1);
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
     .portfolio-bucket-account-row__header-row
     > .portfolio-bucket-account-row__values {
     grid-column: 2;
@@ -551,25 +581,40 @@
     align-items: flex-end;
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__values-row {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__values-row {
     padding: var(--space-4);
     padding-bottom: var(--space-1);
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__hint-stack {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__hint-stack {
     grid-column: 1 / -1;
     grid-row: 2;
     padding: var(--space-1) var(--portfolio-row-pad-x, var(--space-4)) var(--space-2);
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__identity-extra,
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__trend {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__identity-extra,
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__trend {
     grid-column: 1 / -1;
     grid-row: 2;
     padding-inline: var(--portfolio-row-pad-x, var(--space-4));
   }
 
-  .portfolio-bucket-account-row--amount-beside-scenario .portfolio-bucket-account-row__actions {
+  .portfolio-bucket-account-row--amount-beside-scenario:not(
+      .portfolio-bucket-account-row--income-summary
+    )
+    .portfolio-bucket-account-row__actions {
     grid-column: 1 / -1;
     grid-row: 3;
   }

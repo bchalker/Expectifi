@@ -55,7 +55,7 @@ export function IncomeAccountRow({
           <span className="income-account-row__runway-arrow" aria-hidden>
             <IconArrowNarrowRightDashed size={12} stroke={1.15} />
           </span>
-          This will last{" "}
+          This will last about{" "}
           <strong
             className={[
               "income-account-row__runway-years",
@@ -76,7 +76,7 @@ export function IncomeAccountRow({
         <PortfolioBucketAccountRow
           badgeOrder={badgeOrder}
           label={label}
-          amountBesideScenario
+          incomeSummary
           subtext={strategySubtext}
           total={
             <AccountBucketMonthlyIncomePill
@@ -84,11 +84,13 @@ export function IncomeAccountRow({
             />
           }
           valuesExtra={
-            <span
-              className="income-account-row__balance"
-              aria-label="Projected balance at retirement"
-            >
-              {fmt(balanceAtRetirement)}
+            <span className="income-account-row__bucket-value">
+              <span className="income-account-row__bucket-value-label">
+                Bucket value:
+              </span>{" "}
+              <span className="income-account-row__bucket-value-amount tabular-nums">
+                {fmt(balanceAtRetirement)}
+              </span>
             </span>
           }
           showViewHoldings

@@ -104,7 +104,8 @@
 
 @media (max-width: 680px) {
   .portfolio-account-list {
-    padding: var(--space-2);
+    padding: 0;
+    background: transparent;
   }
 }
 

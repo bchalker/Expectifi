@@ -72,29 +72,30 @@ export function ImportedHoldingsScenarioGuide({
             Fine-tune each account income strategy
           </h3>
           <p className="imported-holdings-scenario-guide__lead">
-            <>
-              When you retire your portfolio stops accumulating and starts
-              paying you. How you draw from each account matters. The order, the
-              method, and the rate all affect how much you keep after taxes and
-              how long your money lasts. Some accounts are better suited for
-              dividend income. Others are better drawn down strategically before
-              required distributions force your hand.{" "}
-              <strong>
-                Inflation adjustment{" "}
-                {onInflationAdjChange ? (
-                  <IncomeInflationPercentControl
-                    wdInflation={inflationAdj}
-                    onWdInflation={onInflationAdjChange}
-                  />
-                ) : (
-                  `${(inflationAdj * 100).toFixed(1)}%`
-                )}{" "}
-                applied globally.
-              </strong>{" "}
-              <em className="imported-holdings-scenario-guide__lead-note">
-                Note: {INCOME_RECOMMENDATION_DISCLAIMER}
-              </em>
-            </>
+            When you retire your portfolio stops accumulating and starts paying
+            you. How you draw from each account matters. The order, the method,
+            and the rate all affect how much you keep after taxes and how long
+            your money lasts. Some accounts are better suited for dividend
+            income. Others are better drawn down strategically before required
+            distributions force your hand. At your retirement age, account
+            holdings shift to the selected income strategy.{" "}
+            <strong>
+              Brokerage account transitions may incur capital gains tax not yet
+              reflected in this projection.
+            </strong>{" "}
+            Inflation adjustment{" "}
+            {onInflationAdjChange ? (
+              <IncomeInflationPercentControl
+                wdInflation={inflationAdj}
+                onWdInflation={onInflationAdjChange}
+              />
+            ) : (
+              <u>{(inflationAdj * 100).toFixed(1)}%</u>
+            )}{" "}
+            applied globally.{" "}
+            <em className="imported-holdings-scenario-guide__lead-note">
+              Note: {INCOME_RECOMMENDATION_DISCLAIMER}
+            </em>
           </p>
         </div>
       </aside>

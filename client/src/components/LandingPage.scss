@@ -600,10 +600,10 @@ body:has(.landing-page) {
 }
 
 .landing-faq dt {
-  margin: 0 0 var(--space-1) /* review: was 0.35rem */;
+  // margin: 0 0 var(--space-1) /* review: was 0.35rem */;
   font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--landing-text-on-light);
+  font-weight: 700;
+  color: var(--text);
 }
 
 .landing-faq dd {

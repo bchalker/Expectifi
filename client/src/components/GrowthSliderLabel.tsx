@@ -1,5 +1,4 @@
 import {
-  IconArrowNarrowDownDashed,
   IconChevronCompactDown,
   IconCircleX,
   IconTrendingDown,
@@ -22,7 +21,10 @@ import {
   scenarioColumnShortLabel,
   HOLDING_ROW_SCENARIO_SUBLABEL,
 } from "../lib/holdingScenarioApply";
-import { HoldingsScenarioBadge, holdingsScenarioTriggerChoiceClass } from "./HoldingsScenarioBadge";
+import {
+  HoldingsScenarioBadge,
+  holdingsScenarioTriggerChoiceClass,
+} from "./HoldingsScenarioBadge";
 import {
   blendedBaselineFV,
   positionUsesCustomReturnMode,
@@ -308,9 +310,7 @@ export function GrowthSliderLabel({
     return (
       <p className="growth-slider-label__suffix-line">
         <span className="growth-slider-label__suffix">
-          {allCustom
-            ? "Default rate for non-position balances"
-            : "Default rate for all, except"}
+          {allCustom ? "Default rate for non-position balances" : "Except for"}
         </span>
         {!allCustom ? (
           <span className="growth-slider-label__tickers">
@@ -340,52 +340,51 @@ export function GrowthSliderLabel({
     return (
       <div className="growth-slider-label__panel-exceptions">
         <p className="growth-slider-label__panel-default">
-          {allCustom
-            ? "Default rate for non-position balances"
-            : "Default rate for all, except"}
+          {allCustom ? "Default rate for non-position balances" : "Except for"}
         </p>
         {!allCustom ? (
           <>
-            <IconArrowNarrowDownDashed
+            {/* <IconArrowNarrowDownDashed
               className="growth-slider-label__panel-arrow"
               size={16}
               stroke={1.5}
               aria-hidden
-            />
+            /> */}
             <ul className="growth-slider-label__exception-list">
               {customPositionsForSuffix.map((p) => {
                 const scenarioChoice = scenarioChoiceFor(p);
-                const scenarioClass = holdingsScenarioTriggerChoiceClass(scenarioChoice);
+                const scenarioClass =
+                  holdingsScenarioTriggerChoiceClass(scenarioChoice);
                 return (
-                <li key={p.id} className="growth-slider-label__exception-row">
-                  <button
-                    type="button"
-                    data-growth-slider-ticker
-                    className="growth-slider-label__exception-symbol"
-                    onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
-                    onMouseLeave={scheduleClose}
-                  >
-                    {p.ticker || "—"}
-                  </button>
-                  <span
-                    className={[
-                      "growth-slider-label__exception-scenario",
-                      scenarioClass,
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {scenarioLabelFor(p)}
-                  </span>
-                  <button
-                    type="button"
-                    className="growth-slider-label__exception-remove"
-                    aria-label={`Remove custom return overrides for ${p.ticker || "holding"} (all accounts)`}
-                    onClick={() => removePositionOverrides(p)}
-                  >
-                    <IconCircleX size={14} stroke={1.5} aria-hidden />
-                  </button>
-                </li>
+                  <li key={p.id} className="growth-slider-label__exception-row">
+                    <button
+                      type="button"
+                      data-growth-slider-ticker
+                      className="growth-slider-label__exception-symbol"
+                      onMouseEnter={(e) => openForTicker(p.id, e.currentTarget)}
+                      onMouseLeave={scheduleClose}
+                    >
+                      {p.ticker || "—"}
+                    </button>
+                    <span
+                      className={[
+                        "growth-slider-label__exception-scenario",
+                        scenarioClass,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
+                      {scenarioLabelFor(p)}
+                    </span>
+                    <button
+                      type="button"
+                      className="growth-slider-label__exception-remove"
+                      aria-label={`Remove custom return overrides for ${p.ticker || "holding"} (all accounts)`}
+                      onClick={() => removePositionOverrides(p)}
+                    >
+                      <IconCircleX size={14} stroke={1.5} aria-hidden />
+                    </button>
+                  </li>
                 );
               })}
             </ul>
@@ -413,10 +412,10 @@ export function GrowthSliderLabel({
                     >
                       {retirementAge}
                     </button>
-                    , I expect to grow at
+                    , I expect a
                   </>
                 ) : (
-                  "I expect to grow at"
+                  "I expect a"
                 )}
               </p>
               <div

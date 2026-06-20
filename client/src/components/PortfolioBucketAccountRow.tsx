@@ -42,6 +42,8 @@ type Props = {
    * Income rows leave this off (name + values share a row).
    */
   amountBesideScenario?: boolean
+  /** Income mode: identity column | values column | chevron. */
+  incomeSummary?: boolean
 }
 
 /** Portfolio account summary row: order count, name + tax subtext, total, scenario, chevron. */
@@ -59,11 +61,37 @@ export function PortfolioBucketAccountRow({
   actionSlot = null,
   valuesExtra = null,
   amountBesideScenario = false,
+  incomeSummary = false,
 }: Props) {
   const showScenario = Boolean(scenario)
   const showActionSlot = Boolean(actionSlot)
   const showActionsColumn = showScenario || showActionSlot || showViewHoldings
   const showHintStack = Boolean(subtext || withdrawalPill)
+  const valuesBesideIdentity = amountBesideScenario || incomeSummary
+
+  const nameGroup = (
+    <div className="portfolio-bucket-account-row__name-group">
+      {badgeOrder != null ? (
+        <span className="portfolio-bucket-account-row__order-badge-wrap">
+          <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
+        </span>
+      ) : null}
+      <span className="portfolio-bucket-account-row__name">{label}</span>
+    </div>
+  )
+
+  const hintStack = showHintStack ? (
+    <div className="portfolio-bucket-account-row__hint-stack">
+      {subtext ? (
+        typeof subtext === 'string' ? (
+          <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
+        ) : (
+          subtext
+        )
+      ) : null}
+      {withdrawalPill}
+    </div>
+  ) : null
 
   const valuesColumn = (
     <div className="portfolio-bucket-account-row__values">
@@ -81,6 +109,7 @@ export function PortfolioBucketAccountRow({
       className={[
         'portfolio-bucket-account-row',
         amountBesideScenario && 'portfolio-bucket-account-row--amount-beside-scenario',
+        incomeSummary && 'portfolio-bucket-account-row--income-summary',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -90,36 +119,25 @@ export function PortfolioBucketAccountRow({
           <div className="portfolio-bucket-account-row__content">
             <div className="portfolio-bucket-account-row__main">
               <div className="portfolio-bucket-account-row__identity">
-                <div
-                  className={[
-                    'portfolio-bucket-account-row__title-row',
-                    showHintStack && 'portfolio-bucket-account-row__title-row--stacked-hint',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <div className="portfolio-bucket-account-row__name-group">
-                    {badgeOrder != null ? (
-                      <span className="portfolio-bucket-account-row__order-badge-wrap">
-                        <span className="portfolio-bucket-account-row__order-badge">{badgeOrder}</span>
-                      </span>
-                    ) : null}
-                    <span className="portfolio-bucket-account-row__name">{label}</span>
+                {incomeSummary ? (
+                  <div className="portfolio-bucket-account-row__identity-col">
+                    {nameGroup}
+                    {hintStack}
                   </div>
-                  {!amountBesideScenario ? valuesColumn : null}
-                  {showHintStack ? (
-                    <div className="portfolio-bucket-account-row__hint-stack">
-                      {subtext ? (
-                        typeof subtext === 'string' ? (
-                          <span className="portfolio-bucket-account-row__subtext">{subtext}</span>
-                        ) : (
-                          subtext
-                        )
-                      ) : null}
-                      {withdrawalPill}
-                    </div>
-                  ) : null}
-                </div>
+                ) : (
+                  <div
+                    className={[
+                      'portfolio-bucket-account-row__title-row',
+                      showHintStack && 'portfolio-bucket-account-row__title-row--stacked-hint',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {nameGroup}
+                    {!valuesBesideIdentity ? valuesColumn : null}
+                    {hintStack}
+                  </div>
+                )}
                 {identityExtra ? (
                   <div className="portfolio-bucket-account-row__identity-extra">{identityExtra}</div>
                 ) : null}
@@ -127,7 +145,7 @@ export function PortfolioBucketAccountRow({
               </div>
             </div>
           </div>
-          {amountBesideScenario ? valuesColumn : null}
+          {valuesBesideIdentity ? valuesColumn : null}
           {showActionsColumn ? (
             <div className="portfolio-bucket-account-row__actions">
               {showActionSlot ? (
