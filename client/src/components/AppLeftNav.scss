@@ -41,16 +41,23 @@
 .app-left-nav__views {
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-1);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  gap: var(--space-1) var(--space-2);
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
   padding: var(--space-2) var(--space-4);
 }
 
 .app-left-nav__view-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  width: 100%;
+  width: auto;
+  flex: 0 0 auto;
   min-height: 44px;
   margin: 0;
   padding: var(--space-2) var(--space-3);
@@ -63,6 +70,7 @@
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.35;
+  white-space: nowrap;
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
