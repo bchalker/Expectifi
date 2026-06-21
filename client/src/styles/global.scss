@@ -310,6 +310,13 @@
     var(--layout-marketing-max),
     calc(100vw - var(--layout-marketing-gutter) - var(--layout-marketing-gutter-end))
   );
+
+
+
+  /* tan gradient for tax summary column edges */
+
+  --tax-summary-column-edge-gradient: radial-gradient(ellipse 40% 120% at calc(100% - 3px) center, white 0%, var(--bg-faint) 0%, transparent 50%);
+  --tax-summary-column-edge-gradient-left: radial-gradient(ellipse 40% 120% at left center, white 0%, var(--bg-faint) 0%, transparent 50%);
   /* Portfolio post-import reveal (keep in sync with dashboardViewReveal.ts) */
   --dashboard-reveal-duration: 0.5s;
   --dashboard-stagger-step: 0.12s;
