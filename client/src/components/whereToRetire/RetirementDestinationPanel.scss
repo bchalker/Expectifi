@@ -28,10 +28,11 @@
   transform: translateX(calc(100% + 2rem));
   visibility: hidden;
   pointer-events: none;
+  box-shadow: 0px 0px 0px 0px rgba(0,0,0, 0);
   transition:
     transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 0.32s;
-  overflow: hidden;
+  // overflow: hidden;
   min-height: 0;
 }
 
@@ -39,6 +40,7 @@
   transform: translateX(0);
   visibility: visible;
   pointer-events: auto;
+  box-shadow: -6px 0px 20px -14px rgba(0,0,0, 0.5);
   transition:
     transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 0s;

@@ -41,6 +41,9 @@ export function applyWtrDetailBasemapSymbolVisibility(
         ? 'none'
         : 'visible'
 
+    const current = map.getLayoutProperty(layer.id, 'visibility')
+    if (current === visibility) continue
+
     map.setLayoutProperty(layer.id, 'visibility', visibility)
   }
 }

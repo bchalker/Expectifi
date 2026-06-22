@@ -581,17 +581,28 @@ export function RetirementMapLibreMap({
     map.on("dragstart", onMapInteractionStart);
     map.on("zoomstart", onMapInteractionStart);
 
-    const onStyleReady = () => {
+    /** Only when the basemap style was (re)loaded — not on every styledata tick. */
+    const ensureCityLayersOnStyle = () => {
       if (!map.isStyleLoaded()) return;
-      ensureWtrCityLayers(map);
-      attachCityLayerHandlers(map);
-      updateWtrCityLayerData(map, citiesGeoJsonRef.current);
-      applyWtrDetailBasemapSymbolVisibility(map, detailPanelOpenRef.current);
+
+      const hasCityLayers =
+        map.getSource(WTR_CITIES_SOURCE) != null &&
+        map.getLayer(WTR_CITIES_LAYER) != null;
+
+      if (!hasCityLayers) {
+        ensureWtrCityLayers(map);
+        attachCityLayerHandlers(map);
+        updateWtrCityLayerData(map, citiesGeoJsonRef.current);
+        if (detailPanelOpenRef.current) {
+          applyWtrDetailBasemapSymbolVisibility(map, true);
+        }
+      }
+
       flushPendingMapAction(map, mapPendingRef.current);
     };
 
-    map.on("load", onStyleReady);
-    map.on("styledata", onStyleReady);
+    map.on("load", ensureCityLayersOnStyle);
+    map.on("style.load", ensureCityLayersOnStyle);
 
     mapRef.current = map;
 
@@ -600,8 +611,8 @@ export function RetirementMapLibreMap({
       map.off("movestart", onMapInteractionStart);
       map.off("dragstart", onMapInteractionStart);
       map.off("zoomstart", onMapInteractionStart);
-      map.off("load", onStyleReady);
-      map.off("styledata", onStyleReady);
+      map.off("load", ensureCityLayersOnStyle);
+      map.off("style.load", ensureCityLayersOnStyle);
       clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
       cityLayerHandlersAttachedRef.current = false;
       hoveredCityIdRef.current = null;

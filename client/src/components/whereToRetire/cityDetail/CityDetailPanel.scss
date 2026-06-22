@@ -436,10 +436,11 @@
 
 .wtr-city-detail__section-title {
   font-family: var(--heading);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.3;
   color: var(--text);
+  margin-bottom: var(--space-2);
 }
 
 .wtr-city-detail__cards {
