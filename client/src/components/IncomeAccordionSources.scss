@@ -5,6 +5,9 @@
   font-weight: 400;
   line-height: var(--leading-snug, 1.35);
   color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .income-accordion-sources__label {

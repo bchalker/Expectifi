@@ -14,9 +14,9 @@ export const usBrokerageHint: AccountHintDefinition = {
       ])
     }
     return hintJoin([
-      hintText('Taxable growth with capital gains drag. '),
-      hintLink('Set a custom rate →', { type: 'scenario', bucket: 'brokerage', tab: 'custom' }),
-      hintText(' if you expect this to outperform.'),
+      hintText('Gains and dividends are taxed annually. No RMDs or withdrawal restrictions, useful for bridge income before 59½ or large one-time expenses. '),
+      // hintLink('Set a custom rate →', { type: 'scenario', bucket: 'brokerage', tab: 'custom' }),
+      // hintText(' if you expect this to outperform.'),
     ])
   },
   incomeHint: (ctx) => {

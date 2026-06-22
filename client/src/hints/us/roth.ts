@@ -1,4 +1,4 @@
-import { hintJoin, hintLink, hintText } from '../segments'
+import { hintJoin, hintText } from '../segments'
 import type { AccountHintDefinition } from '../types'
 
 export const usRothHint: AccountHintDefinition = {
@@ -6,8 +6,9 @@ export const usRothHint: AccountHintDefinition = {
   taxTreatment: 'taxFree',
   growthHint: () =>
     hintJoin([
-      hintText('Tax-free compounding with no RMDs. Every dollar of growth here is yours to keep. '),
-      hintLink('Adjust scenario →', { type: 'scenario', bucket: 'roth', tab: 'outlook' }),
+      hintText(
+        'Tax-free growth and withdrawals, no RMDs ever. Your most valuable tax-free asset, worth preserving as long as possible. ',
+      ),
     ]),
   incomeHint: (ctx) => {
     if (ctx.userHasBrokerage) {

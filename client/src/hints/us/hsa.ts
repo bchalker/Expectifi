@@ -8,9 +8,8 @@ export const usHsaHint: AccountHintDefinition = {
   growthHint: () =>
     hintJoin([
       hintText(
-        'Triple tax advantage: deductible contributions, tax-free growth, tax-free medical withdrawals. ',
+        'Medical withdrawals are always tax-free. After 65, non-medical withdrawals are taxed like a traditional IRA, making this a stealth retirement account. ',
       ),
-      hintLink('Set growth rate →', { type: 'scenario', bucket: 'hsa', tab: 'custom' }),
     ]),
   incomeHint: (ctx) => {
     if (ctx.hasMedicalExpensesConfigured && ctx.projectedMedicalMonthly > 0) {

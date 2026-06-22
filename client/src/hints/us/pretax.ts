@@ -11,7 +11,7 @@ export const usPretaxHint: AccountHintDefinition = {
     }
     return hintJoin([
       hintText(
-        'Taxes are deferred, helping more of your money stay invested over time. ',
+        'Withdrawals are taxed as ordinary income. RMDs begin at age 73, and large balances can push your tax bracket higher than expected. ',
       ),
     ])
   },
