@@ -347,6 +347,12 @@
   outline-offset: 2px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .where-to-retire-preview-panel__cta-primary-icon-stack {
+    transition-duration: 0.01ms;
+  }
+}
+
 .where-to-retire-preview-panel__cta-income {
   font-weight: 600;
 }
