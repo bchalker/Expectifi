@@ -1,0 +1,458 @@
+.wtr-people-culture {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3) /* review: was 0.65rem */;
+  padding-bottom: var(--space-2);
+}
+
+.wtr-people-culture__social-disclosures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.wtr-people-culture__social-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--border-radius-md, 8px);
+  border: 0.5px solid var(--color-border-warning, #f59e0b);
+  background: var(--color-background-warning, #fffbeb);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-warning, #b45309);
+}
+
+.wtr-people-culture__empty {
+  margin: var(--space-5) 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__data-empty {
+  border: 1px dashed var(--border);
+  box-shadow: none;
+}
+
+.wtr-people-culture__data-empty-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--heading);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.wtr-people-culture__data-empty-body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__country-fallback {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-amber-dark);
+  text-align: left;
+  cursor: pointer;
+}
+
+.wtr-people-culture__country-fallback:hover {
+  text-decoration: underline;
+}
+
+.wtr-people-culture__english-level {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__expat-heads-up {
+  margin-bottom: var(--space-3);
+}
+
+.wtr-people-culture__expat-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wtr-people-culture__expat-label {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wtr-people-culture__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-sizing: border-box;
+}
+
+.wtr-people-culture__section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wtr-people-culture__section-header .wtr-people-culture__section-title {
+  margin: 0;
+}
+
+.wtr-people-culture__section-helper {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__section-title {
+  margin-bottom: var(--space-2);
+}
+
+.wtr-people-culture__dominant {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.wtr-people-culture__dominant-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.wtr-people-culture__religion-breakdown,
+.wtr-people-culture__religion-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--wtr-city-detail-panel-bg);
+  border-radius: var(--border-radius-md, 8px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wtr-people-culture__religion-bar {
+  display: flex;
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+
+.wtr-people-culture__religion-segment {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  width: 0;
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wtr-people-culture__religion-bar--revealed .wtr-people-culture__religion-segment {
+  width: var(--segment-target);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wtr-people-culture__religion-segment {
+    transition: none;
+  }
+
+  .wtr-people-culture__religion-bar--revealed .wtr-people-culture__religion-segment {
+    width: var(--segment-target);
+  }
+}
+
+.wtr-people-culture__religion-segment--christian {
+  background: var(--sky-blue-d2);
+}
+
+.wtr-people-culture__religion-segment--muslim {
+  background: var(--green3);
+}
+
+.wtr-people-culture__religion-segment--buddhist {
+  background: var(--amber3);
+}
+
+.wtr-people-culture__religion-segment--hindu {
+  background: #e06828;
+}
+
+.wtr-people-culture__religion-segment--jewish {
+  background: #7b5ea8;
+}
+
+.wtr-people-culture__religion-segment--unaffiliated {
+  background: var(--blue4);
+}
+
+.wtr-people-culture__religion-segment--other {
+  background: var(--surface-d4);
+}
+
+.wtr-people-culture__legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+.wtr-people-culture__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  line-height: 1.0;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__legend-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.wtr-people-culture__legend-dot--christian {
+  background: var(--sky-blue-d2);
+}
+
+.wtr-people-culture__legend-dot--muslim {
+  background: var(--green3);
+}
+
+.wtr-people-culture__legend-dot--buddhist {
+  background: var(--amber3);
+}
+
+.wtr-people-culture__legend-dot--hindu {
+  background: #e06828;
+}
+
+.wtr-people-culture__legend-dot--jewish {
+  background: #7b5ea8;
+}
+
+.wtr-people-culture__legend-dot--unaffiliated {
+  background: var(--blue4);
+}
+
+.wtr-people-culture__legend-dot--other {
+  background: var(--surface-d4);
+}
+
+.wtr-people-culture__legend-label .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-people-culture__worship-note {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__worship-note em {
+  font-style: italic;
+
+}
+
+.wtr-people-culture__demo-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wtr-people-culture__demo-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.wtr-people-culture__demo-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.wtr-people-culture__demo-stat--start {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.wtr-people-culture__demo-stat--center {
+  align-items: center;
+  text-align: center;
+}
+
+.wtr-people-culture__demo-stat--end {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.wtr-people-culture__demo-stat-label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.wtr-people-culture__demo-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.wtr-people-culture__demo-age-callout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--border-radius-md, 8px);
+  background: #f9f9f9;
+  box-sizing: border-box;
+}
+
+.wtr-people-culture__demo-age-headline {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.wtr-people-culture__demo-callout {
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 3px solid color-mix(in srgb, var(--border) 80%, var(--text-muted));
+  // border-radius: var(--border-radius-md, 8px);
+  // background: var(--color-card);
+}
+
+.wtr-people-culture__demo-callout.narrative-why-line {
+  margin-top: 0;
+}
+
+.wtr-people-culture__demo-language-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wtr-people-culture__demo-inline-row {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.wtr-people-culture__demo-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.wtr-people-culture__demo-block-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.wtr-people-culture__demo-block-body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.wtr-people-culture__english-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) /* review: was 0.2rem */ var(--space-2) /* review: was 0.55rem */;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.wtr-people-culture__english-badge--green {
+  color: var(--color-text-success);
+  background: color-mix(in srgb, var(--color-text-success) 14%, var(--color-card));
+}
+
+.wtr-people-culture__english-badge--teal {
+  color: var(--color-teal-dark);
+  background: var(--color-teal-bg);
+}
+
+.wtr-people-culture__english-badge--amber {
+  color: var(--color-amber-dark);
+  background: var(--color-amber-bg);
+}
+
+.wtr-people-culture__english-badge--muted {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 12%, var(--color-card));
+}
+
+.wtr-people-culture__expat-copy {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.wtr-people-culture__why {
+  margin-top: var(--space-2);
+}
+
+.wtr-people-culture__heads-up {
+  width: 100%;
+}
+
+@media (max-width: 680px) {
+  .wtr-people-culture__demo-stat-value {
+    font-size: var(--text-base);
+  }
+
+  .wtr-people-culture__demo-stat-label {
+    font-size: var(--text-xs);
+  }
+}

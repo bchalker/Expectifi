@@ -1,0 +1,12 @@
+        <RetirementDestinationPanel
+          scored={selectedScored}
+          monthlyIncome={explorationIncome}
+          planMonthlyIncome={planMonthlyIncome}
+          mapFilters={filters}
+          preferences={preferences}
+          open={detailPanelOpen}
+          onClose={closePanel}
+          listNav={destinationListNav}
+          detailColumnLayout={detailColumnLayout}
+          onPanelWidthChange={handleDetailPanelWidthChange}
+        />

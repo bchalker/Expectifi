@@ -1,23 +1,11 @@
 .wtr-city-detail__index-rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-8);
 
   @media (max-width: 480px) {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-.wtr-city-detail__index-card-shell {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 100%;
-  box-sizing: border-box;
-}
-
-.wtr-city-detail__index-card-shell .wtr-city-detail-index-card {
-  flex: 1 1 auto;
 }
 
 .wtr-city-detail-index-card {
@@ -115,12 +103,13 @@
 
 .wtr-city-detail-index-card__comparison-row {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: 0.4em;
+  gap: 0.35em;
   max-width: 100%;
-  flex-direction: row;
+  white-space: nowrap;
+  flex-direction: column;
 }
 
 .wtr-city-detail-index-card__caption {

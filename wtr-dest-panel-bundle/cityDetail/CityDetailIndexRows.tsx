@@ -1,5 +1,4 @@
 import { useUserLocale } from '../../../context/UserLocaleContext'
-import { DetailPanelCard } from '../../ui/DetailPanelCard'
 import { Tooltip } from '../../Tooltip'
 import {
   formatQoLIndex,
@@ -283,43 +282,33 @@ export function CityDetailIndexRows({ country, className }: Props) {
 
   return (
     <div className={['wtr-city-detail__index-rows', className].filter(Boolean).join(' ')}>
-      <DetailPanelCard
-        className="wtr-city-detail__index-card-shell"
-        aria-label="Cost of Living index"
-      >
-        <CityDetailIndexCard
-          label="Cost of Living"
-          tooltip={HOME_AVG_TOOLTIPS.col}
-          value={colIndex.value}
-          displayValue={colIndex.display}
-          band={colBand}
-          comparisonBand={colBand}
-          benchmark={homeColBenchmark}
-          comparison={colComparison}
-          tierLabel={null}
-          titleSuffix={null}
-          fillVariant="col"
-        />
-      </DetailPanelCard>
-      <DetailPanelCard
-        className="wtr-city-detail__index-card-shell"
-        aria-label="Quality of Life index"
-      >
-        <CityDetailIndexCard
-          label="Quality of Life"
-          tooltip={HOME_AVG_TOOLTIPS.qol}
-          benchmarkTooltip={QOL_US_BASELINE_TOOLTIP}
-          value={qolIndex.value}
-          displayValue={qolIndex.display}
-          band={qolTier?.band ?? null}
-          comparisonBand={qolComparisonBand}
-          benchmark={qolUsComparable ? usQolBenchmark : null}
-          comparison={qolComparison}
-          tierLabel={qolUsComparable ? null : (qolTier?.label ?? null)}
-          titleSuffix="(Country avg)"
-          fillVariant="qol"
-        />
-      </DetailPanelCard>
+      <CityDetailIndexCard
+        label="Cost of Living"
+        tooltip={HOME_AVG_TOOLTIPS.col}
+        value={colIndex.value}
+        displayValue={colIndex.display}
+        band={colBand}
+        comparisonBand={colBand}
+        benchmark={homeColBenchmark}
+        comparison={colComparison}
+        tierLabel={null}
+        titleSuffix={null}
+        fillVariant="col"
+      />
+      <CityDetailIndexCard
+        label="Quality of Life"
+        tooltip={HOME_AVG_TOOLTIPS.qol}
+        benchmarkTooltip={QOL_US_BASELINE_TOOLTIP}
+        value={qolIndex.value}
+        displayValue={qolIndex.display}
+        band={qolTier?.band ?? null}
+        comparisonBand={qolComparisonBand}
+        benchmark={qolUsComparable ? usQolBenchmark : null}
+        comparison={qolComparison}
+        tierLabel={qolUsComparable ? null : (qolTier?.label ?? null)}
+        titleSuffix="(Country avg)"
+        fillVariant="qol"
+      />
     </div>
   )
 }

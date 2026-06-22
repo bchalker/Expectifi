@@ -222,7 +222,7 @@ export function CostOfLivingTab({
   return (
     <div className="wtr-city-detail__tab-content wtr-city-detail__tab-content--col">
       <section
-        className="wtr-city-detail__col-summary"
+        className="detail-panel-card wtr-city-detail__col-summary"
         aria-label="Cost indices"
       >
         <CityDetailIndexRows country={city.country} />
@@ -239,37 +239,32 @@ export function CostOfLivingTab({
         />
       </div>
       <section
-        className="wtr-city-detail__col-budget-group"
+        className="detail-panel-card wtr-city-detail__col-budget-group"
         aria-label="Monthly budget breakdown and costs"
       >
-        <div className="detail-panel-card spending_group">
-          <ColBudgetBreakdownBar
-            breakdown={budgetBreakdown}
-            className="wtr-city-detail__budget-bar"
-            showTitle
-          />
-          <ColGroceriesBudgetCard
-            amount={budgetBreakdown.breakdown.groceries}
-            className="wtr-city-detail__col-groceries"
-          />
-          <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
-            {colBudgetCards.map((card) => {
-              const { id: _id, ...categoryProps } = card;
-              const categoryDot = COL_BUDGET_CARD_CATEGORY_DOT[card.id];
-              return (
-                <div key={card.id} className="wtr-city-detail__card-cell">
-                  <ColCategoryCard
-                    {...categoryProps}
-                    categoryDot={categoryDot}
-                  />
-                </div>
-              );
-            })}
-            <p className="wtr-city-detail__col-budget-footnote font-xs">
-              Based on your lifestyle preset basket and dining habits
-            </p>
-          </div>
+        <ColBudgetBreakdownBar
+          breakdown={budgetBreakdown}
+          className="wtr-city-detail__budget-bar"
+          showTitle
+        />
+        <ColGroceriesBudgetCard
+          amount={budgetBreakdown.breakdown.groceries}
+          className="wtr-city-detail__col-groceries"
+        />
+        <div className="wtr-city-detail__cards wtr-city-detail__cards--col">
+          {colBudgetCards.map((card) => {
+            const { id: _id, ...categoryProps } = card;
+            const categoryDot = COL_BUDGET_CARD_CATEGORY_DOT[card.id];
+            return (
+              <div key={card.id} className="wtr-city-detail__card-cell">
+                <ColCategoryCard {...categoryProps} categoryDot={categoryDot} />
+              </div>
+            );
+          })}
         </div>
+        <p className="wtr-city-detail__col-budget-footnote font-xs">
+          Based on your lifestyle preset basket and dining habits
+        </p>
       </section>
     </div>
   );
