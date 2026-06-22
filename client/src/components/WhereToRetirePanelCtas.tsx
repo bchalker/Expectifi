@@ -1,3 +1,5 @@
+import { IconMapSearch } from "@tabler/icons-react";
+
 type Props = {
   hasOpenedPrefsOverlay: boolean;
   onExplore: () => void;
@@ -17,6 +19,7 @@ export function WhereToRetirePanelCtas({
         onClick={onExplore}
       >
         Where to Retire
+        <IconMapSearch size={16} stroke={1.5} aria-hidden />
       </button>
       <button
         type="button"

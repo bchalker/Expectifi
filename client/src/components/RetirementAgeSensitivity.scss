@@ -28,12 +28,14 @@
   padding-bottom: var(--space-3);
   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
   box-shadow: var(--sky-blue) 0px 10px 10px -10px, rgba(255, 255, 255, 0.8) 0px 0px 0px 0px;
+  box-shadow: var(--sky-blue) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
 
 .retirement-sensitivity-trigger__btn:hover {
 
   box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
   box-shadow: var(--sky-blue) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
+  box-shadow: var(--sky-blue) 0px 10px 10px -10px, rgba(255, 255, 255, 0.8) 0px 0px 0px 0px;
 }
 
 .retirement-sensitivity-trigger__btn:focus-visible {
@@ -50,8 +52,12 @@
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  transition: all .3s ease;
 }
-
+.retirement-sensitivity-trigger__btn:hover .retirement-sensitivity-trigger__age,
+.retirement-sensitivity-trigger__btn:focus-visible .retirement-sensitivity-trigger__age {
+  color: var(--sky-blue-d5);
+}
 .retirement-sensitivity-trigger__compare {
   display: inline-flex;
   align-items: center;
@@ -65,6 +71,7 @@
   font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.2;
+  transition: all .3s ease;
   color: var(--accent-text);
   text-decoration: none;
   white-space: nowrap;
