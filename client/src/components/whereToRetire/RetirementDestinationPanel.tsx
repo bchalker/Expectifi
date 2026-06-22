@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import { BottomSheetPortal } from "../ui/BottomSheetPortal";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
@@ -14,6 +14,7 @@ import "./RetirementDestinationPanel.scss";
 
 const MAP_RAIL_SLIDE_MS = 320;
 const MAP_RAIL_SLIDE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+const MOBILE_SHEET_SLIDE_MS = 300;
 
 export type DestinationListNav = {
   index: number;
@@ -30,6 +31,8 @@ type Props = {
   preferences: RetirementPreferences;
   open: boolean;
   onClose: () => void;
+  /** Fired after the close slide finishes — parent can unmount city data. */
+  onCloseComplete?: () => void;
   listNav: DestinationListNav | null;
   detailColumnLayout?: boolean;
   onPanelWidthChange?: (width: number) => void;
@@ -43,6 +46,7 @@ export function RetirementDestinationPanel({
   preferences,
   open,
   onClose,
+  onCloseComplete,
   listNav,
   detailColumnLayout = false,
   onPanelWidthChange,
@@ -51,6 +55,9 @@ export function RetirementDestinationPanel({
   const sheetRef = useRef<HTMLElement>(null);
   const mapRailAnimRef = useRef<Animation | null>(null);
   const mapRailWasOpenRef = useRef(false);
+  const onCloseCompleteRef = useRef(onCloseComplete);
+  onCloseCompleteRef.current = onCloseComplete;
+  const [slideOpen, setSlideOpen] = useState(false);
 
   const {
     isDragging,
@@ -60,28 +67,68 @@ export function RetirementDestinationPanel({
     handleTouchEnd,
   } = useBottomSheetDrag({
     enabled: mobileSheet,
-    open,
+    open: slideOpen,
     panelRef: sheetRef,
     onDismiss: onClose,
   });
 
   useEffect(() => {
-    const el = sheetRef.current;
-    if (!el || mobileSheet || detailColumnLayout) {
-      if (el && detailColumnLayout) {
-        el.style.transform = "";
-        el.style.visibility = "";
-        el.style.pointerEvents = "";
-      }
+    if (!open) {
+      setSlideOpen(false);
       return;
     }
+    setSlideOpen(false);
+    const id = window.requestAnimationFrame(() => setSlideOpen(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [open]);
 
-    mapRailAnimRef.current?.cancel();
-    mapRailAnimRef.current = null;
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!el) return;
+
+    const finishClose = () => {
+      mapRailWasOpenRef.current = false;
+      onCloseCompleteRef.current?.();
+    };
+
+    const scheduleCssCloseComplete = (durationMs: number) => {
+      if (durationMs <= 0) {
+        finishClose();
+        return undefined;
+      }
+      const timer = window.setTimeout(finishClose, durationMs);
+      return () => window.clearTimeout(timer);
+    };
 
     const reducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (mobileSheet || detailColumnLayout) {
+      el.style.transform = "";
+      el.style.visibility = "";
+      el.style.pointerEvents = "";
+
+      if (open) {
+        mapRailWasOpenRef.current = true;
+        return;
+      }
+
+      if (!mapRailWasOpenRef.current) {
+        finishClose();
+        return;
+      }
+
+      const durationMs = reducedMotion
+        ? 0
+        : mobileSheet
+          ? MOBILE_SHEET_SLIDE_MS
+          : MAP_RAIL_SLIDE_MS;
+      return scheduleCssCloseComplete(durationMs);
+    }
+
+    mapRailAnimRef.current?.cancel();
+    mapRailAnimRef.current = null;
 
     const setClosedStyles = () => {
       el.style.transform = "translateX(100%)";
@@ -98,10 +145,11 @@ export function RetirementDestinationPanel({
     if (reducedMotion) {
       if (open) {
         setOpenStyles();
+        mapRailWasOpenRef.current = true;
       } else {
         setClosedStyles();
+        finishClose();
       }
-      mapRailWasOpenRef.current = open;
       return;
     }
 
@@ -133,6 +181,7 @@ export function RetirementDestinationPanel({
 
     if (!mapRailWasOpenRef.current) {
       setClosedStyles();
+      finishClose();
       return;
     }
 
@@ -153,8 +202,8 @@ export function RetirementDestinationPanel({
     anim.onfinish = () => {
       setClosedStyles();
       mapRailAnimRef.current = null;
+      finishClose();
     };
-    mapRailWasOpenRef.current = false;
     return () => {
       anim.cancel();
       mapRailAnimRef.current = null;
@@ -227,7 +276,7 @@ export function RetirementDestinationPanel({
           !mobileSheet &&
             detailColumnLayout &&
             "wtr-dest-panel--detail-column",
-          open && "wtr-dest-panel--open",
+          slideOpen && "wtr-dest-panel--open",
           mobileSheet && "wtr-dest-panel--sheet",
           isDragging && "mobile-bottom-sheet-panel--dragging",
         ]

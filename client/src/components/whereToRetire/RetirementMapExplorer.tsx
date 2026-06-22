@@ -647,6 +647,9 @@ export function RetirementMapExplorer({
 
   const closePanel = useCallback(() => {
     setPanelOpen(false);
+  }, []);
+
+  const handlePanelCloseComplete = useCallback(() => {
     setSelectedId(null);
   }, []);
 
@@ -1047,8 +1050,9 @@ export function RetirementMapExplorer({
           planMonthlyIncome={planMonthlyIncome}
           mapFilters={filters}
           preferences={preferences}
-          open={detailPanelOpen}
+          open={panelOpen}
           onClose={closePanel}
+          onCloseComplete={handlePanelCloseComplete}
           listNav={destinationListNav}
           detailColumnLayout={detailColumnLayout}
           onPanelWidthChange={handleDetailPanelWidthChange}
