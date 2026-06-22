@@ -1,4 +1,4 @@
-import { IconMapSearch } from "@tabler/icons-react";
+import { IconArrowNarrowRightDashed, IconMapSearch } from "@tabler/icons-react";
 
 type Props = {
   hasOpenedPrefsOverlay: boolean;
@@ -19,7 +19,19 @@ export function WhereToRetirePanelCtas({
         onClick={onExplore}
       >
         Where to Retire
-        <IconMapSearch size={16} stroke={1.5} aria-hidden />
+        <span
+          className="where-to-retire-preview-panel__cta-primary-icon"
+          aria-hidden
+        >
+          <span className="where-to-retire-preview-panel__cta-primary-icon-stack">
+            <span className="where-to-retire-preview-panel__cta-primary-icon-layer">
+              <IconMapSearch size={16} stroke={1.5} />
+            </span>
+            <span className="where-to-retire-preview-panel__cta-primary-icon-layer">
+              <IconArrowNarrowRightDashed size={16} stroke={1.5} />
+            </span>
+          </span>
+        </span>
       </button>
       <button
         type="button"

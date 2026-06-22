@@ -308,6 +308,36 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.where-to-retire-preview-panel__cta-primary-icon {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.where-to-retire-preview-panel__cta-primary-icon-stack {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.where-to-retire-preview-panel__cta-primary-icon-layer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.where-to-retire-preview-panel__cta-primary:hover
+  .where-to-retire-preview-panel__cta-primary-icon-stack,
+.where-to-retire-preview-panel__cta-primary:focus-visible
+  .where-to-retire-preview-panel__cta-primary-icon-stack {
+  transform: translateY(-1rem);
+}
+
 .where-to-retire-preview-panel__cta-primary:hover {
   filter: brightness(1.06);
 }
