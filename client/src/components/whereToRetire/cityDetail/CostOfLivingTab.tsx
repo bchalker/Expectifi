@@ -265,10 +265,10 @@ export function CostOfLivingTab({
                 </div>
               );
             })}
-            <p className="wtr-city-detail__col-budget-footnote font-xs">
-              Based on your lifestyle preset basket and dining habits
-            </p>
           </div>
+          <p className="wtr-city-detail__col-budget-footnote">
+            Based on your lifestyle preset basket and dining habits
+          </p>
         </div>
       </section>
     </div>

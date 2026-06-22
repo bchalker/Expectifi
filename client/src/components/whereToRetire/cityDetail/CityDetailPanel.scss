@@ -242,6 +242,8 @@
   padding: var(--space-4);
   border-radius: 0;
   background: var(--wtr-city-detail-panel-bg);
+  background: var(--surface);
+  box-shadow: -6px 0px 20px -14px rgba(0,0,0, 0.5);
   box-sizing: border-box;
 }
 
@@ -291,6 +293,7 @@
   border-top: 1px solid var(--border);
   line-height: 1.45;
   color: var(--text-muted);
+  font-size: var(--text-xs);
   text-align: center;
 }
 
@@ -312,23 +315,26 @@
   margin: 0;
   padding: 0;
   background: var(--surface);
+  z-index: 1;
   overflow-x: auto;
   overflow-y: hidden;
   gap: 1px;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.03);
-  &::after {
-    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
-    content: '';
-    display: block;
-    width: 100%;
-    height: 10px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
+  // overscroll-behavior: contain;
+  // scrollbar-width: thin;
+  position: relative;
+  border-bottom: var(--space-2) solid var(--surface);
+  box-shadow: rgba(0,0,0, 0.3) 0px 2px 6px 0px;
+//   &::before {
+// background: linear-gradient(to bottom, rgba(0,0,0, 0.6), transparent);
+//     content: '';
+//     display: block;
+//     width: 100%;
+//     height: 60px;
+//     position: absolute;
+//     bottom: 0;
+//     left: 0;
+//     z-index: 1;
+//   }
 }
 
 .wtr-city-detail__tab-scroll {
@@ -346,7 +352,7 @@
   flex: 1 1 0;
   min-width: 0;
   min-height: 44px;
-  padding: var(--space-3) var(--space-3);
+  padding: var(--space-3) var(--space-2);
   border: none;
   margin: 0;
   gap: var(--space-2);
@@ -367,13 +373,15 @@
 .wtr-city-detail__nav-item:hover {
   color: var(--text);
   background-color: var(--wtr-city-detail-panel-bg);
-  box-shadow: inset 0 -2px 0 0 var(--color-text-success);
+  background-color: var(--surface);
+  box-shadow: inset 0 0px 0 0 var(--color-text-success);
 }
 
 .wtr-city-detail__nav-item--active {
   color: var(--text);
   // font-weight: 700;
   background-color: var(--wtr-city-detail-panel-bg);
+  background-color: var(--surface);
   box-shadow: inset 0 -6px 0 0 var(--color-text-success);
 }
 
