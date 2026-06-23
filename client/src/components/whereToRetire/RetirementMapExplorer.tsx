@@ -33,6 +33,7 @@ import { lookupRetirementCity } from "../../lib/whereToRetire/retirementCityLook
 import { countryToIsoCode } from "../../utils/costOfLiving";
 import { expatCommunitySortRank } from "../../utils/expatInfo";
 import type { MapPinColorView } from "../../lib/whereToRetire/mapPinDisplay";
+import { resolveMapPinDisplay } from "../../lib/whereToRetire/mapPinDisplay";
 import { RetirementDestinationCard } from "./RetirementDestinationCard";
 import { RetirementDestinationPanel } from "./RetirementDestinationPanel";
 import { WtrCompareBar, type CompareBarCity } from "./WtrCompareBar";
@@ -561,6 +562,31 @@ export function RetirementMapExplorer({
     };
   }, [selectedScored?.city.id, selectedScored?.city.lng, selectedScored?.city.lat]);
 
+  const activeMapMarker = useMemo(() => {
+    if (!detailPanelOpen || !selectedScored) return null;
+    const isFavorite = favoritedKeySet.has(
+      `${selectedScored.city.city}\u0001${selectedScored.city.country}`,
+    );
+    const display = resolveMapPinDisplay(
+      selectedScored,
+      pinColorView,
+      explorationIncome,
+      isFavorite,
+    );
+    return {
+      cityId: selectedScored.city.id,
+      lng: selectedScored.city.lng,
+      lat: selectedScored.city.lat,
+      pinColor: display.pinColor,
+    };
+  }, [
+    detailPanelOpen,
+    selectedScored,
+    pinColorView,
+    explorationIncome,
+    favoritedKeySet,
+  ]);
+
   useEffect(() => {
     if (!detailColumnLayout) return;
     notifyMapResize();
@@ -1017,6 +1043,7 @@ export function RetirementMapExplorer({
               detailColumnLayout={detailColumnLayout}
               detailPanelPaddingRight={detailPanelWidth}
               detailFlyCoords={detailFlyCoords}
+              activeMapMarker={activeMapMarker}
               suppressTooltips={filtersOpen}
               fitKey={mapFitKey}
               fitDestinations={mapFitDestinations}

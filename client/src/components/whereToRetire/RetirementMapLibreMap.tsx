@@ -40,10 +40,16 @@ import {
   MAP_DETAIL_CITY_ZOOM,
   MAP_DETAIL_FLY_DURATION_MS,
 } from "../../lib/whereToRetire/flyMapToSelectedCity";
+import {
+  removeAllMapMarkers,
+  syncActiveMapMarker,
+  type WtrActiveMapMarker,
+} from "../../lib/whereToRetire/wtrMapDomMarker";
 import { applyWtrDetailBasemapSymbolVisibility } from "../../lib/whereToRetire/wtrMapBasemapSymbols";
 import {
   resolveMapPinDisplay,
   type MapPinColorView,
+  type MapPinDisplay,
 } from "../../lib/whereToRetire/mapPinDisplay";
 import { WtrMapPinLegend } from "./WtrMapPinLegend";
 import { WtrMapPinTooltip } from "./WtrMapPinTooltip";
@@ -116,6 +122,7 @@ type Props = {
   detailColumnLayout?: boolean;
   detailPanelPaddingRight?: number;
   detailFlyCoords?: { lng: number; lat: number } | null;
+  activeMapMarker?: WtrActiveMapMarker | null;
   suppressTooltips?: boolean;
   fitKey: string;
   fitDestinations: ScoredMapCity[];
@@ -189,6 +196,7 @@ export function RetirementMapLibreMap({
   detailColumnLayout = false,
   detailPanelPaddingRight = 0,
   detailFlyCoords = null,
+  activeMapMarker = null,
   suppressTooltips = false,
   fitKey,
   fitDestinations,
@@ -227,6 +235,12 @@ export function RetirementMapLibreMap({
     waiting: false,
   });
   const styleIndexRef = useRef(0);
+  const markersRef = useRef(new Map<string, maplibregl.Marker>());
+  const activeMarkerIdRef = useRef<string | null>(null);
+  const focusIdRef = useRef<string | null>(null);
+  const pinDisplaysRef = useRef(new Map<string, MapPinDisplay>());
+  const activeMapMarkerRef = useRef(activeMapMarker);
+  const syncActiveMarkerOverlayRef = useRef<() => void>(() => {});
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const legendActiveBands =
@@ -293,6 +307,45 @@ export function RetirementMapLibreMap({
   );
   const citiesGeoJsonRef = useRef(citiesGeoJson);
   citiesGeoJsonRef.current = citiesGeoJson;
+  pinDisplaysRef.current = pinDisplays;
+  focusIdRef.current = focusId;
+  activeMapMarkerRef.current = activeMapMarker;
+
+  const syncActiveMarkerOverlay = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const currentFocusId = focusIdRef.current;
+    const active = activeMapMarkerRef.current;
+    const activeForFocus =
+      active && active.cityId === currentFocusId ? active : null;
+
+    const scored = currentFocusId
+      ? destinationsRef.current.find((item) => item.city.id === currentFocusId)
+      : undefined;
+    const display = currentFocusId
+      ? pinDisplaysRef.current.get(currentFocusId)
+      : undefined;
+
+    const coords = activeForFocus
+      ? { lng: activeForFocus.lng, lat: activeForFocus.lat }
+      : scored
+        ? { lng: scored.city.lng, lat: scored.city.lat }
+        : null;
+    const pinColor =
+      activeForFocus?.pinColor ?? display?.pinColor ?? null;
+
+    syncActiveMapMarker(
+      map,
+      markersRef.current,
+      activeMarkerIdRef,
+      currentFocusId,
+      coords,
+      pinColor,
+    );
+  }, []);
+
+  syncActiveMarkerOverlayRef.current = syncActiveMarkerOverlay;
 
   destinationsRef.current = destinations;
   fitDestinationsRef.current = fitDestinations;
@@ -598,6 +651,10 @@ export function RetirementMapLibreMap({
         }
       }
 
+      removeAllMapMarkers(markersRef.current);
+      activeMarkerIdRef.current = null;
+      syncActiveMarkerOverlayRef.current();
+
       flushPendingMapAction(map, mapPendingRef.current);
     };
 
@@ -616,6 +673,8 @@ export function RetirementMapLibreMap({
       clearTooltipTimers(hideTooltipTimeoutRef, enterTooltipFrameRef);
       cityLayerHandlersAttachedRef.current = false;
       hoveredCityIdRef.current = null;
+      removeAllMapMarkers(markersRef.current);
+      activeMarkerIdRef.current = null;
       map.remove();
       mapRef.current = null;
       mapPendingRef.current.pending = null;
@@ -668,6 +727,21 @@ export function RetirementMapLibreMap({
     if (!map || !map.isStyleLoaded()) return;
     updateWtrCityLayerData(map, citiesGeoJson);
   }, [citiesGeoJson]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!map.isStyleLoaded()) {
+      const retry = () => syncActiveMarkerOverlay();
+      map.once("idle", retry);
+      return () => {
+        map.off("idle", retry);
+      };
+    }
+
+    syncActiveMarkerOverlay();
+  }, [focusId, pinDisplays, activeMapMarker, syncActiveMarkerOverlay]);
 
   useEffect(() => {
     const map = mapRef.current;

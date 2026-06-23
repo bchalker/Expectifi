@@ -21,6 +21,7 @@ export function buildCitiesGeoJson(
       const display = pinDisplays.get(item.city.id)
       if (!display) return []
       const isFocused = item.city.id === focusId
+      if (isFocused) return []
       return [
         {
           type: 'Feature' as const,
@@ -33,8 +34,8 @@ export function buildCitiesGeoJson(
             cityId: item.city.id,
             pinColor: display.pinColor,
             pinRadius: Math.max(3, item.pinSizePx / 2),
-            baseOpacity: isFocused ? 1 : 0.5,
-            strokeWidth: isFocused ? 2 : 1,
+            baseOpacity: 0.5,
+            strokeWidth: 1,
           },
         },
       ]

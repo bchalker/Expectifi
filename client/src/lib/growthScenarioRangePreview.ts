@@ -232,7 +232,7 @@ export function computeGrowthScenarioRangePreview(
     brkRate,
     inputs,
   );
-  const expectedFv = globalTierExpectedFv(
+  const globalTierBaseFv = globalTierExpectedFv(
     retPrincipal,
     brkPrincipal,
     c.save,
@@ -240,12 +240,16 @@ export function computeGrowthScenarioRangePreview(
     baseBrkRate,
     h,
   );
+  /** Match headline portfolio FV (includes custom holdings and account scenarios). */
+  const expectedFv = c.totalFV;
 
   function projectedFor(choice: OutlookScenarioChoice): number {
     const savingsAdj = savingsScenarioDelta(c.save, baseRetRate, choice, h);
     const retDelta = lumpOutlookDelta(retPrincipal, baseRetRate, choice, h);
     const brkDelta = lumpOutlookDelta(brkPrincipal, baseBrkRate, choice, h);
-    return expectedFv + savingsAdj + retDelta + brkDelta;
+    const globalWingFv =
+      globalTierBaseFv + savingsAdj + retDelta + brkDelta;
+    return expectedFv + (globalWingFv - globalTierBaseFv);
   }
 
   const pessimisticFv = projectedFor("very_bear");
