@@ -89,14 +89,14 @@ const PANEL_TABS: {
   },
   {
     id: 'peopleCulture',
-    label: 'Community',
+    label: 'Demographic',
     tabId: 'wtr-dest-tab-people-culture',
     panelId: 'wtr-dest-tabpanel-people-culture',
     icon: <IconUsers size={16} stroke={1.5} />,
   },
   {
     id: 'expatLife',
-    label: 'Expat life',
+    label: 'Expats',
     tabId: 'wtr-dest-tab-expat-life',
     panelId: 'wtr-dest-tabpanel-expat-life',
     icon: <IconUsersGroup size={16} stroke={1.5} />,

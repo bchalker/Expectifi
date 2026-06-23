@@ -323,6 +323,13 @@ export function qolBarFillPercent(score: number, invert = false): number {
 
 export type QoLOverallBand = 'excellent' | 'moderate' | 'below-average'
 
+/** Map 3-tier overall badge to 4-tier meter/card palette. */
+export function qolOverallBandToVisual(band: QoLOverallBand): HealthcareBand {
+  if (band === 'excellent') return 'world-class'
+  if (band === 'moderate') return 'basic'
+  return 'limited'
+}
+
 export type QoLMetricBand = 'good' | 'mid' | 'bad'
 
 /** Shared 3-tier color for the overall score gradient bar. */

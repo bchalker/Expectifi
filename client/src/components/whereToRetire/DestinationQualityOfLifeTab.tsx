@@ -10,6 +10,7 @@ import {
   QOL_NORMALIZED_MAX,
   QOL_UNAVAILABLE_MESSAGE,
   qolNormalizedFromIndex,
+  qolOverallBandToVisual,
   qolOverallScoreBand,
   resolveQoLMetricBand,
   type QoLMetricKey,
@@ -156,6 +157,7 @@ function QoLOverallCard({
       <QoLBandedScoreMeter
         metricKey="overall"
         score={qolNormalized}
+        visualBand={qolOverallBandToVisual(band)}
         compact
         meterAriaLabel={`Overall quality of life: ${meterBandLabel}, score ${scoreValue} out of ${QOL_NORMALIZED_MAX}`}
       />
@@ -165,53 +167,42 @@ function QoLOverallCard({
 
 function QoLMetricRow({ config }: { config: MetricRowConfig }) {
   const scoreValue = formatQoLDisplayScore(config.score);
-  const { label: bandLabel } = resolveQoLMetricBand(config.id, config.score);
+  const { label: bandLabel, visualClass } = resolveQoLMetricBand(
+    config.id,
+    config.score,
+  );
 
   return (
-    <li className="wtr-qol-metric-row">
-      <div className="wtr-qol-metric-row__head">
-        <span className="wtr-qol-metric-row__label">{config.label}</span>
-        <span className="wtr-qol-metric-row__value tabular-nums">
-          {scoreValue}
-        </span>
-      </div>
-      <QoLBandedScoreMeter
-        metricKey={config.id}
-        score={config.score}
-        compact
-        meterAriaLabel={`${config.label}: ${bandLabel}, score ${scoreValue} out of 100`}
-      />
+    <li
+      className={[
+        "wtr-qol-metric-row",
+        `wtr-qol-metric-row--${visualClass}`,
+      ].join(" ")}
+    >
+      <span className="wtr-qol-metric-row__label">{config.label}</span>
+      <span className="wtr-qol-metric-row__value tabular-nums">
+        {scoreValue}
+      </span>
+      <span
+        className={`wtr-qol-metric-row__band wtr-qol-metric-row__band--${visualClass}`}
+      >
+        {bandLabel}
+      </span>
     </li>
   );
 }
 
 function buildMetricRows(data: QualityOfLifeCountryData): MetricRowConfig[] {
   return [
-    {
-      id: "safety",
-      label: "Safety",
-      score: data.safety_index,
-    },
-    {
-      id: "climate",
-      label: "Climate",
-      score: data.climate_index,
-    },
-    {
-      id: "pollution",
-      label: "Air quality",
-      score: data.pollution_index,
-    },
+    { id: "safety", label: "Safety", score: data.safety_index },
+    { id: "climate", label: "Climate", score: data.climate_index },
+    { id: "pollution", label: "Air quality", score: data.pollution_index },
     {
       id: "purchasing",
       label: "Purchasing",
       score: data.purchasing_power_index,
     },
-    {
-      id: "traffic",
-      label: "Traffic",
-      score: data.traffic_commute_index,
-    },
+    { id: "traffic", label: "Traffic", score: data.traffic_commute_index },
   ];
 }
 

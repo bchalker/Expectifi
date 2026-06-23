@@ -1,3 +1,66 @@
+/* Four-band QoL palette — shared by meter badges, bar fills, and metric cards */
+.wtr-qol-tab {
+  --qol-limited-ink: color-mix(
+    in srgb,
+    var(--wtr-match-poor, var(--color-text-danger)) 92%,
+    var(--text)
+  );
+  --qol-limited-surface: color-mix(
+    in srgb,
+    var(--wtr-match-poor, var(--color-text-danger)) 24%,
+    var(--surface)
+  );
+  --qol-limited-surface-start: color-mix(
+    in srgb,
+    var(--qol-limited-surface) 0%,
+    transparent
+  );
+  --qol-limited-fill: var(--wtr-match-poor, var(--color-text-danger));
+
+  --qol-basic-ink: color-mix(
+    in srgb,
+    var(--wtr-match-stretch, var(--color-amber)) 62%,
+    var(--text)
+  );
+  --qol-basic-surface: color-mix(
+    in srgb,
+    var(--wtr-match-stretch, var(--color-amber)) 30%,
+    var(--surface)
+  );
+  --qol-basic-surface-start: color-mix(
+    in srgb,
+    var(--qol-basic-surface) 0%,
+    transparent
+  );
+  --qol-basic-fill: var(--wtr-match-stretch, var(--color-amber));
+
+  --qol-good-ink: color-mix(in srgb, var(--blue1) 35%, var(--green1));
+  --qol-good-surface: color-mix(in srgb, var(--blue1) 8%, var(--surface));
+  --qol-good-surface-start: color-mix(
+    in srgb,
+    var(--qol-good-surface) 0%,
+    transparent
+  );
+  --qol-good-fill: color-mix(in srgb, var(--blue1) 62%, var(--green1));
+
+  --qol-world-class-ink: color-mix(
+    in srgb,
+    var(--wtr-match-strong, var(--color-text-success)) 88%,
+    var(--text)
+  );
+  --qol-world-class-surface: color-mix(
+    in srgb,
+    var(--green1) 28%,
+    var(--surface)
+  );
+  --qol-world-class-surface-start: color-mix(
+    in srgb,
+    var(--qol-world-class-surface) 0%,
+    transparent
+  );
+  --qol-world-class-fill: var(--green1);
+}
+
 .qol-banded-meter {
   display: flex;
   flex-direction: column;
@@ -7,7 +70,7 @@
 }
 
 .qol-banded-meter--compact {
-  gap: var(--space-2);
+  gap: 0;
 }
 
 .qol-banded-meter__score-row {
@@ -50,27 +113,23 @@
 }
 
 .qol-banded-meter__badge--limited {
-  color: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 90%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 14%, var(--surface));
+  color: var(--qol-limited-ink);
+  background: var(--qol-limited-surface);
 }
 
 .qol-banded-meter__badge--basic {
-  color: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 90%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 20%, var(--surface));
+  color: var(--qol-basic-ink);
+  background: var(--qol-basic-surface);
 }
 
 .qol-banded-meter__badge--good {
-  color: color-mix(in srgb, var(--green1) 35%, var(--blue1));
-  background: color-mix(
-    in srgb,
-    color-mix(in srgb, var(--green1) 40%, var(--blue1)) 18%,
-    var(--surface)
-  );
+  color: var(--qol-good-ink);
+  background: var(--qol-good-surface);
 }
 
 .qol-banded-meter__badge--world-class {
-  color: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 85%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 16%, var(--surface));
+  color: var(--qol-world-class-ink);
+  background: var(--qol-world-class-surface);
 }
 
 .qol-banded-meter__wimfy.narrative-why-line {
@@ -79,117 +138,38 @@
   border-left: 3px solid color-mix(in srgb, var(--border) 80%, var(--text-muted));
 }
 
-.qol-banded-meter__meter {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.qol-banded-meter__bar {
   width: 100%;
-}
-
-.qol-banded-meter__meter-track {
-  position: relative;
-  width: 100%;
-}
-
-.qol-banded-meter__meter-segments {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
-  width: 100%;
-}
-
-.qol-banded-meter__meter-segment {
-  height: 0.5rem;
+  height: 4px;
   border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
 }
 
-.qol-banded-meter__meter-segment--limited {
-  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 28%, var(--surface));
-}
-
-.qol-banded-meter__meter-segment--basic {
-  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 32%, var(--surface));
-}
-
-.qol-banded-meter__meter-segment--good {
-  background: color-mix(
-    in srgb,
-    color-mix(in srgb, var(--green1) 38%, var(--blue1)) 30%,
-    var(--surface)
-  );
-}
-
-.qol-banded-meter__meter-segment--world-class {
-  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 30%, var(--surface));
-}
-
-.qol-banded-meter__meter-segment--limited.qol-banded-meter__meter-segment--active {
-  background: var(--wtr-match-poor, var(--color-text-danger));
-}
-
-.qol-banded-meter__meter-segment--basic.qol-banded-meter__meter-segment--active {
-  background: var(--wtr-match-stretch, var(--color-amber));
-}
-
-.qol-banded-meter__meter-segment--good.qol-banded-meter__meter-segment--active {
-  background: color-mix(in srgb, var(--green1) 42%, var(--blue1));
-}
-
-.qol-banded-meter__meter-segment--world-class.qol-banded-meter__meter-segment--active {
-  background: var(--wtr-match-strong, var(--color-text-success));
-}
-
-.qol-banded-meter__marker {
-  position: absolute;
-  top: 50%;
-  left: var(--qol-marker-pct);
-  width: 0.375rem;
-  height: 0.375rem;
-  border: 2px solid var(--surface);
+.qol-banded-meter__bar-fill {
+  height: 100%;
   border-radius: 999px;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--border) 70%, transparent);
+  transition: width 0.4s ease;
 }
 
-.qol-banded-meter__marker--limited {
-  background: var(--wtr-match-poor, var(--color-text-danger));
+.qol-banded-meter__bar--limited .qol-banded-meter__bar-fill {
+  background: var(--qol-limited-fill);
 }
 
-.qol-banded-meter__marker--basic {
-  background: var(--wtr-match-stretch, var(--color-amber));
+.qol-banded-meter__bar--basic .qol-banded-meter__bar-fill {
+  background: var(--qol-basic-fill);
 }
 
-.qol-banded-meter__marker--good {
-  background: color-mix(in srgb, var(--green1) 42%, var(--blue1));
+.qol-banded-meter__bar--good .qol-banded-meter__bar-fill {
+  background: var(--qol-good-fill);
 }
 
-.qol-banded-meter__marker--world-class {
-  background: var(--wtr-match-strong, var(--color-text-success));
-}
-
-.qol-banded-meter__meter-labels {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-1);
-  width: 100%;
-}
-
-.qol-banded-meter__meter-label {
-  font-size: var(--text-xs);
-  font-weight: 500;
-  line-height: 1.25;
-  text-align: center;
-  color: var(--text-muted);
-}
-
-.qol-banded-meter__meter-label--active,
-.qol-banded-meter--compact .qol-banded-meter__meter-label--active {
-  font-weight: 700;
-  color: var(--text);
+.qol-banded-meter__bar--world-class .qol-banded-meter__bar-fill {
+  background: var(--qol-world-class-fill);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .qol-banded-meter__marker {
+  .qol-banded-meter__bar-fill {
     transition: none;
   }
 }

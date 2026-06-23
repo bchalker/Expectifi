@@ -18,23 +18,24 @@
 }
 
 .wtr-weather-tab__title-row {
-  // position: sticky;
+  position: sticky;
   top: 0;
   z-index: 3;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   column-gap: var(--space-3);
-  width: 100%;
-  min-width: 0;
   box-sizing: border-box;
-  // margin-block: calc(-1 * var(--space-2)) 0;
-  // margin-inline: calc(-1 * var(--wtr-tabpanel-pad, var(--space-5)));
-  padding: var(--space-2) 0 var(--space-4);
-  // background: var(--wtr-city-detail-panel-bg);
+
+  // Escape the container's padding on both sides
+  margin: calc(var(--space-5) * -1);
+  padding: var(--space-3) var(--space-5);
+margin-bottom: var(--space-3);
+  // padding-block: var(--space-2) var(--space-4);
+  background: var(--bg-faint);
   border-bottom: 1px solid var(--border);
-  // box-shadow: rgba(33, 35, 38, 0.08) 0 6px 8px -8px;
 }
+
 
 .wtr-weather-tab__title-block {
   display: flex;

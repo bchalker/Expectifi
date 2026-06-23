@@ -6,7 +6,6 @@ import {
   demographicsCountryFallbackLabel,
   formatCompactDemographicNumber,
   getDemographicsData,
-  getDemographicsPanelHeadsUp,
   getReligionBarSegments,
   getReligionLegendItems,
   medianAgeWhy,
@@ -28,7 +27,6 @@ import {
   usePeopleCultureMetricsAnimation,
 } from "../../hooks/usePeopleCultureMetricsAnimation";
 import { NarrativeWhyLine } from "../ui/NarrativeWhyLine";
-import { PanelHeadsUpCallout } from "../ui/PanelHeadsUpCallout";
 import "../ui/DetailPanelCard.scss";
 import "./DestinationPeopleCultureTab.scss";
 
@@ -274,7 +272,6 @@ export function DestinationPeopleCultureTab({
     () => socialLawDisclosureLabels(country),
     [country],
   );
-  const panelHeadsUp = useMemo(() => getDemographicsPanelHeadsUp(data), [data]);
 
   if (!data && !englishLevel) {
     return (
@@ -475,37 +472,6 @@ export function DestinationPeopleCultureTab({
           </div>
           <NarrativeWhyLine className="wtr-people-culture__why">
             {religion.expat_worship_why}
-          </NarrativeWhyLine>
-        </section>
-      ) : null}
-
-      {demographics ? (
-        <section
-          aria-labelledby="wtr-people-culture-expat-heading"
-          {...staggerSectionProps(
-            sectionIndex++,
-            "detail-panel-card wtr-people-culture__group",
-            staggerClassName,
-            staggerStyle,
-          )}
-        >
-          <h3
-            id="wtr-people-culture-expat-heading"
-            className="wtr-city-detail__section-title wtr-people-culture__section-title"
-          >
-            Expat community
-          </h3>
-          <PanelHeadsUpCallout className="wtr-people-culture__expat-heads-up">
-            {panelHeadsUp}
-          </PanelHeadsUpCallout>
-          <div className="wtr-people-culture__expat-block">
-            <p className="wtr-people-culture__expat-label">Community size</p>
-            <p className="wtr-people-culture__expat-copy">
-              {demographics.expat_population}
-            </p>
-          </div>
-          <NarrativeWhyLine className="wtr-people-culture__why">
-            {demographics.expat_population_why}
           </NarrativeWhyLine>
         </section>
       ) : null}
