@@ -75,15 +75,16 @@
 .wtr-qol-overall__score-value {
   font-family: var(--heading);
   font-size: var(--text-2xl);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
 }
 
 .wtr-qol-overall__score-denom {
   font-family: var(--body);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-muted);
+  letter-spacing: -0.02em;
 }
 
 .wtr-qol-overall__badge {
@@ -286,7 +287,7 @@
 }
 
 .wtr-qol-metric-row__value {
-  font-family: var(--heading);
+  font-family: var(--body);
   font-size: var(--text-xl);
   font-weight: 700;
   line-height: 1.05;

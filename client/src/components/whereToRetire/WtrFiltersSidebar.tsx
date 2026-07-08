@@ -89,7 +89,7 @@ export function WtrFiltersSidebar({
                 id="wtr-budget-adjust-label"
                 className="wtr-filters-sidebar__slider-label"
               >
-                Need cushion - or restraint? Adjust your budget
+                Need cushion - or restraint?
               </h2>
               <p className="wtr-filters-sidebar__slider-helper font-xs">
                 Doesn&apos;t affect your retirement income above
@@ -180,7 +180,8 @@ export function WtrFiltersSidebar({
                       type="button"
                       className={[
                         "wtr-filters-sidebar__preferences-btn",
-                        preferencesOpen && "wtr-filters-sidebar__preferences-btn--open",
+                        preferencesOpen &&
+                          "wtr-filters-sidebar__preferences-btn--open",
                       ]
                         .filter(Boolean)
                         .join(" ")}
@@ -241,8 +242,9 @@ export function WtrFiltersSidebar({
       </div>
 
       <footer className="wtr-filters-sidebar__footer font-xs" role="note">
-        All figures are educational estimates only — not tax, legal, financial, or
-        immigration advice. Consult qualified professionals before relocating. Sources:{" "}
+        All figures are educational estimates only — not tax, legal, financial,
+        or immigration advice. Consult qualified professionals before
+        relocating. Sources:{" "}
         <a
           href="https://www.irs.gov/individuals/international-taxpayers"
           target="_blank"

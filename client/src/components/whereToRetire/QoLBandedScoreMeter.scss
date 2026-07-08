@@ -91,7 +91,7 @@
 .qol-banded-meter__score-value {
   font-family: var(--heading);
   font-size: var(--text-xl);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
 }
 
@@ -100,6 +100,7 @@
   font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-muted);
+  letter-spacing: -0.02em;
 }
 
 .qol-banded-meter__badge {

@@ -247,6 +247,7 @@
   gap: 0;
   width: 100%;
   min-width: 0;
+  padding: var(--space-4) var(--space-2);
 }
 
 .welcome-goal-fields--step3 .welcome-goal-fields__aiming-group {
@@ -254,7 +255,7 @@
 }
 
 .welcome-goal-fields--step3 .welcome-goal-fields__aiming-row {
-  gap: 10px;
+  gap: var(--space-6);
 }
 
 .welcome-goal-fields--step3 .welcome-goal-fields__aiming-hint {

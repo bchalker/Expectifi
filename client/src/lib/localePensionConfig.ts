@@ -36,10 +36,10 @@ const US_CONFIG: LocalePensionConfig = {
   claimQuestionLabel: 'Claim at age',
   spouseClaimQuestionLabel: 'Claim at age',
   spouseClaimModeQuestionLabel: 'How will your spouse claim?',
-  benefitFieldLabel: 'Expected monthly benefit',
-  spouseBenefitFieldLabel: 'Expected monthly benefit',
+  benefitFieldLabel: 'Expected monthly',
+  spouseBenefitFieldLabel: 'Expected monthly',
   benefitHint:
-    'Average at 67 is ~$1,800. ssa.gov has a free estimator.',
+    'Average retiree (at 67) receives about $2,100/month',
   benefitHintLinkUrl: 'https://www.ssa.gov/',
   claimAgeHint:
     'Claiming before 67 reduces your monthly check. Waiting until 70 increases it.',

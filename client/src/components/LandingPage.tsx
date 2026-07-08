@@ -50,7 +50,7 @@ const PRICING_FREE_FEATURES = [
   "Manual account entry",
   "CSV import (Fidelity, Vanguard, Schwab)",
   "Growth and income projections",
-  "Per-account income strategy (dividend, withdraw, or both)",
+  "Per-account income strategy",
   "Withdrawal strategy",
   "Tax breakdown at retirement",
   "Runway projections per account",

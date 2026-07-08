@@ -20,6 +20,7 @@ body:has(.landing-page) {
   --landing-green-muted: var(--green4, #5dcaa5);
   --landing-on-green: var(--color-primary-on, #fff);
   --landing-surface: var(--color-surface);
+  --landing-surface-dark: var(--color-surface-dark);
   --landing-card: var(--surface);
   --landing-text-on-navy: rgba(255, 255, 255, 0.92);
   --landing-text-muted-on-navy: rgba(255, 255, 255, 0.62);
@@ -327,7 +328,7 @@ body:has(.landing-page) {
 
 /* ── Pricing ── */
 .landing-pricing {
-  background: var(--landing-surface);
+  background: var(--landing-surface-dark);
   color: var(--landing-text-on-light);
   padding: clamp(2.5rem, 6vw, 4rem) 0;
 }
@@ -457,7 +458,7 @@ body:has(.landing-page) {
 
 .landing-pricing-plan__list-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-2);
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
@@ -466,7 +467,7 @@ body:has(.landing-page) {
 
 .landing-pricing-plan__check {
   flex-shrink: 0;
-  margin-top: var(--space-1) /* review: was 0.1rem */;
+  // margin-top: var(--space-1) /* review: was 0.1rem */;
   color: var(--color-primary);
 }
 
@@ -514,7 +515,7 @@ body:has(.landing-page) {
 .landing-anchor-section {
   background: var(--landing-surface);
   color: var(--landing-text-on-light);
-  padding: var(--space-6) 0;
+  padding: var(--space-10) 0;
 }
 
 .landing-anchor-section--alt {

@@ -76,7 +76,10 @@ type OnboardingBackButtonProps = {
   onClick: () => void;
 };
 
-function OnboardingBackButton({ disabled, onClick }: OnboardingBackButtonProps) {
+function OnboardingBackButton({
+  disabled,
+  onClick,
+}: OnboardingBackButtonProps) {
   return (
     <button
       type="button"
@@ -548,7 +551,9 @@ export function OnboardingOverlay({
             <span className="onboarding-overlay__brand-ifi">ifi</span>
           </span>
           <OnboardingProgressSteps
-            activeIndex={(['profile', 'contributions', 'goals'] as const).indexOf(step)}
+            activeIndex={(
+              ["profile", "contributions", "goals"] as const
+            ).indexOf(step)}
             totalSteps={3}
             className="onboarding-overlay__progress"
           />

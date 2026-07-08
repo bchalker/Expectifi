@@ -72,7 +72,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-1);
+  // gap: var(--space-1);
   min-width: 0;
 }
 
@@ -85,9 +85,9 @@
 }
 
 .pref-factor-row__name {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 700;
-  line-height: var(--leading-snug);
+  // line-height: var(--leading-snug);
   color: var(--color-text-primary, var(--text));
 }
 
@@ -96,11 +96,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: 1.5rem;
-  height: 1.5rem;
+  min-width: 1.8rem;
+  height: 1.8rem;
   padding-inline: var(--space-1);
   border-radius: 999px;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -134,7 +134,7 @@
 .pref-factor-row__helper {
   display: block;
   margin: 0;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 400;
   line-height: 1.35;
 }

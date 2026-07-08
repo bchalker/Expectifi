@@ -94,7 +94,7 @@
   --surface-u3: color-mix(in srgb, var(--surface1) 50%, white);
   --surface-u2: color-mix(in srgb, var(--surface1) 70%, white);
   --surface-u1: color-mix(in srgb, var(--surface1) 90%, white);
-  --surface-d1: color-mix(in srgb, var(--surface1) 90%, black);
+  --surface-d1: color-mix(in srgb, var(--surface1) 98%, black);
   --surface-d2: color-mix(in srgb, var(--surface1) 70%, black);
   --surface-d3: color-mix(in srgb, var(--surface1) 50%, black);
   --surface-d4: color-mix(in srgb, var(--surface1) 30%, black);
@@ -138,6 +138,7 @@
   --color-amber-dark: color-mix(in srgb, var(--amber1) 55%, var(--blue1));
   --color-amber-bg: var(--amber6);
   --color-surface: var(--surface1);
+  --color-surface-dark: var(--surface-d1);
   --color-card: #ffffff;
   --color-border: var(--border-medium-dark);
   --color-text-primary: var(--blue1);

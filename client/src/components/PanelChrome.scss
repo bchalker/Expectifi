@@ -74,8 +74,8 @@
 
 /* Configure drawer: narrower than scenario / strategy panels */
 .drawer-shell.drawer-shell--right.drawer-shell--config {
-  width: min(28rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
-  max-width: min(28rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
+  width: min(32rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
+  max-width: min(32rem, calc(100vw - var(--drawer-panel-inset, 2rem) * 2));
   min-width: 0;
 }
 
