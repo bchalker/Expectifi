@@ -5,9 +5,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const devFontPreviewEntry = path.resolve(__dirname, 'src/dev/fontPreview/index.tsx')
+const devFontPreviewStub = path.resolve(__dirname, 'src/dev/fontPreview/empty.tsx')
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [tailwindcss(), react()],
   optimizeDeps: {
     include: [
@@ -44,7 +46,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '#dev-font-preview': mode === 'production' ? devFontPreviewStub : devFontPreviewEntry,
       shared: path.resolve(__dirname, '../shared'),
     },
   },
-})
+}))

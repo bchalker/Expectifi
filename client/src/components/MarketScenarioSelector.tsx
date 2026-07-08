@@ -1,13 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import {
-  IconAdjustmentsHorizontal,
-  IconChartAreaLine,
-  IconChevronDown,
-  IconClockPause,
-  IconFlame,
-  IconTrendingDown,
-  IconTrendingUp,
-} from '@tabler/icons-react'
+import { IconChevronDown } from '@tabler/icons-react'
 import { useClickOutside } from '../hooks/useClickOutside'
 import {
   getMarketScenarioDefinition,
@@ -18,23 +10,6 @@ import './HoldingScenarioPopout.scss'
 import './MarketScenarioSelector.scss'
 
 const MARKET_SCENARIO_SUBLABEL = 'Market Scenario'
-
-function scenarioIcon(id: MarketScenarioId) {
-  switch (id) {
-    case 'bull':
-      return IconTrendingUp
-    case 'bear':
-      return IconTrendingDown
-    case 'stagflation':
-      return IconFlame
-    case 'lost_decade':
-      return IconClockPause
-    case 'recession_recovery':
-      return IconChartAreaLine
-    default:
-      return IconAdjustmentsHorizontal
-  }
-}
 
 function marketScenarioTriggerClass(id: MarketScenarioId): string {
   if (id === 'bull') return 'holdings-scenario-trigger--bull'
@@ -100,7 +75,6 @@ export function MarketScenarioSelector({ value, onChange, className = '' }: Mark
           aria-labelledby="market-scenario-selector-label"
         >
           {MARKET_SCENARIOS.map((scenario) => {
-            const Icon = scenarioIcon(scenario.id)
             const selected = scenario.id === value
             return (
               <li key={scenario.id}>
@@ -119,9 +93,6 @@ export function MarketScenarioSelector({ value, onChange, className = '' }: Mark
                     setOpen(false)
                   }}
                 >
-                  <span className="market-scenario-selector__option-icon" aria-hidden>
-                    <Icon size={16} stroke={1.5} />
-                  </span>
                   <span className="market-scenario-selector__option-text">
                     <span className="market-scenario-selector__option-label">{scenario.label}</span>
                     <span className="market-scenario-selector__option-desc">{scenario.description}</span>

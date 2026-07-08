@@ -20,7 +20,10 @@
   /* --font-heading: 'Patua One', Georgia, 'Times New Roman', serif; */
   /* --font-heading: 'Young Serif', Georgia, 'Times New Roman', serif; */
   /* --font-heading: 'Gloock', Georgia, 'Times New Roman', serif; */
-  /* --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;  */
+  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif; 
+  /* --font-heading: 'DM Serif Text', Georgia, 'Times New Roman', serif;  */
+  /* Hero numbers: age readout, subheader totals, WTR monthly amount */
+  --font-heading-number: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-serif: var(--font-heading);
 
   /* Type scale */

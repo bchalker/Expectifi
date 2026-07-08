@@ -298,7 +298,7 @@
   margin: var(--space-2) 0 0;
   padding: var(--space-2) var(--space-2) /* review: was 0.6rem */;
   border-radius: var(--border-radius-md, 8px);
-  background: color-mix(in srgb, var(--amber4) 28%, var(--surface));
+   background: var(--sky-blue-u1);
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;

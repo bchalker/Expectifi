@@ -393,6 +393,7 @@
   --mono: var(--ds-font-mono); --sans: var(--font-sans); --serif: var(--font-serif);
   --body: var(--ds-font-body);
   --heading: var(--font-heading);
+  --heading-number: var(--font-heading-number);
   /* Bubble: prefer true 72/1000 aspect from width, but never shorter than content (narrow viewports) */
   --subheader-bubble-h: max(
     min(calc(100vw * 72 / 1000), 7.5rem),

@@ -109,12 +109,12 @@ export function WtrFiltersSidebar({
           aria-labelledby="wtr-spending-level-label"
         >
           <Card className="wtr-filters-sidebar__intensity-card">
-            <p
+            <h4
               id="wtr-spending-level-label"
               className="wtr-filters-sidebar__intensity-label"
             >
               What is your spending level?
-            </p>
+            </h4>
             <IntensitySelector
               variant="compact"
               value={filters.budgetPreferences.intensity}

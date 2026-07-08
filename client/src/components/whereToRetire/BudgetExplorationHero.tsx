@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Tooltip } from '../Tooltip'
+import { useMemo } from "react";
+import { Tooltip } from "../Tooltip";
 import {
   clampExplorationIncome,
   explorationIncomeMax,
@@ -8,84 +8,96 @@ import {
   resolveExplorationIncome,
   INCOME_EXPLORE_STEP,
   incomeSliderPct,
-} from '../../lib/whereToRetire/budgetExplorationStats'
-import { fmt, fmtMon } from '../../utils/format'
-import './BudgetExplorationHero.scss'
+} from "../../lib/whereToRetire/budgetExplorationStats";
+import { fmt, fmtMon } from "../../utils/format";
+import "./BudgetExplorationHero.scss";
 
 type Props = {
-  planMonthlyIncome: number
-  explorationIncome: number
-  onExplorationIncomeChange: (income: number) => void
+  planMonthlyIncome: number;
+  explorationIncome: number;
+  onExplorationIncomeChange: (income: number) => void;
   /** Map view: intro above panel; slider parts for toolbar layout. */
-  section?: 'intro' | 'slider' | 'slider-label' | 'slider-rail'
-}
+  section?: "intro" | "slider" | "slider-label" | "slider-rail";
+};
 
 export function BudgetExplorationHero({
   planMonthlyIncome,
   explorationIncome,
   onExplorationIncomeChange,
-  section = 'slider',
+  section = "slider",
 }: Props) {
   const incomeMin = useMemo(
     () => explorationIncomeMin(planMonthlyIncome),
     [planMonthlyIncome],
-  )
+  );
 
   const incomeMax = useMemo(
     () => explorationIncomeMax(planMonthlyIncome),
     [planMonthlyIncome],
-  )
+  );
 
   const mapIncome = useMemo(
     () => resolveExplorationIncome(planMonthlyIncome, explorationIncome),
     [planMonthlyIncome, explorationIncome],
-  )
+  );
 
-  const fillWidth = incomeSliderPct(explorationIncome, incomeMin, incomeMax)
-  const planMarkerPct = incomeSliderPct(planMonthlyIncome, incomeMin, incomeMax)
-  const withinFillWidth = Math.min(fillWidth, planMarkerPct)
-  const overFillWidth = Math.max(0, fillWidth - planMarkerPct)
-  const showOverFill = overFillWidth > 0
-  const planMarkTooltip = `${fmtMon(planMonthlyIncome)} projected income`
+  const fillWidth = incomeSliderPct(explorationIncome, incomeMin, incomeMax);
+  const planMarkerPct = incomeSliderPct(
+    planMonthlyIncome,
+    incomeMin,
+    incomeMax,
+  );
+  const withinFillWidth = Math.min(fillWidth, planMarkerPct);
+  const overFillWidth = Math.max(0, fillWidth - planMarkerPct);
+  const showOverFill = overFillWidth > 0;
+  const planMarkTooltip = `${fmtMon(planMonthlyIncome)} projected income`;
   const atProjected = isAtProjectedExplorationIncome(
     planMonthlyIncome,
     explorationIncome,
-  )
-  const thumbIncome = atProjected ? planMonthlyIncome : mapIncome
+  );
+  const thumbIncome = atProjected ? planMonthlyIncome : mapIncome;
 
-  const introBlock = section === 'intro' ? (
-    <div className="wtr-budget-hero__intro-stack">
-      <p className="wtr-budget-hero__sub font-xs">Based on your projected income</p>
-      <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
-        Where can you retire on?
-      </h1>
-      <p className="wtr-budget-hero__intro-value tabular-nums">
-        <span className="wtr-budget-hero__intro-value-amount">{fmt(planMonthlyIncome)}</span>
-        <span className="wtr-budget-hero__intro-value-suffix">/mo</span>
-      </p>
-    </div>
-  ) : null
+  const introBlock =
+    section === "intro" ? (
+      <div className="wtr-budget-hero__intro-stack">
+        <p className="wtr-budget-hero__sub font-xs">
+          Based on your projected income
+        </p>
+        <h1 id="wtr-budget-hero-title" className="wtr-budget-hero__title">
+          Where to retire on
+        </h1>
+        <p className="wtr-budget-hero__intro-value tabular-nums">
+          <span className="wtr-budget-hero__intro-value-amount">
+            {fmt(planMonthlyIncome)}
+          </span>
+          <span className="wtr-budget-hero__intro-value-suffix">/mo</span>
+        </p>
+      </div>
+    ) : null;
 
-  if (section === 'intro') {
+  if (section === "intro") {
     return (
-      <header className="wtr-budget-hero wtr-budget-hero--intro" aria-labelledby="wtr-budget-hero-title">
+      <header
+        className="wtr-budget-hero wtr-budget-hero--intro"
+        aria-labelledby="wtr-budget-hero-title"
+      >
         {introBlock}
       </header>
-    )
+    );
   }
 
   const sliderLabelBlock = (
     <div className="wtr-budget-hero__slider-label-block">
       <div className="wtr-budget-hero__slider-label-stack" aria-live="polite">
         <span className="wtr-budget-hero__slider-title">
-          {atProjected ? 'Projected income' : 'Custom income'}
+          {atProjected ? "Projected income" : "Custom income"}
         </span>
         <span className="wtr-budget-hero__slider-heading-value tabular-nums">
           {fmtMon(atProjected ? planMonthlyIncome : mapIncome)}
         </span>
       </div>
     </div>
-  )
+  );
 
   const sliderRailBlock = (
     <div className="wtr-budget-hero__slider-main">
@@ -98,11 +110,11 @@ export function BudgetExplorationHero({
           <div
             className="wtr-budget-hero__fill-group"
             style={{
-              left: '0%',
+              left: "0%",
               width: `${fillWidth}%`,
               gridTemplateColumns: showOverFill
                 ? `${withinFillWidth}fr ${overFillWidth}fr`
-                : '1fr',
+                : "1fr",
             }}
             aria-hidden
           >
@@ -149,7 +161,10 @@ export function BudgetExplorationHero({
             aria-valuetext={fmtMon(mapIncome)}
             onChange={(e) =>
               onExplorationIncomeChange(
-                clampExplorationIncome(Number(e.target.value), planMonthlyIncome),
+                clampExplorationIncome(
+                  Number(e.target.value),
+                  planMonthlyIncome,
+                ),
               )
             }
           />
@@ -159,22 +174,22 @@ export function BudgetExplorationHero({
         </span>
       </div>
     </div>
-  )
+  );
 
-  if (section === 'slider-label') {
+  if (section === "slider-label") {
     return (
       <div className="wtr-budget-hero wtr-budget-hero--slider-label wtr-budget-hero--embedded">
         {sliderLabelBlock}
       </div>
-    )
+    );
   }
 
-  if (section === 'slider-rail') {
+  if (section === "slider-rail") {
     return (
       <div className="wtr-budget-hero wtr-budget-hero--slider-rail wtr-budget-hero--embedded">
         {sliderRailBlock}
       </div>
-    )
+    );
   }
 
   const sliderBlock = (
@@ -184,11 +199,11 @@ export function BudgetExplorationHero({
         {sliderRailBlock}
       </div>
     </div>
-  )
+  );
 
   return (
     <section className="wtr-budget-hero wtr-budget-hero--slider-only wtr-budget-hero--embedded">
       {sliderBlock}
     </section>
-  )
+  );
 }

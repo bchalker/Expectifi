@@ -1008,6 +1008,7 @@
   position: relative;
   z-index: 1;
   font-size: var(--text-base);
+  font-family: var(--heading);
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) 0.07s;
 }
 

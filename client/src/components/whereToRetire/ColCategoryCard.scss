@@ -50,13 +50,13 @@
 .wtr-col-category-card__head-text {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .wtr-col-category-card__title {
   margin: 0;
-  font-family: var(--body);
+  font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--text);
@@ -73,7 +73,7 @@
 .wtr-col-category-card__head-amount {
   flex-shrink: 0;
   margin: 0;
-  font-family: var(--body);
+  font-family: var(--heading);
   font-size: var(--text-md);
   font-weight: 700;
   line-height: 1.1;

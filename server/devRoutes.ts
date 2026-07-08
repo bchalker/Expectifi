@@ -10,6 +10,25 @@ function devRoutesAllowed(req: Request): boolean {
 
 /** Local-only: set session cookie and redirect (for OAuth testing). */
 export function installDevRoutes(app: Express): void {
+  app.get('/api/dev/google-fonts-metadata', async (req, res) => {
+    // Local font preview only — never available in production (see client/src/dev/fontPreview).
+    if (!devRoutesAllowed(req)) {
+      res.status(404).end()
+      return
+    }
+    try {
+      const upstream = await fetch('https://fonts.google.com/metadata/fonts')
+      if (!upstream.ok) {
+        res.status(upstream.status).send('Google Fonts metadata unavailable')
+        return
+      }
+      const text = await upstream.text()
+      res.type('application/json').send(text)
+    } catch {
+      res.status(502).send('Failed to fetch Google Fonts metadata')
+    }
+  })
+
   app.get('/api/dev/impersonate', async (req, res) => {
     if (!devRoutesAllowed(req)) {
       res.status(404).end()

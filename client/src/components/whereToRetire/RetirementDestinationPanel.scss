@@ -308,7 +308,7 @@
 
 .wtr-dest-panel__summary-total {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number);
   font-size: var(--text-lg, var(--text-sm));
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -383,7 +383,7 @@
 
 .wtr-dest-panel__col-hero-total {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number);
   font-size: var(--text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;

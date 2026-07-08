@@ -26,8 +26,8 @@ export const DESIGN_TOKEN_META: { key: `--${string}`; label: string }[] = [
 
 export const DEFAULT_DESIGN_TOKENS: Record<string, string> = {
   '--border-medium-dark': '#CFCFCF',
-  '--ds-font-body': "'Nunito', system-ui, -apple-system, sans-serif",
-  '--ds-font-mono': "'Nunito', system-ui, -apple-system, sans-serif",
+  '--ds-font-body': 'var(--font-sans)',
+  '--ds-font-mono': 'var(--font-mono)',
   '--ds-color-bg': '#F9F9F9',
   '--ds-color-surface': '#ffffff',
   '--ds-color-surface2': '#E8EDF2',

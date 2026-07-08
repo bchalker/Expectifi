@@ -36,8 +36,9 @@
   margin: var(--space-half) 0 0;
   font-family: var(--heading);
   font-size: clamp(1.05rem, 3.5vw, 1.35rem);
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1.25;
+  letter-spacing: -0.01em;
   text-align: center;
   color: var(--text);
 }
@@ -45,9 +46,10 @@
 .wtr-budget-hero__intro-value {
   margin: var(--space-1) 0 0;
   font-family: var(--heading);
-  font-size: var(--text-xl);
-  font-weight: 700;
+  font-size: var(--text-3xl);
+  font-weight: 800;
   line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--color-amber-dark);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -59,7 +61,7 @@
 }
 
 .wtr-budget-hero__intro-value-suffix {
-  font-size: 0.75em;
+  font-size: 0.55em;
   font-weight: 600;
 }
 
