@@ -16,7 +16,7 @@
   padding: var(--space-2) /* review: was 0.45rem */ var(--space-2) /* review: was 0.55rem */;
   border-radius: 6px;
   border: none;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
@@ -26,7 +26,7 @@
   box-shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .market-scenario-selector .market-scenario-selector__trigger.holdings-scenario-trigger--badge:focus-visible {
@@ -35,7 +35,7 @@
 }
 
 .market-scenario-selector .market-scenario-selector__trigger--open.holdings-scenario-trigger--badge {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  box-shadow: inset 0 0 0 1px var(--color-border-text);
 }
 
 .market-scenario-selector .market-scenario-selector__trigger .holdings-scenario-trigger__text {

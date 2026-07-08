@@ -17,19 +17,19 @@
 .guaranteed-income-setup__accordion-heading {
   flex: 1 1 auto;
   min-width: 0;
-  background: #f9f9f9;
+  background: var(--surface1);
   transition: background-color 0.15s ease;
 }
 
 .guaranteed-income-setup__accordion-heading--configured {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .guaranteed-income-setup__accordion-item:has(
     .guaranteed-income-setup__accordion-trigger[aria-expanded='true']
   )
   .guaranteed-income-setup__accordion-heading {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .guaranteed-income-setup__accordion button[data-slot='accordion-trigger'],
@@ -239,14 +239,14 @@
 }
 
 .gi-table-field--filled input[data-slot='input'] {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .gi-table-field--filled input[data-slot='input']:hover:not(:disabled):not([data-disabled='true']),
 .gi-table-field--filled input[data-slot='input']:focus,
 .gi-table-field--filled input[data-slot='input']:focus-visible,
 .gi-table-field--filled input[data-slot='input'][data-focused='true'] {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .gi-table-field--name {
@@ -332,12 +332,12 @@
   padding: 0;
   border: none;
   border-radius: 0;
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
   background: transparent;
 }
 
 .gi-named-table__remove:hover {
-  color: color-mix(in srgb, var(--danger, #b42318) 85%, var(--text));
+  color: color-mix(in srgb, var(--danger, var(--red1)) 85%, var(--text));
   background: transparent;
 }
 
@@ -361,7 +361,7 @@
 
 .gi-named-table__add:hover,
 .gi-named-table__add:focus-visible {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .gi-named-table__add-icon {
@@ -370,10 +370,10 @@
   justify-content: center;
   width: 1.125rem;
   height: 1.125rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border: 1px solid var(--color-border-accent);
   border-radius: 4px;
   color: var(--accent-text);
-  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  background: var(--color-hover-accent-soft);
 }
 
 .guaranteed-income-entry__oas-grid {

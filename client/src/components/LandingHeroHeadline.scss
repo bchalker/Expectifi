@@ -13,7 +13,7 @@
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--accent-contrast);
   text-align: center;
   max-width: 100%;
 }
@@ -87,7 +87,7 @@
   font-family: var(--heading);
   font-size: 0.9em;
   font-weight: 700;
-  color: #c4610a;
+  color: var(--amber-d1);
   white-space: nowrap;
   transition:
     transform 400ms ease,

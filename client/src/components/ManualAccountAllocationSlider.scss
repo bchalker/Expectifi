@@ -93,12 +93,12 @@
 
 .manual-account-allocation__trigger[aria-expanded='true'][data-allocation-tone='conservative']
   .manual-account-allocation__trigger-dot {
-  background: var(--color-navy);
+  background: var(--nav-bg);
 }
 
 .manual-account-allocation__trigger[aria-expanded='true'][data-allocation-tone='moderate']
   .manual-account-allocation__trigger-dot {
-  background: color-mix(in srgb, var(--color-navy) 28%, var(--text-muted));
+  background: color-mix(in srgb, var(--color-text-base) 28%, var(--text-muted));
 }
 
 .manual-account-allocation__trigger[aria-expanded='true'][data-allocation-tone='aggressive']
@@ -112,7 +112,7 @@
 }
 
 .manual-account-allocation__trigger:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -123,11 +123,11 @@
 
 .manual-account-allocation__trigger[data-allocation-tone='conservative'] .manual-account-allocation__trigger-label {
   font-weight: 700;
-  color: var(--color-navy);
+  color: var(--color-text-base);
 }
 
 .manual-account-allocation__trigger[data-allocation-tone='moderate'] .manual-account-allocation__trigger-label {
-  color: var(--color-navy);
+  color: var(--color-text-base);
 }
 
 .manual-account-allocation__trigger[data-allocation-tone='aggressive'] .manual-account-allocation__trigger-label {
@@ -161,8 +161,8 @@
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow:
-    0 4px 6px color-mix(in srgb, var(--color-navy) 8%, transparent),
-    0 14px 32px color-mix(in srgb, var(--color-navy) 18%, transparent);
+    0 4px 6px var(--color-overlay-ink-strong),
+    0 14px 32px var(--color-overlay-ink-strong);
 }
 
 /* Popover opens below trigger — caret on top edge points up at the pill */

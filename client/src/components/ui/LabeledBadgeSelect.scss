@@ -45,7 +45,7 @@
 }
 
 .labeled-badge-select__trigger--open {
-  // box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  // box-shadow: inset 0 0 0 1px var(--color-border-text);
   border-radius: var(--space-2) var(--space-2) 0 0;
   border: none;
 }

@@ -48,8 +48,8 @@
 }
 
 .app-select__native:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-mid);
   outline: none;
 }
 

@@ -52,7 +52,7 @@
 
 .claim-age-segment--subheader {
   border-color: rgba(0, 0, 0, 0.1);
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .claim-age-segment--subheader .claim-age-segment__tab {
@@ -62,11 +62,11 @@
 .claim-age-segment--subheader .claim-age-segment__tab--on,
 .claim-age-segment--subheader .claim-age-segment__tab[aria-pressed='true'] {
   background: var(--nav-bg);
-  color: #fff !important;
+  color: var(--accent-contrast) !important;
 }
 
 .claim-age-segment__tab:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

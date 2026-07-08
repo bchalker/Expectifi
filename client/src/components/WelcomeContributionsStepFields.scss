@@ -7,7 +7,7 @@
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .welcome-contributions-step__card-header {
@@ -48,7 +48,7 @@
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: 1.2;
-  color: #3b6d11;
+  color: var(--green-d2);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -152,7 +152,7 @@
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .contrib-bounded-input__text-field {

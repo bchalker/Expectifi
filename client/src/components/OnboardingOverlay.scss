@@ -39,7 +39,7 @@ body.onboarding-overlay--open .app-header-shell {
   // --text-md: 1rem;
   // --text-lg: 1.125rem;
   --onboarding-field-inset: 0.65rem;
-  --onboarding-field-check: #15803d;
+  --onboarding-field-check: var(--green1);
   --onboarding-panel-max-w: 28rem;
 }
 
@@ -279,7 +279,7 @@ body.onboarding-overlay--open .app-header-shell {
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--blue1) 14%, transparent);
+  box-shadow: 0 6px 16px -6px var(--color-overlay-ink-mid);
 }
 
 .onboarding-overlay__brand {
@@ -296,7 +296,7 @@ body.onboarding-overlay--open .app-header-shell {
 }
 
 .onboarding-overlay__brand-expect {
-  color: var(--blue1);
+  color: var(--color-text-base);
 }
 
 .onboarding-overlay__brand-ifi {
@@ -344,7 +344,7 @@ body.onboarding-overlay--open .app-header-shell {
   font-size: var(--text-sm);
   font-weight: 500;
   line-height: 1.45;
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
 }
 
 .onboarding-overlay__field-grid .config-plan-field .onboarding-overlay__field-hint {
@@ -692,13 +692,13 @@ body.onboarding-overlay--open .app-header-shell {
 .onboarding-overlay
   .dob-select-row--year-input:not(.dob-select-row--segmented)
   .dob-select-row__year-input-wrap--filled {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .onboarding-overlay
   .dob-select-row--year-input:not(.dob-select-row--segmented)
   .dob-select-row__year-input-wrap--filled:hover:not(:focus-within) {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .onboarding-overlay
@@ -775,22 +775,22 @@ body.onboarding-overlay--open .app-header-shell {
 
 .onboarding-overlay .dob-select-row .dob-select--filled [data-slot='select-trigger'],
 .onboarding-overlay .dob-select-row .dob-select--filled .app-select__native {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger'],
 .onboarding-overlay .dob-select-row--segmented .dob-select--filled .app-select__native {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .onboarding-overlay .dob-select-row .dob-select--filled [data-slot='select-trigger']:hover:not(:disabled),
 .onboarding-overlay .dob-select-row .dob-select--filled .app-select__native:hover:not(:disabled) {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .onboarding-overlay .dob-select-row--segmented .dob-select--filled [data-slot='select-trigger']:hover:not(:disabled),
 .onboarding-overlay .dob-select-row--segmented .dob-select--filled .app-select__native:hover:not(:disabled) {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1088,7 +1088,7 @@ body.onboarding-overlay--open .app-header-shell {
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: 1.2;
-  color: #3b6d11;
+  color: var(--green-d2);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -1178,7 +1178,7 @@ body.onboarding-overlay--open .app-header-shell {
 }
 
 .onboarding-overlay__cancel-btn:focus-visible {
-  box-shadow: 0 0 0 2px rgba(93, 202, 165, 0.45);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green3) 45%, transparent);
 }
 
 .onboarding-overlay__cancel-btn:disabled {
@@ -1419,7 +1419,7 @@ body.onboarding-overlay--open .app-header-shell {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.18),
     0 0 0 1px rgb(0 0 0 / 0.08);
@@ -1428,7 +1428,7 @@ body.onboarding-overlay--open .app-header-shell {
 }
 
 .onboarding-overlay__ss-toggle--on .onboarding-overlay__ss-toggle-track {
-  background: var(--accent-green, var(--success, #15803d));
+  background: var(--accent-green, var(--success, var(--green1)));
 }
 
 .onboarding-overlay__ss-toggle--on .onboarding-overlay__ss-toggle-track::after {

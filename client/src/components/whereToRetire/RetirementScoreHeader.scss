@@ -1,5 +1,4 @@
 .wtr-score-header {
-  --wtr-band-color: var(--color-text-danger);
   --wtr-summary-hero-size: var(--text-xl);
 
   width: 100%;
@@ -55,7 +54,7 @@
   min-width: 4.75rem;
   padding: var(--space-2) /* review: was 0.55rem */ var(--space-3);
   border-radius: var(--radius-lg, 12px);
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow: -8px 0 10px -10px var(--border);
   box-sizing: border-box;
   justify-self: end;

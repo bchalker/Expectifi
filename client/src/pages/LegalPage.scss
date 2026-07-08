@@ -2,12 +2,12 @@
   flex: 1 1 auto;
   min-width: 0;
   padding: var(--space-6) 0 var(--space-8);
-  background: var(--landing-surface, #f4f6f7);
-  color: var(--landing-text-on-light, #1c2b3a);
-  --text: var(--landing-text-on-light, #1c2b3a);
-  --text-muted: var(--landing-text-muted-light, #5f5e5a);
-  --border: #e2e4e8;
-  --accent-text: #2a7a5c;
+  background: var(--landing-surface, var(--surface1));
+  color: var(--landing-text-on-light, var(--color-text-base));
+  --text: var(--landing-text-on-light, var(--color-text-base));
+  --text-muted: var(--color-text-muted);
+  --border: var(--surface-d1);
+  --accent-text: var(--green-d1);
 }
 
 .legal-page__article {
@@ -94,9 +94,9 @@
 .legal-page__callout {
   margin: var(--space-3) 0 0;
   padding: var(--space-3) /* review: was 0.85rem */ var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border: 1px solid var(--color-border-accent-soft);
   border-radius: var(--radius-md, 0.5rem);
-  background: color-mix(in srgb, var(--accent) 8%, #ffffff);
+  background: color-mix(in srgb, var(--accent) 8%, var(--accent-contrast));
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
   color: var(--text-muted);

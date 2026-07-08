@@ -18,7 +18,7 @@
 }
 
 .onboarding-field-shell--filled {
-  background: #fff;
+  background: var(--accent-contrast);
   padding-right: calc(var(--onboarding-field-inset) + var(--space-4));
 }
 
@@ -49,8 +49,8 @@
 }
 
 .onboarding-field-shell:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(15, 110, 86, 0.18);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green1) 18%, transparent);
 }
 
 .onboarding-field-shell__check {
@@ -61,13 +61,13 @@
   transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  color: #15803d;
+  color: var(--green1);
   pointer-events: none;
   animation: onboarding-field-check-in 0.22s ease forwards;
 }
 
 .onboarding-field-shell__check svg {
-  stroke: #15803d;
+  stroke: var(--green1);
 }
 
 @keyframes onboarding-field-check-in {

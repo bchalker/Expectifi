@@ -1,12 +1,20 @@
-.country-flag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Tabler flags rely on --tblr-* tokens from full Tabler CSS; provide app fallbacks. */
+.country-flag.flag {
+  --tblr-border-radius: 2px;
+  --tblr-shadow-border: inset 0 0 0 1px var(--color-overlay-text-base);
   flex-shrink: 0;
   line-height: 0;
   vertical-align: middle;
 }
 
-.country-flag .flag {
-  display: inline-flex;
+.country-flag.flag.flag-xs {
+  height: 0.875rem;
+}
+
+.country-flag.flag.flag-sm {
+  height: 1.125rem;
+}
+
+.country-flag.flag.flag-md {
+  height: 1.5rem;
 }

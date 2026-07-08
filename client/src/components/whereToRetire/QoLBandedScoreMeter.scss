@@ -1,66 +1,3 @@
-/* Four-band QoL palette — shared by meter badges, bar fills, and metric cards */
-.wtr-qol-tab {
-  --qol-limited-ink: color-mix(
-    in srgb,
-    var(--wtr-match-poor, var(--color-text-danger)) 92%,
-    var(--text)
-  );
-  --qol-limited-surface: color-mix(
-    in srgb,
-    var(--wtr-match-poor, var(--color-text-danger)) 24%,
-    var(--surface)
-  );
-  --qol-limited-surface-start: color-mix(
-    in srgb,
-    var(--qol-limited-surface) 0%,
-    transparent
-  );
-  --qol-limited-fill: var(--wtr-match-poor, var(--color-text-danger));
-
-  --qol-basic-ink: color-mix(
-    in srgb,
-    var(--wtr-match-stretch, var(--color-amber)) 62%,
-    var(--text)
-  );
-  --qol-basic-surface: color-mix(
-    in srgb,
-    var(--wtr-match-stretch, var(--color-amber)) 30%,
-    var(--surface)
-  );
-  --qol-basic-surface-start: color-mix(
-    in srgb,
-    var(--qol-basic-surface) 0%,
-    transparent
-  );
-  --qol-basic-fill: var(--wtr-match-stretch, var(--color-amber));
-
-  --qol-good-ink: color-mix(in srgb, var(--blue1) 35%, var(--green1));
-  --qol-good-surface: color-mix(in srgb, var(--blue1) 8%, var(--surface));
-  --qol-good-surface-start: color-mix(
-    in srgb,
-    var(--qol-good-surface) 0%,
-    transparent
-  );
-  --qol-good-fill: color-mix(in srgb, var(--blue1) 62%, var(--green1));
-
-  --qol-world-class-ink: color-mix(
-    in srgb,
-    var(--wtr-match-strong, var(--color-text-success)) 88%,
-    var(--text)
-  );
-  --qol-world-class-surface: color-mix(
-    in srgb,
-    var(--green1) 28%,
-    var(--surface)
-  );
-  --qol-world-class-surface-start: color-mix(
-    in srgb,
-    var(--qol-world-class-surface) 0%,
-    transparent
-  );
-  --qol-world-class-fill: var(--green1);
-}
-
 .qol-banded-meter {
   display: flex;
   flex-direction: column;
@@ -114,13 +51,13 @@
 }
 
 .qol-banded-meter__badge--limited {
-  color: var(--qol-limited-ink);
-  background: var(--qol-limited-surface);
+  color: var(--qol-poor-ink);
+  background: var(--qol-poor-surface);
 }
 
 .qol-banded-meter__badge--basic {
-  color: var(--qol-basic-ink);
-  background: var(--qol-basic-surface);
+  color: var(--qol-moderate-ink);
+  background: var(--qol-moderate-surface);
 }
 
 .qol-banded-meter__badge--good {
@@ -129,14 +66,14 @@
 }
 
 .qol-banded-meter__badge--world-class {
-  color: var(--qol-world-class-ink);
-  background: var(--qol-world-class-surface);
+  color: var(--qol-excellent-ink);
+  background: var(--qol-excellent-surface);
 }
 
 .qol-banded-meter__wimfy.narrative-why-line {
   margin: 0;
   padding: var(--space-1) var(--space-3);
-  border-left: 3px solid color-mix(in srgb, var(--border) 80%, var(--text-muted));
+  border-left: 3px solid var(--color-border-faintest);
 }
 
 .qol-banded-meter__bar {
@@ -154,11 +91,11 @@
 }
 
 .qol-banded-meter__bar--limited .qol-banded-meter__bar-fill {
-  background: var(--qol-limited-fill);
+  background: var(--qol-poor-fill);
 }
 
 .qol-banded-meter__bar--basic .qol-banded-meter__bar-fill {
-  background: var(--qol-basic-fill);
+  background: var(--qol-moderate-fill);
 }
 
 .qol-banded-meter__bar--good .qol-banded-meter__bar-fill {
@@ -166,7 +103,7 @@
 }
 
 .qol-banded-meter__bar--world-class .qol-banded-meter__bar-fill {
-  background: var(--qol-world-class-fill);
+  background: var(--qol-excellent-fill);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -38,14 +38,14 @@
 }
 
 .wtr-map-tool-btn:hover:not(.wtr-map-tool-btn--active):not(.wtr-map-tool-btn--has-active) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-color: var(--color-border-accent);
   color: var(--text);
 }
 
 .wtr-map-tool-btn--active,
 .wtr-map-tool-btn--has-active {
   z-index: 1;
-  background: #fff;
+  background: var(--accent-contrast);
   color: var(--color-teal-dark);
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
@@ -58,18 +58,18 @@
 .wtr-map-tool-btn--active:hover,
 .wtr-map-tool-btn--has-active:hover {
   border-color: color-mix(in srgb, var(--color-teal-dark) 25%, var(--border));
-  background: #fff;
+  background: var(--accent-contrast);
   color: var(--color-teal-dark);
   box-shadow: rgba(17, 12, 46, 0.18) 0px 48px 100px 0px;
 }
 
 .wtr-map-tool-btn--has-active .wtr-map-tool-btn__dot {
   background: var(--accent-green);
-  border: 2px solid #fff;
+  border: 2px solid var(--accent-contrast);
 }
 
 .wtr-map-tool-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

@@ -98,18 +98,18 @@
 }
 
 .wtr-qol-overall__badge--excellent {
-  color: var(--qol-world-class-ink);
-  background: var(--qol-world-class-surface);
+  color: var(--qol-excellent-ink);
+  background: var(--qol-excellent-surface);
 }
 
 .wtr-qol-overall__badge--moderate {
-  color: var(--qol-basic-ink);
-  background: var(--qol-basic-surface);
+  color: var(--qol-moderate-ink);
+  background: var(--qol-moderate-surface);
 }
 
 .wtr-qol-overall__badge--below-average {
-  color: var(--qol-limited-ink);
-  background: var(--qol-limited-surface);
+  color: var(--qol-poor-ink);
+  background: var(--qol-poor-surface);
 }
 
 /* Single progress bar lives in QoLBandedScoreMeter — overall card adds spacing below score row */
@@ -156,7 +156,7 @@
 .wtr-qol-healthcare__divider {
   height: 1px;
   margin: var(--space-3) 0;
-  background: color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--color-border-fainter);
 }
 
 .wtr-qol-healthcare__insurance {
@@ -234,10 +234,10 @@
 .wtr-qol-metric-row--world-class {
   // background: linear-gradient(
   //   to bottom,
-  //   var(--qol-world-class-surface-start) 0%,
-  //   var(--qol-world-class-surface) 60%
+  //   var(--qol-excellent-surface-start) 0%,
+  //   var(--qol-excellent-surface) 60%
   // );
-  box-shadow: inset  -2px -2px 0px 0px var(--qol-world-class-surface);
+  box-shadow: inset  -2px -2px 0px 0px var(--qol-excellent-surface);
 }
 
 .wtr-qol-metric-row--good {
@@ -252,19 +252,19 @@
 .wtr-qol-metric-row--basic {
   // background: linear-gradient(
   //   to bottom,
-  //   var(--qol-basic-surface-start) 0%,
-  //   var(--qol-basic-surface) 60%
+  //   var(--qol-moderate-surface-start) 0%,
+  //   var(--qol-moderate-surface) 60%
   // );
-  box-shadow: inset  -2px -2px 0px 0px var(--qol-basic-surface);
+  box-shadow: inset  -2px -2px 0px 0px var(--qol-moderate-surface);
 }
 
 .wtr-qol-metric-row--limited {
   // background: linear-gradient(
   //   to bottom,
-  //   var(--qol-limited-surface-start) 0%,
-  //   var(--qol-limited-surface) 60%
+  //   var(--qol-poor-surface-start) 0%,
+  //   var(--qol-poor-surface) 60%
   // );
-  box-shadow: inset  -2px -2px 0px 0px var(--qol-limited-surface);
+  box-shadow: inset  -2px -2px 0px 0px var(--qol-poor-surface);
 }
 
 .wtr-qol-metric-row__label {
@@ -273,16 +273,16 @@
   line-height: 1.25;
   color: var(--text);
   .wtr-qol-metric-row--limited & {
-    color: var(--qol-limited-ink);
+    color: var(--qol-poor-ink);
   }
  .wtr-qol-metric-row--basic &{
-    color: var(--qol-basic-ink);
+    color: var(--qol-moderate-ink);
   }
    .wtr-qol-metric-row--good &{
     color: var(--qol-good-ink);
   }
   .wtr-qol-metric-row--world-class &{
-    color: var(--qol-world-class-ink);
+    color: var(--qol-excellent-ink);
   }
 }
 
@@ -295,16 +295,16 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   .wtr-qol-metric-row--limited & {
-    color: var(--qol-limited-ink);
+    color: var(--qol-poor-ink);
   }
  .wtr-qol-metric-row--basic &{
-    color: var(--qol-basic-ink);
+    color: var(--qol-moderate-ink);
   }
    .wtr-qol-metric-row--good &{
     color: var(--qol-good-ink);
   }
   .wtr-qol-metric-row--world-class &{
-    color: var(--qol-world-class-ink);
+    color: var(--qol-excellent-ink);
   }
 }
 
@@ -314,7 +314,7 @@
   line-height: 1.2;
 
   &--world-class {
-    color: var(--qol-world-class-ink);
+    color: var(--qol-excellent-ink);
   }
 
   &--good {
@@ -322,10 +322,10 @@
   }
 
   &--basic {
-    color: var(--qol-basic-ink);
+    color: var(--qol-moderate-ink);
   }
 
   &--limited {
-    color: var(--qol-limited-ink);
+    color: var(--qol-poor-ink);
   }
 }

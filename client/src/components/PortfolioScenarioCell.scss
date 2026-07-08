@@ -27,19 +27,19 @@
 }
 
 .portfolio-scenario-cell--accent-bear {
-  border-left: 4px solid color-mix(in srgb, #fce9e9 92%, var(--surface));
+  border-left: 4px solid color-mix(in srgb, var(--red6) 92%, var(--surface));
 }
 
 .portfolio-scenario-cell--accent-very_bear {
-  border-left: 4px solid color-mix(in srgb, #fca5a5 92%, var(--surface));
+  border-left: 4px solid color-mix(in srgb, var(--red4) 92%, var(--surface));
 }
 
 .portfolio-scenario-cell--accent-bull {
-  border-left: 4px solid color-mix(in srgb, var(--accent-light, #e1f5ee) 92%, var(--surface));
+  border-left: 4px solid color-mix(in srgb, var(--accent-light, var(--green6)) 92%, var(--surface));
 }
 
 .portfolio-scenario-cell--accent-very_bull {
-  border-left: 4px solid color-mix(in srgb, #86efac 92%, var(--surface));
+  border-left: 4px solid color-mix(in srgb, var(--green5) 92%, var(--surface));
 }
 
 .portfolio-scenario-cell--accent-normal {
@@ -47,11 +47,11 @@
 }
 
 .portfolio-scenario-cell--accent-custom {
-  border-left: 4px solid #dbeafe;
+  border-left: 4px solid var(--sky-blue-u1);
 }
 
 .portfolio-scenario-cell--accent-peryear {
-  border-left: 4px solid color-mix(in srgb, var(--warn-light, #faeeda) 94%, var(--surface));
+  border-left: 4px solid color-mix(in srgb, var(--warn-light, var(--amber5)) 94%, var(--surface));
 }
 
 .portfolio-scenario-cell--accent-outline {
@@ -105,7 +105,7 @@
   justify-content: space-between;
   border-radius: 6px;
   padding: var(--space-2);
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
 }
 
@@ -128,7 +128,7 @@
 
     rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;;
-    background: #ffffff;
+    background: var(--accent-contrast);
 }
 
 .portfolio-scenario-cell .holdings-scenario-trigger__text {
@@ -176,8 +176,8 @@
   .holdings-scenario-trigger--outline,
 .portfolio-scenario-cell--account.portfolio-scenario-cell--account-active
   .holdings-scenario-trigger--badge {
-  background: #fff;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  background: var(--accent-contrast);
+  box-shadow: inset 0 0 0 1px var(--color-border-text);
 }
 
 /* Holding row — spans account scenario col + chevron (no chevron on holding row) */
@@ -194,7 +194,7 @@
 }
 
 .portfolio-scenario-cell--holding.portfolio-scenario-cell--holding-active {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 @container holdings-symbol-card (max-width: 420px) {

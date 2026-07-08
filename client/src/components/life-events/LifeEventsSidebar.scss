@@ -59,7 +59,7 @@
 .life-events-sidebar__active-value {
   flex-shrink: 0;
   font-weight: 600;
-  color: #a32d2d;
+  color: var(--red1);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }

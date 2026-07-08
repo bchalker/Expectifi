@@ -106,7 +106,7 @@
   max-width: 100%;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--space-2);
-  background: color-mix(in srgb, var(--text) 6%, transparent);
+  background: var(--color-overlay-text);
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 500;
@@ -487,6 +487,6 @@
     margin-top: var(--space-2);
     padding: var(--space-3) var(--space-4) var(--space-4);
     gap: 0;
-    border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
+    border-top: 1px dashed var(--color-border-fainter);
   }
 }

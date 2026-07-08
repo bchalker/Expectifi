@@ -5,18 +5,18 @@
 }
 
 .app-chip.chip.chip--soft.chip--success[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 85%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 14%, var(--surface));
+  color: color-mix(in srgb, var(--wtr-match-strong) 85%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-strong) 14%, var(--surface));
 }
 
 .app-chip.chip.chip--soft.chip--warning[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 90%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 18%, var(--surface));
+  color: color-mix(in srgb, var(--wtr-match-stretch) 90%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-stretch) 18%, var(--surface));
 }
 
 .app-chip.chip.chip--soft.chip--danger[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 82%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 12%, var(--surface));
+  color: color-mix(in srgb, var(--wtr-match-poor) 82%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-poor) 12%, var(--surface));
 }
 
 .app-chip.chip.chip--soft.chip--default[data-slot='chip'] {
@@ -45,21 +45,21 @@
 }
 
 .app-chip.chip.chip--secondary.chip--success[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 85%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 14%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--wtr-match-strong, var(--color-text-success)) 28%, var(--border));
+  color: color-mix(in srgb, var(--wtr-match-strong) 85%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-strong) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-strong) 28%, var(--border));
 }
 
 .app-chip.chip.chip--secondary.chip--danger[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 82%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 12%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--wtr-match-poor, var(--color-text-danger)) 24%, var(--border));
+  color: color-mix(in srgb, var(--wtr-match-poor) 82%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-poor) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-poor) 24%, var(--border));
 }
 
 .app-chip.chip.chip--secondary.chip--warning[data-slot='chip'] {
-  color: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 90%, var(--text));
-  background: color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 18%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--wtr-match-stretch, var(--color-amber)) 30%, var(--border));
+  color: color-mix(in srgb, var(--wtr-match-stretch) 90%, var(--text));
+  background: color-mix(in srgb, var(--wtr-match-stretch) 18%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--wtr-match-stretch) 30%, var(--border));
 }
 
 .app-chip.chip.chip--secondary.chip--accent[data-slot='chip'] {

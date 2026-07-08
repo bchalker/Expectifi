@@ -6,6 +6,7 @@ import {
 } from "@heroui/react";
 import { AppSelect } from "../ui/AppSelect";
 import { AppButton } from "../ui/AppButton";
+import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
 import { useIsMobileBottomSheet } from "../../hooks/useMobileBottomSheet";
@@ -451,7 +452,7 @@ export function RetirementMapFilters({
         ))}
       </div>
 
-      <div className="wtr-map-filters__scroll">
+      <AppOverlayScrollbars className="wtr-map-filters__scroll" defer={false}>
         <div className="wtr-map-filters__body">
           {activeTab === "filters" ? (
             <FilterControlsStack
@@ -490,7 +491,7 @@ export function RetirementMapFilters({
             <WtrBudgetTabContent filters={filters} onChange={onChange} />
           ) : null}
         </div>
-      </div>
+      </AppOverlayScrollbars>
 
       <footer className="wtr-map-filters__footer">
         {activeTab === "filters" && showClearFilters ? (

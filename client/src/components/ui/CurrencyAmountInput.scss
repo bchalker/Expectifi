@@ -38,7 +38,7 @@
 }
 
 .currency-amount-input__label--error {
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
 }
 
 .currency-amount-input__average-badge {
@@ -50,7 +50,7 @@
   padding: var(--space-1) /* review: was 0.15rem */ var(--space-2) /* review: was 0.45rem */;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border: 1px solid var(--color-border-accent-soft);
 }
 
 .currency-amount-input__wrap {
@@ -192,7 +192,7 @@
   font-size: var(--text-sm);
   font-weight: 500;
   line-height: 1.45;
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
 }
 
 .currency-amount-input__sr-only {

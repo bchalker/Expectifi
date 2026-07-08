@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--blue1) 35%, transparent);
+  background: color-mix(in srgb, var(--color-text-base) 35%, transparent);
 }
 
 .upgrade-prompt {

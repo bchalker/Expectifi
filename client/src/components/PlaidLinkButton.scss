@@ -26,7 +26,7 @@
 
 .plaid-link-btn:hover:not(:disabled),
 .plaid-link-btn:focus-visible:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
   color: var(--accent-text);
 }
 
@@ -52,7 +52,7 @@
   margin: 0;
   font-family: var(--body);
   font-size: var(--text-sm);
-  color: var(--danger, #b91c1c);
+  color: var(--danger, var(--red2));
   line-height: 1.35;
 }
 

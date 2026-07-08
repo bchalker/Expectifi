@@ -65,8 +65,8 @@
 }
 
 .scenario-per-year-grid__cell--inherited .holding-scenario-popout__year-input-wrap {
-  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
-  border-color: color-mix(in srgb, var(--border) 65%, transparent);
+  background: var(--color-surface-blend-mid);
+  border-color: var(--color-border-tertiary);
 }
 
 .scenario-per-year-grid__cell--inherited .holding-scenario-popout__year-input,

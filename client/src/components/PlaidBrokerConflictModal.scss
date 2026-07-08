@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--blue1) 35%, transparent);
+  background: color-mix(in srgb, var(--color-text-base) 35%, transparent);
 }
 
 .plaid-conflict-modal {
@@ -79,15 +79,15 @@
 }
 
 .plaid-conflict-modal__option:hover {
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  box-shadow: var(--shadow-md);
 }
 
 .plaid-conflict-modal__option--selected {
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 
 .plaid-conflict-modal__option--selected:hover {
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 
 .plaid-conflict-modal__option--destructive {

@@ -1,7 +1,4 @@
 .wtr-monthly-precip-chart {
-  --wtr-precip-bar-fill: var(--blue4);
-  --wtr-precip-bar-wet: var(--blue3);
-  --wtr-precip-wet-band: color-mix(in srgb, var(--blue5) 55%, transparent);
   width: 100%;
   min-width: 0;
 }
@@ -59,7 +56,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: color-mix(in srgb, var(--border) 65%, transparent);
+  background: var(--color-border-tertiary);
   pointer-events: none;
 }
 
@@ -67,7 +64,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  background: var(--wtr-precip-wet-band);
+  background: color-mix(in srgb, var(--wtr-precip-low) 55%, transparent);
   pointer-events: none;
 }
 
@@ -100,11 +97,11 @@
   width: 100%;
   min-height: 2px;
   border-radius: 3px 3px 1px 1px;
-  background: var(--wtr-precip-bar-fill);
+  background: var(--wtr-precip-mid);
 }
 
 .wtr-monthly-precip-chart__bar--wet {
-  background: var(--wtr-precip-bar-wet);
+  background: var(--wtr-precip-high);
 }
 
 .wtr-monthly-precip-chart__callout {
@@ -191,7 +188,7 @@
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 2px;
-  background: var(--wtr-precip-wet-band);
+  background: color-mix(in srgb, var(--wtr-precip-low) 55%, transparent);
 }
 
 .wtr-monthly-precip-chart__legend-label {

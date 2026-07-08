@@ -16,7 +16,7 @@
   gap: var(--space-1);
   padding: var(--space-2);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  background: var(--color-surface-blend-mid);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

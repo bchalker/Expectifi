@@ -122,7 +122,7 @@
 }
 
 .wtr-climate-card__unit-btn--active {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  background: var(--color-hover-accent-mid);
   color: var(--text);
 }
 
@@ -170,9 +170,9 @@
   border-radius: 6px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--border) 70%, transparent) 25%,
+    var(--color-border-faint) 25%,
     color-mix(in srgb, var(--border) 35%, transparent) 50%,
-    color-mix(in srgb, var(--border) 70%, transparent) 75%
+    var(--color-border-faint) 75%
   );
   background-size: 200% 100%;
   animation: wtr-climate-shimmer 1.2s ease-in-out infinite;

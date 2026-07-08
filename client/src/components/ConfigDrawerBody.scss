@@ -68,13 +68,13 @@
   background: transparent;
   color: var(--text);
   font-weight: 600;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--color-action-primary);
   box-shadow: none;
 }
 
 .config-drawer-tabs--classic .tab-btn:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px rgba(93, 202, 165, 0.35);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--green3) 35%, transparent);
   border-radius: 4px 4px 0 0;
 }
 
@@ -163,7 +163,7 @@
 }
 
 .config-drawer-body .currency-amount-input__label--error {
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
 }
 
 .config-drawer-body .welcome-goal-fields:not(.welcome-goal-fields--centered) .currency-amount-input,

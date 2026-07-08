@@ -346,7 +346,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-claim-age-picker__age-trigger:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--accent-contrast);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -362,7 +362,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+  box-shadow: 0 8px 24px var(--color-overlay-text-muted);
   transform: translateX(-50%);
   box-sizing: border-box;
 }
@@ -416,11 +416,11 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
 .subheader-claim-age-picker__btn--on {
   background: var(--nav-bg);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .subheader-claim-age-picker__btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
   z-index: 1;
 }
@@ -472,7 +472,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.18),
     0 0 0 1px rgb(0 0 0 / 0.08);
@@ -482,7 +482,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
 .subheader-ss-toggle__switch--on .subheader-ss-toggle__track {
   background: var(--green3);
-  border-color: color-mix(in srgb, var(--green3) 55%, #fff);
+  border-color: color-mix(in srgb, var(--green3) 55%, var(--accent-contrast));
 }
 
 .subheader-ss-toggle__switch--on .subheader-ss-toggle__track::after {
@@ -496,7 +496,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
 .subheader--phase-income .subheader-ss-toggle__switch--on .subheader-ss-toggle__track {
   background: var(--green3);
-  border-color: color-mix(in srgb, var(--green3) 55%, #fff);
+  border-color: color-mix(in srgb, var(--green3) 55%, var(--accent-contrast));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -558,13 +558,13 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-guaranteed-income-toggle__link:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--accent-contrast);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 .app-tooltip__trigger.subheader-guaranteed-income-toggle__link:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--accent-contrast);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -574,7 +574,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-guaranteed-income-tooltip__content.app-tooltip__content {
-  background: var(--color-background-primary, #fff);
+  background: var(--color-background-primary, var(--accent-contrast));
   border: 0.5px solid var(--color-border-tertiary, var(--border));
   border-radius: var(--border-radius-md, 8px);
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
@@ -589,7 +589,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
 .subheader-guaranteed-income-tooltip__content.app-tooltip__content [data-slot='overlay-arrow'] path,
 .subheader-guaranteed-income-tooltip__content.app-tooltip__content [data-slot='overlay-arrow'] svg {
-  fill: var(--color-background-primary, #fff);
+  fill: var(--color-background-primary, var(--accent-contrast));
   stroke: var(--color-border-tertiary, var(--border));
   stroke-width: 0.5px;
 }
@@ -634,7 +634,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-guaranteed-income-tooltip__amount {
-  color: #3b6d11;
+  color: var(--green-d2);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -649,7 +649,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   margin: 7px 0 0;
   padding-top: 7px;
   border-top: 0.5px solid var(--color-border-tertiary, var(--border));
-  color: var(--color-text-info, var(--blue3));
+  color: var(--color-text-info);
 }
 
 .subheader-guaranteed-income-tooltip__empty {
@@ -699,7 +699,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-income-composition__link:hover {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .subheader-income-composition__link:focus-visible {
@@ -718,7 +718,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   min-height: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.88); /* scrim — intentional, no token */
   cursor: pointer;
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -745,10 +745,10 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 
 .subheader--phase-income .subheader-ss-add-btn {
   border-color: rgba(0, 0, 0, 0.22);
-  background: rgba(255, 255, 255, 1);
+  background: var(--accent-contrast); /* was rgba white — solid */
   background: rgba(0,0,0, .1);
   color: rgba(0, 0, 0, 0.82);
-  color: #ffffff;
+  color: var(--accent-contrast);
 }
 
 .subheader--phase-income .subheader-ss-add-btn:hover {
@@ -828,7 +828,7 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
   line-height: 1.2;
   white-space: nowrap;
   color: var(--subheader-label-fg);
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.45); /* scrim — intentional, no token */
 }
 
 .subheader-market-scenario-pill__dot {
@@ -840,43 +840,43 @@ html[data-portfolio-import-flush] .subheader .subheader-waves__front-scale {
 }
 
 .subheader-market-scenario-pill--bull {
-  color: #b8f0dc;
-  background: color-mix(in srgb, #6bc9a8 24%, rgba(0, 0, 0, 0.55));
-  border-color: color-mix(in srgb, #6bc9a8 42%, transparent);
+  color: var(--color-series-bull-light);
+  background: color-mix(in srgb, var(--color-series-bull-soft) 24%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, var(--color-series-bull-soft) 42%, transparent);
 }
 
 .subheader-market-scenario-pill--bull .subheader-market-scenario-pill__dot {
-  background: #6bc9a8;
+  background: var(--color-series-bull-soft);
 }
 
 .subheader-market-scenario-pill--bear {
-  color: #ffd6d6;
-  background: color-mix(in srgb, #ef4444 22%, rgba(0, 0, 0, 0.55));
-  border-color: color-mix(in srgb, #ef4444 38%, transparent);
+  color: var(--color-series-bear-light);
+  background: color-mix(in srgb, var(--red1) 22%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, var(--red1) 38%, transparent);
 }
 
 .subheader-market-scenario-pill--bear .subheader-market-scenario-pill__dot {
-  background: #e8a5a5;
+  background: var(--color-series-bear-soft);
 }
 
 .subheader-market-scenario-pill--stagflation {
-  color: #ffe8b8;
-  background: color-mix(in srgb, #e8b86a 24%, rgba(0, 0, 0, 0.55));
-  border-color: color-mix(in srgb, #e8b86a 42%, transparent);
+  color: var(--color-series-neutral-light);
+  background: color-mix(in srgb, var(--color-series-neutral) 24%, rgba(0, 0, 0, 0.55));
+  border-color: color-mix(in srgb, var(--color-series-neutral) 42%, transparent);
 }
 
 .subheader-market-scenario-pill--stagflation .subheader-market-scenario-pill__dot {
-  background: #e8b86a;
+  background: var(--color-series-neutral);
 }
 
 .subheader-market-scenario-pill--lost_decade {
-  color: color-mix(in srgb, #fff 78%, var(--text-muted));
+  color: color-mix(in srgb, var(--accent-contrast) 78%, var(--text-muted));
   background: color-mix(in srgb, var(--text-muted) 28%, rgba(0, 0, 0, 0.55));
   border-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
 }
 
 .subheader-market-scenario-pill--lost_decade .subheader-market-scenario-pill__dot {
-  background: color-mix(in srgb, var(--text-muted) 70%, #fff);
+  background: color-mix(in srgb, var(--text-muted) 70%, var(--accent-contrast));
 }
 
 @media (max-width: 760px) {

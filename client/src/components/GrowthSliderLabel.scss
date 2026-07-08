@@ -38,7 +38,7 @@
 }
 
 .growth-slider-label__panel-age-link:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -85,32 +85,32 @@ input[type='range'].growth-slider-label__panel-range {
     to right,
     var(--green-d1) 0%,
     var(--green-d1) var(--range-fill, 0%),
-    var(--color-border-secondary, var(--border)) var(--range-fill, 0%),
-    var(--color-border-secondary, var(--border)) 100%
+    var(--surface-d1) var(--range-fill, 0%),
+    var(--surface-d1) 100%
   );
 }
 
 input[type='range'].growth-slider-label__panel-range::-webkit-slider-runnable-track {
   height: 4px;
-  border-radius: 2px;
+  border-radius: 999px;
   background: linear-gradient(
     to right,
     var(--green-d1) 0%,
     var(--green-d1) var(--range-fill, 0%),
-    var(--color-border-secondary, var(--border)) var(--range-fill, 0%),
-    var(--color-border-secondary, var(--border)) 100%
+    var(--surface-d1) var(--range-fill, 0%),
+    var(--surface-d1) 100%
   );
 }
 
 input[type='range'].growth-slider-label__panel-range::-moz-range-track {
   height: 4px;
-  border-radius: 2px;
-  background: var(--color-border-secondary, var(--border));
+  border-radius: 999px;
+  background: var(--surface-d1);
 }
 
 input[type='range'].growth-slider-label__panel-range::-moz-range-progress {
   height: 4px;
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--green-d1);
 }
 
@@ -265,11 +265,11 @@ input[type='range'].growth-slider-label__panel-range::-moz-range-progress {
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--very_bear {
-  color: #b91c1c;
+  color: var(--red2);
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--bear {
-  color: #dc2626;
+  color: var(--red2);
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--normal {
@@ -277,15 +277,15 @@ input[type='range'].growth-slider-label__panel-range::-moz-range-progress {
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--bull {
-  color: #059669;
+  color: var(--green1);
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--very_bull {
-  color: #15803d;
+  color: var(--green1);
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--custom {
-  color: #60a5fa;
+  color: var(--sky-blue-d3);
 }
 
 .growth-slider-label__exception-scenario.holdings-scenario-trigger--peryear {

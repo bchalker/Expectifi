@@ -9,19 +9,17 @@ import {
   type CSSProperties,
 } from 'react'
 import { createPortal } from 'react-dom'
-import type { Selection } from 'react-aria-components'
 import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import {
   IconChevronDown,
 } from '@tabler/icons-react'
-import { Tag, TagGroup } from '@heroui/react'
 import { useClickOutside } from '../hooks/useClickOutside'
 import { AppButton } from './ui/AppButton'
+import { AppSelect } from './ui/AppSelect'
 import {
   filterIncomeSecurities,
   formatSecurityYieldPct,
   INCOME_SECURITIES,
-  INCOME_SECURITY_FILTER_DESCRIPTIONS,
   INCOME_SECURITY_FILTERS,
   findIncomeSecurity,
   formatNavErosionRiskSummary,
@@ -125,18 +123,20 @@ function computeBadgePanelPosition(trigger: HTMLElement): CSSProperties {
   const panelWidth = Math.min(BADGE_PANEL_WIDTH_PX, window.innerWidth - VIEWPORT_EDGE_PX * 2)
   const maxHeight = Math.min(BADGE_PANEL_MAX_HEIGHT_PX, window.innerHeight - VIEWPORT_EDGE_PX * 2)
 
-  let top = rect.bottom + BADGE_PANEL_GAP_PX
-  if (top + maxHeight > window.innerHeight - VIEWPORT_EDGE_PX) {
-    const aboveTop = rect.top - BADGE_PANEL_GAP_PX - maxHeight
-    if (aboveTop >= VIEWPORT_EDGE_PX) top = aboveTop
-    else top = Math.max(VIEWPORT_EDGE_PX, window.innerHeight - VIEWPORT_EDGE_PX - maxHeight)
+  // Prefer right of trigger, then left; stay inside the viewport.
+  let left = rect.right + BADGE_PANEL_GAP_PX
+  if (left + panelWidth > window.innerWidth - VIEWPORT_EDGE_PX) {
+    const leftSide = rect.left - BADGE_PANEL_GAP_PX - panelWidth
+    if (leftSide >= VIEWPORT_EDGE_PX) left = leftSide
+    else left = Math.max(VIEWPORT_EDGE_PX, window.innerWidth - VIEWPORT_EDGE_PX - panelWidth)
   }
 
-  let left = rect.right - panelWidth
-  if (left < VIEWPORT_EDGE_PX) left = VIEWPORT_EDGE_PX
-  if (left + panelWidth > window.innerWidth - VIEWPORT_EDGE_PX) {
-    left = window.innerWidth - VIEWPORT_EDGE_PX - panelWidth
+  // Align with the top of the trigger; clamp vertically if needed.
+  let top = rect.top
+  if (top + maxHeight > window.innerHeight - VIEWPORT_EDGE_PX) {
+    top = Math.max(VIEWPORT_EDGE_PX, window.innerHeight - VIEWPORT_EDGE_PX - maxHeight)
   }
+  if (top < VIEWPORT_EDGE_PX) top = VIEWPORT_EDGE_PX
 
   return {
     position: 'fixed',
@@ -165,42 +165,33 @@ type Props = {
   triggerClassName?: string
 }
 
-function CategoryFilterTags({
+const FILTER_SELECT_OPTIONS = INCOME_SECURITY_FILTERS.map((filter) => ({
+  id: filter.id,
+  label: filter.label,
+}))
+
+function CategoryFilterSelect({
   filterId,
   onFilterId,
 }: {
   filterId: IncomeSecurityFilterId
   onFilterId: (id: IncomeSecurityFilterId) => void
 }) {
-  const handleSelectionChange = (keys: Selection) => {
-    if (keys === 'all') return
-    const next = keys.values().next().value
-    if (next != null) onFilterId(String(next) as IncomeSecurityFilterId)
-  }
-
   return (
     <div className="income-security-selector__filter">
-      <TagGroup
-        className="income-security-selector__tag-group"
-        selectionMode="single"
-        selectedKeys={new Set([filterId])}
-        onSelectionChange={handleSelectionChange}
-        size="sm"
-        variant="surface"
-      >
-        <TagGroup.List className="income-security-selector__tag-list">
-          {INCOME_SECURITY_FILTERS.map((filter) => (
-            <Tag key={filter.id} id={filter.id} className="income-security-selector__tag">
-              <Tooltip
-                content={INCOME_SECURITY_FILTER_DESCRIPTIONS[filter.id]}
-                placement="top"
-              >
-                <span className="income-security-selector__tag-label">{filter.label}</span>
-              </Tooltip>
-            </Tag>
-          ))}
-        </TagGroup.List>
-      </TagGroup>
+      <AppSelect
+        value={filterId}
+        onChange={(id) => onFilterId(id as IncomeSecurityFilterId)}
+        options={FILTER_SELECT_OPTIONS}
+        label="Dividend types:"
+        labelClassName="income-security-selector__filter-label"
+        ariaLabel="Dividend types"
+        className="income-security-selector__filter-select"
+        layout="hero"
+        popoverPlacement="bottom"
+        popoverClassName="app-select-import-menu__popover income-security-selector__filter-popover"
+        listClassName="app-select-import-menu__list"
+      />
     </div>
   )
 }
@@ -240,6 +231,7 @@ export function IncomeSecuritySelector({
     close,
     open && !mobileLayout,
     panelPortaled && !mobileLayout ? [panelRef] : undefined,
+    { ignoreClosest: '.income-security-selector__filter-popover' },
   )
 
   const syncBadgePanelPosition = useCallback(() => {
@@ -303,7 +295,7 @@ export function IncomeSecuritySelector({
       aria-label="Select income security"
       onClick={(e) => e.stopPropagation()}
     >
-      <CategoryFilterTags filterId={filterId} onFilterId={setFilterId} />
+      <CategoryFilterSelect filterId={filterId} onFilterId={setFilterId} />
       <AppOverlayScrollbars
         className="income-security-selector__scroll"
         defer={false}

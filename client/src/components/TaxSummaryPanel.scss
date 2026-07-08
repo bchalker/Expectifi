@@ -154,7 +154,7 @@
 }
 
 .tax-breakdown-harvest__callout-link:hover {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .tax-breakdown-harvest__callout-link:focus-visible {
@@ -242,7 +242,7 @@
   padding: var(--space-4) /* review: was 0.85rem */;
   box-sizing: border-box;
   background: var(--surface);
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
   // border-bottom: 1px solid var(--border);
 }
 
@@ -298,7 +298,7 @@
 }
 
 .tax-summary-slide-panel__close:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -378,7 +378,7 @@
 }
 
 .tax-summary-slide-panel__tab--active {
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--color-accent);
   color: var(--text);
   font-weight: 600;
   background: transparent;
@@ -393,7 +393,7 @@
 }
 
 .tax-summary-slide-panel__tab:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

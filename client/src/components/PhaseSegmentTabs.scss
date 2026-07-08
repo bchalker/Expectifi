@@ -55,7 +55,7 @@
 }
 
 .subheader-phase-segment__tab:hover {
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .subheader-phase-segment__tab[aria-selected='true'] {
@@ -111,7 +111,7 @@
 
 .subheader-phase-segment--income .subheader-phase-segment__tab:hover,
 .subheader--phase-income .subheader-phase-segment__tab:hover {
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .subheader-phase-segment--income .subheader-phase-segment__tab[aria-selected='true'],

@@ -4,14 +4,14 @@
   max-width: var(--wtr-content-boundary);
   text-align: center;
   font-size: var(--text-sm);
-  color: color-mix(in srgb, #fff 85%, transparent);
+  color: color-mix(in srgb, var(--accent-contrast) 85%, transparent);
   line-height: 1.5;
 }
 
 .wtr-income-note__amount {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .wtr-income-note__link {
@@ -23,7 +23,7 @@
   border: none;
   background: transparent;
   font-size: var(--text-sm);
-  color: color-mix(in srgb, #fff 90%, transparent);
+  color: color-mix(in srgb, var(--accent-contrast) 90%, transparent);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -38,9 +38,9 @@
 .wtr-income-note__input {
   width: 6.5rem;
   padding: var(--space-1) var(--space-2) /* review: was 0.4rem */;
-  border: 1px solid color-mix(in srgb, #fff 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-contrast) 40%, transparent);
   border-radius: 6px;
-  background: color-mix(in srgb, #000 25%, transparent);
+  background: color-mix(in srgb, var(--color-black) 25%, transparent);
   font-size: 1rem;
-  color: #fff;
+  color: var(--accent-contrast);
 }

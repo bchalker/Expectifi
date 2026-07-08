@@ -80,12 +80,12 @@
 }
 
 .wtr-list-pagination__btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border-color: var(--color-border-accent);
+  background: var(--color-hover-accent-subtle);
 }
 
 .wtr-list-pagination__btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -124,7 +124,7 @@
 }
 
 .wtr-list-pagination--dest-panel {
-  --wtr-pag-inset-hover: color-mix(in srgb, var(--blue1) 8%, var(--green1));
+  --wtr-pag-inset-hover: color-mix(in srgb, var(--color-text-base) 8%, var(--green1));
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn {
@@ -145,27 +145,27 @@
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev {
   box-shadow:
     inset 0 0 0 0 transparent,
-    6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+    6px 0 14px -6px var(--color-overlay-ink-strong);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--next {
   box-shadow:
     inset 0 0 0 0 transparent,
-    -6px 0 14px -6px color-mix(in srgb, var(--color-navy) 22%, transparent);
+    -6px 0 14px -6px var(--color-overlay-ink-strong);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev:hover:not(:disabled) {
   background: var(--surface);
   box-shadow:
     inset 0px 0 0 0 var(--wtr-pag-inset-hover),
-    6px 0 4px -6px color-mix(in srgb, var(--color-navy) 42%, transparent);
+    6px 0 4px -6px var(--color-scrim-mid);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--next:hover:not(:disabled) {
   background: var(--surface);
   box-shadow:
     inset 0px 0 0 0 var(--wtr-pag-inset-hover),
-    -6px 0 4px -6px color-mix(in srgb, var(--color-navy) 42%, transparent);
+    -6px 0 4px -6px var(--color-scrim-mid);
 }
 
 .wtr-list-pagination--dest-panel .wtr-list-pagination__btn--prev:hover:not(:disabled) svg,
@@ -188,7 +188,7 @@
   gap: 0;
   padding: 0;
   background: var(--surface);
-  box-shadow: 0 -8px 20px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  box-shadow: 0 -8px 20px -6px var(--color-overlay-ink-mid);
 }
 
 .wtr-list-pagination--dest-panel.wtr-list-pagination--explorer-list .wtr-list-pagination__controls {

@@ -49,7 +49,7 @@
 }
 
 .manual-account-balance-field--display:hover {
-  color: var(--accent);
+  color: var(--color-accent);
   background: transparent;
 }
 
@@ -61,11 +61,11 @@
   max-width: min(12rem, 42vw);
   padding: var(--space-1) var(--space-2);
   border-radius: 8px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--color-accent);
   background: var(--surface);
   box-shadow:
-    0 4px 6px color-mix(in srgb, var(--color-navy) 8%, transparent),
-    0 10px 24px color-mix(in srgb, var(--color-navy) 14%, transparent);
+    0 4px 6px var(--color-overlay-ink-strong),
+    0 10px 24px var(--color-overlay-ink-mid);
 }
 
 .manual-account-balance-field__prefix {

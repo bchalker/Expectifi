@@ -79,7 +79,7 @@ margin-bottom: var(--space-3);
 }
 
 .wtr-weather-tab__unit-btn--active {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  background: var(--color-hover-accent-mid);
   color: var(--text);
 }
 
@@ -308,7 +308,7 @@ margin-bottom: var(--space-6);
 }
 
 .wtr-weather-tab__season-tag--info {
-  background: var(--blue6);
+  background: var(--color-background-info);
   color: var(--color-text-info);
 }
 
@@ -324,9 +324,9 @@ margin-bottom: var(--space-6);
   border-radius: var(--radius-lg, 12px);
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--border) 70%, transparent) 25%,
+    var(--color-border-faint) 25%,
     color-mix(in srgb, var(--border) 35%, transparent) 50%,
-    color-mix(in srgb, var(--border) 70%, transparent) 75%
+    var(--color-border-faint) 75%
   );
   background-size: 200% 100%;
   animation: wtr-weather-shimmer 1.2s ease-in-out infinite;

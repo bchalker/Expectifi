@@ -18,31 +18,31 @@
 }
 
 .impact-rating-badge--inflow .impact-rating-badge__label {
-  background: #eaf3de;
-  color: #27500a;
+  background: var(--green6);
+  color: var(--green-d2);
 }
 
 .impact-rating-badge--minimal:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
-  background: color-mix(in srgb, var(--text) 6%, transparent);
+  background: var(--color-overlay-text);
   color: var(--text-muted);
 }
 
 .impact-rating-badge--light:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
-  background: color-mix(in srgb, var(--text) 8%, transparent);
+  background: var(--color-overlay-text-soft);
   color: var(--text-muted);
 }
 
 .impact-rating-badge--moderate:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
-  background: #faeeda;
-  color: #633806;
+  background: var(--amber5);
+  color: var(--amber-d1);
 }
 
 .impact-rating-badge--heavy:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
-  background: #faeeda;
-  color: #854f0b;
+  background: var(--amber5);
+  color: var(--amber-d1);
 }
 
 .impact-rating-badge--significant:not(.impact-rating-badge--inflow) .impact-rating-badge__label {
-  background: #fde8e8;
-  color: #a32d2d;
+  background: var(--red6);
+  color: var(--red1);
 }

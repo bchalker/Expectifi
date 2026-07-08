@@ -78,16 +78,16 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button'] {
   border: none;
   min-height: 2rem;
   padding: 0 var(--space-3) /* review: was 0.85rem */;
-  background: var(--header-income-orange, #c4610a);
-  color: #fff;
+  background: var(--header-income-orange, var(--amber-d1));
+  color: var(--accent-contrast);
   font-size: var(--text-xs);
   letter-spacing: 0.02em;
   filter: none;
 }
 
 button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--header-income-orange, #c4610a) 88%, #000);
-  color: #fff;
+  background: color-mix(in srgb, var(--header-income-orange, var(--amber-d1)) 88%, var(--color-black));
+  color: var(--accent-contrast);
   filter: none;
 }
 
@@ -132,7 +132,7 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
   padding: var(--space-4) var(--space-4) /* review: was 1.1rem */ var(--space-4) /* review: was 1.1rem */;
   border-radius: 10px;
   // background: color-mix(in srgb, var(--border) 28%, var(--surface));
-  // border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  // border: 1px solid var(--color-border-tertiary);
 
 }
 
@@ -164,7 +164,7 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
   padding: var(--space-2) var(--space-4);
   border-radius: 8px;
   border: none;
-  background: #f9f9f9;
+  background: var(--surface1);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -292,7 +292,7 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
 .config-profile-tab__confirm-action--danger {
   background: var(--color-danger);
   border-color: var(--color-danger);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .config-profile-tab__confirm-action--danger:hover:not(:disabled) {
@@ -305,13 +305,13 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
 }
 
 .config-profile-tab__confirm-action--muted {
-  background: #e8eaed;
+  background: var(--surface-d1);
   border-color: color-mix(in srgb, var(--border) 80%, transparent);
   color: var(--text);
 }
 
 .config-profile-tab__confirm-action--muted:hover:not(:disabled) {
-  background: #dde1e6;
+  background: var(--surface-d1);
 }
 
 .config-profile-tab__confirm-action--muted:focus-visible {

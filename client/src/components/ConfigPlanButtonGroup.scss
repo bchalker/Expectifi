@@ -59,13 +59,13 @@
 
 .config-plan-button-group button.config-plan-button-group__btn--active {
   background: var(--accent-text) !important;
-  color: #fff !important;
+  color: var(--accent-contrast) !important;
   border-color: var(--border) !important;
 }
 
 .config-plan-button-group button.config-plan-button-group__btn--active:hover {
   background: var(--green-d1) !important;
-  color: #fff !important;
+  color: var(--accent-contrast) !important;
 }
 
 .config-plan-button-group button:focus-visible {

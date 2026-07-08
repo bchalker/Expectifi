@@ -1,31 +1,31 @@
 .app-root-loading {
   min-height: 100vh;
-  background: #1a2332;
+  background: var(--sky-blue-d7);
 }
 
 /* Brand landing — #1a2332 navy, #4ecb8d accent (screenshot reference) */
 html:has(.landing-page),
 body:has(.landing-page) {
-  background-color: #1a2332;
+  background-color: var(--sky-blue-d7);
   background-image: none;
 }
 
 .landing-page {
   overflow-x: clip;
   max-width: 100%;
-  --landing-navy: #1a2332;
-  --landing-navy-trust: #151d29;
-  --landing-navy-footer: #121820;
-  --landing-green: var(--green1, #0f9544);
-  --landing-green-muted: var(--green4, #5dcaa5);
-  --landing-on-green: var(--color-primary-on, #fff);
+  --landing-navy: var(--nav-bg);
+  --landing-navy-trust: var(--sky-blue-d7);
+  --landing-navy-footer: var(--sky-blue-d7);
+  --landing-green: var(--green1);
+  --landing-green-muted: var(--green4, var(--green3));
+  --landing-on-green: var(--color-primary-on, var(--accent-contrast));
   --landing-surface: var(--color-surface);
   --landing-surface-dark: var(--color-surface-dark);
   --landing-card: var(--surface);
   --landing-text-on-navy: rgba(255, 255, 255, 0.92);
   --landing-text-muted-on-navy: rgba(255, 255, 255, 0.62);
-  --landing-text-on-light: var(--color-text-primary, #1c2b3a);
-  --landing-text-muted-light: var(--color-text-muted, #5f5e5a);
+  --landing-text-on-light: var(--color-text-primary);
+  --landing-text-muted-light: var(--color-text-muted);
 
   min-height: 100vh;
   min-height: 100svh;
@@ -89,7 +89,7 @@ body:has(.landing-page) {
 }
 
 .landing-btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--nav-hover);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -240,7 +240,7 @@ body:has(.landing-page) {
 .landing-feature-card__icon {
   flex-shrink: 0;
   margin-bottom: var(--space-3) /* review: was 0.85rem */;
-  color: var(--color-teal-dark, #0f6e56);
+  color: var(--color-teal-dark, var(--green-d1));
 }
 
 .landing-feature-card__title {
@@ -290,7 +290,7 @@ body:has(.landing-page) {
 
 .landing-step-card {
   background: var(--landing-card);
-  border: 1px solid var(--border, #e2e8ed);
+  border: 1px solid var(--border, var(--surface-d1));
   border-radius: 12px;
   padding: var(--space-5) /* review: was 1.35rem */ var(--space-4) /* review: was 1.25rem */ var(--space-5) /* review: was 1.4rem */;
   box-shadow: 0 1px 0 rgba(28, 43, 58, 0.04);
@@ -305,7 +305,7 @@ body:has(.landing-page) {
   margin-bottom: var(--space-3) /* review: was 0.85rem */;
   border-radius: 50%;
   background: var(--landing-navy);
-  color: #fff;
+  color: var(--accent-contrast);
   font-family: var(--mono);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -558,7 +558,7 @@ body:has(.landing-page) {
   width: var(--landing-phone-width);
   padding: 0.55rem;
   border-radius: 2.75rem;
-  background: linear-gradient(165deg, #3a3a3c 0%, #1c1c1e 42%, #0b0b0c 100%);
+  background: linear-gradient(165deg, var(--sky-blue-d6) 0%, var(--sky-blue-d7) 42%, var(--sky-blue-d7) 100%);
   box-shadow:
     0 1.5rem 3rem -0.75rem rgba(28, 43, 58, 0.35),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -570,7 +570,7 @@ body:has(.landing-page) {
   position: relative;
   overflow: hidden;
   border-radius: 2.25rem;
-  background: #000;
+  background: var(--color-true-black);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
@@ -582,7 +582,7 @@ body:has(.landing-page) {
   width: 5.5rem;
   height: 1.35rem;
   border-radius: 999px;
-  background: #1c1c1e;
+  background: var(--sky-blue-d7);
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -633,7 +633,7 @@ body:has(.landing-page) {
   font-size: clamp(1.65rem, 4vw, 2.35rem);
   font-weight: 700;
   line-height: 1.15;
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .landing-cta__sub {

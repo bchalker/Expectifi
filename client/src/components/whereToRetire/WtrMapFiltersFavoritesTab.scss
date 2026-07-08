@@ -60,11 +60,11 @@
 }
 
 .wtr-map-favorites__surplus--pos {
-  color: var(--color-text-success, #15803d);
+  color: var(--color-text-success, var(--green1));
 }
 
 .wtr-map-favorites__surplus--neg {
-  color: var(--color-text-danger, #b91c1c);
+  color: var(--color-text-danger, var(--red2));
 }
 
 .wtr-map-favorites__tax {
@@ -75,15 +75,15 @@
 }
 
 .wtr-map-favorites__tax--green {
-  color: #15803d;
+  color: var(--green1);
 }
 
 .wtr-map-favorites__tax--amber {
-  color: #b45309;
+  color: var(--amber-d1);
 }
 
 .wtr-map-favorites__tax--red {
-  color: #b91c1c;
+  color: var(--red2);
 }
 
 .wtr-map-favorites__remove {
@@ -124,8 +124,8 @@
 }
 
 .wtr-map-favorites__compare:hover {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border-color: var(--color-border-accent);
+  background: var(--color-hover-accent-subtle);
 }
 
 @media (max-width: 480px) {

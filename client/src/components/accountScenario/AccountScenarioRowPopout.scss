@@ -5,7 +5,7 @@
   max-width: min(350px, calc(100vw - var(--space-4)));
   padding: 0;
   background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-secondary, var(--border));
+  // border: 0.5px solid var(--color-border-secondary, var(--border));
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   color: var(--text);
@@ -50,7 +50,7 @@
 .account-scenario-heroui-popover [data-slot='popover-overlay-arrow-group'] svg,
 .account-scenario-heroui-popover [data-slot='popover-overlay-arrow'] path {
   fill: var(--color-background-primary);
-  stroke: var(--color-border-secondary, var(--border));
+  // stroke: var(--color-border-secondary, var(--border));
   stroke-width: 1px;
 }
 

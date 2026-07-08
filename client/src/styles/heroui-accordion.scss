@@ -61,7 +61,7 @@ button[data-slot='accordion-trigger']:hover:not([aria-expanded='true']) {
 }
 
 button[data-slot='accordion-trigger']:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
 

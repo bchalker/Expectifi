@@ -34,11 +34,11 @@
 
 .manual-projections-callout__link:hover,
 .manual-projections-callout__link:focus-visible {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .manual-projections-callout__link:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
   border-radius: 2px;
 }

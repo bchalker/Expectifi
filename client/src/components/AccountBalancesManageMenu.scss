@@ -12,7 +12,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--success, #15803d);
+  background: var(--success, var(--green1));
   animation: plaid-connection-pulse 2s ease-in-out infinite;
 }
 
@@ -39,7 +39,7 @@
   padding: var(--space-2) var(--space-2);
   border-radius: 6px;
   border: none;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
@@ -50,7 +50,7 @@
   box-shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .account-balances-manage .account-balances-manage__trigger.holdings-scenario-trigger--badge:focus-visible {
@@ -59,7 +59,7 @@
 }
 
 .account-balances-manage .account-balances-manage__trigger--open.holdings-scenario-trigger--badge {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  box-shadow: inset 0 0 0 1px var(--color-border-text);
 }
 
 .account-balances-manage .account-balances-manage__trigger .holdings-scenario-trigger__text {
@@ -129,7 +129,7 @@ $account-balances-manage-menu-max-height: min(
   overflow: hidden;
   border-radius: var(--border-radius-lg);
   background: var(--color-background-primary, var(--surface));
-  box-shadow: 0 10px 32px color-mix(in srgb, var(--text) 12%, transparent);
+  box-shadow: 0 10px 32px var(--color-overlay-text-base);
   animation: account-balances-manage-menu-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
 }
@@ -373,7 +373,7 @@ $account-balances-manage-menu-max-height: min(
   height: 100%;
   padding: var(--space-4) var(--space-2);
   padding-left: 0;
-  box-shadow: 6px 0 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow: 6px 0 6px -4px var(--color-overlay-text-mid);
 }
 
 .account-balances-manage__header-back:hover,
@@ -592,7 +592,7 @@ $account-balances-manage-menu-max-height: min(
 }
 
 .account-balances-manage__brand-expect {
-  color: var(--blue1);
+  color: var(--color-text-base);
 }
 
 .account-balances-manage__brand-ifi {
@@ -722,7 +722,7 @@ html:has(
   align-items: center;
   justify-content: center;
   padding: 20px 20px 16px;
-  background: #1a2332;
+  background: var(--sky-blue-d7);
   box-sizing: border-box;
 }
 
@@ -750,7 +750,7 @@ html:has(
 
 .account-balances-manage__col-badge--pro {
   background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .account-balances-manage__col-badge--free {
@@ -770,7 +770,7 @@ html:has(
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  color: #fff;
+  color: var(--accent-contrast);
   text-align: center;
 }
 
@@ -801,11 +801,11 @@ html:has(
   padding: 9px 16px;
   border: none;
   border-radius: var(--border-radius-md, 8px);
-  background: #fff;
+  background: var(--accent-contrast);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  color: #1a2332;
+  color: var(--color-text-base);
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
@@ -897,23 +897,23 @@ html:has(
   font-family: var(--body);
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .account-balances-manage__brand-icon--fidelity {
-  background: #237d4a;
+  background: var(--green-d1);
 }
 
 .account-balances-manage__brand-icon--schwab {
-  background: #0066a1;
+  background: var(--sky-blue-d4);
 }
 
 .account-balances-manage__brand-icon--vanguard {
-  background: #851a22;
+  background: var(--red1);
 }
 
 .account-balances-manage__brand-icon--webull {
-  background: #ff0000;
+  background: var(--red2);
 }
 
 .account-balances-manage__import-row-text {
@@ -1017,7 +1017,7 @@ html:has(
 
 .account-balances-manage__plaid-section .plaid-connection-panel__row--synced {
   grid-template-columns: minmax(0, 1fr) auto;
-  background: color-mix(in srgb, var(--success, #15803d) 8%, var(--surface));
+  background: color-mix(in srgb, var(--success, var(--green1)) 8%, var(--surface));
 }
 
 .account-balances-manage__plaid-section .plaid-connection-panel__name-row {
@@ -1036,7 +1036,7 @@ html:has(
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--success, #15803d);
+  background: var(--success, var(--green1));
   animation: plaid-connection-pulse 2s ease-in-out infinite;
 }
 

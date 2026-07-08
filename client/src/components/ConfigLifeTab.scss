@@ -25,19 +25,19 @@
 .config-life-tab__accordion-heading {
   flex: 1 1 auto;
   min-width: 0;
-  background: #f9f9f9;
+  background: var(--surface1);
   transition: background-color 0.15s ease;
 }
 
 .config-life-tab__accordion-heading--configured {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .config-life-tab__accordion-item:has(
     .config-life-tab__accordion-trigger[aria-expanded='true']
   )
   .config-life-tab__accordion-heading {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .config-life-tab__accordion button[data-slot='accordion-trigger'],
@@ -156,14 +156,14 @@
 }
 
 .config-life-tab .config-plan-button-group button.config-plan-button-group__btn--active {
-  background: #3b6d11 !important;
-  color: #fff !important;
+  background: var(--green-d2) !important;
+  color: var(--accent-contrast) !important;
   border-color: var(--color-border-tertiary) !important;
 }
 
 .config-life-tab .config-plan-button-group button.config-plan-button-group__btn--active:hover {
-  background: color-mix(in srgb, #3b6d11 88%, #000) !important;
-  color: #fff !important;
+  background: color-mix(in srgb, var(--green-d2) 88%, var(--color-black)) !important;
+  color: var(--accent-contrast) !important;
 }
 
 .config-life-tab .config-plan-button-group button:not(.config-plan-button-group__btn--active) {

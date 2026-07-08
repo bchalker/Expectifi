@@ -207,7 +207,7 @@
 @media (max-width: 899px) {
   .panel-backdrop {
     z-index: var(--mobile-bottom-sheet-backdrop-z, 1099);
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.5); /* scrim — intentional, no token */
     transition: opacity 0.3s ease;
   }
 

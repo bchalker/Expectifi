@@ -1,7 +1,7 @@
 // Badge / pill colors by preference step (WCAG-friendly pairs).
 
 @mixin pref-description-step-0 {
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary, var(--color-text-muted));
 }
 
 @mixin pref-description-step-1 {
@@ -13,50 +13,50 @@
 }
 
 @mixin pref-description-step-3 {
-  color: var(--color-text-warning, #b45309);
+  color: var(--color-text-warning, var(--amber-d1));
 }
 
 @mixin pref-description-step-4 {
-  color: var(--color-text-success, #15803d);
+  color: var(--color-text-success, var(--green1));
 }
 
 @mixin pref-description-step-5 {
-  color: #166534;
+  color: var(--green1);
 }
 
 @mixin pref-badge-step-0 {
-  background: var(--color-background-secondary, #f3f4f6);
-  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-background-secondary, var(--surface-d1));
+  color: var(--color-text-secondary, var(--color-text-muted));
 }
 
 @mixin pref-badge-step-1 {
-  background: var(--color-background-secondary, #f3f4f6);
-  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-background-secondary, var(--surface-d1));
+  color: var(--color-text-secondary, var(--color-text-muted));
 }
 
 @mixin pref-badge-step-2 {
-  background: var(--color-background-secondary, #f3f4f6);
-  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-background-secondary, var(--surface-d1));
+  color: var(--color-text-secondary, var(--color-text-muted));
 }
 
 @mixin pref-badge-step-3 {
-  background: var(--color-background-warning, #fef3c7);
-  color: var(--color-text-warning, #b45309);
+  background: var(--color-background-warning, var(--color-bg-warning));
+  color: var(--color-text-warning, var(--amber-d1));
 }
 
 @mixin pref-badge-step-4 {
-  background: var(--color-background-success, #dcfce7);
-  color: var(--color-text-success, #15803d);
+  background: var(--color-background-success, var(--green6));
+  color: var(--color-text-success, var(--green1));
 }
 
 @mixin pref-badge-step-5 {
-  background: #166534;
+  background: var(--green1);
   color: #f0fdf4;
 }
 
 @mixin pref-option-step-0 {
-  border-color: var(--color-border-secondary, #d1d5db);
-  background: var(--color-background-secondary, #f3f4f6);
+  border-color: var(--color-border-secondary, var(--color-border));
+  background: var(--color-background-secondary, var(--surface-d1));
 }
 
 @mixin pref-option-step-1 {
@@ -68,28 +68,28 @@
 }
 
 @mixin pref-option-step-3 {
-  border-color: var(--color-border-warning, #f59e0b);
-  background: var(--color-background-warning, #fef3c7);
+  border-color: var(--color-border-warning, var(--amber2));
+  background: var(--color-background-warning, var(--color-bg-warning));
 
   .pref-factor-row__opt-label {
-    color: var(--color-text-warning, #b45309);
+    color: var(--color-text-warning, var(--amber-d1));
   }
 }
 
 @mixin pref-option-step-4 {
-  border-color: var(--color-border-success, #22c55e);
-  background: var(--color-background-success, #dcfce7);
+  border-color: var(--color-border-success, var(--green3));
+  background: var(--color-background-success, var(--green6));
 
   .pref-factor-row__opt-label {
-    color: var(--color-text-success, #15803d);
+    color: var(--color-text-success, var(--green1));
   }
 }
 
 @mixin pref-option-step-5 {
-  border-color: #166534;
+  border-color: var(--green1);
   background: #f0fdf4;
 
   .pref-factor-row__opt-label {
-    color: #166534;
+    color: var(--green1);
   }
 }

@@ -47,8 +47,8 @@ input[data-slot='input'][data-focused='true'],
 textarea[data-slot='textarea']:focus,
 textarea[data-slot='textarea']:focus-visible,
 textarea[data-slot='textarea'][data-focused='true'] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-mid);
   background: var(--surface);
 }
 
@@ -64,8 +64,8 @@ input[data-slot='input'][data-invalid='true'],
 input[data-slot='input'][aria-invalid='true'],
 textarea[data-slot='textarea'][data-invalid='true'],
 textarea[data-slot='textarea'][aria-invalid='true'] {
-  border-color: var(--danger, #b42318);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger, #b42318) 18%, transparent);
+  border-color: var(--danger, var(--red1));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger, var(--red1)) 18%, transparent);
 }
 
 input[data-slot='input']::placeholder,

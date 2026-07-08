@@ -5,7 +5,7 @@
   width: 100%;
   margin-bottom: var(--space-2) /* review: was 10px */;
   padding: var(--space-2) /* review: was 10px */ var(--space-3) /* review: was 14px */;
-  background: var(--color-background-secondary, var(--surface2, #f8f8f6));
+  background: var(--color-background-secondary, var(--surface2, var(--surface1)));
   border-radius: var(--border-radius-md, 8px);
 }
 
@@ -61,11 +61,11 @@
 }
 
 .event-impact-strip__value--outflow {
-  color: #a32d2d;
+  color: var(--red1);
 }
 
 .event-impact-strip__value--inflow {
-  color: #3b6d11;
+  color: var(--green-d2);
 }
 
 .event-impact-strip__sublabel {

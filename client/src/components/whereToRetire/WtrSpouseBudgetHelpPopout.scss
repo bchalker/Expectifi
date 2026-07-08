@@ -22,7 +22,7 @@
 }
 
 .wtr-spouse-budget-help__trigger:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -108,7 +108,7 @@
 
 .wtr-spouse-budget-help__close:hover {
   color: var(--text);
-  background: color-mix(in srgb, var(--text) 6%, transparent);
+  background: var(--color-overlay-text);
 }
 
 .wtr-spouse-budget-help__close:focus-visible {
@@ -170,7 +170,7 @@
     margin: 0;
     padding: 0;
     border: none;
-    background: color-mix(in srgb, var(--text) 32%, transparent);
+    background: var(--color-overlay-text-strong);
     cursor: default;
   }
 
@@ -193,7 +193,7 @@
 
   .wtr-spouse-budget-help__sheet .wtr-spouse-budget-help__head {
     padding: var(--space-3) var(--space-4);
-    box-shadow: rgba(33, 35, 38, 0.1) 0 10px 10px -10px;
+    box-shadow: var(--shadow-account-divider);
   }
 
   .wtr-spouse-budget-help__sheet .wtr-spouse-budget-help__content {

@@ -1,9 +1,8 @@
 .wtr-map-filters {
   --wtr-filter-panel-w: min(22.5rem, 100%);
   --wtr-filter-content-bg: var(--surface);
-  --color-accent: var(--accent);
-  --color-accent-hover: color-mix(in srgb, var(--accent) 88%, #000);
-  --color-accent-foreground: #fff;
+  --color-accent-hover: color-mix(in srgb, var(--accent) 88%, var(--color-black));
+  --color-accent-foreground: var(--accent-contrast);
 
   font-family: var(--body);
   font-size: var(--text-sm);
@@ -29,7 +28,7 @@
   width: var(--wtr-filter-panel-w);
   max-width: 100%;
   background: var(--surface);
-  box-shadow: -8px 0 24px color-mix(in srgb, var(--color-navy) 10%, transparent);
+  box-shadow: -8px 0 24px var(--color-overlay-ink);
   transform: translateX(100%);
   pointer-events: none;
   visibility: hidden;
@@ -63,7 +62,7 @@
     max-width: var(--wtr-filter-panel-rail-width);
     height: auto;
     background: var(--surface);
-    box-shadow: -8px 0 24px color-mix(in srgb, var(--color-navy) 10%, transparent);
+    box-shadow: -8px 0 24px var(--color-overlay-ink);
     transform: translateX(100%);
     pointer-events: none;
     visibility: hidden;
@@ -119,7 +118,7 @@
   padding: var(--space-4) /* review: was 0.65rem */;
   // border-bottom: 1px solid var(--border);
   background: var(--bg-faint);
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
 }
 
 .wtr-map-filters__head-copy {
@@ -157,7 +156,7 @@
   flex-shrink: 0;
   display: flex;
   gap: 0;
-  padding: 0 var(--space-4);
+  // padding: 0 var(--space-4);
   border-bottom: 1px solid var(--border);
   background: linear-gradient(
     180deg,
@@ -200,7 +199,7 @@
 .wtr-map-filters__tab--active {
   color: var(--text);
   font-weight: 600;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--color-accent);
 }
 
 .wtr-map-filters__display-placeholder {
@@ -211,22 +210,14 @@
 }
 
 .wtr-map-filters__scroll {
+  flex: 1 1 auto;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   background: var(--wtr-filter-content-bg);
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--text-muted) 55%, transparent) transparent;
 }
 
-.wtr-map-filters__scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.wtr-map-filters__scroll::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-muted) 55%, transparent);
-  border-radius: 99px;
+.wtr-map-filters__scroll [data-overlayscrollbars-viewport] {
+  min-height: 0;
 }
 
 .wtr-map-filters__body {
@@ -418,7 +409,7 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
   border-top: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: 0 -8px 20px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  box-shadow: 0 -8px 20px -6px var(--color-overlay-ink-mid);
   box-sizing: border-box;
 }
 
@@ -435,7 +426,7 @@
 .wtr-map-filters__clear {
   align-self: flex-start;
   font-weight: 600;
-  color: var(--accent-text, var(--accent));
+  color: var(--accent-text, var(--color-accent));
 }
 
 @media (max-width: 360px) {
@@ -463,7 +454,7 @@
     border-radius: 16px 16px 0 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    box-shadow: 0 -12px 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
+    box-shadow: 0 -12px 40px var(--color-overlay-ink-strong);
     transform: translateY(100%);
     transition: transform 0.3s ease, visibility 0s linear 0.3s;
     box-sizing: border-box;

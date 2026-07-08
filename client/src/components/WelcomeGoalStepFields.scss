@@ -279,7 +279,7 @@
 
 .welcome-goal-fields__step2-contribution {
   width: 100%;
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
   padding-bottom: var(--space-4);
 }
 

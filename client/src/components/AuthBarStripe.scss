@@ -55,10 +55,10 @@
 }
 
 .auth-modal .auth-bar-stripe-textfield:hover .auth-bar-stripe-slot {
-  border-color: color-mix(in srgb, var(--text-muted) 45%, var(--border-strong));
+  border-color: var(--color-border-text-muted);
 }
 
 .auth-modal .auth-bar-stripe-textfield:focus-within .auth-bar-stripe-slot {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-mid);
 }

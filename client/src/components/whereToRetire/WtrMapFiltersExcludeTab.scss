@@ -43,8 +43,8 @@
 }
 
 .wtr-map-exclude__search:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-mid);
   outline: none;
 }
 
@@ -62,7 +62,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-navy) 12%, transparent);
+  box-shadow: 0 8px 20px var(--color-overlay-ink-strong);
 }
 
 .wtr-map-exclude__dropdown-item {
@@ -124,7 +124,7 @@
 
 .wtr-map-exclude__accordion .accordion-section__header {
   padding: 0 var(--space-2);
-  background: color-mix(in srgb, var(--surface2) 40%, var(--surface));
+  background: var(--color-surface-blend-soft);
 }
 
 .wtr-map-exclude__accordion .accordion-section__trigger {
@@ -216,7 +216,7 @@
 }
 
 .wtr-map-exclude__reason--advisory {
-  color: var(--color-text-warning, #7a4a10);
+  color: var(--color-text-warning, var(--amber-d1));
 }
 
 .wtr-map-exclude__include-btn {
@@ -237,11 +237,11 @@
 }
 
 .wtr-map-exclude__include-btn:hover {
-  color: var(--accent);
+  color: var(--color-action-primary);
 }
 
 .wtr-map-exclude__include-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }

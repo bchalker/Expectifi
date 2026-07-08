@@ -47,7 +47,7 @@
 
 .wtr-tax-visa__row {
   padding: var(--space-3) /* review: was 0.65rem */ 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-bottom: 1px solid var(--color-border-tertiary);
 }
 
 .wtr-tax-visa__group .wtr-tax-visa__row:first-of-type {
@@ -102,7 +102,7 @@
   font-size: var(--text-xs);
   font-weight: 600;
   line-height: 1.35;
-  color: #fff;
+  color: var(--accent-contrast);
   background: var(--color-text-success, var(--wtr-match-strong));
 }
 

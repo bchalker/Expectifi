@@ -44,7 +44,7 @@
   padding: var(--space-1) /* review: was 5px */ var(--space-2) /* review: was 10px */;
   border: 0.5px solid var(--border);
   border-radius: 6px;
-  background-color: color-mix(in srgb, var(--text) 6%, transparent);
+  background-color: var(--color-overlay-text);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -158,7 +158,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+  box-shadow: 0 8px 24px var(--color-overlay-text-muted);
   box-sizing: border-box;
 }
 
@@ -225,11 +225,11 @@
 
 .yield-controls .infl-pill:hover {
   background: color-mix(in srgb, var(--accent) 14%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-color: var(--color-border-accent);
 }
 
 .yield-controls .infl-pill:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

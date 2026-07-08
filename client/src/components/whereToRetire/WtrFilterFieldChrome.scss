@@ -7,7 +7,7 @@
   padding: var(--space-3) var(--space-3);
   // border: 1px solid color-mix(in srgb, var(--text-muted) 22%, var(--border));
   border-radius: 8px;
-  background: #f9f9f9;
+  background: var(--surface1);
   box-sizing: border-box;
   transition:
     border-color 0.15s ease,
@@ -44,7 +44,7 @@
 }
 
 .wtr-filter-toggle__row:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -150,7 +150,7 @@
   min-width: 0;
   padding: var(--space-1) /* review: was 2px */;
   border-radius: 6px;
-  background: #f0f2f5;
+  background: var(--surface-d1);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -201,7 +201,7 @@
 }
 
 .wtr-filter-segment__btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
   z-index: 1;
 }

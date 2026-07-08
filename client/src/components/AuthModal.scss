@@ -18,7 +18,7 @@
   border: none;
   border-radius: 0;
   cursor: pointer;
-  background: color-mix(in srgb, var(--color-navy) 55%, transparent);
+  background: var(--color-scrim-mid);
 }
 
 /* Flex column: fixed header + footer, scroll only in body */
@@ -40,7 +40,7 @@
   border-radius: 14px;
   box-shadow:
     0 4px 6px color-mix(in srgb, var(--text) 4%, transparent),
-    0 22px 48px color-mix(in srgb, var(--color-navy) 14%, transparent);
+    0 22px 48px var(--color-overlay-ink-mid);
   box-sizing: border-box;
 }
 
@@ -61,7 +61,7 @@
   border-radius: 14px 14px 0 0;
   min-width: 0;
   background: var(--auth-modal-chrome-bg);
-  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--blue1) 14%, transparent);
+  box-shadow: 0 6px 16px -6px var(--color-overlay-ink-mid);
 }
 
 .auth-modal__header-main {
@@ -100,7 +100,7 @@
 
 .auth-modal__register-tagline-price {
   font-weight: 700;
-  color: var(--accent);
+  color: var(--color-accent);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -154,7 +154,7 @@
   font-weight: 700;
   line-height: inherit;
   letter-spacing: var(--tracking-normal);
-  color: var(--header-income-orange, #a85208);
+  color: var(--header-income-orange, var(--amber-d1));
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   white-space: nowrap;
@@ -230,7 +230,7 @@
   background: none;
   font: inherit;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -242,7 +242,7 @@
 
 .auth-modal__inline-link:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-strong);
   border-radius: 2px;
 }
 
@@ -495,13 +495,13 @@
 }
 
 .auth-modal input[data-slot='input']:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--text-muted) 45%, var(--border-strong));
+  border-color: var(--color-border-text-muted);
 }
 
 .auth-modal input[data-slot='input']:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
   background: var(--color-card);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 0 0 2px var(--color-overlay-accent-mid);
 }
 
 .auth-modal input[data-slot='input']:disabled {
@@ -562,8 +562,8 @@
 }
 
 .auth-modal button.auth-modal__outline.auth-modal__google[data-slot='button'] {
-  background: color-mix(in srgb, var(--color-navy) 3%, var(--surface));
-  border-color: color-mix(in srgb, var(--color-navy) 7%, var(--border));
+  background: var(--color-hover-neutral);
+  border-color: var(--color-border);
   color: var(--text);
   /* Match floating email/password control height (border + padding + one 1rem/1.35lh line) */
   min-height: calc(2px + 1.05rem + 1.35rem + 0.42rem);
@@ -574,8 +574,8 @@
 }
 
 .auth-modal button.auth-modal__outline.auth-modal__google[data-slot='button']:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-navy) 5%, var(--surface2));
-  border-color: color-mix(in srgb, var(--color-navy) 12%, var(--border-strong));
+  background: var(--color-hover-neutral);
+  border-color: var(--color-border);
   color: var(--text);
 }
 
@@ -687,7 +687,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-muted);
-  box-shadow: 0 -6px 16px -6px color-mix(in srgb, var(--blue1) 14%, transparent);
+  box-shadow: 0 -6px 16px -6px var(--color-overlay-ink-mid);
 }
 
 .auth-modal__footer-pay {
@@ -731,7 +731,7 @@
 }
 
 .auth-modal__footer-link:hover {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .auth-modal__msg {
@@ -833,8 +833,8 @@
 }
 
 .auth-modal button.auth-modal__promo-apply[data-slot='button']:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-primary) 88%, #000);
-  border-color: color-mix(in srgb, var(--color-primary) 88%, #000);
+  background: color-mix(in srgb, var(--color-primary) 88%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-primary) 88%, var(--color-black));
 }
 
 .auth-modal button.auth-modal__promo-apply[data-slot='button']:disabled {

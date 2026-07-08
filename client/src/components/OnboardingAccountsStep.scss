@@ -66,7 +66,7 @@
   padding: var(--space-5) /* review: was 1.75rem */ var(--space-4) /* review: was 1.25rem */;
   box-sizing: border-box;
   text-align: center;
-  border: 1.5px dashed color-mix(in srgb, var(--border) 70%, transparent);
+  border: 1.5px dashed var(--color-border-faint);
   border-radius: 12px;
   background: var(--surface1);
 }
@@ -107,13 +107,13 @@
 
 button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button'] {
   border: none;
-  background: var(--blue2);
-  color: #fff;
+  background: var(--color-wave-income);
+  color: var(--accent-contrast);
   filter: none;
 }
 
 button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:hover:not(:disabled) {
-  background: var(--blue1);
+  background: var(--nav-bg);
   filter: none;
 }
 
@@ -407,7 +407,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
 
 .onboarding-accounts-step__add:hover,
 .onboarding-accounts-step__add:focus-visible {
-  color: var(--accent);
+  color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 0.12em;
 }
@@ -418,7 +418,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   font-size: var(--text-sm);
   font-weight: 500;
   line-height: 1.45;
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--red1));
 }
 
 .onboarding-overlay__accounts-total {
@@ -430,7 +430,7 @@ button.onboarding-accounts-step__empty-cta.app-btn--primary[data-slot='button']:
   padding: var(--space-3) /* review: was 0.85rem */ var(--space-4);
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--accent-contrast);
   animation: onboarding-accounts-total-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

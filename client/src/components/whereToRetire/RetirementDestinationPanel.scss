@@ -1,8 +1,4 @@
 .wtr-dest-panel {
-  --wtr-match-strong: var(--color-text-success);
-  --wtr-match-moderate: var(--color-teal-mid);
-  --wtr-match-stretch: var(--color-amber);
-  --wtr-match-poor: var(--color-text-danger);
   --wtr-panel-stagger-base: 0.14s;
   --wtr-panel-stagger-step: 0.048s;
   --wtr-dest-panel-top: calc(
@@ -51,7 +47,7 @@
   inset: 0;
   z-index: 999;
   border: none;
-  background: color-mix(in srgb, var(--color-navy) 42%, transparent);
+  background: var(--color-scrim-mid);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -134,7 +130,7 @@
 
 .wtr-dest-panel__sticky-head--stuck {
   z-index: 2;
-  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  box-shadow: 0 6px 16px -6px var(--color-overlay-ink-mid);
 }
 
 .wtr-dest-panel__header {
@@ -173,7 +169,7 @@
   text-align: left;
   padding-bottom: var(--space-3);
   margin-bottom: var(--space-3);
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
 }
 
 .wtr-dest-panel__close {
@@ -264,7 +260,7 @@
   padding: 0;
   border-top: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: 0 -8px 20px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  box-shadow: 0 -8px 20px -6px var(--color-overlay-ink-mid);
 }
 
 .wtr-dest-panel__footer .wtr-col-budget-bar {
@@ -303,10 +299,10 @@
   max-width: 100%;
   padding: var(--space-3);
   border-radius: var(--radius-lg, 12px);
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow: 8px 0 10px -10px var(--border);
   // background: var(--surface2);
-  // box-shadow: 8px 10px 14px -6px color-mix(in srgb, var(--color-navy) 14%, transparent);
+  // box-shadow: 8px 10px 14px -6px var(--color-overlay-navy-mid);
   box-sizing: border-box;
 }
 
@@ -487,8 +483,8 @@
 .wtr-dest-panel__tab--active {
   color: var(--text);
   font-weight: 400;
-  border-left-color: var(--accent, var(--color-teal-dark));
-  background: var(--color-card, #fff);
+  border-left-color: var(--color-accent, var(--color-teal-dark));
+  background: var(--color-card, var(--accent-contrast));
 }
 
 .wtr-dest-panel__tab-nav {
@@ -580,7 +576,7 @@
 }
 
 .wtr-dest-panel__tab-select-sheet-inner:focus-within {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -912,7 +908,7 @@
 
   .wtr-dest-panel--sheet.wtr-dest-panel--open {
     transform: translateY(0);
-    box-shadow: 0 -12px 40px color-mix(in srgb, var(--color-navy) 18%, transparent);
+    box-shadow: 0 -12px 40px var(--color-overlay-ink-strong);
     transition:
       transform 0.3s ease,
       box-shadow 0.3s ease,

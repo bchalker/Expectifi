@@ -32,8 +32,8 @@
   background: var(--surface);
   background: var(--sky-blue-d6);
   // box-shadow:
-  //   0 1px 2px color-mix(in srgb, var(--text) 8%, transparent),
-  //   0 0 0 1px color-mix(in srgb, var(--border) 65%, transparent);
+  //   0 1px 2px var(--color-overlay-text-soft),
+  //   0 0 0 1px var(--color-border-tertiary);
   pointer-events: none;
   transition:
     all .3s ease;
@@ -72,7 +72,7 @@
 }
 
 .wtr-intensity-selector__btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

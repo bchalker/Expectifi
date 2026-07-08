@@ -2,6 +2,7 @@ import { useId, type ReactNode, type Ref } from 'react'
 import { ListBox, Select } from '@heroui/react'
 import { firstKeyFromSelectSelection } from '../../lib/dateOfBirthSelect'
 import { useNativeSelectLayout } from '../../hooks/useNativeSelectLayout'
+import { AppSelectMenuScroll } from './AppSelectMenuScroll'
 import './AppSelect.scss'
 
 export type AppSelectOption = {
@@ -136,19 +137,21 @@ export function AppSelect({
           placement={popoverPlacement}
           className={popoverClassName}
         >
-          <ListBox className={listClassName}>
-            {options.map((opt) => (
-              <ListBox.Item
-                key={opt.id}
-                id={opt.id}
-                textValue={opt.label}
-                isDisabled={opt.disabled}
-                ref={getItemRef?.(opt.id)}
-              >
-                {opt.label}
-              </ListBox.Item>
-            ))}
-          </ListBox>
+          <AppSelectMenuScroll>
+            <ListBox className={listClassName}>
+              {options.map((opt) => (
+                <ListBox.Item
+                  key={opt.id}
+                  id={opt.id}
+                  textValue={opt.label}
+                  isDisabled={opt.disabled}
+                  ref={getItemRef?.(opt.id)}
+                >
+                  {opt.label}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </AppSelectMenuScroll>
         </Select.Popover>
       </Select>
     </div>

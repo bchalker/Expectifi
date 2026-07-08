@@ -11,7 +11,7 @@ export type OnboardingRegionOption = {
   country: string
   locale: OnboardingRegionId
   currency: DisplayCurrencyCode
-  /** ISO 3166-1 alpha-2 for Flagpack. */
+  /** ISO 3166-1 alpha-2 for Tabler flags. */
   iso: string
 }
 

@@ -34,7 +34,7 @@
   font-size: var(--text-xs);
   font-weight: 700;
   line-height: 1;
-  color: #fff;
+  color: var(--accent-contrast);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   text-align: center;
@@ -176,7 +176,7 @@
   padding: var(--space-2) var(--portfolio-row-pad-x, var(--space-4))
     var(--portfolio-row-pad-y-end, 0.5rem);
     padding: var(--space-2) var(--space-4);
-  border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
+  border-top: 1px dashed var(--color-border-fainter);
   box-sizing: border-box;
 }
 
@@ -289,7 +289,7 @@
 }
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline {
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
 }
 

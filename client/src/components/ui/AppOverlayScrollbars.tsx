@@ -16,6 +16,12 @@ export const APP_OVERLAY_SCROLLBARS_OPTIONS: PartialOptions = {
   },
 }
 
+/** Horizontal chip/tab strips — same theme as vertical panel scroll. */
+export const APP_OVERLAY_SCROLLBARS_HORIZONTAL_OPTIONS: PartialOptions = {
+  overflow: { x: 'scroll', y: 'hidden' },
+  scrollbars: APP_OVERLAY_SCROLLBARS_OPTIONS.scrollbars,
+}
+
 type Props = Omit<
   ComponentPropsWithoutRef<typeof OverlayScrollbarsComponent>,
   'options' | 'defer' | 'children'

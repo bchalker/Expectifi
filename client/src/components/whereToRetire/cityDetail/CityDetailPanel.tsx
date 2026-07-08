@@ -5,7 +5,10 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { AppOverlayScrollbars } from "../../ui/AppOverlayScrollbars";
+import {
+  AppOverlayScrollbars,
+  APP_OVERLAY_SCROLLBARS_HORIZONTAL_OPTIONS,
+} from "../../ui/AppOverlayScrollbars";
 import { AppSelect } from "../../ui/AppSelect";
 import { DetailPanelCard } from "../../ui/DetailPanelCard";
 import { useRetirementExclusions } from "../../../hooks/useRetirementExclusions";
@@ -307,32 +310,38 @@ function CityDetailPanelBody({
             onChange={onActiveTabChange}
           />
         ) : (
-          <nav
-            className="wtr-city-detail__nav"
-            role="tablist"
-            aria-label="Destination details"
-            aria-orientation="vertical"
+          <AppOverlayScrollbars
+            className="wtr-city-detail__nav-scroll"
+            defer={false}
+            options={APP_OVERLAY_SCROLLBARS_HORIZONTAL_OPTIONS}
           >
-            {PANEL_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={tab.tabId}
-                aria-selected={activeTab === tab.id}
-                aria-controls={tab.panelId}
-                className={[
-                  "wtr-city-detail__nav-item",
-                  activeTab === tab.id && "wtr-city-detail__nav-item--active",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => onActiveTabChange(tab.id)}
-              >
-                <span className="wtr-city-detail__nav-label">{tab.label}</span>
-              </button>
-            ))}
-          </nav>
+            <nav
+              className="wtr-city-detail__nav"
+              role="tablist"
+              aria-label="Destination details"
+              aria-orientation="horizontal"
+            >
+              {PANEL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={tab.tabId}
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={tab.panelId}
+                  className={[
+                    "wtr-city-detail__nav-item",
+                    activeTab === tab.id && "wtr-city-detail__nav-item--active",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => onActiveTabChange(tab.id)}
+                >
+                  <span className="wtr-city-detail__nav-label">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </AppOverlayScrollbars>
         )}
 
         <AppOverlayScrollbars

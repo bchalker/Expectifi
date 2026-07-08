@@ -120,7 +120,7 @@
 
 .where-to-retire-preview-panel__score--top {
   font-weight: 500;
-  color: #0f9544;
+  color: var(--green1);
 }
 
 .where-to-retire-preview-panel__divider {
@@ -250,7 +250,7 @@
   display: block;
   width: var(--where-to-retire-preview-travel-size);
   height: var(--where-to-retire-preview-travel-size);
-  background-color: var(--blue1);
+  background-color: var(--nav-bg);
   mask: url('/icons/income-harvest-travel.png') center / contain no-repeat;
   -webkit-mask: url('/icons/income-harvest-travel.png') center / contain no-repeat;
 }
@@ -301,7 +301,7 @@
   font-size: var(--text-base);
   font-weight: 500;
   line-height: normal;
-  color: var(--color-primary-on, #fff);
+  color: var(--color-primary-on, var(--accent-contrast));
   cursor: pointer;
   box-sizing: border-box;
   text-align: center;
@@ -383,7 +383,7 @@
 
 .where-to-retire-preview-panel__cta-secondary:hover {
   border-color: color-mix(in srgb, var(--color-border-tertiary) 70%, var(--color-text-secondary));
-  background: color-mix(in srgb, var(--color-background-primary, #fff) 88%, var(--color-text-secondary));
+  background: color-mix(in srgb, var(--color-background-primary, var(--accent-contrast)) 88%, var(--color-text-secondary));
     box-shadow: rgba(33, 35, 38, 0.2) 0px 0px 0px 0px;
 }
 
@@ -402,7 +402,7 @@
   padding: 10px 14px;
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-lg);
-  background: var(--color-background-primary, #fff);
+  background: var(--color-background-primary, var(--accent-contrast));
   cursor: pointer;
   box-sizing: border-box;
   text-align: left;
@@ -469,7 +469,7 @@
   padding: var(--space-4);
   border-radius: 8px;
   background: color-mix(in srgb, var(--sky-blue) 28%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border: 1px solid var(--color-border-tertiary);
   box-sizing: border-box;
 }
 

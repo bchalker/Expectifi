@@ -8,14 +8,14 @@
   margin: 0;
   border: none;
   border-radius: 0;
-  background: #ffffff;
-  background: rgba(255,255,255,1);
+  background: var(--accent-contrast);
+  background: var(--accent-contrast); /* was rgba white — solid */
   box-shadow: var(--shadow-account-divider);
   box-sizing: border-box;
   overflow: hidden;
   container-type: inline-size;
   container-name: holdings-symbol-card;
-  --holdings-accent-orange: var(--header-income-orange, #c4610a);
+  --holdings-accent-orange: var(--header-income-orange, var(--amber-d1));
 }
 
 /* 4px green inset bar — scales in/out from the left (no blur). */
@@ -26,7 +26,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--sky-blue-d4, var(--success, #15803d));
+  background: var(--sky-blue-d4, var(--success, var(--green1)));
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s ease-out;
@@ -39,7 +39,7 @@
 }
 
 .holdings-symbol-card--scenario-active {
-  background: #ffffff;
+  background: var(--accent-contrast);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -95,8 +95,8 @@
   z-index: 450;
   width: min(17rem, calc(100vw - 1rem));
   padding: 0;
-  background: #ffffff;
-  border: 1px solid var(--border, #e2e8ed);
+  background: var(--accent-contrast);
+  border: 1px solid var(--border, var(--surface-d1));
   border-radius: 8px;
   box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.16);
   overflow: hidden;
@@ -218,7 +218,7 @@
   box-sizing: border-box;
   border-left: none;
   padding: var(--space-1) 0;
-  border-top: 1px dashed #dddddd;
+  border-top: 1px dashed var(--surface-d1);
 
   &:first-child {
     border-top: none;
@@ -320,7 +320,7 @@
   height: 5px;
   margin-right: 0;
   border-radius: 50%;
-  background: var(--sky-blue-d6, var(--success, #15803d));
+  background: var(--sky-blue-d6, var(--success, var(--green1)));
   opacity: 0;
   transform: translateX(-6px);
   transition:
@@ -375,7 +375,7 @@
 }
 
 .holdings-symbol-card--scenario-active .holdings-symbol-card__symbol {
-  color: var(--sky-blue-d6, var(--success, #15803d));
+  color: var(--sky-blue-d6, var(--success, var(--green1)));
 }
 
 .holdings-symbol-card__desc {
@@ -486,7 +486,7 @@
 }
 
 .holdings-symbol-card .holdings-scenario-trigger--badge {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {

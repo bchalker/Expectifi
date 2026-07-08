@@ -1,6 +1,4 @@
-import Flag from "react-flagpack";
 import { countryToIsoCode } from "../../utils/costOfLiving";
-import "./CountryFlag.scss";
 
 export type CountryFlagSize = "s" | "m" | "l";
 
@@ -9,24 +7,24 @@ type Props = {
   iso?: string;
   size?: CountryFlagSize;
   className?: string;
-  hasBorder?: boolean;
-  hasBorderRadius?: boolean;
-  hasDropShadow?: boolean;
 };
 
-const FLAGPACK_ISO_ALIASES: Record<string, string> = {
-  GB: "GBR",
+/** Map app sizes to Tabler flag size classes. */
+const SIZE_CLASS: Record<CountryFlagSize, string> = {
+  s: "flag-xs",
+  m: "flag-sm",
+  l: "flag-md",
 };
 
-export function resolveFlagpackCode(iso: string): string | null {
-  const normalized = iso.trim().toUpperCase();
+export function resolveTablerFlagCode(iso: string): string | null {
+  const normalized = iso.trim().toLowerCase();
   if (normalized.length !== 2) return null;
-  return FLAGPACK_ISO_ALIASES[normalized] ?? normalized;
+  return normalized;
 }
 
 export function countryFlagCode(country: string): string | null {
   const iso = countryToIsoCode(country);
-  return iso ? resolveFlagpackCode(iso) : null;
+  return iso ? resolveTablerFlagCode(iso) : null;
 }
 
 export function CountryFlag({
@@ -34,30 +32,25 @@ export function CountryFlag({
   iso,
   size = "s",
   className,
-  hasBorder = true,
-  hasBorderRadius = true,
-  hasDropShadow = true,
 }: Props) {
   const code =
-    (iso ? resolveFlagpackCode(iso) : null) ??
+    (iso ? resolveTablerFlagCode(iso) : null) ??
     (country ? countryFlagCode(country) : null);
 
   if (!code) return null;
 
   return (
     <span
-      className={["country-flag", `country-flag--${size}`, className]
+      className={[
+        "country-flag",
+        "flag",
+        SIZE_CLASS[size],
+        `flag-country-${code}`,
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
       aria-hidden
-    >
-      <Flag
-        code={code as never}
-        size={size}
-        hasBorder={hasBorder}
-        hasBorderRadius={hasBorderRadius}
-        hasDropShadow={hasDropShadow}
-      />
-    </span>
+    />
   );
 }

@@ -10,7 +10,7 @@
   padding: var(--space-4);
   margin-top: var(--space-6);
   // background: #8fbc8f;
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
   
   // border-bottom: 1px solid var(--border);
 }
@@ -57,7 +57,7 @@
 }
 
 .tax-breakdown-panel-trigger:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -805,7 +805,7 @@ background: rgba(0,0,0, .025);
 
 .financials-entry-choice:hover:not(:disabled),
 .financials-entry-choice:focus-visible:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
   color: var(--accent-text);
 }
 
@@ -865,7 +865,7 @@ background: rgba(0,0,0, .025);
   padding: var(--space-2) /* review: was 0.55rem */ var(--space-4);
   border: none;
   border-radius: 8px;
-  background: var(--accent);
+  background: var(--color-action-primary);
   color: var(--surface);
   font-family: var(--body);
   font-size: var(--text-base);
@@ -903,7 +903,7 @@ background: rgba(0,0,0, .025);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent);
+  box-shadow: 0 8px 24px var(--color-overlay-text-base);
   transform: translateX(-50%);
   box-sizing: border-box;
 }
@@ -1809,7 +1809,7 @@ background: rgba(0,0,0, .025);
   background: var(--surface);
   // border: 1px solid var(--border);
   border-radius: 10px;
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: 0 12px 40px var(--color-overlay-text-soft);
   box-sizing: border-box;
 }
 
@@ -2010,7 +2010,7 @@ background: rgba(0,0,0, .025);
 }
 
 .custom-scenario-scope__opt input {
-  accent-color: var(--accent, #6366f1);
+  accent-color: var(--color-accent, var(--color-cat-indigo));
 }
 
 .custom-scenario-panel {
@@ -2074,7 +2074,7 @@ background: rgba(0,0,0, .025);
   flex-wrap: wrap;
   gap: var(--space-1) /* review: was 0.35rem */ var(--space-2);
   padding: var(--space-2) 0 var(--space-1);
-  border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
+  border-top: 1px dashed var(--color-border-faint);
   margin-top: var(--space-1) /* review: was 0.35rem */;
 }
 

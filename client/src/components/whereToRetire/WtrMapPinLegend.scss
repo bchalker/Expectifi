@@ -7,7 +7,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   border: 1px solid var(--border);
-  box-shadow: 0 1px 6px color-mix(in srgb, var(--color-navy) 8%, transparent);
+  box-shadow: 0 1px 6px var(--color-overlay-ink-strong);
 }
 
 .wtr-map-pin-legend--interactive {
@@ -61,12 +61,12 @@
 }
 
 .wtr-map-pin-legend__item--button:hover {
-  background: color-mix(in srgb, var(--surface2) 55%, var(--surface));
+  background: var(--color-surface-blend-mid);
   border-color: color-mix(in srgb, var(--text-muted) 20%, var(--border));
 }
 
 .wtr-map-pin-legend__item--button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

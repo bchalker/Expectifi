@@ -151,7 +151,7 @@
 .retire-regions__chip-remove:focus-visible,
 .retire-regions__chip:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(15, 110, 86, 0.35);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green1) 35%, transparent);
 }
 
 .retire-regions__panel {

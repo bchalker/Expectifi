@@ -606,7 +606,7 @@ $tax-summary-column-edge-gradient: radial-gradient(
   inset: 0;
   z-index: var(--tax-summary-overlay-backdrop-z, 1099);
   border: none;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5); /* scrim — intentional, no token */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -685,7 +685,7 @@ $tax-summary-column-edge-gradient: radial-gradient(
 
   .tax-summary-slide-panel--open {
     transform: translateX(0);
-    box-shadow: -4px 0 18px color-mix(in srgb, var(--text) 12%, transparent);
+    box-shadow: -4px 0 18px var(--color-overlay-text-base);
     pointer-events: auto;
   }
 }

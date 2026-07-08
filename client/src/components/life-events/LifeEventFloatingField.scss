@@ -139,11 +139,11 @@
 .life-events-panel__card .life-event-floating-field--filled .life-event-floating-field__control,
 .life-events-panel__card .life-event-floating-field--active .life-event-floating-field__control,
 .life-events-panel__card .life-event-floating-field:focus-within .life-event-floating-field__control {
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 .life-events-panel__card .life-event-floating-field:focus-within .life-event-floating-field__control {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .life-events-panel__card .life-event-floating-field__label {
@@ -431,8 +431,8 @@
 
 .life-events-panel__card .life-event-floating-field:has(button[data-open='true']) .life-event-floating-field__control,
 .life-events-panel__card .life-event-floating-field:has(.app-select__native:focus-visible) .life-event-floating-field__control {
-  border-color: var(--accent);
-  background: #fff;
+  border-color: var(--color-accent);
+  background: var(--accent-contrast);
 }
 
 .life-events-panel__card .life-event-floating-field--inline {

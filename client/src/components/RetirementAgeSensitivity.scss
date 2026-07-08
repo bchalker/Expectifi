@@ -26,7 +26,7 @@
   box-shadow: rgba(17, 12, 46, 0.08) 0px 8px 20px 0px;
   transition: all .3s ease;
   padding-bottom: var(--space-3);
-  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  box-shadow: var(--shadow-account-divider);
   box-shadow: var(--sky-blue) 0px 10px 10px -10px, rgba(255, 255, 255, 0.8) 0px 0px 0px 0px;
   box-shadow: var(--sky-blue) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
@@ -39,7 +39,7 @@
 }
 
 .retirement-sensitivity-trigger__btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -85,7 +85,7 @@
 }
 
 .retirement-sensitivity {
-  --retirement-sensitivity-goal-bg: #f9f9f9;
+  --retirement-sensitivity-goal-bg: var(--surface1);
   --retirement-sensitivity-label-width: 106px;
   --retirement-sensitivity-age-col-width: 88px;
   --retirement-sensitivity-set-col-width: 104px;
@@ -112,7 +112,7 @@
   border: none;
   border-radius: 0;
   cursor: pointer;
-  background: color-mix(in srgb, var(--color-navy) 55%, transparent);
+  background: var(--color-scrim-mid);
   animation: retirement-sensitivity-backdrop-in 150ms ease forwards;
 }
 
@@ -135,7 +135,7 @@
   border-radius: var(--border-radius-lg);
   box-shadow:
     0 4px 6px color-mix(in srgb, var(--text) 4%, transparent),
-    0 22px 48px color-mix(in srgb, var(--color-navy) 14%, transparent);
+    0 22px 48px var(--color-overlay-ink-mid);
   animation: retirement-sensitivity-panel-in 150ms ease forwards;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .retirement-sensitivity__close:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
 }
 
@@ -394,11 +394,11 @@
 .retirement-sensitivity__age-btn--set {
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--color-navy);
+  color: var(--color-text-base);
 }
 
 .retirement-sensitivity__age-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -487,7 +487,7 @@ line-height: normal;
 }
 
 .retirement-sensitivity__add-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
 }
 
@@ -521,7 +521,7 @@ line-height: normal;
 }
 
 .retirement-sensitivity__set-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline: 2px solid var(--color-overlay-accent-strong);
   outline-offset: 2px;
 }
 

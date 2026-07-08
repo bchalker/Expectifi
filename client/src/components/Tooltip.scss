@@ -39,8 +39,8 @@
 .app-tooltip__content--dark {
   max-width: 14rem;
   padding: var(--space-2) /* review: was 0.45rem */ var(--space-3) /* review: was 0.65rem */;
-  background: #212529;
-  color: #f8f9fa;
+  background: var(--color-text-base);
+  color: var(--surface1);
   border: none;
   border-radius: 6px;
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);

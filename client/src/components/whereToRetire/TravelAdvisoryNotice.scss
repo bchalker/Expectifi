@@ -1,9 +1,9 @@
 .wtr-travel-advisory {
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-4) /* review: was 0.9rem */;
-  border: 1px solid color-mix(in srgb, #ca8a04 35%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--amber2) 35%, var(--border));
   border-radius: 10px;
-  background: color-mix(in srgb, #fef9c3 55%, var(--surface));
+  background: color-mix(in srgb, var(--amber6) 55%, var(--surface));
   box-sizing: border-box;
 }
 
@@ -11,12 +11,12 @@
   margin: 0;
   font-size: var(--text-sm);
   line-height: 1.45;
-  color: color-mix(in srgb, #713f12 75%, var(--text));
+  color: color-mix(in srgb, var(--amber-d1) 75%, var(--text));
 }
 
 .wtr-travel-advisory__link {
   font-weight: 600;
-  color: color-mix(in srgb, #854d0e 90%, var(--accent-text));
+  color: color-mix(in srgb, var(--amber-d1) 90%, var(--accent-text));
   text-decoration: underline;
   text-underline-offset: 2px;
 }

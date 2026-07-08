@@ -40,7 +40,7 @@
 }
 
 .bucket-total-trend--on-dark.bucket-total-trend--down .bucket-total-trend__pct {
-  color: #f87171;
+  color: var(--red4);
 }
 
 .bucket-total-trend--on-dark.bucket-total-trend--flat .bucket-total-trend__pct {

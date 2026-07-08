@@ -404,7 +404,7 @@
 
 .where-to-retire__prefs-pill:hover {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  background: var(--color-hover-accent-subtle);
 }
 
 .where-to-retire__discover {

@@ -1,5 +1,5 @@
 .tax-treatment-disclosure {
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  border-bottom: 1px solid var(--color-overlay-text-mid);
 }
 
 /* Account header + holdings list — single card per bucket */
@@ -273,7 +273,7 @@
   padding: var(--space-3) var(--space-3) /* review: was 0.85rem */;
   border: 1px solid var(--border);
   border-radius: 0;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow: var(--shadow-account-divider);
   box-sizing: border-box;
 }
@@ -653,8 +653,8 @@
   font-size: var(--text-xs);
   font-weight: 700;
   font-family: var(--mono);
-  background: #2a4365;
-  color: #fff;
+  background: var(--sky-blue-d6);
+  color: var(--accent-contrast);
   border: none;
   flex-shrink: 0;
   line-height: 1;

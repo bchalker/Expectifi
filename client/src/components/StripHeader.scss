@@ -199,7 +199,7 @@
 }
 
 .strip-drawer-btn:not(.strip-drawer-btn--active):hover {
-  background: #fce9dc !important;
+  background: var(--amber6) !important;
   border-color: var(--strip-drawer) !important;
   color: var(--strip-drawer-strong) !important;
 }
@@ -417,8 +417,8 @@
   border: none;
   border-radius: 999px;
   box-sizing: border-box;
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--surface-d1);
+  color: var(--color-text-muted);
   font-family: var(--body);
   font-size: 0.625rem;
   font-weight: 600;
@@ -429,8 +429,8 @@
 }
 
 .strip-income-pct-pill:hover {
-  background: #cbd5e1;
-  color: #334155;
+  background: var(--surface-d2);
+  color: var(--color-text-base);
 }
 
 .strip-income-pct-pill:focus-visible {

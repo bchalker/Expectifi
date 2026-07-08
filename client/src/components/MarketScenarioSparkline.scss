@@ -261,7 +261,7 @@
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow: 0 6px 20px var(--color-overlay-text-mid);
   pointer-events: none;
   white-space: nowrap;
 }

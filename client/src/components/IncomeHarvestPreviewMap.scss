@@ -73,7 +73,7 @@ html[data-doc-hidden] .income-harvest-preview-map--skeleton {
 }
 
 .income-harvest-preview-map__pin {
-  stroke: #ffffff;
+  stroke: var(--accent-contrast);
   stroke-width: 0.75;
   pointer-events: none;
 }

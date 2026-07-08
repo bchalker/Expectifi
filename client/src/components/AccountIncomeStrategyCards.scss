@@ -97,7 +97,7 @@
   max-width: 100%;
   padding: var(--space-3) var(--space-4);
   border-radius: 12px;
-  background: #f9f9f9;
+  background: var(--surface1);
   box-sizing: border-box;
   transition: opacity 0.2s ease;
 }
@@ -148,8 +148,8 @@
 }
 
 .income-strategy-strip__toggle .ui-toggle__input:checked + .ui-toggle__track::after {
-  background: #fff;
-  border-color: #fff;
+  background: var(--accent-contrast);
+  border-color: var(--accent-contrast);
   transform: translate(0.75rem, -50%);
 }
 
@@ -291,7 +291,7 @@
   min-height: 3.125rem;
   border-radius: 6px;
   border: none;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
@@ -299,7 +299,7 @@
 }
 
 .income-strategy-strip__rate-field:focus-within {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, var(--border));
+  box-shadow: inset 0 0 0 1px var(--color-border-text);
 }
 
 .income-strategy-strip__rate-value-row {
@@ -320,7 +320,7 @@
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-3);
   border-radius: 6px;
-  background: #fff;
+  background: var(--accent-contrast);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0 1px 3px -1px;
