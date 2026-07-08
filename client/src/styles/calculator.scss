@@ -149,6 +149,22 @@ html[data-main-hero-stuck='true'] .main__hero {
   }
 }
 
+/*
+ * Growth orange wave fills .subheader height (bubbles are height: 100%).
+ * Keep income sizing as-is; shave 2rem off growth so the wave is visibly shorter.
+ */
+html[data-app-phase='growth'] .main__hero {
+  --subheader-h: max(
+    0px,
+    calc(
+      max(
+          var(--subheader-bubble-h),
+          clamp(6.35rem, min(38vw, 34vh), var(--main-hero-subheader-max-h-active))
+        ) - 1rem
+    )
+  );
+}
+
 html[data-no-portfolio-subheader='true'] .main__hero {
   --subheader-h: var(--subheader-bubble-h);
 }
