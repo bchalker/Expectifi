@@ -1,0 +1,18 @@
+.landing-trust__divider {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  line-height: 0;
+  margin-top: -1px;
+  color: var(--landing-navy-trust);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.landing-trust__divider-svg {
+  display: block;
+  width: 100%;
+  height: clamp(3rem, 10vw, 6.25rem);
+}

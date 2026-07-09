@@ -1,3 +1,4 @@
+import { useRef, type CSSProperties } from "react";
 import {
   IconChartLine,
   IconCircleCheck,
@@ -6,7 +7,9 @@ import {
 } from "@tabler/icons-react";
 import { Header } from "./Header";
 import { LandingFooter } from "./LandingFooter";
+import { LandingHeroDivider } from "./LandingHeroDivider";
 import { LandingHeroHeadline } from "./LandingHeroHeadline";
+import { useLandingFaqPhoneScroll } from "../hooks/useLandingFaqPhoneScroll";
 import { landingNavigateOnboarding } from "./landingNav";
 import "./LandingPage.scss";
 
@@ -106,6 +109,13 @@ export function LandingPage({
   onGetStarted = landingNavigateOnboarding,
   onContactClick,
 }: Props) {
+  const faqSectionRef = useRef<HTMLElement>(null);
+  const faqDeviceRef = useRef<HTMLElement>(null);
+  const faqPhoneProgress = useLandingFaqPhoneScroll(faqSectionRef);
+  const faqPhoneStyle = {
+    "--landing-phone-progress": faqPhoneProgress,
+  } as CSSProperties;
+
   const scrollToSection = (id: "how-it-works" | "pricing" | "faq") => {
     document
       .getElementById(id)
@@ -152,6 +162,7 @@ export function LandingPage({
               </div>
             ))}
           </div>
+          <LandingHeroDivider />
         </section>
 
         <section
@@ -306,13 +317,18 @@ export function LandingPage({
         </section>
 
         <section
+          ref={faqSectionRef}
           id="faq"
           className="landing-anchor-section landing-anchor-section--alt landing-faq-section"
           aria-labelledby="landing-faq-title"
         >
           <div className="landing-page__wrap landing-faq-section__wrap">
             <div className="landing-faq-section__layout">
-              <figure className="landing-faq-section__device">
+              <figure
+                ref={faqDeviceRef}
+                className="landing-faq-section__device"
+                style={faqPhoneStyle}
+              >
                 <div className="landing-phone-frame">
                   <div className="landing-phone-frame__shell">
                     <div className="landing-phone-frame__island" aria-hidden />

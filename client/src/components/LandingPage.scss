@@ -11,7 +11,6 @@ body:has(.landing-page) {
 }
 
 .landing-page {
-  overflow-x: clip;
   max-width: 100%;
   --landing-navy: var(--nav-bg);
   --landing-navy-trust: var(--sky-blue-d7);
@@ -19,8 +18,8 @@ body:has(.landing-page) {
   --landing-green: var(--green1);
   --landing-green-muted: var(--green4, var(--green3));
   --landing-on-green: var(--color-primary-on, var(--accent-contrast));
-  --landing-surface: var(--color-surface);
-  --landing-surface-dark: var(--color-surface-dark);
+  --landing-surface: var(--page-bg-lighter);
+  --landing-surface-dark: var(--page-bg-light);
   --landing-card: var(--surface);
   --landing-text-on-navy: rgba(255, 255, 255, 0.92);
   --landing-text-muted-on-navy: rgba(255, 255, 255, 0.62);
@@ -112,7 +111,7 @@ body:has(.landing-page) {
 .landing-hero {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
   background: linear-gradient(to bottom right, var(--sky-blue-d6), var(--sky-blue-d7));
   padding: clamp(2.5rem, 8vw, 4.5rem) 0 clamp(2.75rem, 7vw, 4rem);
 }
@@ -163,12 +162,17 @@ body:has(.landing-page) {
 
 /* ── Trust bar ── */
 .landing-trust {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
   background: var(--landing-navy-trust);
   border-block: 1px solid rgba(255, 255, 255, 0.06);
   padding: var(--space-4) /* review: was 1.1rem */ 0;
 }
 
 .landing-trust__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -191,9 +195,11 @@ body:has(.landing-page) {
 
 /* ── How it works ── */
 .landing-steps {
+  position: relative;
+  z-index: 0;
   background: var(--landing-surface);
   color: var(--landing-text-on-light);
-  padding: clamp(2.5rem, 6vw, 4rem) 0;
+  padding: calc(clamp(2.5rem, 6vw, 4rem) + clamp(1.5rem, 5vw, 3.25rem)) 0 clamp(2.5rem, 6vw, 4rem);
 }
 
 .landing-steps__inner {
@@ -349,7 +355,23 @@ body:has(.landing-page) {
 
 /* ── Pricing ── */
 .landing-pricing {
-  background: var(--landing-surface-dark);
+  background-color: var(--landing-surface-dark);
+  background-image:
+    linear-gradient(
+      color-mix(
+        in srgb,
+        var(--landing-surface-dark) calc((1 - var(--page-bg-pattern-opacity)) * 10%),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--landing-surface-dark) calc((1 - var(--page-bg-pattern-opacity)) * 10%),
+        transparent
+      )
+    ),
+    url('/images/leaves-pattern.svg');
+  background-position: 0 0;
+  background-repeat: repeat;
   color: var(--landing-text-on-light);
   padding: clamp(2.5rem, 6vw, 4rem) 0;
 }
@@ -566,6 +588,8 @@ body:has(.landing-page) {
   flex-shrink: 0;
   margin: 0;
   min-width: 0;
+  --landing-phone-progress: 0;
+  perspective: 68.75rem;
 }
 
 .landing-faq-section__content {
@@ -575,16 +599,25 @@ body:has(.landing-page) {
 
 .landing-phone-frame {
   --landing-phone-width: min(17.5rem, 72vw);
+  --landing-phone-tilt-y: calc(-22deg * (1 - var(--landing-phone-progress, 0)));
+  --landing-phone-tilt-x: calc(11deg * (1 - var(--landing-phone-progress, 0)));
+  --landing-phone-shadow-y: calc(1rem + 1.75rem * var(--landing-phone-progress, 0));
+  --landing-phone-shadow-blur: calc(1.75rem + 2.25rem * var(--landing-phone-progress, 0));
+  --landing-phone-shadow-alpha: calc(0.2 + 0.22 * var(--landing-phone-progress, 0));
 
   width: var(--landing-phone-width);
   padding: 0.55rem;
   border-radius: 2.75rem;
   background: linear-gradient(165deg, var(--sky-blue-d6) 0%, var(--sky-blue-d7) 42%, var(--sky-blue-d7) 100%);
+  transform: rotateY(var(--landing-phone-tilt-y)) rotateX(var(--landing-phone-tilt-x));
+  transform-origin: center center;
+  transform-style: preserve-3d;
   box-shadow:
-    0 1.5rem 3rem -0.75rem rgba(28, 43, 58, 0.35),
+    0 var(--landing-phone-shadow-y) var(--landing-phone-shadow-blur) -0.75rem rgba(28, 43, 58, var(--landing-phone-shadow-alpha)),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
   box-sizing: border-box;
+  will-change: transform, box-shadow;
 }
 
 .landing-phone-frame__shell {
@@ -755,7 +788,7 @@ body:has(.landing-page) {
   .landing-faq-section__device {
     flex: 0 0 auto;
     position: sticky;
-    top: var(--space-6);
+    top: calc(var(--app-top-chrome-h) + var(--space-4));
   }
 
   .landing-faq-section__content {
@@ -775,6 +808,13 @@ body:has(.landing-page) {
     flex-direction: row;
     justify-content: space-between;
     text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-phone-frame {
+    transform: none;
+    will-change: auto;
   }
 }
 
