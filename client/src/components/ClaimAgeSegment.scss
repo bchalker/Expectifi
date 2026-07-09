@@ -11,8 +11,8 @@
 
 .claim-age-segment__thumb {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
+  top: var(--space-half);
+  bottom: var(--space-half);
   left: 0;
   z-index: 0;
   border-radius: 9999px;

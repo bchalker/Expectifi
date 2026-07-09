@@ -280,9 +280,9 @@
   --pref-wizard-rail-edge-fade-w: 0.5rem;
 
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  bottom: 1rem;
+  top: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
   left: auto;
   z-index: 22;
   display: flex;

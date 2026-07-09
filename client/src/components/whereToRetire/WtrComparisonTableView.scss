@@ -255,7 +255,7 @@
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--wtr-compare-baseline-city);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   text-decoration: underline;
   text-decoration-style: dashed;
   text-decoration-thickness: 1px;
@@ -333,7 +333,7 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-muted);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   text-align: center;
 }
 
@@ -383,7 +383,7 @@
   font-size: var(--text-sm);
   font-weight: 700;
   color: var(--text);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .wtr-compare-table__label-cell {
@@ -433,7 +433,7 @@
 .wtr-compare-table__cell-value {
   display: block;
   font-size: var(--text-base);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--text);

@@ -100,14 +100,14 @@
   margin: 0;
   font-size: var(--text-xs);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--color-amber-dark);
 }
 
 .wtr-score-header__qol-unavailable {
   margin: 0;
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 

@@ -123,7 +123,7 @@
   font-size: var(--text-xs);
   font-weight: 400;
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 @media (max-width: 480px) {

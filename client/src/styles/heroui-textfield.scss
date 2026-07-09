@@ -24,7 +24,7 @@ textarea[data-slot='textarea'] {
   font-family: var(--body);
   font-size: 1rem;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   outline: none;
   -webkit-appearance: none;

@@ -20,9 +20,9 @@
   position: fixed;
   top: var(--app-header-stack-h);
   bottom: var(--drawer-panel-inset, 1rem);
-  top: 1rem;
-  bottom: 1rem;
-  right: 1rem;
+  top: var(--space-4);
+  bottom: var(--space-4);
+  right: var(--space-4);
   padding-top: 0;
   box-sizing: border-box;
   width: min(680px, calc(100vw - var(--drawer-panel-inset, 1rem) * 2));

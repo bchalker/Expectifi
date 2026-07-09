@@ -34,7 +34,7 @@
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .wtr-getting-there__section-helper--direct {
@@ -89,7 +89,7 @@
 .wtr-getting-there__airport-primary-helper {
   margin: 0;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--green1);
 }
 
@@ -97,7 +97,7 @@
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   text-align: left;
 }
@@ -117,7 +117,7 @@
   margin: 0;
   min-width: 0;
   font-size: var(--text-sm);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
   text-align: left;
 }
@@ -137,7 +137,7 @@
 .wtr-getting-there__status-badge {
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .wtr-getting-there__status-badge--direct {
@@ -159,7 +159,7 @@
 
 .wtr-getting-there__verified-caption {
   margin: 0;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 

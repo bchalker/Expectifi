@@ -90,7 +90,7 @@
   margin: 0;
   font-size: var(--text-xs);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   text-align: center;
   color: inherit;
   display: none;
@@ -100,7 +100,7 @@
   margin: 0;
   font-size: var(--text-xs);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   text-align: center;
   color: inherit;
 }
@@ -166,7 +166,7 @@
   min-width: 0;
   font-size: var(--text-sm);
   color: var(--color-text-secondary, var(--text-muted));
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .wtr-city-detail__country-forbid {
@@ -521,7 +521,7 @@
 .wtr-city-detail__card-note {
   margin: 0;
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   padding: var(--space-2);
   background: var(--surface1);
@@ -587,7 +587,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--color-amber-dark);
   text-align: center;
   white-space: nowrap;

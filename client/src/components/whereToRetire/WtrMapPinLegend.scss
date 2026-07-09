@@ -41,7 +41,7 @@
 
 .wtr-map-pin-legend__label {
   font-size: var(--text-xs);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text-muted);
   white-space: nowrap;
 }

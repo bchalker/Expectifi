@@ -11,7 +11,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -34,7 +34,7 @@
   font-family: var(--body);
   font-size: 1rem;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   box-sizing: border-box;
   cursor: pointer;

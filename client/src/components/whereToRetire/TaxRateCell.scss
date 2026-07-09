@@ -45,7 +45,7 @@
 .wtr-tax-cell__headline--body {
   font-size: var(--text-base);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -104,7 +104,7 @@
   padding: var(--space-1) /* review: was 0.35rem */ 0;
   border-top: 1px solid var(--color-border-faint);
   vertical-align: top;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .wtr-tax-cell__table th {
@@ -141,6 +141,6 @@
 .wtr-tax-cell__disclaimer {
   margin: var(--space-2) 0 0;
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }

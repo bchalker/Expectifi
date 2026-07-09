@@ -155,7 +155,7 @@
   gap: var(--space-1);
   min-width: 0;
   font-size: var(--text-xs);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--color-text-info);
 }
 
@@ -193,6 +193,6 @@
 
 .wtr-monthly-precip-chart__legend-label {
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }

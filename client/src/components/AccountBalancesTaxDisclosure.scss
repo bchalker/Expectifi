@@ -50,7 +50,7 @@
 .portfolio-account-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   width: 100%;
   box-sizing: border-box;
   overflow-anchor: none;
@@ -689,7 +689,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-faint);
 }
 

@@ -59,7 +59,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--color-amber-dark);
   text-align: left;
   cursor: pointer;
@@ -73,7 +73,7 @@
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 
@@ -350,7 +350,7 @@
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 700;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -389,7 +389,7 @@
 .wtr-people-culture__demo-block-title {
   margin: 0;
   font-size: var(--text-base);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -407,7 +407,7 @@
   border-radius: 999px;
   font-size: var(--text-xs);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   white-space: nowrap;
 }
 

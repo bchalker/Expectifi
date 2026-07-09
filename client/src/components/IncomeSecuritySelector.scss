@@ -252,7 +252,7 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--accent-contrast);
   letter-spacing: 0.02em;
   transition: background 0.12s ease;

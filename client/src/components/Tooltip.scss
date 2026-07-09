@@ -46,7 +46,7 @@
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
   font-size: var(--text-xs);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   z-index: var(--app-tooltip-z, 1200);
 }
 

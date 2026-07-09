@@ -14,24 +14,17 @@
   /* Body + tabular UI: Nunito */
   --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
   --font-mono: 'Nunito', system-ui, -apple-system, sans-serif;
-  /* Display numbers + hero figures (Merriweather) */
-  --font-heading: 'Merriweather', Georgia, 'Times New Roman', serif;
-  /* --font-heading: 'Libre Baskerville', Georgia, 'Times New Roman', serif; */
-  /* --font-heading: 'Patua One', Georgia, 'Times New Roman', serif; */
-  /* --font-heading: 'Young Serif', Georgia, 'Times New Roman', serif; */
-  /* --font-heading: 'Gloock', Georgia, 'Times New Roman', serif; */
-  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif; 
-  /* --font-heading: 'DM Serif Text', Georgia, 'Times New Roman', serif;  */
-  /* Hero numbers: age readout, subheader totals, WTR monthly amount */
+  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-heading-number: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-serif: var(--font-heading);
 
-  /* Type scale */
-  /* --text-xs: 0.6875rem;
-  --text-sm: 0.75rem;
-  --text-base: 0.875rem;
-  --text-md: 1rem; */
+  /* Font weights — hardcoded in components by convention; tokenize only if theming needed */
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
 
+  /* Type scale */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -41,11 +34,11 @@
   --text-2xl: 1.75rem;
   --text-3xl: 2.25rem;
   --text-4xl: 3rem;
+  /* Responsive — clamp() values; Figma uses max value as static approximation */
   --text-strip: clamp(1.375rem, 2.5vw, 1.75rem);
   --text-hero: clamp(1.75rem, 4vw, 2.5rem);
-  --text-super: clamp(1.25rem, 2vw, 1.5rem);
 
-  /* Line height */
+  /* Line heights — use these tokens; do not hardcode values in components */
   --leading-tight: 1.2;
   --leading-snug: 1.35;
   --leading-normal: 1.55;
@@ -60,6 +53,7 @@
   --tracking-widest: 0.12em;
 
   /* Base-8 spacing scale — padding, margin, gap only */
+  --space-0: 0px;
   --space-half: 2px;
   --space-1: 4px;   /* half-step — micro spacing */
   --space-2: 8px;

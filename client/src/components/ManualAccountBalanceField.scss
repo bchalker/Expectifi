@@ -16,7 +16,7 @@
   font-family: var(--body);
   font-size: var(--text-base);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -40,7 +40,7 @@
   font-family: var(--body);
   font-size: var(--text-base);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -73,7 +73,7 @@
   font-family: var(--body);
   font-size: var(--text-base);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -106,7 +106,7 @@
   font-family: var(--body);
   font-size: 1rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   text-align: right;
   color: var(--text);
   font-variant-numeric: tabular-nums;

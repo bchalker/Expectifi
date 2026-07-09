@@ -2,11 +2,18 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  /* ── Theme scales (locked palette) ───────────────────────────────────
+  /* ── Theme scales (locked palette) ─────────────
      Chromatic (blue, amber, red, green): *1 = base hex.
-       *d5…*d1 = 5 steps darker (mix black), *2…*6 = 5 steps lighter (mix white).
-       *7…*10 = legacy aliases (see below).
-     Surface: *1 = lightest base; *u1…*u5 lighter (mix white), *d1…*d5 darker (mix black). */
+       *d5…*d1 = 5 steps darker (mix black)
+       *2…*6   = 5 steps lighter (mix white)
+     Blue scale is text/ink only. Nav and chrome 
+     use sky-blue scale. Legacy navy aliases removed.
+     Surface: *1 = lightest base; *u1…*u5 lighter 
+       (mix white), *d1…*d5 darker (mix black).
+     Sky-blue: hsl(207, 100%) scale — owns all 
+       interactive chrome, focus rings, and accent UI.
+     Tan: hsl(36, 20%) scale — page canvas and 
+       warm neutral surfaces. */
 
   --blue1: #1a2332;
   --blue-d5: color-mix(in srgb, var(--blue1) 10%, black);

@@ -193,7 +193,7 @@
   font-family: var(--mono);
   font-size: var(--text-sm);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--green1);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

@@ -1,7 +1,7 @@
 .sync-status {
   display: block;
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

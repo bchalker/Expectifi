@@ -238,7 +238,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text);
   white-space: nowrap;
 }
@@ -255,7 +255,7 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--green-d1);
   white-space: nowrap;
 }
@@ -406,7 +406,7 @@
   padding-top: var(--space-2);
   border-top: 1px dotted var(--border);
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .wtr-dest-card__meta-visa {

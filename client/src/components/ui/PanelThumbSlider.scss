@@ -79,7 +79,7 @@
   font-family: var(--body);
   font-size: var(--text-base);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

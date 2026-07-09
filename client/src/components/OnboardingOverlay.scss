@@ -368,7 +368,7 @@ body.onboarding-overlay--open .app-header-shell {
   color: var(--text-muted);
   margin: 0;
   max-width: 60%;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .onboarding-overlay__duration-hint {
@@ -489,7 +489,7 @@ body.onboarding-overlay--open .app-header-shell {
   font-family: var(--heading);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   letter-spacing: -0.01em;
   color: var(--text);
 }
@@ -1087,7 +1087,7 @@ body.onboarding-overlay--open .app-header-shell {
   font-family: var(--body);
   font-size: var(--text-lg);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--green-d2);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -1306,7 +1306,7 @@ body.onboarding-overlay--open .app-header-shell {
 }
 
 .onboarding-overlay__goal-step .currency-amount-input__prefix-outside {
-  font-size: 1.375rem;
+  font-size: var(--text-xl);
   color: var(--text-muted);
 }
 
@@ -1325,7 +1325,7 @@ body.onboarding-overlay--open .app-header-shell {
 .onboarding-overlay__goal-step .currency-amount-input__field {
   width: 100%;
   min-width: 4.5rem;
-  font-size: 1.375rem;
+  font-size: var(--text-xl);
   text-align: left;
 }
 
@@ -1415,7 +1415,7 @@ body.onboarding-overlay--open .app-header-shell {
   content: '';
   position: absolute;
   top: 50%;
-  left: 2px;
+  left: var(--space-half);
   width: 10px;
   height: 10px;
   border-radius: 50%;

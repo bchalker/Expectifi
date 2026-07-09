@@ -25,7 +25,7 @@
   margin-bottom: var(--space-2);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -73,7 +73,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -83,7 +83,7 @@
   display: block;
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   min-width: 0;
 }
@@ -123,7 +123,7 @@
   display: block;
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -178,7 +178,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 400;
-  line-height: 1.65;
+  line-height: var(--leading-relaxed);
   color: var(--text-muted);
   max-width: none;
 }

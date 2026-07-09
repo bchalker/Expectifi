@@ -25,7 +25,7 @@
   max-width: 22rem;
   font-family: var(--body);
   font-size: var(--text-sm);
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: var(--text-muted);
 }
 
@@ -140,7 +140,7 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
   margin: 0;
   font-family: var(--body);
   font-size: var(--text-sm);
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: var(--text-muted);
 }
 
@@ -239,7 +239,7 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
 .config-profile-tab__confirm-body {
   margin: 0;
   font-size: var(--text-sm);
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: var(--text-muted);
   text-align: center;
 }

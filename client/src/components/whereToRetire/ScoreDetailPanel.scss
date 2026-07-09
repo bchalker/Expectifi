@@ -8,7 +8,7 @@
 .wtr-score-panel__meta {
   margin: 0 0 var(--space-2);
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 
@@ -34,7 +34,7 @@
 
 .wtr-score-panel__label {
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 

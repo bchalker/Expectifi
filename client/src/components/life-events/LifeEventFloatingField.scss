@@ -56,13 +56,13 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .life-events-panel__card .life-event-floating-field--hug .life-event-floating-field__width-sizer-value {
   display: inline-flex;
   align-items: center;
-  gap: 0.125rem;
+  gap: var(--space-half);
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -160,7 +160,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text-muted);
   transform: translateY(-50%);
   transform-origin: left center;
@@ -196,7 +196,7 @@
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 0.125rem;
+  gap: var(--space-half);
   grid-row: 2;
   grid-column: 1;
   align-self: end;

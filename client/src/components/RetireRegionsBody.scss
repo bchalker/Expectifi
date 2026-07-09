@@ -173,7 +173,7 @@
   margin: 0 0 var(--space-1);
   font-size: var(--text-sm);
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: var(--leading-normal);
 }
 
 .retire-regions__inflation-note {

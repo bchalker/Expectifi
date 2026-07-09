@@ -443,7 +443,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   gap: var(--space-1) /* review: was 6px */ var(--space-2) /* review: was 10px */;
   font-family: var(--body);
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 .scenario-table__kv--sub {
   margin-top: var(--space-1) /* review: was 5px */;
@@ -1082,7 +1082,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   font-family: var(--body);
   font-size: var(--text-md);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
   text-align: center;
 }

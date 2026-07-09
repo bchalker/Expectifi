@@ -193,7 +193,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -382,7 +382,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
   word-break: break-word;
 }
@@ -434,7 +434,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text-muted);
 }
 
@@ -442,7 +442,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

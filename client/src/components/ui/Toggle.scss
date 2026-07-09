@@ -14,7 +14,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -50,7 +50,7 @@
   content: '';
   position: absolute;
   top: 50%;
-  left: 0.125rem;
+  left: var(--space-half);
   width: 0.875rem;
   height: 0.875rem;
   border-radius: 50%;

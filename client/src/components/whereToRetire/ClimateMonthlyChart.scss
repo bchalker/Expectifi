@@ -116,7 +116,7 @@
 
 .wtr-climate-monthly-chart__callout--low {
   transform: translate(-50%, 100%);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-half);
 }
 
 .wtr-climate-monthly-chart__callout--high {
@@ -170,7 +170,7 @@
 .wtr-climate-monthly-chart__season-name {
   font-size: var(--text-xs);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text);
 }
 
@@ -193,7 +193,7 @@
 
 .wtr-climate-monthly-chart__legend-label {
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 
@@ -204,6 +204,6 @@
 
   .wtr-climate-monthly-chart__season-col .wtr-weather-tab__season-tag {
     font-size: 0.625rem;
-    padding: 2px var(--space-1);
+    padding: var(--space-half) var(--space-1);
   }
 }

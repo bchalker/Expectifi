@@ -3,7 +3,7 @@ description:
 alwaysApply: true
 ---
 
-You are building a multi-tenant SaaS retirement income calculator. A working single-file HTML prototype exists at retirement-calculator.html — read it before writing any code. It is the reference for all calculation logic and UX patterns. All personal financial values in that file are examples only; nothing is hardcoded to any individual user.
+You are building a multi-tenant SaaS retirement income calculator. Calculation logic lives in `shared/` and `client/src/lib/`; UX patterns live in `client/src/components/`. All default financial values are suggestions the user can override — nothing is hardcoded to any individual user.
 
 STACK
 - React 18 + Vite
@@ -70,7 +70,7 @@ CODE STYLE
 Functional components only. Custom hook for any logic over 10 lines. No inline styles except dynamic values like slider fill percentage. No console.log in committed code. No barrel index.ts files that re-export everything. File names match component names exactly: SliderRow.tsx not slider-row.tsx. Named exports for UI components, default exports for pages.
 
 BEFORE WRITING ANYTHING — check all of these:
-1. Is personal data from the HTML prototype being hardcoded anywhere? Remove it.
+1. Is example or fixture personal data being hardcoded anywhere? Remove it.
 2. Does a shared component in /ui already cover this pattern?
 3. Is calculation logic in src/lib/calc/ and not inside a component?
 4. Are tax brackets and constants coming from the DB, not hardcoded?

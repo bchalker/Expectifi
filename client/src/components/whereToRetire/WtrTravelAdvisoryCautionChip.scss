@@ -6,9 +6,9 @@
 .wtr-travel-caution-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   max-width: 100%;
-  padding: 0.125rem 0.5rem;
+  padding: var(--space-half) var(--space-2);
   border-radius: 999px;
   font-size: var(--text-xs);
   font-weight: 600;
@@ -72,7 +72,7 @@
 
 .wtr-travel-caution-chip__tooltip-title {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-1);
   font-weight: 600;
 }
 
@@ -96,7 +96,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--color-accent);
   text-align: left;
   text-decoration: underline;

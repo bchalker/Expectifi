@@ -1,7 +1,7 @@
 .priority-slider {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-half);
   width: 100%;
   min-width: 0;
   overflow: visible;

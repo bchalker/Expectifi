@@ -11,7 +11,7 @@
   flex: 1 1 calc(50% - 3px);
   flex-direction: column;
   align-items: stretch;
-  gap: 2px;
+  gap: var(--space-half);
   min-width: 120px;
   margin: 0;
   padding: 8px 10px;

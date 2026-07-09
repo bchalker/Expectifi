@@ -58,7 +58,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: rgba(0,0,0, 0.88);
   white-space: nowrap;
   overflow: hidden;

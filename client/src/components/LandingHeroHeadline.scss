@@ -35,9 +35,9 @@
 .landing-hero-headline__tagline {
   margin: var(--space-3) /* review: was 0.65rem */ 0 0;
   font-family: var(--heading);
-  font-size: clamp(var(--text-base), 2.4vw, 1.25rem);
+  font-size: clamp(var(--text-base), 2.4vw, 1rem);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--landing-text-muted-on-navy);
   text-align: center;
 }

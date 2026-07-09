@@ -14,7 +14,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 
@@ -121,7 +121,7 @@
   flex: 0 0 auto;
   width: 1.75rem;
   height: 1rem;
-  margin: 0.125rem 0 0;
+  margin: var(--space-half) 0 0;
   padding: 0;
   border: none;
   border-radius: 999px;
@@ -155,7 +155,7 @@
   content: '';
   position: absolute;
   top: 50%;
-  left: 2px;
+  left: var(--space-half);
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 50%;

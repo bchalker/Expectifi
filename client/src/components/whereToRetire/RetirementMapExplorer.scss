@@ -432,7 +432,7 @@
   box-sizing: border-box;
   font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .wtr-explorer__list-search--has-value .wtr-explorer__list-search-field input[data-slot='input'] {
@@ -796,7 +796,7 @@
   background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
   font-family: var(--body);
   font-size: var(--text-sm);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--text);
 }
 

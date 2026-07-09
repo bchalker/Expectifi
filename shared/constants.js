@@ -1,4 +1,4 @@
-/** Growth horizon: age 55 → 62 (matches retirement-calculator.html) */
+/** Growth horizon: age 55 → 62 */
 export const YEARS = 7;
 export const YEARS_TO_RETIREMENT = YEARS;
 

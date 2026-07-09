@@ -2,7 +2,7 @@
   position: fixed;
   z-index: 1200;
   left: 50%;
-  bottom: 1.5rem;
+  bottom: var(--space-5);
   transform: translate(-50%, 120%);
   max-width: min(28rem, calc(100vw - 2rem));
   padding: var(--space-3) var(--space-4);
@@ -26,8 +26,8 @@
 
 .app-toast--corner {
   left: auto;
-  right: 1rem;
-  bottom: 1rem;
+  right: var(--space-4);
+  bottom: var(--space-4);
   transform: translateY(calc(100% + 1rem));
   max-width: min(18rem, calc(100vw - 2rem));
   padding: var(--space-2) var(--space-3);
@@ -43,12 +43,12 @@
 
 @media (min-width: 681px) {
   .app-toast {
-    bottom: 2rem;
+    bottom: var(--space-6);
   }
 
   .app-toast--corner {
-    right: 1.5rem;
-    bottom: 1.5rem;
+    right: var(--space-5);
+    bottom: var(--space-5);
   }
 }
 

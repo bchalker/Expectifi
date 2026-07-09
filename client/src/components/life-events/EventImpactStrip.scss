@@ -43,7 +43,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-xs);
   color: var(--color-text-secondary, var(--text-muted));
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .event-impact-strip__value {
@@ -73,7 +73,7 @@
   font-family: var(--font-sans);
   font-size: 0.625rem;
   color: var(--color-text-secondary, var(--text-muted));
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 @media (max-width: 680px) {

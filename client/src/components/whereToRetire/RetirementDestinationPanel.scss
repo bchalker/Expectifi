@@ -8,8 +8,8 @@
   position: fixed;
   isolation: isolate;
   top: var(--wtr-dest-panel-top);
-  right: 1rem;
-  bottom: 1rem;
+  right: var(--space-4);
+  bottom: var(--space-4);
   left: auto;
   z-index: var(--z-drawer-shell);
   display: flex;
@@ -184,7 +184,7 @@
   font-size: 1.125rem;
   font-weight: 500;
   color: var(--color-text-primary, var(--text));
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .wtr-dest-panel__country {
@@ -192,7 +192,7 @@
   min-width: 0;
   font-size: var(--text-sm);
   color: var(--color-text-secondary, var(--text-muted));
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .wtr-dest-panel__head-divider {
@@ -442,7 +442,7 @@
   font-family: var(--body);
   font-size: 0.75rem;
   font-weight: 400;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   text-align: left;
   color: var(--color-text-secondary, var(--text-muted));
   cursor: pointer;
@@ -539,7 +539,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: var(--color-amber-dark);
   text-align: center;
   white-space: nowrap;
@@ -682,7 +682,7 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--text);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .wtr-dest-panel__card-head {

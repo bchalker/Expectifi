@@ -53,7 +53,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--danger, var(--red2));
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }
 
 .plaid-link-btn__info {
@@ -61,5 +61,5 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
 }

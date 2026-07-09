@@ -102,7 +102,7 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: rgba(255, 255, 255, 1);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   white-space: nowrap;
 }
 
@@ -181,7 +181,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: rgba(255, 255, 255, 0.88);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -235,7 +235,7 @@
   font-family: var(--body);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: rgba(255, 255, 255, 0.88);
   white-space: nowrap;
   cursor: pointer;

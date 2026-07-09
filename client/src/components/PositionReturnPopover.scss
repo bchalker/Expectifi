@@ -1,8 +1,8 @@
 .position-return-popover {
   position: fixed;
   z-index: 250;
-  right: 2rem;
-  bottom: 2rem;
+  right: var(--space-6);
+  bottom: var(--space-6);
   left: auto;
   top: auto;
   width: min(40vw, 600px);
@@ -81,7 +81,7 @@
   font-family: var(--body);
   font-size: var(--text-xs);
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   word-break: break-word;
   text-transform: none;
 }

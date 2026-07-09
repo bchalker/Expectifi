@@ -89,7 +89,7 @@
   display: flex;
   justify-content: space-between;
   font-size: var(--text-xs);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
   color: var(--text-muted);
 }
 
