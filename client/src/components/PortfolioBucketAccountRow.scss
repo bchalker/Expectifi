@@ -146,6 +146,7 @@
 .portfolio-bucket-account-row__name {
   font-family: var(--heading);
   font-size: var(--text-base);
+  letter-spacing: -0.03em;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text);
@@ -177,6 +178,13 @@
     var(--portfolio-row-pad-y-end, 0.5rem);
     padding: var(--space-2) var(--space-4);
   border-top: 1px dashed var(--color-border-fainter);
+  box-sizing: border-box;
+}
+
+.portfolio-bucket-account-row__growth-bar {
+  width: 100%;
+  padding-inline: var(--portfolio-row-pad-x, var(--space-4));
+  padding-bottom: var(--space-3);
   box-sizing: border-box;
 }
 
@@ -227,11 +235,12 @@
 
 .portfolio-bucket-account-row__total {
   flex-shrink: 0;
-  font-family: var(--body);
+  font-family: var(--heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: var(--leading-tight);
   color: var(--text);
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   white-space: nowrap;

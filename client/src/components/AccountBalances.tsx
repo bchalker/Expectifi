@@ -120,6 +120,12 @@ import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
+import { AccountGrowthBar } from "./AccountGrowthBar";
+import {
+  ACCOUNT_GROWTH_COLORS,
+  accountGrowthScenarioRate,
+  buildAccountGrowthBarData,
+} from "../lib/accountGrowthBar";
 import { TaxBreakdownPanelTrigger } from "./TaxBreakdownHeaderButton";
 import {
   AccountBalancesManageMenu,
@@ -484,6 +490,14 @@ function AccountBalancesContent({
 }: Props) {
   const { locale, taxConfig } = useUserLocale();
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly;
+  const showGrowthBars = Boolean(
+    phase === "growth" &&
+      mergedDashboard &&
+      readOnly &&
+      !configureInputsOnly &&
+      c.hasPortfolioBalances &&
+      inputs,
+  );
 
   const displayBalanceMode = useMemo(
     () => resolvePortfolioBalanceMode(balanceMode),
@@ -2375,6 +2389,31 @@ function AccountBalancesContent({
     return accountLabelForWithdrawalBucket(taxConfig, bucket) ?? fallback;
   }
 
+  function renderAccountGrowthBar(
+    bucket: AccountScenarioBucketId,
+    startingBalance: number,
+  ): ReactNode {
+    if (!showGrowthBars || !(startingBalance > 0) || !inputs) return null;
+
+    const rate = accountGrowthScenarioRate(
+      "base",
+      bucket,
+      inputs.retRate,
+      brkRate ?? inputs.brkRate,
+      c.yearsToRetirement,
+      inputs,
+    );
+    const data = buildAccountGrowthBarData(
+      startingBalance,
+      rate,
+      c.yearsToRetirement,
+      c.currentAge,
+      ACCOUNT_GROWTH_COLORS[bucket],
+    );
+    if (!data) return null;
+    return <AccountGrowthBar data={data} />;
+  }
+
   function renderManualPortfolioAccountCard(
     key: string,
     opts: {
@@ -2402,6 +2441,7 @@ function AccountBalancesContent({
     const rowValues = renderManualRowValuesControls(entryForAllocation);
     const displayTotal =
       rowValues.total ?? fmt(entryForAllocation?.balance ?? total);
+    const startingBalance = entryForAllocation?.balance ?? total;
 
     return (
       <div
@@ -2423,6 +2463,7 @@ function AccountBalancesContent({
             total={displayTotal}
             showViewHoldings={false}
             scenario={scenario}
+            growthBar={renderAccountGrowthBar(bucket, startingBalance)}
           />
         </div>
       </div>
@@ -2456,6 +2497,7 @@ function AccountBalancesContent({
         total={fmt(def.total)}
         trend={trend}
         scenario={accountScenario}
+        growthBar={renderAccountGrowthBar(accountBucket, def.total)}
       />
     );
 
@@ -2704,6 +2746,7 @@ function AccountBalancesContent({
         total={fmt(brkBal)}
         trend={brkTrend}
         scenario={brokerageScenario}
+        growthBar={renderAccountGrowthBar("brokerage", brkBal)}
       />
     );
 

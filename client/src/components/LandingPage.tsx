@@ -46,7 +46,7 @@ const TRUST_ITEMS = [
   "United States & Canada",
   "Your data stays private",
   "No account required",
-  "Results in under 2 minutes",
+  "Results in minutes",
 ] as const;
 
 const PRICING_FREE_FEATURES = [
@@ -143,7 +143,7 @@ export function LandingPage({
               >
                 Get started free
               </button>
-              <p className="landing-hero__note">No credit card required</p>
+              {/* <p className="landing-hero__note">No credit card required</p> */}
             </div>
           </div>
         </section>

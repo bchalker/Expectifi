@@ -32,6 +32,8 @@ type Props = {
   badgeOrder?: number | null
   /** Content below name/hint (e.g. income strategy segment). */
   identityExtra?: ReactNode | null
+  /** Growth phase: year-by-year projection bar below the summary row. */
+  growthBar?: ReactNode | null
   scenario?: PortfolioBucketAccountScenarioProps | null
   /** Income mode: dividend fund selector in the scenario column. */
   actionSlot?: ReactNode | null
@@ -57,6 +59,7 @@ export function PortfolioBucketAccountRow({
   showViewHoldings = true,
   badgeOrder = null,
   identityExtra = null,
+  growthBar = null,
   scenario = null,
   actionSlot = null,
   valuesExtra = null,
@@ -163,6 +166,9 @@ export function PortfolioBucketAccountRow({
         </div>
         {allocationSlot ? (
           <div className="portfolio-bucket-account-row__allocation-row">{allocationSlot}</div>
+        ) : null}
+        {growthBar ? (
+          <div className="portfolio-bucket-account-row__growth-bar">{growthBar}</div>
         ) : null}
       </div>
     </div>
