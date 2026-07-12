@@ -400,9 +400,9 @@ export function GrowthSliderLabel({
         {suffixLayout === "panel" ? (
           <>
             <div className="growth-slider-label__panel-heading">
-              <p className="growth-slider-label__panel-rate-lead">
+              <div className="growth-slider-label__panel-rate-lead">
                 {onOpenRetirementAgeCompare ? (
-                  <>
+                  <p className="growth-slider-label__panel-rate-prefix">
                     Until I am{" "}
                     <button
                       type="button"
@@ -412,21 +412,22 @@ export function GrowthSliderLabel({
                     >
                       {retirementAge}
                     </button>
-                    , I expect a
-                  </>
-                ) : (
-                  "I expect a"
-                )}
-              </p>
+                    ,
+                  </p>
+                ) : null}
+                <p className="growth-slider-label__panel-rate-line">
+                  I expect an
+                </p>
+                <p className="growth-slider-label__panel-rate-line">
+                  annual return of
+                </p>
+              </div>
               <div
                 className="growth-slider-label__panel-rate"
                 aria-live="polite"
               >
                 <span className="growth-slider-label__panel-rate-pct strip-equation-main-val--tween">
                   {headlinePct}%
-                </span>
-                <span className="growth-slider-label__panel-rate-caption">
-                  annual return
                 </span>
                 <IconChevronCompactDown
                   className="growth-slider-label__panel-rate-chevron"

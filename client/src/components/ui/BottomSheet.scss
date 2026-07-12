@@ -47,6 +47,11 @@
     border-radius: 12px;
   }
 
+  .mobile-bottom-sheet-panel--sliding,
+  .drawer-shell--sliding {
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+  }
+
   .mobile-bottom-sheet-panel--dragging {
     transition: none !important;
     animation: none !important;

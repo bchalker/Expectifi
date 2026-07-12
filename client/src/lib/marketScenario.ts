@@ -153,15 +153,12 @@ export function marketScenarioIsBase(scenarioId: MarketScenarioId | undefined): 
 
 export type MarketScenarioInputState = {
   marketScenario?: MarketScenarioId
-  /** When true, projections use the selected scenario; otherwise Base. Default false. */
   marketScenarioActive?: boolean
 }
 
-/** UI + compute: non-Base scenarios apply only when explicitly enabled (`true`). */
+/** UI + compute: non-Base scenarios apply when selected. */
 export function resolveMarketScenarioActive(inputs: MarketScenarioInputState): boolean {
-  const id = normalizeMarketScenarioId(inputs.marketScenario)
-  if (marketScenarioIsBase(id)) return false
-  return inputs.marketScenarioActive === true
+  return !marketScenarioIsBase(inputs.marketScenario)
 }
 
 /** Whether the selected macro scenario affects projections (non-Base and toggle on). */

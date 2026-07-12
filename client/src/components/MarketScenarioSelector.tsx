@@ -6,10 +6,16 @@ import {
   MARKET_SCENARIOS,
   type MarketScenarioId,
 } from '../lib/marketScenario'
+import { ModeButtonGroup } from './ModeButton'
 import './HoldingScenarioPopout.scss'
 import './MarketScenarioSelector.scss'
 
 const MARKET_SCENARIO_SUBLABEL = 'Market Scenario'
+
+const MARKET_SCENARIO_BUTTON_OPTIONS = MARKET_SCENARIOS.map((scenario) => ({
+  id: scenario.id,
+  label: scenario.label,
+}))
 
 function marketScenarioTriggerClass(id: MarketScenarioId): string {
   if (id === 'bull') return 'holdings-scenario-trigger--bull'
@@ -22,6 +28,27 @@ export type MarketScenarioSelectorProps = {
   value: MarketScenarioId
   onChange: (id: MarketScenarioId) => void
   className?: string
+}
+
+/** Desktop row of pill buttons for macro market scenario selection. */
+export function MarketScenarioButtonGroup({
+  value,
+  onChange,
+  className = '',
+}: MarketScenarioSelectorProps) {
+  return (
+    <div
+      className={['market-scenario-button-group', className].filter(Boolean).join(' ')}
+    >
+      <span className="market-scenario-button-group__label">Scenario:</span>
+      <ModeButtonGroup
+        value={value}
+        options={MARKET_SCENARIO_BUTTON_OPTIONS}
+        onChange={onChange}
+        ariaLabel="Market scenario"
+      />
+    </div>
+  )
 }
 
 /** Macro market scenario control — matches portfolio row scenario badge styling. */

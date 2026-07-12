@@ -154,24 +154,6 @@ export function MarketScenarioSparkline({
             .filter(Boolean)
             .join(" ")}
         >
-          {showDeltaHeadline ? (
-            <div
-              className={[
-                "market-scenario-sparkline__delta-headline",
-                `market-scenario-sparkline__delta-headline--${deltaTone}`,
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <p className="market-scenario-sparkline__delta-value">
-                {deltaLabel}
-              </p>
-              <p className="market-scenario-sparkline__delta-caption">
-                vs. Base by {endpointYear}
-              </p>
-            </div>
-          ) : null}
-
           <div
             className={[
               "market-scenario-sparkline__chart-visual",
@@ -180,6 +162,24 @@ export function MarketScenarioSparkline({
               .filter(Boolean)
               .join(" ")}
           >
+            {showDeltaHeadline ? (
+              <div
+                className={[
+                  "market-scenario-sparkline__delta-headline",
+                  `market-scenario-sparkline__delta-headline--${deltaTone}`,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <p className="market-scenario-sparkline__delta-value">
+                  {deltaLabel}
+                </p>
+                <p className="market-scenario-sparkline__delta-caption">
+                  vs. Base by {endpointYear}
+                </p>
+              </div>
+            ) : null}
+
             <ResponsiveContainer
               className="market-scenario-sparkline__responsive"
               width="100%"

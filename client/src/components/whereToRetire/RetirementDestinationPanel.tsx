@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import { BottomSheetPortal } from "../ui/BottomSheetPortal";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
+import { useBottomSheetSlideShadow } from "../../hooks/useBottomSheetSlideShadow";
 import { useWtrDestPanelMobileSheet } from "../../hooks/useWtrDestPanelMobileSheet";
 import type {
   ScoredMapCity,
@@ -71,6 +72,13 @@ export function RetirementDestinationPanel({
     panelRef: sheetRef,
     onDismiss: onClose,
   });
+
+  const isSliding = useBottomSheetSlideShadow(
+    sheetRef,
+    slideOpen,
+    mobileSheet,
+    { durationMs: MOBILE_SHEET_SLIDE_MS },
+  );
 
   useEffect(() => {
     if (!open) {
@@ -278,6 +286,7 @@ export function RetirementDestinationPanel({
             "wtr-dest-panel--detail-column",
           slideOpen && "wtr-dest-panel--open",
           mobileSheet && "wtr-dest-panel--sheet",
+          isSliding && "mobile-bottom-sheet-panel--sliding",
           isDragging && "mobile-bottom-sheet-panel--dragging",
         ]
           .filter(Boolean)

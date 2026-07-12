@@ -2,6 +2,7 @@ import { CloseButton } from '@heroui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useBottomSheetDrag } from '../../hooks/useBottomSheetDrag'
+import { useBottomSheetSlideShadow } from '../../hooks/useBottomSheetSlideShadow'
 import { useIsMobileBottomSheet } from '../../hooks/useMobileBottomSheet'
 import { OnboardingProgressSteps } from '../OnboardingProgressSteps'
 import { BottomSheetHandle } from '../ui/BottomSheetHandle'
@@ -79,6 +80,10 @@ export function PreferencesWizardModal({
     open: visible,
     panelRef,
     onDismiss: onClose,
+  })
+
+  const isSliding = useBottomSheetSlideShadow(panelRef, visible, isMobileSheet, {
+    durationMs: SLIDE_MS,
   })
 
   useEffect(() => {
@@ -250,6 +255,7 @@ export function PreferencesWizardModal({
           'pref-wizard-modal--map-rail',
           isMobileSheet && 'pref-wizard-modal--mobile-sheet',
           visible && 'pref-wizard-modal--visible',
+          isSliding && 'mobile-bottom-sheet-panel--sliding',
           isDragging && 'mobile-bottom-sheet-panel--dragging',
         ]
           .filter(Boolean)

@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import type {
   ComputedSnapshot,
   CalculatorInputs,
@@ -7,14 +7,12 @@ import type {
 import { computeResults } from "../lib/computeResults";
 import {
   getMarketScenarioDefinition,
-  marketScenarioIsBase,
   marketScenarioModifierSummary,
   type MarketScenarioId,
 } from "../lib/marketScenario";
 import { buildMarketScenarioProjectionSeries } from "../lib/marketScenarioProjection";
 import { fmtK } from "../utils/format";
 import { AccordionSection } from "./ui/AccordionSection";
-import { Toggle } from "./ui/Toggle";
 import { MarketScenarioSparkline } from "./MarketScenarioSparkline";
 import "./HoldingScenarioPopout.scss";
 import "./MarketScenarioContextRow.scss";
@@ -31,12 +29,10 @@ function ScenarioHeadingBlock({
   label,
   dotClass,
   titleAs = "h3",
-  scenarioControls = null,
 }: {
   label: string;
   dotClass: string;
   titleAs?: "h3" | "span";
-  scenarioControls?: ReactNode;
 }) {
   const TitleTag = titleAs;
   return (
@@ -51,7 +47,6 @@ function ScenarioHeadingBlock({
             {label}
           </TitleTag>
         </div>
-        {scenarioControls}
       </div>
     </div>
   );
@@ -65,8 +60,6 @@ function formatSignedDeltaK(delta: number): string {
 
 export type MarketScenarioContextRowProps = {
   scenarioId: MarketScenarioId;
-  marketScenarioActive: boolean;
-  onMarketScenarioActiveChange: (active: boolean) => void;
   c: ComputedSnapshot;
   inputs: CalculatorInputs;
   balanceModes: ComputeBalanceModes;
@@ -78,8 +71,6 @@ export type MarketScenarioContextRowProps = {
 
 export function MarketScenarioContextRow({
   scenarioId,
-  marketScenarioActive,
-  onMarketScenarioActiveChange,
   c,
   inputs,
   balanceModes,
@@ -90,8 +81,6 @@ export function MarketScenarioContextRow({
 }: MarketScenarioContextRowProps) {
   const def = getMarketScenarioDefinition(scenarioId);
   const dotClass = marketScenarioDotClass(scenarioId);
-  const isPaused = !marketScenarioActive;
-  const showActiveToggle = !marketScenarioIsBase(scenarioId);
 
   const chartUi = useMemo(
     () => ({
@@ -120,18 +109,7 @@ export function MarketScenarioContextRow({
     [balanceModes, chartUi, inputs],
   );
 
-  const scenarioSnapshot = useMemo(
-    () =>
-      computeResults(
-        { ...inputs, marketScenario: scenarioId, marketScenarioActive: true },
-        chartUi,
-        balanceModes,
-      ),
-    [balanceModes, chartUi, inputs, scenarioId],
-  );
-
   const retirementYear = projectionSnapshot.retirementCalendarYear;
-  const chartScenarioEnd = marketScenarioActive ? c.totalFV : scenarioSnapshot.totalFV;
 
   const series = useMemo(
     () =>
@@ -145,12 +123,12 @@ export function MarketScenarioContextRow({
         retirementCalendarYear: retirementYear,
         scenarioId,
         terminalBaseTotal: baseSnapshot.totalFV,
-        terminalScenarioTotal: chartScenarioEnd,
+        terminalScenarioTotal: c.totalFV,
       }),
     [
       baseSnapshot.totalFV,
       brkRate,
-      chartScenarioEnd,
+      c.totalFV,
       projectionSnapshot.brkBal,
       projectionSnapshot.retBal,
       projectionSnapshot.save,
@@ -163,32 +141,12 @@ export function MarketScenarioContextRow({
 
   const modifierSummary = marketScenarioModifierSummary(scenarioId);
   const baseEnd = baseSnapshot.totalFV;
-  const scenarioEnd = chartScenarioEnd;
+  const scenarioEnd = c.totalFV;
   const delta = scenarioEnd - baseEnd;
   const deltaTone = delta > 0 ? "positive" : delta < 0 ? "negative" : "neutral";
 
-  const scenarioControls = showActiveToggle ? (
-    <div className="market-scenario-context-row__controls">
-      <Toggle
-        className="market-scenario-context-row__active-toggle"
-        accessibilityLabel="Active market scenario"
-        value={marketScenarioActive}
-        onChange={onMarketScenarioActiveChange}
-      />
-      {isPaused ? (
-        <span className="market-scenario-context-row__paused-pill font-xs">
-          Paused
-        </span>
-      ) : null}
-    </div>
-  ) : null;
-
   const headingBlock = (
-    <ScenarioHeadingBlock
-      label={def.label}
-      dotClass={dotClass}
-      scenarioControls={scenarioControls}
-    />
+    <ScenarioHeadingBlock label={def.label} dotClass={dotClass} />
   );
 
   const copyBlock = (
@@ -217,15 +175,12 @@ export function MarketScenarioContextRow({
         deltaLabel={formatSignedDeltaK(delta)}
         deltaTone={deltaTone}
         retirementYear={series.years[series.years.length - 1] ?? retirementYear}
-        showDeltaHeadline={marketScenarioActive}
-        chartPaused={isPaused}
         animationKey={scenarioId}
       />
     </div>
   );
 
   const bodyClassName = "market-scenario-context-row__body";
-  const pausedClass = isPaused ? "market-scenario-context-row--paused" : "";
   const variantClass = `market-scenario-context-row--${scenarioId}`;
 
   return (
@@ -235,7 +190,6 @@ export function MarketScenarioContextRow({
           "market-scenario-context-row",
           "market-scenario-context-row--desktop",
           variantClass,
-          pausedClass,
           className,
         ]
           .filter(Boolean)
@@ -261,13 +215,11 @@ export function MarketScenarioContextRow({
             titleAs="span"
           />
         }
-        triggerAside={scenarioControls}
         defaultOpen={false}
         className={[
           "market-scenario-context-row",
           "market-scenario-context-row--mobile",
           variantClass,
-          pausedClass,
           className,
         ]
           .filter(Boolean)

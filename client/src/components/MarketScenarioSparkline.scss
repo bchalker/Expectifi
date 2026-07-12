@@ -30,6 +30,7 @@
 }
 
 .market-scenario-sparkline__chart-visual {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -106,7 +107,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 3;
+  z-index: 1;
   max-width: min(100%, 12rem);
   padding-left: calc(100% * var(--market-scenario-pad-left) / 200);
   text-align: left;
@@ -249,7 +250,7 @@
 }
 
 .market-scenario-sparkline__tooltip-wrapper {
-  z-index: 4;
+  z-index: 10;
   outline: none;
 }
 

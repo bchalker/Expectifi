@@ -118,7 +118,7 @@ import {
 } from "./PortfolioBucketAccountRow";
 import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
-import { MarketScenarioSelector } from "./MarketScenarioSelector";
+import { MarketScenarioButtonGroup, MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
 import { AccountGrowthBar } from "./AccountGrowthBar";
 import {
@@ -135,7 +135,6 @@ import {
 import {
   marketScenarioIsBase,
   normalizeMarketScenarioId,
-  resolveMarketScenarioActive,
 } from "../lib/marketScenario";
 import { aggregatedHoldingsForScenarioGuide } from "../lib/holdingScenarioGuideExamples";
 import { ImportedHoldingsScenarioGuide } from "./ImportedHoldingsScenarioGuide";
@@ -521,9 +520,6 @@ function AccountBalancesContent({
   );
   const retirementAge = inputs?.targetRetirementAge ?? c.targetRetirementAge;
   const marketScenarioId = normalizeMarketScenarioId(inputs?.marketScenario);
-  const marketScenarioActive = inputs
-    ? resolveMarketScenarioActive(inputs)
-    : false;
   const showMarketScenarioContext = Boolean(
     phase === "growth" &&
     inputs &&
@@ -3350,35 +3346,51 @@ function AccountBalancesContent({
             />
           ) : null}
           {hasAnyAccountCardData ? (
-            <div className="account-balances-header-row">
-              <div className="account-balances-header-row__title-block">
-                <h2 className="account-balances-header-row__title">
-                  Retirement Accounts
-                </h2>
-                {phase === "growth" || showWithdrawalGuidance ? (
-                  <TaxBreakdownPanelTrigger>
-                    Tax Details
-                  </TaxBreakdownPanelTrigger>
-                ) : null}
-              </div>
-              <div className="account-balances-header-row__actions">
-                <div className="account-balances-header-row__actions-primary">
-                  {phase === "growth" && inputs && setInputs ? (
-                    <MarketScenarioSelector
-                      value={normalizeMarketScenarioId(inputs.marketScenario)}
-                      onChange={(marketScenario) => {
-                        const id = normalizeMarketScenarioId(marketScenario);
-                        setInputs({
-                          marketScenario: id,
-                          marketScenarioActive: false,
-                        });
-                      }}
-                    />
+            <>
+              <div className="account-balances-header-row">
+                <div className="account-balances-header-row__title-block">
+                  <h2 className="account-balances-header-row__title">
+                    Retirement Accounts
+                  </h2>
+                  {phase === "growth" || showWithdrawalGuidance ? (
+                    <TaxBreakdownPanelTrigger>
+                      Tax Details
+                    </TaxBreakdownPanelTrigger>
                   ) : null}
-                  {headerManageMenu}
+                </div>
+                <div className="account-balances-header-row__actions">
+                  <div className="account-balances-header-row__actions-primary">
+                    {phase === "growth" && inputs && setInputs ? (
+                      <MarketScenarioSelector
+                        value={normalizeMarketScenarioId(inputs.marketScenario)}
+                        onChange={(marketScenario) => {
+                          const id = normalizeMarketScenarioId(marketScenario);
+                          setInputs({
+                            marketScenario: id,
+                            marketScenarioActive: !marketScenarioIsBase(id),
+                          });
+                        }}
+                      />
+                    ) : null}
+                    {headerManageMenu}
+                  </div>
                 </div>
               </div>
-            </div>
+              {phase === "growth" && inputs && setInputs ? (
+                <div className="account-balances-market-scenario-row">
+                  <MarketScenarioButtonGroup
+                    value={normalizeMarketScenarioId(inputs.marketScenario)}
+                    onChange={(marketScenario) => {
+                      const id = normalizeMarketScenarioId(marketScenario);
+                      setInputs({
+                        marketScenario: id,
+                        marketScenarioActive: !marketScenarioIsBase(id),
+                      });
+                    }}
+                  />
+                </div>
+              ) : null}
+            </>
           ) : null}
           <div
             className={[
@@ -3393,10 +3405,6 @@ function AccountBalancesContent({
               {marketScenarioCardMounted && inputs && setInputs ? (
                 <MarketScenarioContextRow
                   scenarioId={marketScenarioId}
-                  marketScenarioActive={marketScenarioActive}
-                  onMarketScenarioActiveChange={(active) =>
-                    setInputs({ marketScenarioActive: active })
-                  }
                   c={c}
                   inputs={inputs}
                   balanceModes={{

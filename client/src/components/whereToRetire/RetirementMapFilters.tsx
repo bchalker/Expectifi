@@ -9,6 +9,7 @@ import { AppButton } from "../ui/AppButton";
 import { AppOverlayScrollbars } from "../ui/AppOverlayScrollbars";
 import { BottomSheetHandle } from "../ui/BottomSheetHandle";
 import { useBottomSheetDrag } from "../../hooks/useBottomSheetDrag";
+import { useBottomSheetSlideShadow } from "../../hooks/useBottomSheetSlideShadow";
 import { useIsMobileBottomSheet } from "../../hooks/useMobileBottomSheet";
 import {
   ALL_DESTINATION_REGIONS,
@@ -366,6 +367,8 @@ export function RetirementMapFilters({
     onDismiss: onClose,
   });
 
+  const isSliding = useBottomSheetSlideShadow(panelRef, open, isMobileSheet);
+
   const clearFilters = () => {
     onChange({
       ...DEFAULT_MAP_FILTERS,
@@ -397,6 +400,7 @@ export function RetirementMapFilters({
           "wtr-map-filters--panel",
           isMobileSheet ? "wtr-map-filters--side" : "wtr-map-filters--map-rail",
           isMobileSheet && "wtr-map-filters--mobile-sheet",
+          isSliding && "mobile-bottom-sheet-panel--sliding",
           isDragging && "mobile-bottom-sheet-panel--dragging",
           open && "wtr-map-filters--open",
         ]

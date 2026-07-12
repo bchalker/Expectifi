@@ -4,6 +4,7 @@ import { AppOverlayScrollbars } from './ui/AppOverlayScrollbars'
 import { BottomSheetHandle } from './ui/BottomSheetHandle'
 import { CloseButton } from '@heroui/react'
 import { useBottomSheetDrag } from '../hooks/useBottomSheetDrag'
+import { useBottomSheetSlideShadow } from '../hooks/useBottomSheetSlideShadow'
 import { useIsMobileBottomSheet } from '../hooks/useMobileBottomSheet'
 import { useBottomSheetStackRegistration } from '../context/BottomSheetStackContext'
 import './ui/BottomSheet.scss'
@@ -71,6 +72,8 @@ export function SidePanelShell({
     onDismiss: onClose,
   })
 
+  const isSliding = useBottomSheetSlideShadow(panelRef, open, isMobileSheet)
+
   useEffect(() => {
     if (open) {
       setLatchedShellClass(shellClassName)
@@ -100,6 +103,7 @@ export function SidePanelShell({
         hasBelowHeader ? 'drawer-shell--with-below-header' : '',
         isMobileSheet ? 'drawer-shell--mobile-sheet' : '',
         isDragging ? 'drawer-shell--dragging' : '',
+        isSliding ? 'drawer-shell--sliding' : '',
         latchedShellClass,
         open ? 'drawer-shell--open' : '',
       ]

@@ -8,6 +8,7 @@ import { BottomSheetHandle } from './BottomSheetHandle'
 import { BottomSheetPortal } from './BottomSheetPortal'
 import { useBottomSheetStackRegistration } from '../../context/BottomSheetStackContext'
 import { useBottomSheetDrag } from '../../hooks/useBottomSheetDrag'
+import { useBottomSheetSlideShadow } from '../../hooks/useBottomSheetSlideShadow'
 import { useIsMobileBottomSheet } from '../../hooks/useMobileBottomSheet'
 
 type Props<T extends ElementType = 'aside'> = {
@@ -46,6 +47,8 @@ export function BottomSheetAside<T extends ElementType = 'aside'>({
     onDismiss: onClose,
   })
 
+  const isSliding = useBottomSheetSlideShadow(panelRef, open, isMobileSheet)
+
   useBottomSheetStackRegistration(open)
 
   return (
@@ -70,6 +73,7 @@ export function BottomSheetAside<T extends ElementType = 'aside'>({
         className={[
           className,
           isMobileSheet ? 'mobile-bottom-sheet-panel' : '',
+          isSliding ? 'mobile-bottom-sheet-panel--sliding' : '',
           isDragging ? 'mobile-bottom-sheet-panel--dragging' : '',
         ]
           .filter(Boolean)

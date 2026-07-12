@@ -52,7 +52,9 @@ export function GlobalGrowthRateSlider({
   const sliderPct = retRate * 100;
   const panelRangeFillStyle = useMemo(
     () =>
-      suffixLayout === "panel" ? growthRateRangeFillStyle(sliderPct) : undefined,
+      suffixLayout === "panel"
+        ? growthRateRangeFillStyle(sliderPct)
+        : undefined,
     [sliderPct, suffixLayout],
   );
 
@@ -76,7 +78,9 @@ export function GlobalGrowthRateSlider({
           <input
             type="range"
             className={
-              suffixLayout === "panel" ? "growth-slider-label__panel-range" : undefined
+              suffixLayout === "panel"
+                ? "growth-slider-label__panel-range"
+                : undefined
             }
             min={GROWTH_RATE_SLIDER_MIN}
             max={GROWTH_RATE_SLIDER_MAX}
@@ -85,7 +89,10 @@ export function GlobalGrowthRateSlider({
             style={panelRangeFillStyle}
             onInput={(e) => {
               const next = Number(e.currentTarget.value);
-              e.currentTarget.style.setProperty("--range-fill", growthRateRangeFillPct(next));
+              e.currentTarget.style.setProperty(
+                "--range-fill",
+                growthRateRangeFillPct(next),
+              );
               onRetRate(next / 100);
             }}
             aria-label="Global annual return percent"
@@ -94,7 +101,9 @@ export function GlobalGrowthRateSlider({
         sliderTicks={
           <div className="range-inline-ticks">
             <span className="range-inline-tick">3%</span>
-            <span className="range-inline-tick range-inline-tick--end">55%</span>
+            <span className="range-inline-tick range-inline-tick--end">
+              55%
+            </span>
           </div>
         }
       />

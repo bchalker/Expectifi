@@ -6,6 +6,7 @@ import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { BottomSheetHandle } from "./ui/BottomSheetHandle";
 import { BottomSheetPortal } from "./ui/BottomSheetPortal";
 import { useBottomSheetDrag } from "../hooks/useBottomSheetDrag";
+import { useBottomSheetSlideShadow } from "../hooks/useBottomSheetSlideShadow";
 import { useIsMobileBottomSheet } from "../hooks/useMobileBottomSheet";
 import { useBottomSheetStackRegistration } from "../context/BottomSheetStackContext";
 import {
@@ -441,6 +442,10 @@ export function TaxSummarySlidePanel({
 
   useBottomSheetStackRegistration(open);
 
+  const isSliding = useBottomSheetSlideShadow(panelRef, open, true, {
+    durationMs: isMobileSheet ? 300 : 250,
+  });
+
   return (
     <BottomSheetPortal enabled>
       {open ? (
@@ -459,6 +464,7 @@ export function TaxSummarySlidePanel({
         className={[
           "tax-summary-slide-panel",
           open && "tax-summary-slide-panel--open",
+          isSliding && "tax-summary-slide-panel--sliding",
           isMobileSheet && "tax-summary-slide-panel--mobile-sheet",
           isDragging && "mobile-bottom-sheet-panel--dragging",
           className,

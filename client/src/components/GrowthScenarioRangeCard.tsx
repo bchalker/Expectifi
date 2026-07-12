@@ -100,6 +100,12 @@ function WingRateRange({ row }: { row: GrowthScenarioRangeRow }) {
   );
 }
 
+function wingDeltaQualifier(id: GrowthScenarioRangeRow["id"]): string | null {
+  if (id === "very_bear") return "less";
+  if (id === "very_bull") return "more";
+  return null;
+}
+
 function WingDeltaRow({
   row,
   delta,
@@ -107,10 +113,26 @@ function WingDeltaRow({
   row: GrowthScenarioRangeRow;
   delta: number;
 }) {
+  const qualifier = wingDeltaQualifier(row.id);
+
   return (
     <div className="growth-scenario-range-card__wing-delta-row">
       <DeltaAmount delta={delta} />
-      <WingTrendIcon id={row.id} />
+      {qualifier ? (
+        <span
+          className={[
+            "growth-scenario-range-card__delta-qualifier",
+            row.id === "very_bear" &&
+              "growth-scenario-range-card__delta-qualifier--less",
+            row.id === "very_bull" &&
+              "growth-scenario-range-card__delta-qualifier--more",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {qualifier}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -120,6 +142,7 @@ function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
     <div className="growth-scenario-range-card__wing-item">
       <div className="growth-scenario-range-card__wing-label-row">
         <span className="growth-scenario-range-card__label">{row.label}</span>
+        <WingTrendIcon id={row.id} />
       </div>
       <span className="growth-scenario-range-card__wing-value tabular-nums">
         {fmt(Math.round(row.projectedFv))}

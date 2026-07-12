@@ -643,9 +643,13 @@ $tax-summary-column-edge-gradient: radial-gradient(
     max-height: 85vh;
     border: none;
     border-radius: 16px 16px 0 0;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+    box-shadow: none;
     transform: translateY(100%);
     transition: transform 0.3s ease;
+  }
+
+  .tax-summary-slide-panel--sliding {
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
   }
 
   .tax-summary-slide-panel--open {
@@ -678,14 +682,15 @@ $tax-summary-column-edge-gradient: radial-gradient(
     border-radius: 0;
     box-shadow: none;
     transform: translateX(100%);
-    transition:
-      transform 250ms ease-in-out,
-      box-shadow 250ms ease-in-out;
+    transition: transform 250ms ease-in-out;
+  }
+
+  .tax-summary-slide-panel--sliding {
+    box-shadow: -4px 0 18px var(--color-overlay-text-base);
   }
 
   .tax-summary-slide-panel--open {
     transform: translateX(0);
-    box-shadow: -4px 0 18px var(--color-overlay-text-base);
     pointer-events: auto;
   }
 }

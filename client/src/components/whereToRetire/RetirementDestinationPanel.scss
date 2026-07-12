@@ -902,16 +902,13 @@
     transform: translateY(100%);
     transition:
       transform 0.3s ease,
-      box-shadow 0.3s ease,
       visibility 0s linear 0.3s;
   }
 
   .wtr-dest-panel--sheet.wtr-dest-panel--open {
     transform: translateY(0);
-    box-shadow: 0 -12px 40px var(--color-overlay-ink-strong);
     transition:
       transform 0.3s ease,
-      box-shadow 0.3s ease,
       visibility 0s linear 0s;
   }
 

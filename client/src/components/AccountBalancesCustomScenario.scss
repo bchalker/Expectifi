@@ -145,6 +145,23 @@
   width: auto;
 }
 
+.account-balances-market-scenario-row {
+  display: none;
+  width: 100%;
+  padding: var(--space-4) var(--space-3);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1001px) {
+  .account-balances-market-scenario-row {
+    display: block;
+  }
+
+  .account-balances-header-row__actions-primary > .market-scenario-selector {
+    display: none;
+  }
+}
+
 .account-balances-header-row__entry {
   display: flex;
   flex-wrap: wrap;
@@ -1890,11 +1907,12 @@ background: rgba(0,0,0, .025);
 @keyframes holding-scenario-slide-sheet-in {
   from {
     transform: translateX(100%);
-    box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
   }
+
   to {
     transform: translateX(0);
-    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
+    box-shadow: none;
   }
 }
 
@@ -1903,9 +1921,10 @@ background: rgba(0,0,0, .025);
     transform: translateX(0);
     box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
   }
+
   to {
     transform: translateX(100%);
-    box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+    box-shadow: none;
   }
 }
 
@@ -1914,7 +1933,7 @@ background: rgba(0,0,0, .025);
     .portfolio-accounts-reveal.portfolio-accounts-reveal--in .holding-scenario-slide__sheet {
       animation: none;
       transform: translateX(0);
-      box-shadow: -10px 0 28px rgba(0, 0, 0, 0.14);
+      box-shadow: none;
     }
 
     .portfolio-accounts-reveal.portfolio-accounts-reveal--in
@@ -2163,7 +2182,7 @@ background: rgba(0,0,0, .025);
     border-radius: 16px 16px 0 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.14);
+    box-shadow: none;
     animation: holding-scenario-sheet-mobile-in 0.3s ease forwards;
   }
 
@@ -2175,20 +2194,24 @@ background: rgba(0,0,0, .025);
 @keyframes holding-scenario-sheet-mobile-in {
   from {
     transform: translateY(100%);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.14);
   }
 
   to {
     transform: translateY(0);
+    box-shadow: none;
   }
 }
 
 @keyframes holding-scenario-sheet-mobile-out {
   from {
     transform: translateY(0);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.14);
   }
 
   to {
     transform: translateY(100%);
+    box-shadow: none;
   }
 }
 
