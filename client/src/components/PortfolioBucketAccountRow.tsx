@@ -68,7 +68,6 @@ export function PortfolioBucketAccountRow({
 }: Props) {
   const showScenario = Boolean(scenario)
   const showActionSlot = Boolean(actionSlot)
-  const showActionsColumn = showScenario || showActionSlot || showViewHoldings
   const showHintStack = Boolean(subtext || withdrawalPill)
   const valuesBesideIdentity = amountBesideScenario || incomeSummary
 
@@ -106,6 +105,33 @@ export function PortfolioBucketAccountRow({
       ) : null}
     </div>
   )
+
+  const scenarioSlot = showActionSlot ? (
+    <div className="portfolio-bucket-account-row__scenario">{actionSlot}</div>
+  ) : showScenario ? (
+    <div className="portfolio-bucket-account-row__scenario">
+      <PortfolioScenarioCell layout="account" {...scenario!} />
+    </div>
+  ) : null
+
+  const chevronHint = showViewHoldings ? (
+    <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" />
+  ) : null
+
+  const scenarioColumn =
+    amountBesideScenario && scenarioSlot ? (
+      <div className="portfolio-bucket-account-row__actions portfolio-bucket-account-row__actions--scenario-only">
+        {scenarioSlot}
+      </div>
+    ) : null
+
+  const bundledActionsColumn =
+    !amountBesideScenario && (scenarioSlot || chevronHint) ? (
+      <div className="portfolio-bucket-account-row__actions">
+        {scenarioSlot}
+        {chevronHint}
+      </div>
+    ) : null
 
   return (
     <div
@@ -148,21 +174,10 @@ export function PortfolioBucketAccountRow({
               </div>
             </div>
           </div>
+          {scenarioColumn}
           {valuesBesideIdentity ? valuesColumn : null}
-          {showActionsColumn ? (
-            <div className="portfolio-bucket-account-row__actions">
-              {showActionSlot ? (
-                <div className="portfolio-bucket-account-row__scenario">{actionSlot}</div>
-              ) : showScenario ? (
-                <div className="portfolio-bucket-account-row__scenario">
-                  <PortfolioScenarioCell layout="account" {...scenario!} />
-                </div>
-              ) : null}
-              {showViewHoldings ? (
-                <ViewHoldingsHint className="portfolio-bucket-account-row__chevron" />
-              ) : null}
-            </div>
-          ) : null}
+          {amountBesideScenario ? chevronHint : null}
+          {bundledActionsColumn}
         </div>
         {allocationSlot ? (
           <div className="portfolio-bucket-account-row__allocation-row">{allocationSlot}</div>

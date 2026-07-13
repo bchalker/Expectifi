@@ -135,18 +135,6 @@ export function HoldingsSymbolCard({
               {description}
             </div>
           </div>
-          <div className="holdings-symbol-card__right">
-            <div className="holdings-symbol-card__field holdings-symbol-card__field--value">
-              <span className="holdings-symbol-card__field-label">Value:</span>
-              {valueAmount}
-            </div>
-            <div className="holdings-symbol-card__field holdings-symbol-card__field--basis">
-              <span className="holdings-symbol-card__field-label">Cost Basis:</span>
-              <span className="holdings-symbol-card__basis">
-                {costBasis != null ? fmt(costBasis) : '—'}
-              </span>
-            </div>
-          </div>
         </div>
         {scenario ? (
           <div
@@ -160,6 +148,18 @@ export function HoldingsSymbolCard({
             <HoldingsSymbolCardScenarioPanel scenario={scenario} />
           </div>
         ) : null}
+        <div className="holdings-symbol-card__right">
+          <div className="holdings-symbol-card__field holdings-symbol-card__field--value">
+            <span className="holdings-symbol-card__field-label">Value:</span>
+            {valueAmount}
+          </div>
+          <div className="holdings-symbol-card__field holdings-symbol-card__field--basis">
+            <span className="holdings-symbol-card__field-label">Cost Basis:</span>
+            <span className="holdings-symbol-card__basis">
+              {costBasis != null ? fmt(costBasis) : '—'}
+            </span>
+          </div>
+        </div>
       </div>
     </article>
   )

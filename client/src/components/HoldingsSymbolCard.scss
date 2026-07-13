@@ -513,25 +513,47 @@
   display: none;
 }
 
-/* Narrow card — stacked header + full-width action row */
+/* Narrow card — symbol row + scenario, values below */
 @container holdings-symbol-card (max-width: 420px) {
   .holdings-symbol-card__summary-row {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
     gap: 0;
   }
 
-  .holdings-symbol-card__left-main,
-  .holdings-symbol-card__right {
-    padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem) var(--space-1) /* review: was 0.15rem */;
-  }
-
   .holdings-symbol-card__content {
-    width: 100%;
+    display: contents;
+  }
+
+  .holdings-symbol-card__left,
+  .holdings-symbol-card__left-main {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .holdings-symbol-card__left-main {
+    padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem) var(--space-1);
+  }
+
+  .holdings-symbol-card__actions {
+    grid-column: 2;
+    grid-row: 1;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    align-self: center;
+    padding: var(--portfolio-row-pad-y-start, 0.5rem) var(--portfolio-row-pad-x, 1rem) var(--space-1);
   }
 
   .holdings-symbol-card__right {
+    grid-column: 1 / -1;
+    grid-row: 2;
     flex: 0 0 auto;
     align-items: flex-end;
+    padding: 0 var(--portfolio-row-pad-x, 1rem) var(--portfolio-row-pad-y-start, 0.5rem);
   }
 
   .holdings-symbol-card__field--value .holdings-symbol-card__field-label {
@@ -541,33 +563,21 @@
   .holdings-symbol-card__field--basis {
     flex-direction: row;
     align-items: baseline;
-    gap: var(--space-1) /* review: was 0.35rem */;
+    gap: var(--space-1);
     text-align: right;
   }
 
-  .holdings-symbol-card__actions {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    min-height: 0;
-    align-self: auto;
-    align-items: stretch;
-    // padding: var(--portfolio-scenario-stack-pad-top, 0.75rem) var(--portfolio-row-pad-x, 1rem) var(--space-2);
-
-  }
-
   .holdings-symbol-card__scenario {
-    width: 100%;
+    width: auto;
     min-width: 0;
     height: auto;
-    align-self: auto;
+    align-self: center;
   }
 
   .holdings-symbol-card__scenario .portfolio-scenario-cell--holding {
     height: auto;
     min-height: 0;
-    align-self: auto;
+    align-self: center;
   }
 
   .holdings-symbol-card__scenario .portfolio-scenario-cell--holding .holdings-scenario-trigger,
@@ -584,7 +594,7 @@
   }
 }
 
-/* Wide card — single horizontal row */
+/* Wide card — symbol | scenario | value/cost basis */
 @container holdings-symbol-card (min-width: 421px) {
   .holdings-symbol-card__summary-row {
     flex-direction: row;
@@ -599,6 +609,14 @@
     align-items: center;
   }
 
+  .holdings-symbol-card__left-main {
+    padding: var(--space-2) var(--space-4) var(--space-1);
+  }
+
+  .holdings-symbol-card__right {
+    padding: var(--space-2) var(--space-4) var(--space-1);
+  }
+
   .holdings-symbol-card__actions {
     flex: 0 0 auto;
     width: var(--holdings-scenario-col-w, auto);
@@ -607,6 +625,11 @@
     align-self: stretch;
     align-items: stretch;
     min-height: 0;
+  }
+
+  .holdings-symbol-card__right {
+    flex: 0 0 auto;
+    align-self: center;
   }
 
   .holdings-symbol-card__scenario {
@@ -621,7 +644,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: baseline;
-    gap: var(--space-1) /* review: was 0.35rem */;
+    gap: var(--space-1);
   }
 
   .holdings-symbol-card__field--value .holdings-symbol-card__field-label {

@@ -7,9 +7,14 @@
   --portfolio-account-row-bg-closed: color-mix(in srgb, var(--sky-blue) 50%, transparent);
   --portfolio-scenario-trigger-min: 9rem;
   --portfolio-scenario-col-pad-x: var(--space-3);
-  --portfolio-account-chevron-pad-end: var(--space-4);
+  --portfolio-account-chevron-pad-end: var(--portfolio-row-pad-x);
   --portfolio-account-chevron-gap: var(--space-3);
   --portfolio-value-col-pad: var(--space-4);
+  --portfolio-account-value-width: 8.5rem;
+  /* Gutter to the right of the account value: flex gap + 16px chevron + row pad */
+  --portfolio-value-trailing-gutter: calc(
+    var(--space-3) + 16px + var(--portfolio-row-pad-x)
+  );
   --portfolio-row-pad: var(--space-4);
   --portfolio-row-pad-x: var(--portfolio-row-pad);
   --portfolio-row-pad-y-start: var(--portfolio-row-pad);
@@ -407,7 +412,25 @@
 }
 
 .tax-treatment-disclosure.portfolio-account-group .portfolio-bucket-account-row__chevron.view-holdings-hint {
-  padding-right: 0;
+  padding-right: var(--portfolio-row-pad-x);
+}
+
+/* Holding value column mirrors the account value column: same content width,
+   right edge aligned under the account balance (chevron gutter compensated). */
+@container holdings-symbol-card (min-width: 421px) {
+  .tax-treatment-disclosure.portfolio-account-group .holdings-symbol-card__right {
+    width: calc(
+      var(--portfolio-account-value-width) + var(--portfolio-value-trailing-gutter)
+    );
+    min-width: calc(
+      var(--portfolio-account-value-width) + var(--portfolio-value-trailing-gutter)
+    );
+    max-width: calc(
+      var(--portfolio-account-value-width) + var(--portfolio-value-trailing-gutter)
+    );
+    padding-left: 0;
+    padding-right: var(--portfolio-value-trailing-gutter);
+  }
 }
 
 @container portfolio-bucket-account-row (max-width: 420px) {
