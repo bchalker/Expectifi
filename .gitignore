@@ -7,4 +7,3 @@ dist
 client/dist
 server/dist
 client/public/flags
-supabase/.temp

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Commit (if needed), verify client build, push to GitHub → Railway auto-deploys.
+# Commit (if needed), verify client build, push to GitHub → production auto-deploys.
 #
 # Usage:
-#   deploy-railway.sh "Commit message"     # commit dirty tree + build + push main
+#   deploy-railway.sh "Commit title" --desc "What changed and why"
 #   deploy-railway.sh --push-only          # push existing commits only (fails if dirty)
 #
+# When you have uncommitted changes, both a title and description are required.
 # Secrets in server/.env and client/.env are never committed.
 
 set -euo pipefail
@@ -13,19 +14,36 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
 
 PUSH_ONLY=0
-MSG=""
+TITLE=""
+DESC=""
 
-for arg in "$@"; do
-  case "$arg" in
-    --push-only) PUSH_ONLY=1 ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --push-only)
+      PUSH_ONLY=1
+      shift
+      ;;
+    --desc)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --desc requires a value."
+        exit 1
+      fi
+      DESC="$2"
+      shift 2
+      ;;
     -h | --help)
-      sed -n '2,8p' "$0"
+      sed -n '2,9p' "$0"
       exit 0
       ;;
     *)
-      if [[ -z "$MSG" ]]; then
-        MSG="$arg"
+      if [[ -z "$TITLE" ]]; then
+        TITLE="$1"
+      else
+        echo "ERROR: Unexpected argument: $1"
+        echo "  Use: deploy-railway.sh \"Title\" --desc \"Description\""
+        exit 1
       fi
+      shift
       ;;
   esac
 done
@@ -39,10 +57,27 @@ if [[ -z "$BRANCH" ]]; then
 fi
 
 if [[ "$BRANCH" != "$DEPLOY_BRANCH" ]]; then
-  echo "ERROR: You are on '$BRANCH'. Railway tracks '$DEPLOY_BRANCH'."
+  echo "ERROR: You are on '$BRANCH'. Production tracks '$DEPLOY_BRANCH'."
   echo "  git checkout $DEPLOY_BRANCH"
   exit 1
 fi
+
+require_commit_metadata() {
+  if [[ -z "${TITLE//[[:space:]]/}" ]]; then
+    echo "ERROR: Production deploy requires a commit title."
+    echo '  deploy-railway.sh "Short title" --desc "What changed and why"'
+    exit 1
+  fi
+  if [[ -z "${DESC//[[:space:]]/}" ]]; then
+    echo "ERROR: Production deploy requires a commit description."
+    echo '  deploy-railway.sh "Short title" --desc "What changed and why"'
+    exit 1
+  fi
+  if [[ "$TITLE" == "Deploy production updates" ]]; then
+    echo "ERROR: Use a specific commit title — not the generic \"Deploy production updates\"."
+    exit 1
+  fi
+}
 
 block_env_commit() {
   if git diff --cached --name-only 2>/dev/null | grep -qE '(^|/)server/\.env$|(^|/)client/\.env$'; then
@@ -59,18 +94,15 @@ fi
 
 if [[ "$PUSH_ONLY" -eq 1 ]]; then
   if [[ "$HAS_CHANGES" -eq 1 ]]; then
-    echo "ERROR: Uncommitted changes — Railway only deploys what is on GitHub."
-    echo "  Use task: Deploy: commit, build check, push to Railway"
+    echo "ERROR: Uncommitted changes — production only deploys what is on GitHub."
+    echo '  Use: Deploy: commit, build check, push to production'
     echo ""
     git status --short
     exit 1
   fi
 else
   if [[ "$HAS_CHANGES" -eq 1 ]]; then
-    if [[ -z "${MSG//[[:space:]]/}" ]]; then
-      MSG="Deploy $(date '+%Y-%m-%d %H:%M')"
-      echo "No commit message — using: $MSG"
-    fi
+    require_commit_metadata
 
     echo "── Staging changes ──"
     git add -A
@@ -81,13 +113,15 @@ else
       echo "Nothing to commit after staging (only ignored .env files?)."
     else
       echo ""
-      echo "── Production build check (same as Railway Docker) ──"
+      echo "── Production build check ──"
       npm run build -w client
 
       echo ""
       echo "── Committing ──"
+      echo "Title: $TITLE"
+      echo "Description: $DESC"
       git status --short
-      git commit -m "$MSG"
+      git commit -m "$TITLE" -m "$DESC"
       echo "Committed: $(git log -1 --oneline)"
     fi
   else
@@ -105,7 +139,7 @@ REMOTE_HEAD="$(git rev-parse "origin/$DEPLOY_BRANCH" 2>/dev/null || echo "")"
 if [[ -n "$REMOTE_HEAD" && "$LOCAL_HEAD" == "$REMOTE_HEAD" ]]; then
   echo ""
   echo "WARNING: origin/$DEPLOY_BRANCH already at $(git rev-parse --short HEAD)."
-  echo "  No new commits to push — Railway will NOT rebuild unless you redeploy in the dashboard."
+  echo "  No new commits to push — production will NOT rebuild unless you redeploy manually."
   if [[ "$HAS_CHANGES" -eq 1 && "$PUSH_ONLY" -eq 0 ]]; then
     echo "  (Commit step may have been skipped — check status above.)"
   fi
@@ -129,7 +163,6 @@ if [[ "$REMOTE_AFTER" != "$LOCAL_HEAD" ]]; then
 fi
 
 echo ""
-echo "Done. GitHub has $(git rev-parse --short HEAD) — Railway should start a new deployment."
-echo "  • Railway → retirement_calc_app → Deployments (wait for Success)"
+echo "Done. GitHub has $(git rev-parse --short HEAD) — production should start a new deployment."
 echo "  • Hard-refresh https://expectifi.com (Cmd+Shift+R)"
 echo "  • Health: https://expectifi.com/api/health"

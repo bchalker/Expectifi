@@ -56,7 +56,6 @@ Monorepo workspaces: `client`, `server`, `shared`.
 ├── client/          React app (calculator UI, maps, onboarding)
 ├── server/          Express API (auth, billing, Plaid, plan sync)
 ├── shared/          Types and logic shared across client and server
-├── supabase/        SQL migrations (reference / deployment)
 └── scripts/         Dev helpers, deploy, data refresh jobs
 ```
 
@@ -99,7 +98,7 @@ Minimum for local dev:
 
 See `server/.env.example` for optional integrations: Google OAuth, Stripe, Plaid, Wise, SMTP.
 
-The server runs `ensureSchema()` on startup and creates tables if they do not exist.
+The server runs `ensureSchema()` in `server/db.ts` on startup — that is the schema source of truth (tables are created and migrated in code).
 
 ### Run locally
 
@@ -153,12 +152,10 @@ Never commit `server/.env`. Example files only.
 
 ## Deployment
 
-Production runs the Express server, which serves the built client from `client/dist`. Environment variables are set on the host (e.g. Railway):
+Production runs the Express server, which serves the built client from `client/dist`. Set environment variables on your host:
 
 - `DATABASE_URL`, `JWT_SECRET`, `CLIENT_ORIGIN`, `API_PUBLIC_URL`
 - Stripe, Google, and Plaid keys as required
-
-See `scripts/deploy-railway.sh` for the deploy workflow used in this project.
 
 ---
 

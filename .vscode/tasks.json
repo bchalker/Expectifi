@@ -2,10 +2,16 @@
   "version": "2.0.0",
   "inputs": [
     {
-      "id": "deployCommitMessage",
+      "id": "deployCommitTitle",
       "type": "promptString",
-      "description": "Commit message (required when you have uncommitted changes)",
-      "default": "Deploy production updates"
+      "description": "Commit title (required when you have uncommitted changes)",
+      "default": ""
+    },
+    {
+      "id": "deployCommitDescription",
+      "type": "promptString",
+      "description": "Commit description — what changed and why (required for production deploy)",
+      "default": ""
     }
   ],
   "tasks": [
@@ -77,12 +83,14 @@
       }
     },
     {
-      "label": "Deploy: commit, build check, push to Railway",
+      "label": "Deploy: commit, build check, push to production",
       "type": "shell",
       "command": "bash",
       "args": [
         "${workspaceFolder}/scripts/deploy-railway.sh",
-        "${input:deployCommitMessage}"
+        "${input:deployCommitTitle}",
+        "--desc",
+        "${input:deployCommitDescription}"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
