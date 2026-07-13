@@ -1,6 +1,6 @@
 # Expectifi
 
-**Plan retirement income — then find where it goes furthest.**
+**Plan retirement income, then find where it goes furthest.**
 
 Expectifi is a multi-tenant SaaS retirement income calculator. Model portfolio growth and withdrawal strategies across taxable, pre-tax, Roth, and HSA accounts, then connect projected income to a global **Where to Retire** map that ranks 870+ cities by real surplus after taxes and cost of living.
 
@@ -25,7 +25,7 @@ Live at [expectifi.com](https://expectifi.com).
 - 870 cities across 135 countries
 - Cost of living, healthcare, climate, air quality, and expat community data
 - Local tax treatment on foreign pension income
-- Live connection to calculator income — cities update as you change inputs
+- Live connection to calculator income; cities update as you change inputs
 
 ### Accounts & plans
 
@@ -59,7 +59,7 @@ Monorepo workspaces: `client`, `server`, `shared`.
 └── scripts/         Dev helpers, deploy, data refresh jobs
 ```
 
-Financial calculation logic lives in pure functions under `client/src/lib/calc/` — not in components or API routes.
+Financial calculation logic lives in pure functions under `client/src/lib/calc/`, not in components or API routes.
 
 ---
 
@@ -98,17 +98,17 @@ Minimum for local dev:
 
 See `server/.env.example` for optional integrations: Google OAuth, Stripe, Plaid, Wise, SMTP.
 
-The server runs `ensureSchema()` in `server/db.ts` on startup — that is the schema source of truth (tables are created and migrated in code).
+The server runs `ensureSchema()` in `server/db.ts` on startup. That is the schema source of truth (tables are created and migrated in code).
 
 ### Run locally
 
 In two terminals:
 
 ```bash
-# Terminal 1 — API (port 3001)
+# Terminal 1: API (port 3001)
 npm run dev:server
 
-# Terminal 2 — Vite (port 5173)
+# Terminal 2: Vite (port 5173)
 npm run dev:client
 ```
 
@@ -140,11 +140,11 @@ Open [http://localhost:5173](http://localhost:5173).
 
 Configure in `server/.env` as needed:
 
-- **Stripe** — premium subscriptions and webhooks
-- **Google OAuth** — sign-in; callback path is `/api/auth/google/callback`
-- **Plaid** — linked brokerage and investment accounts
-- **Wise** — live exchange rates for Where to Retire (public rates work without credentials)
-- **SMTP** — contact form delivery
+- **Stripe:** premium subscriptions and webhooks
+- **Google OAuth:** sign-in; callback path is `/api/auth/google/callback`
+- **Plaid:** linked brokerage and investment accounts
+- **Wise:** live exchange rates for Where to Retire (public rates work without credentials)
+- **SMTP:** contact form delivery
 
 Never commit `server/.env`. Example files only.
 
@@ -163,7 +163,7 @@ Production runs the Express server, which serves the built client from `client/d
 
 - **Multi-tenant:** all user data is scoped by `user_id`; no global personal financial state.
 - **Configurable per user:** balances, retirement age, SS benefits, dividend yield, withdrawal rate, filing status, currency, and more.
-- **Admin-managed constants:** tax brackets, standard deductions, and SS thresholds come from the database — not hardcoded in the app.
+- **Admin-managed constants:** tax brackets, standard deductions, and SS thresholds come from the database, not hardcoded in the app.
 - **Plan gating:** features are gated via a `usePlan()` hook; plan checks are not scattered in components.
 
 ---
