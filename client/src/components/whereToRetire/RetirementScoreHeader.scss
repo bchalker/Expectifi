@@ -69,9 +69,8 @@
   color: var(--wtr-band-color);
   line-height: 1.15;
 }
-
 .wtr-score-header__panel-score-value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 700;
   font-variant-numeric: tabular-nums;

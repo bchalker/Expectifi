@@ -350,10 +350,9 @@ input[type='range'].growth-slider-label__panel-range::-moz-range-progress {
   flex-direction: column;
   gap: var(--space-1) /* review: was 2px */;
 }
-
 .growth-slider-hover-pop__symbol {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.3;
@@ -386,12 +385,11 @@ input[type='range'].growth-slider-label__panel-range::-moz-range-progress {
   color: var(--text-muted);
   margin-top: var(--space-2);
 }
-
 .growth-slider-hover-pop__delta {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-weight: 600;
   margin-top: var(--space-1);
 }

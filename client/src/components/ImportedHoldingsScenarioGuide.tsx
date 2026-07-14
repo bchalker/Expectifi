@@ -15,7 +15,9 @@ type Props = {
 
 function TickerSymbol({ symbol }: { symbol: string }) {
   return (
-    <strong className="imported-holdings-scenario-guide__ticker">{symbol}</strong>
+    <strong className="imported-holdings-scenario-guide__ticker">
+      {symbol}
+    </strong>
   );
 }
 
@@ -24,15 +26,15 @@ function GrowthLeadCopy({ dynamicHoldings }: { dynamicHoldings: string[] }) {
 
   return (
     <p className="imported-holdings-scenario-guide__lead">
-      The global rate applies to everything as a starting point. Click
-      Scenario next to any holding to set a custom rate, pick a market outlook,
-      or dial in year-by-year projections
+      The global rate applies to everything as a starting point. Click Scenario
+      next to any holding to set a custom rate, pick a market outlook, or dial
+      in year-by-year projections
       {holding1 && holding2 ? (
         <>
           {" "}
           for positions like <TickerSymbol symbol={holding1} /> and{" "}
-          <TickerSymbol symbol={holding2} /> that may behave differently from the
-          rest of your portfolio.
+          <TickerSymbol symbol={holding2} /> that may behave differently from
+          the rest of your portfolio.
         </>
       ) : holding1 ? (
         <>
@@ -93,9 +95,9 @@ export function ImportedHoldingsScenarioGuide({
               <u>{(inflationAdj * 100).toFixed(1)}%</u>
             )}{" "}
             applied globally.{" "}
-            <em className="imported-holdings-scenario-guide__lead-note">
+            <span className="imported-holdings-scenario-guide__lead-note">
               Note: {INCOME_RECOMMENDATION_DISCLAIMER}
-            </em>
+            </span>
           </p>
         </div>
       </aside>

@@ -78,9 +78,8 @@
   margin-left: auto;
   text-align: right;
 }
-
 .life-events-panel__impact-value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   line-height: var(--leading-snug);

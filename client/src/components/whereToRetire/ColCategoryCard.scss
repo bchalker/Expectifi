@@ -53,10 +53,9 @@
   gap: var(--space-1);
   min-width: 0;
 }
-
 .wtr-col-category-card__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--text);
@@ -69,11 +68,10 @@
   line-height: 1.15;
   color: var(--text-muted);
 }
-
 .wtr-col-category-card__head-amount {
   flex-shrink: 0;
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 700;
   line-height: 1.1;

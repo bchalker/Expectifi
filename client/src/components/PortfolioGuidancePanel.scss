@@ -46,12 +46,11 @@
   outline: 2px solid var(--accent-text);
   outline-offset: -2px;
 }
-
 .portfolio-guidance__trigger-label {
   min-width: 0;
   flex: 1 1 auto;
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: var(--leading-snug, 1.35);

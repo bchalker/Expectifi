@@ -210,9 +210,8 @@
   font-family: var(--body);
   margin-bottom: var(--space-1);
 }
-
 .retire-regions__hero-val {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: clamp(1.25rem, 3vw, 1.65rem);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

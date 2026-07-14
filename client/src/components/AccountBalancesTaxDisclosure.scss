@@ -523,9 +523,8 @@
   word-break: break-word;
   text-align: left;
 }
-
 .tax-source-account-disclosure__total {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

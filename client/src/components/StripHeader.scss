@@ -132,7 +132,7 @@
   align-items: baseline;
   justify-content: center;
   gap: 0.12em;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-strip);
   line-height: 1.05;
   color: var(--accent-text);
@@ -141,10 +141,9 @@
   font-variant-numeric: tabular-nums;
 }
 .strip-total-val-suffix {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: 0.52em;
   font-weight: 500;
-  letter-spacing: 0.02em;
   line-height: 1;
 }
 .strip-total-val.strip-total-val--period-labels {
@@ -266,9 +265,8 @@
   border: 1px solid var(--border);
   color: var(--text-faint);
 }
-
 .strip-equation-main-val {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 500;
   color: var(--text);

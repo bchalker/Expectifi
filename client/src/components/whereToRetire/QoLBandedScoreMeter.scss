@@ -24,9 +24,8 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
-
 .qol-banded-meter__score-value {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-xl);
   font-weight: 800;
   color: var(--text);

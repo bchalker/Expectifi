@@ -422,10 +422,9 @@
   top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
   right: var(--space-3);
 }
-
 .pref-wizard-modal__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
 }

@@ -188,10 +188,9 @@
   gap: var(--space-2) /* review: was 0.4rem */;
   min-width: 0;
 }
-
 .market-scenario-context-row__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   line-height: 1.25;

@@ -151,14 +151,13 @@
   border-radius: 8px;
   object-fit: contain;
 }
-
 .plaid-connection-panel__logo-fallback {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: var(--surface2, var(--surface));
   border: 1px solid var(--border);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-muted);

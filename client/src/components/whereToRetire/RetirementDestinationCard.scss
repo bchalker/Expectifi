@@ -136,8 +136,8 @@
 
 .wtr-dest-card__fit-col {
   display: flex;
-  flex: 0 0 3rem;
-  width: 3rem;
+  flex: 0 0 3.2rem;
+  width: 3.2rem;
   align-items: stretch;
   padding: var(--space-1);
   gap: 0;
@@ -235,17 +235,19 @@
 
 .wtr-dest-card__budget-amount {
   font-size: var(--text-sm);
-  font-weight: 700;
+  font-weight: 400;
+  font-family: var(--body);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  letter-spacing: var(--tracking-normal);
   line-height: var(--leading-tight);
   color: var(--text);
   white-space: nowrap;
 }
 
 .wtr-dest-card__budget-suffix {
-  font-size: var(--text-base);
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: 400;
   color: var(--text-muted);
 }
 
@@ -308,9 +310,8 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
-
 .wtr-dest-card__name {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--color-text-base);
@@ -462,10 +463,9 @@
   flex-direction: column;
   gap: var(--space-2);
 }
-
 .wtr-dest-card-list__title {
   margin: 0 0 var(--space-2);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);

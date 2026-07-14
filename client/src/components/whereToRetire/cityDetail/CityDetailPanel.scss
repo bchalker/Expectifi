@@ -63,12 +63,11 @@
   gap: var(--space-1);
   min-width: 0;
 }
-
 .wtr-city-detail__fit-score-value {
   display: inline-flex;
   align-items: baseline;
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 400;
   line-height: 1;
@@ -119,11 +118,10 @@
   padding: var(--space-4);
   box-sizing: border-box;
 }
-
 .wtr-city-detail__name {
   margin: 0;
   min-width: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-text-primary, var(--text));
@@ -201,10 +199,9 @@
   text-align: right;
   box-sizing: border-box;
 }
-
 .wtr-city-detail__cost-total {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -433,9 +430,8 @@
 .wtr-city-detail__tab-content .detail-panel-card {
   box-shadow: 4px 0 20px -6px rgba(0, 0, 0, 0.2);
 }
-
 .wtr-city-detail__section-title {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.3;

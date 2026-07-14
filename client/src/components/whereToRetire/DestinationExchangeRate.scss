@@ -41,10 +41,9 @@
 .wtr-exchange-rate__rate-row {
   margin: 0;
 }
-
 .wtr-exchange-rate__spot-rate {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   font-variant-numeric: tabular-nums;

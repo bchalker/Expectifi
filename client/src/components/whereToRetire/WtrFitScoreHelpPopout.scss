@@ -71,12 +71,11 @@
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
-
 .wtr-fit-score-help__title {
   margin: 0;
   min-width: 0;
   flex: 1 1 auto;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.3;

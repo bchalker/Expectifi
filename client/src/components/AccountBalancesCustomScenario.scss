@@ -20,17 +20,15 @@
   min-width: 0;
   // margin-bottom: var(--space-4);
 }
-
 .account-balances-header-row__title {
   margin: 0;
   padding: 0;
   border: none;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);
   text-transform: none;
-  letter-spacing: normal;
   line-height: var(--leading-snug);
 }
 
@@ -475,9 +473,8 @@
   font-weight: 500;
   color: var(--text-faint);
 }
-
 .account-balances-total-retirement__value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: var(--leading-tight);
@@ -570,9 +567,8 @@ background: rgba(0,0,0, .025);
   line-height: 1.25;
   color: var(--text-muted);
 }
-
 .account-balances-section-footer__total-value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   line-height: var(--leading-tight);
@@ -718,10 +714,9 @@ background: rgba(0,0,0, .025);
   opacity: 0;
   animation: financials-entry-fade-rise 0.5s cubic-bezier(0.33, 1, 0.68, 1) 0.48s both;
 }
-
 .account-balances-financials-entry__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   line-height: var(--leading-snug);
@@ -1605,10 +1600,9 @@ background: rgba(0,0,0, .025);
   line-height: 1.45;
   color: var(--text-muted);
 }
-
 .account-balances-edit-sheet__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);
@@ -1829,10 +1823,9 @@ background: rgba(0,0,0, .025);
   box-shadow: 0 12px 40px var(--color-overlay-text-soft);
   box-sizing: border-box;
 }
-
 .account-balances-remove-overlay__title {
   margin: 0 0 var(--space-3) /* review: was 0.65rem */;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text);

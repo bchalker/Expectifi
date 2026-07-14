@@ -142,11 +142,9 @@
   align-self: auto;
   padding: 0;
 }
-
 .portfolio-bucket-account-row__name {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
-  letter-spacing: -0.03em;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text);
@@ -232,15 +230,13 @@
 .portfolio-bucket-account-row:has([data-balance-editing='true']) .portfolio-bucket-account-row__actions {
   pointer-events: none;
 }
-
 .portfolio-bucket-account-row__total {
   flex-shrink: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: var(--leading-tight);
   color: var(--text);
-  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   white-space: nowrap;

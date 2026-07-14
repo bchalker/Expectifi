@@ -199,9 +199,8 @@
   flex-shrink: 0;
   line-height: 0;
 }
-
 .wtr-compare-table__col-name {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 700;
   color: var(--text);
@@ -249,9 +248,8 @@
   line-height: 1.25;
   text-decoration: none;
 }
-
 .wtr-compare-table__col-city-trigger-text {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--wtr-compare-baseline-city);
@@ -375,11 +373,10 @@
 .wtr-compare-table__section-row:first-child .wtr-compare-table__section-head {
   border-top: none;
 }
-
 .wtr-compare-table__section-head-text {
   display: block;
   padding: var(--space-2) /* review: was 0.6rem */ var(--space-3) /* review: was 0.85rem */;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 700;
   color: var(--text);

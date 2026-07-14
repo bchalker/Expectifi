@@ -75,9 +75,8 @@
   gap: var(--space-1);
   max-width: 100%;
 }
-
 .import-ledger__total {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 500;
   color: var(--accent-text);

@@ -51,10 +51,9 @@
   background: var(--accent-light);
   color: var(--accent-text);
 }
-
 .upgrade-prompt__title {
   margin: 0 0 var(--space-2);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text);

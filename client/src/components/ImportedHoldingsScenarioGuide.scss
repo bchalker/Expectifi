@@ -68,13 +68,11 @@
   flex: 1 1 0;
   min-width: 0;
 }
-
 .imported-holdings-scenario-guide__title {
   margin: 0 0 var(--space-1) /* review: was 0.35rem */;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
-  letter-spacing: -0.03em;
   line-height: var(--leading-snug);
   color: var(--accent-text);
 }
@@ -99,11 +97,7 @@
   color: var(--text);
 }
 
-.imported-holdings-scenario-guide__lead-note {
-  font-style: italic;
-  font-weight: 400;
-  color: var(--text-muted);
-}
+
 
 .imported-holdings-scenario-guide__options {
   flex: 1 1 0;
@@ -224,4 +218,9 @@
 
 .imported-holdings-scenario-guide__lead .imported-holdings-scenario-guide__ticker {
   color: var(--color-amber-dark);
+}
+.imported-holdings-scenario-guide__lead-note {
+  font-style: italic;
+
+  color: var(--text-muted);
 }

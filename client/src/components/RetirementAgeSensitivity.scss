@@ -370,7 +370,6 @@
 .retirement-sensitivity__row--goal .retirement-sensitivity__age-col--goal.retirement-sensitivity__age-col--selected {
   background: var(--sky-blue-u2);
 }
-
 .retirement-sensitivity__age-btn {
   display: inline-flex;
   align-items: center;
@@ -381,7 +380,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: 1;

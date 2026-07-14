@@ -44,10 +44,9 @@ margin-bottom: var(--space-3);
   grid-column: 1;
   min-width: 0;
 }
-
 .wtr-weather-tab__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.15;
@@ -159,10 +158,8 @@ margin-bottom: var(--space-6);
 .wtr-weather-tab__section-header .wtr-weather-tab__section-title {
   margin: 0;
 }
-
 .wtr-weather-tab__section-title {
-
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 700;
   line-height: 1.3;

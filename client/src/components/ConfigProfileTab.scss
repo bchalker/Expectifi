@@ -10,13 +10,11 @@
   text-align: center;
   padding: var(--space-5) var(--space-2) var(--space-3);
 }
-
 .config-profile-tab__empty-title {
   margin: 0 0 var(--space-3) /* review: was 0.65rem */;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
   color: var(--text);
 }
 
@@ -226,10 +224,9 @@ button.config-profile-tab__empty-cta.app-btn--primary[data-slot='button']:hover:
   box-shadow: none;
   text-align: center;
 }
-
 .config-profile-tab__confirm-title {
   margin: 0 0 var(--space-3);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 500;
   color: var(--text);

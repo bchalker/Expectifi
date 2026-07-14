@@ -211,9 +211,8 @@
   grid-template-columns: 1fr;
   justify-items: end;
 }
-
 .csv-import-modal__title {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);
@@ -686,11 +685,9 @@
   color: var(--text-muted);
   margin: 0 0 var(--space-2);
 }
-
 /* Import intent step (existing holdings) */
 .csv-import-intent__title {
-
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text);
@@ -807,11 +804,10 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
-
 /* Diff summary (update existing) */
 .csv-import-diff__title {
   margin: 0 0 var(--space-2);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text);

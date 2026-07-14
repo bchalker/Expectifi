@@ -23,7 +23,7 @@
 .where-to-retire-preview-panel__title {
   margin: 0;
   font-family: var(--body);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
   line-height: 1.4;
   color: var(--color-text-primary);
@@ -31,7 +31,9 @@
 
 .where-to-retire-preview-panel__title-income {
   color: var(--color-amber);
+  font-family: var(--heading-number);
   font-variant-numeric: tabular-nums;
+  font-weight: 800;
   font-feature-settings: 'tnum';
 }
 
@@ -283,7 +285,6 @@
   padding: var(--space-2) 0;
   box-sizing: border-box;
 }
-
 .where-to-retire-preview-panel__cta-primary {
   display: inline-flex;
   align-items: center;
@@ -292,19 +293,18 @@
   width: fit-content;
   max-width: 100%;
   // min-height: 44px;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--tracking-heading);
   margin: 0;
   padding: var(--space-2) var(--space-4);
   border: none;
   border-radius: var(--space-2);
   background: var(--green1);
-  font-family: var(--heading);
+  font-family: var(--heading); 
   font-size: var(--text-base);
   font-weight: 700;
   line-height: normal;
   color: var(--color-primary-on, var(--accent-contrast));
   cursor: pointer;
-
   box-sizing: border-box;
   text-align: center;
   -webkit-tap-highlight-color: transparent;

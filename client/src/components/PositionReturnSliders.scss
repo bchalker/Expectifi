@@ -111,9 +111,8 @@
 .position-return-sentiment .position-return-scenario-wrap {
   margin-bottom: 0;
 }
-
 .position-return-sentiment__label {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
@@ -143,9 +142,8 @@
 .position-return-assumption {
   margin-bottom: var(--space-3);
 }
-
 .position-return-assumption__label {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
@@ -195,9 +193,8 @@
   gap: var(--space-1) /* review: was 6px */ var(--space-3);
   justify-content: space-between;
 }
-
 .position-return-summary__delta {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-weight: 600;
 }
 

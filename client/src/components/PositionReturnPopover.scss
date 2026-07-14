@@ -67,10 +67,9 @@
   max-width: min(560px, calc(100% - 40px));
   flex: 1;
 }
-
 .position-return-popover__badge {
   display: inline-block;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-weight: 600;
   font-size: var(--text-sm);
   color: var(--text);

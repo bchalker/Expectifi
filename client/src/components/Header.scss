@@ -165,12 +165,10 @@
 .header__wordmark-ifi {
   color: var(--sky-blue-d2);
 }
-
 .header__mark {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
   color: var(--nav-text);
   white-space: nowrap;
 }

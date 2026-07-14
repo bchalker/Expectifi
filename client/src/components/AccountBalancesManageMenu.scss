@@ -330,11 +330,10 @@ $account-balances-manage-menu-max-height: min(
   justify-content: space-between;
   gap: var(--space-3);
 }
-
 .account-balances-manage__phase-title {
   margin: 0;
   min-width: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.25;

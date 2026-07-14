@@ -140,9 +140,9 @@ function WingDeltaRow({
 function WingTile({ row }: { row: GrowthScenarioRangeRow }) {
   return (
     <div className="growth-scenario-range-card__wing-item">
+      <WingTrendIcon id={row.id} />
       <div className="growth-scenario-range-card__wing-label-row">
         <span className="growth-scenario-range-card__label">{row.label}</span>
-        <WingTrendIcon id={row.id} />
       </div>
       <span className="growth-scenario-range-card__wing-value tabular-nums">
         {fmt(Math.round(row.projectedFv))}

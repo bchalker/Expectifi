@@ -54,10 +54,9 @@
   border-radius: var(--space-4);
   background: var(--surface1);
 }
-
 .wtr-city-detail-index-card__score {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-2xl);
   font-weight: 700;
   line-height: 1;

@@ -85,16 +85,14 @@
 .onboarding-field-shell--readonly {
   min-height: 2.75rem;
 }
-
 .onboarding-field-shell__readonly-value {
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 600;
   line-height: 1.25;
-  letter-spacing: -0.01em;
   color: var(--text);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

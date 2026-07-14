@@ -52,9 +52,8 @@
   gap: var(--space-1);
   min-width: 0;
 }
-
 .wtr-col-groceries-card__title {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.1;
@@ -73,9 +72,8 @@
   align-items: center;
   gap: var(--space-2);
 }
-
 .wtr-col-groceries-card__head-amount {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 700;
   line-height: 1.1;

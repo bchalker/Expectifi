@@ -87,9 +87,8 @@
   // text-transform: uppercase;
   // letter-spacing: 0.06em;
 }
-
 .life-events-sidebar__total-value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-xl);
   font-weight: 500;
   line-height: var(--leading-tight);

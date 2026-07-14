@@ -1,3 +1,4 @@
+@import './styles/fonts.css';
 @import './styles/tokens.css';
 @import '@heroui/styles';
 @import './styles/heroui-select.scss';
@@ -38,6 +39,7 @@ html[data-app-phase='where-to-retire'] {
 body {
   margin: 0;
   min-height: 100vh;
+  font-family: var(--body);
   background-color: var(--bg);
   background-image:
     linear-gradient(

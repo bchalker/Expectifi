@@ -17,10 +17,9 @@
   color: var(--text-muted);
   text-align: center;
 }
-
 .onboarding-region-step__heading {
   margin: 0 0 var(--space-5) /* review: was 1.35rem */;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-xl);
   font-weight: 600;
   line-height: var(--leading-tight);

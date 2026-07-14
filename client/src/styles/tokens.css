@@ -11,11 +11,13 @@
  * Color tokens (including --sky-blue*) live in styles/global.scss :root.
  */
 :root {
-  /* Body + tabular UI: Nunito */
-  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Nunito', system-ui, -apple-system, sans-serif;
+  /* Body + tabular UI: Proxima Nova */
+  --font-sans: 'Proxima Nova', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Proxima Nova', system-ui, -apple-system, sans-serif;
   --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Sora', Georgia, 'Times New Roman', serif;
   --font-heading-number: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-heading-number: 'Sora', Georgia, 'Times New Roman', serif;
   --font-serif: var(--font-heading);
 
   /* Font weights — hardcoded in components by convention; tokenize only if theming needed */
@@ -46,6 +48,7 @@
   --leading-loose: 1.8;
 
   /* Letter spacing */
+  --tracking-heading: -0.04em;
   --tracking-tight: -0.01em;
   --tracking-normal: 0em;
   --tracking-wide: 0.04em;

@@ -118,7 +118,6 @@
   border-color: var(--color-border-accent-strong);
   box-shadow: 0 0 0 2px var(--color-overlay-accent);
 }
-
 .holding-scenario-intent-tabs__custom-input {
   width: 4rem;
   min-width: 3rem;
@@ -127,7 +126,7 @@
   border: none;
   outline: none;
   background: transparent;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: 1.125rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -135,9 +134,8 @@
   text-align: right;
   color: var(--text);
 }
-
 .holding-scenario-intent-tabs__custom-suffix {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-muted);

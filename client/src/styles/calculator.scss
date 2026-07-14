@@ -47,7 +47,7 @@
   margin-bottom: var(--space-1) /* review: was 3px */;
 }
 .strip-card-val {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 500;
   color: var(--text);
@@ -218,7 +218,7 @@ html[data-app-hero-in-main='true'] .main__hero {
   font-family: var(--body);
 }
 .card-value {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-lg);
   font-weight: 500;
   color: var(--text);
@@ -241,7 +241,7 @@ html[data-app-hero-in-main='true'] .main__hero {
 .slider-group { margin-bottom: 1.5rem; }
 .slider-val {
   display: block;
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 500;
   color: var(--text);
@@ -473,20 +473,20 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
 }
 .scenario-table tr:last-child td { border-bottom: none; }
 .scenario-table tr:hover td { background: var(--surface2); }
-.rate-pill { font-family: var(--heading); font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 100px; display: inline-block; white-space: nowrap; }
+.rate-pill { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 100px; display: inline-block; white-space: nowrap; }
 .pill-normal { background: var(--surface2); color: var(--text-muted); }
 .pill-warn { background: var(--warn-light); color: var(--warn); }
 .pill-danger { background: var(--danger-light); color: var(--danger); }
-.val-mono { font-family: var(--heading); font-size: 13px; }
-.val-strong { font-family: var(--heading); font-size: 13px; font-weight: 500; }
-.val-accent { font-family: var(--heading); font-size: 13px; font-weight: 500; color: var(--accent-text); }
-.val-muted { font-family: var(--heading); font-size: 12px; color: var(--text-muted); }
+.val-mono { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 13px; }
+.val-strong { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 13px; font-weight: 500; }
+.val-accent { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 13px; font-weight: 500; color: var(--accent-text); }
+.val-muted { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 12px; color: var(--text-muted); }
 
 /* ── TAX-FREE STACK ── */
 .stack-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 8px; }
 .stack-item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; flex-wrap: wrap; gap: 6px; }
 .stack-item-title { font-size: 13px; font-weight: 500; }
-.stack-item-amount { font-family: var(--heading); font-size: 16px; font-weight: 500; }
+.stack-item-amount { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 16px; font-weight: 500; }
 .stack-item-note { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
 .badge {
   font-family: var(--mono);
@@ -560,7 +560,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   color: var(--text-muted);
 }
 .isr-val {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 500;
   color: var(--text);
@@ -835,7 +835,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   flex: 1;
 }
 .edit-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.edit-row-val { font-family: var(--heading); font-size: 1rem; font-weight: 500; color: var(--text); }
+.edit-row-val { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); font-size: 1rem; font-weight: 500; color: var(--text); }
 .edit-btn { background: none; border: 1px solid var(--border); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; color: var(--text-faint); font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
 .edit-btn:hover { border-color: var(--color-accent); color: var(--accent-text); background: var(--accent-light); }
 .edit-popover { display: none; position: absolute; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 8px 32px rgba(0,0,0,0.14); z-index: 300; width: 280px; }
@@ -1241,7 +1241,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
 }
 .imported-account-bucket-label.unmapped { color: var(--warn); }
 .imported-account-summary-total {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: 13px;
   font-weight: 600;
   color: var(--accent-text);
@@ -1295,8 +1295,8 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   white-space: nowrap;
   vertical-align: middle;
 }
-.holdings-positions-table .sym { font-family: var(--heading); color: var(--text); }
-.holdings-positions-table .val { font-family: var(--heading); color: var(--text); text-align: right; white-space: nowrap; }
+.holdings-positions-table .sym { font-family: var(--heading); letter-spacing: var(--tracking-heading); color: var(--text); }
+.holdings-positions-table .val { font-family: var(--heading-number); letter-spacing: var(--tracking-heading); color: var(--text); text-align: right; white-space: nowrap; }
 
 .holdings-positions-table th.holdings-scenario-th,
 .holdings-positions-table td.holdings-scenario-cell {
@@ -1338,7 +1338,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   margin-bottom: var(--space-1) /* review: was 2px */;
 }
 .strip-card-inline-val {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 500;
 }
@@ -1357,7 +1357,7 @@ input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(
   margin-bottom: var(--space-1) /* review: was 3px */;
 }
 .strip-tax-bd-val {
-  font-family: var(--heading);
+  font-family: var(--heading-number); letter-spacing: var(--tracking-heading);
   font-size: var(--text-md);
   font-weight: 500;
 }

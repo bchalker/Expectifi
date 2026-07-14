@@ -41,10 +41,9 @@
   background: var(--surface2);
   color: var(--text);
 }
-
 .plaid-conflict-modal__title {
   margin: 0 var(--space-6) var(--space-1) /* review: was 2px */ 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--text);

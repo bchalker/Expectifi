@@ -112,10 +112,9 @@
   max-width: 18rem;
   text-align: center;
 }
-
 .wtr-filters-sidebar__intensity-label {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: var(--leading-snug);
@@ -351,10 +350,9 @@
   text-transform: uppercase;
   color: var(--color-text-success);
 }
-
 .wtr-filters-sidebar__prefs-success-title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.25;

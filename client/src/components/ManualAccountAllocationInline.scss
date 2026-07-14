@@ -67,9 +67,8 @@
   border-color: var(--color-accent);
   background: color-mix(in srgb, var(--accent) 8%, var(--surface1));
 }
-
 .manual-account-allocation__card-title {
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-sm);
   font-weight: 700;
   line-height: 1.3;

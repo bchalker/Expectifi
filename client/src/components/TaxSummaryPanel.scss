@@ -18,10 +18,9 @@
 .tax-breakdown-harvest__section--last {
   margin-bottom: 0;
 }
-
 .tax-breakdown-harvest__title {
   margin: 0 0 var(--space-1);
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   margin-bottom: var(--space-2);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -261,14 +260,12 @@
 .tax-summary-slide-panel__scroll-inner .tax-summary-slide-panel__filing.filing-status-field--compact {
   margin-bottom: var(--space-3);
 }
-
 .tax-summary-slide-panel__title {
   margin: 0;
-  font-family: var(--heading);
+  font-family: var(--heading); letter-spacing: var(--tracking-heading);
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.15;
-  letter-spacing: normal;
   text-transform: none;
   color: var(--text);
 }
