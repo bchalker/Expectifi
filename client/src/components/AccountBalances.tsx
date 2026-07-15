@@ -120,11 +120,11 @@ import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
 import { MarketScenarioButtonGroup, MarketScenarioSelector } from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
-import { AccountGrowthBar } from "./AccountGrowthBar";
 import {
   ACCOUNT_GROWTH_COLORS,
   accountGrowthScenarioRate,
   buildAccountGrowthBarData,
+  formatGrowthBarValue,
 } from "../lib/accountGrowthBar";
 import { TaxBreakdownPanelTrigger } from "./TaxBreakdownHeaderButton";
 import {
@@ -2385,7 +2385,7 @@ function AccountBalancesContent({
     return accountLabelForWithdrawalBucket(taxConfig, bucket) ?? fallback;
   }
 
-  function renderAccountGrowthBar(
+  function renderAccountProjectedValue(
     bucket: AccountScenarioBucketId,
     startingBalance: number,
   ): ReactNode {
@@ -2407,7 +2407,11 @@ function AccountBalancesContent({
       ACCOUNT_GROWTH_COLORS[bucket],
     );
     if (!data) return null;
-    return <AccountGrowthBar data={data} />;
+    return (
+      <span className="portfolio-bucket-account-row__projected tabular-nums">
+        +&nbsp;{formatGrowthBarValue(data.projectedFinal)}
+      </span>
+    );
   }
 
   function renderManualPortfolioAccountCard(
@@ -2459,7 +2463,7 @@ function AccountBalancesContent({
             total={displayTotal}
             showViewHoldings={false}
             scenario={scenario}
-            growthBar={renderAccountGrowthBar(bucket, startingBalance)}
+            valuesExtra={renderAccountProjectedValue(bucket, startingBalance)}
           />
         </div>
       </div>
@@ -2493,7 +2497,7 @@ function AccountBalancesContent({
         total={fmt(def.total)}
         trend={trend}
         scenario={accountScenario}
-        growthBar={renderAccountGrowthBar(accountBucket, def.total)}
+        valuesExtra={renderAccountProjectedValue(accountBucket, def.total)}
       />
     );
 
@@ -2742,7 +2746,7 @@ function AccountBalancesContent({
         total={fmt(brkBal)}
         trend={brkTrend}
         scenario={brokerageScenario}
-        growthBar={renderAccountGrowthBar("brokerage", brkBal)}
+        valuesExtra={renderAccountProjectedValue("brokerage", brkBal)}
       />
     );
 

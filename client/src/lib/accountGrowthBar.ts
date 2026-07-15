@@ -93,7 +93,9 @@ export function accountGrowthScenarioRate(
     ? effectiveGlobalBaseRate(sliderRate, marketScenarioId, horizon)
     : sliderRate;
 
-  if (scenario === "base") return sliderRate;
+  // "base" must use the market-adjusted rate when a macro scenario is active —
+  // same effective rate path as growthScenarioRangePreview / computeResults.
+  if (scenario === "base") return wingBaseRate;
   if (scenario === "bear") {
     return (
       anchoredOutlookScenarioRateRangePcts("very_bear", wingBaseRate, horizon)

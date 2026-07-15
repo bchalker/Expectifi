@@ -1,11 +1,12 @@
-.account-scenario-heroui-popover.popover,
-.account-scenario-heroui-popover {
+/* Shared HeroUI popover chrome for account + holding scenario rows.
+   Matches the account look: no accent border, plain arrow fill. */
+.scenario-heroui-popover.popover,
+.scenario-heroui-popover {
   z-index: var(--z-drawer-shell, 360);
   width: 350px;
   max-width: min(350px, calc(100vw - var(--space-4)));
   padding: 0;
   background: var(--color-background-primary);
-  // border: 0.5px solid var(--color-border-secondary, var(--border));
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   color: var(--text);
@@ -14,15 +15,15 @@
   overflow: visible;
 }
 
-.account-scenario-heroui-popover[data-entering='true'] {
-  animation: account-scenario-heroui-popover-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.scenario-heroui-popover[data-entering='true'] {
+  animation: scenario-heroui-popover-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.account-scenario-heroui-popover[data-exiting='true'] {
-  animation: account-scenario-heroui-popover-out 0.16s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.scenario-heroui-popover[data-exiting='true'] {
+  animation: scenario-heroui-popover-out 0.16s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes account-scenario-heroui-popover-in {
+@keyframes scenario-heroui-popover-in {
   from {
     opacity: 0;
     transform: translateX(10px) scale(0.98);
@@ -34,7 +35,7 @@
   }
 }
 
-@keyframes account-scenario-heroui-popover-out {
+@keyframes scenario-heroui-popover-out {
   from {
     opacity: 1;
     transform: translateX(0) scale(1);
@@ -46,15 +47,14 @@
   }
 }
 
-.account-scenario-heroui-popover__arrow,
-.account-scenario-heroui-popover [data-slot='popover-overlay-arrow-group'] svg,
-.account-scenario-heroui-popover [data-slot='popover-overlay-arrow'] path {
+.scenario-heroui-popover__arrow,
+.scenario-heroui-popover [data-slot='popover-overlay-arrow-group'] svg,
+.scenario-heroui-popover [data-slot='popover-overlay-arrow'] path {
   fill: var(--color-background-primary);
-  // stroke: var(--color-border-secondary, var(--border));
   stroke-width: 1px;
 }
 
-.account-scenario-heroui-popover__dialog.popover__dialog {
+.scenario-heroui-popover__dialog.popover__dialog {
   margin: 0;
   padding: 0;
   background: transparent;
@@ -66,8 +66,8 @@
 }
 
 @media (max-width: 680px) {
-  .account-scenario-heroui-popover.popover,
-  .account-scenario-heroui-popover {
+  .scenario-heroui-popover.popover,
+  .scenario-heroui-popover {
     position: fixed !important;
     inset: 0 !important;
     top: 0 !important;
@@ -87,11 +87,11 @@
     z-index: var(--mobile-bottom-sheet-z, 1100);
   }
 
-  .account-scenario-heroui-popover__arrow {
+  .scenario-heroui-popover__arrow {
     display: none;
   }
 
-  .account-scenario-heroui-popover__dialog.popover__dialog {
+  .scenario-heroui-popover__dialog.popover__dialog {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -100,16 +100,16 @@
     border-radius: 0;
   }
 
-  .account-scenario-heroui-popover[data-entering='true'] {
-    animation: account-scenario-heroui-popover-mobile-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  .scenario-heroui-popover[data-entering='true'] {
+    animation: scenario-heroui-popover-mobile-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
-  .account-scenario-heroui-popover[data-exiting='true'] {
-    animation: account-scenario-heroui-popover-mobile-out 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  .scenario-heroui-popover[data-exiting='true'] {
+    animation: scenario-heroui-popover-mobile-out 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
-@keyframes account-scenario-heroui-popover-mobile-in {
+@keyframes scenario-heroui-popover-mobile-in {
   from {
     opacity: 1;
     transform: translateY(100%);
@@ -121,7 +121,7 @@
   }
 }
 
-@keyframes account-scenario-heroui-popover-mobile-out {
+@keyframes scenario-heroui-popover-mobile-out {
   from {
     opacity: 1;
     transform: translateY(0);
@@ -134,13 +134,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .account-scenario-heroui-popover[data-entering='true'],
-  .account-scenario-heroui-popover[data-exiting='true'] {
+  .scenario-heroui-popover[data-entering='true'],
+  .scenario-heroui-popover[data-exiting='true'] {
     animation: none;
   }
 
   @media (max-width: 680px) {
-    .account-scenario-heroui-popover[data-exiting='true'] {
+    .scenario-heroui-popover[data-exiting='true'] {
       transform: translateY(100%);
     }
   }

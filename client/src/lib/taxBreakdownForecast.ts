@@ -19,31 +19,6 @@ const BROKERAGE_DRAG_EFFECTIVE_RATE = 0.18
 export const FORECAST_TAX_EMPTY_GUIDANCE =
   'Add account balances and monthly savings to see how taxes affect your growth phase.'
 
-export type ForecastTaxRawInputs = {
-  phase: 'growth'
-  monthlySave: number
-  annualSave: number
-  tradBal: number
-  rothBal: number
-  hsaBal: number
-  brkBal: number
-  retBal: number
-  retRate: number
-  brkRate: number
-  yearsToRetirement: number
-  projectedRetFV: number
-  projectedBrkFV: number
-  wdRate: number
-  /** Values from retirement-withdrawal tax path — not used for growth display. */
-  retirementPathAnnWd: number
-  retirementPathTotalSSMonthly: number
-  retirementPathTradWd: number
-  retirementPathSsTaxable: number
-  retirementPathTotalTax: number
-  retirementPathOrdTax: number
-  incomeModeFlag: boolean
-}
-
 export type ForecastGrowthTaxDetail = {
   annualContributions: number
   brokerageTaxDragAnnual: number
@@ -73,52 +48,6 @@ const CONTRIBUTION_REASON_BY_BUCKET: Record<WithdrawalDisplayBucket, string> = {
 function contributionBucketOrder(locale: OnboardingRegionId): WithdrawalDisplayBucket[] {
   if (locale === 'ca') return ['roth', 'pretax', 'brokerage']
   return ['hsa', 'pretax', 'roth', 'brokerage']
-}
-
-export function buildForecastTaxRawInputs(
-  c: ComputedSnapshot,
-  inputs: CalculatorInputs,
-  incomeModeFlag: boolean,
-): ForecastTaxRawInputs {
-  return {
-    phase: 'growth',
-    monthlySave: c.save,
-    annualSave: c.save * 12,
-    tradBal: c.tradBal,
-    rothBal: c.rothBal,
-    hsaBal: c.hsaBal,
-    brkBal: c.brkBal,
-    retBal: c.retBal,
-    retRate: inputs.retRate,
-    brkRate: inputs.brkRate,
-    yearsToRetirement: c.yearsToRetirement,
-    projectedRetFV: c.retFV,
-    projectedBrkFV: c.brkFV,
-    wdRate: inputs.wdRate,
-    retirementPathAnnWd: c.annWd,
-    retirementPathTotalSSMonthly: c.totalSS,
-    retirementPathTradWd: c.taxDetail.tradWd,
-    retirementPathSsTaxable: c.taxDetail.ssTaxable,
-    retirementPathTotalTax: c.taxDetail.totalTax,
-    retirementPathOrdTax: c.taxDetail.ordTax,
-    incomeModeFlag,
-  }
-}
-
-/** Dev-only: log inputs before growth tax breakdown is rendered. */
-export function logForecastTaxBreakdownRawInputs(raw: ForecastTaxRawInputs): void {
-  if (!import.meta.env.DEV) return
-  console.info('[Forecast Tax Breakdown] raw values before growth tax model', raw)
-  console.info(
-    '[Forecast Tax Breakdown] retirement-path taxDetail is NOT used for growth display',
-    {
-      ssTaxable: raw.retirementPathSsTaxable,
-      totalTax: raw.retirementPathTotalTax,
-      tradWd: raw.retirementPathTradWd,
-      note:
-        'These come from projected retirement withdrawals × wdRate and guaranteed income — wrong for accumulation.',
-    },
-  )
 }
 
 export function calcForecastGrowthTaxDetail(

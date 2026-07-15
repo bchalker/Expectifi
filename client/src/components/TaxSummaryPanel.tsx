@@ -56,7 +56,7 @@ export function TaxSummaryPanelBody({
         className="tax-summary-panel__filing"
       />
       {!incomeMode ? (
-        <TaxBreakdownForecastContent c={c} inputs={inputs} incomeModeFlag={incomeMode} />
+        <TaxBreakdownForecastContent c={c} inputs={inputs} />
       ) : (
         <TaxSummaryContent c={c} />
       )}
@@ -334,7 +334,6 @@ function ExpectifinsightsPanelTabs({
               <TaxBreakdownForecastContent
                 c={c}
                 inputs={inputs}
-                incomeModeFlag={false}
               />
             )}
           </div>
@@ -521,7 +520,6 @@ export function TaxSummarySlidePanel({
               <TaxBreakdownForecastContent
                 c={c}
                 inputs={inputs}
-                incomeModeFlag={incomeMode}
               />
             ) : (
               <TaxSummaryContent c={c} />

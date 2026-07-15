@@ -1451,7 +1451,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                     });
                   }}
                   retRate={inputs.retRate}
-                  onRetRate={(r) => setInputs({ retRate: r })}
+                  onRetRate={(r) => setInputs({ retRate: r, brkRate: r })}
                   incYield={inputs.incYield}
                   onIncYield={(y) => {
                     setInputs({ incYield: y });
@@ -1693,7 +1693,7 @@ export default function App({ initialAuthModal = null }: AppProps) {
                             brokerage: brokerageMode,
                           }}
                           retRate={inputs.retRate}
-                          onRetRate={(r) => setInputs({ retRate: r })}
+                          onRetRate={(r) => setInputs({ retRate: r, brkRate: r })}
                           brkRate={inputs.brkRate}
                           mergedRetirementPositionModels={
                             c.mergedRetirementPositionModels

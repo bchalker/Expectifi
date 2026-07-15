@@ -9,7 +9,7 @@
   color: var(--text);
 }
 
-/* Panel lives inside HeroUI Popover — outer chrome comes from `.holding-scenario-heroui-popover`. */
+/* Panel lives inside HeroUI Popover — outer chrome comes from `.scenario-heroui-popover`. */
 .holding-scenario-popout.holding-scenario-popout--panel {
   z-index: auto;
   background: transparent;
@@ -32,7 +32,7 @@
   box-shadow: 0 -4px 12px -2px rgb(28 43 58 / 0.1);
 }
 
-/* HeroUI popover chrome — see holdingScenario/HoldingScenarioRowPopout.scss */
+/* HeroUI popover chrome — see scenario/ScenarioRowPopover.scss */
 
 .holding-scenario-popout--heroui-dialog.popover__dialog {
   margin: 0;

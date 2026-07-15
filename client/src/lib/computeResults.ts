@@ -581,29 +581,6 @@ export function computeResults(
           filingStatus,
         )
 
-  if (import.meta.env.DEV && hasPortfolioBalances) {
-    const growthTaxPath = !(ui.incomeMode && hasPortfolioBalances)
-    console.info('[Expectifinsights Tax Breakdown audit]', {
-      path: growthTaxPath ? 'growth (portfolio wdRate × projected FV)' : 'income (per-account strategies)',
-      balanceBasisForWithdrawalEstimates: growthTaxPath
-        ? 'PROJECTED at retirement (retFV/brkFV), not current retBal/brkBal'
-        : 'PROJECTED per account via accountRetirementBalance()',
-      current_retBal: retBal,
-      current_tradBal: tradBal,
-      projected_retFV: retFV,
-      projected_brkFV: brkFV,
-      projected_totalFV: totalFV,
-      projected_pretaxBucketFV: retFV * tradRatio,
-      tradRatio_sourcedFrom: 'current tradBal / retBal (computeResults ~275)',
-      wdRate,
-      wdInflation,
-      annWd_annualWithdrawal: annWd,
-      taxDetail_tradWd_pretax: taxDetail.tradWd,
-      taxDetail_brkWd: taxDetail.brkWd,
-      counterfactual_if_current_pretax_used: tradBal * wdRate * (1 + wdInflation),
-    })
-  }
-
   const annTax = taxDetail.totalTax
   const afterTaxMon = (annWd + totalSS * 12 - annTax) / 12
   const incomeGoalProgressPct =

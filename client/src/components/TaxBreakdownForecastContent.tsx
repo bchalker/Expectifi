@@ -1,41 +1,22 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { CalculatorInputs, ComputedSnapshot } from '../lib/computeResults'
 import { useUserLocale } from '../context/UserLocaleContext'
 import {
   buildForecastContributionOrder,
   buildForecastTaxCallouts,
   buildForecastTaxPictureNarrative,
-  buildForecastTaxRawInputs,
-  calcForecastGrowthTaxDetail,
   forecastTaxGrowthReady,
   FORECAST_TAX_EMPTY_GUIDANCE,
-  logForecastTaxBreakdownRawInputs,
 } from '../lib/taxBreakdownForecast'
 import { TaxBreakdownTaxPictureBody } from './TaxBreakdownTaxPictureBody'
 
 type Props = {
   c: ComputedSnapshot
   inputs: CalculatorInputs
-  /** Whether computeResults ran with income-mode tax path (should be false on growth dashboard). */
-  incomeModeFlag?: boolean
 }
 
-export function TaxBreakdownForecastContent({ c, inputs, incomeModeFlag = false }: Props) {
+export function TaxBreakdownForecastContent({ c, inputs }: Props) {
   const { locale, taxConfig } = useUserLocale()
-
-  const rawInputs = useMemo(
-    () => buildForecastTaxRawInputs(c, inputs, incomeModeFlag),
-    [c, inputs, incomeModeFlag],
-  )
-
-  useEffect(() => {
-    logForecastTaxBreakdownRawInputs(rawInputs)
-  }, [rawInputs])
-
-  const growthTaxDetail = useMemo(
-    () => calcForecastGrowthTaxDetail(c, inputs),
-    [c, inputs],
-  )
 
   const taxPicture = useMemo(
     () => buildForecastTaxPictureNarrative(c, inputs, taxConfig),
@@ -53,10 +34,6 @@ export function TaxBreakdownForecastContent({ c, inputs, incomeModeFlag = false 
   )
 
   const growthReady = forecastTaxGrowthReady(c)
-
-  if (import.meta.env.DEV) {
-    console.info('[Forecast Tax Breakdown] growth tax model output', growthTaxDetail)
-  }
 
   return (
     <div className="tax-breakdown-harvest">
