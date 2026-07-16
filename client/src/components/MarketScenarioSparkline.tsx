@@ -2,7 +2,6 @@ import { useEffect, useId, useMemo, useState } from "react";
 import type { MarketScenarioId } from "../lib/marketScenario";
 import {
   Area,
-  CartesianGrid,
   ComposedChart,
   Line,
   ResponsiveContainer,
@@ -219,12 +218,6 @@ export function MarketScenarioSparkline({
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                className="market-scenario-sparkline__grid"
-                vertical
-                horizontal={false}
-                stroke="var(--market-scenario-grid-stroke)"
-              />
               <XAxis
                 dataKey="yearLabel"
                 axisLine={false}

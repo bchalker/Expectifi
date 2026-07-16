@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import type { HoldingReturnRateSource } from '../lib/accountReturnScenario'
 import {
   SCENARIO_MIXED,
@@ -10,9 +10,10 @@ import { fmt } from '../utils/format'
 import { HoldingsBreakdownPopout } from './HoldingsBreakdownPopout'
 import { PortfolioScenarioCell } from './PortfolioScenarioCell'
 import type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
-import { Tooltip } from './Tooltip'
 import { HoldingAggregateHint } from './ui/HoldingAggregateHint'
 import './HoldingsSymbolCard.scss'
+
+const BREAKDOWN_CLOSE_DELAY_MS = 160
 
 export type { HoldingsScenarioTriggerVariant } from './HoldingsScenarioTrigger'
 export {
@@ -61,6 +62,7 @@ export function HoldingsSymbolCard({
   const [breakdownOpen, setBreakdownOpen] = useState(false)
   const breakdownPanelId = useId()
   const breakdownToggleRef = useRef<HTMLButtonElement>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inheritsAccountScenario =
     scenario != null &&
     scenario.rateSource === 'account' &&
@@ -69,42 +71,60 @@ export function HoldingsSymbolCard({
     <span className="holdings-symbol-card__value">{fmt(currentValue)}</span>
   )
 
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimerRef.current != null) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }, [])
+
+  const openBreakdown = useCallback(() => {
+    clearCloseTimer()
+    setBreakdownOpen(true)
+  }, [clearCloseTimer])
+
+  const scheduleCloseBreakdown = useCallback(() => {
+    clearCloseTimer()
+    closeTimerRef.current = setTimeout(() => {
+      setBreakdownOpen(false)
+      closeTimerRef.current = null
+    }, BREAKDOWN_CLOSE_DELAY_MS)
+  }, [clearCloseTimer])
+
+  useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
+
   const breakdownToggle = breakdown ? (
     <>
-      <Tooltip
-        nativeTrigger
-        variant="dark"
-        delay={400}
-        closeDelay={150}
-        placement="bottom"
-        content={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
+      <button
+        ref={breakdownToggleRef}
+        type="button"
+        className={[
+          'holdings-symbol-card__aggregate-toggle',
+          breakdownOpen && 'holdings-symbol-card__aggregate-toggle--open',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-expanded={breakdownOpen}
+        aria-haspopup="dialog"
+        aria-controls={breakdownPanelId}
+        aria-label="Show account breakdown"
+        onPointerEnter={openBreakdown}
+        onPointerLeave={scheduleCloseBreakdown}
+        onFocus={openBreakdown}
+        onBlur={scheduleCloseBreakdown}
       >
-        <button
-          ref={breakdownToggleRef}
-          type="button"
-          className={[
-            'holdings-symbol-card__aggregate-toggle',
-            breakdownOpen && 'holdings-symbol-card__aggregate-toggle--open',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          aria-expanded={breakdownOpen}
-          aria-haspopup="dialog"
-          aria-controls={breakdownPanelId}
-          aria-label={breakdownOpen ? 'Hide account breakdown' : 'Show account breakdown'}
-          onClick={(e) => {
-            e.stopPropagation()
-            setBreakdownOpen((open) => !open)
-          }}
-        >
-          <HoldingAggregateHint expanded={breakdownOpen} />
-        </button>
-      </Tooltip>
+        <HoldingAggregateHint expanded={breakdownOpen} />
+      </button>
       <HoldingsBreakdownPopout
         open={breakdownOpen}
         anchorRef={breakdownToggleRef}
         panelId={breakdownPanelId}
-        onClose={() => setBreakdownOpen(false)}
+        onClose={() => {
+          clearCloseTimer()
+          setBreakdownOpen(false)
+        }}
+        onMouseEnterPopout={openBreakdown}
+        onMouseLeavePopout={scheduleCloseBreakdown}
         note={breakdownNote}
       >
         {breakdown}

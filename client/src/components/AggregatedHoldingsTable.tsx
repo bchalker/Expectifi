@@ -6,8 +6,9 @@ import type {
   ImportedPositionRow,
 } from "../lib/positionsCsv";
 import {
-  aggregateRowHasAccountBreakdown,
-  breakdownAggregateByAccount,
+  breakdownRowsByAccount,
+  importedRowsMatchingSymbol,
+  rowsHaveAccountBreakdown,
 } from "../lib/positionsCsv";
 import { formatHoldingDescription } from "../lib/holdingsDisplay";
 import { truncateForHoldingsTable } from "../lib/holdingDisplay";
@@ -50,9 +51,7 @@ export type HoldingsScenarioBundle = {
 
 type Props = {
   rows: AggregatedSymbolRow[];
-  /** When true, same ticker appeared on more than one import line (e.g. multiple accounts). */
-  combinedLines: boolean;
-  /** Full merged import rows (for return model ids). */
+  /** Full merged import rows (for return model ids + cross-bucket multi-account detection). */
   importedPositionRows: ImportedPositionRow[];
   /** Dashboard only: enables scenario popout on each row. */
   scenarioBundle?: HoldingsScenarioBundle | null;
@@ -74,7 +73,8 @@ type HoldingGroupProps = {
   accountScenarioBucket?: AccountScenarioBucketId;
   mergedModels: PositionReturnModel[];
   h: number;
-  showMergedTickerNote: boolean;
+  /** Full import — used so multi-account detection spans tax buckets. */
+  importedPositionRows: ImportedPositionRow[];
 };
 
 function AggregatedHoldingGroup({
@@ -83,12 +83,17 @@ function AggregatedHoldingGroup({
   accountScenarioBucket,
   mergedModels,
   h,
-  showMergedTickerNote,
+  importedPositionRows,
 }: HoldingGroupProps) {
-  const hasBreakdown = aggregateRowHasAccountBreakdown(r);
+  // Look across every tax bucket so FDTX in Pre-tax + HSA (etc.) shows the aggregate hint.
+  const globalRows = useMemo(
+    () => importedRowsMatchingSymbol(importedPositionRows, r.symbol),
+    [importedPositionRows, r.symbol],
+  );
+  const hasBreakdown = rowsHaveAccountBreakdown(globalRows);
   const breakdown = useMemo(
-    () => (hasBreakdown ? breakdownAggregateByAccount(r) : []),
-    [hasBreakdown, r],
+    () => (hasBreakdown ? breakdownRowsByAccount(globalRows) : []),
+    [hasBreakdown, globalRows],
   );
   const fullDesc = formatHoldingDescription(r.description);
   const shortDesc = truncateForHoldingsTable(fullDesc);
@@ -192,7 +197,7 @@ function AggregatedHoldingGroup({
       }
     : null;
 
-  const breakdownNote = showMergedTickerNote ? (
+  const breakdownNote = hasBreakdown ? (
     <p className="holdings-symbol-card__breakdown-note">Ticker is in:</p>
   ) : null;
 
@@ -240,7 +245,6 @@ function AggregatedHoldingGroup({
 /** Single table: one row per symbol (totals across accounts in the parent tax bucket). */
 export function AggregatedHoldingsTable({
   rows,
-  combinedLines,
   importedPositionRows,
   scenarioBundle,
   accountScenarioBucket,
@@ -258,9 +262,6 @@ export function AggregatedHoldingsTable({
   const h = scenarioBundle
     ? Math.max(1, Math.min(50, Math.round(scenarioBundle.yearsToRetirement)))
     : 7;
-
-  const showCombinedNote =
-    combinedLines || rows.some((r) => aggregateRowHasAccountBreakdown(r));
 
   if (!rows.length) return null;
 
@@ -287,7 +288,7 @@ export function AggregatedHoldingsTable({
             accountScenarioBucket={accountScenarioBucket}
             mergedModels={mergedModels}
             h={h}
-            showMergedTickerNote={showCombinedNote}
+            importedPositionRows={importedPositionRows}
           />
         ))}
       </div>

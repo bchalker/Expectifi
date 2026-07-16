@@ -35,8 +35,7 @@ import {
   type ManualAccountEntry,
   type OnboardingAccountType,
 } from "../lib/manualAccountEntries";
-import {
-} from "../lib/allocationProfile";
+import {} from "../lib/allocationProfile";
 import { ManualAccountAllocationSlider } from "./ManualAccountAllocationSlider";
 import "./ManualAccountAllocationSlider.scss";
 import { ManualAccountBalanceField } from "./ManualAccountBalanceField";
@@ -111,14 +110,20 @@ import {
   type HoldingsScenarioBundle,
 } from "./AggregatedHoldingsTable";
 import { AccountScenarioPopoutDataProvider } from "../context/AccountScenarioPopoutDataContext";
-import { ScenarioPopoutProvider, useScenarioPopout } from "../context/ScenarioPopoutContext";
+import {
+  ScenarioPopoutProvider,
+  useScenarioPopout,
+} from "../context/ScenarioPopoutContext";
 import {
   PortfolioBucketAccountRow,
   type PortfolioBucketAccountScenarioProps,
 } from "./PortfolioBucketAccountRow";
 import { PositionsCsvImport } from "./PositionsCsvImport";
 import { AppOverlayScrollbars } from "./ui/AppOverlayScrollbars";
-import { MarketScenarioButtonGroup, MarketScenarioSelector } from "./MarketScenarioSelector";
+import {
+  MarketScenarioButtonGroup,
+  MarketScenarioSelector,
+} from "./MarketScenarioSelector";
 import { MarketScenarioContextRow } from "./MarketScenarioContextRow";
 import {
   ACCOUNT_GROWTH_COLORS,
@@ -491,11 +496,11 @@ function AccountBalancesContent({
   const mergedDashboard = mergeBrokerageInRetirementCard && readOnly;
   const showGrowthBars = Boolean(
     phase === "growth" &&
-      mergedDashboard &&
-      readOnly &&
-      !configureInputsOnly &&
-      c.hasPortfolioBalances &&
-      inputs,
+    mergedDashboard &&
+    readOnly &&
+    !configureInputsOnly &&
+    c.hasPortfolioBalances &&
+    inputs,
   );
 
   const displayBalanceMode = useMemo(
@@ -925,7 +930,12 @@ function AccountBalancesContent({
     setBalanceEditPanel(null);
     setBalanceEditClosing(false);
     onRemoveRetirementAccounts?.();
-  }, [removeAccountsModalState, onRemoveRetirementAccounts, closeAccountScenario, closeHoldingScenario]);
+  }, [
+    removeAccountsModalState,
+    onRemoveRetirementAccounts,
+    closeAccountScenario,
+    closeHoldingScenario,
+  ]);
 
   useEffect(() => {
     const req = openReturnEditorRequest;
@@ -1255,9 +1265,7 @@ function AccountBalancesContent({
         finalizeBalanceEditClose({ closeManageMenu: true });
         return;
       }
-      if (
-        e.animationName !== "account-balances-import-sheet-out"
-      ) {
+      if (e.animationName !== "account-balances-import-sheet-out") {
         return;
       }
       if (!balanceEditClosing) return;
@@ -1519,7 +1527,8 @@ function AccountBalancesContent({
 
   const manageMenuWasOpenRef = useRef(false);
   const prevHasAccountCardDataRef = useRef(hasAnyAccountCardData);
-  const [showPostOnboardingImport, setShowPostOnboardingImport] = useState(false);
+  const [showPostOnboardingImport, setShowPostOnboardingImport] =
+    useState(false);
 
   useEffect(() => {
     const hadAccounts = prevHasAccountCardDataRef.current;
@@ -1543,11 +1552,7 @@ function AccountBalancesContent({
       onImportOpenHandled?.();
       setCloseManageRequest((n) => n + 1);
     }
-  }, [
-    hasAnyAccountCardData,
-    postOnboardingImportActive,
-    onImportOpenHandled,
-  ]);
+  }, [hasAnyAccountCardData, postOnboardingImportActive, onImportOpenHandled]);
 
   const handleManageOpenChange = useCallback(
     (open: boolean) => {
@@ -1654,11 +1659,7 @@ function AccountBalancesContent({
       brkRate: accountScenarioBundle.brkRate,
       accountNameForBucket: accountScenarioPanelTitle,
     };
-  }, [
-    accountScenarioBundle,
-    accountScenarioPanelTitle,
-    importedPositionRows,
-  ]);
+  }, [accountScenarioBundle, accountScenarioPanelTitle, importedPositionRows]);
 
   const holdingsScenarioBundle = holdingsScenarioEditingEnabled
     ? accountScenarioBundle
@@ -2485,7 +2486,6 @@ function AccountBalancesContent({
     const positions = positionsForTaxTreatment(importedPositionRows, tax);
     const trend = computeBucketTrendDisplay(positions);
     const aggregated = aggregatePositionsBySymbol(positions);
-    const combinedLines = positions.length > aggregated.length;
 
     const summaryInner = (
       <PortfolioBucketAccountRow
@@ -2517,7 +2517,6 @@ function AccountBalancesContent({
           ) : (
             <AggregatedHoldingsTable
               rows={aggregated}
-              combinedLines={combinedLines}
               importedPositionRows={importedPositionRows}
               scenarioBundle={holdingsScenarioBundle}
               accountScenarioBucket={accountBucket}
@@ -2751,7 +2750,6 @@ function AccountBalancesContent({
     );
 
     const brkAggregated = aggregatePositionsBySymbol(brokeragePositions);
-    const brkCombinedLines = brokeragePositions.length > brkAggregated.length;
 
     return (
       <details
@@ -2764,7 +2762,6 @@ function AccountBalancesContent({
         <div className="tax-treatment-disclosure__body tax-treatment-disclosure__body--import-style">
           <AggregatedHoldingsTable
             rows={brkAggregated}
-            combinedLines={brkCombinedLines}
             importedPositionRows={importedPositionRows}
             scenarioBundle={holdingsScenarioBundle}
             accountScenarioBucket="brokerage"
@@ -3433,7 +3430,9 @@ function AccountBalancesContent({
           >
             <div
               className={`account-balances-card-inner-wrap${
-                !hasAnyAccountCardData ? " account-balances-card-inner-wrap--empty-state" : ""
+                !hasAnyAccountCardData
+                  ? " account-balances-card-inner-wrap--empty-state"
+                  : ""
               }`}
               style={hasAnyAccountCardData ? cardStyle : undefined}
             >

@@ -28,10 +28,16 @@ const ACTIVE_MARKET_SCENARIO_SUBLABEL = "Market Scenario";
 function ScenarioHeadingBlock({
   label,
   dotClass,
+  deltaLabel,
+  deltaTone,
+  retirementYear,
   titleAs = "h3",
 }: {
   label: string;
   dotClass: string;
+  deltaLabel: string;
+  deltaTone: "positive" | "negative" | "neutral";
+  retirementYear: number;
   titleAs?: "h3" | "span";
 }) {
   const TitleTag = titleAs;
@@ -43,9 +49,24 @@ function ScenarioHeadingBlock({
       <div className="market-scenario-context-row__title-toolbar">
         <div className={`market-scenario-context-row__title-row ${dotClass}`}>
           <span className="holdings-scenario-trigger__dot" aria-hidden />
-          <TitleTag className="market-scenario-context-row__title">
-            {label}
-          </TitleTag>
+          <div className="market-scenario-context-row__title-content">
+            <div className="market-scenario-context-row__title-main">
+              <TitleTag className="market-scenario-context-row__title">
+                {label}
+              </TitleTag>
+              <span className="market-scenario-context-row__delta-divider" aria-hidden>
+                ·
+              </span>
+              <span
+                className={`market-scenario-context-row__heading-delta market-scenario-context-row__heading-delta--${deltaTone}`}
+              >
+                {deltaLabel}
+              </span>
+            </div>
+            <span className="market-scenario-context-row__heading-caption">
+              vs. Base by {retirementYear}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -144,9 +165,18 @@ export function MarketScenarioContextRow({
   const scenarioEnd = c.totalFV;
   const delta = scenarioEnd - baseEnd;
   const deltaTone = delta > 0 ? "positive" : delta < 0 ? "negative" : "neutral";
+  const endpointYear =
+    series.years[series.years.length - 1] ?? retirementYear;
+  const deltaLabel = formatSignedDeltaK(delta);
 
   const headingBlock = (
-    <ScenarioHeadingBlock label={def.label} dotClass={dotClass} />
+    <ScenarioHeadingBlock
+      label={def.label}
+      dotClass={dotClass}
+      deltaLabel={deltaLabel}
+      deltaTone={deltaTone}
+      retirementYear={endpointYear}
+    />
   );
 
   const copyBlock = (
@@ -172,9 +202,10 @@ export function MarketScenarioContextRow({
       <MarketScenarioSparkline
         series={series}
         scenarioLabel={def.label}
-        deltaLabel={formatSignedDeltaK(delta)}
+        deltaLabel={deltaLabel}
         deltaTone={deltaTone}
-        retirementYear={series.years[series.years.length - 1] ?? retirementYear}
+        retirementYear={endpointYear}
+        showDeltaHeadline={false}
         animationKey={scenarioId}
       />
     </div>
@@ -212,6 +243,9 @@ export function MarketScenarioContextRow({
           <ScenarioHeadingBlock
             label={def.label}
             dotClass={dotClass}
+            deltaLabel={deltaLabel}
+            deltaTone={deltaTone}
+            retirementYear={endpointYear}
             titleAs="span"
           />
         }

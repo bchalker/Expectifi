@@ -93,14 +93,38 @@
 .holdings-breakdown-popout.popover,
 .holdings-breakdown-popout {
   z-index: 450;
-  width: min(17rem, calc(100vw - 1rem));
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 1rem));
   padding: 0;
   background: var(--accent-contrast);
   border: 1px solid var(--border, var(--surface-d1));
   border-radius: 8px;
   box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.16);
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
+}
+
+.holdings-breakdown-popout__arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-contrast);
+  border: 1px solid var(--border, var(--surface-d1));
+  transform: translateY(-50%) rotate(45deg);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.holdings-breakdown-popout__arrow[data-placement='right'] {
+  left: -6px;
+  border-top: none;
+  border-right: none;
+}
+
+.holdings-breakdown-popout__arrow[data-placement='left'] {
+  right: -6px;
+  border-bottom: none;
+  border-left: none;
 }
 
 .holdings-breakdown-popout--open {
@@ -195,6 +219,7 @@
   font-weight: 400;
   line-height: var(--leading-snug);
   color: var(--text);
+  white-space: nowrap;
 }
 
 .holdings-breakdown-popout .holdings-breakdown-block {
@@ -228,7 +253,8 @@
 .holdings-breakdown-popout .holdings-breakdown-row__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: space-between;
+  gap: var(--space-5);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -236,9 +262,15 @@
   box-sizing: border-box;
 }
 
+.holdings-breakdown-popout .holdings-breakdown-row__account-cell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .holdings-breakdown-popout .holdings-breakdown-row__account {
   font-size: var(--text-sm);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .holdings-breakdown-popout .holdings-breakdown-row__value {

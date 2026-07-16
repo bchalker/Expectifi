@@ -658,8 +658,14 @@ export function shortSourceAccountLabel(accountName: string): string {
 
 /** Per-account lines for one aggregated symbol row (multiple Plaid/CSV source accounts). */
 export function breakdownAggregateByAccount(row: AggregatedSymbolRow): HoldingAccountBreakdown[] {
+  return breakdownRowsByAccount(row.contributingRows)
+}
+
+/** Group raw import rows into per-account breakdown lines. */
+export function breakdownRowsByAccount(rows: ImportedPositionRow[]): HoldingAccountBreakdown[] {
   const byAccount = new Map<string, ImportedPositionRow[]>()
-  for (const r of row.contributingRows) {
+  for (const r of rows) {
+    if (isPendingActivityImportRow(r)) continue
     const key = fidelityAccountKey(r.accountName)
     const list = byAccount.get(key) ?? []
     list.push(r)
@@ -686,8 +692,30 @@ export function breakdownAggregateByAccount(row: AggregatedSymbolRow): HoldingAc
 }
 
 export function aggregateRowHasAccountBreakdown(row: AggregatedSymbolRow): boolean {
-  const keys = new Set(row.contributingRows.map((r) => fidelityAccountKey(r.accountName)))
-  return keys.size > 1
+  return rowsHaveAccountBreakdown(row.contributingRows)
+}
+
+/** True when the given rows span more than one source account. */
+export function rowsHaveAccountBreakdown(rows: ImportedPositionRow[]): boolean {
+  const keys = new Set<string>()
+  for (const r of rows) {
+    if (isPendingActivityImportRow(r)) continue
+    keys.add(fidelityAccountKey(r.accountName))
+    if (keys.size > 1) return true
+  }
+  return false
+}
+
+/** All import rows for a ticker across every tax bucket / account. */
+export function importedRowsMatchingSymbol(
+  rows: ImportedPositionRow[],
+  symbol: string,
+): ImportedPositionRow[] {
+  const key = normalizeImportSymbol(symbol).toUpperCase() || '__EMPTY__'
+  return rows.filter((r) => {
+    if (isPendingActivityImportRow(r)) return false
+    return (normalizeImportSymbol(r.symbol).toUpperCase() || '__EMPTY__') === key
+  })
 }
 
 /** Rows assigned to a retirement calculator bucket (excludes brokerage / unknown). */
