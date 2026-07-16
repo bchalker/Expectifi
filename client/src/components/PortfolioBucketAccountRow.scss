@@ -300,11 +300,16 @@
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline {
   background: var(--accent-contrast);
-  box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
+  box-shadow:
+    var(--sky-blue) 6px 2px 16px 0,
+    rgba(255, 255, 255, 0.8) -6px -2px 16px 0;
 }
 
 .portfolio-bucket-account-row .holdings-scenario-trigger--outline:hover {
-  background: var(--surface);
+  background: var(--accent-contrast);
+  box-shadow:
+    var(--sky-blue) 0 10px 10px -10px,
+    rgba(255, 255, 255, 0.8) 0 0 0 0;
 }
 
 .portfolio-bucket-account-row__chevron.view-holdings-hint {

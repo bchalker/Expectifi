@@ -82,7 +82,7 @@ function MarketScenarioChartTooltip({ active, payload }: ChartTooltipProps) {
         {row.year}
       </span>
       <span className="market-scenario-sparkline__tooltip-line market-scenario-sparkline__tooltip-line--base">
-        Base: {fmt(row.base)}
+        None: {fmt(row.base)}
       </span>
       <span className="market-scenario-sparkline__tooltip-line market-scenario-sparkline__tooltip-line--scenario">
         Scenario: {fmt(row.scenario)}
@@ -174,7 +174,7 @@ export function MarketScenarioSparkline({
                   {deltaLabel}
                 </p>
                 <p className="market-scenario-sparkline__delta-caption">
-                  vs. Base by {endpointYear}
+                  vs. None by {endpointYear}
                 </p>
               </div>
             ) : null}
@@ -309,7 +309,7 @@ export function MarketScenarioSparkline({
                   aria-hidden
                 />
                 <span className="market-scenario-sparkline__legend-text">
-                  Base · {fmt(baseEnd)}
+                  None · {fmt(baseEnd)}
                 </span>
               </span>
             </div>

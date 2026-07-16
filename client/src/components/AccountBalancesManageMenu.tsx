@@ -13,7 +13,6 @@ import { createPortal } from "react-dom";
 import {
   IconAlertTriangle,
   IconArrowLeft,
-  IconChevronDown,
   IconLink,
   IconPencil,
   IconUpload,
@@ -40,8 +39,6 @@ import "./HoldingScenarioPopout.scss";
 import "./SidePanelShell.scss";
 import "./AccountBalancesManageMenu.scss";
 
-const MANAGE_SUBLABEL = "Manage";
-
 export type ManageOverlayPhase = "method" | "manual" | "csv";
 
 export type ManageOverlayPhaseHeader = {
@@ -49,7 +46,7 @@ export type ManageOverlayPhaseHeader = {
   subtitle?: ReactNode;
   extra?: ReactNode;
 };
-const MANAGE_VALUE_LABEL = "Accounts";
+const MANAGE_LABEL = "Manage Accounts";
 
 const CSV_IMPORT_OPTIONS = CSV_CUSTODIAN_OPTIONS.filter(
   (o) => o.id !== "other" && o.id !== "webull",
@@ -537,21 +534,11 @@ export function AccountBalancesManageMenu({
           disabled={ctx?.linkBusy}
           onClick={toggleMenu}
         >
-          <span className="holdings-scenario-trigger__text">
-            <span
-              className="holdings-scenario-trigger__sublabel"
-              id="account-balances-manage-label"
-            >
-              {MANAGE_SUBLABEL}
-            </span>
-            <span className="holdings-scenario-trigger__label-row">
-              <span className="holdings-scenario-trigger__label">
-                {MANAGE_VALUE_LABEL}
-              </span>
-              <span className="holdings-scenario-trigger__trail" aria-hidden>
-                <IconChevronDown size={14} stroke={1.5} />
-              </span>
-            </span>
+          <span
+            className="account-balances-manage__trigger-label"
+            id="account-balances-manage-label"
+          >
+            {MANAGE_LABEL}
           </span>
         </button>
       ) : null}

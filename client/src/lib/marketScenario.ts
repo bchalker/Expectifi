@@ -33,7 +33,7 @@ export const DEFAULT_MARKET_SCENARIO_ID: MarketScenarioId = 'base'
 export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
   {
     id: 'base',
-    label: 'Base',
+    label: 'None',
     description: 'Your global slider rate, no adjustment.',
     contextDescription:
       'Your global growth rate applies across the board. No adjustments, no assumptions, just the rate you set.',

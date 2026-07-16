@@ -17,24 +17,17 @@ import { MarketScenarioSparkline } from "./MarketScenarioSparkline";
 import "./HoldingScenarioPopout.scss";
 import "./MarketScenarioContextRow.scss";
 
-function marketScenarioDotClass(id: MarketScenarioId): string {
-  if (id === "bull") return "holdings-scenario-trigger--bull";
-  if (id === "bear") return "holdings-scenario-trigger--bear";
-  return "holdings-scenario-trigger--custom";
-}
-
-const ACTIVE_MARKET_SCENARIO_SUBLABEL = "Market Scenario";
+const ACTIVE_MARKET_SCENARIO_SUBLABEL =
+  "You're applying this market scenario";
 
 function ScenarioHeadingBlock({
   label,
-  dotClass,
   deltaLabel,
   deltaTone,
   retirementYear,
   titleAs = "h3",
 }: {
   label: string;
-  dotClass: string;
   deltaLabel: string;
   deltaTone: "positive" | "negative" | "neutral";
   retirementYear: number;
@@ -47,8 +40,7 @@ function ScenarioHeadingBlock({
         {ACTIVE_MARKET_SCENARIO_SUBLABEL}
       </span>
       <div className="market-scenario-context-row__title-toolbar">
-        <div className={`market-scenario-context-row__title-row ${dotClass}`}>
-          <span className="holdings-scenario-trigger__dot" aria-hidden />
+        <div className="market-scenario-context-row__title-row">
           <div className="market-scenario-context-row__title-content">
             <div className="market-scenario-context-row__title-main">
               <TitleTag className="market-scenario-context-row__title">
@@ -64,7 +56,7 @@ function ScenarioHeadingBlock({
               </span>
             </div>
             <span className="market-scenario-context-row__heading-caption">
-              vs. Base by {retirementYear}
+              vs. None by {retirementYear}
             </span>
           </div>
         </div>
@@ -101,7 +93,6 @@ export function MarketScenarioContextRow({
   className = "",
 }: MarketScenarioContextRowProps) {
   const def = getMarketScenarioDefinition(scenarioId);
-  const dotClass = marketScenarioDotClass(scenarioId);
 
   const chartUi = useMemo(
     () => ({
@@ -172,7 +163,6 @@ export function MarketScenarioContextRow({
   const headingBlock = (
     <ScenarioHeadingBlock
       label={def.label}
-      dotClass={dotClass}
       deltaLabel={deltaLabel}
       deltaTone={deltaTone}
       retirementYear={endpointYear}
@@ -242,7 +232,6 @@ export function MarketScenarioContextRow({
         title={
           <ScenarioHeadingBlock
             label={def.label}
-            dotClass={dotClass}
             deltaLabel={deltaLabel}
             deltaTone={deltaTone}
             retirementYear={endpointYear}

@@ -1,4 +1,4 @@
-import { IconLibraryPlus } from '@tabler/icons-react'
+import { IconChartHistogram } from '@tabler/icons-react'
 import { forwardRef, type ComponentPropsWithRef } from 'react'
 import {
   ACCOUNT_SCENARIO_SUBLABEL,
@@ -99,7 +99,7 @@ export const HoldingsScenarioTrigger = forwardRef<HTMLButtonElement, HoldingsSce
         <>
           <span className="holdings-scenario-trigger__label">{label}</span>
           <span className="holdings-scenario-trigger__plus" aria-hidden>
-            <IconLibraryPlus size={14} stroke={1.5} />
+            <IconChartHistogram size={14} stroke={1.5} />
           </span>
         </>
       )}
