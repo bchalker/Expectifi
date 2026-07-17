@@ -507,11 +507,17 @@
 
   a {
     font-weight: 600;
-    color: var(--color-accent);
+    color: var(--sky-blue-d5);
     text-decoration: none;
   }
 
-  a:hover {
+  a:visited {
+    color: var(--sky-blue-d5);
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: var(--sky-blue-d6);
     text-decoration: underline;
   }
 }

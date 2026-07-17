@@ -1,3 +1,19 @@
+.account-scenario-outlook {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.account-scenario-outlook__basis {
+  margin: 0;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
 .account-scenario-outlook-grid {
   display: flex;
   flex-wrap: wrap;
@@ -77,6 +93,14 @@
   margin-left: auto;
 }
 
+.account-scenario-outlook-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
 .account-scenario-outlook-card__range {
   font-family: var(--body);
   font-size: var(--text-xs);
@@ -85,4 +109,21 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+}
+
+.account-scenario-outlook-card__chip {
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.account-scenario-outlook-grid--relative .account-scenario-outlook-card__chip {
+  color: var(--accent-text);
+}
+
+.account-scenario-outlook-card--selected .account-scenario-outlook-card__chip {
+  color: var(--color-text-success);
 }

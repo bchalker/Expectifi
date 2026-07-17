@@ -1,6 +1,7 @@
 import { IconArrowNarrowRightDashed } from '@tabler/icons-react'
 import type { MapIncomeFitDisplay } from '../../lib/whereToRetire/mapIncomeFit'
 import { AppChip } from '../ui/AppChip'
+import { Tooltip } from '../Tooltip'
 import { wtrTaxChipColor } from '../../lib/whereToRetire/wtrChipColors'
 import './WtrIncomeFitBadges.scss'
 
@@ -12,19 +13,35 @@ type Props = {
   part?: 'tax' | 'visa'
 }
 
+function TaxChip({
+  fit,
+  className,
+}: {
+  fit: MapIncomeFitDisplay
+  className?: string
+}) {
+  const chip = (
+    <AppChip
+      className={className}
+      color={wtrTaxChipColor(fit.taxTone)}
+      variant="soft"
+    >
+      {fit.taxLabel}
+    </AppChip>
+  )
+  if (!fit.taxTooltip) return chip
+  return (
+    <Tooltip content={fit.taxTooltip} placement="top">
+      {chip}
+    </Tooltip>
+  )
+}
+
 /** Tax + visa chips shared by map list cards and income-fit cards. */
 export function WtrIncomeFitBadges({ fit, className, variant = 'inline', part }: Props) {
   if (variant === 'list') {
     if (part === 'tax') {
-      return (
-        <AppChip
-          className={className}
-          color={wtrTaxChipColor(fit.taxTone)}
-          variant="soft"
-        >
-          {fit.taxLabel}
-        </AppChip>
-      )
+      return <TaxChip fit={fit} className={className} />
     }
 
     if (part === 'visa') {
@@ -57,9 +74,7 @@ export function WtrIncomeFitBadges({ fit, className, variant = 'inline', part }:
 
   return (
     <div className={['wtr-fit-card__badges', className].filter(Boolean).join(' ')}>
-      <AppChip color={wtrTaxChipColor(fit.taxTone)} variant="soft">
-        {fit.taxLabel}
-      </AppChip>
+      <TaxChip fit={fit} />
       <AppChip
         variant="soft"
         color={fit.visaQualifies ? 'accent' : 'danger'}

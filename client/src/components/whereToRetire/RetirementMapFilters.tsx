@@ -290,6 +290,7 @@ type PanelProps = FilterChangeProps & {
   activeTab: MapOptionsPanelTab;
   onActiveTabChange: (tab: MapOptionsPanelTab) => void;
   monthlyIncome: number;
+  modeledAge?: number;
   excludedCountryEntries: ExcludedCountryEntry[];
   favoriteCities: FavoriteCityEntry[];
   onAddExcludedCountry: (country: string) => void;
@@ -315,6 +316,7 @@ export function RetirementMapFilters({
   filters,
   onChange,
   monthlyIncome,
+  modeledAge,
   excludedCountryEntries,
   favoriteCities,
   onAddExcludedCountry,
@@ -480,6 +482,7 @@ export function RetirementMapFilters({
             <WtrMapFiltersFavoritesTab
               favoriteCities={favoriteCities}
               monthlyIncome={monthlyIncome}
+              modeledAge={modeledAge}
               filters={filters}
               onRemoveFavorite={onRemoveFavorite}
             />

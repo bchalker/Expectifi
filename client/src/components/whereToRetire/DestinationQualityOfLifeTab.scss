@@ -35,6 +35,10 @@
   color: var(--text-muted);
 }
 
+.wtr-qol-tab__freshness {
+  margin-top: var(--space-2);
+}
+
 /* Overall score + metric breakdown card */
 .wtr-qol-score-card {
   display: flex;

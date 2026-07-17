@@ -12,6 +12,10 @@ import {
 } from '../lib/calc/retireRegions'
 import { fmt, fmtMon } from '../utils/format'
 import { InlineSliderRow } from './InlineSliderRow'
+import { DataConfidenceNote } from './ui/DataConfidenceNote'
+import { PORTUGAL_TAX_DISCLOSURE_LONG } from '../lib/calc/portugalTax'
+import { FRANCE_TAX_DISCLOSURE_LONG } from '../lib/calc/franceTax'
+import { ITALY_TAX_DISCLOSURE_LONG } from '../lib/calc/italyTax'
 import './RetireRegionsBody.scss'
 
 function RegionFlag({ colors }: { colors: readonly string[] }) {
@@ -88,6 +92,27 @@ function RegionComparisonPanel({
           <div className="retire-regions__hero-val retire-regions__hero-val--gross">{fmtMon(comparison.afterTaxMonthlyUsd)}</div>
         </div>
       </div>
+      {comparison.regionId === 'portugal' ? (
+        <DataConfidenceNote
+          variant="message"
+          text={PORTUGAL_TAX_DISCLOSURE_LONG}
+          className="retire-regions__portugal-tax-note"
+        />
+      ) : null}
+      {comparison.regionId === 'italy' ? (
+        <DataConfidenceNote
+          variant="message"
+          text={ITALY_TAX_DISCLOSURE_LONG}
+          className="retire-regions__italy-tax-note"
+        />
+      ) : null}
+      {comparison.regionId === 'france' ? (
+        <DataConfidenceNote
+          variant="message"
+          text={FRANCE_TAX_DISCLOSURE_LONG}
+          className="retire-regions__france-tax-note"
+        />
+      ) : null}
       <div className="grid-3">
         <div className="card">
           <div className="card-label">Est. living cost</div>

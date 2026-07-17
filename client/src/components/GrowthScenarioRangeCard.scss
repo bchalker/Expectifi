@@ -7,6 +7,22 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.growth-scenario-range-card__coverage-note {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--border);
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.growth-scenario-range-card__coverage-note .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
 .growth-scenario-range-card__wing-item {
   display: flex;
   flex-direction: column;

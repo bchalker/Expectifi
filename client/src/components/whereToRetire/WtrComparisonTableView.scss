@@ -82,6 +82,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.wtr-compare-view__portugal-tax-note {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
 .wtr-compare-table-wrap--head-stuck .wtr-compare-table__head-row th {
   box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.08);
 }

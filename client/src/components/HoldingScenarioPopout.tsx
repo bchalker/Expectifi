@@ -220,6 +220,7 @@ export function HoldingScenarioPopout({
             horizon={state.h}
             selection={state.outlookSelection}
             onSelect={state.onSelectOutlookTile}
+            rateBasis="relative"
             globalBlended={state.globalBlended}
           />
         ) : null}

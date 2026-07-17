@@ -3,6 +3,8 @@ import { IconArrowLeft } from '@tabler/icons-react'
 import { useWtrComparisonColumns, resolveCompareScored } from '../../hooks/useWtrComparisonColumns'
 import {
   COMPARISON_TABLE_ROWS,
+  comparisonHealthcareRatingsFreshnessMessage,
+  comparisonTeleportFallbacksFreshnessMessage,
   getComparisonCellDisplay,
   getComparisonHighlightClass,
   isComparisonDirectFlightsBadgeRow,
@@ -18,11 +20,21 @@ import { scoreMapCity } from '../../lib/whereToRetire/cityMapScoring'
 import { getAllMapCities, type MapCity } from '../../utils/costOfLiving'
 import { CountryFlag } from '../ui/CountryFlag'
 import { AppChip } from '../ui/AppChip'
+import { DataConfidenceNote } from '../ui/DataConfidenceNote'
+import { PORTUGAL_TAX_DISCLOSURE_SHORT } from '../../lib/calc/portugalTax'
+import { FRANCE_TAX_DISCLOSURE_SHORT } from '../../lib/calc/franceTax'
+import { NETHERLANDS_TAX_DISCLOSURE_SHORT } from '../../lib/calc/netherlandsTax'
+import {
+  ITALY_ART_24_TER_DISCLOSURE_SHORT,
+  ITALY_TAX_DISCLOSURE_SHORT,
+  isItalyArt24TerEligibleCity,
+} from '../../lib/calc/italyTax'
 import { WtrAffordabilityScoreBar } from './WtrAffordabilityScoreBar'
 import './WtrComparisonTableView.scss'
 
 type Props = {
   monthlyIncome: number
+  modeledAge: number
   compareIds: string[]
   baselineCity: MapCity | null
   onBaselineCityChange: (city: MapCity | null) => void
@@ -225,6 +237,7 @@ function CityColumnHeader({
 
 export function WtrComparisonTableView({
   monthlyIncome,
+  modeledAge,
   compareIds,
   baselineCity,
   onBaselineCityChange,
@@ -243,6 +256,7 @@ export function WtrComparisonTableView({
     compareScored,
     baselineCity,
     monthlyIncome,
+    modeledAge,
   )
 
   const baselineResults = useMemo(() => {
@@ -273,6 +287,40 @@ export function WtrComparisonTableView({
     out.push(...compareColumns)
     return out
   }, [baselineCol, compareColumns])
+
+  const includesPortugal = useMemo(
+    () => highlightColumns.some((c) => c.city.country.trim() === 'Portugal'),
+    [highlightColumns],
+  )
+  const includesItalyArt24Ter = useMemo(
+    () =>
+      highlightColumns.some(
+        (c) =>
+          c.city.country.trim() === 'Italy' &&
+          isItalyArt24TerEligibleCity(c.city.city),
+      ),
+    [highlightColumns],
+  )
+  const includesItalyProgressive = useMemo(
+    () =>
+      highlightColumns.some(
+        (c) =>
+          c.city.country.trim() === 'Italy' &&
+          !isItalyArt24TerEligibleCity(c.city.city),
+      ),
+    [highlightColumns],
+  )
+  const includesFrance = useMemo(
+    () => highlightColumns.some((c) => c.city.country.trim() === 'France'),
+    [highlightColumns],
+  )
+  const includesNetherlands = useMemo(
+    () =>
+      highlightColumns.some(
+        (c) => c.city.country.trim() === 'Netherlands',
+      ),
+    [highlightColumns],
+  )
 
   const colCount = 1 + compareColumns.length
   const showEmpty = compareIds.length === 0 && !baselineCity
@@ -478,6 +526,51 @@ export function WtrComparisonTableView({
               })}
             </tbody>
           </table>
+          {includesPortugal ? (
+            <DataConfidenceNote
+              variant="message"
+              text={PORTUGAL_TAX_DISCLOSURE_SHORT}
+              className="wtr-compare-view__portugal-tax-note"
+            />
+          ) : null}
+          {includesItalyProgressive ? (
+            <DataConfidenceNote
+              variant="message"
+              text={ITALY_TAX_DISCLOSURE_SHORT}
+              className="wtr-compare-view__italy-tax-note"
+            />
+          ) : null}
+          {includesItalyArt24Ter ? (
+            <DataConfidenceNote
+              variant="message"
+              text={ITALY_ART_24_TER_DISCLOSURE_SHORT}
+              className="wtr-compare-view__italy-art24-tax-note"
+            />
+          ) : null}
+          {includesFrance ? (
+            <DataConfidenceNote
+              variant="message"
+              text={FRANCE_TAX_DISCLOSURE_SHORT}
+              className="wtr-compare-view__france-tax-note"
+            />
+          ) : null}
+          {includesNetherlands ? (
+            <DataConfidenceNote
+              variant="message"
+              text={NETHERLANDS_TAX_DISCLOSURE_SHORT}
+              className="wtr-compare-view__netherlands-tax-note"
+            />
+          ) : null}
+          <DataConfidenceNote
+            variant="message"
+            text={comparisonHealthcareRatingsFreshnessMessage()}
+            className="wtr-compare-view__healthcare-freshness"
+          />
+          <DataConfidenceNote
+            variant="message"
+            text={comparisonTeleportFallbacksFreshnessMessage()}
+            className="wtr-compare-view__teleport-freshness"
+          />
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import gettingThereDataset from '../data/getting-there.json'
 import { AIRPORT_COORDINATES } from '../data/airport-coordinates'
 import { haversineMiles } from '../lib/calc/geo'
+import { formatYearMonthLabel } from './formatYearMonth'
 
 export type GettingThereAirport = {
   code: string
@@ -41,8 +42,14 @@ const dataset = gettingThereDataset as GettingThereDatasetFile
 export const GETTING_THERE_UNAVAILABLE_MESSAGE =
   'Flight information not yet available for this country.'
 
-export const GETTING_THERE_TAB_SOURCE_FOOTER =
-  'Flight data is approximate and curated in-app (last updated May 2026). Distances are great-circle miles from US hubs to the primary destination airport (OurAirports). Routes and availability change seasonally — verify before planning.'
+/** Source footer — month stamp comes from getting-there.json metadata.last_updated. */
+export function getGettingThereTabSourceFooter(): string {
+  const lastUpdated = formatYearMonthLabel(dataset.metadata.last_updated)
+  return `Flight data is approximate and curated in-app (last updated ${lastUpdated}). Distances are great-circle miles from US hubs to the primary destination airport (OurAirports). Routes and availability change seasonally — verify before planning.`
+}
+
+/** @deprecated Prefer getGettingThereTabSourceFooter() so the stamp stays tied to JSON metadata. */
+export const GETTING_THERE_TAB_SOURCE_FOOTER = getGettingThereTabSourceFooter()
 
 /** Country-level flight and entry data (keys match `city.country`, e.g. "Portugal"). */
 export function getGettingThereData(country: string): GettingThereCountryData | null {

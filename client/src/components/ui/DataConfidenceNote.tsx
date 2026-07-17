@@ -14,7 +14,14 @@ type HeuristicProps = {
   className?: string
 }
 
-export type DataConfidenceNoteProps = SourcedProps | HeuristicProps
+type MessageProps = {
+  /** Custom confidence / estimate copy (same visual tone as heuristic). */
+  variant: 'message'
+  text: string
+  className?: string
+}
+
+export type DataConfidenceNoteProps = SourcedProps | HeuristicProps | MessageProps
 
 /** Inline source or confidence label — matches page footer tone, not vague "Source: Estimated". */
 export function DataConfidenceNote(props: DataConfidenceNoteProps) {
@@ -22,7 +29,9 @@ export function DataConfidenceNote(props: DataConfidenceNoteProps) {
   const text =
     props.variant === 'sourced'
       ? `${props.scope} · ${props.dataset}`
-      : 'Rough estimate, not tied to a specific dataset'
+      : props.variant === 'message'
+        ? props.text
+        : 'Rough estimate, not tied to a specific dataset'
 
   return <p className={className}>{text}</p>
 }

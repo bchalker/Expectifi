@@ -1,11 +1,20 @@
 import { useMemo } from "react";
 import { PanelHeadsUpCallout } from "../../ui/PanelHeadsUpCallout";
+import { DataFreshnessNote } from "../../ui/DataFreshnessNote";
 import {
   getTaxVisaData,
+  getTaxVisaLastUpdated,
   getTaxVisaPanelHeadsUp,
   TAX_VISA_TAB_DISCLAIMER_BODY,
   TAX_VISA_UNAVAILABLE_MESSAGE,
+  type TaxVisaCountryData,
 } from "../../../utils/taxVisa";
+import {
+  ITALY_ART_24_TER_KEY_EXEMPTIONS,
+  ITALY_ART_24_TER_TAX_RATE_LABEL,
+  ITALY_ART_24_TER_TAX_SUMMARY,
+  isItalyArt24TerEligibleCity,
+} from "../../../lib/calc/italyTax";
 import {
   formatTextField,
   type CityDetailTabStaggerProps,
@@ -15,7 +24,31 @@ import "./TaxVisaTab.scss";
 
 type Props = CityDetailTabStaggerProps & {
   country: string;
+  city?: string;
 };
+
+function applyItalyCityTaxOverrides(
+  country: string,
+  city: string | undefined,
+  data: TaxVisaCountryData,
+): TaxVisaCountryData {
+  if (country.trim() !== "Italy" || !isItalyArt24TerEligibleCity(city)) {
+    return data;
+  }
+  return {
+    ...data,
+    tax_rate_label: ITALY_ART_24_TER_TAX_RATE_LABEL,
+    tax_summary: ITALY_ART_24_TER_TAX_SUMMARY,
+    key_exemptions: ITALY_ART_24_TER_KEY_EXEMPTIONS,
+    top_reason: ITALY_ART_24_TER_TAX_RATE_LABEL,
+    tax_rate_why:
+      "This comune meets the Puglia + ≤30k tests for Article 24-ter — the 7% rate is the planning figure here, not standard IRPEF.",
+    tax_summary_why:
+      "You still need a qualifying foreign pension and a clean five-year non-residency history to elect the regime — confirm with a cross-border advisor before relocating.",
+    key_exemptions_why:
+      "Standard progressive IRPEF still applies in Italy’s major cities; this town is one of the catalog exceptions that can elect 7%.",
+  };
+}
 
 function TaxNarrativeCard({
   title,
@@ -42,8 +75,17 @@ function TaxNarrativeCard({
   );
 }
 
-export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
-  const data = useMemo(() => getTaxVisaData(country), [country]);
+export function TaxVisaTab({
+  country,
+  city,
+  staggerClassName,
+  staggerStyle,
+}: Props) {
+  const data = useMemo(() => {
+    const base = getTaxVisaData(country);
+    if (!base) return null;
+    return applyItalyCityTaxOverrides(country, city, base);
+  }, [country, city]);
   const panelHeadsUp = useMemo(
     () => getTaxVisaPanelHeadsUp(country, data),
     [country, data],
@@ -165,6 +207,19 @@ export function TaxVisaTab({ country, staggerClassName, staggerStyle }: Props) {
       >
         <strong>Sources</strong>: {TAX_VISA_TAB_DISCLAIMER_BODY}
       </p>
+      <div
+        {...staggerSectionProps(
+          4,
+          undefined,
+          staggerClassName,
+          staggerStyle,
+        )}
+      >
+        <DataFreshnessNote
+          lastUpdated={getTaxVisaLastUpdated()}
+          className="wtr-tax-visa-tab__freshness"
+        />
+      </div>
     </div>
   );
 }

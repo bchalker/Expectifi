@@ -48,6 +48,11 @@ type TaxVisaDatasetFile = {
 
 const dataset = taxVisaDataset as TaxVisaDatasetFile
 
+/** `metadata.last_updated` from retirement-tax-visa.json (`YYYY-MM`). */
+export function getTaxVisaLastUpdated(): string {
+  return dataset.metadata.last_updated
+}
+
 /** Default panel caveat — most countries. */
 export function defaultTaxVisaPanelHeadsUp(country: string): string {
   const name = country.trim() || 'this country'
@@ -63,7 +68,9 @@ const TAX_VISA_PANEL_HEADS_UP_OVERRIDES: Record<string, string> = {
   Thailand:
     'As a US citizen, you still file with the IRS on worldwide income. Thai rules tax foreign income remitted in the same year you earn it — timing your pension transfers matters. Talk to a cross-border advisor before setting up automatic wires.',
   Italy:
-    "As a US citizen, you still file with the IRS on worldwide income. Italy's 7% flat regime is a real break — but it only applies in qualifying southern towns and doesn't replace your US filing. A cross-border advisor should map both sides before you relocate.",
+    "As a US citizen, you still file with the IRS on worldwide income. Most Expectifi Italy cities use standard progressive IRPEF; Art. 24-ter 7% applies only in confirmed eligible towns ≤30,000 residents (e.g. San Giovanni Rotondo). A cross-border advisor should map both sides before you relocate.",
+  France:
+    "As a US citizen, you still file with the IRS on worldwide income. French tax on retirement income depends on type — Social Security and private pensions are generally taxed by France under the treaty; US government pensions may not be. Map your income mix with a cross-border advisor before assuming a rate.",
   Hungary:
     "As a US citizen, you still file with the IRS on worldwide income. Hungary's 15% flat rate is simple on paper, but treaty and Foreign Tax Credit rules still determine what you actually owe the US — confirm the full picture with a cross-border advisor.",
 }
@@ -91,7 +98,7 @@ export const TAX_VISA_UNAVAILABLE_MESSAGE =
 
 const TAX_VISA_SCOPE_OVERRIDES: Record<string, string> = {
   Italy:
-    'Tax rate shown is the national 7% special regime for qualifying southern municipalities. Standard rates apply elsewhere.',
+    'Tax rate shown is standard progressive IRPEF for most catalog cities. Art. 24-ter 7% applies only in confirmed eligible towns ≤30k (e.g. San Giovanni Rotondo).',
   Switzerland:
     'Income tax rates vary significantly by canton. Rates shown are approximate national averages.',
   'United States':

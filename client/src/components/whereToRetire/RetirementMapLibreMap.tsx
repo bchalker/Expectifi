@@ -113,6 +113,7 @@ function runWhenMapStyleReady(
 type Props = {
   destinations: ScoredMapCity[];
   monthlyIncome: number;
+  modeledAge?: number;
   pinColorView: MapPinColorView;
   filters: MapFilters;
   onFiltersChange: (filters: MapFilters) => void;
@@ -187,6 +188,7 @@ function cityIdFromEvent(event: MapLayerMouseEvent): string | null {
 export function RetirementMapLibreMap({
   destinations,
   monthlyIncome,
+  modeledAge,
   pinColorView,
   filters,
   onFiltersChange,
@@ -823,6 +825,7 @@ export function RetirementMapLibreMap({
             <WtrMapPinTooltip
               scored={hoveredScored}
               monthlyIncome={monthlyIncome}
+              modeledAge={modeledAge}
               pinColorView={pinColorView}
               filters={filters}
               isFavoritePin={hoveredIsFavorite}

@@ -9,7 +9,18 @@ export type TravelAdvisoryEntry = {
   title: string
 }
 
+export type TravelAdvisoriesMetadata = {
+  sourceUrl: string
+  /** ISO timestamp when the advisory feed was fetched. */
+  fetchedAt: string
+  feedPubDate: string
+  catalogCountryCount: number
+  level4MatchedCount: number
+  level3MatchedCount: number
+}
+
 type TravelAdvisoriesFile = {
+  metadata: TravelAdvisoriesMetadata
   level4: TravelAdvisoryEntry[]
   level3: TravelAdvisoryEntry[]
 }
@@ -49,6 +60,30 @@ export function getReconsiderTravelAdvisory(country: string): TravelAdvisoryEntr
 
 export function hasReconsiderTravelAdvisory(country: string): boolean {
   return level3ByCountry.has(normalizeLookup(country))
+}
+
+export function getTravelAdvisoriesFetchedAt(): string {
+  return data.metadata.fetchedAt
+}
+
+/** Calendar date for chip copy, e.g. `Jun 16, 2026`. */
+export function formatTravelAdvisoriesAsOfDate(
+  fetchedAt: string = data.metadata.fetchedAt,
+): string {
+  const ms = Date.parse(fetchedAt)
+  if (!Number.isFinite(ms)) return fetchedAt
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(ms))
+}
+
+export function travelAdvisoriesAsOfMessage(
+  fetchedAt: string = data.metadata.fetchedAt,
+): string {
+  return `Advisory data as of ${formatTravelAdvisoriesAsOfDate(fetchedAt)}.`
 }
 
 export function formatTravelAdvisorySummary(entry: TravelAdvisoryEntry): string {

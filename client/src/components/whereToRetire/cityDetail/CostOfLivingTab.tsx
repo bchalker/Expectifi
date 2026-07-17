@@ -17,6 +17,8 @@ import {
   formatUsd,
   hasTravelAdvisory,
 } from "../../../utils/costOfLiving";
+import { SAN_GIOVANNI_ROTONDO_COL_CONFIDENCE_NOTE } from "../../../lib/calc/italyTax";
+import { DataConfidenceNote } from "../../ui/DataConfidenceNote";
 import {
   ColBudgetBreakdownBar,
   COL_BUDGET_CARD_CATEGORY_DOT,
@@ -269,6 +271,14 @@ export function CostOfLivingTab({
           <p className="wtr-city-detail__col-budget-footnote">
             Based on your lifestyle preset basket and dining habits
           </p>
+          {city.city === "San Giovanni Rotondo" &&
+          city.country === "Italy" ? (
+            <DataConfidenceNote
+              variant="message"
+              text={SAN_GIOVANNI_ROTONDO_COL_CONFIDENCE_NOTE}
+              className="wtr-city-detail__col-confidence"
+            />
+          ) : null}
         </div>
       </section>
     </div>

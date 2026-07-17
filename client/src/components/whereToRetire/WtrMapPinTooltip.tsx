@@ -6,6 +6,7 @@ import './WtrMapPinTooltip.scss'
 type Props = {
   scored: ScoredMapCity
   monthlyIncome: number
+  modeledAge?: number
   pinColorView: MapPinColorView
   filters: Pick<MapFilters, 'lifestyle'>
   isFavoritePin?: boolean
@@ -14,6 +15,7 @@ type Props = {
 export function WtrMapPinTooltip({
   scored,
   monthlyIncome,
+  modeledAge,
   pinColorView,
   filters,
   isFavoritePin = false,
@@ -24,6 +26,7 @@ export function WtrMapPinTooltip({
         variant="tooltip"
         scored={scored}
         monthlyIncome={monthlyIncome}
+        modeledAge={modeledAge}
         pinColorView={pinColorView}
         mapFilters={filters}
         isFavoritePin={isFavoritePin}

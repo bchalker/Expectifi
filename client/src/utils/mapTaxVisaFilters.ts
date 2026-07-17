@@ -1,4 +1,5 @@
 import { getTaxVisaData } from './taxVisa'
+import { isItalyArt24TerEligibleCity } from '../lib/calc/italyTax'
 
 /** Foreign-income tax treatment bucket for map filtering (aligned with retirement-tax-visa.json). */
 export type ForeignTaxCategory = 'not-taxed-locally' | 'low-flat-rate' | 'standard'
@@ -23,7 +24,6 @@ const NOT_TAXED_LOCALLY_COUNTRIES = new Set([
 
 /** Dedicated low flat regimes (under ~15%) — see tax_rate_label in retirement-tax-visa.json. */
 const LOW_FLAT_RATE_COUNTRIES = new Set([
-  'Italy',
   'Greece',
   'Cyprus',
   'Bulgaria',
@@ -64,12 +64,18 @@ const RETIREMENT_VISA_PROGRAM_COUNTRIES = new Set([
 ])
 
 /**
- * Map a country to a foreign-tax filter bucket. Lists follow retirement-tax-visa.json
- * tax_rate_label patterns; everything else is standard.
+ * Map a country (and optional city) to a foreign-tax filter bucket.
+ * Italy is standard IRPEF except confirmed Art. 24-ter towns → low-flat-rate.
  */
-export function foreignTaxCategoryForCountry(country: string): ForeignTaxCategory {
+export function foreignTaxCategoryForCountry(
+  country: string,
+  city?: string | null,
+): ForeignTaxCategory {
   const trimmed = country.trim()
   if (NOT_TAXED_LOCALLY_COUNTRIES.has(trimmed)) return 'not-taxed-locally'
+  if (trimmed === 'Italy' && isItalyArt24TerEligibleCity(city)) {
+    return 'low-flat-rate'
+  }
   if (LOW_FLAT_RATE_COUNTRIES.has(trimmed)) return 'low-flat-rate'
   return 'standard'
 }
@@ -77,9 +83,10 @@ export function foreignTaxCategoryForCountry(country: string): ForeignTaxCategor
 export function passesForeignTaxMapFilter(
   country: string,
   filter: ForeignTaxFilter,
+  city?: string | null,
 ): boolean {
   if (filter === 'any') return true
-  return foreignTaxCategoryForCountry(country) === filter
+  return foreignTaxCategoryForCountry(country, city) === filter
 }
 
 /** Whether the country has a dedicated named retirement visa in our tax/visa dataset. */

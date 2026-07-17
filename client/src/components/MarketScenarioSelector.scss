@@ -1,8 +1,21 @@
 .market-scenario-selector {
   position: relative;
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
   flex-shrink: 0;
   box-sizing: border-box;
+  gap: var(--space-1);
+}
+
+.market-scenario-selector__note {
+  margin: 0;
+  max-width: 16rem;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
+  text-align: right;
 }
 
 /* Match .portfolio-scenario-cell .holdings-scenario-trigger--badge (row scenario buttons). */
@@ -134,9 +147,18 @@
 
 .market-scenario-button-group {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.market-scenario-button-group__controls {
+  display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  min-width: 0;
 }
 
 .market-scenario-button-group__label {
@@ -146,6 +168,15 @@
   font-weight: 500;
   color: var(--text-muted);
   white-space: nowrap;
+}
+
+.market-scenario-button-group__note {
+  margin: 0;
+  max-width: 40rem;
+  font-family: var(--body);
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
 }
 
 .market-scenario-button-group .mode-button-group {

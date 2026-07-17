@@ -21,6 +21,7 @@ export function useWtrComparisonColumns(
   compareScored: ScoredMapCity[],
   baselineCity: MapCity | null,
   monthlyIncome: number,
+  modeledAge?: number,
 ): ColumnBundle {
   const [extras, setExtras] = useState<
     Record<string, { climate: ComparisonColumnData['climate']; fx: ComparisonColumnData['dollarStrength'] }>
@@ -108,6 +109,7 @@ export function useWtrComparisonColumns(
       return buildComparisonColumnData(
         scored,
         monthlyIncome,
+        modeledAge,
         extra?.climate ?? null,
         extra?.fx ?? null,
         cur?.code ?? null,
@@ -123,7 +125,14 @@ export function useWtrComparisonColumns(
       out.push(build(s.city))
     }
     return out
-  }, [baselineCity, compareScored, extras, currencyById, monthlyIncome])
+  }, [
+    baselineCity,
+    compareScored,
+    extras,
+    currencyById,
+    monthlyIncome,
+    modeledAge,
+  ])
 
   const loading = allTargets.length > 0 && Object.keys(extras).length < allTargets.length
 

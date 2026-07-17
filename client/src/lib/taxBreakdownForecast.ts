@@ -21,6 +21,10 @@ export const FORECAST_TAX_EMPTY_GUIDANCE =
 
 export type ForecastGrowthTaxDetail = {
   annualContributions: number
+  /**
+   * Illustrative estimate only — not from `calcTaxDetailed`.
+   * Heuristic: balance × return × taxable-yield share × blended federal rate.
+   */
   brokerageTaxDragAnnual: number
   taxShelteredBalance: number
   taxableBrokerageBalance: number
@@ -60,7 +64,8 @@ export function calcForecastGrowthTaxDetail(
       : 0
 
   return {
-    annualContributions: c.save * 12,
+    // `save` is already an annual USD contribution (see computeResults / shared calc).
+    annualContributions: c.save,
     brokerageTaxDragAnnual,
     taxShelteredBalance: c.tradBal + c.rothBal + c.hsaBal,
     taxableBrokerageBalance: c.brkBal,
@@ -92,7 +97,7 @@ export function buildForecastTaxPictureNarrative(
   if (detail.annualContributions > 0) {
     sentences.push([
       'You are saving about ',
-      { em: `${fmtMon(c.save)}/month` },
+      { em: fmtMon(c.save / 12) },
       ' (',
       { em: `${fmt(detail.annualContributions)}/year` },
       ') into tax-advantaged retirement accounts that compound without annual federal tax on growth.',
@@ -112,7 +117,7 @@ export function buildForecastTaxPictureNarrative(
         { em: fmt(detail.taxableBrokerageBalance) },
         ' may create roughly ',
         { em: `${fmt(detail.brokerageTaxDragAnnual)}/year` },
-        ' in estimated federal tax drag at your growth assumptions — sheltered accounts avoid that annual bite.',
+        ' in illustrative federal tax drag (estimate, not from the full tax engine) at your growth assumptions — sheltered accounts avoid that annual bite.',
       ])
     } else {
       sentences.push([
@@ -187,7 +192,7 @@ export function buildForecastTaxCallouts(
     callouts.push({
       id: 'brokerage-drag',
       label: 'Taxable account drag',
-      body: `Estimated ${fmt(detail.brokerageTaxDragAnnual)}/year in federal tax drag on taxable growth — sheltered accounts avoid this while you accumulate.`,
+      body: `Illustrative estimate of ${fmt(detail.brokerageTaxDragAnnual)}/year in federal tax drag on taxable growth (not from the full tax engine) — sheltered accounts avoid this while you accumulate.`,
     })
   }
 

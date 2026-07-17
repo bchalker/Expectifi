@@ -331,11 +331,15 @@ function passesRegionScope(country: string, scope: MapRegionScope): boolean {
   return country !== US_COUNTRY
 }
 
-function passesMapDealbreakers(country: string, filters: MapFilters): boolean {
+function passesMapDealbreakers(
+  country: string,
+  filters: MapFilters,
+  city?: string | null,
+): boolean {
   if (!passesEnglishProficiencyMapFilter(country, filters.englishProficiency)) {
     return false
   }
-  if (!passesForeignTaxMapFilter(country, filters.foreignTax)) {
+  if (!passesForeignTaxMapFilter(country, filters.foreignTax, city)) {
     return false
   }
   if (filters.retirementVisa && !hasRetirementVisaProgram(country)) {
@@ -692,7 +696,7 @@ export function passesMapFilters(
     return false
   }
 
-  if (!passesMapDealbreakers(city.country, filters)) return false
+  if (!passesMapDealbreakers(city.country, filters, city.city)) return false
 
   if (filters.hideAdvisories && hasTravelAdvisory(city.country)) return false
 

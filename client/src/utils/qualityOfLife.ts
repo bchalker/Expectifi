@@ -30,6 +30,11 @@ type QualityOfLifeCombinedFile = {
 const combined = qualityOfLifeCombined as unknown as QualityOfLifeCombinedFile
 const dataset = combined.countries
 
+/** `metadata.last_updated` from quality-of-life.json (`YYYY-MM`). */
+export function getQualityOfLifeLastUpdated(): string {
+  return combined.metadata.last_updated
+}
+
 /** Raw overall index ceiling (pre-normalization). */
 export const QOL_OVERALL_MAX = 220
 

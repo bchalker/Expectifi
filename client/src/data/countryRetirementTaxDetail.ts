@@ -85,15 +85,15 @@ export const COUNTRY_RETIREMENT_TAX_DETAIL: Record<string, RetirementTaxDetail> 
     'Spain taxes residents on worldwide income under progressive rates. US citizens remain liable for US federal tax, but the US-Spain treaty and Foreign Tax Credit usually prevent full double taxation. Regional rules and special regimes can change outcomes — verify current Beckham Law eligibility separately from this estimate.',
   ),
   IT: treatyCountry(
-    '7% flat tax on foreign-sourced income (qualifying new residents, up to 10 years)',
-    'Foreign Tax Credit typically offsets most or all US federal tax on income already taxed under Italy’s flat regime. Double taxation is usually avoided.',
+    'Progressive IRPEF (standard rates — Art. 24-ter only in confirmed eligible towns)',
+    'Foreign Tax Credit typically offsets US federal tax on income already taxed in Italy. Double taxation is usually avoided under the US–Italy treaty.',
     {
-      socialSecurity: 'Taxable at US federal rate; treaty may affect treatment',
-      retirement401k: 'Often subject to Italy’s 7% flat tax for qualifying residents; FTC offsets US federal',
-      pension: 'Often subject to Italy’s 7% flat tax for qualifying residents',
-      investmentIncome: 'Often subject to Italy’s 7% flat tax for qualifying residents',
+      socialSecurity: 'Generally taxable in Italy under standard IRPEF when resident; FTC may offset US federal',
+      retirement401k: 'Taxable in Italy under standard IRPEF when resident; FTC commonly offsets US federal',
+      pension: 'Taxable under standard IRPEF unless the city qualifies for Art. 24-ter 7% (eligible towns ≤30k)',
+      investmentIncome: 'Generally taxable in Italy when resident under progressive IRPEF (or Art. 24-ter when elected in an eligible town)',
     },
-    'Italy offers a 7% flat tax on foreign-sourced income for qualifying new residents for up to 10 years. As a US citizen you still file US federal returns, but the US-Italy tax treaty and Foreign Tax Credit typically prevent full double taxation. Your actual combined burden depends on your income level and how the treaty applies to each income type.',
+    'Most Expectifi Italy destinations are modeled under standard progressive IRPEF. Article 24-ter (7% substitute tax) applies only in confirmed eligible southern or earthquake-zone municipalities with ≤30,000 residents. IRPEF brackets are not sourced yet for non-eligible cities, so those displays use a temporary planning stub. As a US citizen you still file US federal returns; the US–Italy treaty and Foreign Tax Credit typically prevent full double taxation.',
   ),
   MX: treatyCountry(
     'Mexican resident rates on worldwide income (simplified ~10% planning rate)',
@@ -107,9 +107,9 @@ export const COUNTRY_RETIREMENT_TAX_DETAIL: Record<string, RetirementTaxDetail> 
     'Mexico generally taxes tax residents on worldwide income. US citizens still owe US federal tax, but the US-Mexico treaty and Foreign Tax Credit usually prevent paying the full amount twice. Residency after 183 days in a year is a common trigger for Mexican taxation.',
   ),
   CR: usOnlyLocal(
-    'No tax on foreign-sourced income',
+    '0% on foreign-sourced retirement income (territorial)',
     'Only US federal income tax applies. Costa Rica does not tax foreign-sourced retirement income.',
-    'Costa Rica uses a territorial tax system, meaning it does not tax income earned outside the country. As a US citizen you still owe US federal income tax on your retirement income, but Costa Rica adds no additional burden on foreign-source amounts. There is no US-Costa Rica tax treaty, so Foreign Tax Credit does not apply to Costa Rican tax (because local tax on foreign income is generally zero).',
+    'Costa Rica uses a territorial tax system: foreign-source pensions, Social Security, dividends, and capital gains are not taxed locally (0%). Locally-sourced Costa Rican income is taxed progressively — that is a different case from the foreign-source retirement income Expectifi models. As a US citizen you still owe US federal tax on worldwide income. There is no US-Costa Rica tax treaty.',
     { territorialSystem: true },
   ),
   PA: usOnlyLocal(
@@ -148,15 +148,15 @@ export const COUNTRY_RETIREMENT_TAX_DETAIL: Record<string, RetirementTaxDetail> 
     'Greece offers incentives for pensioners relocating from abroad, including a flat tax on foreign pension income for qualifying applicants. US federal tax still applies, but treaty relief and the Foreign Tax Credit usually offset much of the overlap.',
   ),
   FR: treatyCountry(
-    'Progressive French rates on worldwide income when resident',
-    'US-France treaty and Foreign Tax Credit typically limit double taxation.',
+    'SS: progressive brackets (Art. 20); other income 0–45% by type',
+    'US-France treaty and Foreign Tax Credit typically limit double taxation; outcome depends on income category.',
     {
-      socialSecurity: 'Treaty may coordinate social security taxation',
-      retirement401k: 'Taxable in France when resident; FTC often offsets US federal',
-      pension: 'Pension articles apply under US-France treaty',
-      investmentIncome: 'Generally taxable in France when resident',
+      socialSecurity: 'Taxable by France under treaty Art. 20 — Expectifi applies 2026 progressive brackets',
+      retirement401k: 'Private pensions / IRA–401(k) generally taxable by France under Art. 18 (range stub until pension type is modeled)',
+      pension: 'US government pensions often reserved to US taxation under Art. 19 — product field needed to distinguish',
+      investmentIncome: 'Generally taxable; prélèvements sociaux may apply on capital income on top of income tax',
     },
-    'France taxes residents on worldwide income at progressive rates. US citizens remain subject to US federal tax, but the US-France treaty and Foreign Tax Credit usually prevent paying full tax twice.',
+    'US Social Security is taxed by France under Art. 20 using 2026 progressive brackets. Other retirement income is 0–45% depending on amount and pension type; US government pensions may be reserved to US taxation (Art. 19). CSM (~6.5%) and prélèvements sociaux can apply on top and are not modeled. Non-SS surplus math uses a planning stub (FRANCE_PENSION_TYPE_FOLLOWUP) until government vs private pension is distinguished in the product.',
   ),
   DE: treatyCountry(
     'German progressive rates on worldwide income when resident',
@@ -170,15 +170,15 @@ export const COUNTRY_RETIREMENT_TAX_DETAIL: Record<string, RetirementTaxDetail> 
     'Germany taxes tax residents on worldwide income. US federal obligations continue, but the US-Germany treaty and Foreign Tax Credit typically prevent full double taxation.',
   ),
   NL: treatyCountry(
-    'Dutch box system — ordinary income often ~18–37% (simplified 18% model)',
+    '2026 Box 1 progressive rates — reduced first bracket from AOW age 67',
     'Treaty and Foreign Tax Credit usually offset much US federal tax after Dutch tax.',
     {
       socialSecurity: 'Treaty coordination may apply',
-      retirement401k: 'Taxable in Netherlands when resident',
-      pension: 'Pension treatment under US-Netherlands treaty',
+      retirement401k: 'Taxable in Netherlands when resident as Box 1 ordinary income',
+      pension: 'Pension income taxed in full as Box 1 (not deferred/exempt)',
       investmentIncome: 'May fall under box 3 wealth tax concepts separately from income tax',
     },
-    'The Netherlands has distinctive box taxation including wealth tax concepts. US citizens still file US federal returns. Treaty relief and the Foreign Tax Credit usually reduce double taxation on income taxed in both countries.',
+    'The Netherlands taxes pension withdrawals as Box 1 ordinary income. Expectifi applies the 2026 brackets, the reduced first bracket from modeled age 67, and algemene heffingskorting (general tax credit). Arbeidskorting is intentionally excluded — it applies to employment income, not pension income for retirees. The uncommon pre-1946 threshold variant is not modeled. US citizens still file US federal returns; treaty relief and the Foreign Tax Credit usually reduce double taxation.',
   ),
   IE: treatyCountry(
     'Irish progressive rates on worldwide income when resident',

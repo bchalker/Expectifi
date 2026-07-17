@@ -164,6 +164,10 @@
   color: var(--text-muted);
 }
 
+.wtr-climate-card__freshness {
+  margin-top: var(--space-2);
+}
+
 .wtr-climate-card--loading .wtr-climate-card__skeleton-head,
 .wtr-climate-card--loading .wtr-climate-card__skeleton-bar,
 .wtr-climate-card--loading .wtr-climate-card__skeleton-rows span {

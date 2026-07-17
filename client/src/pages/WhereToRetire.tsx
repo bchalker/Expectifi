@@ -326,6 +326,7 @@ export function WhereToRetire({ c }: Props) {
                   <RetirementMapExplorer
                     explorationIncome={mapExplorationIncome}
                     planMonthlyIncome={grossMonthlyIncome}
+                    modeledAge={c.targetRetirementAge}
                     filters={mapFilters}
                     preferences={prefs}
                     onFiltersChange={handleMapFiltersChange}
@@ -369,6 +370,7 @@ export function WhereToRetire({ c }: Props) {
                     >
                       <WtrComparisonTableView
                         monthlyIncome={mapExplorationIncome}
+                        modeledAge={c.targetRetirementAge}
                         compareIds={compareIds}
                         baselineCity={baselineCity}
                         onBaselineCityChange={setBaselineCity}

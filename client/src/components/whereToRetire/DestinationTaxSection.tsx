@@ -6,14 +6,24 @@ import {
   type RetirementTaxDetail,
 } from '../../data/retirementTaxDetail'
 import { getCountryTaxForCityCountry } from '../../lib/whereToRetire/countryTaxForCity'
+import { resolveCountryEffectiveRetirementRate } from '../../data/countryTaxRates'
+import { PORTUGAL_TAX_DISCLOSURE_LONG } from '../../lib/calc/portugalTax'
+import { FRANCE_TAX_DISCLOSURE_LONG } from '../../lib/calc/franceTax'
+import { NETHERLANDS_TAX_DISCLOSURE_LONG } from '../../lib/calc/netherlandsTax'
+import { ITALY_TAX_DISCLOSURE_LONG } from '../../lib/calc/italyTax'
 import { formatUsd } from '../../utils/costOfLiving'
 import { TaxRateCell } from './TaxRateCell'
+import { DataConfidenceNote } from '../ui/DataConfidenceNote'
 import './TaxRateCell.scss'
 import './DestinationTaxSection.scss'
 
 type Props = {
   country: string
   monthlyIncome: number
+  /** Monthly US Social Security (user + spouse) for France Art. 20 tax. */
+  monthlySsIncome?: number
+  /** User age at the modeled retirement point (Dutch AOW branch). */
+  modeledAge?: number
 }
 
 const CARD_ICON_SIZE = 24
@@ -78,7 +88,12 @@ function TaxFlags({ detail }: { detail: RetirementTaxDetail }) {
   )
 }
 
-export function DestinationTaxSection({ country, monthlyIncome }: Props) {
+export function DestinationTaxSection({
+  country,
+  monthlyIncome,
+  monthlySsIncome,
+  modeledAge,
+}: Props) {
   const entry = useMemo(() => getCountryTaxForCityCountry(country), [country])
 
   if (!entry) {
@@ -90,7 +105,13 @@ export function DestinationTaxSection({ country, monthlyIncome }: Props) {
   }
 
   const detail = entry.retirementTaxDetail
-  const localTax = monthlyIncome * entry.effectiveRetirementRate
+  const effectiveRate = resolveCountryEffectiveRetirementRate(
+    entry.code,
+    monthlyIncome * 12,
+    monthlySsIncome != null ? monthlySsIncome * 12 : undefined,
+    modeledAge,
+  )
+  const localTax = monthlyIncome * effectiveRate
   const afterTax = monthlyIncome - localTax
 
   return (
@@ -113,6 +134,34 @@ export function DestinationTaxSection({ country, monthlyIncome }: Props) {
             </dd>
           </div>
         </dl>
+        {entry.code === 'PT' ? (
+          <DataConfidenceNote
+            variant="message"
+            text={PORTUGAL_TAX_DISCLOSURE_LONG}
+            className="wtr-dest-tax__portugal-note"
+          />
+        ) : null}
+        {entry.code === 'IT' ? (
+          <DataConfidenceNote
+            variant="message"
+            text={ITALY_TAX_DISCLOSURE_LONG}
+            className="wtr-dest-tax__italy-note"
+          />
+        ) : null}
+        {entry.code === 'FR' ? (
+          <DataConfidenceNote
+            variant="message"
+            text={FRANCE_TAX_DISCLOSURE_LONG}
+            className="wtr-dest-tax__france-note"
+          />
+        ) : null}
+        {entry.code === 'NL' ? (
+          <DataConfidenceNote
+            variant="message"
+            text={NETHERLANDS_TAX_DISCLOSURE_LONG}
+            className="wtr-dest-tax__netherlands-note"
+          />
+        ) : null}
       </article>
 
       <TaxDetailCard

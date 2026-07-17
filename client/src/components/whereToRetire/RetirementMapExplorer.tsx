@@ -62,6 +62,8 @@ type Props = {
   explorationIncome: number;
   /** Expectifi projected monthly income from the calculator. */
   planMonthlyIncome: number;
+  /** User age at the modeled retirement point (Dutch AOW branch). */
+  modeledAge: number;
   filters: MapFilters;
   preferences: RetirementPreferences;
   onFiltersChange: (
@@ -204,6 +206,7 @@ function pinViewSelectLabel(pinColorView: MapPinColorView): string {
 export function RetirementMapExplorer({
   explorationIncome,
   planMonthlyIncome,
+  modeledAge,
   filters,
   preferences,
   onFiltersChange,
@@ -900,6 +903,7 @@ export function RetirementMapExplorer({
           key={`${item.city.id}-${pinColorView}`}
           scored={item}
           monthlyIncome={explorationIncome}
+          modeledAge={modeledAge}
           pinColorView={pinColorView}
           rank={
             pinColorView === "score"
@@ -1034,6 +1038,7 @@ export function RetirementMapExplorer({
             <RetirementMapLibreMap
               destinations={mapSortedCities}
               monthlyIncome={debouncedExplorationIncome}
+              modeledAge={modeledAge}
               pinColorView={pinColorView}
               filters={filters}
               onFiltersChange={onFiltersChange}
@@ -1093,6 +1098,7 @@ export function RetirementMapExplorer({
           filters={filters}
           onChange={onFiltersChange}
           monthlyIncome={explorationIncome}
+          modeledAge={modeledAge}
           excludedCountryEntries={excludedCountryEntries}
           favoriteCities={favoriteCities}
           onAddExcludedCountry={onAddExcludedCountry}

@@ -5,11 +5,13 @@ import type { MapFilters } from '../../lib/whereToRetire/cityMapScoring'
 import type { FavoriteCityEntry } from '../../lib/retirementStorage'
 import { sendPrompt } from '../../lib/sendPrompt'
 import { CountryFlag } from '../ui/CountryFlag'
+import { Tooltip } from '../Tooltip'
 import './WtrMapFiltersFavoritesTab.scss'
 
 type Props = {
   favoriteCities: FavoriteCityEntry[]
   monthlyIncome: number
+  modeledAge?: number
   filters: Pick<MapFilters, 'lifestyle'>
   onRemoveFavorite: (city: string, country: string) => void
 }
@@ -17,12 +19,19 @@ type Props = {
 export function WtrMapFiltersFavoritesTab({
   favoriteCities,
   monthlyIncome,
+  modeledAge,
   filters,
   onRemoveFavorite,
 }: Props) {
   const rows = useMemo(
-    () => buildFavoriteMapRows(favoriteCities, monthlyIncome, filters),
-    [favoriteCities, monthlyIncome, filters],
+    () =>
+      buildFavoriteMapRows(
+        favoriteCities,
+        monthlyIncome,
+        filters,
+        modeledAge,
+      ),
+    [favoriteCities, monthlyIncome, filters, modeledAge],
   )
 
   if (rows.length === 0) {
@@ -53,14 +62,27 @@ export function WtrMapFiltersFavoritesTab({
             >
               {formatFavoriteSurplus(row.surplus)}
             </span>
-            <span
-              className={[
-                'wtr-map-favorites__tax',
-                `wtr-map-favorites__tax--${row.taxTone}`,
-              ].join(' ')}
-            >
-              {row.taxLabel}
-            </span>
+            {row.taxTooltip ? (
+              <Tooltip content={row.taxTooltip} placement="top">
+                <span
+                  className={[
+                    'wtr-map-favorites__tax',
+                    `wtr-map-favorites__tax--${row.taxTone}`,
+                  ].join(' ')}
+                >
+                  {row.taxLabel}
+                </span>
+              </Tooltip>
+            ) : (
+              <span
+                className={[
+                  'wtr-map-favorites__tax',
+                  `wtr-map-favorites__tax--${row.taxTone}`,
+                ].join(' ')}
+              >
+                {row.taxLabel}
+              </span>
+            )}
             <button
               type="button"
               className="wtr-map-favorites__remove"

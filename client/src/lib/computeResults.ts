@@ -7,7 +7,6 @@ import {
   fv,
   fvAnnuity,
   rothConversionRoom,
-  ssFromAge,
   ssProvisionalThresholds,
   type FilingStatusId,
 } from 'shared'
@@ -19,12 +18,20 @@ import { computePortfolioGuidanceMetrics, type PortfolioGuidanceMetrics } from '
 import type { AccountIncomeStrategy } from './accountIncomeStrategy'
 import { retirementFvForAccountBucket } from './accountBucketRetirementBalance'
 import { resolveOnboardingAccountLocale } from './onboardingAccountTypesByLocale'
-import { buildSurvivorCallout, computeHouseholdSs, isSsConfigured } from './socialSecurity'
+import {
+  benefitAtClaimAge,
+  buildSurvivorCallout,
+  computeHouseholdSs,
+  isSsConfigured,
+  monthYearAtClaimAge,
+  resolveUserEstimates,
+} from './socialSecurity'
 import {
   guaranteedIncomeFutureHeroNote,
   guaranteedIncomeMonthlyAtAge,
   guaranteedIncomeSourcesFromInputs,
   guaranteedIncomeTooltipModel,
+  guaranteedSsMonthlyAtAge,
   isGuaranteedIncomeConfigured,
 } from './guaranteedIncome'
 import { flattenBatches, loadStoredPositionsImport } from './positionsImportStorage'
@@ -641,15 +648,21 @@ export function computeResults(
   const barColor = ssZone === 'free' ? '#16DB65' : ssZone === 'partial' ? '#F9A03F' : '#C03221'
 
   const grossAnnualUsd = annWd + totalSS * 12
+  const annualSsUsd = guaranteedSsMonthlyAtAge(inputs, targetRetirementAge) * 12
   const usTax = calcTax(annWd, totalSS, retFV, brkFV, tradRatio, rothRatio, hsaRatio, filingStatus)
-  const retireRegionComparisons = computeAllRetireRegionComparisons(retireRegions, grossAnnualUsd, usTax)
+  const retireRegionComparisons = computeAllRetireRegionComparisons(
+    retireRegions,
+    grossAnnualUsd,
+    usTax,
+    annualSsUsd,
+  )
   const primaryRegion = retireRegionComparisons[0]
   const itAnn = grossAnnualUsd
   const itTax = primaryRegion ? primaryRegion.localTaxMonthlyUsd * 12 : 0
   const itAfter = primaryRegion?.afterTaxMonthlyUsd ?? 0
   const itSurplus = primaryRegion?.surplusMonthlyUsd ?? 0
 
-  const ssTiming = computeSSTiming(inputs.ssInvestPct / 100)
+  const ssTiming = computeSSTiming(inputs, currentAge)
 
   const strategy = computeStrategyBlock({
     i: {
@@ -742,6 +755,7 @@ export function computeResults(
     itAfter,
     itSurplus,
     usTax,
+    annualSsUsd,
     retireRegions,
     retireRegionComparisons,
     ssTiming,
@@ -764,11 +778,20 @@ export function computeResults(
   }
 }
 
-function computeSSTiming(r: number) {
-  const SS_62 = ssFromAge(62)
-  const SS_67 = ssFromAge(67)
-  const SS_70 = ssFromAge(70)
-  const startYear = 2033
+function computeSSTiming(inputs: CalculatorInputs, currentAge: number) {
+  const r = inputs.ssInvestPct / 100
+  const estimates = resolveUserEstimates(inputs)
+  const SS_62 = benefitAtClaimAge(estimates, 62)
+  const SS_67 = benefitAtClaimAge(estimates, 67)
+  const SS_70 = benefitAtClaimAge(estimates, 70)
+  // Calendar year when the user turns 62 — same pattern as calendarRetirementYear.
+  const startYear =
+    new Date().getFullYear() + Math.max(0, Math.round(62 - currentAge))
+  const claimMonthYear = (claimAge: number) => {
+    const fromDob = monthYearAtClaimAge(inputs.dateOfBirth, claimAge)
+    if (fromDob) return fromDob
+    return String(startYear + (claimAge - 62))
+  }
   function cumulative(drawAge: number, ssMonthly: number, toAge: number) {
     let total = 0
     const drawStart = startYear + (drawAge - 62)
@@ -797,6 +820,13 @@ function computeSSTiming(r: number) {
     be6267: breakevenAge(62, SS_62, 67, SS_67),
     be6270: breakevenAge(62, SS_62, 70, SS_70),
     be6770: breakevenAge(67, SS_67, 70, SS_70),
+    benefits: { b62: SS_62, b67: SS_67, b70: SS_70 },
+    claimAt: {
+      age62: claimMonthYear(62),
+      age67: claimMonthYear(67),
+      age70: claimMonthYear(70),
+    },
+    startYear,
   }
 }
 
@@ -970,6 +1000,7 @@ export function applyPortfolioDeltaAtRetirement(
     retireRegions,
     grossAnnualUsd,
     usTax,
+    snapshot.annualSsUsd,
   )
   const primaryRegion = retireRegionComparisons[0]
 

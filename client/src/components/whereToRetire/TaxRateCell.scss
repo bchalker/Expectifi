@@ -61,6 +61,11 @@
   color: var(--text-muted);
 }
 
+.wtr-tax-cell__verified-note {
+  margin-top: var(--space-1);
+  text-align: center;
+}
+
 .wtr-tax-cell__block {
   display: flex;
   flex-direction: column;

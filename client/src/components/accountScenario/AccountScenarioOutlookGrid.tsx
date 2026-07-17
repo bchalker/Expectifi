@@ -6,6 +6,25 @@ import {
 } from '../../lib/holdingScenarioApply'
 import './AccountScenarioOutlookGrid.scss'
 
+/** How outlook presets resolve rates — UI only; calculation paths unchanged. */
+export type OutlookRateBasis = 'absolute' | 'relative'
+
+const OUTLOOK_RATE_BASIS_COPY: Record<
+  OutlookRateBasis,
+  { caption: string; chip: string; ariaLabel: string }
+> = {
+  absolute: {
+    caption: 'Fixed preset rates — independent of your growth slider.',
+    chip: 'Fixed rate',
+    ariaLabel: 'Market outlook (fixed rates)',
+  },
+  relative: {
+    caption: 'Rates move with your global growth slider.',
+    chip: 'vs your rate',
+    ariaLabel: 'Market outlook (relative to your rate)',
+  },
+}
+
 const OUTLOOK_CARD_META: Record<
   OutlookScenarioChoice,
   {
@@ -61,7 +80,12 @@ type Props = {
   horizon: number
   selection: OutlookScenarioChoice | null
   onSelect: (choice: OutlookScenarioChoice) => void
-  /** When set, outlook tile ranges anchor to the global slider (holding popout). */
+  /**
+   * Absolute = account-bucket presets (fixed SCENARIO_PRESETS).
+   * Relative = holding presets anchored to the global slider.
+   */
+  rateBasis: OutlookRateBasis
+  /** Required when rateBasis is relative — anchors tile ranges to the slider. */
   globalBlended?: number
 }
 
@@ -84,48 +108,70 @@ function OutlookTrendIcons({
   )
 }
 
-export function AccountScenarioOutlookGrid({ horizon, selection, onSelect, globalBlended }: Props) {
-  return (
-    <div className="account-scenario-outlook-grid" role="listbox" aria-label="Market outlook">
-      {OUTLOOK_SCENARIO_TILES.map((tile) => {
-        const meta = OUTLOOK_CARD_META[tile.choice]
-        const selected = selection === tile.choice
-        const range = formatPopoutOutlookRange(tile.choice, horizon, globalBlended)
+export function AccountScenarioOutlookGrid({
+  horizon,
+  selection,
+  onSelect,
+  rateBasis,
+  globalBlended,
+}: Props) {
+  const basis = OUTLOOK_RATE_BASIS_COPY[rateBasis]
+  const rangeBlended = rateBasis === 'relative' ? globalBlended : undefined
 
-        return (
-          <button
-            key={tile.choice}
-            type="button"
-            role="option"
-            aria-selected={selected}
-            className={[
-              'account-scenario-outlook-card',
-              meta.fullWidth && 'account-scenario-outlook-card--full',
-              selected && 'account-scenario-outlook-card--selected',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => onSelect(tile.choice)}
-          >
-            <span className="account-scenario-outlook-card__head">
-              <span
-                className="account-scenario-outlook-card__dot"
-                style={{ background: meta.dotColor }}
-                aria-hidden
-              />
-              <span className="account-scenario-outlook-card__label">{tile.label}</span>
-              {meta.trendDirection && meta.trendCount > 0 ? (
-                <OutlookTrendIcons
-                  direction={meta.trendDirection}
-                  count={meta.trendCount as 1 | 2}
-                  color={meta.trendColor}
+  return (
+    <div className="account-scenario-outlook">
+      <p className="account-scenario-outlook__basis">{basis.caption}</p>
+      <div
+        className={[
+          'account-scenario-outlook-grid',
+          `account-scenario-outlook-grid--${rateBasis}`,
+        ].join(' ')}
+        role="listbox"
+        aria-label={basis.ariaLabel}
+      >
+        {OUTLOOK_SCENARIO_TILES.map((tile) => {
+          const meta = OUTLOOK_CARD_META[tile.choice]
+          const selected = selection === tile.choice
+          const range = formatPopoutOutlookRange(tile.choice, horizon, rangeBlended)
+
+          return (
+            <button
+              key={tile.choice}
+              type="button"
+              role="option"
+              aria-selected={selected}
+              className={[
+                'account-scenario-outlook-card',
+                meta.fullWidth && 'account-scenario-outlook-card--full',
+                selected && 'account-scenario-outlook-card--selected',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={() => onSelect(tile.choice)}
+            >
+              <span className="account-scenario-outlook-card__head">
+                <span
+                  className="account-scenario-outlook-card__dot"
+                  style={{ background: meta.dotColor }}
+                  aria-hidden
                 />
-              ) : null}
-            </span>
-            <span className="account-scenario-outlook-card__range">{range}</span>
-          </button>
-        )
-      })}
+                <span className="account-scenario-outlook-card__label">{tile.label}</span>
+                {meta.trendDirection && meta.trendCount > 0 ? (
+                  <OutlookTrendIcons
+                    direction={meta.trendDirection}
+                    count={meta.trendCount as 1 | 2}
+                    color={meta.trendColor}
+                  />
+                ) : null}
+              </span>
+              <span className="account-scenario-outlook-card__meta">
+                <span className="account-scenario-outlook-card__range">{range}</span>
+                <span className="account-scenario-outlook-card__chip">{basis.chip}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

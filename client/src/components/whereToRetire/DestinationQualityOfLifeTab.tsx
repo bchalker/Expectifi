@@ -1,10 +1,12 @@
 import { useMemo, type CSSProperties } from "react";
 import { IconShieldHeart, IconStethoscope } from "@tabler/icons-react";
 import { DataConfidenceNote } from "../ui/DataConfidenceNote";
+import { DataFreshnessNote } from "../ui/DataFreshnessNote";
 import { formatHealthcareInsuranceMonthlyRange } from "../../utils/countryPreferenceData";
 import {
   formatQoLDisplayScore,
   getQualityOfLifeData,
+  getQualityOfLifeLastUpdated,
   getQoLTabSourceFooter,
   healthcareBandDescription,
   QOL_NORMALIZED_MAX,
@@ -265,6 +267,10 @@ export function DestinationQualityOfLifeTab({
         {...staggerSectionProps(2, undefined, staggerClassName, staggerStyle)}
       >
         <p className="wtr-qol-tab__footnote">{sourceFooter}</p>
+        <DataFreshnessNote
+          lastUpdated={getQualityOfLifeLastUpdated()}
+          className="wtr-qol-tab__freshness"
+        />
       </section>
     </div>
   );

@@ -52,8 +52,6 @@ const PIN_BAND_COLORS: Record<RetirementScoreBand, string> = {
 }
 
 const FLAT_TERRITORIAL_COUNTRIES = new Set([
-  'Italy',
-  'Portugal',
   'Panama',
   'Paraguay',
   'Georgia',
@@ -142,6 +140,8 @@ function normalizeIndexScore(value: number | null | undefined): number {
 
 function incomeTaxHaircut(country: string, estimatedTaxRate: number): number {
   if (FLAT_TERRITORIAL_COUNTRIES.has(country.trim())) return 0.07
+  // Portugal / Italy: estimatedTaxRate is the modeled (or stub) local rate.
+  if (country.trim() === 'Portugal' || country.trim() === 'Italy') return estimatedTaxRate
   const pct = estimatedTaxRate * 100
   if (pct > 40) return 0.35
   if (pct > 30) return 0.28
@@ -304,7 +304,11 @@ export function calculateRetirementScore(
     ? getQualityOfLifeData(resolvedCountry)
     : null
 
-  const { taxScore, estimatedTaxRate } = resolveRetirementTaxScoreComponents(resolvedCountry)
+  const { taxScore, estimatedTaxRate } = resolveRetirementTaxScoreComponents(
+    resolvedCountry,
+    monthlyIncome,
+    cityData.city,
+  )
   const haircut = incomeTaxHaircut(resolvedCountry, estimatedTaxRate)
   const effectiveIncome = monthlyIncome * (1 - haircut)
 

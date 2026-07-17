@@ -1,7 +1,13 @@
 import { CURATED_RETIREMENT_DESTINATIONS } from '../../data/curatedRetirementDestinations'
-import { getHealthcareRating } from '../../data/destinationHealthcare'
-import { getCountryTaxEntry } from '../../data/countryTaxRates'
-import { getTeleportFallback } from '../../data/teleportFallbacks'
+import {
+  getHealthcareRating,
+  healthcareRatingsLastReviewedMessage,
+} from '../../data/destinationHealthcare'
+import { getCountryTaxEntry, resolveCountryEffectiveRetirementRate } from '../../data/countryTaxRates'
+import {
+  getTeleportFallback,
+  teleportFallbacksLastReviewedMessage,
+} from '../../data/teleportFallbacks'
 import { readApiCache } from '../api/apiCache'
 import type { DollarStrengthSeries } from '../api/exchangeRates'
 import type { CityClimate } from '../api/openMeteo'
@@ -115,9 +121,21 @@ function practicalScoresForCountry(country: string) {
   }
 }
 
-function afterTaxIncome(monthlyIncome: number, country: string): number {
+function afterTaxIncome(
+  monthlyIncome: number,
+  country: string,
+  modeledAge?: number,
+  city?: string | null,
+): number {
   const entry = getCountryTaxForCityCountry(country)
-  const rate = entry?.effectiveRetirementRate ?? 0
+  if (!entry) return monthlyIncome
+  const rate = resolveCountryEffectiveRetirementRate(
+    entry.code,
+    monthlyIncome * 12,
+    undefined,
+    modeledAge,
+    city,
+  )
   return monthlyIncome * (1 - rate)
 }
 
@@ -128,6 +146,7 @@ function topReasonForScored(scored: ScoredMapCity): string {
 export function buildComparisonColumnData(
   scored: ScoredMapCity,
   monthlyIncome: number,
+  modeledAge: number | undefined,
   climate: CityClimate | null,
   dollarStrength: DollarStrengthSeries | null,
   currencyCode: string | null,
@@ -135,7 +154,12 @@ export function buildComparisonColumnData(
   exchangeRateLabel: string | null,
 ): ComparisonColumnData {
   const { city } = scored
-  const afterTax = afterTaxIncome(monthlyIncome, city.country)
+  const afterTax = afterTaxIncome(
+    monthlyIncome,
+    city.country,
+    modeledAge,
+    city.city,
+  )
   return {
     key: city.id,
     city,
@@ -543,3 +567,14 @@ export function getComparisonHighlightClass(
   }
   return null
 }
+
+/** Freshness copy for comparison-table rows backed by destinationHealthcare.ts. */
+export function comparisonHealthcareRatingsFreshnessMessage(): string {
+  return healthcareRatingsLastReviewedMessage()
+}
+
+/** Freshness copy for comparison-table COL index rows backed by teleportFallbacks.ts. */
+export function comparisonTeleportFallbacksFreshnessMessage(): string {
+  return teleportFallbacksLastReviewedMessage()
+}
+

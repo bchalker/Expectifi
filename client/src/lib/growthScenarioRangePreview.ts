@@ -62,6 +62,19 @@ export type GrowthScenarioRangeRow = {
   deltaFromExpected?: number;
 };
 
+/** How much of current portfolio principal drives the range wings. */
+export type GrowthScenarioRangeCoverage = {
+  /** Balances still on the global slider tier (drives wing deltas). */
+  globalTierPrincipal: number;
+  /** Current retirement + brokerage balances. */
+  totalPortfolio: number;
+};
+
+export type GrowthScenarioRangePreviewResult = {
+  rows: GrowthScenarioRangeRow[];
+  coverage: GrowthScenarioRangeCoverage;
+};
+
 function horizonClamp(y: number): number {
   return Math.max(1, Math.min(50, Math.round(y)));
 }
@@ -215,7 +228,7 @@ export function computeGrowthScenarioRangePreview(
   retRate: number,
   brkRate: number,
   inputs?: GrowthScenarioRangePreviewInputs,
-): GrowthScenarioRangeRow[] {
+): GrowthScenarioRangePreviewResult {
   const h = c.yearsToRetirement;
   const marketApplied = inputs ? isMarketScenarioApplied(inputs) : false;
   const marketScenarioId = inputs ? effectiveMarketScenarioId(inputs) : "base";
@@ -232,6 +245,12 @@ export function computeGrowthScenarioRangePreview(
     brkRate,
     inputs,
   );
+  const globalTierPrincipal = retPrincipal + brkPrincipal;
+  const totalPortfolio = Math.max(0, c.retBal) + Math.max(0, c.brkBal);
+  const coverage: GrowthScenarioRangeCoverage = {
+    globalTierPrincipal,
+    totalPortfolio,
+  };
   const globalTierBaseFv = globalTierExpectedFv(
     retPrincipal,
     brkPrincipal,
@@ -265,29 +284,37 @@ export function computeGrowthScenarioRangePreview(
     h,
   );
 
-  return [
-    {
-      id: "very_bear",
-      label: "Pessimistic",
-      rangeMinPct: pessimisticRange.min,
-      rangeMaxPct: pessimisticRange.max,
-      projectedFv: pessimisticFv,
-      deltaFromExpected: pessimisticFv - expectedFv,
-    },
-    {
-      id: "normal",
-      label: "Expected",
-      subtext: expectedSubtext(retRate, baseRetRate, marketApplied, scenarioLabel),
-      projectedFv: expectedFv,
-    },
-    {
-      id: "very_bull",
-      label: "Optimistic",
-      rangeMinPct: optimisticRange.min,
-      rangeMaxPct: optimisticRange.max,
-      projectedFv: optimisticFv,
-      deltaFromExpected: optimisticFv - expectedFv,
-    },
-  ];
+  return {
+    rows: [
+      {
+        id: "very_bear",
+        label: "Pessimistic",
+        rangeMinPct: pessimisticRange.min,
+        rangeMaxPct: pessimisticRange.max,
+        projectedFv: pessimisticFv,
+        deltaFromExpected: pessimisticFv - expectedFv,
+      },
+      {
+        id: "normal",
+        label: "Expected",
+        subtext: expectedSubtext(
+          retRate,
+          baseRetRate,
+          marketApplied,
+          scenarioLabel,
+        ),
+        projectedFv: expectedFv,
+      },
+      {
+        id: "very_bull",
+        label: "Optimistic",
+        rangeMinPct: optimisticRange.min,
+        rangeMaxPct: optimisticRange.max,
+        projectedFv: optimisticFv,
+        deltaFromExpected: optimisticFv - expectedFv,
+      },
+    ],
+    coverage,
+  };
 }
 

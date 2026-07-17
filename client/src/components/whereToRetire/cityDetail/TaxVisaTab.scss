@@ -94,6 +94,10 @@
   color: var(--text);
 }
 
+.wtr-tax-visa-tab__freshness {
+  margin-top: var(--space-2);
+}
+
 @media (max-width: 680px) {
   .wtr-tax-visa-tab__cards {
     grid-template-columns: minmax(0, 1fr);

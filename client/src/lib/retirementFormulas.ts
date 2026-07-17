@@ -5,20 +5,82 @@ import {
   type CityData,
   type LifestyleInputs,
 } from '../utils/costOfLiving'
+import { usdToEur, getUsdToEurRate } from './api/exchangeRates'
+import { calcPortugalTax, PT_REFERENCE_TAXABLE_EUR } from './calc/portugalTax'
+import {
+  franceBlendedEffectiveRate,
+  FR_NON_SS_STUB_RATE,
+} from './calc/franceTax'
+import {
+  calcNetherlandsTax,
+  isAtNetherlandsAowAge,
+  NL_REFERENCE_TAXABLE_EUR,
+} from './calc/netherlandsTax'
+import {
+  isItalyArt24TerEligibleCity,
+  resolveItalyEffectiveTaxRate,
+} from './calc/italyTax'
 
 /**
  * Effective local tax rate on gross retirement income for US expat planning.
- * Simplified model — represents approximate effective rate at $3,000–$8,000/mo gross.
+ * Simplified model — represents approximate effective rate at $3,000–$8,000/mo gross
+ * unless income is provided (Portugal / Netherlands: progressive; France: Art. 20 on SS;
+ * Italy: Art. 24-ter 7% for confirmed eligible towns; else unsourced IRPEF stub).
  * US federal tax still applies on worldwide income regardless of local rate.
  * Foreign Tax Credit and tax treaties may reduce combined burden — not tax advice.
  *
  * Sources: retirement-tax-visa.json, IRS treaty tables, Tax Foundation,
  * Greenback Tax Services, Taxes for Expats. Last verified: 2026-05.
  */
-export function getEffectiveTaxRate(countryIso: string): number {
+export function getEffectiveTaxRate(
+  countryIso: string,
+  annualGrossUsd?: number,
+  annualSsUsd?: number,
+  modeledAge?: number,
+  city?: string | null,
+): number {
+  const iso = countryIso.toUpperCase()
+  if (iso === 'PT') {
+    const taxableEur =
+      annualGrossUsd != null && annualGrossUsd > 0
+        ? usdToEur(annualGrossUsd)
+        : PT_REFERENCE_TAXABLE_EUR
+    // calcPortugalTax applies the Cat. H pension specific deduction before brackets.
+    return calcPortugalTax(taxableEur).effectiveRate
+  }
+
+  if (iso === 'FR') {
+    const gross =
+      annualGrossUsd != null && annualGrossUsd > 0 ? annualGrossUsd : undefined
+    if (gross == null) return FR_NON_SS_STUB_RATE
+    const eurPerUsd = getUsdToEurRate()
+    return franceBlendedEffectiveRate(
+      gross,
+      annualSsUsd,
+      usdToEur,
+      (eur) => (eurPerUsd > 0 ? eur / eurPerUsd : 0),
+    )
+  }
+
+  if (iso === 'NL') {
+    const taxableEur =
+      annualGrossUsd != null && annualGrossUsd > 0
+        ? usdToEur(annualGrossUsd)
+        : NL_REFERENCE_TAXABLE_EUR
+    return calcNetherlandsTax(
+      taxableEur,
+      isAtNetherlandsAowAge(modeledAge),
+    ).effectiveRate
+  }
+
+  if (iso === 'IT') {
+    // Art. 24-ter 7% only for confirmed eligible towns; else IRPEF stub.
+    return resolveItalyEffectiveTaxRate(city)
+  }
+
   const RATES: Record<string, number> = {
     // === FLAT / SPECIAL REGIMES (most reliable) ===
-    IT: 0.07, // 7% flat — qualifying southern towns < 20k pop only (Article 24-ter)
+    // IT: routed above — city-aware Art. 24-ter vs IRPEF stub
     GR: 0.07, // 7% flat — Article 5B, up to 15 years, US qualifies
     CY: 0.05, // 5% flat on foreign pensions over €3,420 (special regime)
     MT: 0.15, // 15% flat on foreign income (special regime)
@@ -36,7 +98,7 @@ export function getEffectiveTaxRate(countryIso: string): number {
 
     // === TERRITORIAL (foreign income generally not taxed locally) ===
     PA: 0.0, // territorial — foreign-sourced income not taxed
-    CR: 0.0, // territorial — foreign-sourced income not taxed
+    CR: 0.0, // territorial — foreign-source pension/investment income not taxed (local-source income is progressive; not modeled)
     GE: 0.0, // territorial — foreign income not taxed
     AE: 0.0, // no income tax
     HK: 0.0, // territorial — foreign income not taxed
@@ -44,11 +106,9 @@ export function getEffectiveTaxRate(countryIso: string): number {
     ID: 0.0, // territorial for non-residents
 
     // === WESTERN EUROPE (progressive, treaty countries) ===
-    PT: 0.2, // progressive up to 48% — NHR ended 2024, ~20% effective at this income
+    // PT / FR / NL: routed above
     ES: 0.19, // progressive up to 47% — ~19% effective
-    FR: 0.2, // progressive — ~20% effective at this income
     DE: 0.22, // progressive — ~22% effective at this income
-    NL: 0.36, // progressive 36.97–49.5% — no special retirement regime
     BE: 0.3, // progressive up to 50% — ~30% effective
     IE: 0.2, // progressive — ~20% effective
     GB: 0.2, // progressive — ~20% effective
@@ -109,7 +169,7 @@ export function getEffectiveTaxRate(countryIso: string): number {
     CA: 0.18, // federal + provincial combined — ~18% effective; US-Canada treaty
   }
 
-  return RATES[countryIso.toUpperCase()] ?? 0.2
+  return RATES[iso] ?? 0.2
 }
 
 export type RetirementFitResult = {
@@ -134,8 +194,21 @@ export function calcFit(
   catalog: RetirementCityRecord,
   grossMonthly: number,
   lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
+  monthlySsUsd?: number,
+  modeledAge?: number,
 ): RetirementFitResult {
-  const taxRate = getEffectiveTaxRate(catalog.country_iso)
+  const annualGrossUsd = Math.max(0, grossMonthly) * 12
+  const annualSsUsd =
+    monthlySsUsd != null && Number.isFinite(monthlySsUsd)
+      ? Math.max(0, monthlySsUsd) * 12
+      : undefined
+  const taxRate = getEffectiveTaxRate(
+    catalog.country_iso,
+    annualGrossUsd,
+    annualSsUsd,
+    modeledAge,
+    catalog.city,
+  )
   const taxAmount = grossMonthly * taxRate
   const netIncome = grossMonthly - taxAmount
 
@@ -181,8 +254,16 @@ export function calcFitScore(
   catalog: RetirementCityRecord,
   grossMonthly: number,
   lifestyle: LifestyleInputs = DEFAULT_LIFESTYLE,
+  modeledAge?: number,
 ): number {
-  const fit = calcFit(budgetCity, catalog, grossMonthly, lifestyle)
+  const fit = calcFit(
+    budgetCity,
+    catalog,
+    grossMonthly,
+    lifestyle,
+    undefined,
+    modeledAge,
+  )
   const qol = catalog.quality_of_life
 
   const surplusRatio = Math.max(0, Math.min(fit.surplus / grossMonthly, 0.5))
@@ -196,13 +277,37 @@ export function calcFitScore(
   return Math.round(surplusScore + qolScore + healthScore + visaScore + engScore)
 }
 
-export function taxBadgeLabel(rate: number): string {
+export function taxBadgeLabel(
+  rate: number,
+  countryIso?: string,
+  city?: string | null,
+): string {
+  const iso = countryIso?.toUpperCase()
+  if (iso === 'FR') {
+    return '0–45% (by income type)'
+  }
+  if (iso === 'IT') {
+    return isItalyArt24TerEligibleCity(city) ? '7% flat tax' : 'Progressive IRPEF'
+  }
+  if (iso === 'CR') {
+    return '0% foreign-source'
+  }
   const pct = Math.round(rate * 100)
   if (pct <= 10) return `${pct}% flat tax`
   return `${pct}% Taxes`
 }
 
-export function taxBadgeTone(rate: number): 'green' | 'amber' | 'red' {
+export function taxBadgeTone(
+  rate: number,
+  countryIso?: string,
+  city?: string | null,
+): 'green' | 'amber' | 'red' {
+  const iso = countryIso?.toUpperCase()
+  if (iso === 'FR') return 'amber'
+  if (iso === 'IT') {
+    return isItalyArt24TerEligibleCity(city) ? 'green' : 'amber'
+  }
+  if (iso === 'CR') return 'green'
   const pct = rate * 100
   if (pct <= 10) return 'green'
   if (pct <= 30) return 'amber'
@@ -216,7 +321,39 @@ export function cityFitCaveats(
 ): string[] {
   const notes: string[] = []
   if (city.country_iso === 'IT') {
-    notes.push('7% rate requires town under 20k — verify eligibility')
+    if (isItalyArt24TerEligibleCity(city.city)) {
+      notes.push(
+        'Art. 24-ter 7% applies here (eligible southern comune ≤30k) — requires a qualifying foreign pension to elect',
+      )
+    } else {
+      notes.push(
+        'This city does not qualify for Art. 24-ter 7% — catalog Italy destinations use standard progressive IRPEF unless confirmed eligible',
+      )
+      notes.push(
+        'IRPEF brackets are not sourced yet; local-tax estimates use a temporary planning stub',
+      )
+    }
+  }
+  if (city.country_iso === 'PT') {
+    notes.push('Portugal NHR closed in 2024 — pensions face progressive rates up to 48%')
+  }
+  if (city.country_iso === 'CR') {
+    notes.push(
+      '0% applies to foreign-source retirement income; Costa Rica still taxes locally-sourced income progressively',
+    )
+  }
+  if (city.country_iso === 'FR') {
+    notes.push(
+      'Social Security is taxed by France under progressive brackets (Art. 20); pension/investment income is 0–45% by amount and type — US government pensions may stay US-taxed (Art. 19)',
+    )
+    notes.push(
+      'CSM and prélèvements sociaux can add charges on top of income tax for investment-heavy retirees',
+    )
+  }
+  if (city.country_iso === 'NL') {
+    notes.push(
+      'Dutch Box 1 estimate uses age-dependent 2026 brackets plus algemene heffingskorting; arbeidskorting is excluded for pension income',
+    )
   }
   if (
     city.country_iso === 'GR' &&

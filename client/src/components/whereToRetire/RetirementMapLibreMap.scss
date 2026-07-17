@@ -125,8 +125,18 @@
   color: var(--text-muted);
 }
 
-.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a {
-  color: var(--color-accent);
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib-inner {
+  font-family: var(--body);
+}
+
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a,
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a:visited {
+  color: var(--sky-blue-d5);
+}
+
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a:hover,
+.wtr-maplibre-map__canvas .maplibregl-ctrl-attrib a:focus-visible {
+  color: var(--sky-blue-d6);
 }
 
 .wtr-maplibre-map__canvas .maplibregl-ctrl-group {

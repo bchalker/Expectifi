@@ -17,6 +17,7 @@ import {
 import {
   getEnglishProficiency,
   getEnglishProficiencyBadgeLabel,
+  getEnglishProficiencyLastUpdated,
   getEnglishProficiencyTone,
   getEnglishProficiencyWhy,
   type EnglishProficiencyLevel,
@@ -27,6 +28,7 @@ import {
   usePeopleCultureMetricsAnimation,
 } from "../../hooks/usePeopleCultureMetricsAnimation";
 import { NarrativeWhyLine } from "../ui/NarrativeWhyLine";
+import { DataFreshnessNote } from "../ui/DataFreshnessNote";
 import "../ui/DetailPanelCard.scss";
 import "./DestinationPeopleCultureTab.scss";
 
@@ -339,6 +341,12 @@ export function DestinationPeopleCultureTab({
         <div {...staggerSectionProps(sectionIndex++, undefined, staggerClassName, staggerStyle)}>
           <ReligionDataEmptyCard city={city} />
         </div>
+        <div {...staggerSectionProps(sectionIndex++, undefined, staggerClassName, staggerStyle)}>
+          <DataFreshnessNote
+            lastUpdated={getEnglishProficiencyLastUpdated()}
+            className="wtr-people-culture__freshness"
+          />
+        </div>
       </div>
     );
   }
@@ -475,6 +483,12 @@ export function DestinationPeopleCultureTab({
           </NarrativeWhyLine>
         </section>
       ) : null}
+      <div {...staggerSectionProps(sectionIndex++, undefined, staggerClassName, staggerStyle)}>
+        <DataFreshnessNote
+          lastUpdated={getEnglishProficiencyLastUpdated()}
+          className="wtr-people-culture__freshness"
+        />
+      </div>
     </div>
   );
 }

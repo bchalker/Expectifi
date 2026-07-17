@@ -11,7 +11,7 @@ import {
   getDirectUsHubIata,
   getDirectUsCityDistanceMiles,
   getPrimaryAirportCode,
-  GETTING_THERE_TAB_SOURCE_FOOTER,
+  getGettingThereTabSourceFooter,
   GETTING_THERE_UNAVAILABLE_MESSAGE,
   getGettingThereData,
   googleFlightsRouteSearchUrl,
@@ -365,7 +365,7 @@ export function DestinationGettingThereTab({
           staggerStyle,
         )}
       >
-        {GETTING_THERE_TAB_SOURCE_FOOTER}
+        {getGettingThereTabSourceFooter()}
       </p>
     </div>
   );

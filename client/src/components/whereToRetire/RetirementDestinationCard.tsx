@@ -35,6 +35,7 @@ import "./WtrMapPinLegend.scss";
 type CommonProps = {
   scored: ScoredMapCity;
   monthlyIncome: number;
+  modeledAge?: number;
   pinColorView: MapPinColorView;
   mapFilters: Pick<MapFilters, "lifestyle">;
   /** Favorite pin band override — map tooltips only today. */
@@ -63,6 +64,7 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
   const {
     scored,
     monthlyIncome,
+    modeledAge,
     pinColorView,
     mapFilters,
     isFavoritePin = false,
@@ -87,6 +89,7 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
     city.country,
     monthlyIncome,
     mapFilters,
+    modeledAge,
   );
 
   const expatInfo =
@@ -155,6 +158,7 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
         ]
           .filter(Boolean)
           .join(" ")}
+        title={incomeFit.taxTooltip}
       >
         {isList ? <span className="wtr-dest-card__meta-tax-dot" aria-hidden /> : null}
         {incomeFit.taxLabel}
@@ -228,32 +232,6 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
           <div className="wtr-dest-card__head-row">
             <div className="wtr-dest-card__identity">
               <span className="wtr-dest-card__name">{city.city}</span>
-              <span className="wtr-dest-card__country">
-                <CountryFlag
-                  country={city.country}
-                  size="s"
-                  className="wtr-dest-card__flag"
-                />
-                <span className="wtr-dest-card__country-line">
-                  <span className="wtr-dest-card__country-name">
-                    {city.country}
-                  </span>
-                  {showCaution ? (
-                    <>
-                      <span
-                        className="wtr-dest-card__country-divider"
-                        aria-hidden
-                      >
-                        ·
-                      </span>
-                      <WtrTravelAdvisoryCautionChip
-                        country={city.country}
-                        variant="inline"
-                      />
-                    </>
-                  ) : null}
-                </span>
-              </span>
             </div>
 
             {showMonthlyStat ? (
@@ -272,6 +250,33 @@ export function RetirementDestinationCard(props: RetirementDestinationCardProps)
                 ) : null}
               </span>
             ) : null}
+
+            <span className="wtr-dest-card__country">
+              <CountryFlag
+                country={city.country}
+                size="s"
+                className="wtr-dest-card__flag"
+              />
+              <span className="wtr-dest-card__country-line">
+                <span className="wtr-dest-card__country-name">
+                  {city.country}
+                </span>
+                {showCaution ? (
+                  <>
+                    <span
+                      className="wtr-dest-card__country-divider"
+                      aria-hidden
+                    >
+                      ·
+                    </span>
+                    <WtrTravelAdvisoryCautionChip
+                      country={city.country}
+                      variant="inline"
+                    />
+                  </>
+                ) : null}
+              </span>
+            </span>
           </div>
 
           {isList ? (

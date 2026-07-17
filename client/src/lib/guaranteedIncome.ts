@@ -427,6 +427,20 @@ export function guaranteedIncomeMonthlyAtAge(
     .reduce((sum, source) => sum + source.monthlyAmount, 0)
 }
 
+/** US Social Security (user + spouse) active at a given age — for treaty Art. 20 France tax. */
+export function guaranteedSsMonthlyAtAge(
+  inputs: CalculatorInputs,
+  age: number,
+): number {
+  return guaranteedIncomeSourcesFromInputs(inputs)
+    .filter(
+      (source) =>
+        (source.type === 'ss' || source.type === 'spouse-ss') &&
+        source.startAge <= age,
+    )
+    .reduce((sum, source) => sum + source.monthlyAmount, 0)
+}
+
 export type FutureGuaranteedIncomeNote = {
   monthlyAmount: number
   startAge: number

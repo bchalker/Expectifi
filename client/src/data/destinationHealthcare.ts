@@ -1,4 +1,7 @@
-/** Healthcare accessibility rating (0–100) for destination scoring. Last reviewed 2025-01. */
+import { formatYearMonthLabel } from '../utils/formatYearMonth'
+
+/** Healthcare accessibility rating (0–100) for destination scoring. */
+export const HEALTHCARE_RATINGS_LAST_REVIEWED = '2025-01'
 
 export const DESTINATION_HEALTHCARE_RATINGS: Record<string, number> = {
   'state:AL': 72,
@@ -82,4 +85,12 @@ const DEFAULT_RATING = 70
 
 export function getHealthcareRating(key: string): number {
   return DESTINATION_HEALTHCARE_RATINGS[key] ?? DEFAULT_RATING
+}
+
+export function getHealthcareRatingsLastReviewed(): string {
+  return HEALTHCARE_RATINGS_LAST_REVIEWED
+}
+
+export function healthcareRatingsLastReviewedMessage(): string {
+  return `Healthcare ratings last reviewed ${formatYearMonthLabel(HEALTHCARE_RATINGS_LAST_REVIEWED)}.`
 }

@@ -1,5 +1,10 @@
 /** Retirement destination catalog + comparison math (US citizen, simplified tax model). */
 
+import { getUsdToEurRate, usdToEur } from '../api/exchangeRates'
+import { calcPortugalTax } from './portugalTax'
+import { franceBlendedEffectiveRate } from './franceTax'
+import { IT_UNSOURCED_EFFECTIVE_STUB } from './italyTax'
+
 export const MAX_RETIRE_REGIONS = 5
 
 export type RetireRegionId =
@@ -61,10 +66,11 @@ const REGIONS: RetireRegionDefinition[] = [
     flagColors: ['#009246', '#ffffff', '#CE2B37'],
     defaultMonthlyCostUsd: 2800,
     annualColInflation: 0.02,
-    localFlatTaxRate: 0.07,
-    localTaxShortLabel: '7% flat tax (Art. 24-bis)',
+    // Catalog cities do not qualify for Art. 24-ter 7%. IRPEF brackets unsourced — stub only.
+    localFlatTaxRate: IT_UNSOURCED_EFFECTIVE_STUB,
+    localTaxShortLabel: 'Progressive IRPEF (stub)',
     taxSummary:
-      'Italy’s 7% flat tax on foreign-sourced income for qualifying new residents (up to 10 years). US citizens still file US returns; Foreign Tax Credit usually prevents double taxation on the same income.',
+      'Most Expectifi Italy destinations use standard progressive IRPEF — not Article 24-ter. The 7% regime requires an eligible southern or earthquake-zone town ≤30,000 residents; confirmed catalog exceptions (e.g. San Giovanni Rotondo) are modeled at 7% in city views. IRPEF brackets are not sourced yet for non-eligible cities, so this strip uses a temporary planning stub. US citizens still file US returns; Foreign Tax Credit usually prevents double taxation on the same income.',
     colGuidance:
       '$2,000–$2,800: smaller cities (Bari, Lecce, Abruzzo)\n$2,800–$3,800: mid-size cities (Bologna, Florence outskirts)\n$4,000+: Milan, Rome, coastal hotspots',
     colSliderMax: 8000,
@@ -75,10 +81,11 @@ const REGIONS: RetireRegionDefinition[] = [
     flagColors: ['#006600', '#FF0000', '#FFCC00'],
     defaultMonthlyCostUsd: 2600,
     annualColInflation: 0.022,
-    localFlatTaxRate: 0.2,
-    localTaxShortLabel: '~20% simplified regime',
+    // null — local tax computed via calcPortugalTax (2026 IRS brackets), not a flat rate
+    localFlatTaxRate: null,
+    localTaxShortLabel: 'Progressive IRS (up to 48%)',
     taxSummary:
-      'Portugal offers several regimes for new residents; rates and eligibility change often. This model uses a flat 20% placeholder on gross income — not tax advice.',
+      'NHR closed to new applicants in 2024; foreign pensions face progressive IRS rates up to 48% (Art. 68 CIRS). Tax is computed from your gross income using 2026 brackets plus solidarity surcharge above €80k — not tax advice.',
     colGuidance:
       '$1,800–$2,400: interior / smaller towns\n$2,400–$3,200: Porto, Lisbon suburbs\n$3,500+: central Lisbon, Algarve prime areas',
     colSliderMax: 7500,
@@ -118,9 +125,9 @@ const REGIONS: RetireRegionDefinition[] = [
     defaultMonthlyCostUsd: 2400,
     annualColInflation: 0.03,
     localFlatTaxRate: null,
-    localTaxShortLabel: 'Local tax not modeled',
+    localTaxShortLabel: '0% on foreign-source income',
     taxSummary:
-      'Costa Rica uses territorial taxation for many local-source items, but US citizens remain taxable in the US on global income. COL is the main lever here.',
+      'Costa Rica’s territorial system does not tax foreign-source pensions, Social Security, dividends, or capital gains. Local-source Costa Rican income is taxed progressively (not modeled here). US citizens still owe US tax on worldwide income.',
     colGuidance:
       '$1,600–$2,200: Central Valley towns\n$2,200–$3,000: Escazú, Tamarindo\n$3,200+: premium coastal pockets',
     colSliderMax: 7000,
@@ -173,10 +180,11 @@ const REGIONS: RetireRegionDefinition[] = [
     flagColors: ['#0055A4', '#ffffff', '#EF4135'],
     defaultMonthlyCostUsd: 3200,
     annualColInflation: 0.018,
-    localFlatTaxRate: 0.25,
-    localTaxShortLabel: '~25% planning placeholder',
+    // SS uses calcFranceSSTax; non-SS uses stub — see FRANCE_PENSION_TYPE_FOLLOWUP in franceTax.ts
+    localFlatTaxRate: null,
+    localTaxShortLabel: 'SS progressive + stub',
     taxSummary:
-      'France taxes residents on worldwide income at progressive rates. This flat 25% is a rough planning stub only — not a substitute for French tax advice.',
+      'France: US Social Security is taxed under 2026 progressive brackets (Art. 20). Other retirement income is 0–45% depending on amount and pension type; US government pensions may be reserved to US taxation (Art. 19). CSM (~6.5%) and prélèvements sociaux can apply on top — not modeled. Non-SS surplus math uses a ~25% stub until government vs private pension is distinguished in the product.',
     colGuidance:
       '$2,200–$2,800: smaller cities (Toulouse, Lyon outskirts)\n$2,800–$3,800: Bordeaux, Nantes\n$4,000+: Paris, Côte d’Azur',
     colSliderMax: 9000,
@@ -250,6 +258,7 @@ export function computeRetireRegionComparison(
   pick: RetireRegionPick,
   grossAnnualUsd: number,
   usTaxAnnualUsd: number,
+  annualSsUsd?: number,
 ): RetireRegionComparison | null {
   const def = getRetireRegion(pick.regionId)
   if (!def) return null
@@ -258,6 +267,19 @@ export function computeRetireRegionComparison(
   let localTaxAnnualUsd = 0
   if (def.id === 'united-states') {
     localTaxAnnualUsd = usTaxAnnualUsd
+  } else if (def.id === 'portugal') {
+    const eurPerUsd = getUsdToEurRate()
+    const taxEur = calcPortugalTax(usdToEur(grossAnnualUsd)).totalTax
+    localTaxAnnualUsd = eurPerUsd > 0 ? taxEur / eurPerUsd : 0
+  } else if (def.id === 'france') {
+    const eurPerUsd = getUsdToEurRate()
+    const rate = franceBlendedEffectiveRate(
+      grossAnnualUsd,
+      annualSsUsd,
+      usdToEur,
+      (eur) => (eurPerUsd > 0 ? eur / eurPerUsd : 0),
+    )
+    localTaxAnnualUsd = grossAnnualUsd * rate
   } else if (def.localFlatTaxRate != null) {
     localTaxAnnualUsd = grossAnnualUsd * def.localFlatTaxRate
   }
@@ -288,8 +310,11 @@ export function computeAllRetireRegionComparisons(
   picks: RetireRegionPick[],
   grossAnnualUsd: number,
   usTaxAnnualUsd: number,
+  annualSsUsd?: number,
 ): RetireRegionComparison[] {
   return picks
-    .map((pick) => computeRetireRegionComparison(pick, grossAnnualUsd, usTaxAnnualUsd))
+    .map((pick) =>
+      computeRetireRegionComparison(pick, grossAnnualUsd, usTaxAnnualUsd, annualSsUsd),
+    )
     .filter((row): row is RetireRegionComparison => row != null)
 }

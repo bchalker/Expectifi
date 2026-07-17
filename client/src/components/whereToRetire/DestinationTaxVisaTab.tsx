@@ -1,7 +1,9 @@
 import { useMemo, type CSSProperties } from "react";
 import { IconInfoCircle, IconWorld } from "@tabler/icons-react";
+import { DataFreshnessNote } from "../ui/DataFreshnessNote";
 import {
   getTaxVisaData,
+  getTaxVisaLastUpdated,
   getTaxVisaScopeLabel,
   TAX_VISA_FOREIGN_INCOME_NOTE,
   TAX_VISA_TAB_DISCLAIMER_BODY,
@@ -190,6 +192,14 @@ export function DestinationTaxVisaTab({
       >
         <strong>Sources</strong>: {TAX_VISA_TAB_DISCLAIMER_BODY}
       </p>
+      <div
+        {...staggerSectionProps(5, undefined, staggerClassName, staggerStyle)}
+      >
+        <DataFreshnessNote
+          lastUpdated={getTaxVisaLastUpdated()}
+          className="wtr-tax-visa__freshness"
+        />
+      </div>
     </div>
   );
 }

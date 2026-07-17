@@ -272,3 +272,30 @@ export function formatUsdToLocalAmount(amount: number, currencyCode: string): st
   }
   return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
+
+/**
+ * Fallback USD→EUR when open.er-api / Wise cache is empty (SSR or first load).
+ * Prefer {@link getUsdToEurRate} which reads the same cache as destination FX UI.
+ */
+export const FALLBACK_USD_TO_EUR = 0.92
+
+/**
+ * Sync EUR per 1 USD from the exchange-rate cache used by `getLocalCurrencyInfo`.
+ * Does not fetch — callers that need a fresh quote should await `getLocalCurrencyInfo('EUR')` first.
+ */
+export function getUsdToEurRate(): number {
+  const local = readApiCache<LocalCurrencyInfo>(NAMESPACE, 'local-v2-EUR')
+  if (local?.rate && local.rate > 0) return local.rate
+
+  const latest = readApiCache<OpenErApiLatest>(NAMESPACE, LATEST_CACHE_KEY)
+  const fromLatest = latest?.rates?.EUR
+  if (typeof fromLatest === 'number' && fromLatest > 0) return fromLatest
+
+  return FALLBACK_USD_TO_EUR
+}
+
+/** Convert a USD amount to EUR using the cached (or fallback) spot rate. */
+export function usdToEur(amountUsd: number): number {
+  if (!Number.isFinite(amountUsd) || amountUsd === 0) return 0
+  return amountUsd * getUsdToEurRate()
+}

@@ -50,6 +50,11 @@ type EnglishProficiencyDatasetFile = {
 const dataset = englishProficiencyDataset as EnglishProficiencyDatasetFile
 const countries = dataset.countries
 
+/** `metadata.last_updated` from english-proficiency.json (`YYYY-MM`). */
+export function getEnglishProficiencyLastUpdated(): string {
+  return dataset.metadata.last_updated
+}
+
 /** Country-level English proficiency (keys match `city.country`, e.g. "Portugal"). */
 export function getEnglishProficiency(country: string): EnglishProficiencyLevel | null {
   const trimmed = country.trim()

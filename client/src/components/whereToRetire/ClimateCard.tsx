@@ -3,13 +3,18 @@ import { IconSun } from '@tabler/icons-react'
 import type { CityClimate } from '../../lib/api/openMeteo'
 import { formatTemp } from '../../lib/api/openMeteo'
 import type { ClimatePreferenceDirection, PreferenceStep } from '../../types/preferences'
+import type { CityClimateSource } from '../../hooks/useCityClimate'
+import { climateNormalsFreshnessMessage } from '../../utils/climateNormals'
 import { deriveClimateDetail } from '../../utils/climateDetail'
 import { deriveClimateNotes } from '../../utils/climateNotes'
 import { ClimateMonthlyChart } from './ClimateMonthlyChart'
+import { DataConfidenceNote } from '../ui/DataConfidenceNote'
 import './ClimateCard.scss'
 
 type Props = {
   climate: CityClimate | null
+  /** When `normals`, show baseline + regen stamp. Live Open-Meteo needs no stamp. */
+  climateSource?: CityClimateSource | null
   lat?: number
   climatePreferenceStep?: PreferenceStep
   climatePreferenceDirection?: ClimatePreferenceDirection
@@ -55,6 +60,7 @@ function StaggerSection({
 
 export function ClimateCard({
   climate,
+  climateSource = null,
   lat = 0,
   climatePreferenceStep = 0,
   climatePreferenceDirection = 'none',
@@ -226,8 +232,17 @@ export function ClimateCard({
       <p {...staggerSectionProps(4, 'wtr-climate-card__range-note', staggerClassName, staggerStyle)}>
         Monthly avg. highs{' '}
         {formatTemp(Math.max(...climate.monthly.map((m) => m.avgHighC)), tempUnit)} / lows{' '}
-        {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)} (1990–2020)
+        {formatTemp(Math.min(...climate.monthly.map((m) => m.avgLowC)), tempUnit)}
       </p>
+      {climateSource === 'normals' ? (
+        <div {...staggerSectionProps(5, undefined, staggerClassName, staggerStyle)}>
+          <DataConfidenceNote
+            variant="message"
+            text={climateNormalsFreshnessMessage()}
+            className="wtr-climate-card__freshness"
+          />
+        </div>
+      ) : null}
     </article>
   )
 }

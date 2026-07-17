@@ -1,4 +1,7 @@
-/** Manually maintained COL / QoL (0–10) per urban-area slug. Last reviewed 2025-01. */
+import { formatYearMonthLabel } from '../utils/formatYearMonth'
+
+/** Manually maintained COL / QoL (0–10) per urban-area slug. */
+export const TELEPORT_FALLBACKS_LAST_REVIEWED = '2025-01'
 
 export type CatalogUrbanScores = {
   col: number
@@ -95,4 +98,12 @@ export function getCatalogUrbanScores(citySlug: string): CatalogUrbanScores {
 /** @deprecated Use getCatalogUrbanScores */
 export function getTeleportFallback(citySlug: string): CatalogUrbanScores {
   return getCatalogUrbanScores(citySlug)
+}
+
+export function getTeleportFallbacksLastReviewed(): string {
+  return TELEPORT_FALLBACKS_LAST_REVIEWED
+}
+
+export function teleportFallbacksLastReviewedMessage(): string {
+  return `Cost-of-living / QoL fallback scores last reviewed ${formatYearMonthLabel(TELEPORT_FALLBACKS_LAST_REVIEWED)}.`
 }

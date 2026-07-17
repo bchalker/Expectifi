@@ -127,10 +127,11 @@
 }
 
 .wtr-dest-card__head-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
+  column-gap: var(--space-2);
+  row-gap: var(--space-half);
   min-width: 0;
 }
 
@@ -223,7 +224,6 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-half) /* review: was 0.12rem */;
   min-width: 0;
 }
 
@@ -320,18 +320,21 @@
 
 .wtr-dest-card__country {
   display: flex;
-  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
+  white-space: nowrap;
 }
 
 .wtr-dest-card__country-line {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.2em;
   min-width: 0;
+  white-space: nowrap;
 }
 
 .wtr-dest-card__flag {

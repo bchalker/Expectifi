@@ -3,12 +3,21 @@ import { useMemo } from "react";
 import type { ComputedSnapshot } from "../lib/computeResults";
 import {
   computeGrowthScenarioRangePreview,
+  type GrowthScenarioRangeCoverage,
   type GrowthScenarioRangePreviewInputs,
   type GrowthScenarioRangeRow,
 } from "../lib/growthScenarioRangePreview";
 import { formatSignedRatePct } from "../lib/holdingScenarioApply";
 import { fmt, fmtK } from "../utils/format";
 import "./GrowthScenarioRangeCard.scss";
+
+/** Show coverage note whenever any principal is off the global tier. */
+function shouldShowCoverageNote(coverage: GrowthScenarioRangeCoverage): boolean {
+  return (
+    coverage.totalPortfolio > 0 &&
+    coverage.globalTierPrincipal < coverage.totalPortfolio - 0.5
+  );
+}
 
 type Props = {
   c: ComputedSnapshot;
@@ -162,7 +171,7 @@ export function GrowthScenarioRangeCard({
   brkRate,
   inputs,
 }: Props) {
-  const rows = useMemo(
+  const { rows, coverage } = useMemo(
     () => computeGrowthScenarioRangePreview(c, retRate, brkRate, inputs),
     [
       c,
@@ -187,12 +196,28 @@ export function GrowthScenarioRangeCard({
 
   if (!pessimistic || !optimistic) return null;
 
+  const showCoverageNote = shouldShowCoverageNote(coverage);
+
   return (
     <div className="growth-scenario-range-card">
       <div className="growth-scenario-range-card__wings">
         <WingTile row={pessimistic} />
         <WingTile row={optimistic} />
       </div>
+      {showCoverageNote ? (
+        <p className="growth-scenario-range-card__coverage-note">
+          Range applies to{" "}
+          <span className="tabular-nums">
+            {fmt(Math.round(coverage.globalTierPrincipal))}
+          </span>{" "}
+          of your{" "}
+          <span className="tabular-nums">
+            {fmt(Math.round(coverage.totalPortfolio))}
+          </span>{" "}
+          total portfolio. Holdings and accounts with custom scenarios use their
+          own settings and aren&apos;t reflected here.
+        </p>
+      ) : null}
     </div>
   );
 }

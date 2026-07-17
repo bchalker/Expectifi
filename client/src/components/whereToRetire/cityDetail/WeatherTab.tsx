@@ -2,14 +2,17 @@ import { useMemo, useState } from "react";
 import { IconStethoscope } from "@tabler/icons-react";
 import type { CityClimate } from "../../../lib/api/openMeteo";
 import { formatTemp } from "../../../lib/api/openMeteo";
+import type { CityClimateSource } from "../../../hooks/useCityClimate";
 import type {
   PreferenceStep,
   RetirementPreferences,
 } from "../../../types/preferences";
+import { climateNormalsFreshnessMessage } from "../../../utils/climateNormals";
 import { deriveClimateNotes } from "../../../utils/climateNotes";
 import { deriveClimateDetail } from "../../../utils/climateDetail";
 import { ClimateMonthlyChart } from "../ClimateMonthlyChart";
 import { MonthlyPrecipChart } from "../MonthlyPrecipChart";
+import { DataConfidenceNote } from "../../ui/DataConfidenceNote";
 import {
   staggerSectionProps,
   type CityDetailTabStaggerProps,
@@ -21,6 +24,7 @@ import "./WeatherTab.scss";
 type Props = CityDetailTabStaggerProps & {
   cityId: string;
   climate: CityClimate | null;
+  climateSource?: CityClimateSource | null;
   climatePreferenceStep: PreferenceStep;
   climatePreferenceDirection: RetirementPreferences["climatePreference"];
   climateTempMinF?: number;
@@ -162,6 +166,7 @@ function MetricColumn({
 export function WeatherTab({
   cityId,
   climate,
+  climateSource = null,
   climatePreferenceStep,
   climatePreferenceDirection,
   climateTempMinF,
@@ -405,8 +410,7 @@ export function WeatherTab({
               {formatTemp(
                 Math.min(...climate.monthly.map((m) => m.avgLowC)),
                 tempUnit,
-              )}{" "}
-              · climate normals 2011–2020 (NASA POWER)
+              )}
             </p>
           </div>
           <ClimateMonthlyChart
@@ -436,12 +440,27 @@ export function WeatherTab({
               Monthly precipitation
             </h3>
             <p className="wtr-weather-tab__section-helper">
-              Monthly totals from daily averages · climate normals 2011–2020
-              (NASA POWER)
+              Monthly totals from daily averages
             </p>
           </div>
           <MonthlyPrecipChart monthly={climate.monthly} />
         </section>
+        {climateSource === "normals" ? (
+          <div
+            {...staggerSectionProps(
+              staggerIdx++,
+              undefined,
+              staggerClassName,
+              staggerStyle,
+            )}
+          >
+            <DataConfidenceNote
+              variant="message"
+              text={climateNormalsFreshnessMessage()}
+              className="wtr-weather-tab__freshness"
+            />
+          </div>
+        ) : null}
       </article>
     </div>
   );

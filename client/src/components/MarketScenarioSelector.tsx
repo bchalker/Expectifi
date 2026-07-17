@@ -3,6 +3,7 @@ import { IconChevronDown } from '@tabler/icons-react'
 import { useClickOutside } from '../hooks/useClickOutside'
 import {
   getMarketScenarioDefinition,
+  MARKET_SCENARIO_ILLUSTRATIVE_NOTE,
   MARKET_SCENARIOS,
   type MarketScenarioId,
 } from '../lib/marketScenario'
@@ -40,13 +41,16 @@ export function MarketScenarioButtonGroup({
     <div
       className={['market-scenario-button-group', className].filter(Boolean).join(' ')}
     >
-      <span className="market-scenario-button-group__label">Scenario:</span>
-      <ModeButtonGroup
-        value={value}
-        options={MARKET_SCENARIO_BUTTON_OPTIONS}
-        onChange={onChange}
-        ariaLabel="Market scenario"
-      />
+      <div className="market-scenario-button-group__controls">
+        <span className="market-scenario-button-group__label">Scenario:</span>
+        <ModeButtonGroup
+          value={value}
+          options={MARKET_SCENARIO_BUTTON_OPTIONS}
+          onChange={onChange}
+          ariaLabel="Market scenario"
+        />
+      </div>
+      <p className="market-scenario-button-group__note">{MARKET_SCENARIO_ILLUSTRATIVE_NOTE}</p>
     </div>
   )
 }
@@ -95,6 +99,7 @@ export function MarketScenarioSelector({ value, onChange, className = '' }: Mark
           </span>
         </span>
       </button>
+      <p className="market-scenario-selector__note">{MARKET_SCENARIO_ILLUSTRATIVE_NOTE}</p>
       {open ? (
         <ul
           className="market-scenario-selector__menu"

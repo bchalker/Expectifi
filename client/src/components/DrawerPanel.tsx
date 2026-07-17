@@ -307,33 +307,35 @@ function SSTimingBody({
 }) {
   const t = c.ssTiming
   const beStr = (be: number | null) => (be ? `Age ${be}` : 'Never at this return rate')
+  const { b62, b67, b70 } = t.benefits
   return (
     <div id="ss-timing-section">
       <div className="section-title">Social Security timing — breakeven analysis</div>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-5)' }}>
-        SSA projected benefits × 75% (expected solvency factor): age 62 = $1,949/mo · age 67 = $2,916/mo · age 70 = $3,704/mo. Breakeven accounts for investment returns on early payments.
+        Your SSA benefit estimates: age 62 = {fmtMon(b62)} · age 67 = {fmtMon(b67)} · age 70 ={' '}
+        {fmtMon(b70)}. Breakeven accounts for investment returns on early payments.
       </p>
       <div className="grid-3" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="card" style={{ borderTop: '3px solid #A32D2D' }}>
           <div className="card-label">Draw at 62</div>
           <div className="card-value" style={{ color: 'var(--color-danger)' }}>
-            $1,949/mo
+            {fmtMon(b62)}
           </div>
-          <div className="card-sub">75% of $2,599 · Jan 2033</div>
+          <div className="card-sub">{t.claimAt.age62}</div>
         </div>
         <div className="card" style={{ borderTop: '3px solid #2B6CB0' }}>
           <div className="card-label">Draw at 67 (FRA)</div>
           <div className="card-value" style={{ color: '#2B6CB0' }}>
-            $2,916/mo
+            {fmtMon(b67)}
           </div>
-          <div className="card-sub">75% of $3,888 · Dec 2037</div>
+          <div className="card-sub">{t.claimAt.age67}</div>
         </div>
         <div className="card" style={{ borderTop: '3px solid #1D9E75' }}>
           <div className="card-label">Draw at 70 (max)</div>
           <div className="card-value" style={{ color: 'var(--color-teal-dark)' }}>
-            $3,704/mo
+            {fmtMon(b70)}
           </div>
-          <div className="card-sub">75% of $4,939 · Dec 2040</div>
+          <div className="card-sub">{t.claimAt.age70}</div>
         </div>
       </div>
       <div className="slider-group" style={{ maxWidth: 420, marginBottom: 'var(--space-5)' }}>

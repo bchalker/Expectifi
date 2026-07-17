@@ -30,6 +30,10 @@ export type MarketScenarioDefinition = {
 
 export const DEFAULT_MARKET_SCENARIO_ID: MarketScenarioId = 'base'
 
+/** Visible near the scenario selector — these are hand-authored rate paths, not models. */
+export const MARKET_SCENARIO_ILLUSTRATIVE_NOTE =
+  'Illustrative fixed-rate paths — not statistical projections, Monte Carlo simulations, or historical backtests.'
+
 export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
   {
     id: 'base',
@@ -48,9 +52,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Bull run',
     description: 'Optimistic sustained growth above your global slider rate.',
     contextDescription:
-      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017: long stretches where things just kept going up.',
+      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Similar in spirit to long bull stretches like 2013–17, using an illustrative fixed rate rather than actual historical returns.',
     contextSummary:
-      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Think 2013 or 2017: long stretches where things just kept going up.',
+      'Markets climb steadily and stay there. Companies grow, investor confidence holds, and your portfolio compounds faster than average. Similar in spirit to long bull stretches like 2013–17, using an illustrative fixed rate rather than actual historical returns.',
     modifierLabel: '+3%',
     kind: 'flat_modifier',
     flatModifier: 0.03,
@@ -70,12 +74,12 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
   {
     id: 'stagflation',
     label: 'Stagflation',
-    description: 'Low growth with inflation eroding real returns.',
+    description: 'A sustained lower-growth scenario (illustrative fixed rate).',
     contextDescription:
-      'The worst of both worlds: the economy stalls but prices keep rising. Your nominal returns might look okay on paper, but inflation is quietly eating your purchasing power. The 1970s are the textbook case.',
+      'The worst of both worlds: the economy stalls but prices keep rising. Your returns may look okay on paper while purchasing power feels squeezed. Similar in spirit to the 1970s, using an illustrative fixed rate rather than actual historical returns.',
     contextSummary:
-      'The worst of both worlds: the economy stalls but prices keep rising. Your nominal returns might look okay on paper, but inflation is quietly eating your purchasing power. The 1970s are the textbook case.',
-    modifierLabel: '-2% real',
+      'The worst of both worlds: the economy stalls but prices keep rising. Your returns may look okay on paper while purchasing power feels squeezed. Similar in spirit to the 1970s, using an illustrative fixed rate rather than actual historical returns.',
+    modifierLabel: '-2%',
     kind: 'flat_modifier',
     flatModifier: -0.02,
   },
@@ -84,9 +88,9 @@ export const MARKET_SCENARIOS: readonly MarketScenarioDefinition[] = [
     label: 'Lost decade',
     description: 'Flat or near-zero growth for five years, then recovery.',
     contextDescription:
-      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
+      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. Similar in spirit to a lost decade like the 2000s, using an illustrative fixed curve rather than actual historical returns. Starting point and timing matter enormously here.",
     contextSummary:
-      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. The 2000s S&P 500 is the classic example: flat from 2000 to 2010, then a long recovery. Starting point and timing matter enormously here.",
+      "Growth doesn't crash, it just disappears for years. Your portfolio treads water while time passes. Similar in spirit to a lost decade like the 2000s, using an illustrative fixed curve rather than actual historical returns. Starting point and timing matter enormously here.",
     modifierLabel: 'Custom curve',
     kind: 'curve',
     curveOffsetsPct: [-6, -6, -5, -5, -4, 2, 3, 4, 3, 2],
@@ -174,9 +178,6 @@ export function effectiveMarketScenarioId(inputs: MarketScenarioInputState): Mar
 /** One-line modifier summary for the dashboard context row. */
 export function marketScenarioModifierSummary(scenarioId: MarketScenarioId): string {
   const def = getMarketScenarioDefinition(scenarioId)
-  if (def.id === 'stagflation') {
-    return 'Applies −2% real return adjustment to all holdings using the global rate.'
-  }
   if (def.kind === 'flat_modifier' && def.flatModifier != null && def.flatModifier !== 0) {
     const pct = Math.abs(def.flatModifier * 100)
     const sign = def.flatModifier > 0 ? '+' : '−'

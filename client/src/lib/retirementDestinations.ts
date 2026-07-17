@@ -1,4 +1,5 @@
 import combined from '../data/retirement-destinations-combined.json'
+import { getCityData } from '../utils/costOfLiving'
 
 export type RetirementCityRecord = {
   city: string
@@ -6,20 +7,6 @@ export type RetirementCityRecord = {
   country_iso: string
   lat: number | null
   lng: number | null
-  col: {
-    rent_1br_outside: number
-    rent_1br_center: number
-    utilities: number
-    transport_monthly: number
-    meal_inexpensive: number
-    avg_net_salary: number | null
-  }
-  col_computed: {
-    base_monthly: number
-    full_monthly_with_health_ins: number
-    health_insurance_est: number
-    meals_45x: number
-  }
   tax: {
     rate_label: string
     key_exemptions: string
@@ -60,14 +47,18 @@ type CombinedFile = {
 
 const dataset = combined as CombinedFile
 
+/** True when the city has usable COL data in cost-of-living.csv (same gate the map uses). */
+function hasCatalogCostData(city: string, country: string): boolean {
+  const csv = getCityData(city, country)
+  return csv != null && csv.rent_1br_outside_centre > 0
+}
+
 let cachedCities: RetirementCityRecord[] | null = null
 
 export function getRetirementDestinationCities(): RetirementCityRecord[] {
   if (!cachedCities) {
-    cachedCities = dataset.cities.filter(
-      (c) =>
-        Number.isFinite(c.col_computed.base_monthly) &&
-        c.col_computed.base_monthly > 0,
+    cachedCities = dataset.cities.filter((c) =>
+      hasCatalogCostData(c.city, c.country),
     )
   }
   return cachedCities

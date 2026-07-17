@@ -4,6 +4,7 @@ import {
   formatTravelAdvisorySummary,
   getDoNotTravelAdvisory,
   getReconsiderTravelAdvisory,
+  travelAdvisoriesAsOfMessage,
 } from '../../lib/travelAdvisories'
 import { requestHideLevel3CautionedCities } from '../../lib/whereToRetire/wtrHideLevel3Cautions'
 import { Tooltip } from '../Tooltip'
@@ -43,7 +44,8 @@ export function WtrTravelAdvisoryCautionChip({
     <>
       <span className="wtr-travel-caution-chip__tooltip-title">{entry.title}</span>
       <span className="wtr-travel-caution-chip__tooltip-meta">
-        {formatTravelAdvisorySummary(entry)} Source: US State Department.
+        {formatTravelAdvisorySummary(entry)} Source: US State Department.{' '}
+        {travelAdvisoriesAsOfMessage()}
       </span>
       {entry.level === 3 ? (
         <button

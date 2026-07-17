@@ -1,5 +1,9 @@
 import { IconCheck } from '@tabler/icons-react'
-import type { RetirementTaxDetail } from '../../data/retirementTaxDetail'
+import {
+  taxRatesLastVerifiedMessage,
+  type RetirementTaxDetail,
+} from '../../data/retirementTaxDetail'
+import { DataConfidenceNote } from '../ui/DataConfidenceNote'
 import './TaxRateCell.scss'
 
 type Props = {
@@ -42,6 +46,13 @@ export function TaxRateCell({ detail, isUsState, noStateIncomeTax }: Props) {
               <span className="wtr-tax-cell__subtitle">{detail.localRateSubtitle}</span>
             ) : null}
           </span>
+          {detail.lastVerified ? (
+            <DataConfidenceNote
+              variant="message"
+              text={taxRatesLastVerifiedMessage(detail.lastVerified)}
+              className="wtr-tax-cell__verified-note"
+            />
+          ) : null}
         </div>
       </div>
     </div>

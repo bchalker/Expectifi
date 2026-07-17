@@ -138,6 +138,7 @@ export function AccountScenarioPopout({
             horizon={state.h}
             selection={state.outlookSelection}
             onSelect={state.onSelectOutlookTile}
+            rateBasis="absolute"
           />
         ) : null}
 

@@ -217,6 +217,7 @@ function CityDetailPanelBody({
   const activeTabMeta = PANEL_TABS.find((t) => t.id === activeTab);
   const {
     climate,
+    source: climateSource,
     loading: climateLoading,
     failed: climateFailed,
   } = useCityClimate(scored.city);
@@ -276,6 +277,7 @@ function CityDetailPanelBody({
           <WeatherTab
             cityId={city.id}
             climate={climate}
+            climateSource={climateSource}
             climatePreferenceStep={climatePreferenceStep}
             climatePreferenceDirection={climatePreferenceDirection}
             climateTempMinF={climateTempMinF}
@@ -288,7 +290,7 @@ function CityDetailPanelBody({
       case "gettingThere":
         return <GettingThereTab country={city.country} />;
       case "taxVisa":
-        return <TaxVisaTab country={city.country} />;
+        return <TaxVisaTab country={city.country} city={city.city} />;
       case "qol":
         return <QualityOfLifeTab country={city.country} />;
       case "peopleCulture":

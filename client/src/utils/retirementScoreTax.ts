@@ -1,11 +1,16 @@
 import { getCountryTaxEntry } from '../data/countryTaxRates'
 import { countryToIsoCode } from './costOfLiving'
 import { getTaxVisaData } from './taxVisa'
+import { usdToEur } from '../lib/api/exchangeRates'
+import { calcPortugalTax, PT_REFERENCE_TAXABLE_EUR } from '../lib/calc/portugalTax'
+import {
+  IT_ART_24_TER_RATE,
+  IT_UNSOURCED_EFFECTIVE_STUB,
+  isItalyArt24TerEligibleCity,
+} from '../lib/calc/italyTax'
 
 /** Flat / territorial regimes especially favorable for US retirees (see retirement-tax-visa.json). */
 const TAX_FAVORABLE_US_RETIREE_COUNTRIES = new Set([
-  'Italy',
-  'Portugal',
   'Panama',
   'Paraguay',
   'Georgia',
@@ -71,10 +76,50 @@ export function estimatedTaxRateFromTopRate(topRatePct: number): number {
 const NEUTRAL_TAX_SCORE = 60
 const NEUTRAL_ESTIMATED_TAX_RATE = 0.2
 
+function portugalTaxScoreComponents(monthlyIncomeUsd?: number): RetirementTaxScoreComponents {
+  const annualUsd =
+    monthlyIncomeUsd != null && monthlyIncomeUsd > 0 ? monthlyIncomeUsd * 12 : undefined
+  const taxableEur = annualUsd != null ? usdToEur(annualUsd) : PT_REFERENCE_TAXABLE_EUR
+  const result = calcPortugalTax(taxableEur)
+  const effectivePct = result.effectiveRate * 100
+  return {
+    topIncomeTaxRatePct: 48,
+    // Score from real effective rate at this income — not a static "favorable" bucket.
+    taxScore: taxScoreFromTopRate(effectivePct),
+    estimatedTaxRate: result.effectiveRate,
+  }
+}
+
+function italyTaxScoreComponents(city?: string | null): RetirementTaxScoreComponents {
+  if (isItalyArt24TerEligibleCity(city)) {
+    return {
+      topIncomeTaxRatePct: 7,
+      taxScore: 100,
+      estimatedTaxRate: IT_ART_24_TER_RATE,
+    }
+  }
+  return {
+    topIncomeTaxRatePct: null,
+    // Stub until IRPEF brackets are sourced — not Art. 24-ter 7%.
+    taxScore: taxScoreFromTopRate(IT_UNSOURCED_EFFECTIVE_STUB * 100),
+    estimatedTaxRate: IT_UNSOURCED_EFFECTIVE_STUB,
+  }
+}
+
 export function resolveRetirementTaxScoreComponents(
   country?: string | null,
+  monthlyIncomeUsd?: number,
+  city?: string | null,
 ): RetirementTaxScoreComponents {
   const trimmed = country?.trim() ?? ''
+
+  if (trimmed === 'Portugal') {
+    return portugalTaxScoreComponents(monthlyIncomeUsd)
+  }
+
+  if (trimmed === 'Italy') {
+    return italyTaxScoreComponents(city)
+  }
 
   if (trimmed && TAX_FAVORABLE_US_RETIREE_COUNTRIES.has(trimmed)) {
     return {
