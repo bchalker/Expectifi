@@ -167,7 +167,6 @@ export function AnchoredHoverCell({
           onPointerEnter={onPanelEnter}
           onPointerLeave={onPanelLeave}
         >
-          <Popover.Arrow className="wtr-hover-popover__arrow" />
           <Popover.Dialog className="wtr-hover-popover__dialog">{panel}</Popover.Dialog>
         </div>
       </Popover.Content>

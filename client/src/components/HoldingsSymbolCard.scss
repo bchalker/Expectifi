@@ -104,29 +104,6 @@
   box-sizing: border-box;
 }
 
-.holdings-breakdown-popout__arrow {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: var(--accent-contrast);
-  border: 1px solid var(--border, var(--surface-d1));
-  transform: translateY(-50%) rotate(45deg);
-  box-sizing: border-box;
-  pointer-events: none;
-}
-
-.holdings-breakdown-popout__arrow[data-placement='right'] {
-  left: -6px;
-  border-top: none;
-  border-right: none;
-}
-
-.holdings-breakdown-popout__arrow[data-placement='left'] {
-  right: -6px;
-  border-bottom: none;
-  border-left: none;
-}
-
 .holdings-breakdown-popout--open {
   animation: holdings-breakdown-popout-in 0.15s ease forwards;
 }

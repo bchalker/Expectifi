@@ -32,7 +32,6 @@ export function ScenarioRowPopover({
           shouldFlip
           className="scenario-heroui-popover"
         >
-          <Popover.Arrow className="scenario-heroui-popover__arrow" />
           <Popover.Dialog className="scenario-heroui-popover__dialog" aria-label={dialogAriaLabel}>
             {children}
           </Popover.Dialog>

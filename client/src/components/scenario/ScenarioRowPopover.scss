@@ -1,5 +1,5 @@
 /* Shared HeroUI popover chrome for account + holding scenario rows.
-   Matches the account look: no accent border, plain arrow fill. */
+   Matches the account look: no accent border, no arrow. */
 .scenario-heroui-popover.popover,
 .scenario-heroui-popover {
   z-index: var(--z-drawer-shell, 360);
@@ -47,13 +47,6 @@
   }
 }
 
-.scenario-heroui-popover__arrow,
-.scenario-heroui-popover [data-slot='popover-overlay-arrow-group'] svg,
-.scenario-heroui-popover [data-slot='popover-overlay-arrow'] path {
-  fill: var(--color-background-primary);
-  stroke-width: 1px;
-}
-
 .scenario-heroui-popover__dialog.popover__dialog {
   margin: 0;
   padding: 0;
@@ -85,10 +78,6 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     z-index: var(--mobile-bottom-sheet-z, 1100);
-  }
-
-  .scenario-heroui-popover__arrow {
-    display: none;
   }
 
   .scenario-heroui-popover__dialog.popover__dialog {

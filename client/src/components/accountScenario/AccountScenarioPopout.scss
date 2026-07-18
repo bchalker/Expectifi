@@ -2,7 +2,7 @@
   width: 350px;
   max-width: min(350px, calc(100vw - 16px));
   background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-secondary, var(--border));
+  border: none;
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;

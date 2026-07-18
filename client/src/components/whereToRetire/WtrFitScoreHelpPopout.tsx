@@ -198,7 +198,6 @@ export function WtrFitScoreHelpPopout() {
         shouldFlip
         className="wtr-fit-score-help-popover"
       >
-        <Popover.Arrow className="wtr-fit-score-help-popover__arrow" />
         <Popover.Dialog
           className="wtr-fit-score-help-popover__dialog"
           aria-labelledby={titleId}

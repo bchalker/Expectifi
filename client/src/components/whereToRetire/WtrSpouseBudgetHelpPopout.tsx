@@ -221,7 +221,6 @@ export function WtrSpouseBudgetHelpPopout() {
         shouldFlip
         className="wtr-spouse-budget-help-popover"
       >
-        <Popover.Arrow className="wtr-spouse-budget-help-popover__arrow" />
         <Popover.Dialog
           className="wtr-spouse-budget-help-popover__dialog"
           aria-labelledby={titleId}

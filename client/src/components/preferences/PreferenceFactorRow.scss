@@ -315,7 +315,7 @@
   padding: 0;
   background: var(--color-background-primary, var(--surface));
   background: var(--accent-contrast);
-  border: 0.5px solid var(--color-border-secondary, var(--border));
+  border: none;
   border-radius: var(--border-radius-lg, 12px);
   box-shadow: 0 4px 24px rgb(0 0 0 / 0.13);
   color: var(--color-text-primary, var(--text));
@@ -330,11 +330,6 @@
   border-radius: 0;
   box-shadow: none;
   outline: none;
-}
-
-.pref-factor-row__popover-arrow {
-  fill: var(--color-background-primary, var(--surface));
-  stroke: var(--color-border-secondary, var(--border));
 }
 
 .pref-factor-row__options {

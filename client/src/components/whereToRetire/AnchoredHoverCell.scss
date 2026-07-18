@@ -69,7 +69,7 @@
   box-sizing: border-box;
 }
 
-/* HeroUI Popover shell — arrow from Popover.Arrow */
+/* HeroUI Popover shell — no arrow */
 .wtr-hover-popover.popover,
 .wtr-hover-popover {
   z-index: 450;
@@ -99,9 +99,4 @@
   border-radius: 0;
   box-shadow: none;
   outline: none;
-}
-
-.wtr-hover-popover__arrow {
-  fill: var(--surface, var(--accent-contrast));
-  stroke: var(--border, var(--surface-d1));
 }

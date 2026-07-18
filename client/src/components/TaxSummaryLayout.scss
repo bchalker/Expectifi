@@ -129,9 +129,11 @@ $tax-summary-column-edge-gradient: radial-gradient(
   // gap: var(--space-4);
   width: 100%;
   min-width: 0;
-  box-shadow: $tax-summary-sidebar-shadow, inset -2px 0 4px 0 var(--surface);
+  // box-shadow: $tax-summary-sidebar-shadow, 120px 120px 120px 20px rgba(0, 0, 0, 0.5),  inset -2px 0 4px 0 var(--surface);
   transition: box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  // box-shadow: -48px 0 64px -20px rgba(0, 0, 0, 0.22),  inset -2px 0 4px 0 var(--surface);
   z-index: 999;
+  border-left: 1px solid var(--border);
   background: $tax-summary-column-edge-gradient;
 }
 
@@ -292,7 +294,7 @@ $tax-summary-column-edge-gradient: radial-gradient(
 /* WTR detail-column layout: filters rail matches city list width (22rem). */
 @media (min-width: 1919px) {
   .section--tax-summary--where-to-retire {
-    --layout-snapshot-panel-width: var(--layout-snapshot-panel-width-where-to-retire);
+    --layout-snapshot-panel-width: var(--layout-snapshot-panel-width-where-to-retire-right);
   }
 }
 

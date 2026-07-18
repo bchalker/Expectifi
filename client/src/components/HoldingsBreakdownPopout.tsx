@@ -12,8 +12,6 @@ type PopoutPosition = {
   top: number
   left: number
   placement: PopoutPlacement
-  /** Arrow center offset from the panel's top edge, so it points at the trigger. */
-  arrowTop: number
 }
 
 type Props = {
@@ -72,7 +70,7 @@ export function HoldingsBreakdownPopout({
       Math.min(top, window.innerHeight - height - VIEWPORT_PAD),
     )
 
-    setPos({ top, left, placement, arrowTop: anchorCenterY - top })
+    setPos({ top, left, placement })
   }, [anchorRef])
 
   useClickOutside(panelRef, onClose, open, [anchorRef])
@@ -120,12 +118,6 @@ export function HoldingsBreakdownPopout({
       onPointerEnter={onMouseEnterPopout}
       onPointerLeave={onMouseLeavePopout}
     >
-      <span
-        className="holdings-breakdown-popout__arrow"
-        data-placement={pos?.placement ?? 'right'}
-        style={pos ? { top: pos.arrowTop } : undefined}
-        aria-hidden
-      />
       <div className="holdings-breakdown-popout__dialog">
         {note}
         <div className="holdings-symbol-card__breakdown-inner">{children}</div>
