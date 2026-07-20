@@ -9,6 +9,7 @@ import { Header } from "./Header";
 import { LandingFooter } from "./LandingFooter";
 import { LandingHeroDivider } from "./LandingHeroDivider";
 import { LandingHeroHeadline } from "./LandingHeroHeadline";
+import { LandingHeroLandmarks } from "./LandingHeroLandmarks";
 import { useLandingFaqPhoneScroll } from "../hooks/useLandingFaqPhoneScroll";
 import { landingNavigateOnboarding } from "./landingNav";
 import "./LandingPage.scss";
@@ -133,6 +134,7 @@ export function LandingPage({
 
       <main>
         <section className="landing-hero" aria-labelledby="landing-hero-title">
+          <LandingHeroLandmarks />
           <div className="landing-page__wrap">
             <div className="landing-hero__inner">
               <LandingHeroHeadline />
