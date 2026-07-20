@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from "react";
+import type { AnimationEvent, FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleLogoMark } from "./ui/GoogleLogoMark";
 import {
@@ -60,8 +60,8 @@ function CreateAccountMarketing() {
   return (
     <div className="auth-modal__register-marketing">
       <p className="auth-modal__register-marketing__value-add">
-        Premium saves your CSV uploads, <strong>Plaid</strong> bank sync in the
-        United States and Canada, and settings—kept in sync.
+        Premium keeps your CSV uploads, settings, and{" "}
+        <strong>Plaid</strong> bank sync (US and Canada) saved across devices.
       </p>
 
       {showStripeSetupHint ? (
@@ -91,7 +91,6 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     googleCheckoutUi,
     resolveGoogleCheckoutFromUrl,
     completeGoogleCheckout,
-    clearGoogleCheckoutUi,
     signIn,
     signUp,
     signInWithGoogle,
@@ -117,6 +116,8 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     null,
   );
   const prevOpenRef = useRef<AuthModalMode | null>(null);
+  const [closing, setClosing] = useState(false);
+  const closeFinishedRef = useRef(false);
 
   const resetFields = useCallback(() => {
     setFirstName("");
@@ -134,6 +135,42 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
     setPromoHint(null);
     setAppliedPromo(null);
   }, []);
+
+  const requestClose = useCallback(() => {
+    if (!mode || closing) return;
+    closeFinishedRef.current = false;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      onClose();
+      return;
+    }
+    setClosing(true);
+  }, [closing, mode, onClose]);
+
+  const finishClose = useCallback(() => {
+    if (closeFinishedRef.current) return;
+    closeFinishedRef.current = true;
+    onClose();
+  }, [onClose]);
+
+  const onModalAnimationEnd = useCallback(
+    (event: AnimationEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) return;
+      if (!closing) return;
+      if (event.animationName !== "auth-modal-out") return;
+      finishClose();
+    },
+    [closing, finishClose],
+  );
+
+  useEffect(() => {
+    if (mode) {
+      setClosing(false);
+      closeFinishedRef.current = false;
+    }
+  }, [mode]);
 
   useEffect(() => {
     if (!mode) {
@@ -191,10 +228,9 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
 
   useEffect(() => {
     if (user && mode && mode !== "google_checkout") {
-      onClose();
-      resetFields();
+      requestClose();
     }
-  }, [user, mode, onClose, resetFields]);
+  }, [user, mode, requestClose]);
 
   useEffect(() => {
     if (mode !== "google_checkout" || googleCheckoutUi?.email) return;
@@ -219,11 +255,11 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
   useEffect(() => {
     if (!mode) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") requestClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [mode, onClose]);
+  }, [mode, requestClose]);
 
   const stripePromise = getStripeBrowserPromise();
 
@@ -474,7 +510,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
         <button
           type="button"
           className="auth-modal__inline-link"
-          onClick={onClose}
+          onClick={requestClose}
         >
           Continue without an account
         </button>
@@ -550,7 +586,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
             variant="outline"
             fullWidth
             className="auth-modal__outline"
-            onPress={onClose}
+            onPress={requestClose}
           >
             Close
           </Button>
@@ -592,10 +628,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
               variant="primary"
               fullWidth
               className="auth-modal__primary"
-              onPress={() => {
-                clearGoogleCheckoutUi();
-                onClose();
-              }}
+              onPress={requestClose}
             >
               Close
             </Button>
@@ -627,7 +660,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
             variant="outline"
             fullWidth
             className="auth-modal__outline"
-            onPress={onClose}
+            onPress={requestClose}
           >
             Close
           </Button>
@@ -694,10 +727,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
               size="sm"
               variant="outline"
               className="auth-modal__outline auth-modal__reg-back"
-              onPress={() => {
-                clearGoogleCheckoutUi();
-                onClose();
-              }}
+              onPress={requestClose}
             >
               Cancel
             </Button>
@@ -1047,16 +1077,19 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
 
   return (
     <div
-      className="auth-modal"
+      className={["auth-modal", closing ? "auth-modal--closing" : ""]
+        .filter(Boolean)
+        .join(" ")}
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-modal-title"
+      onAnimationEnd={onModalAnimationEnd}
     >
       <button
         type="button"
         className="auth-modal__backdrop"
         aria-label="Close"
-        onClick={onClose}
+        onClick={requestClose}
       />
       <div
         className={`auth-modal__panel${footer ? "" : " auth-modal__panel--no-footer"}`}
@@ -1073,8 +1106,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
                 Everything synced, nothing lost.{" "}
                 <span className="auth-modal__register-tagline-price">
                   $9/mo
-                </span>{" "}
-                — cancel anytime.
+                </span>
               </p>
             ) : null}
             {headerSignupEmail}
@@ -1083,7 +1115,7 @@ export function AuthModal({ open, onClose, onSwitchMode }: Props) {
           <CloseButton
             className="auth-modal__close"
             aria-label="Close"
-            onPress={onClose}
+            onPress={requestClose}
           />
         </header>
         <div className="auth-modal__body" tabIndex={-1}>
