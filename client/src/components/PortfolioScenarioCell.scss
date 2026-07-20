@@ -95,19 +95,24 @@
 .portfolio-scenario-cell .holdings-scenario-trigger--badge,
 .portfolio-scenario-cell .holdings-scenario-trigger--outline {
   display: flex;
-  width: 100%;
-  // min-width: var(--portfolio-scenario-trigger-min, 8rem);
   height: auto;
   box-shadow:
     var(--sky-blue) 6px 2px 16px 0,
     rgba(255, 255, 255, 0.8) -6px -2px 16px 0;
 }
 
+.portfolio-scenario-cell .holdings-scenario-trigger--badge {
+  width: 100%;
+}
+
 .portfolio-scenario-cell .holdings-scenario-trigger--outline {
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  width: auto;
   border-radius: 6px;
-  padding: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  min-height: 2.5rem;
   background: var(--accent-contrast);
 }
 
@@ -147,10 +152,13 @@
   text-align: left;
 }
 
-.portfolio-scenario-cell .holdings-scenario-trigger__trail,
-.portfolio-scenario-cell .holdings-scenario-trigger__plus {
+.portfolio-scenario-cell .holdings-scenario-trigger__trail {
   flex-shrink: 0;
   margin-left: auto;
+}
+
+.portfolio-scenario-cell .holdings-scenario-trigger__plus {
+  flex-shrink: 0;
 }
 
 /* Account row — scenario + chevron share one column with holding rows */
@@ -170,11 +178,18 @@
   border-left: none;
 }
 
-.portfolio-scenario-cell--account .holdings-scenario-trigger,
+.portfolio-scenario-cell--account .holdings-scenario-trigger--outline {
+  align-self: auto;
+  height: auto;
+  min-height: 2.5rem;
+  width: auto;
+}
+
+.portfolio-scenario-cell--account .holdings-scenario-trigger--badge,
 .portfolio-scenario-cell--account .holdings-scenario-trigger-shell {
   align-self: auto;
   height: auto;
-  min-height: 0;
+  min-height: 2.5rem;
   width: 100%;
 }
 

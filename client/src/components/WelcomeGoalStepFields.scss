@@ -46,15 +46,21 @@
   min-width: 0;
 }
 
+.welcome-goal-fields__goals-row:has(.welcome-goal-fields__retire-age) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
 .welcome-goal-fields__goal-input {
   width: 100%;
   min-width: 0;
 }
 
 .welcome-goal-fields__retire-age {
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
 }
 
 .welcome-goal-fields__hint {
@@ -385,10 +391,14 @@
   .welcome-goal-fields__aiming-row {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .welcome-goal-fields__goals-row:has(.welcome-goal-fields__retire-age) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-@media (min-width: 680px) {
-  .welcome-goal-fields:not(.welcome-goal-fields--centered) .welcome-goal-fields__retire-age {
-    max-width: 14rem;
+@media (min-width: 480px) and (max-width: 679px) {
+  .welcome-goal-fields__goals-row:has(.welcome-goal-fields__retire-age) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }

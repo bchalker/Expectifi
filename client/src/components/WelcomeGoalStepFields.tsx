@@ -187,59 +187,56 @@ export function WelcomeGoalStepFields({
             externalSuffix="/mo"
             showFillState={showFillState}
           />
+          {onRetireAgeChange ? (
+            <div className="config-plan-field welcome-goal-fields__retire-age">
+              <label
+                className="config-plan-label"
+                htmlFor="welcome-planning-retire-age"
+              >
+                When to retire?
+              </label>
+              <div
+                className={[
+                  "onboarding-field-shell",
+                  "welcome-goal-fields__age-input-wrap",
+                  retireAgeFilled ? "onboarding-field-shell--filled" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <input
+                  id="welcome-planning-retire-age"
+                  type="text"
+                  inputMode="numeric"
+                  className="onboarding-field-shell__input welcome-goal-fields__age-input"
+                  value={ageDisplay}
+                  min={bounds.min}
+                  max={bounds.max}
+                  aria-valuemin={bounds.min}
+                  aria-valuemax={bounds.max}
+                  aria-valuenow={retireAge > 0 ? retireAge : undefined}
+                  onFocus={() => {
+                    setAgeFocused(true);
+                    setAgeDraft(retireAge > 0 ? String(retireAge) : "");
+                  }}
+                  onChange={(e) =>
+                    setAgeDraft(e.target.value.replace(/[^\d]/g, ""))
+                  }
+                  onBlur={() => {
+                    setAgeFocused(false);
+                    commitRetireAgeDraft();
+                  }}
+                />
+                {retireAgeFilled ? (
+                  <span className="onboarding-field-shell__check" aria-hidden>
+                    <IconCheck size={14} strokeWidth={2} />
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
-      {onRetireAgeChange ? (
-        <div className="config-plan-field welcome-goal-fields__retire-age">
-          <label
-            className="config-plan-label"
-            htmlFor="welcome-planning-retire-age"
-          >
-            ...and when would you like to retire?
-          </label>
-          <div
-            className={[
-              "onboarding-field-shell",
-              "welcome-goal-fields__age-input-wrap",
-              retireAgeFilled ? "onboarding-field-shell--filled" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            <input
-              id="welcome-planning-retire-age"
-              type="text"
-              inputMode="numeric"
-              className="onboarding-field-shell__input welcome-goal-fields__age-input"
-              value={ageDisplay}
-              min={bounds.min}
-              max={bounds.max}
-              aria-valuemin={bounds.min}
-              aria-valuemax={bounds.max}
-              aria-valuenow={retireAge > 0 ? retireAge : undefined}
-              onFocus={() => {
-                setAgeFocused(true);
-                setAgeDraft(retireAge > 0 ? String(retireAge) : "");
-              }}
-              onChange={(e) =>
-                setAgeDraft(e.target.value.replace(/[^\d]/g, ""))
-              }
-              onBlur={() => {
-                setAgeFocused(false);
-                commitRetireAgeDraft();
-              }}
-            />
-            {retireAgeFilled ? (
-              <span className="onboarding-field-shell__check" aria-hidden>
-                <IconCheck size={14} strokeWidth={2} />
-              </span>
-            ) : null}
-          </div>
-          <p className="welcome-goal-fields__hint">
-            {WELCOME_PLANNING_HINTS.targetRetirementAge}
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 }

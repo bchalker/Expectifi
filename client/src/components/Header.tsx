@@ -152,7 +152,6 @@ function HeaderAuthTail({
       ? firstNameFromDisplayName(googleCheckoutUi.displayName) ||
         googleCheckoutUi.email
       : "";
-  const showViewMyPlansInProfile = Boolean(user?.onboardingDone);
   const isApp = variant === "app";
 
   const wrap = (node: ReactNode) =>
@@ -169,6 +168,24 @@ function HeaderAuthTail({
           .filter(Boolean)
           .join(" ")}
       >
+        <button
+          type="button"
+          className={[
+            "header__settings",
+            "header__settings--signed-in",
+            drawer === "config" ? "header__settings--active" : "",
+            slideIn ? "header__settings--slide-in" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-label="My Plans: planning and Social Security"
+          aria-expanded={drawer === "config"}
+          aria-controls="drawer"
+          onClick={onOpenConfig}
+        >
+          <span className="header__settings-label">My Plans</span>
+          <IconAdjustments size={18} stroke={1.65} aria-hidden />
+        </button>
         <div
           className="header__profile-popout"
           role="menu"
@@ -187,17 +204,11 @@ function HeaderAuthTail({
           <button
             type="button"
             className="header__account-group__profile"
-            aria-label="View My Plans"
+            aria-label={accountLabel ? `Account: ${accountLabel}` : "Account"}
             aria-haspopup="menu"
-            aria-expanded={drawer === "config"}
-            aria-controls="drawer"
-            onClick={onOpenConfig}
           >
             {accountLabel ? (
               <span className="header__profile-name">{accountLabel}</span>
-            ) : null}
-            {showViewMyPlansInProfile ? (
-              <span className="header__profile-ages">View My Plans</span>
             ) : null}
           </button>
         </div>
